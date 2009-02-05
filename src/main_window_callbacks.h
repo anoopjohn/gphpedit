@@ -114,5 +114,8 @@ void close_all_tabs(void);
 void session_reopen(void);
 void session_save(void);
 
+gint on_parse_current_click(GtkWidget *widget);
+gint on_tab_change_update_classbrowser(GtkWidget *widget);
+
 
 #endif

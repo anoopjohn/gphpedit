@@ -270,6 +270,7 @@ static void main_window_fill_panes(void)
 {
 	GtkWidget *box;
 	GtkWidget *box2;
+  GtkWidget *chkOnlyCurFileFuncs;
 	GtkCellRenderer *renderer;
 	GtkTreeViewColumn *column;
 
@@ -283,6 +284,15 @@ static void main_window_fill_panes(void)
 	box = gtk_vbox_new(FALSE, 0);
 	gtk_widget_show(box);
 	gtk_paned_pack1 (GTK_PANED (main_window.main_horizontal_pane), box, FALSE, TRUE);
+
+  //add checkbox to show only current file's classes
+  //the signals to be checked for the check box are onclick of the checkbox 
+  //and the on change of the file.
+  main_window.chkOnlyCurFileFuncs = gtk_check_button_new_with_label("Parse only current file"); 
+  gtk_widget_show (main_window.chkOnlyCurFileFuncs);
+	gtk_box_pack_start(GTK_BOX(box), main_window.chkOnlyCurFileFuncs, FALSE, FALSE, 10);
+	g_signal_connect (G_OBJECT (main_window.chkOnlyCurFileFuncs), "clicked",
+	                  G_CALLBACK (on_parse_current_click), NULL);
 
 	main_window.scrolledwindow3 = gtk_scrolled_window_new (NULL, NULL);
 	gtk_widget_show (main_window.scrolledwindow3);
@@ -300,6 +310,8 @@ static void main_window_fill_panes(void)
 
 	main_window.classtreestore = gtk_tree_store_new (N_COLUMNS, G_TYPE_STRING,
 	                             G_TYPE_INT, G_TYPE_STRING, G_TYPE_INT, G_TYPE_INT);
+	//enable sorting of the columns
+	classbrowser_set_sortable(main_window.classtreestore);
 
 	main_window.classtreeview = gtk_tree_view_new_with_model (GTK_TREE_MODEL (main_window.classtreestore));
 	gtk_widget_show (main_window.classtreeview);
@@ -364,6 +376,8 @@ static void main_window_fill_panes(void)
 	gtk_widget_set_usize(main_window.notebook_editor,400,400);
 	g_signal_connect (G_OBJECT (main_window.notebook_editor), "switch_page", GTK_SIGNAL_FUNC (on_notebook_switch_page), NULL);
 	//g_signal_connect (G_OBJECT (main_window.notebook_editor), "focus-tab", GTK_SIGNAL_FUNC (on_notebook_focus_tab), NULL);
+	//check if classbrowser need to be updated
+	g_signal_connect (G_OBJECT (main_window.notebook_editor), "switch_page", GTK_SIGNAL_FUNC (on_tab_change_update_classbrowser), NULL);
 }
 
 guint get_longest_matching_length(gchar *filename1, gchar *filename2)

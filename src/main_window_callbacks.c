@@ -1566,3 +1566,25 @@ void force_python(GtkWidget *widget)
 		set_editor_to_python(main_window.current_editor);
 	}
 }
+
+//function to refresh treeview when the parse only current file checkbox is clicked
+//or when the checkbox is clicked and the files tabbar is clicked
+gint on_parse_current_click (GtkWidget *widget)
+{
+  classbrowser_update();
+  return 0;
+}
+//function to refresh treeview when the current tab changes 
+//view is refreshed only if the parse only current file parameter is set
+gint on_tab_change_update_classbrowser(GtkWidget *widget)
+{
+  //debug("Toggled");
+  //if parse only current file is set then add only the file in the current tab
+  //the filteration logic is set inside classbrowser_update
+	if(GTK_TOGGLE_BUTTON (main_window.chkOnlyCurFileFuncs)->active)
+	{
+    //debug("Is set");
+   	classbrowser_update();
+	}
+  return 0;
+}

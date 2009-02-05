@@ -628,6 +628,8 @@ void classbrowser_filelist_remove(ClassBrowserFile *file)
 	g_free(file);
 }
 
+//Note: this function can be optimized by not requesting to reparse files on tab change
+//when the parse only selected tab is set - Anoop
 
 void classbrowser_update(void)
 {
@@ -653,18 +655,29 @@ void classbrowser_update(void)
 	classbrowser_dirlist_clear();
 	classbrowser_dirlist_add_shared_source();
 
-	// iterate open files
-	for(li = editors; li!= NULL; li = g_slist_next(li)) {
-		editor = li->data;
-		if (editor) {
-			classbrowser_filelist_add(editor->filename->str);
-			classbrowser_dirlist_add(g_path_get_dirname(editor->filename->str));
+  //if parse only current file is set then add only the file in the current tab
+	if(GTK_TOGGLE_BUTTON (main_window.chkOnlyCurFileFuncs)->active)
+	{
+		//add only if there is a current editor
+		if (main_window.current_editor)
+		{
+			classbrowser_filelist_add(main_window.current_editor->filename->str);
 		}
 	}
+	else
+	{ 
+		// iterate open files
+		for(li = editors; li!= NULL; li = g_slist_next(li)) {
+			editor = li->data;
+			if (editor) {
+				classbrowser_filelist_add(editor->filename->str);
+				classbrowser_dirlist_add(g_path_get_dirname(editor->filename->str));
+			}
+		}
 
-	//classbrowser_dirlist_add(preferences.shared_source_location);
-
-	classbrowser_filelist_update();
+		//classbrowser_dirlist_add(preferences.shared_source_location);
+		classbrowser_filelist_update();
+  }
 
 	classbrowser_start_update();
 
@@ -789,4 +802,38 @@ void classbrowser_update_selected_label(gchar *filename, gint line)
 		g_string_free(new_label, TRUE);
 		g_slist_free(filenames);
 	}
+}
+
+//enable sorting of the list
+void classbrowser_set_sortable(GtkTreeStore *classtreestore)
+{
+	gtk_tree_sortable_set_default_sort_func(GTK_TREE_SORTABLE(classtreestore), 
+											classbrowser_compare_function_names,
+											NULL,NULL);
+	gtk_tree_sortable_set_sort_func(GTK_TREE_SORTABLE(classtreestore), 
+									0, classbrowser_compare_function_names, 
+									NULL,NULL);
+	gtk_tree_sortable_set_sort_column_id(GTK_TREE_SORTABLE(classtreestore),
+											0,
+											GTK_SORT_ASCENDING);
+}
+//compare function names of the iter of the gtktreeview
+gint classbrowser_compare_function_names(GtkTreeModel *model,
+										GtkTreeIter *a,
+										GtkTreeIter *b,
+										gpointer user_data)
+{
+	GValue aValue, bValue;
+	gchar *aName, *bName;
+	gint retVal;
+	//gtk_tree_model_get_value(model, a, 0, aValue);
+	//gtk_tree_model_get_value(model, b, 0, bValue);
+	gtk_tree_model_get(model, a, 0, &aName, -1);
+	gtk_tree_model_get(model, b, 0, &bName, -1);
+	//retVal = g_ascii_strcasecmp(g_value_get_string(aValue), g_value_get_string(bValue));
+	retVal = g_ascii_strcasecmp(aName, bName);
+	g_free(aName);
+	g_free(bName);
+	//g_message("* compare values %s and %s; return %d\n", g_value_get_string(&aValue), g_value_get_string(&bValue), retVal);
+	return retVal;
 }

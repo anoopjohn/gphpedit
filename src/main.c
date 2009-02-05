@@ -79,3 +79,17 @@ int main (int argc, char **argv)
 
 	return 0;
 }
+
+gint debug(gchar *strMsg)
+{
+  GtkWidget *dlg;
+  dlg = gtk_message_dialog_new (main_window.window,
+                                GTK_DIALOG_DESTROY_WITH_PARENT,
+                                GTK_MESSAGE_INFO,
+                                GTK_BUTTONS_CLOSE,
+                                "%s",
+                                strMsg);
+  gtk_dialog_run (GTK_DIALOG (dlg));
+  gtk_widget_destroy (dlg);  
+  return 0;
+}

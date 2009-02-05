@@ -74,6 +74,9 @@ typedef struct
 
 	Editor *current_editor;
 
+	//Checkbox above treeview to parse only the current tab	
+	GtkWidget *chkOnlyCurFileFuncs;
+
 	GtkWidget *scrolledwindow3;
 	GtkTreeStore *classtreestore;
 	GtkWidget *classtreeview;

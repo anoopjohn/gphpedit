@@ -53,8 +53,7 @@ typedef struct
 	guint line_number;
 	guint class_id;
 	gchar *classname;
-	gboolean remove
-		;
+	gboolean remove;
 	guint identifierid;
 }
 ClassBrowserFunction;
@@ -64,12 +63,12 @@ typedef struct
 	gchar *classname;
 	gchar *filename;
 	guint line_number;
-	gboolean remove
-		;
+	gboolean remove;
 	guint identifierid;
 }
 ClassBrowserClass;
 
+void classbrowser_set_sortable(GtkTreeStore *classtreestore);
 void classbrowser_update(void);
 void classbrowser_filelist_remove(ClassBrowserFile *file);
 void classbrowser_functionlist_start_file(gchar *filename);
@@ -78,6 +77,6 @@ void classbrowser_classlist_add(gchar *classname, gchar *filename, gint line_num
 void classbrowser_functionlist_add(gchar *classname, gchar *funcname, gchar *filename, guint line_number, gchar *param_list);
 void autocomplete_member_function(GtkWidget *scintilla, gint wordStart, gint wordEnd);
 void classbrowser_update_selected_label(gchar *filename, gint line);
-
+gint classbrowser_compare_function_names(GtkTreeModel *model, GtkTreeIter *a, GtkTreeIter *b, gpointer user_data);
 
 #endif
