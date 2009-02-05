@@ -1,4 +1,6 @@
-/* This file is part of gPHPEdit, a GNOME2 PHP Editor.
+/* This is the license notice for the following files in this folder 
+   which are part of gPHPEdit, a GNOME2 PHP Editor.
+   1) gphpedit.png    	
  
    Copyright (C) 2003, 2004, 2005 Andy Jeffries
       andy@gphpedit.org
@@ -21,37 +23,6 @@
    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA
    02111-1307, USA.
  
-   The GNU General Public License is contained in the file COPYING.*/
+   The GNU General Public License is contained in the file COPYING.
+*/
 
-
-#include "tab_util.h"
-#include "preferences.h"
-
-gchar *merge_font (gchar *modifier)
-{
-	gint i;
-	gchar **df, **sf;
-	gchar *merged;
-
-	df = g_strsplit (preferences.default_font, "-", -1);
-	sf = g_strsplit (modifier, "-", -1);
-
-	for (i = 1; (df[i] != NULL) && (sf[i] != NULL); i++) {
-		if (g_strcasecmp (sf[i], "*") != 0)
-			g_stpcpy (df[i], sf[i]);
-	}
-
-	merged = g_strjoinv ("-", df);
-
-	g_strfreev (df);
-	g_strfreev (sf);
-
-	return merged;
-}
-
-
-
-gint scintilla_color(gint red, gint green, gint blue)
-{
-	return red | (green << 8) | (blue << 16);
-}

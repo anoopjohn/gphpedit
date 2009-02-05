@@ -1,6 +1,6 @@
 /* This file is part of gPHPEdit, a GNOME2 PHP Editor.
  
-   Copyright (C) 2003-2005 Andy Jeffries
+   Copyright (C) 2003, 2004, 2005 Andy Jeffries
       andy@gphpedit.org
 	  
    For more information or to find the latest release, visit our 
