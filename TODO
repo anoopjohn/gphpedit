@@ -1,0 +1,52 @@
+BUGS TO FIX
+
+---------------------------------------------------------------
+
+Filters for the open/save dialogs, but for PHP filter is must use the PHP file extensions preference.
+
+---------------------------------------------------------------
+
+Print current PHP file, using Anjuta code.
+
+---------------------------------------------------------------
+
+Bookmarks: Ctrl+F2 makes a bookmark at a line, and with F2 you cycle 
+through all bookmarks in line number order.
+If you insert a line before a bookbmark, the bookmark line is shifted 1 
+up, so that the bookmark stays on the code line you've originally selected
+
+---------------------------------------------------------------
+
+> And it would be standard-conform (to ms visual studio and some others) 
+> to have Ctrl+Shift+Space = show hint to current function [helpful if 
+> your'e changing the code and not writing new calls] and Ctrl+Space = 
+> Show function dropdown immediateley.
+
+Changing cursor position (either by keypress or mouse click) should reparse back from position to find nearest PHP function.  Should popup hint for function.  Should also work for cases like: outer( inner(
+
+
+---------------------------------------------------------------
+
+Tabs: with context menu and a "close"-item in it or a close button next 
+to the tab (close the current file)
+
+---------------------------------------------------------------
+
+class view: when there are multiple files with the same class names, it 
+would be nice if the file name is directly appended in the class view, 
+not only when clicking on it (or the diff to the other file names ;))
+
+---------------------------------------------------------------
+
+
+NEW FUNCTIONALITY
+
+Memory of Incremental Search strings
+
+Metric reporting (Function length, LOC)
+
+Turck-mmcache integration
+
+Debugger Support
+
+Project/Live site editing

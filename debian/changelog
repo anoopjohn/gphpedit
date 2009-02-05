@@ -1,0 +1,86 @@
+gphpedit (0.9.91-5) unstable; urgency=low
+
+  * Add patch from Ubuntu to prevent segfault when checking if an empty
+    document is PHP.
+  * bump Standards-Version to 3.7.3
+    - Fix menu section according to the new policy.
+    - Move homepage from description to a regular header.
+
+ -- Lior Kaplan <kaplan@debian.org>  Fri, 28 Dec 2007 17:15:42 +0200
+
+gphpedit (0.9.91-4) unstable; urgency=low
+
+  * Apply patch by Martin Michlmayr to fix FTBFS with GCC 4.3 (Closes: #421215)
+
+ -- Lior Kaplan <kaplan@debian.org>  Sat, 28 Apr 2007 01:43:47 +0300
+
+gphpedit (0.9.91-3) unstable; urgency=low
+
+  * Apply a patch to prevent gphpedit from crashing after searching &
+    replacing. (Closes: #396325)
+
+ -- Lior Kaplan <kaplan@debian.org>  Wed, 13 Dec 2006 20:25:24 +0200
+
+gphpedit (0.9.91-2) unstable; urgency=low
+
+  * Really add a watch file
+
+ -- Lior Kaplan <kaplan@debian.org>  Wed, 30 Aug 2006 17:49:20 +0300
+
+gphpedit (0.9.91-1) unstable; urgency=low
+
+  * New upstream release
+    - Fixes frequently crashes while working on amd64 (Closes: #357426)
+    - Includes updated German translation by Holger Wansing.
+  * Add a watch file to monitor future releases.
+
+ -- Lior Kaplan <kaplan@debian.org>  Sat, 22 Jul 2006 15:03:16 +0300
+
+gphpedit (0.9.80-3) unstable; urgency=low
+
+  * Update debian/control and src/tab.c since phpdoc was renamed to php-doc
+  * Change standards-version to 3.7.2, no changes needed.
+  * Add php5-cli to suggests in order to have syntax check work
+
+ -- Lior Kaplan <kaplan@debian.org>  Tue, 16 May 2006 00:45:38 -0500
+
+gphpedit (0.9.80-2) unstable; urgency=low
+
+  * loosened relations with phpdoc from recommends to suggests
+  * Updated German Translation by Holger Wansing (Closes: #348904)
+  * Removed absolute path from desktop file (as done in Ubuntu).
+
+ -- Lior Kaplan <kaplan@debian.org>  Mon, 20 Mar 2006 23:06:36 +0200
+
+gphpedit (0.9.80-1) unstable; urgency=low
+
+  * New upstream release
+    - Fixed files rendering incorrectly (Closes: #324574)
+    - Fixed small issue highlighting parenthesis (Closes: #303798)
+    - Fixed crashing on startup on amd64 (x86_64) (Closes: #315539)
+    - Fixed indentation using spaces doesn't work correctly (Closes: #303793)
+    - Fixed crash on searching through the PHP manual (Closes: #304207)
+    - Fix position of Font change confirmation box (Closes: #324567, #308645)
+  * Fix FSF address in debian/copyright
+  * Change standards-version to 3.6.2, no changes needed.
+
+ -- Lior Kaplan <webmaster@guides.co.il>  Wed, 19 Oct 2005 22:37:49 +0200
+
+gphpedit (0.9.50-2) unstable; urgency=low
+
+  * debian/control:
+    - Add Shaul Karl <shaul@debian.org> to uploaders.
+    - Fix package description. Closes: #301353
+    - Add phpdoc to recommends.
+  * Patch tab.c to search the php manual in the right location. Closes: #303790
+
+ -- Lior Kaplan <webmaster@guides.co.il>  Sat,  9 Apr 2005 16:17:45 +0300
+
+gphpedit (0.9.50-1) unstable; urgency=low
+
+  * Initial Release. (Closes: #218868)
+  * Minor manpage fixes by Ivo <I.F.A.C.Fokkema@lumc.nl> 
+    and Andy Jeffries <andy@gphpedit.org>.
+
+ -- Lior Kaplan <webmaster@guides.co.il>  Wed, 16 Feb 2005 23:46:58 +0200
+

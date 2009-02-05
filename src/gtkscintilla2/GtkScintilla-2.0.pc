@@ -1,0 +1,11 @@
+prefix=/usr
+exec_prefix=/usr
+libdir=/usr/lib
+includedir=/usr/include
+
+Name: GtkScintilla2
+Description: A GTK+2 wrapper for the Scintilla editing component
+Version: 0.1.0
+Libs: -L${libdir} -lgtkscintilla2
+Cflags: -I${includedir}/gtkscintilla2
+

@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=gPHPEdit
+GenericName=PHP/HTML/CSS editor
+Comment=Edit PHP source files
+Exec=gphpedit
+Icon=gphpedit.png
+Terminal=false
+Type=Application
+Categories=Development;IDE;
+Version=0.9.91

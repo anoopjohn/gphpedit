@@ -1,0 +1,9 @@
+version=3
+
+# Uncomment to examine a Webpage 
+# <Webpage URL> <string match>
+#http://www.example.com/downloads.php #PACKAGE#-(.*)\.tar\.gz
+#http://www.gphpedit.org/download/ gphpedit-(.*)\.tar\.gz
+opts=filenamemangle=s/.*=(.*)/gphpedit-$1\.tar\.gz/ \
+http://www.gphpedit.org/download/ get\.php\?file\=main-tarball\&version=(.*)
+

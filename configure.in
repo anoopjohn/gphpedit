@@ -1,0 +1,69 @@
+dnl
+dnl configure.in for gphpedit
+dnl
+
+AC_INIT(src)
+AM_CONFIG_HEADER(config.h)
+AM_INIT_AUTOMAKE(gphpedit, 0.9.91)
+
+AM_MAINTAINER_MODE
+
+AC_PROG_CC
+AC_PROG_CXX
+AC_PROG_LIBTOOL
+AC_PROG_INTLTOOL
+
+dnl  --------------
+dnl | dependencies |-----------------------------------------------------------
+dnl  --------------
+
+PKG_CHECK_MODULES(GPHPEDIT,[
+	gtk+-2.0
+	libgnomeui-2.0
+	gnome-vfs-2.0
+	libgtkhtml-2.0
+dnl	libgnomeprint-2.2
+dnl	libgnomeprintui-2.2
+	])
+
+AC_SUBST(GPHPEDIT_CFLAGS)
+AC_SUBST(GPHPEDIT_LIBS)
+
+dnl ---------------------------------------------------------------------------
+
+dnl  ------------------
+dnl | language support |-------------------------------------------------------
+dnl  ------------------
+
+GETTEXT_PACKAGE=gphpedit
+AC_SUBST(GETTEXT_PACKAGE)
+AC_DEFINE_UNQUOTED(GETTEXT_PACKAGE,"$GETTEXT_PACKAGE",[The package name, for gettext])
+
+dnl Please keep this in alphabetical order
+ALL_LINGUAS=""
+
+AM_GLIB_GNU_GETTEXT
+
+dnl AM_GLIB_GNU_GETTEXT sets $DATADIRNAME
+AC_MSG_CHECKING(locale directory)
+if test "x$prefix" = "xNONE"; then
+  PACKAGE_LOCALE_DIR=$ac_default_prefix/share/locale
+else
+  PACKAGE_LOCALE_DIR=$prefix/share/locale
+fi
+AC_DEFINE_UNQUOTED(PACKAGE_LOCALE_DIR, "$PACKAGE_LOCALE_DIR",
+	[The directory in which gphpedit's locale data will be stored])
+AC_MSG_RESULT("$PACKAGE_LOCALE_DIR")
+
+dnl ---------------------------------------------------------------------------
+
+AC_OUTPUT([
+Makefile
+gphpedit.desktop
+gphpedit.spec
+data/Makefile
+doc/Makefile
+pixmaps/Makefile
+po/Makefile.in
+src/Makefile
+])

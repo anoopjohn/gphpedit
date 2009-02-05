@@ -1,0 +1,516 @@
+2005-10-16 Andy Jeffries <andy@gphpedit.org>
+
+	* Single instance working, thanks to Yevgen Muntyan
+	* Comment patch so hopefully the Ubuntu guys will stop
+	  applying unnecessary patches
+	
+2005-10-14 Andy Jeffries <andy@gphpedit.org>
+
+	* GtkCombo's changed to
+	  GtkEntry in Find and Replace dialogs, as no history was being
+	  kept - when/if I do actually do that feature they'll be
+	  GtkComboBoxes anyway
+	* Tweaks to Find/Replace - Escape, Enter key
+	  presses works, close is consistent, not found wraps
+	* Find dialog should close on clicking close,
+	  not just hide
+	* Open Selected failed to check if file exists before opening, hence 
+	  asks to create in each folder that is open (new GNOME-VFS prob)
+	
+2005-10-13 Andy Jeffries <andy@gphpedit.org>
+
+	* File dialogs now work with non-local folders
+	* Converted to Asynchronous GNOME-VFS calls
+	* Fixed bug when trying to search
+	  Help, searching files isn't available in GtkHTML2 so disabled for
+	  help tabs
+	* Changed GtkCombo to GtkComboBox to fix problem with Change all
+	  fonts/size under Dropdown
+	* AMD64 fixes and work to stop crash with unsaved files  
+	
+2005-10-12 Andy Jeffries <andy@gphpedit.org>
+
+	* Removed a GTK warning when the
+	  preferences box is shown, some needless box stuff
+	* Calltip functionality is now
+	  case-insensitive, as are php/sql/css function/property names  
+	* File Save/Rename alter MRU list and
+	  Rename actually gets the full URI rather than just the old
+	  filename
+	* Fixed bug: opening gphpedit with
+	  untitled, type text and quit chosing to discard changes crashes
+	  with segfault  
+	* Upgraded to Scintilla 1.66
+	
+2005-09-15 Andy Jeffries <andy@gphpedit.org>
+
+	* Added new Gentoo PHP-Docs location
+
+2005-08-22 Andy Jeffries <andy@gphpedit.org>
+
+	* Incremental search box suggests
+	  highlighted text
+	
+2005-08-22 Andy Jeffries <andy@gphpedit.org>
+
+	* Returns to previous line number after reopening a file
+	
+2005-04-07 Andy Jeffries <andy@gphpedit.org>
+
+	* Fixed two compiler warnings
+	  about UTF-8 and added some debugging prints
+	  
+2005-03-18  Sven Herzberg  <herzi@gnome-de.org>
+
+	Added i18n build framework and a simple (end empty) german
+	translation.
+
+2005-02-08 Andy Jeffries <andy@gphpedit.org>
+
+	* Fixes to Python highlighting
+
+2005-02-08  Andy Jeffries <andy@gphpedit.org>
+
+	* src/main_window_callbacks.c: Fixed a crash bug
+
+2005-02-04  Andy Jeffries <andy@gphpedit.org>
+
+	* New plugin response MESSAGE pops open dialog
+
+2005-02-04  Andy Jeffries <andy@gphpedit.org>
+
+	* Added very basic Python syntax highlighting
+
+2004-12-15  Andy Jeffries <andy@gphpedit.org>
+
+	* Fixed PHP Help location for Debian
+
+2004-12-07  Andy Jeffries <andy@gphpedit.org>
+
+	* Fixed off by one error and warnings in reopen
+
+2004-11-26  Andy Jeffries <andy@gphpedit.org>
+
+	* Updated num plugins to 30 and num reopen items to 20
+
+2004-11-24  Andy Jeffries <andy@gphpedit.org>
+
+	* Simplified completion timer code and bracket matching
+	  and indentation
+
+2004-11-19  Andy Jeffries <andy@gphpedit.org>
+
+	* Fixed class browser
+
+2004-11-18  Andy Jeffries <andy@gphpedit.org>
+
+	* Wouldn't prompt for saving
+	  unsaved PHP/SQL/CSS files etc only non-coded files
+
+2004-11-14  Andy Jeffries <andy@gphpedit.org>
+
+	* Sorts plugin menu in alphabetical order
+
+2004-11-03  Andy Jeffries <andy@gphpedit.org>
+
+	* Muntyan (someone I met off IRC) converted gPHPEdit to use a local
+	  statically built version of GtkScintilla2 to aid getting gPHPEdit
+	  into Debian
+
+2004-10-27  Andy Jeffries <andy@gphpedit.org>
+
+	* Got session saving working
+	* Fixed a bug making the X button leave the app running but orphaned
+
+2004-10-01  Andy Jeffries <andy@gphpedit.org>
+
+	There are quite a few items that have been done that aren't in the ChangeLog below - so lets try
+	to bring it up to date....
+	
+	* Used GNOME-VFS now so you can open/save files to/from FTP/SCP/SFTP locations (and indeed any other type
+	  of location supported by GNOME-VFS)
+	* Updated syntax highlighting to support PHP5 keywords
+	* By editing the settings file (~/.gnome2/gPHPEdit) you can now change what files are
+	  recognised as PHP files (the separator is a comma - NO spaces)
+	* Opens with a blank page by default, if you haven't changed it and open a file
+	  the Untitled page is replaced by the file you choose to open.
+
+2004-09-16  Andy Jeffries <andy@gphpedit.org>
+
+	Wow!  Really looks like I haven't done anything for ages, I have but
+	I've forgotten to put it in here.  Here is a list of some of the things
+	done:
+
+        * Fixed the fact that changes to the Line Number size don't show
+	* Moved to GtkFileChooser from GtkFileSelection
+	* Implemented plugins (although still possibly buggy)
+
+2004-04-08  Andy Jeffries <andy@gphpedit.org>
+
+        * Fixed a few bugs from the bugs list, mainly crash bugs
+
+2004-04-07  Andy Jeffries <andy@gphpedit.org>
+
+        * UTF-8 and other code pages now work.  It works by converting on the fly from the user's locale to UTF-8 
+	  and back to their locale when saving
+	* Recently opened files menu implemented
+	* File open dialog remembers last opened folder (unless you have an active file open, in which case it still
+	  reverts to that folder).
+
+2004-03-10  Andy Jeffries <andy@gphpedit.org>
+
+         * UTF-8 works (although other code pages such as ISO-8859-1 don't!
+
+2004-03-10  Andy Jeffries <andy@gphpedit.org>
+
+         * As there have been quite a few fixes, I've decided to do an interim release.
+
+2004-03-10  Andy Jeffries <andy@gphpedit.org>
+
+         * Class browser doesn't update (slow) if it isn't currently shown - speeds up opening of files for those people 
+   	   that don't use the class browser.
+
+2004-03-04  Andy Jeffries <andy@gphpedit.org>
+
+         * Implemented brace matching (properly) - and it works :-)
+
+2004-02-25  Andy Jeffries <andy@gphpedit.org>
+
+         * Fixed crash bug when Find dialog is closed using WM X button rather than close
+
+2004-02-15  Tim Jackson <tim@timj.co.uk>
+
+         * Fixed gtkhtml2 dependencies in RPM spec file
+
+2004-02-13  Andy Jeffries  <andy@gphpedit.org>
+
+	* OK, preferences code is in there and seems to be working.  This version is a pre-1.0 beta 
+	  but it seems a lot more stable in use than 0.4.3 (due to the number of bugs I've fixed)
+
+2004-02-08  Andy Jeffries  <andy@gphpedit.org>
+
+	* I've started doing the preferences code.  The dialog has been designed for a while, but there's been no code.
+	  It now makes a copy of the preferences, the code to retrieve a list of fonts is done and the code to determine
+	  when a syntax highlighting style (e.g. PHP Single-quoted String) changes.
+
+2004-02-03  Andy Jeffries  <andy@gphpedit.org>
+
+	* Will these version numbers be consistent?  After a lot of soul searching (and discussions with a few users), 
+	  I've decided to make this the pre-1.0 version.  A lot of people are using it day-in-day-out and it's stable.
+	  However, I've added a couple of new features to this version - so I'll put it out for testing before going
+	  to 1.0.
+	* Upgrading to Pango fonts bug fixed (KEPT prefixing with ! every time)
+	* Multiple files open from selection dialog implemented (thanks Leszek)
+
+2004-02-03  Andy Jeffries  <andy@gphpedit.org>
+
+	* Changed version to 0.4.9 (ready for testing locally before changing back to 0.5.0 for release)
+
+2004-01-30  Andy Jeffries  <andy@gphpedit.org>
+
+	* Forced upgrading to Pango rendering is complete (message box on start)
+	* Implemented bug fix for multiple calltip popups (bug 55, Urkle)
+
+2004-01-30  Andy Jeffries  <andy@gphpedit.org>
+
+	* Online help now works without hanging the app (although will break if an external link or an anchor is present)
+
+2004-01-30  Andy Jeffries  <andy@gphpedit.org>
+
+	* configure.in: Updated to 0.5.0
+	* Close page now moves the focus back a page rather than to the first page
+	* The start of online help is in there, but the app hangs on closing the help window
+
+2003-07-09  Andy Jeffries  <andy@gphpedit.org>
+
+	* configure.in: Updated to 0.4.3 to avoid conflicts with 0.4.2 (in testing)
+	* src/main_window.c: (main_window_create_panes), src/main_window_callbacks.c: (classbrowser_show),
+	(classbrowser_hide), src/preferences.c: (save_classbrowser_position):
+	Properly implemented Show/Hide Classbrowser, previous version didn't
+	actually resize the pane, nor remember it's status upon restarting.
+
+2003-07-09  Andy Jeffries  <andy@gphpedit.org>
+
+	* configure.in: Updated version number to 0.4.2 to reflect change below
+	* src/main_window_callbacks.c: (classbrowser_show),
+	(classbrowser_hide), src/main_window_callbacks.h, src/main_window_menu.h:
+	Implemented Show/Hide Classbrowser feature requested by Tim Jackson.
+
+2003-07-01  Andy Jeffries  <andy@gphpedit.org>
+
+	* configure.in: Updated version number to 0.4.1 to reflect change below
+	* src/preferences.c: (preferences_load), (preferences_save), src/preferences.h,
+	  src/tab.c: (tab_set_general_scintilla_properties): All updated to reflect 
+	  preference for turning off line wrapping in response to feature request from
+	  Erik Williamson <erik@cpsc.ucalgary.ca>
+
+2003-06-24  Andy Jeffries  <andy@gphpedit.org>
+
+	* configure.in: Changed version number to 0.4.0 as no bugs have been
+	found in code folding or keyboard macros.  Still need to define
+	keyboard shortcuts for code folding, but that won't stop it being
+	released now.
+
+2003-06-20  Andy Jeffries  <andy@gphpedit.org>
+
+	* configure.in: Changed version number to 0.3.85 for testing (in RPM
+	form) the latest fixes for keyboard macro recording.
+
+2003-06-17  Andy Jeffries  <andy@gphpedit.org>
+
+        * Implemented keyboard macro recording, updated version to 0.3.8 (ready for 0.4 when
+          finished testing both new areas of functionality)
+
+2003-06-17  Andy Jeffries  <andy@gphpedit.org>
+
+	* src/main_window.c: (Note: prepare-ChangeLog.pl kept reporting 
+	  a segfault) Fixed window title not to have a hanging "-"
+
+2003-06-17  Andy Jeffries  <andy@gphpedit.org>
+
+	* src/tab.c, src/tab_php.c, src/preferences.h: (Note: prepare-ChangeLog.pl kept reporting 
+	  a segfault) code folding implemented (uses a preference setting, but still no dialog)
+
+2003-06-10  Tim Jackson  <tim@timj.co.uk>
+
+	* src/syntax_check.c: (syntax_check_run): corrected error message if PHP binary not found
+
+2003-06-10  Tim Jackson  <tim@timj.co.uk>
+
+	* src/syntax_check.c: (run_php_lint), (syntax_add_lines),
+	(syntax_check_run): fixed bug #37 and cleaned up behaviour if no editors are open
+
+2003-06-10  Tim Jackson  <tim@timj.co.uk>
+
+	* src/main_window.c: (update_app_title): fixed compile error (added missing brace)
+
+2003-06-08  Andy Jeffries  <andy@gphpedit.org>
+
+	* src/main_window.c: (update_app_title): Removed the version number from the title
+          of the main window.  This wasn't standar but was useful during the early days of
+          development.
+
+2003-06-08  Andy Jeffries  <andy@gphpedit.org>
+
+	After tagging CVS as Release_0_3_0 I found I had knackered the dependancies 
+	trying to get it to work with Dennis Houy's GtkScintalla2.
+
+2003-06-08  Andy Jeffries  <andy@gphpedit.org>
+
+	* configure.in: Updated version number to be 0.3.0
+
+2003-06-07  Sven Herzberg  <herzi@abi02.de>
+
+	* .cvsignore: added gphpedit.spec
+	* autogen.sh: fixed a typo
+
+2003-06-06  Andy Jeffries  <andy@gphpedit.org>
+
+	* src/Makefile.am: Added tab_sql.c/.h so the SQL lexing is included
+	* src/calltip.c: (get_sql_completion_list),
+	(css_autocomplete_word), (sql_autocomplete_word): Added the SQL known
+	  word drop down functionality
+	* src/calltip.h: added the list of SQL known words
+	* src/preferences.c: (preferences_load), (preferences_save): Added
+	  the SQL properties loading/saving
+	* src/preferences.h: Added the SQL properties
+	* src/tab.c: (is_sql_file), (tab_check_sql_file), (tab_create_new),
+	(sql_auto_complete_callback), (char_added): Added code to handle SQL 
+          lexing.
+	* src/tab.h: Added definition for SQL functions
+	* src/tab_sql.c: (tab_sql_set_lexer), src/tab_sql.h: Created
+	  SQL lexer code
+
+2003-06-06  Andy Jeffries  <andy@gphpedit.org>
+
+	* src/main_window_callbacks.c: (open_file_ok):Changed to 
+          use switch_to_file_or_open to open a new file, should 
+          therefore stop the same file being opened twice.
+	* AUTHORS: Added Tim Jackson as he has worked on a lot of 
+          package related files
+
+2003-06-04  Tim Jackson  <tim@timj.co.uk>
+
+	* src/main_window_callbacks.c: (on_about1_activate): Added herzi as contributor
+	* src/preferences.c: (preferences_save): Fixed bug #39 (config error on quit)
+
+2003-06-04  Tim Jackson  <tim@timj.co.uk>
+
+	* gphpedit.spec.in: updated spec file for automake'd build
+
+2003-06-04  Sven Herzberg  <herzi@gnome-de.org>
+
+	* Makefile.am: should enable a RH build now
+	* data/Makefile.am: fixed a typo to install the api correctly
+
+2003-06-04  Tim Jackson  <tim@timj.co.uk>
+
+	* data/Makefile.am: hopefully got it right this time
+
+2003-06-04  Tim Jackson  <tim@timj.co.uk>
+
+	* data/Makefile.am: reverting to Herzi's version
+
+2003-06-04  Tim Jackson  <tim@timj.co.uk>
+
+	* Makefile.am:
+	* data/Makefile.am: failed attempt to get API file installed in right place
+	* gphpedit.desktop.in:
+	* src/syntax_check.c: (syntax_check_run): fixed compiler warning
+
+2003-06-04  Tim Jackson  <tim@timj.co.uk>
+
+	* Makefile.am: fix duplicate EXTRA_DIST definition
+	* gphpedit.desktop.in: amend for gphpedit.png
+	* pixmaps/Makefile.am: amend for gphpedit.png
+	* pixmaps/gphpedit.png: renamed version of gphpedit_icon.png
+	* pixmaps/gphpedit_icon.png: renamed to gphpedit.png for consistency
+	* src/main.h: amend for gphpedit.png and put in <data>/pixmaps instead of <data>/pixmaps/gphpedit
+
+2003-06-04  Tim Jackson  <tim@timj.co.uk>
+
+	* src/preferences.c: (preferences_save): fixed saving of GNOME config for php_binary
+	* src/syntax_check.c: (syntax_check_run): disable stat() check on php binary
+
+2003-06-03  Andy Jeffries  <andy@gphpedit.org>
+
+	* src/main_window_callbacks.c: (on_about1_activate): Removed the 
+          signal connection - this was causing a segfault although it appears right
+
+2003-06-03  Sven Herzberg  <herzi@gnome-de.org>
+
+	* src/.cvsignore: updates cleanly now
+
+2003-06-03  Sven Herzberg  <herzi@gnome-de.org>
+
+	* Makefile.am: added the .spec.in file to EXTRA_DIST
+	* configure.in: creates .spec file now
+	* gphpedit.spec: removed (created at configure time now)
+	* gphpedit.spec.in: added to make configure.in create a spec file
+
+2003-06-03  Sven Herzberg  <herzi@gnome-de.org>
+
+	* Makefile.am: installs the desktopfile for an entry in the menus
+
+2003-06-03  Sven Herzberg  <herzi@gnome-de.org>
+
+	* data/Makefile.am: fixed a typo to install the api-file correctly
+
+2003-06-03  Tim Jackson  <tim@timj.co.uk>
+
+	* data/Makefile.am: updated to include PHP api file on make dist
+
+2003-05-30  Andy Jeffries  <andy@gphpedit.org>
+
+	* src/classbrowser_parse.c: (classbrowser_parse_file): Fixed a compiler warning about variables may not be initialised
+	* src/find_replace.c: (find_clicked), (replace_clicked),
+	(replace_all_clicked): Fixed a compiler warning about variables may not be initialised
+	* src/syntax_check.c: (syntax_add_lines), (syntax_check_run): Fixed a compiler warning about variables may not be initialised
+
+2003-05-21  Andy Jeffries  <andy@gphpedit.org>
+
+	* Makefile.am: Added the RPM spec file and the po folder into the distribution
+	* gphpedit.spec: Tried to get it to work, still has an issue with %doc
+	* pixmaps/Makefile.am: Included the gphpedit_icon.png in the distribution
+	* src/Makefile.am: Added main_window_menu.h back
+
+2003-05-21  Sven Herzberg  <herzi@gnome-de.org>
+
+	* .cvsignore: make updates nicer
+	* data/.cvsignore: make updates nicer
+	* doc/.cvsignore: make updates nicer
+	* pixmaps/.cvsignore: make updates nicer
+	* po/.cvsignore: make updates nicer
+	* src/.cvsignore: make updates nicer
+
+2003-05-21  Sven Herzberg  <herzi@gnome-de.org>
+
+	* pixmaps/gphpedit_icon.png: added file to CVS
+	* po/Makefile.in.in: added file to CVS
+
+2003-05-21  Sven Herzberg  <herzi@gnome-de.org>
+
+	* .cvsignore: added file to CVS
+	* src/calltip.c: added file to CVS
+	* src/calltip.h: added file to CVS
+	* src/classbrowser.c: added file to CVS
+	* src/classbrowser.h: added file to CVS
+	* src/classbrowser_parse.c: added file to CVS
+	* src/classbrowser_parse.h: added file to CVS
+	* src/find_replace.c: added file to CVS
+	* src/find_replace.h: added file to CVS
+	* src/grel2abs.c: added file to CVS
+	* src/grel2abs.h: added file to CVS
+	* src/main.c: added file to CVS
+	* src/main.h: added file to CVS
+	* src/main_window.c: added file to CVS
+	* src/main_window_callbacks.c: added file to CVS
+	* src/main_window_callbacks.h: added file to CVS
+	* src/main_window.h: added file to CVS
+	* src/main_window_menu.h: added file to CVS
+	* src/Makefile.am: added file to CVS
+	* src/preferences.c: added file to CVS
+	* src/preferences_dialog.c: added file to CVS
+	* src/preferences_dialog.h: added file to CVS
+	* src/preferences.h: added file to CVS
+	* src/syntax_check.c: added file to CVS
+	* src/syntax_check.h: added file to CVS
+	* src/tab.c: added file to CVS
+	* src/tab_css.c: added file to CVS
+	* src/tab_css.h: added file to CVS
+	* src/tab.h: added file to CVS
+	* src/tab_php.c: added file to CVS
+	* src/tab_php.h: added file to CVS
+	* src/tab_util.c: added file to CVS
+	* src/tab_util.h: added file to CVS
+
+2003-05-21  Sven Herzberg  <herzi@gnome-de.org>
+
+	* doc/how-to-configure: added file to CVS
+
+2003-05-21  Sven Herzberg  <herzi@gnome-de.org>
+
+	* data/gphpedit.pws: added file to CVS
+	* data/php-gphpedit.api: added file to CVS
+	* data/rip.php: added file to CVS
+	* data/test.php: added file to CVS
+
+2003-05-21  Sven Herzberg  <herzi@gnome-de.org>
+
+	* AUTHORS: added file to CVS
+	* COPYING: added file to CVS
+	* INSTALL: added file to CVS
+	* Makefile.am: added file to CVS
+	* README: added file to CVS
+	* autogen.sh: added file to CVS
+	* config.h.in: added file to CVS
+	* configure.in: added file to CVS
+	* gphpedit.desktop.in: added file to CVS
+	* gphpedit.spec: added file to CVS
+
+2003-03-24 Sven Herzberg <herzi@abi02.de>
+
+	* autogen.sh: automates creation of Makefile.in's and configure
+	* configure.in: autoconf input file
+	* Makefile.am: automake input file
+	* AUTHORS, NEWS, README: neccessary files for automake
+	* data/Makefile.am: automake input file
+	* doc/Makefile.am: automake input file
+	* pixmaps/Makefile.am: automake input file
+	* src/Makefile.am: automake input file
+
+2003-03-24 Sven Herzberg <herzi@abi02.de>
+
+	* all files: moved the files into a new directory layout
+
+### 23 January 2003, Andy Jeffries <andy@gphpedit.org>
+Incremental search, jump to line and PHP function drop down list implemented
+
+### 13 January 2003, Tim Jackson <tim@timj.co.uk>
+PHP XML DocBook sources ripped to an api file with a PHP script
+
+### 12 January 2003, Andy Jeffries <andy@gphpedit.org>
+File operations and clipboard operations completed
+
+### 20 December 2002, Andy Jeffries <andy@gphpedit.org>
+Work started on gPHPEdit

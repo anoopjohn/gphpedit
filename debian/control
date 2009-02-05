@@ -1,0 +1,17 @@
+Source: gphpedit
+Section: gnome
+Priority: optional
+Maintainer: Lior Kaplan <kaplan@debian.org>
+Build-Depends: debhelper (>= 5.0.0), libgnomeui-dev, libgtkhtml2-dev, libxml-parser-perl
+Standards-Version: 3.7.3
+Homepage: http://www.gphpedit.org/
+
+Package: gphpedit
+Architecture: any
+Depends: ${shlibs:Depends}
+Suggests: php5-cli, php-doc
+Description: development environment for PHP/HTML/CSS 
+ gPHPEdit is a GNOME2 editor that is dedicated to editing 
+ PHP files and other supporting files, like HTML/CSS. It 
+ has support for drop-down function lists, hints showing 
+ parameters, and syntax highlighting.

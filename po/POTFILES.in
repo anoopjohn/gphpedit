@@ -1,0 +1,8 @@
+src/find_replace.c
+src/edit_template.c
+src/main_window.c
+src/main_window_callbacks.c
+src/preferences.c
+src/preferences_dialog.c
+src/syntax_check.c
+src/tab.c
