@@ -124,7 +124,10 @@ GString *get_api_line(GtkWidget *scintilla, gint wordStart, gint wordEnd)
 		return_value = strtok(NULL, "|");
 		params = strtok(NULL, "|");
 		description = strtok(NULL, "|");
-		if (strncasecmp(function_name, buffer, strlen(buffer))==0) {
+		//A full comparison of the function name is required for the tool tip
+		//a partial match will result in an incorrect tooltip. So we 
+		//have to use strcmp and not strncasecmp
+		if (strcmp(function_name, buffer)==0) {
 			g_string_sprintf(calltip, "%s %s %s\n%s", return_value, function_name, params, description);
 			g_free (buffer);
 			g_free(copy_line);
@@ -317,7 +320,9 @@ void sql_autocomplete_word(GtkWidget *scintilla, gint wordStart, gint wordEnd)
 	}
 }
 
-
+//function to show the tool tip with a short description about the
+//php function. The current word at the cursor is used to find the
+//corresponding function from the php-gphpedit.api file
 void show_call_tip(GtkWidget *scintilla, gint pos)
 {
 	gint wordStart;
@@ -327,6 +332,7 @@ void show_call_tip(GtkWidget *scintilla, gint pos)
 	wordStart = gtk_scintilla_word_start_position(GTK_SCINTILLA(scintilla), pos-1, TRUE);
 	wordEnd = gtk_scintilla_word_end_position(GTK_SCINTILLA(scintilla), pos-1, TRUE);
 
+  //function returns the global variable calltip. So does not have to free
 	api_line = get_api_line(scintilla, wordStart, wordEnd);
 
 	if (api_line != NULL) {
