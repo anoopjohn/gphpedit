@@ -1,27 +1,26 @@
 /* This file is part of gPHPEdit, a GNOME2 PHP Editor.
  
-   Copyright (C) 2003, 2004, 2005 Andy Jeffries
-      andy@gphpedit.org
+   Copyright (C) 2003, 2004, 2005 Andy Jeffries <andy at gphpedit.org>
+   Copyright (C) 2009 Anoop John <anoop dot john at zyxware.com>   
 	  
    For more information or to find the latest release, visit our 
    website at http://www.gphpedit.org/
  
-   This program is free software; you can redistribute it and/or
-   modify it under the terms of the GNU General Public License as
-   published by the Free Software Foundation; either version 2 of the
-   License, or (at your option) any later version.
- 
-   This program is distributed in the hope that it will be useful, but
-   WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-   General Public License for more details.
- 
+   gPHPEdit is free software: you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation, either version 3 of the License, or
+   (at your option) any later version.
+
+   gPHPEdit is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
    You should have received a copy of the GNU General Public License
-   along with this program; if not, write to the Free Software
-   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA
-   02111-1307, USA.
+   along with gPHPEdit.  If not, see <http://www.gnu.org/licenses/>.
  
-   The GNU General Public License is contained in the file COPYING.*/
+   The GNU General Public License is contained in the file COPYING.
+*/
 
 #ifdef HAVE_CONFIG_H
 #include <config.h>
@@ -1285,7 +1284,8 @@ void inc_search_typed (GtkEntry *entry, const gchar *text, gint length,
 	glong text_min, text_max;
 	gchar *current_text;
 
-	if (main_window.current_editor) {
+	//Inc search only if the current tab is not a help tab
+	if (main_window.current_editor && main_window.current_editor->type != TAB_HELP) {
 		current_text = (gchar *)gtk_entry_get_text(entry);
 
 		found_pos = gtk_scintilla_find_text(GTK_SCINTILLA(main_window.current_editor->scintilla), 0, current_text, 0, gtk_scintilla_get_length(GTK_SCINTILLA(main_window.current_editor->scintilla)), &text_min, &text_max);
@@ -1298,11 +1298,13 @@ void inc_search_typed (GtkEntry *entry, const gchar *text, gint length,
 
 gboolean inc_search_key_release_event(GtkWidget *widget,GdkEventKey *event,gpointer user_data)
 {
-	if (event->keyval == GDK_Escape) {
-		gtk_scintilla_grab_focus(GTK_SCINTILLA(main_window.current_editor->scintilla));
-		return TRUE;
+	//Auto focus editor tab only if it is a scintilla tab
+  if(main_window.current_editor && main_window.current_editor->type != TAB_HELP) {
+		if (event->keyval == GDK_Escape) {
+			gtk_scintilla_grab_focus(GTK_SCINTILLA(main_window.current_editor->scintilla));
+			return TRUE;
+		}
 	}
-
 	return FALSE;
 }
 
@@ -1314,7 +1316,8 @@ void inc_search_activate(GtkEntry *entry,gpointer user_data)
 	glong text_min, text_max;
 	gchar *current_text;
 
-	if (main_window.current_editor) {
+	//Inc search only if the current tab is not a help tab
+	if (main_window.current_editor && main_window.current_editor->type != TAB_HELP) {
 		current_pos = gtk_scintilla_get_current_pos(GTK_SCINTILLA(main_window.current_editor->scintilla));
 		current_text = (gchar *)gtk_entry_get_text(entry);
 
