@@ -1,3 +1,8 @@
+2009-02-08  Anoop John <anoop.john at zyxware.com>
+
+          * Fixed crash on incremental search while in help tab. 
+            Bug reported at http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=304207
+            
 2009-02-07  Anoop John <anoop.john at zyxware.com>
 
           * Fixed bug - Nowdoc and heredoc tokens were ruining syntax
