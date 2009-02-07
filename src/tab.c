@@ -1599,23 +1599,24 @@ void update_ui(GtkWidget *scintilla)
 	current_pos = gtk_scintilla_get_current_pos(GTK_SCINTILLA(scintilla));
 	current_line = gtk_scintilla_line_from_position(GTK_SCINTILLA(scintilla), gtk_scintilla_get_current_pos(GTK_SCINTILLA(scintilla)));
 	
-	//FindMatchingBracePosition
+	//Check if the character before the cursor is a brace.
 	if (current_pos > 0) {
-		character_before = gtk_scintilla_get_char_at(GTK_SCINTILLA(scintilla), current_pos-1);
-		// style_before = gtk_scintilla_get_style_at(GTK_SCINTILLA(scintilla), current_pos-1);
+		character_before = gtk_scintilla_get_char_at(GTK_SCINTILLA(scintilla), current_pos - 1);
+		// style_before = gtk_scintilla_get_style_at(GTK_SCINTILLA(scintilla), current_pos - 1);
 		if (character_before && strchr("[](){}", character_before)) {
-			current_brace_pos = current_pos-1;
+			current_brace_pos = current_pos - 1;
 		}
 	}
-	
+	//If the character before the cursor is not a brace then
+	//check if the character at the cursor is a brace.
 	if (current_brace_pos < 0) {
-		character_after = gtk_scintilla_get_char_at(GTK_SCINTILLA(scintilla), current_pos+1);
-		// style_before = gtk_scintilla_get_style_at(GTK_SCINTILLA(scintilla), current_pos-1);
+		character_after = gtk_scintilla_get_char_at(GTK_SCINTILLA(scintilla), current_pos);
+		// style_before = gtk_scintilla_get_style_at(GTK_SCINTILLA(scintilla), current_pos);
 		if (character_after && strchr("[](){}", character_after)) {
-			current_brace_pos = current_pos+1;
+			current_brace_pos = current_pos;
 		}
 	}
-		
+	//find the matching brace	
 	if (current_brace_pos>=0) {
 		matching_brace_pos = gtk_scintilla_brace_match(GTK_SCINTILLA(scintilla), current_brace_pos);
 	}
