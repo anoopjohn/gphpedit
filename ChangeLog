@@ -1,3 +1,18 @@
+2009-02-07  Anoop John <anoop.john at zyxware.com>
+
+          * Fixed bug - Nowdoc and heredoc tokens were ruining syntax
+            highlighting. Corrected to handle these tokens properly.
+          * Fixed bug - incorrect tool tips that were being shown
+            with partial matches with php function names. Modified to
+            show tooltip only for full match
+          * New Feature - Sorted list of class browser functions. The
+            classbrowser functions were not listed in alphabetical
+            order. This has been changed to alphabetical listing.
+          * New Feature - Added the ability to restrict the classbrowser
+            function listing for only the current tab.
+          * Corrected incorrect highlighting of braces, bug reported at
+            http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=303798
+
 2009-01-18  Anoop John <anoop.john at zyxware.com>
 
           * Added GPL notices correctly in source files
