@@ -28,6 +28,7 @@
 #endif
 
 #include <libgnomevfs/gnome-vfs.h>
+#include <stdarg.h>
 #include "main.h"
 #include "main_window.h"
 #include "main_window_callbacks.h"
@@ -80,16 +81,56 @@ int main (int argc, char **argv)
 	return 0;
 }
 
-gint debug(gchar *strMsg)
+gint debug(char *formatstring, ...)
 {
   GtkWidget *dlg;
+	int intReturn;
+	char *buf, *temp;
+	temp = (char*) calloc(500, sizeof(char));
+	buf = (char*) calloc(500, sizeof(char));
+	va_list arguments;
+	va_start(arguments, formatstring);
+	int i  ;
+	for (i =0 ; formatstring[i] != '\0'; i++) {
+		if (formatstring[i] != '%' ) {
+			strncat(buf, formatstring + i, 1);
+		}
+		else {
+			switch (formatstring[++i]) {
+				case 's':
+					strcat(buf, va_arg(arguments, char*));
+					continue;
+				case 'd':
+					sprintf(temp, "%d", va_arg(arguments, int));
+					strcat(buf, temp);
+					continue;
+				case 'f':
+					sprintf(temp, "%f", va_arg(arguments, double));
+					strcat(buf, temp);
+					continue;
+				case 'l':
+					sprintf(temp, "%ld", va_arg(arguments, long));
+					strcat(buf,temp);
+					continue;
+				case 'c':
+					sprintf(temp, "%c", va_arg(arguments, int));
+					strcat(buf,temp);
+					continue;
+				case 'p':
+					sprintf(temp, "%p", va_arg(arguments, int*));
+					strcat(buf,temp);
+				continue;
+			}
+		}
+	}
   dlg = gtk_message_dialog_new (main_window.window,
                                 GTK_DIALOG_DESTROY_WITH_PARENT,
                                 GTK_MESSAGE_INFO,
                                 GTK_BUTTONS_CLOSE,
                                 "%s",
-                                strMsg);
+                                buf);
   gtk_dialog_run (GTK_DIALOG (dlg));
   gtk_widget_destroy (dlg);  
-  return 0;
+	va_end(arguments);
+	return 0;
 }
