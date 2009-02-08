@@ -36,6 +36,6 @@
 
 extern GnomeProgram* gphpedit_program;
 gboolean add (gpointer bla);
-gint debug(gchar *strMsg);
+gint debug(gchar *strMsg, ...);
 
 #endif
