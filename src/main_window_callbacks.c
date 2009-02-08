@@ -705,6 +705,23 @@ void on_reload1_activate(GtkWidget *widget)
 	}
 }
 
+void on_tab_close_activate(GtkWidget *widget, Editor *editor)
+{
+	try_close_page(editor);
+}
+
+void on_tab_close_set_style(GtkWidget *hbox, GtkWidget *button)
+{
+	gint w=0, h=0;
+	gtk_icon_size_lookup_for_settings(gtk_widget_get_settings(hbox),
+                                    GTK_ICON_SIZE_MENU,
+                                    &w,
+                                    &h);
+	//debug("%d-%d", w, h);
+	gtk_widget_set_size_request(button, w+2, h+2);
+}
+
+
 
 void rename_file(GString *newfilename)
 {
