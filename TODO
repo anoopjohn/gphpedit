@@ -24,11 +24,9 @@ up, so that the bookmark stays on the code line you've originally selected
 
 Changing cursor position (either by keypress or mouse click) should reparse back from position to find nearest PHP function.  Should popup hint for function.  Should also work for cases like: outer( inner(
 
-
 ---------------------------------------------------------------
 
-Tabs: with context menu and a "close"-item in it or a close button next 
-to the tab (close the current file)
+Tabs: with context menu
 
 ---------------------------------------------------------------
 
@@ -38,6 +36,10 @@ not only when clicking on it (or the diff to the other file names ;))
 
 ---------------------------------------------------------------
 
+Class browser: handle the choice of parsing only current file
+in the configuration
+
+---------------------------------------------------------------
 
 NEW FUNCTIONALITY
 
