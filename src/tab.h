@@ -104,6 +104,7 @@ gboolean is_php_file(Editor *editor);
 gboolean is_php_file_from_filename(gchar *filename);
 gboolean switch_to_file_or_open(gchar *filename, gint line_number);
 void tab_set_configured_scintilla_properties(GtkScintilla *scintilla, Preferences prefs);
+GtkWidget *get_close_tab_widget(Editor *editor);
 // Probably don't need all of these declared in the .h file, but I'll remove the unnecessary ones later - AJ
 void fold_clicked(GtkWidget *scintilla, guint lineClick,guint bstate);
 void fold_expand(GtkWidget *scintilla, gint line, gboolean doExpand, gboolean force, gint visLevels, gint level);

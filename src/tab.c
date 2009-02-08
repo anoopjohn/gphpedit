@@ -1,28 +1,26 @@
 /* This file is part of gPHPEdit, a GNOME2 PHP Editor.
  
-   Copyright (C) 2003, 2004, 2005 Andy Jeffries
-      andy@gphpedit.org
+   Copyright (C) 2003, 2004, 2005 Andy Jeffries <andy at gphpedit.org>
+   Copyright (C) 2009 Anoop John <anoop dot john at zyxware.com>
 	  
    For more information or to find the latest release, visit our 
    website at http://www.gphpedit.org/
  
-   This program is free software; you can redistribute it and/or
-   modify it under the terms of the GNU General Public License as
-   published by the Free Software Foundation; either version 2 of the
-   License, or (at your option) any later version.
- 
-   This program is distributed in the hope that it will be useful, but
-   WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-   General Public License for more details.
- 
-   You should have received a copy of the GNU General Public License
-   along with this program; if not, write to the Free Software
-   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA
-   02111-1307, USA.
- 
-   The GNU General Public License is contained in the file COPYING.*/
+   gPHPEdit is free software: you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation, either version 3 of the License, or
+   (at your option) any later version.
 
+   gPHPEdit is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with gPHPEdit.  If not, see <http://www.gnu.org/licenses/>.
+ 
+   The GNU General Public License is contained in the file COPYING.
+*/
 
 #define PLAT_GTK 1
 #include <gtkscintilla.h>
@@ -628,7 +626,7 @@ gboolean tab_create_help(Editor *editor, GString *filename)
 {
 	GString *caption;
 	GString *long_filename = NULL;
-	GtkWidget *dialog;
+	GtkWidget *dialog, *editor_tab;
  
 	caption = g_string_new(filename->str);
 	caption = g_string_prepend(caption, _("Help: "));
@@ -663,7 +661,8 @@ gboolean tab_create_help(Editor *editor, GString *filename)
 		html_view_set_document(HTML_VIEW(editor->help_view), editor->help_document);
 		gtk_widget_show_all(editor->help_scrolled_window);
 		
-		gtk_notebook_append_page (GTK_NOTEBOOK (main_window.notebook_editor), editor->help_scrolled_window, editor->label);
+		editor_tab = get_close_tab_widget(editor);
+		gtk_notebook_append_page (GTK_NOTEBOOK (main_window.notebook_editor), editor->help_scrolled_window, editor_tab);
 		gtk_notebook_set_current_page (GTK_NOTEBOOK (main_window.notebook_editor), -1);
 	}
 	return TRUE;
@@ -1031,13 +1030,14 @@ gboolean tab_create_new(gint type, GString *filename)
 {
 	Editor *editor;
 	GString *dialog_message;
+	GtkWidget *editor_tab;
 	gchar abs_buffer[2048];
 	gchar *abs_path = NULL;
 	gchar *cwd;
 	gboolean result;
 	gboolean file_created = FALSE;
 	GnomeVFSURI *uri = NULL;
-//	gchar * buffer = NULL;
+  //gchar *buffer = NULL;
 
 	if (DEBUG_MODE) { g_print("DEBUG: tab.c:tab_create_new:filename->str: %s\n", filename->str); }
 	if (filename != NULL) {
@@ -1074,7 +1074,7 @@ gboolean tab_create_new(gint type, GString *filename)
 			editors = g_slist_remove(editors, editor);
 		}
 		else {
-			editor->saved=TRUE;
+			editor->saved = TRUE;
 		}
 	}
 	else {
@@ -1113,10 +1113,13 @@ gboolean tab_create_new(gint type, GString *filename)
 		// Hmmm, I had the same error as the following comment.  A reshuffle here and upgrading GtkScintilla2 to 0.1.0 seems to have fixed it
 		if (!GTK_WIDGET_VISIBLE (editor->scintilla))
 			gtk_widget_show (editor->scintilla);
-		gtk_notebook_append_page (GTK_NOTEBOOK (main_window.notebook_editor), editor->scintilla, editor->label);
+
+		editor_tab = get_close_tab_widget(editor);
+
+		gtk_notebook_append_page (GTK_NOTEBOOK (main_window.notebook_editor), editor->scintilla, editor_tab);
  		gtk_scintilla_set_save_point(GTK_SCINTILLA(editor->scintilla));
 		tab_set_event_handlers(editor);
-		
+
 		/* Possible problem on the next line, one user reports: 
 			assertion `GTK_WIDGET_ANCHORED (widget) || GTK_IS_INVISIBLE (widget)' failed */
 		gtk_notebook_set_current_page (GTK_NOTEBOOK (main_window.notebook_editor), -1);
@@ -1124,7 +1127,7 @@ gboolean tab_create_new(gint type, GString *filename)
 		gtk_scintilla_goto_pos(GTK_SCINTILLA(editor->scintilla), 0);
 		gtk_scintilla_grab_focus(GTK_SCINTILLA(editor->scintilla));
 		main_window.current_editor = editor;
-		
+
 		if (gotoline_after_create_tab) {
 			goto_line_int(gotoline_after_create_tab);
 			gotoline_after_create_tab = 0;
@@ -1135,10 +1138,40 @@ gboolean tab_create_new(gint type, GString *filename)
 	update_app_title();
 
 	g_free(abs_path);
-	
+
 	return TRUE;
 }
 
+GtkWidget *get_close_tab_widget(Editor *editor) {
+	GtkWidget *hbox, *image, *close_button;
+	GtkRcStyle *rcstyle;
+
+	hbox = gtk_hbox_new(FALSE, 0);
+	image = gtk_image_new_from_stock(GTK_STOCK_CLOSE, GTK_ICON_SIZE_MENU);
+	gtk_misc_set_padding(image, 0, 0);
+	gtk_container_set_border_width(GTK_CONTAINER(hbox), 0);
+	close_button = gtk_button_new();
+	gtk_widget_set_tooltip_text(close_button, "Close Tab");
+
+	gtk_button_set_image(close_button, image);
+	gtk_button_set_relief(close_button, GTK_RELIEF_NONE);
+	gtk_button_set_focus_on_click(close_button, FALSE);
+
+	rcstyle = gtk_rc_style_new ();
+	rcstyle->xthickness = rcstyle->ythickness = 0;
+	gtk_widget_modify_style (close_button, rcstyle);
+	gtk_rc_style_unref (rcstyle),
+
+	gtk_signal_connect(GTK_OBJECT(close_button), "clicked", GTK_SIGNAL_FUNC(on_tab_close_activate), editor);
+	gtk_signal_connect(GTK_OBJECT(hbox), "style-set", GTK_SIGNAL_FUNC(on_tab_close_set_style), close_button);
+	gtk_box_pack_start(GTK_BOX(hbox), editor->label, FALSE, FALSE, 0);
+	gtk_box_pack_end(GTK_BOX(hbox), close_button, FALSE, FALSE, 0);
+	gtk_widget_show(editor->label);
+	gtk_widget_show(image);
+	gtk_widget_show(close_button);
+	gtk_widget_show(hbox);
+	return hbox;
+}
 
 Editor *editor_find_from_scintilla(GtkWidget *scintilla)
 {
@@ -1302,18 +1335,18 @@ void fold_expand(GtkWidget *scintilla, gint line, gboolean doExpand, gboolean fo
 // Riverbank Computing Limited <info@riverbankcomputing.co.uk> and Copyright (c) 2003 by them.
 void fold_changed(GtkWidget *scintilla, int line,int levelNow,int levelPrev)
 {
-        if (levelNow & SC_FOLDLEVELHEADERFLAG) {
-                if (!(levelPrev & SC_FOLDLEVELHEADERFLAG))
-                        gtk_scintilla_set_fold_expanded(GTK_SCINTILLA(scintilla), line, 1);
+	if (levelNow & SC_FOLDLEVELHEADERFLAG) {
+		if (!(levelPrev & SC_FOLDLEVELHEADERFLAG))
+			gtk_scintilla_set_fold_expanded(GTK_SCINTILLA(scintilla), line, 1);
         }
 	else if (levelPrev & SC_FOLDLEVELHEADERFLAG) {
-                if (!gtk_scintilla_get_fold_expanded(GTK_SCINTILLA(scintilla), line)) {
-                        // Removing the fold from one that has been contracted
+		if (!gtk_scintilla_get_fold_expanded(GTK_SCINTILLA(scintilla), line)) {
+			// Removing the fold from one that has been contracted
 			// so should expand.  Otherwise lines are left
 			// invisible with no way to make them visible.
-                        fold_expand(scintilla, line, TRUE, FALSE, 0, levelPrev);
-                }
-        }
+			fold_expand(scintilla, line, TRUE, FALSE, 0, levelPrev);
+		}
+	}
 }
 
 // All the folding functions are converted from QScintilla, released under the GPLv2 by
@@ -1487,7 +1520,6 @@ static void indent_line(GtkWidget *scintilla, gint line, gint indent)
 	gtk_scintilla_set_selection_start(GTK_SCINTILLA(scintilla), selStart);
 	gtk_scintilla_set_selection_end(GTK_SCINTILLA(scintilla), selEnd);
 }
-
 
 gboolean auto_complete_callback(gpointer data)
 {
