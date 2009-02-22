@@ -227,7 +227,7 @@ gboolean can_all_tabs_be_saved(void)
 
 
 gboolean main_window_delete_event(GtkWidget *widget,
-                                  GdkEvent *event, gpointer user_data)
+								  GdkEvent *event, gpointer user_data)
 {
 	gboolean cancel_quit = FALSE;
 
@@ -260,7 +260,7 @@ gboolean classbrowser_accept_size(GtkPaned *paned, gpointer user_data)
 }
 
 gint main_window_key_press_event(GtkWidget   *widget,
-                                 GdkEventKey *event,gpointer user_data)
+								 GdkEventKey *event,gpointer user_data)
 {
 	guint current_pos;
 	guint current_line;
@@ -551,7 +551,7 @@ void save_file_as_ok(GtkFileChooser *file_selection_box)
 
 	if (stat (filename->str, &st) == 0) {
 		file_exists_dialog = gnome_question_dialog_modal(_("This file already exists, are you sure you want to overwrite it?"),
-            save_file_as_confirm_overwrite,filename);
+			save_file_as_confirm_overwrite,filename);
 		gnome_dialog_run_and_close(GNOME_DIALOG(file_exists_dialog));
 	}
 	else {
@@ -697,7 +697,7 @@ void on_reload1_activate(GtkWidget *widget)
 
 	if (main_window.current_editor && (main_window.current_editor->saved == FALSE)) {
 		file_revert_dialog = gnome_question_dialog_modal(_("Are you sure you wish to reload the current file, losing your changes?"),
-		                     on_reload_confirm,NULL);
+							 on_reload_confirm,NULL);
 		gnome_dialog_run_and_close(GNOME_DIALOG(file_revert_dialog));
 	}
 	else if (main_window.current_editor) {
@@ -714,9 +714,9 @@ void on_tab_close_set_style(GtkWidget *hbox, GtkWidget *button)
 {
 	gint w=0, h=0;
 	gtk_icon_size_lookup_for_settings(gtk_widget_get_settings(hbox),
-                                    GTK_ICON_SIZE_MENU,
-                                    &w,
-                                    &h);
+									GTK_ICON_SIZE_MENU,
+									&w,
+									&h);
 	//debug("%d-%d", w, h);
 	gtk_widget_set_size_request(button, w+2, h+2);
 }
@@ -758,7 +758,7 @@ void rename_file_ok(GtkFileChooser *file_selection)
 
 	if (stat (filename->str, &st) == 0) {
 		file_exists_dialog = gnome_question_dialog_modal(_("This file already exists, are you sure you want to overwrite it?"),
-		                     save_file_as_confirm_overwrite,filename);
+							 save_file_as_confirm_overwrite,filename);
 		gnome_dialog_run_and_close(GNOME_DIALOG(file_exists_dialog));
 	}
 
@@ -1206,22 +1206,27 @@ void context_help(GtkWidget *widget)
 	g_free(buffer);
 }
 
-
+/**
+ * The about dialog box.
+ */
 void on_about1_activate(GtkWidget *widget)
 {
 	const gchar *authors[] = {
-	                             "Primary Developer/Team Lead:",
-								 "Andy Jeffries <andy@gphpedit.org>",
+								"Current Maintainer",
+								"Anoop John <anoop.john@zyxware.com>",
+								"",
+								"Original Developer",
+								"Andy Jeffries <andy@gphpedit.org>",
 								"",
 								"Assistance with Fixes/Enhancements:",
-				     "Jonh Wendell <wendell@bani.com.br>",
-				     "Tim Jackson <tim@timj.co.uk>",
-				     "Sven Herzberg <herzi@gnome-de.org>",
-	                             NULL
-	                         };
+								"Jonh Wendell <wendell@bani.com.br>",
+								"Tim Jackson <tim@timj.co.uk>",
+								"Sven Herzberg <herzi@gnome-de.org>",
+								NULL
+							 };
 	const gchar *documenters[] = {
-	                                 NULL
-	                             };
+									 NULL
+								 };
 	gchar *translator_credits = _("translator_credits");
 	GtkWidget *about;
 	GdkPixbuf *pixbuf = NULL;
@@ -1234,13 +1239,13 @@ void on_about1_activate(GtkWidget *widget)
 		g_error_free (error);
 	}
 	about = gnome_about_new ("gPHPEdit", VERSION,
-	                         _("Copyright  2003-2006 Andy Jeffries."),
-                         	 _("gPHPEdit is a GNOME2 editor specialised for editing PHP "
-	                         "scripts and related files (HTML/CSS/JS)."),
-	                         (const gchar **) authors,
-	                         (const gchar **) documenters,
-	                         strcmp (translator_credits, "translator_credits") != 0 ? translator_credits : NULL,
-	                         pixbuf);
+							 _("Copyright  2003-2006 Andy Jeffries, 2009 Anoop John"),
+						 	 _("gPHPEdit is a GNOME2 editor specialised for editing PHP "
+							 "scripts and related files (HTML/CSS/JS)."),
+							 (const gchar **) authors,
+							 (const gchar **) documenters,
+							 strcmp (translator_credits, "translator_credits") != 0 ? translator_credits : NULL,
+							 pixbuf);
 	gtk_widget_show(about);
 
 	if (pixbuf) {
@@ -1250,12 +1255,12 @@ void on_about1_activate(GtkWidget *widget)
 	gtk_window_set_transient_for (GTK_WINDOW (about), NULL);
 	/* This line causes a segfault - should be right but commented out!
 	gtk_signal_connect(GTK_OBJECT(about), "destroy",
-	                   GTK_SIGNAL_FUNC(gtk_widget_destroyed), &about);*/
+					   GTK_SIGNAL_FUNC(gtk_widget_destroyed), &about);*/
 	gtk_widget_show (about);
 }
 
 void on_notebook_switch_page (GtkNotebook *notebook, GtkNotebookPage *page,
-                              gint page_num, gpointer user_data)
+							  gint page_num, gpointer user_data)
 {
 	Editor *data;
 	GtkWidget *child;
@@ -1288,14 +1293,14 @@ void on_notebook_switch_page (GtkNotebook *notebook, GtkNotebookPage *page,
 }
 
 gboolean on_notebook_focus_tab(GtkNotebook *notebook,
-                               GtkNotebookTab arg1, gpointer user_data)
+							   GtkNotebookTab arg1, gpointer user_data)
 {
 	gtk_scintilla_grab_focus(GTK_SCINTILLA(main_window.current_editor->scintilla));
 	return TRUE;
 }
 
 void inc_search_typed (GtkEntry *entry, const gchar *text, gint length,
-                       gint *position, gpointer data)
+					   gint *position, gpointer data)
 {
 	gint found_pos;
 	glong text_min, text_max;
@@ -1506,7 +1511,7 @@ gint treeview_double_click(GtkWidget *widget, GdkEventButton *event, gpointer fu
 	guint line_number;
 
 	if (event->type==GDK_2BUTTON_PRESS ||
-	        event->type==GDK_3BUTTON_PRESS) {
+			event->type==GDK_3BUTTON_PRESS) {
 		if (gtk_tree_selection_get_selected (main_window.classtreeselect, NULL, &iter)) {
 			gtk_tree_model_get (GTK_TREE_MODEL(main_window.classtreestore), &iter, FILENAME_COLUMN, &filename, LINE_NUMBER_COLUMN, &line_number, -1);
 			if (filename) {
@@ -1603,7 +1608,7 @@ gint on_tab_change_update_classbrowser(GtkWidget *widget)
   //the filteration logic is set inside classbrowser_update
 	if(GTK_TOGGLE_BUTTON (main_window.chkOnlyCurFileFuncs)->active)
 	{
-    //debug("Is set");
+	//debug("Is set");
    	classbrowser_update();
 	}
   return 0;
