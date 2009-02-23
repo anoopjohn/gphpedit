@@ -1,11 +1,11 @@
 /* This file is part of gPHPEdit, a GNOME2 PHP Editor.
- 
+
    Copyright (C) 2003, 2004, 2005 Andy Jeffries <andy at gphpedit.org>
    Copyright (C) 2009 Anoop John <anoop dot john at zyxware.com>
-	  
+
    For more information or to find the latest release, visit our 
    website at http://www.gphpedit.org/
- 
+
    gPHPEdit is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
    the Free Software Foundation, either version 3 of the License, or
@@ -13,12 +13,12 @@
 
    gPHPEdit is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
    GNU General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with gPHPEdit.  If not, see <http://www.gnu.org/licenses/>.
- 
+   along with gPHPEdit. If not, see <http://www.gnu.org/licenses/>.
+
    The GNU General Public License is contained in the file COPYING.
 */
 
@@ -78,7 +78,7 @@ void main_window_pass_command_line_files(char **argv)
 		while (argv[i] != NULL) {
 			//g_print("%s:%d\n", argv[i], strlen(argv[i]));
 			g_io_channel_write_chars(inter_gphpedit_io, argv[i], strlen(argv[i]),
-			                         &bytes_written, &error);
+									 &bytes_written, &error);
 			++i;
 		}
 	}
@@ -106,12 +106,12 @@ gboolean channel_pass_filename_callback(GIOChannel *source, GIOCondition conditi
 	size_t size;
  
 	// Create the socket. 
-  
+
 	sock = socket (PF_UNIX, SOCK_STREAM, 0);
 	if (sock < 0) {
-      g_print ("Socket creation failed\n");
-      exit (EXIT_FAILURE);
-    }
+		g_print ("Socket creation failed\n");
+		exit (EXIT_FAILURE);
+	}
  
 	// Bind a name to the socket. 
  
@@ -120,12 +120,12 @@ gboolean channel_pass_filename_callback(GIOChannel *source, GIOCondition conditi
  
 	// The size of the address is the offset of the start of the filename, plus its length, plus one for the terminating null byte.
 	size = (offsetof (struct sockaddr_un, sun_path)
-          + strlen (name.sun_path) + 1);
+					+ strlen (name.sun_path) + 1);
  
 	if (bind (sock, (struct sockaddr *) &name, size) < 0) {
-      perror ("bind");
-      exit (EXIT_FAILURE);
-    }
+		perror ("bind");
+		exit (EXIT_FAILURE);
+	}
  
 	unix_socket = sock;
 }*/
@@ -158,7 +158,7 @@ static void main_window_create_toolbars(void)
 	main_window.toolbar_main = gtk_toolbar_new ();
 	gtk_widget_show (main_window.toolbar_main);
 	gnome_app_add_toolbar (GNOME_APP (main_window.window), GTK_TOOLBAR (main_window.toolbar_main), "toolbar1",
-	                       BONOBO_DOCK_ITEM_BEH_NORMAL, BONOBO_DOCK_TOP, 1, 0, 0);
+							 BONOBO_DOCK_ITEM_BEH_NORMAL, BONOBO_DOCK_TOP, 1, 0, 0);
 	gtk_container_set_border_width (GTK_CONTAINER (main_window.toolbar_main), 1);
 	gtk_toolbar_set_style (GTK_TOOLBAR (main_window.toolbar_main), GTK_TOOLBAR_ICONS);
 
@@ -213,7 +213,7 @@ static void main_window_create_toolbars(void)
 	main_window.toolbar_find = gtk_toolbar_new ();
 	gtk_widget_show (main_window.toolbar_find);
 	gnome_app_add_toolbar (GNOME_APP (main_window.window), GTK_TOOLBAR (main_window.toolbar_find), "toolbar_search",
-	                       BONOBO_DOCK_ITEM_BEH_NORMAL, BONOBO_DOCK_TOP, 2, 0, 0);
+							 BONOBO_DOCK_ITEM_BEH_NORMAL, BONOBO_DOCK_TOP, 2, 0, 0);
 	gtk_container_set_border_width (GTK_CONTAINER (main_window.toolbar_find), 1);
 
 	main_window.toolbar_find_search_label = gtk_label_new(_("Search for: "));
@@ -237,6 +237,16 @@ static void main_window_create_toolbars(void)
 	gtk_widget_show(main_window.toolbar_find_goto_entry);
 	gtk_toolbar_append_widget(GTK_TOOLBAR (main_window.toolbar_find), main_window.toolbar_find_goto_entry, _("Go to line"),NULL);
 	gtk_signal_connect_after(GTK_OBJECT(main_window.toolbar_find_goto_entry), "activate", GTK_SIGNAL_FUNC(goto_line_activate), NULL);
+
+	/*
+	GtkToolItem * search_toolbar_separator;
+	search_toolbar_separator = gtk_separator_tool_item_new();
+	gtk_separator_tool_item_set_draw(search_toolbar_separator, FALSE); 
+	gtk_tool_item_set_expand(search_toolbar_separator, TRUE);
+	//gtk_toolbar_insert(GTK_TOOLBAR(main_window.toolbar_find), search_toolbar_separator, 0);
+	gtk_toolbar_append_widget(GTK_TOOLBAR (main_window.toolbar_find), search_toolbar_separator,NULL,NULL);
+	gtk_widget_show(search_toolbar_separator);
+	*/
 }
 
 
@@ -269,7 +279,7 @@ static void main_window_fill_panes(void)
 {
 	GtkWidget *box;
 	GtkWidget *box2;
-  GtkWidget *chkOnlyCurFileFuncs;
+	GtkWidget *chkOnlyCurFileFuncs;
 	GtkCellRenderer *renderer;
 	GtkTreeViewColumn *column;
 
@@ -284,14 +294,14 @@ static void main_window_fill_panes(void)
 	gtk_widget_show(box);
 	gtk_paned_pack1 (GTK_PANED (main_window.main_horizontal_pane), box, FALSE, TRUE);
 
-  //add checkbox to show only current file's classes
-  //the signals to be checked for the check box are onclick of the checkbox 
-  //and the on change of the file.
-  main_window.chkOnlyCurFileFuncs = gtk_check_button_new_with_label("Parse only current file"); 
-  gtk_widget_show (main_window.chkOnlyCurFileFuncs);
+	//add checkbox to show only current file's classes
+	//the signals to be checked for the check box are onclick of the checkbox 
+	//and the on change of the file.
+	main_window.chkOnlyCurFileFuncs = gtk_check_button_new_with_label("Parse only current file"); 
+	gtk_widget_show (main_window.chkOnlyCurFileFuncs);
 	gtk_box_pack_start(GTK_BOX(box), main_window.chkOnlyCurFileFuncs, FALSE, FALSE, 10);
 	g_signal_connect (G_OBJECT (main_window.chkOnlyCurFileFuncs), "clicked",
-	                  G_CALLBACK (on_parse_current_click), NULL);
+						G_CALLBACK (on_parse_current_click), NULL);
 
 	main_window.scrolledwindow3 = gtk_scrolled_window_new (NULL, NULL);
 	gtk_widget_show (main_window.scrolledwindow3);
@@ -308,7 +318,7 @@ static void main_window_fill_panes(void)
 	//gtk_container_add (GTK_CONTAINER (notebook_manager), main_window.scrolledwindow3);
 
 	main_window.classtreestore = gtk_tree_store_new (N_COLUMNS, G_TYPE_STRING,
-	                             G_TYPE_INT, G_TYPE_STRING, G_TYPE_INT, G_TYPE_INT);
+															 G_TYPE_INT, G_TYPE_STRING, G_TYPE_INT, G_TYPE_INT);
 	//enable sorting of the columns
 	classbrowser_set_sortable(main_window.classtreestore);
 
@@ -320,7 +330,7 @@ static void main_window_fill_panes(void)
 	gtk_tree_selection_set_mode (main_window.classtreeselect, GTK_SELECTION_SINGLE);
 	renderer = gtk_cell_renderer_text_new ();
 	column = gtk_tree_view_column_new_with_attributes (_("Name"),
-	         renderer, "text", NAME_COLUMN, NULL);
+					 renderer, "text", NAME_COLUMN, NULL);
 	gtk_tree_view_append_column (GTK_TREE_VIEW (main_window.classtreeview), column);
 
 	/*label1 = gtk_label_new ("Functions");
@@ -335,7 +345,7 @@ static void main_window_fill_panes(void)
 	label2 = gtk_label_new ("Files");
 	gtk_widget_show (label2);
 	gtk_notebook_set_tab_label (GTK_NOTEBOOK (notebook_manager), gtk_notebook_get_nth_page (GTK_NOTEBOOK (notebook_manager), 1), label2);
-	 	gtk_label_set_justify (GTK_LABEL (label2), GTK_JUSTIFY_LEFT);
+	gtk_label_set_justify (GTK_LABEL (label2), GTK_JUSTIFY_LEFT);
 
 	notebook_manager_files_page = gtk_vbox_new (FALSE, 0);
 	gtk_widget_show (notebook_manager_files_page);
@@ -353,20 +363,20 @@ static void main_window_fill_panes(void)
 	gtk_container_add (GTK_CONTAINER (main_window.scrolledwindow1), main_window.lint_view);
 	main_window.lint_renderer = gtk_cell_renderer_text_new ();
 	main_window.lint_column = gtk_tree_view_column_new_with_attributes (_("Syntax Check Output"),
-	                          main_window.lint_renderer,
-	                          "text", 0,
-	                          NULL);
+								main_window.lint_renderer,
+								"text", 0,
+								NULL);
 	gtk_tree_view_append_column (GTK_TREE_VIEW (main_window.lint_view), main_window.lint_column);
 	//gtk_tree_view_set_headers_visible (GTK_TREE_VIEW (main_window.lint_view), FALSE);
 	gtk_widget_set_usize(main_window.lint_view,80,80);
 	main_window.lint_select = gtk_tree_view_get_selection (GTK_TREE_VIEW (main_window.lint_view));
 	gtk_tree_selection_set_mode (main_window.lint_select, GTK_SELECTION_SINGLE);
 	g_signal_connect (G_OBJECT (main_window.lint_select), "changed",
-	                  G_CALLBACK (lint_row_activated), NULL);
+						G_CALLBACK (lint_row_activated), NULL);
 
 	main_window.notebook_editor = gtk_notebook_new ();
 	gtk_notebook_set_scrollable(GTK_NOTEBOOK(main_window.notebook_editor), TRUE);
-	//GTK_WIDGET_UNSET_FLAGS (main_window.notebook_editor,  GTK_CAN_FOCUS | GTK_RECEIVES_DEFAULT);
+	//GTK_WIDGET_UNSET_FLAGS (main_window.notebook_editor, GTK_CAN_FOCUS | GTK_RECEIVES_DEFAULT);
 	// Fix to scrollable list of tabs, however it then messes up grabbing of focus
 	// Hence the focus-tab event (which GTK doesn't seem to recognise
 	GTK_WIDGET_UNSET_FLAGS (main_window.notebook_editor, GTK_RECEIVES_DEFAULT);
@@ -734,7 +744,7 @@ void plugin_exec(gint plugin_num)
 			}
 		}
 		else if (g_strncasecmp(stdout, "MESSAGE", MIN(strlen(stdout),7))==0) {
-			  info_dialog(plugin->name, data);
+				info_dialog(plugin->name, data);
 		}
 		else if (g_strncasecmp(stdout, "OPEN", MIN(strlen(stdout), 4))==0) {
 			if (DEBUG_MODE) { g_print("DEBUG: main_window.c:plugin_exec: Opening file :date: %s\n", data); }
