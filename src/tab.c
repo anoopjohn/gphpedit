@@ -550,13 +550,13 @@ GString *tab_help_find_helpfile(gchar *command)
 		return long_filename;
 
 	// For Redhat/Fedora Core and other sensible distrubutions...
-	long_filename = tab_help_try_filename("/usr/share/doc/phpmanual/function.", command, ".html");
+	long_filename = tab_help_try_filename("/usr/share/doc/php-manual/en/html/function.", command, ".html");
 	if (long_filename)
 		return long_filename;
-	long_filename = tab_help_try_filename("/usr/share/doc/phpmanual/ref.", command, ".html");
+	long_filename = tab_help_try_filename("/usr/share/doc/php-manual/en/html/ref.", command, ".html");
 	if (long_filename)
 		return long_filename;
-	long_filename = tab_help_try_filename("/usr/share/doc/phpmanual/", command, NULL);
+	long_filename = tab_help_try_filename("/usr/share/doc/php-manual/en/html/", command, NULL);
 	if (long_filename)
 		return long_filename;
 
