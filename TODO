@@ -56,8 +56,6 @@ and under an All Files item
 CODE CLEANUP AND MISC CHANGES
 =============================
 
-* Move code to GPLv3
-
 * Use the latest scintilla base
 
 * Take out gtkscintilla wrapper
