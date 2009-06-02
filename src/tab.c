@@ -612,7 +612,7 @@ static void tab_help_link_clicked(GObject *obj, const gchar *url)
 		
 		editor->filename = g_string_new(filename->str);
 		editor->filename = g_string_prepend(editor->filename, _("Help: "));
-
+		
 		editor->short_filename = editor->filename->str;
 		
 		gtk_label_set_text(GTK_LABEL(editor->label), editor->short_filename);
@@ -654,6 +654,8 @@ gboolean tab_create_help(Editor *editor, GString *filename)
 		gtk_container_add(GTK_CONTAINER(editor->help_scrolled_window), editor->help_view);
 	
 		tab_help_load_file(editor, long_filename);
+		
+		debug("%s - %s", long_filename, caption->str);
 	
 		g_signal_connect(G_OBJECT(editor->help_document), "link-clicked",
 			 G_CALLBACK(tab_help_link_clicked), NULL);

@@ -389,26 +389,30 @@ static void main_window_fill_panes(void)
 	g_signal_connect (G_OBJECT (main_window.notebook_editor), "switch_page", GTK_SIGNAL_FUNC (on_tab_change_update_classbrowser), NULL);
 }
 
+/**
+ * Compare two filenames and find the length of the part of the
+ * directory names that match each other. Eg: passing ./home/src/a.php
+ * and ./home/b.php will return 7 i.e. the length of the common
+ * part of the directory names.
+ */
 guint get_longest_matching_length(gchar *filename1, gchar *filename2)
 {
 	gchar *base1, *base1_alloc;
 	gchar *base2, *base2_alloc;
 	guint length;
-	guint maxlength;
 
+	//Store the pointers so as to be freed in the end.
 	base1 = g_path_get_dirname(filename1);
 	base1_alloc = base1;
 	base2 = g_path_get_dirname(filename2);
 	base2_alloc = base2;
 
-	maxlength = strlen(base1);
-	if (strlen(base2)<maxlength) {
-		maxlength = strlen(base2);
-	}
-
 	length = 0;
+	//Check only if both base paths are not ".".
 	if (strcmp(base2_alloc, ".")!=0 && strcmp(base2_alloc, ".")!=0) {
-		while ((*base1 == *base2) && (*base1 != 0) && (*base2 != 0) && length<=maxlength) {
+		//Increment count and move along the characters in both paths
+		//while they are equal and compare till the shorter of the two.
+		while (*base1 && *base2 && (*base1 == *base2)) {
 			base1++;
 			base2++;
 			length++;
@@ -421,7 +425,9 @@ guint get_longest_matching_length(gchar *filename1, gchar *filename2)
 	return length;
 }
 
-
+/**
+ * 
+ */
 GString *get_differing_part(GSList *filenames, gchar *file_requested)
 {
 	GSList *temp_list;
@@ -431,6 +437,7 @@ GString *get_differing_part(GSList *filenames, gchar *file_requested)
 
 	longest_match = 9999;
 
+	// Loop through and find the length of the shortest matching basepath
 	// Seems to miss the first one - if that's not required, change to temp_list = filenames
 	for(temp_list = g_slist_next(filenames); temp_list!= NULL; temp_list = g_slist_next(temp_list)) {
 		match = get_longest_matching_length(temp_list->data, file_requested);
@@ -438,7 +445,7 @@ GString *get_differing_part(GSList *filenames, gchar *file_requested)
 			longest_match = match;
 		}
 	}
-
+	
 	if (longest_match!=9999) {
 		if (*(file_requested + longest_match) == '/') {
 			strcpy(buffer, (file_requested + longest_match+1));
@@ -453,7 +460,6 @@ GString *get_differing_part(GSList *filenames, gchar *file_requested)
 
 	return g_string_new(buffer);
 }
-
 
 GString *get_differing_part_editor(Editor *editor)
 {
@@ -484,37 +490,53 @@ GString *get_differing_part_editor(Editor *editor)
 	g_free(cwd);
 	return result;
 }
-
-
+/**
+ * Update the application title when switching tabs, closing or opening
+ * or opening new tabs or opening new files.
+ */
 void update_app_title(void)
 {
 	GString *title;
+	GString *dir;
 
 	if (main_window.current_editor) {
-		if (main_window.current_editor->filename) {
-			title = get_differing_part_editor(main_window.current_editor);
-			if (title) {
-				if (main_window.current_editor->saved == TRUE) {
-					g_string_append(title, _(" - gPHPEdit"));
-				}
-				else {
-					g_string_append(title, _(" (modified) - gPHPEdit"));
-				}
+		if (main_window.current_editor->type == TAB_FILE
+		    && main_window.current_editor->filename) {
+			//debug("Full Name - %s, Short Name - %s", main_window.current_editor->filename->str, main_window.current_editor->short_filename);
+			//title = get_differing_part_editor(main_window.current_editor);
+			title = g_string_new("");
+			title = g_string_append(title, main_window.current_editor->short_filename);
+			title = g_string_append(title, "(");
+			dir = g_path_get_dirname(main_window.current_editor->filename->str);
+			title = g_string_append(title, dir);
+			g_free(dir);
+			title = g_string_append(title, ")");
+			//debug("Title - %s, Short name - %s", title->str, main_window.current_editor->short_filename);
+			if (main_window.current_editor->saved == TRUE) {
+				g_string_append(title, _(" - gPHPEdit"));
 			}
+			//If the content is not saved then add a * to the begining of the title
 			else {
-				title = g_string_new("gPHPEdit");
+				g_string_prepend(title, "*");
+				g_string_append(title, _(" - gPHPEdit"));
 			}
-			gtk_window_set_title(GTK_WINDOW(main_window.window), title->str);
 		}
+		else if(main_window.current_editor->type == TAB_HELP) {
+			title = g_string_new("Help: ");
+			title = g_string_append(title, main_window.current_editor->help_function);
+		}
+		//If there is no file opened set the name as gPHPEdit
 		else {
-			gtk_window_set_title(GTK_WINDOW(main_window.window), "gPHPEdit");
+			title = g_string_new(_("gPHPEdit"));
 		}
 	}
+	//If there is no file opened set the name as gPHPEdit
 	else {
-		gtk_window_set_title(GTK_WINDOW(main_window.window), "gPHPEdit");
+		title = g_string_new(_("gPHPEdit"));
 	}
+	gtk_window_set_title(GTK_WINDOW(main_window.window), title->str);
+	g_string_free(title, TRUE);
 }
-
 
 gint minimum(gint val1, gint val2)
 {
