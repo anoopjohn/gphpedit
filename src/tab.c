@@ -655,7 +655,7 @@ gboolean tab_create_help(Editor *editor, GString *filename)
 	
 		tab_help_load_file(editor, long_filename);
 		
-		debug("%s - %s", long_filename, caption->str);
+		//debug("%s - %s", long_filename, caption->str);
 	
 		g_signal_connect(G_OBJECT(editor->help_document), "link-clicked",
 			 G_CALLBACK(tab_help_link_clicked), NULL);
