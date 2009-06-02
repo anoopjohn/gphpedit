@@ -1,6 +1,6 @@
 Summary: A PHP source editor for GNOME 2.
 Name: gphpedit
-Version: 0.9.91
+Version: 0.9.96
 Release: 1
 License: GPL
 Group: X11/Utilities
