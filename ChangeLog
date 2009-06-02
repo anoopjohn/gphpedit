@@ -1,3 +1,7 @@
+2009-02-22  Anoop John <anoop.john at zyxware.com>
+
+          * Moved gphpedit sources to GPLv3
+            
 2009-02-09  Anoop John <anoop.john at zyxware.com>
 
           * Added a close button [x] for each tab
