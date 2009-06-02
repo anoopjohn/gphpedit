@@ -20,7 +20,7 @@ dnl
 
 AC_INIT(src)
 AM_CONFIG_HEADER(config.h)
-AM_INIT_AUTOMAKE(gphpedit, 0.9.91)
+AM_INIT_AUTOMAKE(gphpedit, 0.9.96)
 
 AM_MAINTAINER_MODE
 

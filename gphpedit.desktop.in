@@ -1,4 +1,6 @@
 [Desktop Entry]
+Version=0.9.96
+Encoding=UTF-8
 Name=gPHPEdit
 GenericName=PHP/HTML/CSS editor
 Comment=Edit PHP source files
@@ -7,4 +9,4 @@ Icon=gphpedit.png
 Terminal=false
 Type=Application
 Categories=Development;IDE;
-Version=0.9.91
+GenericName[en_IN]=PHP/HTML/CSS editor
