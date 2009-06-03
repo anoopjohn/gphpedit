@@ -384,9 +384,7 @@ static void main_window_fill_panes(void)
 	gtk_paned_pack2 (GTK_PANED (main_window.main_horizontal_pane), main_window.notebook_editor, TRUE, TRUE);
 	gtk_widget_set_usize(main_window.notebook_editor,400,400);
 	g_signal_connect (G_OBJECT (main_window.notebook_editor), "switch_page", GTK_SIGNAL_FUNC (on_notebook_switch_page), NULL);
-	//g_signal_connect (G_OBJECT (main_window.notebook_editor), "focus-tab", GTK_SIGNAL_FUNC (on_notebook_focus_tab), NULL);
-	//check if classbrowser need to be updated
-	g_signal_connect (G_OBJECT (main_window.notebook_editor), "switch_page", GTK_SIGNAL_FUNC (on_tab_change_update_classbrowser), NULL);
+	g_signal_connect (G_OBJECT (main_window.notebook_editor), "focus-tab", GTK_SIGNAL_FUNC (on_notebook_focus_tab), NULL);
 }
 
 /**
@@ -498,9 +496,10 @@ void update_app_title(void)
 {
 	GString *title;
 	GString *dir;
-
-	if (main_window.current_editor) {
-		if (main_window.current_editor->type == TAB_FILE
+	//debug("Function called");
+	if (main_window.current_editor != NULL) {
+		//debug("Not null");
+		if (main_window.current_editor->type != TAB_HELP
 		    && main_window.current_editor->filename) {
 			//debug("Full Name - %s, Short Name - %s", main_window.current_editor->filename->str, main_window.current_editor->short_filename);
 			//title = get_differing_part_editor(main_window.current_editor);

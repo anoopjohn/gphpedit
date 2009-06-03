@@ -806,7 +806,7 @@ void set_active_tab(page_num)
 
 	main_window.current_editor = new_current_editor;
 
-	//update_app_title();
+	update_app_title();
 }
 
 
@@ -1294,6 +1294,7 @@ void on_notebook_switch_page (GtkNotebook *notebook, GtkNotebookPage *page,
 		// Change the title of the main application window to the full filename
 		update_app_title();
 	}
+	on_tab_change_update_classbrowser(main_window.notebook_editor);
 }
 
 gboolean on_notebook_focus_tab(GtkNotebook *notebook,

@@ -613,7 +613,12 @@ static void tab_help_link_clicked(GObject *obj, const gchar *url)
 		editor->filename = g_string_new(filename->str);
 		editor->filename = g_string_prepend(editor->filename, _("Help: "));
 		
-		editor->short_filename = editor->filename->str;
+		//TODO: These strings are not being freed. The app crashes when the free
+		//is uncommented stating that there were duplicate free calls.
+		//g_free(editor->short_filename);
+		//g_free(editor->help_function);
+		editor->short_filename = g_strconcat("Help: ", url, NULL);
+		editor->help_function = g_strdup(url);
 		
 		gtk_label_set_text(GTK_LABEL(editor->label), editor->short_filename);
 		
