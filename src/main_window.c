@@ -437,13 +437,14 @@ GString *get_differing_part(GSList *filenames, gchar *file_requested)
 
 	// Loop through and find the length of the shortest matching basepath
 	// Seems to miss the first one - if that's not required, change to temp_list = filenames
-	for(temp_list = g_slist_next(filenames); temp_list!= NULL; temp_list = g_slist_next(temp_list)) {
+	for(temp_list = filenames; temp_list!= NULL; temp_list = g_slist_next(temp_list)) {
 		match = get_longest_matching_length(temp_list->data, file_requested);
+		//debug("String: %s\nString: %s\nMatch: %d", temp_list->data, file_requested, match);
 		if (match < longest_match) {
 			longest_match = match;
 		}
 	}
-	
+	//debug("Match: %d", longest_match);
 	if (longest_match!=9999) {
 		if (*(file_requested + longest_match) == '/') {
 			strcpy(buffer, (file_requested + longest_match+1));

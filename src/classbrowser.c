@@ -189,8 +189,9 @@ void classbrowser_dirlist_add(gchar *dir)
 				if (g_file_test(fullfilename->str, G_FILE_TEST_IS_DIR)) {
 					//classbrowser_dirlist_add(fullfilename->str);
 				}
-				else if (is_php_file_from_filename(fullfilename->str)){
+				else if (is_php_file_from_filename(fullfilename->str)) {
 					classbrowser_filelist_add(fullfilename->str);
+					//debug("File added: %s", fullfilename->str);
 				}
 				g_string_free(fullfilename, TRUE);
 			}
@@ -540,11 +541,12 @@ void classbrowser_functionlist_add(gchar *classname, gchar *funcname, gchar *fil
 	GtkTreeIter class_iter;
 	GString *function_decl;
 	guint type;
+	
+	//debug("Filename:%s", filename);
 
 	if ((function = classbrowser_functionlist_find(funcname, param_list, filename, classname))) {
 		function->line_number = line_number;
-		function->remove
-		= FALSE;
+		function->remove = FALSE;
 	}
 	else {
 		function = g_malloc0(sizeof(ClassBrowserFunction));
@@ -577,7 +579,7 @@ void classbrowser_functionlist_add(gchar *classname, gchar *funcname, gchar *fil
 			function_decl = g_string_append(function_decl, param_list);
 		}
 		function_decl = g_string_append(function_decl, ")");
-
+		//debug("Filename: %s", filename);
 		gtk_tree_store_set (main_window.classtreestore, &iter,
 		                    NAME_COLUMN, function_decl->str, LINE_NUMBER_COLUMN, line_number, FILENAME_COLUMN, filename, TYPE_COLUMN, type, ID_COLUMN, function->identifierid, -1);
 		g_string_free(function_decl, TRUE);
@@ -653,13 +655,14 @@ void classbrowser_update(void)
 	classbrowser_dirlist_clear();
 	classbrowser_dirlist_add_shared_source();
 
-  //if parse only current file is set then add only the file in the current tab
+	//if parse only current file is set then add only the file in the current tab
 	if(GTK_TOGGLE_BUTTON (main_window.chkOnlyCurFileFuncs)->active)
 	{
 		//add only if there is a current editor
 		if (main_window.current_editor)
 		{
 			classbrowser_filelist_add(main_window.current_editor->filename->str);
+			g_slist_append(dirlist, g_path_get_dirname(main_window.current_editor->filename->str));
 		}
 	}
 	else
@@ -674,9 +677,8 @@ void classbrowser_update(void)
 		}
 
 		//classbrowser_dirlist_add(preferences.shared_source_location);
-		classbrowser_filelist_update();
-  }
-
+	}
+	classbrowser_filelist_update();
 	classbrowser_start_update();
 
 	while ( (file = classbrowser_filelist_getnext() ) ) {
@@ -685,6 +687,7 @@ void classbrowser_update(void)
 		stat(file->filename, &buf);
 		file->modified_time = buf.st_mtime;
 		classbrowser_parse_file(file->filename);
+		//debug("Parsing %s", file->filename);
 	}
 
 	classbrowser_remove_dead_wood();
@@ -779,9 +782,12 @@ void classbrowser_update_selected_label(gchar *filename, gint line)
 	GString *new_label;
 	ClassBrowserFunction *function;
 	gchar *func_filename;
+	gint num_files;
 
 	filenames = NULL;
+	num_files = 0;
 	for(function_walk = functionlist; function_walk!= NULL; function_walk = g_slist_next(function_walk)) {
+		num_files++;
 		function = function_walk->data;
 		if (function) {
 			func_filename = function->filename;
@@ -791,8 +797,13 @@ void classbrowser_update_selected_label(gchar *filename, gint line)
 			}
 		}
 	}
-
-	new_label = get_differing_part(filenames, filename);
+	if(num_files < 2) {
+		new_label = g_string_new(g_path_get_basename(filename));
+	}
+	else {
+		new_label = get_differing_part(filenames, filename);
+	}
+	//debug("%d :: %s", num_files, new_label);	
 	if (new_label) {
 		new_label = g_string_prepend(new_label, _("FILE: "));
 		g_string_append_printf(new_label, "(%d)", line);
@@ -806,14 +817,14 @@ void classbrowser_update_selected_label(gchar *filename, gint line)
 void classbrowser_set_sortable(GtkTreeStore *classtreestore)
 {
 	gtk_tree_sortable_set_default_sort_func(GTK_TREE_SORTABLE(classtreestore), 
-											classbrowser_compare_function_names,
-											NULL,NULL);
+		classbrowser_compare_function_names,
+		NULL,NULL);
 	gtk_tree_sortable_set_sort_func(GTK_TREE_SORTABLE(classtreestore), 
-									0, classbrowser_compare_function_names, 
-									NULL,NULL);
+		0, classbrowser_compare_function_names, 
+		NULL,NULL);
 	gtk_tree_sortable_set_sort_column_id(GTK_TREE_SORTABLE(classtreestore),
-											0,
-											GTK_SORT_ASCENDING);
+		0,
+		GTK_SORT_ASCENDING);
 }
 //compare function names of the iter of the gtktreeview
 gint classbrowser_compare_function_names(GtkTreeModel *model,
