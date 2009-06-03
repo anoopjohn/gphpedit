@@ -155,7 +155,11 @@ static gboolean check_previous(gchar *original, gchar *current, gchar *search)
 	return FALSE;
 }
 
-
+// Check if the character before the search string is a valid character that will
+// make the character + search string a valid token. Used to find out if the char
+// before the occurrence of strings 'class' and 'function' is a non-identifier char
+// and non-$ char
+// Eg: xfunction should return false so should $class
 static gboolean non_letter_before(gchar *original, gchar *current, gchar *search)
 {
 	gint search_len;
@@ -168,7 +172,7 @@ static gboolean non_letter_before(gchar *original, gchar *current, gchar *search
 	}
 
 	// Second, go back from current search_len positions
-	current = current - (search_len+1);
+	current = current - (search_len);
 
 	// Then check to see if we match
 	if (!is_identifier_char(*current) && *current != '$') {
@@ -200,9 +204,9 @@ void classbrowser_parse_file(gchar *filename)
 	guint parenthesis_count;
 	guint line_number;
 
-  gchar *heredoc_tag_start;
-  gchar *heredoc_closingtag;
-  guint heredoctag_length = 0;
+	gchar *heredoc_tag_start;
+	gchar *heredoc_closingtag;
+	guint heredoctag_length = 0;
 	gboolean looking_for_heredocident;
 
 	gchar *within_class;
@@ -233,7 +237,7 @@ void classbrowser_parse_file(gchar *filename)
 	within_double_string = FALSE;
 	within_heredoc = FALSE;
 	looking_for_heredocident = FALSE;
-  heredoc_closingtag = NULL;
+	heredoc_closingtag = NULL;
 	heredoc_tag_start = NULL;
 	
 	brace_count = 0;
@@ -294,24 +298,24 @@ void classbrowser_parse_file(gchar *filename)
 				within_heredoc = FALSE;
 			}
 			else if (within_heredoc && looking_for_heredocident && *c == '\n') {
-			  //if nowdoc
-			  if (*heredoc_tag_start == '\'') {
-			    //-2 for the two single quotes
-          heredoctag_length = c - heredoc_tag_start - 2;  			   
-  				heredoc_closingtag = g_malloc(heredoctag_length + 1);
-				  strncpy(heredoc_closingtag, heredoc_tag_start + 1, heredoctag_length);
-				  heredoc_closingtag[heredoctag_length]='\0';
+				//if nowdoc
+				if (*heredoc_tag_start == '\'') {
+					//-2 for the two single quotes
+					heredoctag_length = c - heredoc_tag_start - 2;  			   
+					heredoc_closingtag = g_malloc(heredoctag_length + 1);
+					strncpy(heredoc_closingtag, heredoc_tag_start + 1, heredoctag_length);
+					heredoc_closingtag[heredoctag_length]='\0';
 #ifdef DEBUG_CLASSBROWSER
-	  			g_print("Expecting Nowdoc closing tag: %s\n", heredoc_closingtag);
+	  				g_print("Expecting Nowdoc closing tag: %s\n", heredoc_closingtag);
 #endif
-			  }
-			  else {
-          heredoctag_length = c - heredoc_tag_start;  			   
-  				heredoc_closingtag = g_malloc(heredoctag_length + 1);
-				  strncpy(heredoc_closingtag, heredoc_tag_start, heredoctag_length);
-				  heredoc_closingtag[heredoctag_length]='\0';
+				}
+				else {
+					heredoctag_length = c - heredoc_tag_start;  			   
+					heredoc_closingtag = g_malloc(heredoctag_length + 1);
+					strncpy(heredoc_closingtag, heredoc_tag_start, heredoctag_length);
+					heredoc_closingtag[heredoctag_length]='\0';
 #ifdef DEBUG_CLASSBROWSER
-  				g_print("Expecting Heredoc closing tag: %s\n", heredoc_closingtag);
+					g_print("Expecting Heredoc closing tag: %s\n", heredoc_closingtag);
 #endif
 				}
 				looking_for_heredocident = FALSE;
