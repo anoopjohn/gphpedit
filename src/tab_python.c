@@ -79,7 +79,7 @@ void scintilla_python_set_lexer(GtkScintilla *scintilla, Preferences prefs)
     gtk_scintilla_set_edge_mode (scintilla, prefs.edge_mode);
     gtk_scintilla_set_edge_column (scintilla, prefs.edge_column);
     gtk_scintilla_set_edge_colour (scintilla, prefs.edge_colour);
-
+	// Python keywords
 	gtk_scintilla_set_keywords(scintilla, 0, "and assert break class continue def del elif else except exec finally for from global if import in is lambda None not or pass print raise return try while yield");
 	
     gtk_scintilla_style_set_fore (scintilla, SCE_P_TRIPLEDOUBLE, prefs.php_hstring_fore);
