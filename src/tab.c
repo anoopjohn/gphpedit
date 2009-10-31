@@ -1032,7 +1032,7 @@ void close_saved_empty_Untitled()
 }
 
 
-/* return TRUE if a tab was created */
+/* Create a new tab and return TRUE if a tab was created */
 gboolean tab_create_new(gint type, GString *filename)
 {
 	Editor *editor;
@@ -1070,7 +1070,9 @@ gboolean tab_create_new(gint type, GString *filename)
 			file_created = TRUE;
 		}
 	}
-	close_saved_empty_Untitled();
+	// When a new tab request is processed if the only current tab is an untitled
+	// and unmodified tab then close it 
+	// close_saved_empty_Untitled();
 	
 	editor = tab_new_editor();
 	editor->type = type;
