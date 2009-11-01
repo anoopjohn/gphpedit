@@ -20,3 +20,4 @@ stamp-h1
 *.[oa]
 src/gphpedit
 autom4te.cache
+patches

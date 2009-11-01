@@ -801,7 +801,7 @@ void set_active_tab(page_num)
 
 	if (new_current_editor) {
 		//page_num = gtk_notebook_page_num(GTK_NOTEBOOK(main_window.notebook_editor),(new_current_editor->scintilla));
-		gtk_notebook_set_current_page(GTK_NOTEBOOK(main_window.notebook_editor),page_num);
+		gtk_notebook_set_current_page(GTK_NOTEBOOK(main_window.notebook_editor), page_num);
 	}
 
 	main_window.current_editor = new_current_editor;
@@ -809,11 +809,20 @@ void set_active_tab(page_num)
 	update_app_title();
 }
 
+/**
+ * Close a tab in the Editor. Removes the notebook page, frees the editor object,
+ * and sets the active tab correcty
+ * 
+ * @param editor - The editor object corresponding to the tab that is going to be closed.
+ * @return void
+ * 
+ */
 
 void close_page(Editor *editor)
 {
 	gint page_num;
 	gint page_num_closing;
+	gint current_active_tab;
 
 	if (GTK_IS_SCINTILLA(editor->scintilla)) {
 		page_num_closing = gtk_notebook_page_num(GTK_NOTEBOOK(main_window.notebook_editor),editor->scintilla);
@@ -822,16 +831,24 @@ void close_page(Editor *editor)
 	else {
 		page_num_closing = gtk_notebook_page_num(GTK_NOTEBOOK(main_window.notebook_editor),editor->help_scrolled_window);
 	}
-
-	page_num = page_num_closing-1;
-	if (page_num<0) {
-		page_num=0;
+	current_active_tab = gtk_notebook_get_current_page(GTK_NOTEBOOK(main_window.notebook_editor));
+	
+	if (page_num_closing != current_active_tab) {
+		page_num = current_active_tab;
+	}
+	else {
+	    // If there is a tab before the current one then set it as the active tab.
+		page_num = page_num_closing - 1;
+	    // If the current tab is the 0th tab then set the current tab as 0 itself.
+	    // If there are are subsequent tabs, then this will set the next tab as active.
+		if (page_num < 0) {
+			page_num = 0;
+		}	
 	}
 	set_active_tab(page_num);
-
 	g_string_free(editor->filename, TRUE);
 	g_free(editor);
-	gtk_notebook_remove_page(GTK_NOTEBOOK(main_window.notebook_editor),page_num_closing);
+	gtk_notebook_remove_page(GTK_NOTEBOOK(main_window.notebook_editor), page_num_closing);
 }
 
 
