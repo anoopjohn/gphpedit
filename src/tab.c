@@ -96,7 +96,8 @@ void tab_set_general_scintilla_properties(Editor *editor)
 	gtk_signal_connect (GTK_OBJECT (editor->scintilla), "save_point_left", GTK_SIGNAL_FUNC (save_point_left), NULL);
 	gtk_signal_connect (GTK_OBJECT (editor->scintilla), "macro_record", GTK_SIGNAL_FUNC (macro_record), NULL);
 
-	gtk_scintilla_set_sel_back(GTK_SCINTILLA(editor->scintilla), 1, 13434879);
+	//gtk_scintilla_set_sel_back(GTK_SCINTILLA(editor->scintilla), 1, 13434879);
+         gtk_scintilla_set_sel_back(GTK_SCINTILLA(editor->scintilla), 1, gnome_config_get_int ("gPHPEdit/default_style/selection=11250603"));
 
 	tab_set_configured_scintilla_properties(GTK_SCINTILLA(editor->scintilla), preferences);
 	gtk_widget_show (editor->scintilla);
