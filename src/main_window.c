@@ -168,24 +168,29 @@ static void main_window_create_toolbars(void)
 	// Add the File operations to the Main Toolbar
 	//main_window.toolbar_main_button_new = gtk_toolbar_insert_stock (GTK_TOOLBAR (main_window.toolbar_main),GTK_STOCK_NEW, _("New File"), NULL, NULL, NULL, -1);
 	main_window.toolbar_main_button_new = gtk_tool_button_new_from_stock(GTK_STOCK_NEW);
+	gtk_tool_item_set_tooltip_text(main_window.toolbar_main_button_new, _("New File"));
   	gtk_toolbar_insert(GTK_TOOLBAR(main_window.toolbar_main), main_window.toolbar_main_button_new, -1);
 	gtk_widget_show (main_window.toolbar_main_button_new);
 	//main_window.toolbar_main_button_open = gtk_toolbar_insert_stock (GTK_TOOLBAR (main_window.toolbar_main),GTK_STOCK_OPEN, _("Open File"), NULL, NULL, NULL, -1);
 	//gtk_widget_show (main_window.toolbar_main_button_open);
 	main_window.toolbar_main_button_open = gtk_tool_button_new_from_stock(GTK_STOCK_OPEN);
+	gtk_tool_item_set_tooltip_text(main_window.toolbar_main_button_open, _("Open File"));
   	gtk_toolbar_insert(GTK_TOOLBAR(main_window.toolbar_main), main_window.toolbar_main_button_open, -1);
 	gtk_widget_show (main_window.toolbar_main_button_open);
 //	main_window.toolbar_main_button_save = gtk_toolbar_insert_stock (GTK_TOOLBAR (main_window.toolbar_main),GTK_STOCK_SAVE, _("Save File"), NULL, NULL, NULL, -1);
 	main_window.toolbar_main_button_save = gtk_tool_button_new_from_stock(GTK_STOCK_SAVE);
+	gtk_tool_item_set_tooltip_text(main_window.toolbar_main_button_save, _("Save File"));
   	gtk_toolbar_insert(GTK_TOOLBAR(main_window.toolbar_main), main_window.toolbar_main_button_save, -1);
 	gtk_widget_show (main_window.toolbar_main_button_save);
 //	main_window.toolbar_main_button_save_as = gtk_toolbar_insert_stock (GTK_TOOLBAR (main_window.toolbar_main),GTK_STOCK_SAVE_AS, _("Save File As..."), NULL, NULL, NULL, -1);
-main_window.toolbar_main_button_save_as = gtk_tool_button_new_from_stock(GTK_STOCK_SAVE_AS);
+	main_window.toolbar_main_button_save_as = gtk_tool_button_new_from_stock(GTK_STOCK_SAVE_AS);
+	gtk_tool_item_set_tooltip_text(main_window.toolbar_main_button_save_as, _("Save File As..."));
   	gtk_toolbar_insert(GTK_TOOLBAR(main_window.toolbar_main), main_window.toolbar_main_button_save_as, -1);
 	gtk_widget_show (main_window.toolbar_main_button_save_as);
 
 //	main_window.toolbar_main_button_close = gtk_toolbar_insert_stock (GTK_TOOLBAR (main_window.toolbar_main),GTK_STOCK_CLOSE, _("Close File"), NULL, NULL, NULL, -1);
-main_window.toolbar_main_button_close = gtk_tool_button_new_from_stock(GTK_STOCK_CLOSE);
+	main_window.toolbar_main_button_close = gtk_tool_button_new_from_stock(GTK_STOCK_CLOSE);
+	gtk_tool_item_set_tooltip_text(main_window.toolbar_main_button_close, _("Close File"));
   	gtk_toolbar_insert(GTK_TOOLBAR(main_window.toolbar_main), main_window.toolbar_main_button_close, -1);
 	gtk_widget_show (main_window.toolbar_main_button_close);
 	gtk_signal_connect (GTK_OBJECT (main_window.toolbar_main_button_open), "clicked", GTK_SIGNAL_FUNC (on_open1_activate), NULL);
@@ -200,10 +205,12 @@ main_window.toolbar_main_button_close = gtk_tool_button_new_from_stock(GTK_STOCK
 	// Add the Undo operations to the Main Toolbar
 //	main_window.toolbar_main_button_undo = gtk_toolbar_insert_stock (GTK_TOOLBAR (main_window.toolbar_main),GTK_STOCK_UNDO, _("Undo last change"), NULL, NULL, NULL, -1);
 	main_window.toolbar_main_button_undo = gtk_tool_button_new_from_stock(GTK_STOCK_UNDO);
+	gtk_tool_item_set_tooltip_text(main_window.toolbar_main_button_undo, _("Undo last change"));
   	gtk_toolbar_insert(GTK_TOOLBAR(main_window.toolbar_main), main_window.toolbar_main_button_undo, -1);
 	gtk_widget_show (main_window.toolbar_main_button_undo);
 //	main_window.toolbar_main_button_redo = gtk_toolbar_insert_stock (GTK_TOOLBAR (main_window.toolbar_main),GTK_STOCK_REDO, _("Redo last change"), NULL, NULL, NULL, -1);
 	main_window.toolbar_main_button_redo = gtk_tool_button_new_from_stock(GTK_STOCK_REDO);
+	gtk_tool_item_set_tooltip_text(main_window.toolbar_main_button_redo, _("Redo last change"));
   	gtk_toolbar_insert(GTK_TOOLBAR(main_window.toolbar_main), main_window.toolbar_main_button_redo, -1);
 	gtk_widget_show (main_window.toolbar_main_button_redo);
 	gtk_signal_connect (GTK_OBJECT (main_window.toolbar_main_button_undo), "clicked", GTK_SIGNAL_FUNC (on_undo1_activate), NULL);
@@ -216,14 +223,19 @@ main_window.toolbar_main_button_close = gtk_tool_button_new_from_stock(GTK_STOCK
 	// Add the Clipboard operations to the Main Toolbar
 	//main_window.toolbar_main_button_cut = gtk_toolbar_insert_stock (GTK_TOOLBAR (main_window.toolbar_main),GTK_STOCK_CUT, _("Cut current selection"), NULL, NULL, NULL, -1);
 	main_window.toolbar_main_button_cut = gtk_tool_button_new_from_stock(GTK_STOCK_CUT);
+	gtk_tool_item_set_tooltip_text(main_window.toolbar_main_button_cut, _("Cut current selection"));
   	gtk_toolbar_insert(GTK_TOOLBAR(main_window.toolbar_main), main_window.toolbar_main_button_cut, -1);
 	gtk_signal_connect (GTK_OBJECT (main_window.toolbar_main_button_cut), "clicked", GTK_SIGNAL_FUNC (on_cut1_activate), NULL);
 	gtk_widget_show (main_window.toolbar_main_button_cut);
 //	main_window.toolbar_main_button_copy = gtk_toolbar_insert_stock (GTK_TOOLBAR (main_window.toolbar_main),GTK_STOCK_COPY, _("Copy current selection"), NULL, NULL, NULL, -1);
+	main_window.toolbar_main_button_copy = gtk_tool_button_new_from_stock(GTK_STOCK_COPY);
+  	gtk_tool_item_set_tooltip_text(main_window.toolbar_main_button_copy, _("Copy current selection"));
+	gtk_toolbar_insert(GTK_TOOLBAR(main_window.toolbar_main), main_window.toolbar_main_button_copy, -1);
 	gtk_signal_connect (GTK_OBJECT (main_window.toolbar_main_button_copy), "clicked", GTK_SIGNAL_FUNC (on_copy1_activate), NULL);
-	gtk_widget_show (main_window.toolbar_main_button_save_as);
+	gtk_widget_show (main_window.toolbar_main_button_copy);
 	//main_window.toolbar_main_button_paste = gtk_toolbar_insert_stock (GTK_TOOLBAR (main_window.toolbar_main),GTK_STOCK_PASTE, _("Paste current selection"), NULL, NULL, NULL, -1);
 	main_window.toolbar_main_button_paste = gtk_tool_button_new_from_stock(GTK_STOCK_PASTE);
+  	gtk_tool_item_set_tooltip_text(main_window.toolbar_main_button_paste, _("Paste current selection"));
   	gtk_toolbar_insert(GTK_TOOLBAR(main_window.toolbar_main), main_window.toolbar_main_button_paste, -1);
 	gtk_signal_connect (GTK_OBJECT (main_window.toolbar_main_button_paste), "clicked", GTK_SIGNAL_FUNC (on_paste1_activate), NULL);
 	gtk_widget_show (main_window.toolbar_main_button_paste);
@@ -234,11 +246,13 @@ main_window.toolbar_main_button_close = gtk_tool_button_new_from_stock(GTK_STOCK
 	// Add the Search operations to the Main Toolbar
 //	main_window.toolbar_main_button_find = gtk_toolbar_insert_stock (GTK_TOOLBAR (main_window.toolbar_main),GTK_STOCK_FIND, _("Find text"), NULL, NULL, NULL, -1);
 	main_window.toolbar_main_button_find = gtk_tool_button_new_from_stock(GTK_STOCK_FIND);
+  	gtk_tool_item_set_tooltip_text(main_window.toolbar_main_button_find, _("Find Text"));
   	gtk_toolbar_insert(GTK_TOOLBAR(main_window.toolbar_main), main_window.toolbar_main_button_find, -1);
 	gtk_widget_show (main_window.toolbar_main_button_find);
 	gtk_signal_connect (GTK_OBJECT (main_window.toolbar_main_button_find), "clicked", GTK_SIGNAL_FUNC (on_find1_activate), NULL);
 	//main_window.toolbar_main_button_replace = gtk_toolbar_insert_stock (GTK_TOOLBAR (main_window.toolbar_main),GTK_STOCK_FIND_AND_REPLACE, _("Find/Replace text"), NULL, NULL, NULL, -1);
 	main_window.toolbar_main_button_replace = gtk_tool_button_new_from_stock(GTK_STOCK_FIND_AND_REPLACE);
+  	gtk_tool_item_set_tooltip_text(main_window.toolbar_main_button_replace, _("Find/Replace text"));
   	gtk_toolbar_insert(GTK_TOOLBAR(main_window.toolbar_main), main_window.toolbar_main_button_replace, -1);
 	gtk_signal_connect (GTK_OBJECT (main_window.toolbar_main_button_replace), "clicked", GTK_SIGNAL_FUNC (on_replace1_activate), NULL);
 	gtk_widget_show (main_window.toolbar_main_button_replace);
@@ -250,16 +264,17 @@ main_window.toolbar_main_button_close = gtk_tool_button_new_from_stock(GTK_STOCK
 	// Add the indent/unindent operations to the Main Toolbar	
 	/*indent block*/
 
-	main_window.toolbar_main_indent = gtk_tool_button_new_from_stock(GTK_STOCK_INDENT);
-  	gtk_toolbar_insert(GTK_TOOLBAR(main_window.toolbar_main), main_window.toolbar_main_indent, -1);
-	gtk_signal_connect (GTK_OBJECT (main_window.toolbar_main_indent), "clicked", GTK_SIGNAL_FUNC (block_indent), NULL);
-	gtk_widget_show (main_window.toolbar_main_indent);
+	main_window.toolbar_main_button_indent = gtk_tool_button_new_from_stock(GTK_STOCK_INDENT);
+	gtk_tool_item_set_tooltip_text(main_window.toolbar_main_button_indent, _("Indent block"));
+  	gtk_toolbar_insert(GTK_TOOLBAR(main_window.toolbar_main), main_window.toolbar_main_button_indent, -1);
+	gtk_signal_connect (GTK_OBJECT (main_window.toolbar_main_button_indent), "clicked", GTK_SIGNAL_FUNC (block_indent), NULL);
+	gtk_widget_show (main_window.toolbar_main_button_indent);
 	/*unindent block*/
-	GtkWidget *toolbar_main_unindent;
-	main_window.toolbar_main_unindent = gtk_tool_button_new_from_stock(GTK_STOCK_UNINDENT);
-  	gtk_toolbar_insert(GTK_TOOLBAR(main_window.toolbar_main), main_window.toolbar_main_unindent, -1);
-	gtk_signal_connect (GTK_OBJECT (main_window.toolbar_main_unindent), "clicked", GTK_SIGNAL_FUNC (block_unindent), NULL);
-	gtk_widget_show (main_window.toolbar_main_unindent);
+	main_window.toolbar_main_button_unindent = gtk_tool_button_new_from_stock(GTK_STOCK_UNINDENT);
+	gtk_tool_item_set_tooltip_text(main_window.toolbar_main_button_unindent, _("Unindent block"));
+  	gtk_toolbar_insert(GTK_TOOLBAR(main_window.toolbar_main), main_window.toolbar_main_button_unindent, -1);
+	gtk_signal_connect (GTK_OBJECT (main_window.toolbar_main_button_unindent), "clicked", GTK_SIGNAL_FUNC (block_unindent), NULL);
+	gtk_widget_show (main_window.toolbar_main_button_unindent);
 
 	// Create the Search Toolbar
 	
@@ -285,6 +300,7 @@ main_window.toolbar_main_button_close = gtk_tool_button_new_from_stock(GTK_STOCK
 	main_window.toolbar_find_search_entry = gtk_entry_new();
 	gtk_widget_show(main_window.toolbar_find_search_entry);
 	gtk_container_add (GTK_CONTAINER (item), main_window.toolbar_find_search_entry);
+	gtk_tool_item_set_tooltip_text(item, _("Incremental search"));
 	gtk_toolbar_insert(GTK_TOOLBAR(main_window.toolbar_find), item, -1);
 	gtk_widget_show(item);
 	//gtk_toolbar_append_widget(GTK_TOOLBAR (main_window.toolbar_find), main_window.toolbar_find_search_entry, _("Incremental search"),NULL);
@@ -311,6 +327,7 @@ main_window.toolbar_main_button_close = gtk_tool_button_new_from_stock(GTK_STOCK
 	item=gtk_tool_item_new();
 	gtk_tool_item_set_expand (item, TRUE);
 	gtk_container_add (GTK_CONTAINER (item), main_window.toolbar_find_goto_entry);
+	gtk_tool_item_set_tooltip_text(item, _("Go to line"));
 	gtk_toolbar_insert(GTK_TOOLBAR(main_window.toolbar_find), item, -1);
 	gtk_widget_show(item);
 

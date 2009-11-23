@@ -48,8 +48,8 @@ typedef struct
 	GtkWidget *toolbar_main_button_find;
 	GtkWidget *toolbar_main_button_replace;
 	GtkToolItem *toolbar_separator;
-	GtkWidget *toolbar_main_indent;
-	GtkWidget *toolbar_main_unindent;
+	GtkWidget *toolbar_main_button_indent;
+	GtkWidget *toolbar_main_button_unindent;
 	GtkWidget *toolbar_find;
 	GtkWidget *toolbar_find_search_label;
 	GtkWidget *toolbar_find_search_entry;
