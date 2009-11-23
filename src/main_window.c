@@ -154,7 +154,7 @@ void force_config_folder(void)
 
 static void main_window_create_toolbars(void)
 {
-	//TODO: update search toolbar code with new gtk+ functions
+	//updated toolbar code with the new gtk+ functions
 	// Create the Main Toolbar
 	main_window.toolbar_main = gtk_toolbar_new ();
 	gtk_widget_show (main_window.toolbar_main);
@@ -242,6 +242,24 @@ main_window.toolbar_main_button_close = gtk_tool_button_new_from_stock(GTK_STOCK
   	gtk_toolbar_insert(GTK_TOOLBAR(main_window.toolbar_main), main_window.toolbar_main_button_replace, -1);
 	gtk_signal_connect (GTK_OBJECT (main_window.toolbar_main_button_replace), "clicked", GTK_SIGNAL_FUNC (on_replace1_activate), NULL);
 	gtk_widget_show (main_window.toolbar_main_button_replace);
+	
+	main_window.toolbar_separator=gtk_separator_tool_item_new();
+	gtk_toolbar_insert(GTK_TOOLBAR(main_window.toolbar_main), main_window.toolbar_separator, -1);
+	gtk_widget_show (main_window.toolbar_separator);
+
+	// Add the indent/unindent operations to the Main Toolbar	
+	/*indent block*/
+
+	main_window.toolbar_main_indent = gtk_tool_button_new_from_stock(GTK_STOCK_INDENT);
+  	gtk_toolbar_insert(GTK_TOOLBAR(main_window.toolbar_main), main_window.toolbar_main_indent, -1);
+	gtk_signal_connect (GTK_OBJECT (main_window.toolbar_main_indent), "clicked", GTK_SIGNAL_FUNC (block_indent), NULL);
+	gtk_widget_show (main_window.toolbar_main_indent);
+	/*unindent block*/
+	GtkWidget *toolbar_main_unindent;
+	main_window.toolbar_main_unindent = gtk_tool_button_new_from_stock(GTK_STOCK_UNINDENT);
+  	gtk_toolbar_insert(GTK_TOOLBAR(main_window.toolbar_main), main_window.toolbar_main_unindent, -1);
+	gtk_signal_connect (GTK_OBJECT (main_window.toolbar_main_unindent), "clicked", GTK_SIGNAL_FUNC (block_unindent), NULL);
+	gtk_widget_show (main_window.toolbar_main_unindent);
 
 	// Create the Search Toolbar
 	
