@@ -154,7 +154,7 @@ void force_config_folder(void)
 
 static void main_window_create_toolbars(void)
 {
-	//TODO: update search toolbar code with new gtk+ functions
+	//Updated toolbar code with the new gtk+ functions
 	// Create the Main Toolbar
 	main_window.toolbar_main = gtk_toolbar_new ();
 	gtk_widget_show (main_window.toolbar_main);
