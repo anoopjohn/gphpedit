@@ -282,6 +282,7 @@ main_window.toolbar_main_button_redo = gtk_tool_button_new_from_stock(GTK_STOCK_
 	*/
 }
 
+
 static void main_window_create_appbar(void)
 {
 	main_window.appbar = gnome_appbar_new (TRUE, TRUE, GNOME_PREFERENCES_NEVER);
