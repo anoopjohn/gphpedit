@@ -484,9 +484,10 @@ void add_file_filters(GtkFileChooser *chooser){
         GtkFileFilter *filter;
 	//creates a new file filter
 	filter = gtk_file_filter_new ();
-	gtk_file_filter_set_name (filter, _("PHP files (*.php)"));
+	gtk_file_filter_set_name (filter, _("PHP files (*.php *.inc)"));
 	//add a pattern to the filter
         gtk_file_filter_add_pattern(filter, "*.php");
+        gtk_file_filter_add_pattern(filter, "*.inc");
 	gtk_file_chooser_add_filter (GTK_FILE_CHOOSER (chooser),
 				     filter);
 	//set default filter to the dialog
@@ -729,7 +730,7 @@ void on_save_as1_activate(GtkWidget *widget)
 		file_selection_box = gtk_file_chooser_dialog_new (_("Please type the filename to save as..."), 
 			GTK_WINDOW(main_window.window), GTK_FILE_CHOOSER_ACTION_SAVE, GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
 			GTK_STOCK_SAVE, GTK_RESPONSE_ACCEPT, NULL);
-
+		
 		gtk_file_chooser_set_local_only (GTK_FILE_CHOOSER(file_selection_box), FALSE);
 		gtk_file_chooser_set_do_overwrite_confirmation (GTK_FILE_CHOOSER(file_selection_box), TRUE);
 		gtk_dialog_set_default_response (GTK_DIALOG(file_selection_box), GTK_RESPONSE_ACCEPT);
@@ -1505,7 +1506,7 @@ void move_block(gint indentation_size)
 		startline = gtk_scintilla_line_from_position(GTK_SCINTILLA(main_window.current_editor->scintilla), gtk_scintilla_get_selection_start(GTK_SCINTILLA(main_window.current_editor->scintilla)));
 		endline = gtk_scintilla_line_from_position(GTK_SCINTILLA(main_window.current_editor->scintilla), gtk_scintilla_get_selection_end(GTK_SCINTILLA(main_window.current_editor->scintilla)));
 
-		for (line = startline; line < endline; line++) {
+		for (line = startline; line <= endline; line++) {
 			indent = gtk_scintilla_get_line_indentation(GTK_SCINTILLA(main_window.current_editor->scintilla), line);
 			gtk_scintilla_set_line_indentation(GTK_SCINTILLA(main_window.current_editor->scintilla), line, indent+indentation_size);
 		}
