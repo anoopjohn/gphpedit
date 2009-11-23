@@ -479,23 +479,96 @@ void on_openselected1_activate(GtkWidget *widget)
 		}
 	}
 }
+void add_file_filters(GtkFileChooser *chooser){
+	//store file filter
+        GtkFileFilter *filter;
+	//creates a new file filter
+	filter = gtk_file_filter_new ();
+	gtk_file_filter_set_name (filter, _("PHP files (*.php)"));
+	//add a pattern to the filter
+        gtk_file_filter_add_pattern(filter, "*.php");
+	gtk_file_chooser_add_filter (GTK_FILE_CHOOSER (chooser),
+				     filter);
+	//set default filter to the dialog
+	gtk_file_chooser_set_filter (GTK_FILE_CHOOSER (chooser),
+				     filter);
 
+	filter = gtk_file_filter_new ();
+	gtk_file_filter_set_name (filter, _("HTML files (*.html *.htm *.xhtml)"));
+        gtk_file_filter_add_pattern(filter, "*.html");
+        gtk_file_filter_add_pattern(filter, "*.htm");
+        gtk_file_filter_add_pattern(filter, "*.xhtml");
+	gtk_file_chooser_add_filter (GTK_FILE_CHOOSER (chooser),
+				     filter);
+	filter = gtk_file_filter_new ();
+	gtk_file_filter_set_name (filter, _("XML files (*.xml)"));
+        gtk_file_filter_add_pattern(filter, "*.xml");
+	gtk_file_chooser_add_filter (GTK_FILE_CHOOSER (chooser),
+				     filter);
+	filter = gtk_file_filter_new ();
+	gtk_file_filter_set_name (filter, _("Stylesheet files (*.css)"));
+        gtk_file_filter_add_pattern(filter, "*.css");
+	gtk_file_chooser_add_filter (GTK_FILE_CHOOSER (chooser),
+				     filter);
+	filter = gtk_file_filter_new ();
+	gtk_file_filter_set_name (filter, _("SQL files (*.sql)"));
+        gtk_file_filter_add_pattern(filter, "*.sql");
+	gtk_file_chooser_add_filter (GTK_FILE_CHOOSER (chooser),
+				     filter);
+	filter = gtk_file_filter_new ();
+	gtk_file_filter_set_name (filter, _("Javascript files (*.js)"));
+        gtk_file_filter_add_pattern(filter, "*.js");
+	gtk_file_chooser_add_filter (GTK_FILE_CHOOSER (chooser),
+				     filter);			
+	filter = gtk_file_filter_new ();
+	gtk_file_filter_set_name (filter, _("C/C++ files (*.c *.h *.cpp *.hh *.cc)"));
+        gtk_file_filter_add_pattern(filter, "*.c");
+        gtk_file_filter_add_pattern(filter, "*.h");
+        gtk_file_filter_add_pattern(filter, "*.cxx");
+        gtk_file_filter_add_pattern(filter, "*.cpp");
+        gtk_file_filter_add_pattern(filter, "*.cc");
+        gtk_file_filter_add_pattern(filter, "*.hxx");
+        gtk_file_filter_add_pattern(filter, "*.hh");
+	gtk_file_chooser_add_filter (GTK_FILE_CHOOSER (chooser),
+				     filter);
+	filter = gtk_file_filter_new ();
+	gtk_file_filter_set_name (filter, _("Perl Files (*.pl *.ph *.pm)"));
+        gtk_file_filter_add_pattern(filter, "*.pl");
+        gtk_file_filter_add_pattern(filter, "*.ph");
+        gtk_file_filter_add_pattern(filter, "*.pm");
+
+	gtk_file_chooser_add_filter (GTK_FILE_CHOOSER (chooser),
+				     filter);
+	filter = gtk_file_filter_new ();
+	gtk_file_filter_set_name (filter, _("Python Files (*.py *.pyd *.pyw)"));
+        gtk_file_filter_add_pattern(filter, "*.py");
+        gtk_file_filter_add_pattern(filter, "*.pyd");
+        gtk_file_filter_add_pattern(filter, "*.pyw");
+
+	gtk_file_chooser_add_filter (GTK_FILE_CHOOSER (chooser),
+				     filter);
+	/* generic filter */
+	filter = gtk_file_filter_new ();
+	gtk_file_filter_set_name (filter, _("All files"));
+        gtk_file_filter_add_pattern(filter, "*");
+	gtk_file_chooser_add_filter (GTK_FILE_CHOOSER (chooser),
+				     filter);
+}
 void on_open1_activate(GtkWidget *widget)
 {
 	GtkWidget *file_selection_box;
 	GString *folder;
 	gchar *last_opened_folder;
-
 	// Create the selector widget
 	file_selection_box = gtk_file_chooser_dialog_new("Please select files for editing", GTK_WINDOW(main_window.window),
 		GTK_FILE_CHOOSER_ACTION_OPEN, GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL, GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT, NULL);
 	
 	gtk_file_chooser_set_local_only (GTK_FILE_CHOOSER(file_selection_box), FALSE);
 	gtk_dialog_set_default_response (GTK_DIALOG(file_selection_box), GTK_RESPONSE_ACCEPT);	
-	
+	//Add filters to the open dialog
+	add_file_filters(GTK_FILE_CHOOSER(file_selection_box));
 	last_opened_folder = gnome_config_get_string("gPHPEdit/general/last_opened_folder=NOTFOUND");
 	if (DEBUG_MODE) { g_print("DEBUG: main_window_callbacks.c:on_open1_activate:last_opened_folder: %s\n", last_opened_folder); }
-	
 	/* opening of multiple files at once */
 	gtk_file_chooser_set_select_multiple(GTK_FILE_CHOOSER(file_selection_box), TRUE);
 	
