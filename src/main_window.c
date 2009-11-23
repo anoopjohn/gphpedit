@@ -154,8 +154,7 @@ void force_config_folder(void)
 
 static void main_window_create_toolbars(void)
 {
-	//code of main toolbar update with new gtk+ functions instead of deprecated uses in old code
-	//TODO: update search toolbar code
+	//TODO: update search toolbar code with new gtk+ functions
 	// Create the Main Toolbar
 	main_window.toolbar_main = gtk_toolbar_new ();
 	gtk_widget_show (main_window.toolbar_main);
@@ -204,7 +203,7 @@ main_window.toolbar_main_button_close = gtk_tool_button_new_from_stock(GTK_STOCK
   	gtk_toolbar_insert(GTK_TOOLBAR(main_window.toolbar_main), main_window.toolbar_main_button_undo, -1);
 	gtk_widget_show (main_window.toolbar_main_button_undo);
 //	main_window.toolbar_main_button_redo = gtk_toolbar_insert_stock (GTK_TOOLBAR (main_window.toolbar_main),GTK_STOCK_REDO, _("Redo last change"), NULL, NULL, NULL, -1);
-main_window.toolbar_main_button_redo = gtk_tool_button_new_from_stock(GTK_STOCK_REDO);
+	main_window.toolbar_main_button_redo = gtk_tool_button_new_from_stock(GTK_STOCK_REDO);
   	gtk_toolbar_insert(GTK_TOOLBAR(main_window.toolbar_main), main_window.toolbar_main_button_redo, -1);
 	gtk_widget_show (main_window.toolbar_main_button_redo);
 	gtk_signal_connect (GTK_OBJECT (main_window.toolbar_main_button_undo), "clicked", GTK_SIGNAL_FUNC (on_undo1_activate), NULL);
@@ -245,32 +244,61 @@ main_window.toolbar_main_button_redo = gtk_tool_button_new_from_stock(GTK_STOCK_
 	gtk_widget_show (main_window.toolbar_main_button_replace);
 
 	// Create the Search Toolbar
+	
+	GtkToolItem *item;
+
 	main_window.toolbar_find = gtk_toolbar_new ();
 	gtk_widget_show (main_window.toolbar_find);
+	gtk_toolbar_set_show_arrow (GTK_TOOLBAR (main_window.toolbar_find), FALSE);
+	gtk_container_set_border_width (GTK_CONTAINER (main_window.toolbar_find), 1);
 	gnome_app_add_toolbar (GNOME_APP (main_window.window), GTK_TOOLBAR (main_window.toolbar_find), "toolbar_search",
 							 BONOBO_DOCK_ITEM_BEH_NORMAL, BONOBO_DOCK_TOP, 2, 0, 0);
-	gtk_toolbar_set_show_arrow (GTK_TOOLBAR (main_window.toolbar_main), FALSE);
-	gtk_container_set_border_width (GTK_CONTAINER (main_window.toolbar_find), 1);
+
 	main_window.toolbar_find_search_label = gtk_label_new(_("Search for: "));
 	gtk_widget_show(main_window.toolbar_find_search_label);
-	gtk_toolbar_append_widget(GTK_TOOLBAR (main_window.toolbar_find), main_window.toolbar_find_search_label,NULL,NULL);
+	item=gtk_tool_item_new();
+	gtk_tool_item_set_expand (item, TRUE);
+	gtk_container_add (GTK_CONTAINER (item), main_window.toolbar_find_search_label);
+	gtk_toolbar_insert(GTK_TOOLBAR(main_window.toolbar_find), item, -1);
+	gtk_widget_show(item);
 
+	item=gtk_tool_item_new();
+	gtk_tool_item_set_expand (item, TRUE);
 	main_window.toolbar_find_search_entry = gtk_entry_new();
 	gtk_widget_show(main_window.toolbar_find_search_entry);
-	gtk_toolbar_append_widget(GTK_TOOLBAR (main_window.toolbar_find), main_window.toolbar_find_search_entry, _("Incremental search"),NULL);
+	gtk_container_add (GTK_CONTAINER (item), main_window.toolbar_find_search_entry);
+	gtk_toolbar_insert(GTK_TOOLBAR(main_window.toolbar_find), item, -1);
+	gtk_widget_show(item);
+	//gtk_toolbar_append_widget(GTK_TOOLBAR (main_window.toolbar_find), main_window.toolbar_find_search_entry, _("Incremental search"),NULL);
 	gtk_signal_connect_after(GTK_OBJECT(main_window.toolbar_find_search_entry), "insert_text", GTK_SIGNAL_FUNC(inc_search_typed), NULL);
 	gtk_signal_connect_after(GTK_OBJECT(main_window.toolbar_find_search_entry), "key_release_event", GTK_SIGNAL_FUNC(inc_search_key_release_event), NULL);
 	gtk_signal_connect_after(GTK_OBJECT(main_window.toolbar_find_search_entry), "activate", GTK_SIGNAL_FUNC(inc_search_activate), NULL);
-	gtk_toolbar_append_space(GTK_TOOLBAR(main_window.toolbar_find));
+	main_window.toolbar_separator=gtk_separator_tool_item_new();
+	gtk_toolbar_insert(GTK_TOOLBAR(main_window.toolbar_find), main_window.toolbar_separator, -1);
+	gtk_widget_show (main_window.toolbar_separator);
+	
+	//gtk_toolbar_append_space(GTK_TOOLBAR(main_window.toolbar_find));
 	main_window.toolbar_find_goto_label = gtk_label_new(_("Go to line: "));
 	gtk_widget_show(main_window.toolbar_find_goto_label);
-	gtk_toolbar_append_widget(GTK_TOOLBAR (main_window.toolbar_find), main_window.toolbar_find_goto_label,NULL,NULL);
+	item=gtk_tool_item_new();
+	gtk_tool_item_set_expand (item, TRUE);
+	gtk_container_add (GTK_CONTAINER (item), main_window.toolbar_find_goto_label);
+	gtk_toolbar_insert(GTK_TOOLBAR(main_window.toolbar_find), item, -1);
+	gtk_widget_show(item);
+//	gtk_toolbar_append_widget(GTK_TOOLBAR (main_window.toolbar_find), main_window.toolbar_find_goto_label,NULL,NULL);
+
 	main_window.toolbar_find_goto_entry = gtk_entry_new_with_max_length(6);
 	gtk_entry_set_width_chars(GTK_ENTRY(main_window.toolbar_find_goto_entry),7);
 	gtk_widget_show(main_window.toolbar_find_goto_entry);
-	gtk_toolbar_append_widget(GTK_TOOLBAR (main_window.toolbar_find), main_window.toolbar_find_goto_entry, _("Go to line"),NULL);
-	gtk_signal_connect_after(GTK_OBJECT(main_window.toolbar_find_goto_entry), "activate", GTK_SIGNAL_FUNC(goto_line_activate), NULL);
+	item=gtk_tool_item_new();
+	gtk_tool_item_set_expand (item, TRUE);
+	gtk_container_add (GTK_CONTAINER (item), main_window.toolbar_find_goto_entry);
+	gtk_toolbar_insert(GTK_TOOLBAR(main_window.toolbar_find), item, -1);
+	gtk_widget_show(item);
 
+//	gtk_toolbar_append_widget(GTK_TOOLBAR (main_window.toolbar_find), main_window.toolbar_find_goto_entry, _("Go to line"),NULL);
+	gtk_signal_connect_after(GTK_OBJECT(main_window.toolbar_find_goto_entry), "activate", GTK_SIGNAL_FUNC(goto_line_activate), NULL);
+	
 	/*
 	GtkToolItem * search_toolbar_separator;
 	search_toolbar_separator = gtk_separator_tool_item_new();
