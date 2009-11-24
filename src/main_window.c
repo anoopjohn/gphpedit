@@ -389,13 +389,32 @@ static void main_window_fill_panes(void)
 	box = gtk_vbox_new(FALSE, 0);
 	gtk_widget_show(box);
 	gtk_paned_pack1 (GTK_PANED (main_window.main_horizontal_pane), box, FALSE, TRUE);
-
+	
 	//add checkbox to show only current file's classes
 	//the signals to be checked for the check box are onclick of the checkbox 
 	//and the on change of the file.
+	//Close button for the side bar
+	GtkWidget *hbox;
+	hbox = gtk_hbox_new(FALSE, 0);
+	gtk_container_set_border_width(GTK_CONTAINER(hbox), 0);
+	main_window.close_image = gtk_image_new_from_stock(GTK_STOCK_CLOSE, GTK_ICON_SIZE_MENU);
+	gtk_misc_set_padding(main_window.close_image, 0, 0);
+	main_window.close_sidebar_button = gtk_button_new();
+	gtk_widget_set_tooltip_text(main_window.close_sidebar_button, "Close class Browser");
+	gtk_button_set_image(main_window.close_sidebar_button, main_window.close_image);
+	gtk_button_set_relief(main_window.close_sidebar_button, GTK_RELIEF_NONE);
+	gtk_button_set_focus_on_click(main_window.close_sidebar_button, FALSE);
+	gtk_signal_connect(GTK_OBJECT(main_window.close_sidebar_button), "clicked", classbrowser_show_hide,NULL);
+	gtk_widget_show(main_window.close_image);
+	gtk_widget_show(main_window.close_sidebar_button);
+	//
 	main_window.chkOnlyCurFileFuncs = gtk_check_button_new_with_label("Parse only current file"); 
 	gtk_widget_show (main_window.chkOnlyCurFileFuncs);
-	gtk_box_pack_start(GTK_BOX(box), main_window.chkOnlyCurFileFuncs, FALSE, FALSE, 10);
+	gtk_box_pack_start(GTK_BOX(hbox), main_window.chkOnlyCurFileFuncs, FALSE, FALSE, 10);
+//	gtk_box_pack_start(GTK_BOX(box), main_window.chkOnlyCurFileFuncs, FALSE, FALSE, 10);
+	gtk_box_pack_start(GTK_BOX(hbox), main_window.close_sidebar_button, FALSE, FALSE, 0);
+	gtk_widget_show(hbox);	
+	gtk_box_pack_start(GTK_BOX(box), hbox, FALSE, FALSE, 10);
 	g_signal_connect (G_OBJECT (main_window.chkOnlyCurFileFuncs), "clicked",
 						G_CALLBACK (on_parse_current_click), NULL);
 
