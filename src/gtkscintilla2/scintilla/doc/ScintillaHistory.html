@@ -9,6 +9,16 @@
     <title>
       Scintilla and SciTE
     </title>
+    <style type="text/css">
+        table {
+            border-collapse: collapse;
+            font-size: 80%;
+        }
+        td {
+            xborder: 1px solid #1F1F1F;
+            padding: 0px 4px;
+        }
+    </style>
   </head>
   <body bgcolor="#FFFFFF" text="#000000">
     <table bgcolor="#000000" width="100%" cellspacing="0" cellpadding="0" border="0">
@@ -34,193 +44,303 @@
     <p>
        Source code and documentation have been contributed by
     </p>
-    <ul>
-	<li>Atsuo Ishimoto</li>
-	<li>Mark Hammond</li>
-	<li>Francois Le Coguiec</li>
-	<li>Dale Nagata</li>
-	<li>Ralf Reinhardt</li>
-	<li>Philippe Lhoste</li>
-	<li>Andrew McKinlay</li>
-	<li>Stephan R. A. Deibel</li>
-	<li>Hans Eckardt</li>
-	<li>Vassili Bourdo</li>
-	<li>Maksim Lin</li>
-	<li>Robin Dunn</li>
-	<li>John Ehresman</li>
-	<li>Steffen Goeldner</li>
-	<li>Deepak S.</li>
-	<li>Yann Gaillard</li>
-	<li>Aubin Paul</li>
-	<li>Jason Diamond</li>
-	<li>Ahmad Baitalmal</li>
-	<li>Paul Winwood</li>
-	<li>Maxim Baranov</li>
-	<li>Ragnar Højland</li>
-	<li>Christian Obrecht</li>
-	<li>Andreas Neukoetter</li>
-	<li>Adam Gates</li>
-	<li>Steve Lhomme</li>
-	<li>Ferdinand Prantl</li>
-	<li>Jan Dries</li>
-	<li>Markus Gritsch</li>
-	<li>Tahir Karaca</li>
-	<li>Ahmad Zawawi</li>
-	<li>Laurent le Tynevez</li>
-	<li>Walter Braeu</li>
-	<li>Ashley Cambrell</li>
-	<li>Garrett Serack</li>
-	<li>Holger Schmidt</li>
-	<li><a href="http://www.activestate.com">ActiveState</a></li>
-	<li>James Larcombe</li>
-	<li>Alexey Yutkin</li>
-	<li>Jan Hercek</li>
-	<li>Richard Pecl</li>
-	<li>Edward K. Ream</li>
-	<li>Valery Kondakoff</li>
-	<li>Smári McCarthy</li>
-	<li>Clemens Wyss</li>
-	<li>Simon Steele</li>
-	<li>Serge A. Baranov</li>
-	<li>Xavier Nodet</li>
-	<li>Willy Devaux</li>
-	<li>David Clain</li>
-	<li>Brendon Yenson</li>
-	<li>Vamsi Potluru</li>
-	<li>Praveen Ambekar</li>
-	<li>Alan Knowles</li>
-	<li>Kengo Jinno</li>
-	<li>Valentin Valchev</li>
-	<li>Marcos E. Wurzius</li>
-	<li>Martin Alderson</li>
-	<li>Robert Gustavsson</li>
-	<li>José Fonseca</li>
-	<li>Holger Kiemes</li>
-	<li>Francis Irving</li>
-	<li>Scott Kirkwood</li>
-	<li>Brian Quinlan</li>
-	<li>Ubi</li>
-	<li>Michael R. Duerig</li>
-	<li>Deepak T</li>
-	<li>Don Paul Beletsky</li>
-	<li>Gerhard Kalab</li>
-	<li>Olivier Dagenais</li>
-	<li>Josh Wingstrom</li>
-	<li>Bruce Dodson</li>
-	<li>Sergey Koshcheyev</li>
-	<li>Chuan-jian Shen</li>
-	<li>Shane Caraveo</li>
-	<li>Alexander Scripnik</li>
-	<li>Ryan Christianson</li>
-	<li>Martin Steffensen</li>
-	<li>Jakub Vrána</li>
-	<li>The Black Horus</li>
-	<li>Bernd Kreuss</li>
-	<li>Thomas Lauer</li>
-	<li>Mike Lansdaal</li>
-	<li>Yukihiro Nakai</li>
-	<li>Jochen Tucht</li>
-	<li>Greg Smith</li>
-	<li>Steve Schoettler</li>
-	<li>Mauritius Thinnes</li>
-	<li>Darren Schroeder</li>
-	<li>Pedro Guerreiro</li>
-	<li>Dan Petitt</li>
-	<li>Biswapesh Chattopadhyay</li>
-	<li>Kein-Hong Man</li>
-	<li>Patrizio Bekerle</li>
-	<li>Nigel Hathaway</li>
-	<li>Hrishikesh Desai</li>
-	<li>Sergey Puljajev</li>
-	<li>Mathias Rauen</li>
-	<li>Angelo Mandato</li>
-	<li>Denis Sureau</li>
-	<li>Kaspar Schiess</li>
-	<li>Christoph Hösler</li>
-	<li>João Paulo F Farias</li>
-	<li>Ron Schofield</li>
-	<li>Stefan Wosnik</li>
-	<li>Marius Gheorghe</li>
-	<li>Naba Kumar</li>
-	<li>Sean O'Dell</li>
-	<li>Stefanos Togoulidis</li>
-	<li>Hans Hagen</li>
-	<li>Jim Cape</li>
-	<li>Roland Walter</li>
-	<li>Brian Mosher</li>
-	<li>Nicholas Nemtsev</li>
-	<li>Roy Wood</li>
-	<li>Peter-Henry Mander</li>
-	<li>Robert Boucher</li>
-	<li>Christoph Dalitz</li>
-	<li>April White</li>
-	<li>S. Umar</li>
-	<li>Trent Mick</li>
-	<li>Filip Yaghob</li>
-	<li>Avi Yegudin</li>
-	<li>Vivi Orunitia</li>
-	<li>Manfred Becker</li>
-	<li>Dimitris Keletsekis</li>
-	<li>Yuiga</li>
-	<li>Davide Scola</li>
-	<li>Jason Boggs</li>
-	<li>Reinhold Niesner</li>
-	<li>Jos van der Zande</li>
-	<li>Pescuma</li>
-	<li>Pavol Bosik</li>
-	<li>Johannes Schmid</li>
-	<li>Blair McGlashan</li>
-	<li>Mikael Hultgren</li>
-	<li>Florian Balmer</li>
-	<li>Hadar Raz</li>
-	<li>Herr Pfarrer</li>
-	<li>Ben Key</li>
-	<li>Gene Barry</li>
-	<li>Niki Spahiev</li>
-	<li>Carsten Sperber</li>
-	<li>Phil Reid</li>
-	<li>Iago Rubio</li>
-	<li>Régis Vaquette</li>
-	<li>Massimo Corà</li>
-	<li>Elias Pschernig</li>
-	<li>Chris Jones</li>
-	<li>Josiah Reynolds</li>
-	<li>Robert Roessler <a href="http://www.rftp.com">rftp.com</a></li>
-	<li>Steve Donovan</li>
-	<li>Jan Martin Pettersen</li>
-	<li>Sergey Philippov</li>
-	<li>Borujoa</li>
-	<li>Michael Owens</li>
-	<li>Franck Marcia</li>
-	<li>Massimo Maria Ghisalberti</li>
-	<li>Frank Wunderlich</li>
-	<li>Josepmaria Roca</li>
-	<li>Tobias Engvall</li>
-	<li>Suzumizaki Kimitaka</li>
-	<li>Michael Cartmell</li>
-	<li>Pascal Hurni</li>
-	<li>Andre</li>
-	<li>Randy Butler</li>
-	<li>Georg Ritter</li>
-	<li>Michael Goffioul</li>
-	<li>Ben Harper</li>
-	<li>Adam Strzelecki</li>
-	<li>Kamen Stanev</li>
-	<li>Steve Menard</li>
-	<li>Oliver Yeoh</li>
-	<li>Eric Promislow</li>
-	<li>Joseph Galbraith</li>
-	<li>Jeffrey Ren</li>
-	<li>Armel Asselin</li>
-	<li>Jim Pattee</li>
-	<li>Friedrich Vedder</li>
-	<li>Sebastian Pipping</li>
-	<li>Andre Arpin</li>
-	<li>Stanislav Maslovski</li>
-	<li>Martin Stone</li>
-	<li>Fabien Proriol</li>
-	<li>mimir</li>
-    </ul>
+    <table>
+      <tr>
+	<td>Atsuo Ishimoto</td>
+	<td>Mark Hammond</td>
+	<td>Francois Le Coguiec</td>
+	<td>Dale Nagata</td>
+      </tr><tr>
+	<td>Ralf Reinhardt</td>
+	<td>Philippe Lhoste</td>
+	<td>Andrew McKinlay</td>
+	<td>Stephan R. A. Deibel</td>
+      </tr><tr>
+	<td>Hans Eckardt</td>
+	<td>Vassili Bourdo</td>
+	<td>Maksim Lin</td>
+	<td>Robin Dunn</td>
+      </tr><tr>
+	<td>John Ehresman</td>
+	<td>Steffen Goeldner</td>
+	<td>Deepak S.</td>
+	<td>Yann Gaillard</td>
+      </tr><tr>
+	<td>Aubin Paul</td>
+	<td>Jason Diamond</td>
+	<td>Ahmad Baitalmal</td>
+	<td>Paul Winwood</td>
+      </tr><tr>
+	<td>Maxim Baranov</td>
+	<td>Ragnar Højland</td>
+	<td>Christian Obrecht</td>
+	<td>Andreas Neukoetter</td>
+      </tr><tr>
+	<td>Adam Gates</td>
+	<td>Steve Lhomme</td>
+	<td>Ferdinand Prantl</td>
+	<td>Jan Dries</td>
+      </tr><tr>
+	<td>Markus Gritsch</td>
+	<td>Tahir Karaca</td>
+	<td>Ahmad Zawawi</td>
+	<td>Laurent le Tynevez</td>
+      </tr><tr>
+	<td>Walter Braeu</td>
+	<td>Ashley Cambrell</td>
+	<td>Garrett Serack</td>
+	<td>Holger Schmidt</td>
+      </tr><tr>
+	<td><a href="http://www.activestate.com">ActiveState</a></td>
+	<td>James Larcombe</td>
+	<td>Alexey Yutkin</td>
+	<td>Jan Hercek</td>
+      </tr><tr>
+	<td>Richard Pecl</td>
+	<td>Edward K. Ream</td>
+	<td>Valery Kondakoff</td>
+	<td>Smári McCarthy</td>
+      </tr><tr>
+	<td>Clemens Wyss</td>
+	<td>Simon Steele</td>
+	<td>Serge A. Baranov</td>
+	<td>Xavier Nodet</td>
+      </tr><tr>
+	<td>Willy Devaux</td>
+	<td>David Clain</td>
+	<td>Brendon Yenson</td>
+	<td>Vamsi Potluru</td>
+      </tr><tr>
+	<td>Praveen Ambekar</td>
+	<td>Alan Knowles</td>
+	<td>Kengo Jinno</td>
+	<td>Valentin Valchev</td>
+      </tr><tr>
+	<td>Marcos E. Wurzius</td>
+	<td>Martin Alderson</td>
+	<td>Robert Gustavsson</td>
+	<td>José Fonseca</td>
+      </tr><tr>
+	<td>Holger Kiemes</td>
+	<td>Francis Irving</td>
+	<td>Scott Kirkwood</td>
+	<td>Brian Quinlan</td>
+      </tr><tr>
+	<td>Ubi</td>
+	<td>Michael R. Duerig</td>
+	<td>Deepak T</td>
+	<td>Don Paul Beletsky</td>
+      </tr><tr>
+	<td>Gerhard Kalab</td>
+	<td>Olivier Dagenais</td>
+	<td>Josh Wingstrom</td>
+	<td>Bruce Dodson</td>
+      </tr><tr>
+	<td>Sergey Koshcheyev</td>
+	<td>Chuan-jian Shen</td>
+	<td>Shane Caraveo</td>
+	<td>Alexander Scripnik</td>
+      </tr><tr>
+	<td>Ryan Christianson</td>
+	<td>Martin Steffensen</td>
+	<td>Jakub Vrána</td>
+	<td>The Black Horus</td>
+      </tr><tr>
+	<td>Bernd Kreuss</td>
+	<td>Thomas Lauer</td>
+	<td>Mike Lansdaal</td>
+	<td>Yukihiro Nakai</td>
+      </tr><tr>
+	<td>Jochen Tucht</td>
+	<td>Greg Smith</td>
+	<td>Steve Schoettler</td>
+	<td>Mauritius Thinnes</td>
+      </tr><tr>
+	<td>Darren Schroeder</td>
+	<td>Pedro Guerreiro</td>
+	<td>Dan Petitt</td>
+	<td>Biswapesh Chattopadhyay</td>
+      </tr><tr>
+	<td>Kein-Hong Man</td>
+	<td>Patrizio Bekerle</td>
+	<td>Nigel Hathaway</td>
+	<td>Hrishikesh Desai</td>
+      </tr><tr>
+	<td>Sergey Puljajev</td>
+	<td>Mathias Rauen</td>
+	<td>Angelo Mandato</td>
+	<td>Denis Sureau</td>
+      </tr><tr>
+	<td>Kaspar Schiess</td>
+	<td>Christoph Hösler</td>
+	<td>João Paulo F Farias</td>
+	<td>Ron Schofield</td>
+      </tr><tr>
+	<td>Stefan Wosnik</td>
+	<td>Marius Gheorghe</td>
+	<td>Naba Kumar</td>
+	<td>Sean O'Dell</td>
+      </tr><tr>
+	<td>Stefanos Togoulidis</td>
+	<td>Hans Hagen</td>
+	<td>Jim Cape</td>
+	<td>Roland Walter</td>
+      </tr><tr>
+	<td>Brian Mosher</td>
+	<td>Nicholas Nemtsev</td>
+	<td>Roy Wood</td>
+	<td>Peter-Henry Mander</td>
+      </tr><tr>
+	<td>Robert Boucher</td>
+	<td>Christoph Dalitz</td>
+	<td>April White</td>
+	<td>S. Umar</td>
+      </tr><tr>
+	<td>Trent Mick</td>
+	<td>Filip Yaghob</td>
+	<td>Avi Yegudin</td>
+	<td>Vivi Orunitia</td>
+      </tr><tr>
+	<td>Manfred Becker</td>
+	<td>Dimitris Keletsekis</td>
+	<td>Yuiga</td>
+	<td>Davide Scola</td>
+      </tr><tr>
+	<td>Jason Boggs</td>
+	<td>Reinhold Niesner</td>
+	<td>Jos van der Zande</td>
+	<td>Pescuma</td>
+      </tr><tr>
+	<td>Pavol Bosik</td>
+	<td>Johannes Schmid</td>
+	<td>Blair McGlashan</td>
+	<td>Mikael Hultgren</td>
+      </tr><tr>
+	<td>Florian Balmer</td>
+	<td>Hadar Raz</td>
+	<td>Herr Pfarrer</td>
+	<td>Ben Key</td>
+      </tr><tr>
+	<td>Gene Barry</td>
+	<td>Niki Spahiev</td>
+	<td>Carsten Sperber</td>
+	<td>Phil Reid</td>
+      </tr><tr>
+	<td>Iago Rubio</td>
+	<td>Régis Vaquette</td>
+	<td>Massimo Corà</td>
+	<td>Elias Pschernig</td>
+      </tr><tr>
+	<td>Chris Jones</td>
+	<td>Josiah Reynolds</td>
+	<td>Robert Roessler <a href="http://www.rftp.com">rftp.com</a></td>
+	<td>Steve Donovan</td>
+      </tr><tr>
+	<td>Jan Martin Pettersen</td>
+	<td>Sergey Philippov</td>
+	<td>Borujoa</td>
+	<td>Michael Owens</td>
+      </tr><tr>
+	<td>Franck Marcia</td>
+	<td>Massimo Maria Ghisalberti</td>
+	<td>Frank Wunderlich</td>
+	<td>Josepmaria Roca</td>
+      </tr><tr>
+	<td>Tobias Engvall</td>
+	<td>Suzumizaki Kimitaka</td>
+	<td>Michael Cartmell</td>
+	<td>Pascal Hurni</td>
+      </tr><tr>
+	<td>Andre</td>
+	<td>Randy Butler</td>
+	<td>Georg Ritter</td>
+	<td>Michael Goffioul</td>
+      </tr><tr>
+	<td>Ben Harper</td>
+	<td>Adam Strzelecki</td>
+	<td>Kamen Stanev</td>
+	<td>Steve Menard</td>
+      </tr><tr>
+	<td>Oliver Yeoh</td>
+	<td>Eric Promislow</td>
+	<td>Joseph Galbraith</td>
+	<td>Jeffrey Ren</td>
+      </tr><tr>
+	<td>Armel Asselin</td>
+	<td>Jim Pattee</td>
+	<td>Friedrich Vedder</td>
+	<td>Sebastian Pipping</td>
+      </tr><tr>
+	<td>Andre Arpin</td>
+	<td>Stanislav Maslovski</td>
+	<td>Martin Stone</td>
+	<td>Fabien Proriol</td>
+      </tr><tr>
+	<td>mimir</td>
+	<td>Nicola Civran</td>
+	<td>Snow</td>
+	<td>Mitchell Foral</td>
+      </tr><tr>
+	<td>Pieter Holtzhausen</td>
+	<td>Waldemar Augustyn</td>
+	<td>Jason Haslam</td>
+	<td>Sebastian Steinlechner</td>
+      </tr><tr>
+	<td>Chris Rickard</td>
+	<td>Rob McMullen</td>
+	<td>Stefan Schwendeler</td>
+	<td>Cristian Adam</td>
+      </tr><tr>
+	<td>Nicolas Chachereau</td>
+	<td>Istvan Szollosi</td>
+	<td>Xie Renhui</td>
+	<td>Enrico Tröger</td>
+      </tr><tr>
+	<td>Todd Whiteman</td>
+	<td>Yuval Papish</td>
+	<td>instanton</td>
+	<td>Sergio Lucato</td>
+      </tr><tr>
+	<td>VladVRO</td>
+	<td>Dmitry Maslov</td>
+	<td>chupakabra</td>
+	<td>Juan Carlos Arevalo Baeza</td>
+      </tr><tr>
+	<td>Nick Treleaven</td>
+	<td>Stephen Stagg</td>
+	<td>Jean-Paul Iribarren</td>
+	<td>Tim Gerundt</td>
+      </tr><tr>
+	<td>Sam Harwell</td>
+	<td>Boris</td>
+	<td>Jason Oster</td>
+	<td>Gertjan Kloosterman</td>
+      </tr><tr>
+	<td>alexbodn</td>
+	<td>Sergiu Dotenco</td>
+	<td>Anders Karlsson</td>
+	<td>ozlooper</td>
+      </tr><tr>
+	<td>Marko Njezic</td>
+	<td>Eugen Bitter</td>
+	<td>Christoph Baumann</td>
+	<td>Christopher Bean</td>
+      </tr><tr>
+	<td>Sergey Kishchenko</td>
+	<td>Kai Liu</td>
+	<td>Andreas Rumpf</td>
+	<td>James Moffatt</td>
+      </tr><tr>
+	<td>Yuzhou Xin</td>
+	<td>Nic Jansma</td>
+	<td>Evan Jones</td>
+	<td>Mike Lischke</td>
+      </tr><tr>
+	<td>Eric Kidd</td>
+	<td>maXmo</td>
+	<td>David Severwright</td>
+    </tr>
+    </table>
     <p>
        Images used in GTK+ version
     </p>
@@ -231,6 +351,1008 @@
       </li>
     </ul>
     <h3>
+       <a href="http://prdownloads.sourceforge.net/scintilla/scite201.zip?download">Release 2.01</a>
+    </h3>
+    <ul>
+	<li>
+	Released on 19 August 2009.
+	</li>
+	<li>
+	Fix to positioning rectangular paste when viewing line ends.
+	</li>
+	<li>
+	Don't insert new lines and indentation for line ends at end of rectangular paste.
+	</li>
+	<li>
+	When not in additional selection typing mode, cutting a rectangular selection removes all of the selected text.
+	</li>
+	<li>
+	Rectangular selections are copied to the clipboard in document order, not in the order of selection.
+	</li>
+	<li>
+	SCI_SETCURRENTPOS and SCI_SETANCHOR work in rectangular mode.
+	</li>
+	<li>
+	On GTK+, drag and drop to a later position in the document now drops at the position.
+	</li>
+	<li>
+	Fix bug where missing property did not use default value.
+	</li>
+    </ul>
+    <h3>
+       <a href="http://prdownloads.sourceforge.net/scintilla/scite200.zip?download">Release 2.0</a>
+    </h3>
+    <ul>
+	<li>
+	Released on 11 August 2009.
+	</li>
+	<li>
+	Multiple pieces of text can be selected simultaneously by holding control whil dragging the mouse.
+	Typing, backspace and delete may affect all selections together.
+	</li>
+	<li>
+	Virtual space allows selecting beyond the last character on a line.
+	</li>
+	<li>
+	SciTE on GTK+ path bar is now optional and defaults to off.
+	</li>
+	<li>
+	MagikSF lexer recognises numbers correctly.
+	</li>
+	<li>
+	Folding of Python comments and blank lines improved. Bug #210240.
+	</li>
+	<li>
+	Bug fixed where background colour of last character in document leaked past that character.
+	</li>
+	<li>
+	Crash fixed when adding marker beyond last line in document. Bug #2830307.
+	</li>
+	<li>
+	Resource leak fixed in SciTE for Windows when printing fails. Bug #2816524.
+	</li>
+	<li>
+	Bug fixed on Windows where the system caret was destroyed during destruction when another window 
+	was using the system caret. Bug #2830223.
+	</li>
+	<li>
+	Bug fixed where indentation guides were drawn over text when the indentation used a style with a different
+	space width to the default style.
+	</li>
+	<li>
+	SciTE bug fixed where box comment added a bare line feed rather than the chosen line end. Bug #2818104.
+	</li>
+	<li>
+	Reverted fix that led to wrapping whole document when displaying the first line of the document.
+	</li>
+	<li>
+	Export to LaTeX in SciTE fixed to work in more cases and not use as much space. Bug #1286548.
+	</li>
+	<li>
+	Bug fixed where EN_CHANGE notification was sent when performing a paste operation in a
+	read-only document. Bug #2825485.
+	</li>
+	<li>
+	Refactored code so that Scintilla exposes less of its internal implementation and uses the C++ standard
+	library for some basic collections. Projects that linked to Scintilla's SString or PropSet classes
+	should copy this code from a previous version of Scintilla or from SciTE.
+	</li>
+    </ul>
+    <h3>
+       <a href="http://prdownloads.sourceforge.net/scintilla/scite179.zip?download">Release 1.79</a>
+    </h3>
+    <ul>
+	<li>
+	Released on 1 July 2009.
+	</li>
+	<li>
+	Memory exhaustion and other exceptions handled by placing an error value into the
+	status property rather than crashing. 
+	Scintilla now builds with exception handling enabled and requires exception handling to be enabled. <br />
+	This is a major change and application developers should consider how they will deal with Scintilla exhausting 
+	memory since Scintilla may not be in a stable state.
+	</li>
+	<li>
+	Deprecated APIs removed. The symbols removed are:
+	<ul>
+ <li>SCI_SETCARETPOLICY</li>
+<li> CARET_CENTER</li>
+<li> CARET_XEVEN</li>
+<li> CARET_XJUMPS</li>
+<li> SC_FOLDFLAG_BOX</li>
+<li> SC_FOLDLEVELBOXHEADERFLAG</li>
+<li> SC_FOLDLEVELBOXFOOTERFLAG</li>
+<li> SC_FOLDLEVELCONTRACTED</li>
+<li> SC_FOLDLEVELUNINDENT</li>
+<li> SCN_POSCHANGED</li>
+<li> SCN_CHECKBRACE</li>
+<li> SCLEX_ASP</li>
+<li> SCLEX_PHP</li>
+</ul>
+	</li>
+	<li>
+	Cocoa platform added.
+	</li>
+	<li>
+	Names of struct types in Scintilla.h now start with "Sci_" to avoid possible clashes with platform
+	definitions. Currently, the old names still work but these will be phased out.
+	</li>
+	<li>
+	When lines are wrapped, subsequent lines may be indented to match the indent of the initial line,
+	or one more indentation level. Feature #2796119.
+	</li>
+	<li>
+	APIs added for finding the character at a point rather than an inter-character position. Feature #2646738.
+	</li>
+	<li>
+	A new marker SC_MARK_BACKGROUND_UNDERLINE is drawn in the text area as an underline 
+	the full width of the window.
+	</li>
+	<li>
+	Batch file lexer understands variables surrounded by '!'.
+	</li>
+	<li>
+	CAML lexer also supports SML.
+	</li>
+	<li>
+	D lexer handles string and numeric literals more accurately. Feature #2793782.
+	</li>
+	<li>
+	Forth lexer is now case-insensitive and better supports numbers like $hex and %binary. Feature #2804894.
+	</li>
+	<li>
+	Lisp lexer treats '[', ']', '{', and '}' as balanced delimiters which is common usage. Feature #2794989.<br />
+	It treats keyword argument names as being equivalent to symbols. Feature #2794901.
+	</li>
+	<li>
+	Pascal lexer bug fixed to prevent hang when 'interface' near beginning of file. Bug #2802863.
+	</li>
+	<li>
+	Perl lexer bug fixed where previous lexical states persisted causing "/" special case styling and
+	subroutine prototype styling to not be correct. Bug #2809168.
+	</li>
+	<li>
+	XML lexer fixes bug where Unicode entities like '&amp;—' were broken into fragments. Bug #2804760.
+	</li>
+	<li>
+	SciTE on GTK+ enables scrolling the tab bar on recent versions of GTK+. Feature #2061821.
+	</li>
+	<li>
+	SciTE on Windows allows tab bar tabs to be reordered by drag and drop.
+	</li>
+	<li>
+	Unit test script for Scintilla on Windows included with source code.
+	</li>
+	<li>
+	User defined menu items are now localised when there is a matching translation.
+	</li>
+	<li>
+	Width of icon column of autocompletion lists on GTK+ made more consistent.
+	</li>
+	<li>
+	Bug with slicing UTF-8 text into character fragments when there is a sequence of 100 or more 3 byte characters. Bug #2780566.
+	</li>
+	<li>
+	Folding bugs introduced in 1.78 fixed. Some of the fix was generic and there was also a specific fix for C++.
+	</li>
+	<li>
+	Bug fixed where a rectangular paste was not padding the line with sufficient spaces to align the pasted text.
+	</li>
+	<li>
+	Bug fixed with showing all text on each line of multi-line annotations when styling the whole annotation using SCI_ANNOTATIONSETSTYLE. Bug #2789430.
+	</li>
+    </ul>
+    <h3>
+       <a href="http://prdownloads.sourceforge.net/scintilla/scite178.zip?download">Release 1.78</a>
+    </h3>
+    <ul>
+	<li>
+	Released on 28 April 2009.
+	</li>
+	<li>
+	Annotation lines may be added to each line.
+	</li>
+	<li>
+	A text margin may be defined with different text on each line.
+	</li>
+	<li>
+	Application actions may be added to the undo history.
+	</li>
+	<li>
+	Can query the symbol defined for a marker.
+	An available symbol added for applications to indicate that plugins may allocate a marker.
+	</li>
+	<li>
+	Can increase the amount of font ascent and descent.
+	</li>
+	<li>
+	COBOL lexer added. Feature #2127406.
+	</li>
+	<li>
+	Nimrod lexer added. Feature #2642620.
+	</li>
+	<li>
+	PowerPro lexer added. Feature #2195308.
+	</li>
+	<li>
+	SML lexer added. Feature #2710950.
+	</li>
+	<li>
+	SORCUS Installation file lexer added. Feature #2343375.
+	</li>
+	<li>
+	TACL lexer added. Feature #2127406.
+	</li>
+	<li>
+	TAL lexer added. Feature #2127406.
+	</li>
+	<li>
+	Rewritten Pascal lexer with improved folding and other fixes. Feature #2190650.
+	</li>
+	<li>
+	INDIC_ROUNDBOX translucency level can be modified. Feature #2586290.
+	</li>
+	<li>
+	C++ lexer treats angle brackets in #include directives as quotes when styling.within.preprocessor. Bug #2551033.
+	</li>
+	<li>
+	Inno Setup lexer is sensitive to whether within the [Code] section and handles comments better. Bug #2552973.
+	</li>
+	<li>
+	HTML lexer does not go into script mode when script tag is self-closing.
+	</li>
+	<li>
+	HTML folder fixed where confused by comments when fold.html.preprocessor off. Bug #2532774.
+	</li>
+	<li>
+	Perl lexer fixes problem with string matching caused by line endings. Bug #2648342.
+	</li>
+	<li>
+	Progress lexer fixes problem with "last-event:function" phrase. Bug #2483619.
+	</li>
+	<li>
+	Properties file lexer extended to handle RFC2822 text when lexer.props.allow.initial.spaces on.
+	</li>
+	<li>
+	Python lexer adds options for Python 3 and Cython.
+	</li>
+	<li>
+	Shell lexer fixes heredoc problem caused by line endings. Bug #2635257.
+	</li>
+	<li>
+	TeX lexer handles comment at end of line correctly. Bug #2698766.
+	</li>
+	<li>
+	SciTE retains selection range when performing a replace selection command. Feature #2339160.
+	</li>
+	<li>
+	SciTE definition of word characters fixed to match documentaiton. Bug #2464531.
+	</li>
+	<li>
+	SciTE on GTK+ performing Search or Replace when dialog already shown now brings dialog to foreground.
+	Bug #2634224.
+	</li>
+	<li>
+	Fixed encoding bug with calltips on GTK+.
+	</li>
+	<li>
+	Block caret drawn in correct place on wrapped lines. Bug #2126144.
+	</li>
+	<li>
+	Compilation for 64 bit Windows works using MinGW. Bug #2515578.
+	</li>
+	<li>
+	Incorrect memory freeing fixed on OS X. Bug #2354098, #2671749.
+	</li>
+	<li>
+	SciTE on GTK+ crash fixed on startup when child process exits before initialisation complete.
+	Bug #2716987.
+	</li>
+	<li>
+	Crash fixed when AutoCompleteGetCurrent called with no active autocompletion.
+	</li>
+	<li>
+	Flickering diminished when pressing Tab. Bug #2723006.
+	</li>
+	<li>
+	Namespace compilation issues with GTK+ on OS X fixed.
+	</li>
+	<li>
+	Increased maximum length of SciTE's Language menu on GTK+ to 100 items. Bug #2528241.
+	</li>
+	<li>
+	Fixed incorrect Python lexing for multi-line continued strings. Bug #2450963.
+	</li>
+    </ul>
+    <h3>
+       <a href="http://prdownloads.sourceforge.net/scintilla/scite177.zip?download">Release 1.77</a>
+    </h3>
+    <ul>
+	<li>
+	Released on 18 October 2008.
+	</li>
+	<li>
+	Direct temporary access to Scintilla's text buffer to allow simple efficient interfacing
+	to libraries like regular expression libraries.
+	</li>
+	<li>
+	Scintilla on Windows can interpret keys as Unicode even when a narrow character 
+	window with SCI_SETKEYSUNICODE.
+	</li>
+	<li>
+	Notification sent when autocompletion cancelled.
+	</li>
+	<li>
+	MySQL lexer added.
+	</li>
+	<li>
+	Lexer for gettext .po files added.
+	</li>
+	<li>
+	Abaqus lexer handles program structure more correctly.
+	</li>
+	<li>
+	Assembler lexer works with non-ASCII text.
+	</li>
+	<li>
+	C++ lexer allows mixed case doc comment tags.
+	</li>
+	<li>
+	CSS lexer updated and works with non-ASCII.
+	</li>
+	<li>
+	Diff lexer adds style for changed lines, handles subversion diffs better and 
+	fixes styling and folding for lines containing chunk dividers ("---").
+	</li>
+	<li>
+	FORTRAN lexer accepts more styles of compiler directive.
+	</li>
+	<li>
+	Haskell lexer allows hexadecimal literals.
+	</li>
+	<li>
+	HTML lexer improves PHP and JavaScript folding. 
+	PHP heredocs, nowdocs, strings and comments processed more accurately.
+	Internet Explorer's non-standard &gt;comment&lt; tag supported.
+	Script recognition in XML can be controlled with lexer.xml.allow.scripts property.
+	</li>
+	<li>
+	Lua lexer styles last character correctly.
+	</li>
+	<li>
+	Perl lexer update.
+	</li>
+	<li>
+	Comment folding implemented for Ruby.
+	</li>
+	<li>
+	Better TeX folding.
+	</li>
+	<li>
+	Verilog lexer updated.
+	</li>
+	<li>
+	Windows Batch file lexer handles %~ and %*.
+	</li>
+	<li>
+	YAML lexer allows non-ASCII text.
+	</li>
+	<li>
+	SciTE on GTK+ implements "Replace in Buffers" in advanced mode.
+	</li>
+	<li>
+	The extender OnBeforeSave method can override the default file saving behaviour by retuning true.
+	</li>
+	<li>
+	Window position and recent files list may be saved into the session file.
+	</li>
+	<li>
+	Right button press outside the selection moves the caret.
+	</li>
+	<li>
+	SciTE load.on.activate works when closing a document reveals a changed document.
+	</li>
+	<li>
+	SciTE bug fixed where eol.mode not used for initial buffer.
+	</li>
+	<li>
+	SciTE bug fixed where a file could be saved as the same name as another 
+	buffer leading to confusing behaviour.
+	</li>
+	<li>
+	Fixed display bug for long lines in same style on Windows.
+	</li>
+	<li>
+	Fixed SciTE crash when finding matching preprocessor command used on some files.
+	</li>
+	<li>
+	Drawing performance improved for files with many blank lines.
+	</li>
+	<li>
+	Folding bugs fixed where changing program text produced a decrease in fold level on a fold header line.
+	</li>
+	<li>
+	Clearing document style now clears all indicators.
+	</li>
+	<li>
+	SciTE's embedded Lua updated to 5.1.4.
+	</li>
+	<li>
+	SciTE will compile with versions of GTK+ before 2.8 again.
+	</li>
+	<li>
+	SciTE on GTK+ bug fixed where multiple files not opened.
+	</li>
+	<li>
+	Bug fixed with SCI_VCHOMEWRAP and SCI_VCHOMEWRAPEXTEND on white last line.
+	</li>
+	<li>
+	Regular expression bug fixed where "^[^(]+$" matched empty lines.
+	</li>
+    </ul>
+    <h3>
+       <a href="http://prdownloads.sourceforge.net/scintilla/scite176.zip?download">Release 1.76</a>
+    </h3>
+    <ul>
+	<li>
+	Released on 16 March 2008.
+	</li>
+	<li>
+	Support for PowerShell.
+	</li>
+	<li>
+	Lexer added for Magik.
+	</li>
+	<li>
+	Director extension working on GTK+.
+	</li>
+	<li>
+	Director extension may set focus to SciTE through "focus:" message on GTK+.
+	</li>
+	<li>
+	C++ folder handles final line better in some cases.
+	</li>
+	<li>
+	SCI_COPYALLOWLINE added which is similar to SCI_COPY except that if the selection is empty then
+	the line holding the caret is copied. On Windows an extra clipboard format allows pasting this as a whole
+	line before the current selection. This behaviour is compatible with Visual Studio.
+	</li>
+	<li>
+	On Windows, the horizontal scroll bar can handle wider files.
+	</li>
+	<li>
+	On Windows, a system palette leak was fixed. Should not affect many as palette mode is rarely used.
+	</li>
+	<li>
+	Install command on GTK+ no longer tries to set explicit owner.
+	</li>
+	<li>
+	Perl lexer handles defined-or operator "//".
+	</li>
+	<li>
+	Octave lexer fixes "!=" operator.
+	</li>
+	<li>
+	Optimized selection change drawing to not redraw as much when not needed.
+	</li>
+	<li>
+	SciTE on GTK+ no longer echoes Lua commands so is same as on Windows.
+	</li>
+	<li>
+	Automatic vertical scrolling limited to one line at a time so is not too fast.
+	</li>
+	<li>
+	Crash fixed when line states set beyond end of line states. This occurred when lexers did not
+	set a line state for each line.
+	</li>
+	<li>
+	Crash in SciTE on Windows fixed when search for 513 character string fails.
+	</li>
+	<li>
+	SciTE disables translucent features on Windows 9x due to crashes reported when using translucency.
+	</li>
+	<li>
+	Bug fixed where whitespace background was not seen on wrapped lines.
+	</li>
+    </ul>
+    <h3>
+       <a href="http://prdownloads.sourceforge.net/scintilla/scite175.zip?download">Release 1.75</a>
+    </h3>
+    <ul>
+	<li>
+	Released on 22 November 2007.
+	</li>
+	<li>
+	Some WordList and PropSet functionality moved from Scintilla to SciTE.
+	Projects that link to Scintilla's code for these classes may need to copy
+	code from SciTE.
+	</li>
+	<li>
+	Borland C++ can no longer build Scintilla.
+	</li>
+	<li>
+	Invalid bytes in UTF-8 mode are displayed as hex blobs. This also prevents crashes due to
+	passing invalid UTF-8 to platform calls.
+	</li>
+	<li>
+	Indentation guides enhanced to be visible on completely empty lines when possible.
+	</li>
+	<li>
+	The horizontal scroll bar may grow to match the widest line displayed.
+	</li>
+	<li>
+	Allow autocomplete popups to appear outside client rectangle in some cases.
+	</li>
+	<li>
+	When line state changed, SC_MOD_CHANGELINESTATE modification notification sent and
+	margin redrawn.
+	</li>
+	<li>
+	SciTE scripts can access the menu command values IDM_*.
+	</li>
+	<li>
+	SciTE's statement.end property has been implemented again.
+	</li>
+	<li>
+	SciTE shows paths and matches in different styles for Find In Files.
+	</li>
+	<li>
+	Incremental search in SciTE for Windows is modeless to make it easier to exit.
+	</li>
+	<li>
+	Folding performance improved.
+	</li>
+	<li>
+	SciTE for GTK+ now includes a Browse button in the Find In Files dialog.
+	</li>
+	<li>
+	On Windows versions that support Unicode well, Scintilla is a wide character window
+	which allows input for some less common languages like Armenian, Devanagari,
+	Tamil, and Georgian. To fully benefit, applications should use wide character calls.
+	</li>
+	<li>
+	Lua function names are exported from SciTE to allow some extension libraries to work.
+	</li>
+	<li>
+	Lexers added for Abaqus, Ansys APDL, Asymptote, and R.
+	</li>
+	<li>
+	SCI_DELWORDRIGHTEND added for closer compatibility with GTK+ entry widget.
+	</li>
+	<li>
+	The styling buffer may now use all 8 bits in each byte for lexical states with 0 bits for indicators.
+	</li>
+	<li>
+	Multiple characters may be set for SciTE's calltip.&lt;lexer&gt;.parameters.start property.
+	</li>
+	<li>
+	Bash lexer handles octal literals.
+	</li>
+	<li>
+	C++/JavaScript lexer recognises regex literals in more situations.
+	</li>
+	<li>
+	Haskell lexer fixed for quoted strings.
+	</li>
+	<li>
+	HTML/XML lexer does not notice XML indicator if there is
+	non-whitespace between the "&lt;?" and "XML".
+	ASP problem fixed where &lt;/ is used inside a comment.
+	</li>
+	<li>
+	Error messages from Lua 5.1 are recognised.
+	</li>
+	<li>
+	Folding implemented for Metapost.
+	</li>
+	<li>
+	Perl lexer enhanced for handling minus-prefixed barewords,
+	underscores in numeric literals and vector/version strings,
+	^D and ^Z similar to __END__,
+	subroutine prototypes as a new lexical class,
+	formats and format blocks as new lexical classes, and
+	'/' suffixed keywords and barewords.
+	</li>
+	<li>
+	Python lexer styles all of a decorator in the decorator style rather than just the name.
+	</li>
+	<li>
+	YAML lexer styles colons as operators.
+	</li>
+	<li>
+	Fixed SciTE bug where undo would group together multiple separate modifications.
+	</li>
+	<li>
+	Bug fixed where setting background colour of calltip failed.
+	</li>
+	<li>
+	SciTE allows wildcard suffixes for file pattern based properties.
+	</li>
+	<li>
+	SciTE on GTK+ bug fixed where user not prompted to save untitled buffer.
+	</li>
+	<li>
+	SciTE bug fixed where property values from one file were not seen by lower priority files.
+	</li>
+	<li>
+	Bug fixed when showing selection with a foreground colour change which highlighted
+	an incorrect range in some positions.
+	</li>
+	<li>
+	Cut now invokes SCN_MODIFYATTEMPTRO notification.
+	</li>
+	<li>
+	Bug fixed where caret not shown at beginning of wrapped lines.
+	Caret made visible in some cases after wrapping and scroll bar updated after wrapping.
+	</li>
+	<li>
+	Modern indicators now work on wrapped lines.
+	</li>
+	<li>
+	Some crashes fixed for 64-bit GTK+.
+	</li>
+	<li>
+	On GTK+ clipboard features improved for VMWare tools copy and paste.
+	SciTE exports the clipboard more consistently on shut down.
+	</li>
+    </ul>
+    <h3>
+       <a href="http://prdownloads.sourceforge.net/scintilla/scite174.zip?download">Release 1.74</a>
+    </h3>
+    <ul>
+	<li>
+	Released on 18 June 2007.
+	</li>
+	<li>
+	OS X support.
+	</li>
+	<li>
+	Indicators changed to be a separate data structure allowing more indicators. Storing indicators in high bits
+	of styling bytes is deprecated and will be removed in the next version.
+	</li>
+	<li>
+	Unicode support extended to all Unicode characters not just the Basic Multilingual Plane.
+	</li>
+	<li>
+	Performance improved on wide lines by breaking long runs in a single style into shorter segments.
+	</li>
+	<li>
+	Performance improved by caching layout of short text segments.
+	</li>
+	<li>
+	SciTE includes Lua 5.1.
+	</li>
+	<li>
+	Caret may be displayed as a block.
+	</li>
+	<li>
+	Lexer added for GAP.
+	</li>
+	<li>
+	Lexer added for PL/M.
+	</li>
+	<li>
+	Lexer added for Progress.
+	</li>
+	<li>
+	SciTE session files have changed format to be like other SciTE .properties files
+	and now use the extension .session.
+	Bookmarks and folds may optionally be saved in session files.
+	Session files created with previous versions of SciTE will not load into this version.
+	</li>
+	<li>
+	SciTE's extension and scripting interfaces add OnKey, OnDwellStart, and OnClose methods.
+	</li>
+	<li>
+	On GTK+, copying to the clipboard does not include the text/urilist type since this caused problems when
+	pasting into Open Office.
+	</li>
+	<li>
+	On GTK+, Scintilla defaults caret blink rate to platform preference.
+	</li>
+	<li>
+	Dragging does not start until the mouse has been dragged a certain amount.
+	This stops spurious drags when just clicking inside the selection.
+	</li>
+	<li>
+	Bug fixed where brace highlight not shown when caret line background set.
+	</li>
+	<li>
+	Bug fixed in Ruby lexer where out of bounds access could occur.
+	</li>
+	<li>
+	Bug fixed in XML folding where tags were not being folded because they are singletons in HTML.
+	</li>
+	<li>
+	Bug fixed when many font names used.
+	</li>
+	<li>
+	Layout bug fixed on GTK+ where fonts have ligatures available.
+	</li>
+	<li>
+	Bug fixed with SCI_LINETRANSPOSE on a blank line.
+	</li>
+	<li>
+	SciTE hang fixed when using UNC path with directory properties feature.
+	</li>
+	<li>
+	Bug on Windows fixed by examining dropped text for Unicode even in non-Unicode mode so it
+	can work when source only provides Unicode or when using an encoding different from the
+	system default.
+	</li>
+	<li>
+	SciTE bug on GTK+ fixed where Stop Executing did not work when more than a single process started.
+	</li>
+	<li>
+	SciTE bug on GTK+ fixed where mouse wheel was not switching between buffers.
+	</li>
+	<li>
+	Minor line end fix to PostScript lexer.
+	</li>
+    </ul>
+    <h3>
+       <a href="http://prdownloads.sourceforge.net/scintilla/scite173.zip?download">Release 1.73</a>
+    </h3>
+    <ul>
+	<li>
+	Released on 31 March 2007.
+	</li>
+	<li>
+	SciTE adds a Directory properties file to configure behaviour for files in a directory and its subdirectories.
+	</li>
+	<li>
+	Style changes may be made during text modification events.
+	</li>
+	<li>
+	Regular expressions recognize \d, \D, \s, \S, \w, \W, and \xHH.
+	</li>
+	<li>
+	Support for cmake language added.
+	</li>
+	<li>
+	More Scintilla properties can be queried.
+	</li>
+	<li>
+	Edge line drawn under text.
+	</li>
+	<li>
+	A savesession command added to SciTE director interface.
+	</li>
+	<li>
+	SciTE File | Encoding menu item names changed to be less confusing.
+	</li>
+	<li>
+	SciTE on GTK+ dialog buttons reordered to follow guidelines.
+	</li>
+	<li>
+	SciTE on GTK+ removed GTK+ 1.x compatible file dialog code.
+	</li>
+	<li>
+	SciTE on GTK+ recognises key names KeypadMultiply and KeypadDivide.
+	</li>
+	<li>
+	Background colour of line wrapping visual flag changed to STYLE_DEFAULT.
+	</li>
+	<li>
+	Makefile lexing enhanced for ':=' operator and when lines start with tab.
+	</li>
+	<li>
+	TADS3 lexer and folder improved.
+	</li>
+	<li>
+	SCN_DOUBLECLICK notification may set SCI_SHIFT, SCI_CTRL, and SCI_ALT flags on modifiers field.
+	</li>
+	<li>
+	Slow folding of large constructs in Python fixed.
+	</li>
+	<li>
+	MSSQL folding fixed to be case-insensitive and fold at more keywords.
+	</li>
+	<li>
+	SciTE's brace matching works better for HTML.
+	</li>
+	<li>
+	Determining API list items checks for specified parameters start character before default '('.
+	</li>
+	<li>
+	Hang fixed in HTML lexer.
+	</li>
+	<li>
+	Bug fixed in with LineTranspose command where markers could move to different line.
+	</li>
+	<li>
+	Memory released when buffer completely emptied.
+	</li>
+	<li>
+	If translucency not available on Windows, draw rectangular outline instead.
+	</li>
+	<li>
+	Bash lexer handles "-x" in "--x-includes..." better.
+	</li>
+	<li>
+	AutoIt3 lexer fixes string followed by '+'.
+	</li>
+	<li>
+	LinesJoin fixed where it stopped early due to not adjusting for inserted spaces..
+	</li>
+	<li>
+	StutteredPageDown fixed when lines wrapped.
+	</li>
+	<li>
+	FormatRange fixed to not double count line number width which could lead to a large space.
+	</li>
+	<li>
+	SciTE Export As PDF and Latex commands fixed to format floating point numbers with '.' even in locales
+	that use ','.
+	</li>
+	<li>
+	SciTE bug fixed where File | New could produce buffer with contents of previous file when using read-only mode.
+	</li>
+	<li>
+	SciTE retains current scroll position when switching buffers and fold.on.open set.
+	</li>
+	<li>
+	SciTE crash fixed where '*' used to invoke parameters dialog.
+	</li>
+	<li>
+	SciTE bugs when writing large UCS-2 files fixed.
+	</li>
+	<li>
+	Bug fixed when scrolling inside a SCN_PAINTED event by invalidating window
+	rather than trying to perform synchronous painting.
+	</li>
+	<li>
+	SciTE for GTK+ View | Full Screen works on recent versions of GTK+.
+	</li>
+	<li>
+	SciTE for Windows enables and disables toolbar commands correctly.
+	</li>
+    </ul>
+    <h3>
+       <a href="http://prdownloads.sourceforge.net/scintilla/scite172.zip?download">Release 1.72</a>
+    </h3>
+    <ul>
+	<li>
+	Released on 15 January 2007.
+	</li>
+	<li>
+	Performance of per-line data improved.
+	</li>
+	<li>
+	SC_STARTACTION flag set on the first modification notification in an undo
+	transaction to help synchronize the container's undo stack with Scintilla's.
+	</li>
+	<li>
+	On GTK+ drag and drop defaults to move rather than copy.
+	</li>
+	<li>
+	Scintilla supports extending appearance of selection to right hand margin.
+	</li>
+	<li>
+	Incremental search available on GTK+.
+	</li>
+	<li>
+	SciTE Indentation Settings dialog available on GTK+ and adds a "Convert" button.
+	</li>
+	<li>
+	Find in Files can optionally ignore binary files or directories that start with ".".
+	</li>
+	<li>
+	Lexer added for "D" language.
+	</li>
+	<li>
+	Export as HTML shows folding with underline lines and +/- symbols.
+	</li>
+	<li>
+	Ruby lexer interprets interpolated strings as expressions.
+	</li>
+	<li>
+	Lua lexer fixes some cases of numeric literals.
+	</li>
+	<li>
+	C++ folder fixes bug with "@" in doc comments.
+	</li>
+	<li>
+	NSIS folder handles !if and related commands.
+	</li>
+	<li>
+	Inno setup lexer adds styling for single and double quoted strings.
+	</li>
+	<li>
+	Matlab lexer handles backslashes in string literals correctly.
+	</li>
+	<li>
+	HTML lexer fixed to allow "?&gt;" in comments in Basic script.
+	</li>
+	<li>
+	Added key codes for Windows key and Menu key.
+	</li>
+	<li>
+	Lua script method scite.MenuCommand(x) performs a menu command.
+	</li>
+	<li>
+	SciTE bug fixed with box comment command near start of file setting selection to end of file.
+	</li>
+	<li>
+	SciTE on GTK+, fixed loop that occurred with automatic loading for an unreadable file.
+	</li>
+	<li>
+	SciTE asks whether to save files when Windows shuts down.
+	</li>
+	<li>
+	Save Session on Windows now defaults the extension to "ses".
+	</li>
+	<li>
+	Bug fixed with single character keywords.
+	</li>
+	<li>
+	Fixed infinite loop for SCI_GETCOLUMN for position beyond end of document.
+	</li>
+	<li>
+	Fixed failure to accept typing on Solaris/GTK+ when using default ISO-8859-1 encoding.
+	</li>
+	<li>
+	Fixed warning from Lua in SciTE when creating a new buffer when already have
+	maximum number of buffers open.
+	</li>
+	<li>
+	Crash fixed with "%%" at end of batch file.
+	</li>
+    </ul>
+    <h3>
+       <a href="http://prdownloads.sourceforge.net/scintilla/scite171.zip?download">Release 1.71</a>
+    </h3>
+    <ul>
+	<li>
+	Released on 21 August 2006.
+	</li>
+	<!--li>
+	On GTK+ drag and drop defaults to move rather than copy.
+	</li-->
+	<li>
+	Double click notification includes line and position.
+	</li>
+	<li>
+	VB lexer bugs fixed for preprocessor directive below a comment or some other states and
+	to use string not closed style back to the starting quote when there are internal doubled quotes.
+	</li>
+	<li>
+	C++ lexer allows identifiers to contain '$' and non-ASCII characters such as UTF-8.
+	The '$' character can be disallowed with lexer.cpp.allow.dollars=0.
+	</li>
+	<li>
+	Perl lexer allows UTF-8 identifiers and has some other small improvements.
+	</li>
+	<li>
+	SciTE's $(CurrentWord) uses word.characters.&lt;filepattern&gt; to define the word
+	rather than a hardcoded list of word characters.
+	</li>
+	<li>
+	SciTE Export as HTML adds encoding information for UTF-8 file and fixes DOCTYPE.
+	</li>
+	<li>
+	SciTE session and .recent files default to the user properties directory rather than global
+	properties directory.
+	</li>
+	<li>
+	Left and right scroll events handled correctly on GTK+ and horizontal scroll bar has more sensible
+	distances for page and arrow clicks.
+	</li>
+	<li>
+	SciTE on GTK+ tab bar fixed to work on recent versions of GTK+.
+	</li>
+	<li>
+	On GTK+, if the approximate character set conversion is unavailable, a second attempt is made
+	without approximations. This may allow keyboard input and paste to work on older systems.
+	</li>
+	<li>
+	SciTE on GTK+ can redefine the Insert key.
+	</li>
+	<li>
+	SciTE scripting interface bug fixed where some string properties could not be changed.
+	</li>
+    </ul>
+    <h3>
        <a href="http://prdownloads.sourceforge.net/scintilla/scite170.zip?download">Release 1.70</a>
     </h3>
     <ul>
@@ -239,7 +1361,7 @@
 	</li>
 	<li>
 	On GTK+, character set conversion is performed using an option that allows approximate conversions rather
-	than failures when a character can not be converted. This may lead to similar characters being inserted or 
+	than failures when a character can not be converted. This may lead to similar characters being inserted or
 	when no similar character is available a '?' may be inserted.
 	</li>
 	<li>
@@ -711,7 +1833,7 @@
 	PHP allows spaces after &lt;&lt;&lt;.
 	</li>
 	<li>
-	TADS3 has a simpler set of states and recognizes identifiers.
+	TADS3 has a simpler set of states and recognises identifiers.
 	</li>
 	<li>
 	Avenue elseif folds better.
@@ -809,7 +1931,7 @@
 	</li>
 	<li>
 	Perl can fold POD and package sections. POD verbatim section style.
-	Globbing syntax recognized better.
+	Globbing syntax recognised better.
 	</li>
 	<li>
 	Context menu moved slightly on GTK+ so that it will be under the mouse and will
@@ -1294,7 +2416,7 @@
 	AutoIt3 lexer updated.
 	</li>
 	<li>
-	Perl lexer recognizes regular expression use better.
+	Perl lexer recognises regular expression use better.
 	</li>
 	<li>
 	Errorlist lexer understands Lua tracebacks and copes with findstr
