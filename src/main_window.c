@@ -276,6 +276,22 @@ static void main_window_create_toolbars(void)
 	gtk_signal_connect (GTK_OBJECT (main_window.toolbar_main_button_unindent), "clicked", GTK_SIGNAL_FUNC (block_unindent), NULL);
 	gtk_widget_show (main_window.toolbar_main_button_unindent);
 
+	main_window.toolbar_separator=gtk_separator_tool_item_new();
+	gtk_toolbar_insert(GTK_TOOLBAR(main_window.toolbar_main), main_window.toolbar_separator, -1);
+	gtk_widget_show (main_window.toolbar_separator);
+	//zoom in
+	main_window.toolbar_main_button_zoom_in = gtk_tool_button_new_from_stock(GTK_STOCK_ZOOM_IN);
+	gtk_tool_item_set_tooltip_text(main_window.toolbar_main_button_zoom_in, _("Zoom in"));
+  	gtk_toolbar_insert(GTK_TOOLBAR(main_window.toolbar_main), main_window.toolbar_main_button_zoom_in, -1);
+	gtk_signal_connect (GTK_OBJECT (main_window.toolbar_main_button_zoom_in), "clicked", GTK_SIGNAL_FUNC (zoom_in), NULL);
+	gtk_widget_show (main_window.toolbar_main_button_zoom_in);
+	//zoom out
+	main_window.toolbar_main_button_zoom_out = gtk_tool_button_new_from_stock(GTK_STOCK_ZOOM_OUT);
+	gtk_tool_item_set_tooltip_text(main_window.toolbar_main_button_zoom_out, _("Zoom out"));
+  	gtk_toolbar_insert(GTK_TOOLBAR(main_window.toolbar_main), main_window.toolbar_main_button_zoom_out, -1);
+	gtk_signal_connect (GTK_OBJECT (main_window.toolbar_main_button_zoom_out), "clicked", GTK_SIGNAL_FUNC (zoom_out), NULL);
+	gtk_widget_show (main_window.toolbar_main_button_zoom_out);
+
 	// Create the Search Toolbar
 	
 	GtkToolItem *item;
@@ -400,7 +416,7 @@ static void main_window_fill_panes(void)
 	main_window.close_image = gtk_image_new_from_stock(GTK_STOCK_CLOSE, GTK_ICON_SIZE_MENU);
 	gtk_misc_set_padding(main_window.close_image, 0, 0);
 	main_window.close_sidebar_button = gtk_button_new();
-	gtk_widget_set_tooltip_text(main_window.close_sidebar_button, _("Close class Browser"));
+	gtk_widget_set_tooltip_text(main_window.close_sidebar_button, "Close class Browser");
 	gtk_button_set_image(main_window.close_sidebar_button, main_window.close_image);
 	gtk_button_set_relief(main_window.close_sidebar_button, GTK_RELIEF_NONE);
 	gtk_button_set_focus_on_click(main_window.close_sidebar_button, FALSE);
@@ -408,7 +424,7 @@ static void main_window_fill_panes(void)
 	gtk_widget_show(main_window.close_image);
 	gtk_widget_show(main_window.close_sidebar_button);
 	//
-	main_window.chkOnlyCurFileFuncs = gtk_check_button_new_with_label(_("Parse only current file")); 
+	main_window.chkOnlyCurFileFuncs = gtk_check_button_new_with_label("Parse only current file"); 
 	gtk_widget_show (main_window.chkOnlyCurFileFuncs);
 	gtk_box_pack_start(GTK_BOX(hbox), main_window.chkOnlyCurFileFuncs, FALSE, FALSE, 10);
 //	gtk_box_pack_start(GTK_BOX(box), main_window.chkOnlyCurFileFuncs, FALSE, FALSE, 10);
