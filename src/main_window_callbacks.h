@@ -76,7 +76,9 @@ void force_sql(GtkWidget *widget);
 void force_cxx(GtkWidget *widget);
 void force_perl(GtkWidget *widget);
 void force_python(GtkWidget *widget);
-
+void zoom_in(GtkWidget *widget);
+void zoom_out(GtkWidget *widget);
+void can_undo(GtkWidget *widget);
 void on_notebook_switch_page (GtkNotebook *notebook, GtkNotebookPage *page,
                               gint page_num, gpointer user_data);
 void inc_search_typed (GtkEntry *entry, const gchar *text, gint length,
@@ -88,6 +90,8 @@ void goto_line_activate(GtkEntry *entry,gpointer user_data);
 void move_block(gint indentation_size);
 void block_indent(GtkWidget *widget);
 void block_unindent(GtkWidget *widget);
+void add_marker(int line);
+void delete_marker(int line);
 void syntax_check(GtkWidget *widget);
 void syntax_check_clear(GtkWidget *widget);
 void lint_row_activated (GtkTreeSelection *selection, gpointer data);

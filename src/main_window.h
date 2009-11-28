@@ -50,6 +50,8 @@ typedef struct
 	GtkToolItem *toolbar_separator;
 	GtkWidget *toolbar_main_button_indent;
 	GtkWidget *toolbar_main_button_unindent;
+	GtkWidget *toolbar_main_button_zoom_in;
+	GtkWidget *toolbar_main_button_zoom_out;
 	GtkWidget *toolbar_find;
 	GtkWidget *toolbar_find_search_label;
 	GtkWidget *toolbar_find_search_entry;

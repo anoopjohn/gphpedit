@@ -324,6 +324,20 @@ gint main_window_key_press_event(GtkWidget   *widget,
 			template_find_and_insert();
 			return TRUE;
 		}
+		else if ((event->state & GDK_CONTROL_MASK)==GDK_CONTROL_MASK && ((event->keyval == GDK_F2)))	{
+			///add a marker
+			current_pos = gtk_scintilla_get_current_pos(GTK_SCINTILLA(main_window.current_editor->scintilla));
+			current_line = gtk_scintilla_line_from_position(GTK_SCINTILLA(main_window.current_editor->scintilla), current_pos);
+			add_marker(current_line);
+			return TRUE;
+		}
+		else if ((event->state & GDK_SHIFT_MASK)==GDK_SHIFT_MASK && ((event->keyval == GDK_F2)))	{
+			///delete a marker
+			current_pos = gtk_scintilla_get_current_pos(GTK_SCINTILLA(main_window.current_editor->scintilla));
+			current_line = gtk_scintilla_line_from_position(GTK_SCINTILLA(main_window.current_editor->scintilla), current_pos);
+			delete_marker(current_line);
+			return TRUE;
+		}
 		else if ((event->state & GDK_CONTROL_MASK)==GDK_CONTROL_MASK && (event->keyval == GDK_space) && 
 				 (main_window.current_editor->type != TAB_HELP)) {
 			current_pos = gtk_scintilla_get_current_pos(GTK_SCINTILLA(main_window.current_editor->scintilla));
@@ -1525,6 +1539,33 @@ void block_unindent(GtkWidget *widget)
 {
 	move_block(0-preferences.indentation_size);
 }
+//zoom in
+
+void zoom_in(GtkWidget *widget)
+{
+gtk_scintilla_zoom_in(GTK_SCINTILLA(main_window.current_editor->scintilla));
+}
+
+//zoom out
+void zoom_out(GtkWidget *widget)
+{
+gtk_scintilla_zoom_out(GTK_SCINTILLA(main_window.current_editor->scintilla));
+}
+
+//add marker
+void add_marker(int line)
+{
+gtk_scintilla_marker_define(GTK_SCINTILLA(main_window.current_editor->scintilla), 0, 18);
+gtk_scintilla_marker_set_back(GTK_SCINTILLA(main_window.current_editor->scintilla), 0, 101);
+gtk_scintilla_set_margin_mask_n(GTK_SCINTILLA(main_window.current_editor->scintilla), 1, -1);
+gtk_scintilla_marker_add(GTK_SCINTILLA(main_window.current_editor->scintilla), line, 0);
+}
+//delete marker
+void delete_marker(int line)
+{
+gtk_scintilla_marker_delete(GTK_SCINTILLA(main_window.current_editor->scintilla), line, 0);
+}
+
 
 
 void syntax_check(GtkWidget *widget)
