@@ -328,14 +328,14 @@ gint main_window_key_press_event(GtkWidget   *widget,
 			///add a marker
 			current_pos = gtk_scintilla_get_current_pos(GTK_SCINTILLA(main_window.current_editor->scintilla));
 			current_line = gtk_scintilla_line_from_position(GTK_SCINTILLA(main_window.current_editor->scintilla), current_pos);
-			add_marker(current_line);
+			mod_marker(current_line);
 			return TRUE;
 		}
-		else if ((event->state & GDK_SHIFT_MASK)==GDK_SHIFT_MASK && ((event->keyval == GDK_F2)))	{
-			///delete a marker
+		else if ((event->keyval == GDK_F2))	{
+			///add a marker
 			current_pos = gtk_scintilla_get_current_pos(GTK_SCINTILLA(main_window.current_editor->scintilla));
 			current_line = gtk_scintilla_line_from_position(GTK_SCINTILLA(main_window.current_editor->scintilla), current_pos);
-			delete_marker(current_line);
+			find_next_marker(current_line);
 			return TRUE;
 		}
 		else if ((event->state & GDK_CONTROL_MASK)==GDK_CONTROL_MASK && (event->keyval == GDK_space) && 
@@ -1555,19 +1555,43 @@ gtk_scintilla_zoom_out(GTK_SCINTILLA(main_window.current_editor->scintilla));
 //add marker
 void add_marker(int line)
 {
-gtk_scintilla_marker_define(GTK_SCINTILLA(main_window.current_editor->scintilla), 0, 18);
-gtk_scintilla_marker_set_back(GTK_SCINTILLA(main_window.current_editor->scintilla), 0, 101);
-gtk_scintilla_set_margin_mask_n(GTK_SCINTILLA(main_window.current_editor->scintilla), 1, -1);
-gtk_scintilla_marker_add(GTK_SCINTILLA(main_window.current_editor->scintilla), line, 0);
+gtk_scintilla_marker_define(GTK_SCINTILLA(main_window.current_editor->scintilla), 1, SC_MARK_SHORTARROW);
+gtk_scintilla_marker_set_back(GTK_SCINTILLA(main_window.current_editor->scintilla), 1, 101);
+gtk_scintilla_marker_set_fore(GTK_SCINTILLA(main_window.current_editor->scintilla), 1, 101);
+gtk_scintilla_marker_add(GTK_SCINTILLA(main_window.current_editor->scintilla), line, 2);
 }
 //delete marker
 void delete_marker(int line)
 {
-gtk_scintilla_marker_delete(GTK_SCINTILLA(main_window.current_editor->scintilla), line, 0);
+gtk_scintilla_marker_delete(GTK_SCINTILLA(main_window.current_editor->scintilla), line, 1);
 }
-
-
-
+//add/delete a marker
+void mod_marker(int line){
+	if (gtk_scintilla_marker_get(GTK_SCINTILLA(main_window.current_editor->scintilla),line)!=2){
+	add_marker(line);
+	}else{
+	delete_marker(line);
+	}
+}
+//circle markers
+//no funciona esta mal el markermask
+void find_next_marker(line_start){
+gint line;
+line= gtk_scintilla_marker_next(GTK_SCINTILLA(main_window.current_editor->scintilla),line_start, 1);
+	if (line==-1){
+		//no markers in that direccion, we should go back to the first line
+		line= gtk_scintilla_marker_previous(GTK_SCINTILLA(main_window.current_editor->scintilla),0, 1);
+		if (line!=-1){
+		//go back to the first marker
+		goto_line_int(line);
+		}else{	
+		g_print("No marker found");
+		}
+	}else{
+	//goto the marker posicion
+	goto_line_int(line);
+	}
+}
 void syntax_check(GtkWidget *widget)
 {
 	if (main_window.current_editor) {

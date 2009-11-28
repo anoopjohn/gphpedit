@@ -97,7 +97,8 @@ void tab_set_general_scintilla_properties(Editor *editor)
 	gtk_signal_connect (GTK_OBJECT (editor->scintilla), "macro_record", GTK_SIGNAL_FUNC (macro_record), NULL);
 
 	//gtk_scintilla_set_sel_back(GTK_SCINTILLA(editor->scintilla), 1, 13434879);
-         gtk_scintilla_set_sel_back(GTK_SCINTILLA(editor->scintilla), 1, gnome_config_get_int ("gPHPEdit/default_style/selection=11250603"));
+gtk_scintilla_set_sel_back(GTK_SCINTILLA(editor->scintilla), 1, gnome_config_get_int ("gPHPEdit/default_style/selection=11250603"));
+
 
 	tab_set_configured_scintilla_properties(GTK_SCINTILLA(editor->scintilla), preferences);
 	gtk_widget_show (editor->scintilla);
@@ -185,6 +186,10 @@ static void tab_set_folding(Editor *editor, gint folding)
 		
 		gtk_scintilla_set_margin_width_n (GTK_SCINTILLA(editor->scintilla), 2, 14);
 		
+		//makers margin settings
+		gtk_scintilla_set_margin_type_n(GTK_SCINTILLA(main_window.current_editor->scintilla), 1, SC_MARGIN_SYMBOL);
+		gtk_scintilla_set_margin_width_n (GTK_SCINTILLA(main_window.current_editor->scintilla), 1, 14);
+		gtk_scintilla_set_margin_sensitive_n(GTK_SCINTILLA(main_window.current_editor->scintilla), 1, 1);
 		//gtk_signal_connect (GTK_OBJECT (editor->scintilla), "fold_clicked", GTK_SIGNAL_FUNC (fold_clicked), NULL);
 		gtk_signal_connect (GTK_OBJECT (editor->scintilla), "modified", GTK_SIGNAL_FUNC (handle_modified), NULL);
 		gtk_signal_connect (GTK_OBJECT (editor->scintilla), "margin_click", GTK_SIGNAL_FUNC (margin_clicked), NULL);
@@ -767,7 +772,7 @@ gboolean is_php_file(Editor *editor)
 		gtk_scintilla_get_text(GTK_SCINTILLA(editor->scintilla), text_length+1, buffer);
 		lines = g_strsplit(buffer, "\n", 10);
 		if (!lines[0])
-			return;
+			return is_php;
 		if (lines[0][0] == '#' && lines[0][1] == '!' && strstr(lines[0], "php") != NULL) {
 			is_php = TRUE;
 		}
@@ -1156,14 +1161,14 @@ GtkWidget *get_close_tab_widget(Editor *editor) {
 
 	hbox = gtk_hbox_new(FALSE, 0);
 	image = gtk_image_new_from_stock(GTK_STOCK_CLOSE, GTK_ICON_SIZE_MENU);
-	gtk_misc_set_padding(image, 0, 0);
+	gtk_misc_set_padding(GTK_MISC(image), 0, 0);
 	gtk_container_set_border_width(GTK_CONTAINER(hbox), 0);
 	close_button = gtk_button_new();
 	gtk_widget_set_tooltip_text(close_button, "Close Tab");
 
-	gtk_button_set_image(close_button, image);
-	gtk_button_set_relief(close_button, GTK_RELIEF_NONE);
-	gtk_button_set_focus_on_click(close_button, FALSE);
+	gtk_button_set_image(GTK_BUTTON(close_button), image);
+	gtk_button_set_relief(GTK_BUTTON(close_button), GTK_RELIEF_NONE);
+	gtk_button_set_focus_on_click(GTK_BUTTON(close_button), FALSE);
 
 	rcstyle = gtk_rc_style_new ();
 	rcstyle->xthickness = rcstyle->ythickness = 0;
@@ -1369,6 +1374,7 @@ void handle_modified(GtkWidget *scintilla, gint pos,gint mtype,gchar *text,gint 
 
 void margin_clicked (GtkWidget *scintilla, gint modifiers, gint position, gint margin)
 {
+if(margin!=1){
 	gint line;
 	
 	line = gtk_scintilla_line_from_position(GTK_SCINTILLA(scintilla), position);
@@ -1376,6 +1382,12 @@ void margin_clicked (GtkWidget *scintilla, gint modifiers, gint position, gint m
 	if (preferences.show_folding && margin == 2) {
 		fold_clicked(scintilla, line, modifiers);
 	}
+}else{
+	gint line;
+	line = gtk_scintilla_line_from_position(GTK_SCINTILLA(scintilla), position);
+//	add_marker(current_line);
+	mod_marker(line);
+}
 }
 
 

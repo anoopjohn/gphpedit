@@ -92,6 +92,8 @@ void block_indent(GtkWidget *widget);
 void block_unindent(GtkWidget *widget);
 void add_marker(int line);
 void delete_marker(int line);
+void mod_marker(int line);
+void find_next_marker(int line_start);
 void syntax_check(GtkWidget *widget);
 void syntax_check_clear(GtkWidget *widget);
 void lint_row_activated (GtkTreeSelection *selection, gpointer data);
