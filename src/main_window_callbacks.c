@@ -332,7 +332,7 @@ gint main_window_key_press_event(GtkWidget   *widget,
 			return TRUE;
 		}
 		else if ((event->keyval == GDK_F2))	{
-			///add a marker
+			///find next marker
 			current_pos = gtk_scintilla_get_current_pos(GTK_SCINTILLA(main_window.current_editor->scintilla));
 			current_line = gtk_scintilla_line_from_position(GTK_SCINTILLA(main_window.current_editor->scintilla), current_pos);
 			find_next_marker(current_line);
@@ -1558,7 +1558,7 @@ void add_marker(int line)
 gtk_scintilla_marker_define(GTK_SCINTILLA(main_window.current_editor->scintilla), 1, SC_MARK_SHORTARROW);
 gtk_scintilla_marker_set_back(GTK_SCINTILLA(main_window.current_editor->scintilla), 1, 101);
 gtk_scintilla_marker_set_fore(GTK_SCINTILLA(main_window.current_editor->scintilla), 1, 101);
-gtk_scintilla_marker_add(GTK_SCINTILLA(main_window.current_editor->scintilla), line, 2);
+gtk_scintilla_marker_add(GTK_SCINTILLA(main_window.current_editor->scintilla), line, 1);
 }
 //delete marker
 void delete_marker(int line)
@@ -1574,24 +1574,26 @@ void mod_marker(int line){
 	}
 }
 //circle markers
-//no funciona esta mal el markermask
 void find_next_marker(line_start){
 gint line;
-line= gtk_scintilla_marker_next(GTK_SCINTILLA(main_window.current_editor->scintilla),line_start, 1);
+//skip the current line
+line= gtk_scintilla_marker_next(GTK_SCINTILLA(main_window.current_editor->scintilla),line_start + 1, 2);
 	if (line==-1){
 		//no markers in that direccion, we should go back to the first line
-		line= gtk_scintilla_marker_previous(GTK_SCINTILLA(main_window.current_editor->scintilla),0, 1);
+		line= gtk_scintilla_marker_next(GTK_SCINTILLA(main_window.current_editor->scintilla),0, 2);
 		if (line!=-1){
 		//go back to the first marker
-		goto_line_int(line);
+		//bugfix the maker is in the next line
+		goto_line_int(line+1);
 		}else{	
-		g_print("No marker found");
+		g_print("No marker found\n");
 		}
 	}else{
 	//goto the marker posicion
-	goto_line_int(line);
+	goto_line_int(line+1);
 	}
 }
+
 void syntax_check(GtkWidget *widget)
 {
 	if (main_window.current_editor) {
