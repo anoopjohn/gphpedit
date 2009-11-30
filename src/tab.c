@@ -1127,7 +1127,8 @@ gboolean tab_create_new(gint type, GString *filename)
 			file_created = TRUE;
 		}
 	}
-	close_saved_empty_Untitled();
+	// Don't open a new tab if it is first tab and it is unmodified. Fixed.
+	//close_saved_empty_Untitled();
 	
 	editor = tab_new_editor();
 	editor->type = type;
