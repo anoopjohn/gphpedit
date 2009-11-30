@@ -37,7 +37,8 @@ PKG_CHECK_MODULES(GPHPEDIT,[
 	gtk+-2.0
 	libgnomeui-2.0
 	gnome-vfs-2.0
-	libgtkhtml-2.0
+	webkit-1.0
+dnl	libgtkhtml-2.0
 dnl	libgnomeprint-2.2
 dnl	libgnomeprintui-2.2
 	])

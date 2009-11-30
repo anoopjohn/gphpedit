@@ -1032,7 +1032,7 @@ void on_cut1_activate(GtkWidget *widget)
 	}
 	//gtk_scintilla_cut(GTK_SCINTILLA(main_window.current_editor->scintilla));
 }
-
+/*
 static gchar *gtkhtml2_selection_get_text (HtmlView *view)
 {
 	GSList *list = view->sel_list;
@@ -1046,9 +1046,9 @@ static gchar *gtkhtml2_selection_get_text (HtmlView *view)
 		HtmlBoxText *text = HTML_BOX_TEXT (list->data);
 
 		list = list->next;
-		/*
-		 * Some boxes may not have any text
-		 */
+		//
+		// Some boxes may not have any text
+		//
 		if (text->canon_text == NULL)
 			continue;
 		switch (text->selection) {
@@ -1076,7 +1076,7 @@ static gchar *gtkhtml2_selection_get_text (HtmlView *view)
 	g_string_free (str, FALSE);
 	return ptr;
 }
-
+*/
 void on_copy1_activate(GtkWidget *widget)
 {
 	gint wordStart;
@@ -1088,9 +1088,10 @@ void on_copy1_activate(GtkWidget *widget)
 		return;
 	
 	if (main_window.current_editor->type == TAB_HELP) {
-		buffer = gtkhtml2_selection_get_text(HTML_VIEW(main_window.current_editor->help_view));
-		gtk_clipboard_set_text(main_window.clipboard, buffer, 1);
-		g_free(buffer);
+		//buffer = gtkhtml2_selection_get_text(HTML_VIEW(main_window.current_editor->help_view));
+		//gtk_clipboard_set_text(main_window.clipboard, buffer, 1);
+		//g_free(buffer);
+		 webkit_web_view_copy_clipboard (WEBKIT_WEB_VIEW(main_window.current_editor->help_view));
 	}
 	else {
 		wordStart = gtk_scintilla_get_selection_start(GTK_SCINTILLA(main_window.current_editor->scintilla));
