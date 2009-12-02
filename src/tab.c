@@ -466,7 +466,7 @@ void tab_help_load_file(Editor *editor, GString *filename)
 	nchars = fread (buffer, 1, size, fp);
 	
 	if (size != nchars) g_warning (_("File size and loaded size not matching"));
-	webkit_web_view_load_string (WEBKIT_WEB_VIEW(editor->help_view),buffer,"text/html", "UTF-8", filename);
+	webkit_web_view_load_string (WEBKIT_WEB_VIEW(editor->help_view),buffer,"text/html", "UTF-8", filename->str);
 	//html_document_clear(editor->help_document);
 	//html_document_open_stream(editor->help_document, "text/html");
 	//html_document_write_stream(editor->help_document, buffer, nchars);
@@ -504,9 +504,9 @@ GString *tab_help_try_filename(gchar *prefix, gchar *command, gchar *suffix)
 	
 	long_filename = g_string_new(command);
 	long_filename = g_string_prepend(long_filename, prefix);
-	//if (suffix) {
-	//	long_filename = g_string_append(long_filename, suffix);
-	//}
+	if (suffix) {
+		long_filename = g_string_append(long_filename, suffix);
+	}
 	if (DEBUG_MODE) { g_print("DEBUG: tab.c:tab_help_try_filename:long_filename->str: %s\n", long_filename->str); }
 	if (g_file_exists(long_filename->str)) {
 		return long_filename;
@@ -614,14 +614,13 @@ subst[i] = '\0';
 
 static void webkit_link_clicked (WebKitWebView *view, WebKitWebFrame *frame, WebKitNetworkRequest *request,Editor *editor)
 {
-g_signal_stop_emission_by_name (WEBKIT_WEB_VIEW (view), "navigation-requested");
 gchar *uri=webkit_network_request_get_uri(request);
 if (uri){
 GString *filename;
-if( strstr(uri, "#")!=NULL){
-// it's a direction like filename.html#refpoint
 char *resp;
 int cant;
+if( strstr(uri, "#")!=NULL){
+// it's a direction like filename.html#refpoint
 resp = strchr(uri,'#');
 cant=resp-uri; //len filename without refpoint
 substring(uri, uri, 0, cant); //skips refpoint part
@@ -642,7 +641,6 @@ if (filename) {
 		//g_free(editor->help_function);
 		editor->short_filename = g_strconcat("Help: ", uri, NULL);
 		editor->help_function = g_strdup(uri);
-		
 		gtk_label_set_text(GTK_LABEL(editor->label), editor->short_filename);
 		
 		update_app_title();
@@ -707,7 +705,7 @@ gboolean tab_create_help(Editor *editor, GString *filename)
 		editor->saved = TRUE;
 		gtk_widget_show (editor->label);
 		editor->help_view= WEBKIT_WEB_VIEW(webkit_web_view_new ());
-//		editor->help_document = html_document_new();
+		//editor->help_document = html_document_new();
 		//editor->help_view = html_view_new();
 		editor->help_scrolled_window = gtk_scrolled_window_new(NULL, NULL);
 		gtk_container_add(GTK_CONTAINER(editor->help_scrolled_window), GTK_WIDGET(editor->help_view));
@@ -1101,7 +1099,7 @@ gboolean tab_create_new(gint type, GString *filename)
 	gboolean result;
 	gboolean file_created = FALSE;
 	GnomeVFSURI *uri = NULL;
-  //gchar *buffer = NULL;
+  	//gchar *buffer = NULL;
 
 	if (DEBUG_MODE) { g_print("DEBUG: tab.c:tab_create_new:filename->str: %s\n", filename->str); }
 	if (filename != NULL) {
@@ -1113,7 +1111,6 @@ gboolean tab_create_new(gint type, GString *filename)
 		else {
 			abs_path = g_strdup(filename->str);
 		}
-
 		uri = gnome_vfs_uri_new(abs_path);
 		if (!gnome_vfs_uri_exists(uri) && type!=TAB_HELP) {
 			dialog_message = g_string_new("");
@@ -1131,7 +1128,7 @@ gboolean tab_create_new(gint type, GString *filename)
 	
 	editor = tab_new_editor();
 	editor->type = type;
-
+	
 	if (editor->type == TAB_HELP) {
 		if (!tab_create_help(editor, filename)) {
 			// Couldn't find the help file, don't keep the editor
@@ -1140,6 +1137,7 @@ gboolean tab_create_new(gint type, GString *filename)
 		else {
 			editor->saved = TRUE;
 		}
+
 	}
 	else {
 		editor->type = TAB_FILE;
@@ -1173,21 +1171,19 @@ gboolean tab_create_new(gint type, GString *filename)
 			}
 			editor->is_untitled=TRUE;
 		}
-
 		// Hmmm, I had the same error as the following comment.  A reshuffle here and upgrading GtkScintilla2 to 0.1.0 seems to have fixed it
+		///desde aca esta el error problamente es porque no hay scintilla en las TABHELP
 		if (!GTK_WIDGET_VISIBLE (editor->scintilla))
 			gtk_widget_show (editor->scintilla);
-
+		
 		editor_tab = get_close_tab_widget(editor);
-
 		gtk_notebook_append_page (GTK_NOTEBOOK (main_window.notebook_editor), editor->scintilla, editor_tab);
  		gtk_scintilla_set_save_point(GTK_SCINTILLA(editor->scintilla));
 		tab_set_event_handlers(editor);
-
+		
 		/* Possible problem on the next line, one user reports: 
 			assertion `GTK_WIDGET_ANCHORED (widget) || GTK_IS_INVISIBLE (widget)' failed */
 		gtk_notebook_set_current_page (GTK_NOTEBOOK (main_window.notebook_editor), -1);
-
 		gtk_scintilla_goto_pos(GTK_SCINTILLA(editor->scintilla), 0);
 		gtk_scintilla_grab_focus(GTK_SCINTILLA(editor->scintilla));
 		main_window.current_editor = editor;
@@ -1261,11 +1257,11 @@ Editor *editor_find_from_help(void *help)
 	for (walk = editors; walk != NULL; walk = g_slist_next (walk)) {
 		editor = walk->data;
 		//if (((void *)(editor->help_document) == (void *)help) || ((void *)(editor->help_scrolled_window) == (void *)help)) {
-		if ((void *)(editor->help_view) == help || (void *)(editor->help_scrolled_window == help)) {
+		//if ((void *)(editor->help_view) == help || (void *)(editor->help_scrolled_window == help)) {
+		if ((void *)(editor->help_scrolled_window == help)) {
 			return walk->data;
 		}
 	}
-
 	return NULL;
 }
 

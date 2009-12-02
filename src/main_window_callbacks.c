@@ -122,14 +122,17 @@ void session_reopen(void)
 				filename++;
 				focus_this_one = TRUE;
 			}
-
+			
 			if (strstr(filename, "phphelp:")) {
 				filename += 8;
 				target = g_string_new(filename);
 				tab_create_new(TAB_HELP, target);
 				g_string_free(target, TRUE);
+				
 				if (focus_this_one && (main_window.current_editor)) {
-					focus_tab = gtk_notebook_page_num(GTK_NOTEBOOK(main_window.notebook_editor),main_window.current_editor->help_scrolled_window);
+					//focus_tab = gtk_notebook_page_num(GTK_NOTEBOOK(main_window.notebook_editor),main_window.current_editor->help_scrolled_window);
+					//FIXME: seg fault if there's open a file and a TABHELP and the TABHELP GOT the focus
+					focus_tab = 0;
 				}
 			}
 			else {
@@ -326,16 +329,22 @@ gint main_window_key_press_event(GtkWidget   *widget,
 		}
 		else if ((event->state & GDK_CONTROL_MASK)==GDK_CONTROL_MASK && ((event->keyval == GDK_F2)))	{
 			///add a marker
+			//bugfix:segfault if type=TABHELP
+			if (main_window.current_editor && main_window.current_editor->type != TAB_HELP) {
 			current_pos = gtk_scintilla_get_current_pos(GTK_SCINTILLA(main_window.current_editor->scintilla));
 			current_line = gtk_scintilla_line_from_position(GTK_SCINTILLA(main_window.current_editor->scintilla), current_pos);
 			mod_marker(current_line);
+			}
 			return TRUE;
 		}
 		else if ((event->keyval == GDK_F2))	{
 			///find next marker
+			//bugfix:segfault if type=TABHELP
+			if (main_window.current_editor && main_window.current_editor->type != TAB_HELP) {
 			current_pos = gtk_scintilla_get_current_pos(GTK_SCINTILLA(main_window.current_editor->scintilla));
 			current_line = gtk_scintilla_line_from_position(GTK_SCINTILLA(main_window.current_editor->scintilla), current_pos);
 			find_next_marker(current_line);
+			}
 			return TRUE;
 		}
 		else if ((event->state & GDK_CONTROL_MASK)==GDK_CONTROL_MASK && (event->keyval == GDK_space) && 
@@ -1138,7 +1147,12 @@ void on_selectall1_activate(GtkWidget *widget)
 {
 	if (main_window.current_editor == NULL)
 		return;
+	if (main_window.current_editor->type == TAB_HELP){
+	//select text in help tab
+	webkit_web_view_select_all (WEBKIT_WEB_VIEW(main_window.current_editor->help_view));
+	} else {
 	gtk_scintilla_select_all(GTK_SCINTILLA(main_window.current_editor->scintilla));
+	}
 }
 
 
@@ -1482,11 +1496,13 @@ gboolean is_valid_digits_only(gchar *text)
 void goto_line_int(gint line)
 {
 	gint current_pos;
-
+	//bugfix: seg fault if not scintilla
+	if (GTK_IS_SCINTILLA(main_window.current_editor->scintilla)){
 	gtk_scintilla_grab_focus(GTK_SCINTILLA(main_window.current_editor->scintilla));
 	gtk_scintilla_goto_line(GTK_SCINTILLA(main_window.current_editor->scintilla), line-1); // seems to be off by one...
 	current_pos = gtk_scintilla_get_current_pos(GTK_SCINTILLA(main_window.current_editor->scintilla));
 	gtk_scintilla_scroll_caret(GTK_SCINTILLA(main_window.current_editor->scintilla));
+	}
 }
 
 
@@ -1532,25 +1548,45 @@ void move_block(gint indentation_size)
 
 void block_indent(GtkWidget *widget)
 {
+//bugfix:segfault if not scintilla
+if (GTK_IS_SCINTILLA(main_window.current_editor->scintilla)){ 
 	move_block(preferences.indentation_size);
+}
 }
 
 
 void block_unindent(GtkWidget *widget)
 {
+//bugfix:segfault if not scintilla
+if (GTK_IS_SCINTILLA(main_window.current_editor->scintilla)){ 
 	move_block(0-preferences.indentation_size);
+}
 }
 //zoom in
 
 void zoom_in(GtkWidget *widget)
 {
-gtk_scintilla_zoom_in(GTK_SCINTILLA(main_window.current_editor->scintilla));
+//bugfix:segfault if not scintilla
+if (GTK_IS_SCINTILLA(main_window.current_editor->scintilla)){ 
+	gtk_scintilla_zoom_in(GTK_SCINTILLA(main_window.current_editor->scintilla));
+	}else{
+	if (WEBKIT_IS_WEB_VIEW(main_window.current_editor->help_view)){
+        	webkit_web_view_zoom_in (main_window.current_editor->help_view);
+	}
+	}
 }
 
 //zoom out
 void zoom_out(GtkWidget *widget)
 {
-gtk_scintilla_zoom_out(GTK_SCINTILLA(main_window.current_editor->scintilla));
+//bugfix:segfault if not scintilla
+if (GTK_IS_SCINTILLA(main_window.current_editor->scintilla)){
+	gtk_scintilla_zoom_out(GTK_SCINTILLA(main_window.current_editor->scintilla));
+	} else {
+	if (WEBKIT_IS_WEB_VIEW(main_window.current_editor->help_view)){
+        	webkit_web_view_zoom_out (main_window.current_editor->help_view);
+	}
+	}
 }
 
 //add marker
@@ -1568,14 +1604,19 @@ gtk_scintilla_marker_delete(GTK_SCINTILLA(main_window.current_editor->scintilla)
 }
 //add/delete a marker
 void mod_marker(int line){
+//bugfix:segfault if not scintilla
+if (GTK_IS_SCINTILLA(main_window.current_editor->scintilla)){
 	if (gtk_scintilla_marker_get(GTK_SCINTILLA(main_window.current_editor->scintilla),line)!=2){
 	add_marker(line);
 	}else{
 	delete_marker(line);
 	}
 }
+}
 //circle markers
 void find_next_marker(line_start){
+//bugfix:segfault if not scintilla
+if (GTK_IS_SCINTILLA(main_window.current_editor->scintilla)){
 gint line;
 //skip the current line
 line= gtk_scintilla_marker_next(GTK_SCINTILLA(main_window.current_editor->scintilla),line_start + 1, 2);
@@ -1593,6 +1634,7 @@ line= gtk_scintilla_marker_next(GTK_SCINTILLA(main_window.current_editor->scinti
 	//goto the marker posicion
 	goto_line_int(line+1);
 	}
+}
 }
 
 void syntax_check(GtkWidget *widget)
