@@ -10,8 +10,12 @@
 
 #if PLAT_WIN
 #define EXT_LEXER_DECL __stdcall
-#elif PLAT_GTK
-#define EXT_LEXER_DECL 
+#else
+#define EXT_LEXER_DECL
+#endif
+
+#ifdef SCI_NAMESPACE
+namespace Scintilla {
 #endif
 
 // External Lexer function definitions...
@@ -37,7 +41,7 @@ public:
 		const char *languageName_=0, LexerFunction fnFolder_=0) : LexerModule(language_, fnLexer_, 0, fnFolder_){
 		strncpy(name, languageName_, sizeof(name));
 		languageName = name;
-	}
+	};
 	virtual void Lex(unsigned int startPos, int lengthDoc, int initStyle,
 					WordList *keywordlists[], Accessor &styler) const;
 	virtual void Fold(unsigned int startPos, int lengthDoc, int initStyle,
@@ -64,7 +68,7 @@ public:
 	void Release();
 	
 	LexerLibrary	*next;
-	SString			m_sModuleName;
+	std::string			m_sModuleName;
 };
 
 /// LexerManager manages external lexers, contains LexerLibrarys.
@@ -91,5 +95,9 @@ class LMMinder {
 public:
 	~LMMinder();
 };
+
+#ifdef SCI_NAMESPACE
+}
+#endif
 
 #endif

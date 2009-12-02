@@ -324,6 +324,20 @@ gint main_window_key_press_event(GtkWidget   *widget,
 			template_find_and_insert();
 			return TRUE;
 		}
+		else if ((event->state & GDK_CONTROL_MASK)==GDK_CONTROL_MASK && ((event->keyval == GDK_F2)))	{
+			///add a marker
+			current_pos = gtk_scintilla_get_current_pos(GTK_SCINTILLA(main_window.current_editor->scintilla));
+			current_line = gtk_scintilla_line_from_position(GTK_SCINTILLA(main_window.current_editor->scintilla), current_pos);
+			mod_marker(current_line);
+			return TRUE;
+		}
+		else if ((event->keyval == GDK_F2))	{
+			///find next marker
+			current_pos = gtk_scintilla_get_current_pos(GTK_SCINTILLA(main_window.current_editor->scintilla));
+			current_line = gtk_scintilla_line_from_position(GTK_SCINTILLA(main_window.current_editor->scintilla), current_pos);
+			find_next_marker(current_line);
+			return TRUE;
+		}
 		else if ((event->state & GDK_CONTROL_MASK)==GDK_CONTROL_MASK && (event->keyval == GDK_space) && 
 				 (main_window.current_editor->type != TAB_HELP)) {
 			current_pos = gtk_scintilla_get_current_pos(GTK_SCINTILLA(main_window.current_editor->scintilla));
@@ -479,23 +493,97 @@ void on_openselected1_activate(GtkWidget *widget)
 		}
 	}
 }
+void add_file_filters(GtkFileChooser *chooser){
+	//store file filter
+        GtkFileFilter *filter;
+	//creates a new file filter
+	filter = gtk_file_filter_new ();
+	gtk_file_filter_set_name (filter, _("PHP files (*.php *.inc)"));
+	//add a pattern to the filter
+        gtk_file_filter_add_pattern(filter, "*.php");
+        gtk_file_filter_add_pattern(filter, "*.inc");
+	gtk_file_chooser_add_filter (GTK_FILE_CHOOSER (chooser),
+				     filter);
+	//set default filter to the dialog
+	gtk_file_chooser_set_filter (GTK_FILE_CHOOSER (chooser),
+				     filter);
 
+	filter = gtk_file_filter_new ();
+	gtk_file_filter_set_name (filter, _("HTML files (*.html *.htm *.xhtml)"));
+        gtk_file_filter_add_pattern(filter, "*.html");
+        gtk_file_filter_add_pattern(filter, "*.htm");
+        gtk_file_filter_add_pattern(filter, "*.xhtml");
+	gtk_file_chooser_add_filter (GTK_FILE_CHOOSER (chooser),
+				     filter);
+	filter = gtk_file_filter_new ();
+	gtk_file_filter_set_name (filter, _("XML files (*.xml)"));
+        gtk_file_filter_add_pattern(filter, "*.xml");
+	gtk_file_chooser_add_filter (GTK_FILE_CHOOSER (chooser),
+				     filter);
+	filter = gtk_file_filter_new ();
+	gtk_file_filter_set_name (filter, _("Stylesheet files (*.css)"));
+        gtk_file_filter_add_pattern(filter, "*.css");
+	gtk_file_chooser_add_filter (GTK_FILE_CHOOSER (chooser),
+				     filter);
+	filter = gtk_file_filter_new ();
+	gtk_file_filter_set_name (filter, _("SQL files (*.sql)"));
+        gtk_file_filter_add_pattern(filter, "*.sql");
+	gtk_file_chooser_add_filter (GTK_FILE_CHOOSER (chooser),
+				     filter);
+	filter = gtk_file_filter_new ();
+	gtk_file_filter_set_name (filter, _("Javascript files (*.js)"));
+        gtk_file_filter_add_pattern(filter, "*.js");
+	gtk_file_chooser_add_filter (GTK_FILE_CHOOSER (chooser),
+				     filter);			
+	filter = gtk_file_filter_new ();
+	gtk_file_filter_set_name (filter, _("C/C++ files (*.c *.h *.cpp *.hh *.cc)"));
+        gtk_file_filter_add_pattern(filter, "*.c");
+        gtk_file_filter_add_pattern(filter, "*.h");
+        gtk_file_filter_add_pattern(filter, "*.cxx");
+        gtk_file_filter_add_pattern(filter, "*.cpp");
+        gtk_file_filter_add_pattern(filter, "*.cc");
+        gtk_file_filter_add_pattern(filter, "*.hxx");
+        gtk_file_filter_add_pattern(filter, "*.hh");
+	gtk_file_chooser_add_filter (GTK_FILE_CHOOSER (chooser),
+				     filter);
+	filter = gtk_file_filter_new ();
+	gtk_file_filter_set_name (filter, _("Perl Files (*.pl *.ph *.pm)"));
+        gtk_file_filter_add_pattern(filter, "*.pl");
+        gtk_file_filter_add_pattern(filter, "*.ph");
+        gtk_file_filter_add_pattern(filter, "*.pm");
+
+	gtk_file_chooser_add_filter (GTK_FILE_CHOOSER (chooser),
+				     filter);
+	filter = gtk_file_filter_new ();
+	gtk_file_filter_set_name (filter, _("Python Files (*.py *.pyd *.pyw)"));
+        gtk_file_filter_add_pattern(filter, "*.py");
+        gtk_file_filter_add_pattern(filter, "*.pyd");
+        gtk_file_filter_add_pattern(filter, "*.pyw");
+
+	gtk_file_chooser_add_filter (GTK_FILE_CHOOSER (chooser),
+				     filter);
+	/* generic filter */
+	filter = gtk_file_filter_new ();
+	gtk_file_filter_set_name (filter, _("All files"));
+        gtk_file_filter_add_pattern(filter, "*");
+	gtk_file_chooser_add_filter (GTK_FILE_CHOOSER (chooser),
+				     filter);
+}
 void on_open1_activate(GtkWidget *widget)
 {
 	GtkWidget *file_selection_box;
 	GString *folder;
 	gchar *last_opened_folder;
-
 	// Create the selector widget
 	file_selection_box = gtk_file_chooser_dialog_new("Please select files for editing", GTK_WINDOW(main_window.window),
 		GTK_FILE_CHOOSER_ACTION_OPEN, GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL, GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT, NULL);
 	
 	gtk_file_chooser_set_local_only (GTK_FILE_CHOOSER(file_selection_box), FALSE);
 	gtk_dialog_set_default_response (GTK_DIALOG(file_selection_box), GTK_RESPONSE_ACCEPT);	
-	
+	//Add filters to the open dialog
+	add_file_filters(GTK_FILE_CHOOSER(file_selection_box));
 	last_opened_folder = gnome_config_get_string("gPHPEdit/general/last_opened_folder=NOTFOUND");
 	if (DEBUG_MODE) { g_print("DEBUG: main_window_callbacks.c:on_open1_activate:last_opened_folder: %s\n", last_opened_folder); }
-	
 	/* opening of multiple files at once */
 	gtk_file_chooser_set_select_multiple(GTK_FILE_CHOOSER(file_selection_box), TRUE);
 	
@@ -656,7 +744,7 @@ void on_save_as1_activate(GtkWidget *widget)
 		file_selection_box = gtk_file_chooser_dialog_new (_("Please type the filename to save as..."), 
 			GTK_WINDOW(main_window.window), GTK_FILE_CHOOSER_ACTION_SAVE, GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
 			GTK_STOCK_SAVE, GTK_RESPONSE_ACCEPT, NULL);
-
+		
 		gtk_file_chooser_set_local_only (GTK_FILE_CHOOSER(file_selection_box), FALSE);
 		gtk_file_chooser_set_do_overwrite_confirmation (GTK_FILE_CHOOSER(file_selection_box), TRUE);
 		gtk_dialog_set_default_response (GTK_DIALOG(file_selection_box), GTK_RESPONSE_ACCEPT);
@@ -943,7 +1031,7 @@ void on_cut1_activate(GtkWidget *widget)
 	}
 	//gtk_scintilla_cut(GTK_SCINTILLA(main_window.current_editor->scintilla));
 }
-
+/*
 static gchar *gtkhtml2_selection_get_text (HtmlView *view)
 {
 	GSList *list = view->sel_list;
@@ -957,9 +1045,9 @@ static gchar *gtkhtml2_selection_get_text (HtmlView *view)
 		HtmlBoxText *text = HTML_BOX_TEXT (list->data);
 
 		list = list->next;
-		/*
-		 * Some boxes may not have any text
-		 */
+		//
+		// Some boxes may not have any text
+		//
 		if (text->canon_text == NULL)
 			continue;
 		switch (text->selection) {
@@ -987,7 +1075,7 @@ static gchar *gtkhtml2_selection_get_text (HtmlView *view)
 	g_string_free (str, FALSE);
 	return ptr;
 }
-
+*/
 void on_copy1_activate(GtkWidget *widget)
 {
 	gint wordStart;
@@ -999,9 +1087,10 @@ void on_copy1_activate(GtkWidget *widget)
 		return;
 	
 	if (main_window.current_editor->type == TAB_HELP) {
-		buffer = gtkhtml2_selection_get_text(HTML_VIEW(main_window.current_editor->help_view));
-		gtk_clipboard_set_text(main_window.clipboard, buffer, 1);
-		g_free(buffer);
+		//buffer = gtkhtml2_selection_get_text(HTML_VIEW(main_window.current_editor->help_view));
+		//gtk_clipboard_set_text(main_window.clipboard, buffer, 1);
+		//g_free(buffer);
+		 webkit_web_view_copy_clipboard (WEBKIT_WEB_VIEW(main_window.current_editor->help_view));
 	}
 	else {
 		wordStart = gtk_scintilla_get_selection_start(GTK_SCINTILLA(main_window.current_editor->scintilla));
@@ -1450,7 +1539,60 @@ void block_unindent(GtkWidget *widget)
 {
 	move_block(0-preferences.indentation_size);
 }
+//zoom in
 
+void zoom_in(GtkWidget *widget)
+{
+gtk_scintilla_zoom_in(GTK_SCINTILLA(main_window.current_editor->scintilla));
+}
+
+//zoom out
+void zoom_out(GtkWidget *widget)
+{
+gtk_scintilla_zoom_out(GTK_SCINTILLA(main_window.current_editor->scintilla));
+}
+
+//add marker
+void add_marker(int line)
+{
+gtk_scintilla_marker_define(GTK_SCINTILLA(main_window.current_editor->scintilla), 1, SC_MARK_SHORTARROW);
+gtk_scintilla_marker_set_back(GTK_SCINTILLA(main_window.current_editor->scintilla), 1, 101);
+gtk_scintilla_marker_set_fore(GTK_SCINTILLA(main_window.current_editor->scintilla), 1, 101);
+gtk_scintilla_marker_add(GTK_SCINTILLA(main_window.current_editor->scintilla), line, 1);
+}
+//delete marker
+void delete_marker(int line)
+{
+gtk_scintilla_marker_delete(GTK_SCINTILLA(main_window.current_editor->scintilla), line, 1);
+}
+//add/delete a marker
+void mod_marker(int line){
+	if (gtk_scintilla_marker_get(GTK_SCINTILLA(main_window.current_editor->scintilla),line)!=2){
+	add_marker(line);
+	}else{
+	delete_marker(line);
+	}
+}
+//circle markers
+void find_next_marker(line_start){
+gint line;
+//skip the current line
+line= gtk_scintilla_marker_next(GTK_SCINTILLA(main_window.current_editor->scintilla),line_start + 1, 2);
+	if (line==-1){
+		//no markers in that direccion, we should go back to the first line
+		line= gtk_scintilla_marker_next(GTK_SCINTILLA(main_window.current_editor->scintilla),0, 2);
+		if (line!=-1){
+		//go back to the first marker
+		//bugfix the maker is in the next line
+		goto_line_int(line+1);
+		}else{	
+		g_print("No marker found\n");
+		}
+	}else{
+	//goto the marker posicion
+	goto_line_int(line+1);
+	}
+}
 
 void syntax_check(GtkWidget *widget)
 {

@@ -47,7 +47,11 @@ typedef struct
 	GtkWidget *toolbar_main_button_paste;
 	GtkWidget *toolbar_main_button_find;
 	GtkWidget *toolbar_main_button_replace;
-
+	GtkToolItem *toolbar_separator;
+	GtkWidget *toolbar_main_button_indent;
+	GtkWidget *toolbar_main_button_unindent;
+	GtkWidget *toolbar_main_button_zoom_in;
+	GtkWidget *toolbar_main_button_zoom_out;
 	GtkWidget *toolbar_find;
 	GtkWidget *toolbar_find_search_label;
 	GtkWidget *toolbar_find_search_entry;
@@ -71,7 +75,10 @@ typedef struct
 	GtkTreeSelection *lint_select;
 
 	Editor *current_editor;
-
+	//widget for close side bar button
+	GtkWidget *close_image;
+	GtkWidget *close_sidebar_button;
+	
 	//Checkbox above treeview to parse only the current tab	
 	GtkWidget *chkOnlyCurFileFuncs;
 

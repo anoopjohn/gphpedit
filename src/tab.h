@@ -32,12 +32,12 @@
 //#include <libgtkhtml/graphics/htmlpainter.h>
 //#include <libgtkhtml/layout/htmlbox.h>
 //#include <libgtkhtml/view/htmlview.h>
-#include <libgtkhtml/gtkhtml.h>
+//#include <libgtkhtml/gtkhtml.h>
 #include <libgnomevfs/gnome-vfs.h>
 
 #include "main.h"
 #include "classbrowser.h"
-
+#include <webkit/webkit.h> 
 
 #define TAB_FILE 1
 #define TAB_PHP 2
@@ -55,8 +55,9 @@ typedef struct
 	GSList components;
 	GtkWidget *scintilla;
 	GtkWidget *help_scrolled_window;
-	HtmlDocument *help_document;
-	GtkWidget *help_view;
+//	HtmlDocument *help_document;
+//	GtkWidget *help_view;
+	WebKitWebView *help_view;
 	gint scintilla_id;
 	gint file_mtime; // TODO: Change from a gint to something more meaningful
 	GString *filename;

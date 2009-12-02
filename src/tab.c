@@ -96,7 +96,9 @@ void tab_set_general_scintilla_properties(Editor *editor)
 	gtk_signal_connect (GTK_OBJECT (editor->scintilla), "save_point_left", GTK_SIGNAL_FUNC (save_point_left), NULL);
 	gtk_signal_connect (GTK_OBJECT (editor->scintilla), "macro_record", GTK_SIGNAL_FUNC (macro_record), NULL);
 
-	gtk_scintilla_set_sel_back(GTK_SCINTILLA(editor->scintilla), 1, 13434879);
+	//gtk_scintilla_set_sel_back(GTK_SCINTILLA(editor->scintilla), 1, 13434879);
+gtk_scintilla_set_sel_back(GTK_SCINTILLA(editor->scintilla), 1, gnome_config_get_int ("gPHPEdit/default_style/selection=11250603"));
+
 
 	tab_set_configured_scintilla_properties(GTK_SCINTILLA(editor->scintilla), preferences);
 	gtk_widget_show (editor->scintilla);
@@ -184,6 +186,10 @@ static void tab_set_folding(Editor *editor, gint folding)
 		
 		gtk_scintilla_set_margin_width_n (GTK_SCINTILLA(editor->scintilla), 2, 14);
 		
+		//makers margin settings
+		gtk_scintilla_set_margin_type_n(GTK_SCINTILLA(main_window.current_editor->scintilla), 1, SC_MARGIN_SYMBOL);
+		gtk_scintilla_set_margin_width_n (GTK_SCINTILLA(main_window.current_editor->scintilla), 1, 14);
+		gtk_scintilla_set_margin_sensitive_n(GTK_SCINTILLA(main_window.current_editor->scintilla), 1, 1);
 		//gtk_signal_connect (GTK_OBJECT (editor->scintilla), "fold_clicked", GTK_SIGNAL_FUNC (fold_clicked), NULL);
 		gtk_signal_connect (GTK_OBJECT (editor->scintilla), "modified", GTK_SIGNAL_FUNC (handle_modified), NULL);
 		gtk_signal_connect (GTK_OBJECT (editor->scintilla), "margin_click", GTK_SIGNAL_FUNC (margin_clicked), NULL);
@@ -460,11 +466,11 @@ void tab_help_load_file(Editor *editor, GString *filename)
 	nchars = fread (buffer, 1, size, fp);
 	
 	if (size != nchars) g_warning (_("File size and loaded size not matching"));
-	
-	html_document_clear(editor->help_document);
-	html_document_open_stream(editor->help_document, "text/html");
-	html_document_write_stream(editor->help_document, buffer, nchars);
-	html_document_close_stream(editor->help_document);
+	webkit_web_view_load_string (WEBKIT_WEB_VIEW(editor->help_view),buffer,"text/html", "UTF-8", filename);
+	//html_document_clear(editor->help_document);
+	//html_document_open_stream(editor->help_document, "text/html");
+	//html_document_write_stream(editor->help_document, buffer, nchars);
+	//html_document_close_stream(editor->help_document);
  
 	g_free (buffer);
 	fclose (fp);
@@ -498,9 +504,9 @@ GString *tab_help_try_filename(gchar *prefix, gchar *command, gchar *suffix)
 	
 	long_filename = g_string_new(command);
 	long_filename = g_string_prepend(long_filename, prefix);
-	if (suffix) {
-		long_filename = g_string_append(long_filename, suffix);
-	}
+	//if (suffix) {
+	//	long_filename = g_string_append(long_filename, suffix);
+	//}
 	if (DEBUG_MODE) { g_print("DEBUG: tab.c:tab_help_try_filename:long_filename->str: %s\n", long_filename->str); }
 	if (g_file_exists(long_filename->str)) {
 		return long_filename;
@@ -593,21 +599,69 @@ GString *tab_help_find_helpfile(gchar *command)
 
 	g_print(_("Help for function not found: %s\n"), command);
 	
-	return NULL;
+	return long_filename;
+}
+//return a substring skip n char from str
+void substring(char *str, char *subst, int start, int lenght)
+{
+int i;
+
+for(i=0; i<lenght && start+i<strlen(str); i++)
+subst[i] = str[start+i];
+
+subst[i] = '\0';
+} 
+
+static void webkit_link_clicked (WebKitWebView *view, WebKitWebFrame *frame, WebKitNetworkRequest *request,Editor *editor)
+{
+g_signal_stop_emission_by_name (WEBKIT_WEB_VIEW (view), "navigation-requested");
+gchar *uri=webkit_network_request_get_uri(request);
+if (uri){
+GString *filename;
+if( strstr(uri, "#")!=NULL){
+// it's a direction like filename.html#refpoint
+char *resp;
+int cant;
+resp = strchr(uri,'#');
+cant=resp-uri; //len filename without refpoint
+substring(uri, uri, 0, cant); //skips refpoint part
+}
+filename=tab_help_find_helpfile(uri);
+if (filename) {
+		//editor = editor_find_from_help((HtmlDocument *)obj);
+		tab_help_load_file(editor, filename);
+		
+		g_string_free(editor->filename, TRUE);
+		
+		editor->filename = g_string_new(filename->str);
+		editor->filename = g_string_prepend(editor->filename, _("Help: "));
+		
+		//TODO: These strings are not being freed. The app crashes when the free
+		//is uncommented stating that there were duplicate free calls.
+		//g_free(editor->short_filename);
+		//g_free(editor->help_function);
+		editor->short_filename = g_strconcat("Help: ", uri, NULL);
+		editor->help_function = g_strdup(uri);
+		
+		gtk_label_set_text(GTK_LABEL(editor->label), editor->short_filename);
+		
+		update_app_title();
+	}
+}
 }
 
-
-static void tab_help_link_clicked(GObject *obj, const gchar *url)
+/* 
+static void tab_help_link_clicked(GObject *obj, const gchar *url,Editor *editor)
 {
-	Editor *editor;
+
 	GString *filename;
 
 	filename = tab_help_find_helpfile((gchar *)url);
-	
+	g_print("file::%s",filename);
 	if (filename) {
-		editor = editor_find_from_help((HtmlDocument *)obj);
+		//editor = editor_find_from_help((HtmlDocument *)obj);
 		tab_help_load_file(editor, filename);
-
+		
 		g_string_free(editor->filename, TRUE);
 		
 		editor->filename = g_string_new(filename->str);
@@ -625,7 +679,7 @@ static void tab_help_link_clicked(GObject *obj, const gchar *url)
 		update_app_title();
 	}
 }
-
+*/
 
 gboolean tab_create_help(Editor *editor, GString *filename)
 {
@@ -652,20 +706,23 @@ gboolean tab_create_help(Editor *editor, GString *filename)
 		editor->is_untitled = FALSE;
 		editor->saved = TRUE;
 		gtk_widget_show (editor->label);
-	
-		editor->help_document = html_document_new();
-		editor->help_view = html_view_new();
+		editor->help_view= WEBKIT_WEB_VIEW(webkit_web_view_new ());
+//		editor->help_document = html_document_new();
+		//editor->help_view = html_view_new();
 		editor->help_scrolled_window = gtk_scrolled_window_new(NULL, NULL);
-		gtk_container_add(GTK_CONTAINER(editor->help_scrolled_window), editor->help_view);
+		gtk_container_add(GTK_CONTAINER(editor->help_scrolled_window), GTK_WIDGET(editor->help_view));
 	
 		tab_help_load_file(editor, long_filename);
 		
 		//debug("%s - %s", long_filename, caption->str);
-	
-		g_signal_connect(G_OBJECT(editor->help_document), "link-clicked",
-			 G_CALLBACK(tab_help_link_clicked), NULL);
 
-		html_view_set_document(HTML_VIEW(editor->help_view), editor->help_document);
+		g_signal_connect(G_OBJECT(editor->help_view), "navigation-requested",
+			 G_CALLBACK(webkit_link_clicked),editor);
+
+//		g_signal_connect(G_OBJECT(editor->help_document), "link-clicked",
+//			 G_CALLBACK(tab_help_link_clicked), NULL);
+
+//		html_view_set_document(HTML_VIEW(editor->help_view), editor->help_document);
 		gtk_widget_show_all(editor->help_scrolled_window);
 		
 		editor_tab = get_close_tab_widget(editor);
@@ -766,7 +823,7 @@ gboolean is_php_file(Editor *editor)
 		gtk_scintilla_get_text(GTK_SCINTILLA(editor->scintilla), text_length+1, buffer);
 		lines = g_strsplit(buffer, "\n", 10);
 		if (!lines[0])
-			return;
+			return is_php;
 		if (lines[0][0] == '#' && lines[0][1] == '!' && strstr(lines[0], "php") != NULL) {
 			is_php = TRUE;
 		}
@@ -1157,14 +1214,14 @@ GtkWidget *get_close_tab_widget(Editor *editor) {
 
 	hbox = gtk_hbox_new(FALSE, 0);
 	image = gtk_image_new_from_stock(GTK_STOCK_CLOSE, GTK_ICON_SIZE_MENU);
-	gtk_misc_set_padding(image, 0, 0);
+	gtk_misc_set_padding(GTK_MISC(image), 0, 0);
 	gtk_container_set_border_width(GTK_CONTAINER(hbox), 0);
 	close_button = gtk_button_new();
 	gtk_widget_set_tooltip_text(close_button, "Close Tab");
 
-	gtk_button_set_image(close_button, image);
-	gtk_button_set_relief(close_button, GTK_RELIEF_NONE);
-	gtk_button_set_focus_on_click(close_button, FALSE);
+	gtk_button_set_image(GTK_BUTTON(close_button), image);
+	gtk_button_set_relief(GTK_BUTTON(close_button), GTK_RELIEF_NONE);
+	gtk_button_set_focus_on_click(GTK_BUTTON(close_button), FALSE);
 
 	rcstyle = gtk_rc_style_new ();
 	rcstyle->xthickness = rcstyle->ythickness = 0;
@@ -1206,13 +1263,14 @@ Editor *editor_find_from_help(void *help)
 	for (walk = editors; walk != NULL; walk = g_slist_next (walk)) {
 		editor = walk->data;
 		//if (((void *)(editor->help_document) == (void *)help) || ((void *)(editor->help_scrolled_window) == (void *)help)) {
-		if ((void *)(editor->help_document) == help || (void *)(editor->help_scrolled_window == help)) {
+		if ((void *)(editor->help_view) == help || (void *)(editor->help_scrolled_window == help)) {
 			return walk->data;
 		}
 	}
 
 	return NULL;
 }
+
 
 static void save_point_reached(GtkWidget *scintilla)
 {
@@ -1370,6 +1428,7 @@ void handle_modified(GtkWidget *scintilla, gint pos,gint mtype,gchar *text,gint 
 
 void margin_clicked (GtkWidget *scintilla, gint modifiers, gint position, gint margin)
 {
+if(margin!=1){
 	gint line;
 	
 	line = gtk_scintilla_line_from_position(GTK_SCINTILLA(scintilla), position);
@@ -1377,6 +1436,12 @@ void margin_clicked (GtkWidget *scintilla, gint modifiers, gint position, gint m
 	if (preferences.show_folding && margin == 2) {
 		fold_clicked(scintilla, line, modifiers);
 	}
+}else{
+	gint line;
+	line = gtk_scintilla_line_from_position(GTK_SCINTILLA(scintilla), position);
+//	add_marker(current_line);
+	mod_marker(line);
+}
 }
 
 

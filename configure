@@ -20059,20 +20059,20 @@ fi
 	gtk+-2.0
 	libgnomeui-2.0
 	gnome-vfs-2.0
-	libgtkhtml-2.0
+	webkit-1.0
 	" >&5
 echo $ECHO_N "checking for
 	gtk+-2.0
 	libgnomeui-2.0
 	gnome-vfs-2.0
-	libgtkhtml-2.0
+	webkit-1.0
 	... $ECHO_C" >&6; }
 
         if $PKG_CONFIG --exists "
 	gtk+-2.0
 	libgnomeui-2.0
 	gnome-vfs-2.0
-	libgtkhtml-2.0
+	webkit-1.0
 	" ; then
             { echo "$as_me:$LINENO: result: yes" >&5
 echo "${ECHO_T}yes" >&6; }
@@ -20084,7 +20084,7 @@ echo $ECHO_N "checking GPHPEDIT_CFLAGS... $ECHO_C" >&6; }
 	gtk+-2.0
 	libgnomeui-2.0
 	gnome-vfs-2.0
-	libgtkhtml-2.0
+	webkit-1.0
 	"`
             { echo "$as_me:$LINENO: result: $GPHPEDIT_CFLAGS" >&5
 echo "${ECHO_T}$GPHPEDIT_CFLAGS" >&6; }
@@ -20095,7 +20095,7 @@ echo $ECHO_N "checking GPHPEDIT_LIBS... $ECHO_C" >&6; }
 	gtk+-2.0
 	libgnomeui-2.0
 	gnome-vfs-2.0
-	libgtkhtml-2.0
+	webkit-1.0
 	"`
             { echo "$as_me:$LINENO: result: $GPHPEDIT_LIBS" >&5
 echo "${ECHO_T}$GPHPEDIT_LIBS" >&6; }
@@ -20108,7 +20108,7 @@ echo "${ECHO_T}$GPHPEDIT_LIBS" >&6; }
 	gtk+-2.0
 	libgnomeui-2.0
 	gnome-vfs-2.0
-	libgtkhtml-2.0
+	webkit-1.0
 	"`
             echo $GPHPEDIT_PKG_ERRORS
         fi
@@ -20128,13 +20128,13 @@ echo "${ECHO_T}$GPHPEDIT_LIBS" >&6; }
 	gtk+-2.0
 	libgnomeui-2.0
 	gnome-vfs-2.0
-	libgtkhtml-2.0
+	webkit-1.0
 	) not met; consider adjusting the PKG_CONFIG_PATH environment variable if your libraries are in a nonstandard prefix so pkg-config can find them." >&5
 echo "$as_me: error: Library requirements (
 	gtk+-2.0
 	libgnomeui-2.0
 	gnome-vfs-2.0
-	libgtkhtml-2.0
+	webkit-1.0
 	) not met; consider adjusting the PKG_CONFIG_PATH environment variable if your libraries are in a nonstandard prefix so pkg-config can find them." >&2;}
    { (exit 1); exit 1; }; }
   fi

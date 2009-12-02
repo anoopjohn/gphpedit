@@ -1,3 +1,18 @@
+2009-11-28  Rostagno Jose <joserostagno at hotmail.com>
+          * New Feature - Added Bookmarks
+	  * Fixed Bug - Remove gtkhtml2 dependency, now uses webkit
+	
+2009-11-27  Rostagno Jose <joserostagno at hotmail.com>
+
+          * Updated toolbar code with the new gtk+ functions
+          * New Feature - Added indent/unindent buttons to the main toolbar
+          * New Feature - Added zoom-in/zoom-out buttons to the main toolbar
+          * Fixed bug - The last line of text block is not indented.
+          * New Feature - Added file filters to the open file dialog
+	  * Fixed Bug - Highlight colour in ubuntu. 
+	    Bug reported at https://bugs.launchpad.net/ubuntu/+source/gphpedit/+bug/73310
+	  * Added a close button [x] for side bar
+
 2009-02-22  Anoop John <anoop.john at zyxware.com>
 
           * Moved gphpedit sources to GPLv3
