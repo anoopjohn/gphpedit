@@ -627,7 +627,8 @@ GString *get_differing_part_editor(Editor *editor)
 void update_app_title(void)
 {
 	GString *title;
-	GString *dir;
+//	GString *dir;
+	gchar *dir;
 	//debug("Function called");
 	if (main_window.current_editor != NULL) {
 		//debug("Not null");
