@@ -1349,9 +1349,8 @@ void fold_expand(GtkWidget *scintilla, gint line, gboolean doExpand, gboolean fo
 	
 	lineMaxSubord = gtk_scintilla_get_last_child(GTK_SCINTILLA(scintilla), line, level & SC_FOLDLEVELNUMBERMASK);
 
-	line++;
-
 	while (line <= lineMaxSubord) {
+		line++;
 		if (force) {
 			if (visLevels > 0) {
 				gtk_scintilla_show_lines(GTK_SCINTILLA(scintilla), line, line);
