@@ -98,7 +98,6 @@ gboolean channel_pass_filename_callback(GIOChannel *source, GIOCondition conditi
 
 
 
-
 /*void main_window_create_unix_socket(void)
 {
 	struct sockaddr_un name;
@@ -154,7 +153,6 @@ void force_config_folder(void)
 
 static void main_window_create_toolbars(void)
 {
-	//updated toolbar code with the new gtk+ functions
 	// Create the Main Toolbar
 	main_window.toolbar_main = gtk_toolbar_new ();
 	gtk_widget_show (main_window.toolbar_main);
@@ -369,7 +367,6 @@ static void main_window_create_appbar(void)
 	gnome_app_set_statusbar (GNOME_APP (main_window.window), main_window.appbar);
 }
 
-
 static void main_window_create_panes(void)
 {
 	main_window.main_vertical_pane = gtk_vpaned_new ();
@@ -386,26 +383,29 @@ static void main_window_create_panes(void)
 		classbrowser_hide();
 }
 
-
 static void main_window_fill_panes(void)
 {
 	GtkWidget *box;
 	GtkWidget *box2;
-	GtkWidget *chkOnlyCurFileFuncs;
 	GtkCellRenderer *renderer;
 	GtkTreeViewColumn *column;
-
+	gint pos;
 	//Commented out as panes aren't used yet AJ 2003-01-21 TODO: replace old style code with new main_window.* code
-	/*notebook_manager = gtk_notebook_new ();
-	gtk_widget_show (notebook_manager);
-	gtk_paned_pack1 (GTK_PANED (hpaned1), notebook_manager, FALSE, TRUE);
-	gtk_notebook_set_tab_pos (GTK_NOTEBOOK (notebook_manager), GTK_POS_BOTTOM);
-	gtk_widget_set_usize(notebook_manager,200,400);*/
-
+	GtkWidget *notebook_manager;
+	notebook_manager = gtk_notebook_new ();
+	main_window.notebook_manager= gtk_notebook_new ();
+	gtk_notebook_set_tab_pos (GTK_NOTEBOOK (main_window.notebook_manager), GTK_POS_BOTTOM);
+	gtk_widget_set_usize(main_window.notebook_manager,200,400);
+	gtk_widget_show (main_window.notebook_manager);
 	box = gtk_vbox_new(FALSE, 0);
 	gtk_widget_show(box);
-	gtk_paned_pack1 (GTK_PANED (main_window.main_horizontal_pane), box, FALSE, TRUE);
-	
+//	gtk_paned_pack1 (GTK_PANED (main_window.main_horizontal_pane), box, FALSE, TRUE);
+	gtk_paned_pack1 (GTK_PANED (main_window.main_horizontal_pane), main_window.notebook_manager, FALSE, TRUE);
+
+	main_window.classlabel = gtk_label_new ("Class Browser");
+	gtk_widget_show(main_window.classlabel);
+	pos=gtk_notebook_insert_page (GTK_NOTEBOOK(main_window.notebook_manager), box, main_window.classlabel, 0);
+
 	//add checkbox to show only current file's classes
 	//the signals to be checked for the check box are onclick of the checkbox 
 	//and the on change of the file.
@@ -423,13 +423,13 @@ static void main_window_fill_panes(void)
 	gtk_signal_connect(GTK_OBJECT(main_window.close_sidebar_button), "clicked", G_CALLBACK (classbrowser_show_hide),NULL);
 	gtk_widget_show(main_window.close_image);
 	gtk_widget_show(main_window.close_sidebar_button);
+	gtk_box_pack_end(GTK_BOX(hbox), main_window.close_sidebar_button, FALSE, FALSE, 0);
+	gtk_widget_show(hbox);
 	//
 	main_window.chkOnlyCurFileFuncs = gtk_check_button_new_with_label(_("Parse only current file")); 
 	gtk_widget_show (main_window.chkOnlyCurFileFuncs);
 	gtk_box_pack_start(GTK_BOX(hbox), main_window.chkOnlyCurFileFuncs, FALSE, FALSE, 10);
 //	gtk_box_pack_start(GTK_BOX(box), main_window.chkOnlyCurFileFuncs, FALSE, FALSE, 10);
-	gtk_box_pack_start(GTK_BOX(hbox), main_window.close_sidebar_button, FALSE, FALSE, 0);
-	gtk_widget_show(hbox);	
 	gtk_box_pack_start(GTK_BOX(box), hbox, FALSE, FALSE, 10);
 	g_signal_connect (G_OBJECT (main_window.chkOnlyCurFileFuncs), "clicked",
 						G_CALLBACK (on_parse_current_click), NULL);
@@ -437,7 +437,7 @@ static void main_window_fill_panes(void)
 	main_window.scrolledwindow3 = gtk_scrolled_window_new (NULL, NULL);
 	gtk_widget_show (main_window.scrolledwindow3);
 	gtk_box_pack_start(GTK_BOX(box), main_window.scrolledwindow3, TRUE, TRUE, 0);
-	gtk_paned_pack1 (GTK_PANED (main_window.main_horizontal_pane), main_window.scrolledwindow3, FALSE, TRUE);
+	//gtk_paned_pack1 (GTK_PANED (main_window.main_horizontal_pane), main_window.scrolledwindow3, FALSE, TRUE);
 
 	box2 = gtk_hbox_new(FALSE, 0);
 	gtk_widget_show(box2);
@@ -446,6 +446,7 @@ static void main_window_fill_panes(void)
 	gtk_widget_show(main_window.treeviewlabel);
 	gtk_box_pack_start(GTK_BOX(box2), main_window.treeviewlabel, FALSE, FALSE, 0);
 	gtk_box_pack_end(GTK_BOX(box), box2, FALSE, FALSE, 4);
+	
 	//gtk_container_add (GTK_CONTAINER (notebook_manager), main_window.scrolledwindow3);
 
 	main_window.classtreestore = gtk_tree_store_new (N_COLUMNS, G_TYPE_STRING,
@@ -487,6 +488,8 @@ static void main_window_fill_panes(void)
 	gtk_notebook_set_tab_label (GTK_NOTEBOOK (notebook_manager), gtk_notebook_get_nth_page (GTK_NOTEBOOK (notebook_manager), 2), label3);
 	gtk_label_set_justify (GTK_LABEL (label3), GTK_JUSTIFY_LEFT);
 	*/
+	// file browser code
+	folderbrowser_create(&main_window);
 	main_window.scrolledwindow1 = gtk_scrolled_window_new (NULL, NULL);
 	gtk_paned_pack2 (GTK_PANED (main_window.main_vertical_pane), main_window.scrolledwindow1, FALSE, TRUE);
 

@@ -122,7 +122,7 @@ gint debug(char *formatstring, ...)
 			}
 		}
 	}
-  dlg = gtk_message_dialog_new (main_window.window,
+  dlg = gtk_message_dialog_new (GTK_WINDOW(main_window.window),
                                 GTK_DIALOG_DESTROY_WITH_PARENT,
                                 GTK_MESSAGE_INFO,
                                 GTK_BUTTONS_CLOSE,

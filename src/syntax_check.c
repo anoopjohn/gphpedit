@@ -78,7 +78,7 @@ void syntax_add_lines(gchar *output)
 				line_start += (indent/preferences.indentation_size);
 	
 				line_end = gtk_scintilla_get_line_end_position(GTK_SCINTILLA(main_window.current_editor->scintilla), atoi(line_number)-1);
-	
+			
 				gtk_scintilla_start_styling(GTK_SCINTILLA(main_window.current_editor->scintilla), line_start, 128);
 				gtk_scintilla_set_styling(GTK_SCINTILLA(main_window.current_editor->scintilla), line_end-line_start, INDIC2_MASK);
 			}

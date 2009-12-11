@@ -614,7 +614,7 @@ subst[i] = '\0';
 
 static void webkit_link_clicked (WebKitWebView *view, WebKitWebFrame *frame, WebKitNetworkRequest *request,Editor *editor)
 {
-gchar *uri=webkit_network_request_get_uri(request);
+gchar *uri= (gchar*) webkit_network_request_get_uri(request);
 if (uri){
 GString *filename;
 char *resp;
@@ -1124,8 +1124,7 @@ gboolean tab_create_new(gint type, GString *filename)
 			file_created = TRUE;
 		}
 	}
-	// Don't open a new tab if it is first tab and it is unmodified. Fixed.
-	//close_saved_empty_Untitled();
+	close_saved_empty_Untitled();
 	
 	editor = tab_new_editor();
 	editor->type = type;

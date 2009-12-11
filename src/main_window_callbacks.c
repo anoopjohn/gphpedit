@@ -26,7 +26,6 @@
 #include <config.h>
 #endif
 #include <libgnomevfs/gnome-vfs.h>
-
 #include "main_window_callbacks.h"
 #include "find_replace.h"
 #include "main_window.h"
@@ -87,7 +86,6 @@ void session_save(void)
 	}
 }
 
-
 void session_reopen(void)
 {
 	GString *session_file;
@@ -136,7 +134,7 @@ void session_reopen(void)
 				}
 			}
 			else {
-				switch_to_file_or_open(filename,0);
+                            	switch_to_file_or_open(filename,0);
 				if (focus_this_one && (main_window.current_editor)) {
 					focus_tab = gtk_notebook_page_num(GTK_NOTEBOOK(main_window.notebook_editor),main_window.current_editor->scintilla);
 				}
@@ -147,7 +145,6 @@ void session_reopen(void)
 		
 		fclose(fp);
 		gtk_notebook_set_current_page( GTK_NOTEBOOK(main_window.notebook_editor), focus_tab);
-
 		unlink(session_file->str);
 	}
 }
@@ -262,8 +259,7 @@ gboolean classbrowser_accept_size(GtkPaned *paned, gpointer user_data)
 	return TRUE;
 }
 
-gint main_window_key_press_event(GtkWidget   *widget,
-								 GdkEventKey *event,gpointer user_data)
+gint main_window_key_press_event(GtkWidget   *widget, GdkEventKey *event,gpointer user_data)
 {
 	guint current_pos;
 	guint current_line;
@@ -1654,6 +1650,55 @@ void syntax_check_clear(GtkWidget *widget)
 	gtk_widget_hide(main_window.scrolledwindow1);
 	gtk_widget_hide(main_window.lint_view);
 }
+void pressed_button_file_chooser(GtkButton *widget, gpointer data)
+ {
+
+ 	//GtkWidget *pParent;
+ 	GtkWidget *pFileSelection;
+
+ 	pFileSelection = gtk_file_chooser_dialog_new("Open...",
+ 	GTK_WINDOW(main_window.window),
+ 	GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER,
+ 	GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
+ 	GTK_STOCK_OPEN, GTK_RESPONSE_OK,
+ 	NULL);
+     gtk_window_set_modal(GTK_WINDOW(pFileSelection), TRUE);
+     /* sets the label folder as start folder */
+     gchar *lbl;
+     lbl=(gchar*)gtk_button_get_label(GTK_BUTTON(main_window.button_dialog));
+     if (strcmp(lbl,"Workspace's directory")!=0){
+    gboolean res;
+    res=gtk_file_chooser_set_current_folder (GTK_FILE_CHOOSER(pFileSelection), lbl);
+    }
+     /*---*/
+ 	  sChemin=NULL;
+ 	  gchar*  sLabel;
+ 	  gchar*  sLabelUtf8;
+
+       switch(gtk_dialog_run(GTK_DIALOG(pFileSelection))) {
+         case GTK_RESPONSE_OK:
+
+             sChemin = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(pFileSelection));
+
+             break;
+         default:
+             break;
+     }
+
+    	gtk_widget_destroy(pFileSelection);
+    	if(sChemin!=NULL){
+ 	sLabel = g_strdup_printf("%s",sChemin);
+     sLabelUtf8 = g_locale_to_utf8(sLabel, -1, NULL, NULL, NULL);
+        gtk_button_set_label(GTK_BUTTON(widget), sLabelUtf8);
+ 	GtkTreeIter iter2;
+ 	GtkTreeIter* iter=NULL;
+ 	gtk_tree_store_clear(main_window.pTree);
+        gtk_tree_sortable_set_sort_func(GTK_TREE_SORTABLE(main_window.pTree), 1,filebrowser_sort_func, NULL, NULL);
+        gtk_tree_sortable_set_sort_column_id(GTK_TREE_SORTABLE(main_window.pTree), 1,GTK_SORT_ASCENDING);
+ 
+ 	create_tree(main_window.pTree,sChemin,iter,&iter2);
+    	}
+   }
 
 void classbrowser_show(void)
 {

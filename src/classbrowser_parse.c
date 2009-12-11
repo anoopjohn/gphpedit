@@ -256,7 +256,7 @@ void classbrowser_parse_file(gchar *filename)
 	while (*c) {
 		if (!within_php) {
 			if (check_previous(o, c, "<?")) {
-			within_php=TRUE;
+				within_php=TRUE;
 			}
 		}
 		else {

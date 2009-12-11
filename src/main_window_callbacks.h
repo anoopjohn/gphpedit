@@ -112,6 +112,7 @@ gboolean classbrowser_accept_size(GtkPaned *paned, gpointer user_data);
 
 void keyboard_macro_startstop(GtkWidget *widget);
 void keyboard_macro_playback(GtkWidget *widget);
+void pressed_button_file_chooser(GtkButton *widget, gpointer data);
 void classbrowser_show(void);
 void classbrowser_hide(void);
 void classbrowser_show_hide(GtkWidget *widget);

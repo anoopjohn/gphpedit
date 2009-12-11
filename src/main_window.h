@@ -28,7 +28,7 @@
 #include "main.h"
 #include "calltip.h"
 #include "tab.h"
-
+#include "folderbrowser.h"
 
 typedef struct
 {
@@ -93,11 +93,17 @@ typedef struct
 	GtkWidget *label2;
 	GtkWidget *notebook_manager_files_page;
 	GtkWidget *label3;*/
-	
+	GtkWidget *classlabel;
 	GtkClipboard* clipboard;
+
+ 	/*Element of directory browser*/
+ 	GtkWidget *folder;	//folderbrowser
+ 	GtkTreeStore *pTree; 
+ 	GtkWidget *pListView;
+ 	GtkWidget *pScrollbar;
+ 	GtkWidget *button_dialog;
 }
 MainWindow;
-
 
 #define CB_ITEM_TYPE_CLASS 1
 #define CB_ITEM_TYPE_CLASS_METHOD 2
