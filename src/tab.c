@@ -478,26 +478,6 @@ void tab_help_load_file(Editor *editor, GString *filename)
 }
 
 
-/*static gboolean tab_help_url_requested(GtkWidget * html, const gchar * url, gpointer stream)
-{
-	Editor *data;
-	GString *filename;
-
-	g_print ("REQUESTED %s\n", url);
-
-	filename = g_string_new(url);
-
-	data = editor_find_from_help(html);
-	tab_help_load_file(data, filename);
-
-	data->filename = g_string_new(filename->str);
-	data->filename = g_string_prepend(data->filename, "Help: ");
-
-	data->short_filename = data->filename->str;
-	update_app_title;
-	return TRUE;
-}*/
-
 GString *tab_help_try_filename(gchar *prefix, gchar *command, gchar *suffix)
 {
 	GString *long_filename;
@@ -648,37 +628,6 @@ if (filename) {
 }
 }
 
-/* 
-static void tab_help_link_clicked(GObject *obj, const gchar *url,Editor *editor)
-{
-
-	GString *filename;
-
-	filename = tab_help_find_helpfile((gchar *)url);
-	g_print("file::%s",filename);
-	if (filename) {
-		//editor = editor_find_from_help((HtmlDocument *)obj);
-		tab_help_load_file(editor, filename);
-		
-		g_string_free(editor->filename, TRUE);
-		
-		editor->filename = g_string_new(filename->str);
-		editor->filename = g_string_prepend(editor->filename, _("Help: "));
-		
-		//TODO: These strings are not being freed. The app crashes when the free
-		//is uncommented stating that there were duplicate free calls.
-		//g_free(editor->short_filename);
-		//g_free(editor->help_function);
-		editor->short_filename = g_strconcat("Help: ", url, NULL);
-		editor->help_function = g_strdup(url);
-		
-		gtk_label_set_text(GTK_LABEL(editor->label), editor->short_filename);
-		
-		update_app_title();
-	}
-}
-*/
-
 gboolean tab_create_help(Editor *editor, GString *filename)
 {
 	GString *caption;
@@ -705,8 +654,6 @@ gboolean tab_create_help(Editor *editor, GString *filename)
 		editor->saved = TRUE;
 		gtk_widget_show (editor->label);
 		editor->help_view= WEBKIT_WEB_VIEW(webkit_web_view_new ());
-		//editor->help_document = html_document_new();
-		//editor->help_view = html_view_new();
 		editor->help_scrolled_window = gtk_scrolled_window_new(NULL, NULL);
 		gtk_container_add(GTK_CONTAINER(editor->help_scrolled_window), GTK_WIDGET(editor->help_view));
 	
@@ -717,10 +664,6 @@ gboolean tab_create_help(Editor *editor, GString *filename)
 		g_signal_connect(G_OBJECT(editor->help_view), "navigation-requested",
 			 G_CALLBACK(webkit_link_clicked),editor);
 
-//		g_signal_connect(G_OBJECT(editor->help_document), "link-clicked",
-//			 G_CALLBACK(tab_help_link_clicked), NULL);
-
-//		html_view_set_document(HTML_VIEW(editor->help_view), editor->help_document);
 		gtk_widget_show_all(editor->help_scrolled_window);
 		
 		editor_tab = get_close_tab_widget(editor);
@@ -1433,7 +1376,6 @@ if(margin!=1){
 }else{
 	gint line;
 	line = gtk_scintilla_line_from_position(GTK_SCINTILLA(scintilla), position);
-//	add_marker(current_line);
 	mod_marker(line);
 }
 }

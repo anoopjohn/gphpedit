@@ -24,11 +24,6 @@
 
 #ifndef MAIN_WINDOW_CALLBACKS_H
 #define MAIN_WINDOW_CALLBACKS_H
-/*
-#include <libgtkhtml/gtkhtml.h>
-#include <libgtkhtml/layout/htmlbox.h>
-#include <libgtkhtml/layout/htmlboxtext.h>
-*/
 #include <webkit/webkit.h> 
 #include "main.h"
 #include "tab.h"

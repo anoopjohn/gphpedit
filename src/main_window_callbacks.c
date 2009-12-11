@@ -1037,51 +1037,7 @@ void on_cut1_activate(GtkWidget *widget)
 	}
 	//gtk_scintilla_cut(GTK_SCINTILLA(main_window.current_editor->scintilla));
 }
-/*
-static gchar *gtkhtml2_selection_get_text (HtmlView *view)
-{
-	GSList *list = view->sel_list;
-	GString *str = g_string_new ("");
-	gchar *ptr;
 
-	if (view->sel_list == NULL)
-		return NULL;
-	
-	while (list) {
-		HtmlBoxText *text = HTML_BOX_TEXT (list->data);
-
-		list = list->next;
-		//
-		// Some boxes may not have any text
-		//
-		if (text->canon_text == NULL)
-			continue;
-		switch (text->selection) {
-		case HTML_BOX_TEXT_SELECTION_NONE:
-			g_assert_not_reached ();
-			break;
-		case HTML_BOX_TEXT_SELECTION_END:
-			g_string_append_len (str, (gchar *)text->canon_text, g_utf8_offset_to_pointer ((gchar *)text->canon_text, (glong)text->sel_end_index) - (gchar *)text->canon_text);
-			break;
-		case HTML_BOX_TEXT_SELECTION_START:
-			g_string_append_len (str, g_utf8_offset_to_pointer ((gchar *)text->canon_text, (glong)text->sel_start_index),
-					 g_utf8_offset_to_pointer ((gchar *)text->canon_text, (glong)text->length) - g_utf8_offset_to_pointer ((gchar *)text->canon_text, (glong)text->sel_start_index));
-			break;
-		case HTML_BOX_TEXT_SELECTION_FULL:
-			g_string_append_len (str, (gchar *)text->canon_text, g_utf8_offset_to_pointer ((gchar *)text->canon_text, (glong)text->length) - (gchar *)text->canon_text);
-			break;
-		case HTML_BOX_TEXT_SELECTION_BOTH:
-			g_string_append_len (str, g_utf8_offset_to_pointer ((gchar *)text->canon_text, (glong)MIN (text->sel_start_index, text->sel_end_index)),
-					g_utf8_offset_to_pointer ((gchar *)text->canon_text, (glong)MAX (text->sel_end_index, text->sel_start_index)) - 
-					g_utf8_offset_to_pointer ((gchar *)text->canon_text, (glong)MIN (text->sel_start_index, text->sel_end_index)));
-			break;
-		}
-	}
-	ptr = str->str;
-	g_string_free (str, FALSE);
-	return ptr;
-}
-*/
 void on_copy1_activate(GtkWidget *widget)
 {
 	gint wordStart;
@@ -1093,9 +1049,6 @@ void on_copy1_activate(GtkWidget *widget)
 		return;
 	
 	if (main_window.current_editor->type == TAB_HELP) {
-		//buffer = gtkhtml2_selection_get_text(HTML_VIEW(main_window.current_editor->help_view));
-		//gtk_clipboard_set_text(main_window.clipboard, buffer, 1);
-		//g_free(buffer);
 		 webkit_web_view_copy_clipboard (WEBKIT_WEB_VIEW(main_window.current_editor->help_view));
 	}
 	else {

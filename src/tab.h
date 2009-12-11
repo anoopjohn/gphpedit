@@ -28,11 +28,6 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
-//#include <libgtkhtml/gtkhtmlcontext.h>
-//#include <libgtkhtml/graphics/htmlpainter.h>
-//#include <libgtkhtml/layout/htmlbox.h>
-//#include <libgtkhtml/view/htmlview.h>
-//#include <libgtkhtml/gtkhtml.h>
 #include <libgnomevfs/gnome-vfs.h>
 
 #include "main.h"
@@ -55,8 +50,6 @@ typedef struct
 	GSList components;
 	GtkWidget *scintilla;
 	GtkWidget *help_scrolled_window;
-//	HtmlDocument *help_document;
-//	GtkWidget *help_view;
 	WebKitWebView *help_view;
 	gint scintilla_id;
 	gint file_mtime; // TODO: Change from a gint to something more meaningful
