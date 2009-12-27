@@ -160,7 +160,7 @@ void syntax_check_run(void)
 		command_line = g_string_append(command_line, " -q -l -d html_errors=Off -f ");
 		command_line = g_string_append(command_line, filename->str);
 
-		//g_print("%s\n", command_line->str);
+		g_print("eject:%s\n", command_line->str);
 
 		output = run_php_lint(command_line->str);
 		g_string_free(command_line, TRUE);

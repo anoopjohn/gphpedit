@@ -1,5 +1,4 @@
 #include "folderbrowser.h"
-
 void create_tree(GtkTreeStore *pTree, gchar *sChemin, GtkTreeIter *iter, GtkTreeIter *iter2)
  {
 GList *list;
@@ -165,7 +164,7 @@ void folderbrowser_create(MainWindow *main_window)
  	if(sChemin!=NULL)
    		main_window->button_dialog = gtk_button_new_with_label (sChemin);
    	else {
-   		main_window->button_dialog = gtk_button_new_with_label (_("Workspace's directory"));
+		main_window->button_dialog = gtk_button_new_with_label (_("Workspace's directory"));
         }
  	g_signal_connect(G_OBJECT(main_window->button_dialog), "pressed", G_CALLBACK(pressed_button_file_chooser), NULL);
 

@@ -26,7 +26,7 @@
 
 #include "main_window.h"
 #include "main_window_callbacks.h"
-
+#include <libgnomevfs/gnome-vfs.h>
 #define MIME_ISDIR(string) (strcmp(string, "inode/directory")==0)
 
 gchar *sChemin;

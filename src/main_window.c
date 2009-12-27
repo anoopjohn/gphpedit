@@ -131,24 +131,33 @@ gboolean channel_pass_filename_callback(GIOChannel *source, GIOCondition conditi
 
 void force_config_folder(void)
 {
-	gint ret;
-	gchar *dir;
-
-	dir = g_build_filename(g_get_home_dir(), ".gphpedit", NULL);
-	ret = mkdir(dir, (S_IRUSR|S_IWUSR|S_IXUSR));
-	g_free(dir);
-	if (ret && errno != EEXIST) {
-		g_print(_("Unable to create ~/.gphpedit/ (%d)"), errno);
-		exit(-1);
-	}
-
-	dir = g_build_filename(g_get_home_dir(), ".gphpedit", "plugins", NULL);
-	ret = mkdir(dir, (S_IRUSR|S_IWUSR|S_IXUSR));
-	g_free(dir);
-	if (ret && errno != EEXIST) {
-		g_print(_("Unable to create ~/.gphpedit/plugins/ (%d)"), errno);
-		exit(-1);
-	}
+        GFile *config;
+        GError *error;
+        error=NULL;
+        GString *uri;
+        uri = g_string_new ("");
+        g_string_printf(uri,"%s/%s",g_get_home_dir(),".gphpedit");
+        config=g_file_new_for_path (uri->str);
+        g_string_free (uri, TRUE);
+        if (!g_file_make_directory (config, NULL, &error)){
+            if (error->code !=2){
+            g_print(_("Unable to create ~/.gphpedit/ (%d) %s"), error->code,error->message);
+            exit(-1);
+            }
+        }
+        error=NULL;
+        uri = g_string_new ("");
+        g_string_printf(uri,"%s/%s/%s",g_get_home_dir(),".gphpedit","plugins");
+        config=g_file_new_for_path (uri->str);
+        g_string_free (uri, TRUE);
+        if (!g_file_make_directory (config, NULL, &error)){
+            //if error code = 2 ya existe el directorio
+            if (error->code !=2){
+            g_print(_("Unable to create ~/.gphpedit/ (%d) %s"), error->code,error->message);
+            exit(-1);
+            }
+        }
+	g_object_unref(config);
 }
 
 static void main_window_create_toolbars(void)
@@ -474,7 +483,7 @@ static void main_window_fill_panes(void)
 	gtk_label_set_justify (GTK_LABEL (label3), GTK_JUSTIFY_LEFT);
 	*/
 	// file browser code
-	folderbrowser_create(&main_window);
+	//folderbrowser_create(&main_window);
 	main_window.scrolledwindow1 = gtk_scrolled_window_new (NULL, NULL);
 	gtk_paned_pack2 (GTK_PANED (main_window.main_vertical_pane), main_window.scrolledwindow1, FALSE, TRUE);
 

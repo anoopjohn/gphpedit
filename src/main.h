@@ -28,7 +28,8 @@
 #include <gnome.h>
 #include <glib.h>
 #include <gtkscintilla.h>
-#include <libgnome/gnome-i18n.h>
+//#include <libgnome/gnome-i18n.h>
+#include <glib/gi18n.h>
 
 #define GPHPEDIT_PIXMAP_ICON "gphpedit.png"
 

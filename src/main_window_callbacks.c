@@ -25,13 +25,13 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-#include <libgnomevfs/gnome-vfs.h>
 #include "main_window_callbacks.h"
 #include "find_replace.h"
 #include "main_window.h"
 #include "preferences_dialog.h"
 #include "tab.h"
 #include "templates.h"
+#include "project.h"
 
 
 gboolean is_app_closing = FALSE;
@@ -377,7 +377,16 @@ void on_new1_activate(GtkWidget *widget)
 	// Create a new untitled tab
 	tab_create_new(TAB_FILE, NULL);
 }
-
+/*
+void on_newproj_activate(GtkWidget *widget){
+    // creates a new project
+    projwindow();
+}
+void on_openproj_activate(GtkWidget *widget){
+    //open a project
+   open_project();
+}
+*/
 
 void open_file_ok(GtkFileChooser *file_selection)
 {
@@ -457,7 +466,6 @@ void on_openselected1_activate(GtkWidget *widget)
 	gchar *ac_buffer;
 	gint ac_length;
 	GString *file;
-	GnomeVFSURI *uri;
 
 	if (main_window.current_editor == NULL || main_window.current_editor->type == TAB_HELP) 
 		return;
@@ -485,12 +493,11 @@ void on_openselected1_activate(GtkWidget *widget)
 			else if (strstr(ac_buffer, "://")) {
 				file = g_string_new(ac_buffer);
 			}
-
-			uri = gnome_vfs_uri_new (file->str);
-			if (gnome_vfs_uri_exists (uri))
-				switch_to_file_or_open(file->str,0);
-			gnome_vfs_uri_unref (uri);
-			
+                        GFile *fi;
+                        fi=g_file_new_for_uri (file->str);
+                        if(g_file_query_exists (fi,NULL))
+			switch_to_file_or_open(file->str,0);
+			g_object_unref(fi);
 			
 			if (file) {
 				g_string_free(file, TRUE);
@@ -609,7 +616,6 @@ void on_open1_activate(GtkWidget *widget)
 	gtk_widget_destroy(file_selection_box);
 }
 
-
 void save_file_as_confirm_overwrite(gint reply,gpointer data)
 {
 	GString *filename;
@@ -641,17 +647,18 @@ void save_file_as_ok(GtkFileChooser *file_selection_box)
 {
 	GString *filename;
 	GtkWidget *file_exists_dialog;
-	struct stat st;
-
+	//struct stat st;
+        //GFile *fi;
 	// Extract filename from the file selection dialog
 	filename = g_string_new(gtk_file_chooser_get_uri(file_selection_box));
-
-	if (stat (filename->str, &st) == 0) {
-		file_exists_dialog = gnome_question_dialog_modal(_("This file already exists, are you sure you want to overwrite it?"),
-			save_file_as_confirm_overwrite,filename);
-		gnome_dialog_run_and_close(GNOME_DIALOG(file_exists_dialog));
-	}
-	else {
+        //fi=g_file_new_for_uri (filename->str);
+	//if(g_file_query_exists (fi,NULL)) {
+       //if (stat (filename->str, &st) == 0) {
+		//file_exists_dialog = gnome_question_dialog_modal(_("This file already exists, are you sure you want to overwrite it?"),
+		//	save_file_as_confirm_overwrite,filename);
+		//gnome_dialog_run_and_close(GNOME_DIALOG(file_exists_dialog));
+	//}
+	//else {
 		// Set the filename of the current editor to be that
 		if (main_window.current_editor->filename) {
 			g_string_free(main_window.current_editor->filename, TRUE);
@@ -670,15 +677,15 @@ void save_file_as_ok(GtkFileChooser *file_selection_box)
 			main_window.current_editor->opened_from = NULL;
 		}
 		g_string_free(filename, FALSE);
-	}
+	//}
+        //g_object_unref(fi);
 }
 
 
 void on_save1_activate(GtkWidget *widget)
 {
 	gchar *filename = NULL;
-	GnomeVFSAsyncHandle *fg;
-	
+	GFile *file;
 	if (main_window.current_editor) {
 		filename = main_window.current_editor->filename->str;
 
@@ -687,7 +694,10 @@ void on_save1_activate(GtkWidget *widget)
 			on_save_as1_activate(widget);
 		}
 		else {
-			gnome_vfs_async_create(&fg, filename, GNOME_VFS_OPEN_WRITE, FALSE, 0755, GNOME_VFS_PRIORITY_DEFAULT, tab_file_save_opened, main_window.current_editor);
+                       GError *error;
+                       error=NULL;
+                       file=g_file_new_for_uri (filename);
+                       g_file_replace_async (file,NULL,TRUE,0,G_PRIORITY_DEFAULT,NULL, tab_file_save_opened, main_window.current_editor);
 		}
 	}
 }
@@ -824,7 +834,13 @@ void rename_file(GString *newfilename)
 {
 	// unlink old filename
 	// unlink((main_window.current_editor->filename->str));
-	gnome_vfs_unlink((const gchar *)main_window.current_editor->filename->str);
+        GFile *file;
+        GError *error;
+        file=g_file_new_for_uri ((const gchar *)main_window.current_editor->filename->str);
+        if (!g_file_delete (file,NULL,&error)){
+            g_print("GIO Error renaming file: %s\n",error->message);
+        }
+        
 	// set current_editor->filename
 	main_window.current_editor->filename=newfilename;
 	main_window.current_editor->short_filename = g_path_get_basename(newfilename->str);
@@ -1284,7 +1300,15 @@ void context_help(GtkWidget *widget)
  */
 void on_about1_activate(GtkWidget *widget)
 {
-	const gchar *authors[] = {
+    GdkPixbuf *pixbuf = NULL;
+    GError *error = NULL;
+    pixbuf = gdk_pixbuf_new_from_file (PIXMAP_DIR "/" GPHPEDIT_PIXMAP_ICON, &error);
+
+	if (error) {
+		g_warning (G_STRLOC ": cannot open icon: %s", error->message);
+		g_error_free (error);
+	}
+  const gchar *authors[] = {
 								"Current Maintainer",
 								"Anoop John <anoop.john@zyxware.com>",
 								"",
@@ -1295,12 +1319,33 @@ void on_about1_activate(GtkWidget *widget)
 								"Jonh Wendell <wendell@bani.com.br>",
 								"Tim Jackson <tim@timj.co.uk>",
 								"Sven Herzberg <herzi@gnome-de.org>",
+                                                                "Jose Rostagno <rostagnojose@yahoo.com>",
 								NULL
 							 };
-	const gchar *documenters[] = {
-									 NULL
-								 };
-	gchar *translator_credits = _("translator_credits");
+  gchar *translator_credits = _("translator_credits");
+  const gchar *documenters[] = {NULL};
+  GtkWidget *dialog = gtk_about_dialog_new();
+  gtk_about_dialog_set_name(GTK_ABOUT_DIALOG(dialog), "gPHPEdit");
+  gtk_about_dialog_set_version(GTK_ABOUT_DIALOG(dialog), VERSION);
+  gtk_about_dialog_set_copyright(GTK_ABOUT_DIALOG(dialog),
+      _("Copyright  2003-2006 Andy Jeffries, 2009 Anoop John"));
+  gtk_about_dialog_set_comments(GTK_ABOUT_DIALOG(dialog),
+     _("gPHPEdit is a GNOME2 editor specialised for editing PHP "
+							 "scripts and related files (HTML/CSS/JS)."));
+  gtk_about_dialog_set_website(GTK_ABOUT_DIALOG(dialog),
+      "http://www.gphpedit.org/");
+  gtk_about_dialog_set_logo(GTK_ABOUT_DIALOG(dialog), pixbuf);
+  gtk_about_dialog_set_authors(GTK_ABOUT_DIALOG(dialog),(const gchar **) authors);
+  gtk_about_dialog_set_translator_credits(GTK_ABOUT_DIALOG(dialog),translator_credits);
+  gtk_about_dialog_set_documenters (GTK_ABOUT_DIALOG(dialog),(const gchar **) documenters);
+  g_object_unref(pixbuf), pixbuf = NULL;
+  gtk_dialog_run(GTK_DIALOG (dialog));
+  gtk_widget_destroy(dialog);
+/*
+
+	
+	
+	
 	GtkWidget *about;
 	GdkPixbuf *pixbuf = NULL;
 	GError *error = NULL;
@@ -1326,10 +1371,12 @@ void on_about1_activate(GtkWidget *widget)
 	}
 		
 	gtk_window_set_transient_for (GTK_WINDOW (about), NULL);
-	/* This line causes a segfault - should be right but commented out!
+	// This line causes a segfault - should be right but commented out!
 	gtk_signal_connect(GTK_OBJECT(about), "destroy",
-					   GTK_SIGNAL_FUNC(gtk_widget_destroyed), &about);*/
+					   GTK_SIGNAL_FUNC(gtk_widget_destroyed), &about);
 	gtk_widget_show (about);
+        */
+
 }
 
 void on_notebook_switch_page (GtkNotebook *notebook, GtkNotebookPage *page,
@@ -1551,6 +1598,7 @@ void delete_marker(int line)
 {
 gtk_scintilla_marker_delete(GTK_SCINTILLA(main_window.current_editor->scintilla), line, 1);
 }
+
 //add/delete a marker
 void mod_marker(int line){
 //bugfix:segfault if not scintilla
@@ -1603,6 +1651,7 @@ void syntax_check_clear(GtkWidget *widget)
 	gtk_widget_hide(main_window.scrolledwindow1);
 	gtk_widget_hide(main_window.lint_view);
 }
+/*
 void pressed_button_file_chooser(GtkButton *widget, gpointer data)
  {
 
@@ -1616,14 +1665,13 @@ void pressed_button_file_chooser(GtkButton *widget, gpointer data)
  	GTK_STOCK_OPEN, GTK_RESPONSE_OK,
  	NULL);
      gtk_window_set_modal(GTK_WINDOW(pFileSelection), TRUE);
-     /* sets the label folder as start folder */
+     // sets the label folder as start folder 
      gchar *lbl;
      lbl=(gchar*)gtk_button_get_label(GTK_BUTTON(main_window.button_dialog));
      if (strcmp(lbl,"Workspace's directory")!=0){
     gboolean res;
     res=gtk_file_chooser_set_current_folder (GTK_FILE_CHOOSER(pFileSelection), lbl);
     }
-     /*---*/
  	  sChemin=NULL;
  	  gchar*  sLabel;
  	  gchar*  sLabelUtf8;
@@ -1637,7 +1685,6 @@ void pressed_button_file_chooser(GtkButton *widget, gpointer data)
          default:
              break;
      }
-
     	gtk_widget_destroy(pFileSelection);
     	if(sChemin!=NULL){
  	sLabel = g_strdup_printf("%s",sChemin);
@@ -1648,11 +1695,10 @@ void pressed_button_file_chooser(GtkButton *widget, gpointer data)
  	gtk_tree_store_clear(main_window.pTree);
         gtk_tree_sortable_set_sort_func(GTK_TREE_SORTABLE(main_window.pTree), 1,filebrowser_sort_func, NULL, NULL);
         gtk_tree_sortable_set_sort_column_id(GTK_TREE_SORTABLE(main_window.pTree), 1,GTK_SORT_ASCENDING);
- 
- 	create_tree(main_window.pTree,sChemin,iter,&iter2);
+       create_tree(main_window.pTree,sChemin,iter,&iter2);
     	}
    }
-
+*/
 void classbrowser_show(void)
 {
 	gtk_paned_set_position(GTK_PANED(main_window.main_horizontal_pane),classbrowser_hidden_position);

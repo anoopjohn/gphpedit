@@ -28,7 +28,7 @@
 #include "main.h"
 #include "calltip.h"
 #include "tab.h"
-#include "folderbrowser.h"
+//#include "folderbrowser.h"
 
 typedef struct
 {

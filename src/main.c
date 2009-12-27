@@ -26,7 +26,8 @@
 #include <config.h>
 #endif
 
-#include <libgnomevfs/gnome-vfs.h>
+//#include <libgnomevfs/gnome-vfs.h>
+#include <gio/gio.h>
 #include <stdarg.h>
 #include "main.h"
 #include "main_window.h"
@@ -41,7 +42,7 @@ GnomeProgram* gphpedit_program;
 int main (int argc, char **argv)
 {
 	//GError *error;
-	gboolean vfs_inited;
+//	gboolean vfs_inited;
 
 	bindtextdomain (GETTEXT_PACKAGE, PACKAGE_LOCALE_DIR);
 	bind_textdomain_codeset (GETTEXT_PACKAGE, "UTF-8");
@@ -50,8 +51,8 @@ int main (int argc, char **argv)
 	gphpedit_program = gnome_program_init ("gPHPEdit", VERSION, LIBGNOMEUI_MODULE,
 	                                       argc, argv, NULL);
 
-	vfs_inited = gnome_vfs_init();
-	g_assert(vfs_inited);
+//	vfs_inited = gnome_vfs_init();
+//	g_assert(vfs_inited);
 
 	preferences_load();
 
@@ -83,7 +84,7 @@ int main (int argc, char **argv)
 gint debug(char *formatstring, ...)
 {
   GtkWidget *dlg;
-	int intReturn;
+//	int intReturn;
 	char *buf, *temp;
 	temp = (char*) calloc(500, sizeof(char));
 	buf = (char*) calloc(500, sizeof(char));

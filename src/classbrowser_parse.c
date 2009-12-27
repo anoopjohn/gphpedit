@@ -23,7 +23,7 @@
 */
 
 #include "classbrowser_parse.h"
-//#define DEBUG_CLASSBROWSER 1
+#define DEBUG_CLASSBROWSER 1
 
 
 static gchar *read_text_file( gchar *filename )

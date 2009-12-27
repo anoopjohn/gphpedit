@@ -52,8 +52,8 @@ am_gphpedit_OBJECTS = calltip.$(OBJEXT) classbrowser.$(OBJEXT) \
 	find_replace.$(OBJEXT) gphpedit_ipc.$(OBJEXT) \
 	grel2abs.$(OBJEXT) plugin.$(OBJEXT) main.$(OBJEXT) \
 	main_window.$(OBJEXT) main_window_callbacks.$(OBJEXT) \
-	preferences.$(OBJEXT) preferences_dialog.$(OBJEXT) \
-	syntax_check.$(OBJEXT) tab.$(OBJEXT) folderbrowser.$(OBJEXT) tab_cxx.$(OBJEXT) \
+	preferences.$(OBJEXT) preferences_dialog.$(OBJEXT) project.$(OBJEXT)\
+	syntax_check.$(OBJEXT) tab.$(OBJEXT) tab_cxx.$(OBJEXT) \
 	tab_css.$(OBJEXT) tab_perl.$(OBJEXT) tab_php.$(OBJEXT) \
 	tab_python.$(OBJEXT) tab_sql.$(OBJEXT) tab_util.$(OBJEXT) \
 	templates.$(OBJEXT)
@@ -89,13 +89,13 @@ DIST_SOURCES = $(gphpedit_SOURCES)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
-ACLOCAL = ${SHELL} /home/pepe/Desktop/gphpedit/missing --run aclocal-1.11
+ACLOCAL = ${SHELL} /home/pepe/Desktop/anoopjohn-gphpedit-0070a04/missing --run aclocal-1.11
 ALL_LINGUAS = 
-AMTAR = ${SHELL} /home/pepe/Desktop/gphpedit/missing --run tar
+AMTAR = ${SHELL} /home/pepe/Desktop/anoopjohn-gphpedit-0070a04/missing --run tar
 AR = ar
-AUTOCONF = ${SHELL} /home/pepe/Desktop/gphpedit/missing --run autoconf
-AUTOHEADER = ${SHELL} /home/pepe/Desktop/gphpedit/missing --run autoheader
-AUTOMAKE = ${SHELL} /home/pepe/Desktop/gphpedit/missing --run automake-1.11
+AUTOCONF = ${SHELL} /home/pepe/Desktop/anoopjohn-gphpedit-0070a04/missing --run autoconf
+AUTOHEADER = ${SHELL} /home/pepe/Desktop/anoopjohn-gphpedit-0070a04/missing --run autoheader
+AUTOMAKE = ${SHELL} /home/pepe/Desktop/anoopjohn-gphpedit-0070a04/missing --run automake-1.11
 AWK = mawk
 CATALOGS = 
 CATOBJEXT = .gmo
@@ -146,7 +146,7 @@ LIPO =
 LN_S = ln -s
 LTLIBOBJS = 
 MAINT = #
-MAKEINFO = ${SHELL} /home/pepe/Desktop/gphpedit/missing --run makeinfo
+MAKEINFO = ${SHELL} /home/pepe/Desktop/anoopjohn-gphpedit-0070a04/missing --run makeinfo
 MKDIR_P = /bin/mkdir -p
 MKINSTALLDIRS = ./mkinstalldirs
 MSGFMT = /usr/bin/msgfmt
@@ -179,10 +179,10 @@ STRIP = strip
 USE_NLS = yes
 VERSION = 0.9.96
 XGETTEXT = /usr/bin/xgettext
-abs_builddir = /home/pepe/Desktop/gphpedit/src
-abs_srcdir = /home/pepe/Desktop/gphpedit/src
-abs_top_builddir = /home/pepe/Desktop/gphpedit
-abs_top_srcdir = /home/pepe/Desktop/gphpedit
+abs_builddir = /home/pepe/Desktop/anoopjohn-gphpedit-0070a04/src
+abs_srcdir = /home/pepe/Desktop/anoopjohn-gphpedit-0070a04/src
+abs_top_builddir = /home/pepe/Desktop/anoopjohn-gphpedit-0070a04
+abs_top_srcdir = /home/pepe/Desktop/anoopjohn-gphpedit-0070a04
 ac_ct_CC = gcc
 ac_ct_CXX = g++
 ac_ct_DUMPBIN = 
@@ -211,7 +211,7 @@ host_vendor = pc
 htmldir = ${docdir}
 includedir = ${prefix}/include
 infodir = ${datarootdir}/info
-install_sh = ${SHELL} /home/pepe/Desktop/gphpedit/install-sh
+install_sh = ${SHELL} /home/pepe/Desktop/anoopjohn-gphpedit-0070a04/install-sh
 libdir = ${exec_prefix}/lib
 libexecdir = ${exec_prefix}/libexec
 localedir = ${datarootdir}/locale
@@ -246,8 +246,6 @@ gphpedit_SOURCES = \
 	classbrowser.h		\
 	classbrowser_parse.c	\
 	classbrowser_parse.h	\
-	folder_browser.h	\
-	folder_browser.c	\
 	edit_template.c		\
 	edit_template.h		\
 	find_replace.c		\

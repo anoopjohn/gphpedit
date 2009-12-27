@@ -120,10 +120,15 @@ poke_existing_instance (int argc, char **argv)
                     /* this is wrong too, but i am lazy to do error checking right now */
                     write (fd, "", 1);
                     for (i = 0; i < argc; ++i) {
-						if (g_path_is_absolute(argv[i]))
-							to_open = gnome_vfs_uri_make_full_from_relative (NULL, argv[i]);
-						else
-							to_open = gnome_vfs_uri_make_full_from_relative (cur_dir, argv[i]);
+						if (g_path_is_absolute(argv[i])){
+							to_open = g_strdup ((gchar *) argv[i]);
+								} else {
+							GString *s_filename;
+							s_filename = g_string_new(cur_dir);
+							s_filename = g_string_append(s_filename, (gchar *) argv[i]);
+							to_open=s_filename->str;
+						g_free(s_filename);
+}
 						if (to_open) {
 							//g_print("From %s to %s\n", argv[i], to_open);
 							write (fd, to_open, strlen (to_open) + 1);

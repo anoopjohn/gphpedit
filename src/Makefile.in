@@ -52,8 +52,8 @@ am_gphpedit_OBJECTS = calltip.$(OBJEXT) classbrowser.$(OBJEXT) \
 	find_replace.$(OBJEXT) gphpedit_ipc.$(OBJEXT) \
 	grel2abs.$(OBJEXT) plugin.$(OBJEXT) main.$(OBJEXT) \
 	main_window.$(OBJEXT) main_window_callbacks.$(OBJEXT) \
-	preferences.$(OBJEXT) preferences_dialog.$(OBJEXT) \
-	syntax_check.$(OBJEXT) tab.$(OBJEXT) folderbrowser.$(OBJEXT) tab_cxx.$(OBJEXT) \
+	preferences.$(OBJEXT) preferences_dialog.$(OBJEXT) project.$(OBJEXT)\
+	syntax_check.$(OBJEXT) tab.$(OBJEXT) tab_cxx.$(OBJEXT) \
 	tab_css.$(OBJEXT) tab_perl.$(OBJEXT) tab_php.$(OBJEXT) \
 	tab_python.$(OBJEXT) tab_sql.$(OBJEXT) tab_util.$(OBJEXT) \
 	templates.$(OBJEXT)
@@ -246,8 +246,6 @@ gphpedit_SOURCES = \
 	classbrowser.h		\
 	classbrowser_parse.c	\
 	classbrowser_parse.h	\
-	folder_browser.h	\
-	folder_browser.c	\
 	edit_template.c		\
 	edit_template.h		\
 	find_replace.c		\
