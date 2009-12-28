@@ -203,33 +203,6 @@ static void tab_set_event_handlers(Editor *editor)
 }
 
 /*
-void report_vfs_error(gchar *name, gchar *desc, GnomeVFSResult result, GtkWindow *win)
-{
-	GtkDialog *dialog;
-	gchar *err_title, *err_message;
-	
-	if (name) {
-		err_title = g_strdup_printf(_("File access error:\n %s: "), name);
-	}
-	else {
-		err_title = g_strdup_printf(_("File access error: \n"));
-	}
-	
-	if (result < GNOME_VFS_NUM_ERRORS) {
-		err_message = g_strdup(gnome_vfs_result_to_string(result));
-	}
-	else {
-		err_message = g_strdup_printf("%s\n", desc ? desc : "");
-	}
-	dialog = GTK_DIALOG(gtk_message_dialog_new(win, GTK_DIALOG_DESTROY_WITH_PARENT, GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE, "%s %s", err_title, err_message));
-	g_signal_connect_swapped(dialog, "response", G_CALLBACK(gtk_widget_destroy), dialog);
-	g_object_set(dialog, "title", "", NULL);
-	gtk_widget_show_all(GTK_WIDGET(dialog));
-	g_free(err_title);
-	g_free(err_message);
-}
-*/
-/*
 void tab_file_closed(GnomeVFSAsyncHandle *fd, GnomeVFSResult result, gpointer li_ptr)
 {
 	//Editor *editor = (Editor *)li_ptr;
@@ -668,51 +641,35 @@ gboolean tab_create_help(Editor *editor, GString *filename)
 
 void info_dialog (gchar *title, gchar *message)
 {
-	GtkWidget *dialog, *label;
-	int button;
-
-	dialog = gnome_dialog_new (
-	             title,
-	             GNOME_STOCK_BUTTON_OK,
-	             NULL);
-	gnome_dialog_set_parent(GNOME_DIALOG (dialog), GTK_WINDOW(main_window.window));
-
-	label = gtk_label_new (message);
-	gtk_widget_show(label);
-	gtk_box_pack_start (GTK_BOX (GNOME_DIALOG (dialog)->vbox), label, TRUE, TRUE, 0);
-
+	GtkWidget *dialog;
+	gint button;
+       	        dialog = gtk_message_dialog_new(GTK_WINDOW(main_window.window),GTK_DIALOG_DESTROY_WITH_PARENT,GTK_MESSAGE_INFO,GTK_BUTTONS_OK,
+            message);
+            gtk_window_set_title(GTK_WINDOW(dialog), title);
+            button = gtk_dialog_run (GTK_DIALOG (dialog));
+            gtk_widget_destroy(dialog);
 	/*
 	 * Run the dialog and wait for the user to select yes or no.
 	 * If the user closes the window with the window manager, we
-	 * will get a -1 return value
+	 * will get a -4 return value
 	 */
-	button = gnome_dialog_run_and_close (GNOME_DIALOG (dialog));
-	
 }
 
 gint yes_no_dialog (gchar *title, gchar *message)
 {
-	GtkWidget *dialog, *label;
-	int button;
-
-	dialog = gnome_dialog_new (
-	             title,
-	             GNOME_STOCK_BUTTON_YES,
-	             GNOME_STOCK_BUTTON_NO,
-	             NULL);
-	gnome_dialog_set_parent(GNOME_DIALOG (dialog), GTK_WINDOW(main_window.window));
-
-	label = gtk_label_new (message);
-	gtk_widget_show(label);
-	gtk_box_pack_start (GTK_BOX (GNOME_DIALOG (dialog)->vbox), label, TRUE, TRUE, 0);
-
+	GtkWidget *dialog;
+	gint button;
+       	dialog = gtk_message_dialog_new(GTK_WINDOW(main_window.window),GTK_DIALOG_DESTROY_WITH_PARENT,GTK_MESSAGE_INFO,GTK_BUTTONS_YES_NO,
+            message);
+            gtk_window_set_title(GTK_WINDOW(dialog), title);
+            button = gtk_dialog_run (GTK_DIALOG (dialog));
+         gtk_widget_destroy(dialog);
 	/*
 	 * Run the dialog and wait for the user to select yes or no.
 	 * If the user closes the window with the window manager, we
-	 * will get a -1 return value
+	 * will get a -4 return value
 	 */
-	button = gnome_dialog_run_and_close (GNOME_DIALOG (dialog));
-
+         
 	return button;
 }
 
@@ -1050,8 +1007,8 @@ gboolean tab_create_new(gint type, GString *filename)
 			result = yes_no_dialog(_("File not found"), dialog_message->str);
 			g_string_free(dialog_message, TRUE);
                         g_object_unref(file);
-			if (result != 0) {
-				return FALSE;
+			if (result != -8){//0) {
+                            return FALSE;
 			}
 			file_created = TRUE;
 		}

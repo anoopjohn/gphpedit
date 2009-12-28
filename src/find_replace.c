@@ -82,7 +82,11 @@ void find_clicked(GtkButton *button, gpointer data)
 
 	if (result == -1) {
 		// Show message saying could not be found.
-		gnome_dialog_run_and_close(GNOME_DIALOG(gnome_ok_dialog(g_strdup_printf(_("The text \"%s\" was not found."), text))));
+                  GtkWidget *dialog;
+                   dialog = gtk_message_dialog_new(GTK_WINDOW(main_window.window),GTK_DIALOG_DESTROY_WITH_PARENT,GTK_MESSAGE_ERROR,GTK_BUTTONS_OK,_("The text \"%s\" was not found."), text);
+                    gtk_window_set_title(GTK_WINDOW(dialog), "gphpedit");
+                    gtk_dialog_run(GTK_DIALOG(dialog));
+                    gtk_widget_destroy(dialog);
 	}
 	else {
 		if (start_found == last_found) {
@@ -318,22 +322,6 @@ void replace_destroy(GtkWidget *widget, gpointer data)
 }
 
 
-
-void replace_prompt_reply(gint reply,gpointer data)
-{
-	gint selection_start;
-	gchar *replace;
-
-	if (reply == 0) { // YES
-		replace = gtk_editable_get_chars (GTK_EDITABLE(replace_dialog.entry2), 0, -1);
-		selection_start = gtk_scintilla_get_selection_start(GTK_SCINTILLA(main_window.current_editor->scintilla));
-		gtk_scintilla_replace_sel(GTK_SCINTILLA(main_window.current_editor->scintilla), replace);
-		gtk_scintilla_set_selection_start(GTK_SCINTILLA(main_window.current_editor->scintilla), selection_start);
-		gtk_scintilla_set_selection_end(GTK_SCINTILLA(main_window.current_editor->scintilla), selection_start + strlen(replace));
-	}
-	replace_clicked(NULL, NULL);
-}
-
 void replace_clicked(GtkButton *button, gpointer data)
 {
 	static gint last_found = 0;
@@ -377,7 +365,11 @@ void replace_clicked(GtkButton *button, gpointer data)
 
 	if (result == -1) {
 		// Show message saying could not be found.
-		gnome_dialog_run_and_close(GNOME_DIALOG(gnome_ok_dialog(g_strdup_printf(_("The text \"%s\" was not found."), text))));
+                 GtkWidget *dialog;
+                 dialog = gtk_message_dialog_new(GTK_WINDOW(main_window.window),GTK_DIALOG_DESTROY_WITH_PARENT,GTK_MESSAGE_ERROR,GTK_BUTTONS_OK,_("The text \"%s\" was not found."), text);
+                 gtk_window_set_title(GTK_WINDOW(dialog), "gphpedit");
+                 gtk_dialog_run(GTK_DIALOG(dialog));
+                 gtk_widget_destroy(dialog);
 	}
 	else {
 		if (start_found == last_found) {
@@ -390,9 +382,21 @@ void replace_clicked(GtkButton *button, gpointer data)
 		gtk_scintilla_set_selection_end(GTK_SCINTILLA(main_window.current_editor->scintilla), end_found);
 		if (gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON(replace_dialog.checkbutton8))) {
 			// Prompt for replace?
-			replace_prompt_dialog = gnome_question_dialog(_("Do you want to replace this occurence?"),
-			                        replace_prompt_reply, NULL);
-			gnome_dialog_run_and_close(GNOME_DIALOG(replace_prompt_dialog));
+                 replace_prompt_dialog = gtk_message_dialog_new(GTK_WINDOW(main_window.window),GTK_DIALOG_DESTROY_WITH_PARENT,GTK_MESSAGE_QUESTION,GTK_BUTTONS_YES_NO,
+            _("Do you want to replace this occurence?"));
+            gtk_window_set_title(GTK_WINDOW(replace_prompt_dialog), "Question");
+            gint result = gtk_dialog_run (GTK_DIALOG (replace_prompt_dialog));
+            gint selection_start;
+            gchar *replace;
+           if (result==GTK_RESPONSE_YES) {
+            	replace = gtk_editable_get_chars (GTK_EDITABLE(replace_dialog.entry2), 0, -1);
+		selection_start = gtk_scintilla_get_selection_start(GTK_SCINTILLA(main_window.current_editor->scintilla));
+		gtk_scintilla_replace_sel(GTK_SCINTILLA(main_window.current_editor->scintilla), replace);
+		gtk_scintilla_set_selection_start(GTK_SCINTILLA(main_window.current_editor->scintilla), selection_start);
+		gtk_scintilla_set_selection_end(GTK_SCINTILLA(main_window.current_editor->scintilla), selection_start + strlen(replace));
+                }
+            replace_clicked(NULL, NULL);
+            gtk_widget_destroy(replace_prompt_dialog);
 		}
 		else {
 			gtk_scintilla_replace_sel(GTK_SCINTILLA(main_window.current_editor->scintilla), replace);
@@ -475,13 +479,11 @@ void replace_all_clicked(GtkButton *button, gpointer data)
 		g_string_sprintf(message, _("%d occurences of %s found, all replaced."), numfound, text);
 	}
 
-	replace_all_dialog = gnome_ok_dialog(message->str);
-	gnome_dialog_run_and_close(GNOME_DIALOG(replace_all_dialog));
-	// Comment the line bellow as suggested at 
-	// http://www.gphpedit.org/bugs/bug_view.php?id=132 to avoid from
-	// a crash after searching & replacing.
-	//g_free(replace_all_dialog);
-	
+         replace_all_dialog = gtk_message_dialog_new(GTK_WINDOW(main_window.window),GTK_DIALOG_DESTROY_WITH_PARENT,GTK_MESSAGE_INFO,GTK_BUTTONS_OK,message->str);
+         gtk_window_set_title(GTK_WINDOW(replace_all_dialog), "gphpedit");
+         gtk_dialog_run(GTK_DIALOG(replace_all_dialog));
+         gtk_widget_destroy(replace_all_dialog);
+
 	gtk_scintilla_goto_pos(GTK_SCINTILLA(main_window.current_editor->scintilla), start_pos);
 }
 

@@ -646,7 +646,7 @@ void save_file_as_confirm_overwrite(gint reply,gpointer data)
 void save_file_as_ok(GtkFileChooser *file_selection_box)
 {
 	GString *filename;
-	GtkWidget *file_exists_dialog;
+	//GtkWidget *file_exists_dialog;
 	//struct stat st;
         //GFile *fi;
 	// Extract filename from the file selection dialog
@@ -787,15 +787,14 @@ void on_save_as1_activate(GtkWidget *widget)
 		gtk_widget_destroy(file_selection_box);		
 	}
 }
-
+/*
 void on_reload_confirm(gint reply,gpointer filename)
 {
 	if (reply==0) {
 		tab_load_file(main_window.current_editor);
 	}
 }
-
-
+ * */
 void on_reload1_activate(GtkWidget *widget)
 {
 	GtkWidget *file_revert_dialog;
@@ -803,9 +802,14 @@ void on_reload1_activate(GtkWidget *widget)
 		return;
 
 	if (main_window.current_editor && (main_window.current_editor->saved == FALSE)) {
-		file_revert_dialog = gnome_question_dialog_modal(_("Are you sure you wish to reload the current file, losing your changes?"),
-							 on_reload_confirm,NULL);
-		gnome_dialog_run_and_close(GNOME_DIALOG(file_revert_dialog));
+                file_revert_dialog = gtk_message_dialog_new(GTK_WINDOW(main_window.window),GTK_DIALOG_DESTROY_WITH_PARENT,GTK_MESSAGE_QUESTION,GTK_BUTTONS_YES_NO,
+            _("Are you sure you wish to reload the current file, losing your changes?"));
+            gtk_window_set_title(GTK_WINDOW(file_revert_dialog), "Question");
+            gint result = gtk_dialog_run (GTK_DIALOG (file_revert_dialog));
+           if (result==GTK_RESPONSE_YES) {
+		tab_load_file(main_window.current_editor);
+        	}
+            gtk_widget_destroy(file_revert_dialog);
 	}
 	else if (main_window.current_editor) {
 		tab_load_file(main_window.current_editor);
@@ -849,33 +853,27 @@ void rename_file(GString *newfilename)
 	on_save1_activate(NULL);
 }
 
-
-void rename_file_overwrite_confirm(gint reply,gpointer filename)
-{
-	if (reply==0) {
-		// Call rename_file
-		rename_file(filename);
-	}
-}
-
-
-
 void rename_file_ok(GtkFileChooser *file_selection)
 {
 	GString *filename;
 	GtkWidget *file_exists_dialog;
-	struct stat st;
-
 	// Extract filename from the file chooser dialog
 	filename = g_string_new(gtk_file_chooser_get_uri(file_selection));
-
-	if (stat (filename->str, &st) == 0) {
-		file_exists_dialog = gnome_question_dialog_modal(_("This file already exists, are you sure you want to overwrite it?"),
-							 save_file_as_confirm_overwrite,filename);
-		gnome_dialog_run_and_close(GNOME_DIALOG(file_exists_dialog));
-	}
-
-	rename_file(filename);
+        GFile *file;
+        file=g_file_new_for_uri (filename->str);
+        if (g_file_query_exists (file,NULL)) {
+            file_exists_dialog = gtk_message_dialog_new(GTK_WINDOW(main_window.window),GTK_DIALOG_DESTROY_WITH_PARENT,GTK_MESSAGE_QUESTION,GTK_BUTTONS_YES_NO,
+            _("This file already exists, are you sure you want to overwrite it?"));
+            gtk_window_set_title(GTK_WINDOW(file_exists_dialog), "Question");
+            gint result = gtk_dialog_run (GTK_DIALOG (file_exists_dialog));
+           if (result==GTK_RESPONSE_YES) {
+		rename_file(filename);
+        	}
+            gtk_widget_destroy(file_exists_dialog);
+        } else {
+            rename_file(filename);
+        }
+        g_object_unref(file);
 }
 
 
@@ -964,16 +962,18 @@ void close_page(Editor *editor)
 gboolean try_save_page(Editor *editor, gboolean close_if_can)
 {
 	GtkWidget *confirm_dialog;
-	int ret;
+	gint ret;
 	GString *string;
-
-	string = g_string_new("");
+        string = g_string_new("");
 	g_string_printf(string, _("The file '%s' has not been saved since your last changes, are you sure you want to close it and lose these changes?"), editor->short_filename);
-	confirm_dialog = gnome_message_box_new (string->str,GNOME_MESSAGE_BOX_WARNING,
-		_("Close and _lose changes"), _("_Save file"), _("_Cancel closing"), NULL);
-	g_string_printf(string,_("Unsaved changes to '%s'"), editor->filename->str);
+        confirm_dialog=gtk_message_dialog_new (GTK_WINDOW(main_window.window),GTK_DIALOG_DESTROY_WITH_PARENT,GTK_MESSAGE_WARNING,GTK_BUTTONS_NONE,_("The file '%s' has not been saved since your last changes, are you sure you want to close it and lose these changes?"),editor->short_filename);
+        g_string_printf(string,_("Unsaved changes to '%s'"), editor->filename->str);
 	gtk_window_set_title(GTK_WINDOW(confirm_dialog), string->str);
-	ret = gnome_dialog_run (GNOME_DIALOG (confirm_dialog));
+        gtk_dialog_add_button (GTK_DIALOG(confirm_dialog),_("Close and _lose changes"),0);
+        gtk_dialog_add_button (GTK_DIALOG(confirm_dialog),_("_Save file"),1);
+        gtk_dialog_add_button (GTK_DIALOG(confirm_dialog),_("_Cancel closing"),2);
+        ret = gtk_dialog_run (GTK_DIALOG (confirm_dialog));
+        gtk_widget_destroy(confirm_dialog);
 	switch (ret) {
 		case 0:
 			if (close_if_can) {
