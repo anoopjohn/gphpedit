@@ -373,7 +373,10 @@ static void main_window_create_panes(void)
 
 	gtk_signal_connect (GTK_OBJECT (main_window.window), "size_allocate", GTK_SIGNAL_FUNC (classbrowser_accept_size), NULL);
 	move_classbrowser_position();
-	if (gnome_config_get_int ("gPHPEdit/main_window/classbrowser_hidden=0") == 1)
+        GConfClient *config;
+        config=gconf_client_get_default ();
+        
+	if (gconf_client_get_int (config,"/gPHPEdit/main_window/classbrowser_hidden",NULL) == 1)
 		classbrowser_hide();
 }
 
@@ -935,17 +938,17 @@ void main_window_update_reopen_menu(void)
 	//gchar *short_filename;
 	guint entry;
 	GtkBin *bin = NULL;
-	
+        GConfClient *config;
+        config=gconf_client_get_default ();
 	for (entry=0; entry<NUM_REOPEN_MAX; entry++) {
-		key = g_string_new("gPHPEdit/recent/");
-		g_string_append_printf(key, "%d=NOTFOUND", entry);
-		full_filename = gnome_config_get_string (key->str);
+		key = g_string_new("/gPHPEdit/recent/");
+		g_string_append_printf(key, "%d", entry);
+		full_filename = gconf_client_get_string(config,key->str,NULL);
 		g_string_free(key, TRUE);
 		
 		//g_print("Recent DEBUG: Entry %d: %s\n", entry, full_filename);
-		
-		if (strcmp(full_filename, "NOTFOUND")!=0) {
-			bin = GTK_BIN(recent_menu[entry].widget);
+                if (full_filename){
+				bin = GTK_BIN(recent_menu[entry].widget);
 			if (bin) {
 				gtk_label_set_text(GTK_LABEL(gtk_bin_get_child(bin)), full_filename);
 				gtk_widget_show(recent_menu[entry].widget);
@@ -955,6 +958,7 @@ void main_window_update_reopen_menu(void)
 			gtk_widget_hide(recent_menu[entry].widget);
 		}
 	}
+                
 }
 
 void main_window_add_to_reopen_menu(gchar *full_filename)
@@ -963,19 +967,21 @@ void main_window_add_to_reopen_menu(gchar *full_filename)
 	gchar *found;
 	GString *key;
 	guint found_id;
-	
+	GConfClient *config;
+        config=gconf_client_get_default ();
 	// Find current filename in list
 	found_id = -1;
 	for (entry=0; entry<NUM_REOPEN_MAX; entry++) {
-		key = g_string_new("gPHPEdit/recent/");
-		g_string_append_printf(key, "%d=NOTFOUND", entry);
-		found = gnome_config_get_string (key->str);
+		key = g_string_new("/gPHPEdit/recent/");
+		g_string_append_printf(key, "%d", entry);
+		found = gconf_client_get_string(config,key->str,NULL);
 		g_string_free(key, TRUE);
-		
+                if (found){
 		if (strcmp(full_filename, found)==0) {
 			found_id = entry;
 			break;
 		}
+               }
 	}
 	
 	// if not found, drop the last one off the end (i.e. pretend it was found in the last position)
@@ -985,22 +991,23 @@ void main_window_add_to_reopen_menu(gchar *full_filename)
 
 	// replace from found_id to 1 with entry above
 	for (entry=found_id; entry > 0; entry--) {
-		key = g_string_new("gPHPEdit/recent/");
-		g_string_append_printf(key, "%d=NOTFOUND", entry-1);
-		found = gnome_config_get_string (key->str);
+		key = g_string_new("/gPHPEdit/recent/");
+		g_string_append_printf(key, "%d", entry-1);
+		found = gconf_client_get_string(config,key->str,NULL);
 		g_string_free(key, TRUE);
 
-		key = g_string_new("gPHPEdit/recent/");
+		key = g_string_new("/gPHPEdit/recent/");
 		g_string_append_printf(key, "%d", entry);
-		gnome_config_set_string (key->str, found);
+		if (found){
+                gconf_client_set_string (config,key->str, found,NULL);
+                }
 		g_string_free(key, TRUE);
 	}
 
 	// set entry 0 to be new entry
-	gnome_config_set_string ("gPHPEdit/recent/0", full_filename);
+        gconf_client_set_string (config,"/gPHPEdit/recent/0", full_filename,NULL);
 		
 	main_window_update_reopen_menu();
-	gnome_config_sync();	
 }
 
 

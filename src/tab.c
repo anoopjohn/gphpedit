@@ -37,7 +37,7 @@
 #include "main_window_callbacks.h"
 #include "preferences.h"
 #include "grel2abs.h"
-
+#include <gconf/gconf-client.h>
 
 GSList *editors;
 guint completion_timer_id;
@@ -97,8 +97,7 @@ void tab_set_general_scintilla_properties(Editor *editor)
 	gtk_signal_connect (GTK_OBJECT (editor->scintilla), "macro_record", GTK_SIGNAL_FUNC (macro_record), NULL);
 
 	//gtk_scintilla_set_sel_back(GTK_SCINTILLA(editor->scintilla), 1, 13434879);
-gtk_scintilla_set_sel_back(GTK_SCINTILLA(editor->scintilla), 1, gnome_config_get_int ("gPHPEdit/default_style/selection=11250603"));
-
+        gtk_scintilla_set_sel_back(GTK_SCINTILLA(editor->scintilla),1,preferences.set_sel_back);
 
 	tab_set_configured_scintilla_properties(GTK_SCINTILLA(editor->scintilla), preferences);
 	gtk_widget_show (editor->scintilla);
@@ -202,18 +201,6 @@ static void tab_set_event_handlers(Editor *editor)
 	gtk_signal_connect (GTK_OBJECT (editor->scintilla), "update_ui", GTK_SIGNAL_FUNC (update_ui), NULL);
 }
 
-/*
-void tab_file_closed(GnomeVFSAsyncHandle *fd, GnomeVFSResult result, gpointer li_ptr)
-{
-	//Editor *editor = (Editor *)li_ptr;
-
-	if (result != GNOME_VFS_OK) {
-		g_print(_("VFS Error: %s\n"), gnome_vfs_result_to_string (result));
-		//gnome_vfs_print_error(result, editor->filename->str);
-	}
-	session_save();
-}
-*/
 void tab_file_write (GObject *source_object, GAsyncResult *res, gpointer user_data)
 {
         Editor *editor = (Editor *)user_data;
@@ -643,7 +630,7 @@ void info_dialog (gchar *title, gchar *message)
 {
 	GtkWidget *dialog;
 	gint button;
-       	        dialog = gtk_message_dialog_new(GTK_WINDOW(main_window.window),GTK_DIALOG_DESTROY_WITH_PARENT,GTK_MESSAGE_INFO,GTK_BUTTONS_OK,
+       	        dialog = gtk_message_dialog_new(GTK_WINDOW(main_window.window),GTK_DIALOG_DESTROY_WITH_PARENT,GTK_MESSAGE_INFO,GTK_BUTTONS_OK,"%s",
             message);
             gtk_window_set_title(GTK_WINDOW(dialog), title);
             button = gtk_dialog_run (GTK_DIALOG (dialog));
@@ -659,7 +646,7 @@ gint yes_no_dialog (gchar *title, gchar *message)
 {
 	GtkWidget *dialog;
 	gint button;
-       	dialog = gtk_message_dialog_new(GTK_WINDOW(main_window.window),GTK_DIALOG_DESTROY_WITH_PARENT,GTK_MESSAGE_INFO,GTK_BUTTONS_YES_NO,
+       	dialog = gtk_message_dialog_new(GTK_WINDOW(main_window.window),GTK_DIALOG_DESTROY_WITH_PARENT,GTK_MESSAGE_INFO,GTK_BUTTONS_YES_NO,"%s",
             message);
             gtk_window_set_title(GTK_WINDOW(dialog), title);
             button = gtk_dialog_run (GTK_DIALOG (dialog));
@@ -922,10 +909,10 @@ void register_file_opened(gchar *filename)
 	tmp_filename = g_string_new(filename);
 
 	folder = get_folder(tmp_filename);
-	gnome_config_set_string("gPHPEdit/general/last_opened_folder",  folder->str);
-	g_string_free(folder, TRUE);
-	gnome_config_sync();
-
+        GConfClient *config;
+        config=gconf_client_get_default ();
+        gconf_client_set_string (config,"/gPHPEdit/general/last_opened_folder",folder->str,NULL);
+        g_string_free(folder, TRUE);
 	g_string_free(tmp_filename, TRUE);
 }
 

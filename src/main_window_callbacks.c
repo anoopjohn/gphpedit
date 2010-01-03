@@ -249,8 +249,11 @@ void main_window_resize(GtkWidget *widget, GtkAllocation *allocation, gpointer u
 void main_window_state_changed(GtkWidget *widget, GdkEventWindowState *event, gpointer user_data)
 {
 	gboolean maximized = GDK_WINDOW_STATE_MAXIMIZED && event->new_window_state;
-	gnome_config_set_bool("gPHPEdit/main_window/maximized", maximized);
-	gnome_config_sync();
+	GConfClient *config;
+        config=gconf_client_get_default ();
+        
+	gconf_client_set_bool (config,"/gPHPEdit/main_window/maximized", maximized,NULL);
+
 }
 
 gboolean classbrowser_accept_size(GtkPaned *paned, gpointer user_data)
@@ -406,10 +409,12 @@ void reopen_recent(GtkWidget *widget, gpointer data)
 {
 	gchar *filename;
 	GString *key;
-	
-	key = g_string_new("gPHPEdit/recent/");
-	g_string_append_printf(key, "%d=NOTFOUND", (gint)data); // Back to being gint from gulong due to compiler warning
-	filename = gnome_config_get_string (key->str);
+	GConfClient *config;
+        config=gconf_client_get_default ();
+
+	key = g_string_new("/gPHPEdit/recent/");
+	g_string_append_printf(key, "%d", (gint)data); // Back to being gint from gulong due to compiler warning
+	filename = gconf_client_get_string(config,key->str,NULL);
 	g_string_free(key, TRUE);
 
 	if (DEBUG_MODE) { g_print("DEBUG: main_window_callbacks.c:reopen_recent:filename: %s\n", filename); }
@@ -594,7 +599,10 @@ void on_open1_activate(GtkWidget *widget)
 	gtk_dialog_set_default_response (GTK_DIALOG(file_selection_box), GTK_RESPONSE_ACCEPT);	
 	//Add filters to the open dialog
 	add_file_filters(GTK_FILE_CHOOSER(file_selection_box));
-	last_opened_folder = gnome_config_get_string("gPHPEdit/general/last_opened_folder=NOTFOUND");
+	GConfClient *config;
+	GError *error = NULL;
+        config=gconf_client_get_default ();
+	last_opened_folder = gconf_client_get_string(config,"/gPHPEdit/general/last_opened_folder",&error);
 	if (DEBUG_MODE) { g_print("DEBUG: main_window_callbacks.c:on_open1_activate:last_opened_folder: %s\n", last_opened_folder); }
 	/* opening of multiple files at once */
 	gtk_file_chooser_set_select_multiple(GTK_FILE_CHOOSER(file_selection_box), TRUE);
@@ -605,7 +613,7 @@ void on_open1_activate(GtkWidget *widget)
 		gtk_file_chooser_set_current_folder_uri(GTK_FILE_CHOOSER(file_selection_box),  folder->str);
 		g_string_free(folder, TRUE);
 	}
-	else if (strcmp(last_opened_folder, "NOTFOUND")!=0) {
+	else if (!last_opened_folder){
 		gtk_file_chooser_set_current_folder_uri(GTK_FILE_CHOOSER(file_selection_box),  last_opened_folder);
 	}
 	
@@ -763,8 +771,11 @@ void on_save_as1_activate(GtkWidget *widget)
 		gtk_file_chooser_set_local_only (GTK_FILE_CHOOSER(file_selection_box), FALSE);
 		gtk_file_chooser_set_do_overwrite_confirmation (GTK_FILE_CHOOSER(file_selection_box), TRUE);
 		gtk_dialog_set_default_response (GTK_DIALOG(file_selection_box), GTK_RESPONSE_ACCEPT);
-	
-		last_opened_folder = gnome_config_get_string("gPHPEdit/general/last_opened_folder=NOTFOUND");
+		
+		GConfClient *config;
+		GError *error = NULL;
+	        config=gconf_client_get_default ();
+		last_opened_folder = gconf_client_get_string(config,"/gPHPEdit/general/last_opened_folder",&error);
 		if (DEBUG_MODE) { g_print("DEBUG: main_window_callbacks.c:on_save_as1_activate:last_opened_folder: %s\n", last_opened_folder); }
 	
 		if (main_window.current_editor) {
@@ -773,7 +784,7 @@ void on_save_as1_activate(GtkWidget *widget)
 				gtk_file_chooser_set_uri(GTK_FILE_CHOOSER(file_selection_box), filename);
 			}
 			else {
-				if (strcmp(last_opened_folder, "NOTFOUND")!=0) {
+				if (!last_opened_folder){
 					if (DEBUG_MODE) { g_print("DEBUG: main_window_callbacks.c:on_save_as1_activate:Setting current_folder_uri to %s\n", last_opened_folder); }
 					gtk_file_chooser_set_current_folder_uri(GTK_FILE_CHOOSER(file_selection_box),  last_opened_folder);
 				}
@@ -787,14 +798,6 @@ void on_save_as1_activate(GtkWidget *widget)
 		gtk_widget_destroy(file_selection_box);		
 	}
 }
-/*
-void on_reload_confirm(gint reply,gpointer filename)
-{
-	if (reply==0) {
-		tab_load_file(main_window.current_editor);
-	}
-}
- * */
 void on_reload1_activate(GtkWidget *widget)
 {
 	GtkWidget *file_revert_dialog;
@@ -1341,42 +1344,6 @@ void on_about1_activate(GtkWidget *widget)
   g_object_unref(pixbuf), pixbuf = NULL;
   gtk_dialog_run(GTK_DIALOG (dialog));
   gtk_widget_destroy(dialog);
-/*
-
-	
-	
-	
-	GtkWidget *about;
-	GdkPixbuf *pixbuf = NULL;
-	GError *error = NULL;
-
-	pixbuf = gdk_pixbuf_new_from_file (PIXMAP_DIR "/" GPHPEDIT_PIXMAP_ICON, &error);
-
-	if (error) {
-		g_warning (G_STRLOC ": cannot open icon: %s", error->message);
-		g_error_free (error);
-	}
-	about = gnome_about_new ("gPHPEdit", VERSION,
-							 _("Copyright  2003-2006 Andy Jeffries, 2009 Anoop John"),
-						 	 _("gPHPEdit is a GNOME2 editor specialised for editing PHP "
-							 "scripts and related files (HTML/CSS/JS)."),
-							 (const gchar **) authors,
-							 (const gchar **) documenters,
-							 strcmp (translator_credits, "translator_credits") != 0 ? translator_credits : NULL,
-							 pixbuf);
-	gtk_widget_show(about);
-
-	if (pixbuf) {
-		gdk_pixbuf_unref (pixbuf);
-	}
-		
-	gtk_window_set_transient_for (GTK_WINDOW (about), NULL);
-	// This line causes a segfault - should be right but commented out!
-	gtk_signal_connect(GTK_OBJECT(about), "destroy",
-					   GTK_SIGNAL_FUNC(gtk_widget_destroyed), &about);
-	gtk_widget_show (about);
-        */
-
 }
 
 void on_notebook_switch_page (GtkNotebook *notebook, GtkNotebookPage *page,
@@ -1703,26 +1670,34 @@ void classbrowser_show(void)
 {
 	gtk_paned_set_position(GTK_PANED(main_window.main_horizontal_pane),classbrowser_hidden_position);
 	//g_print("Width of class browser is %d\n", classbrowser_hidden_position);
-	gnome_config_set_int ("gPHPEdit/main_window/classbrowser_hidden",0);
-	gnome_config_sync();
+	GConfClient *config;
+        config=gconf_client_get_default ();
+        
+	gconf_client_set_int (config, "/gPHPEdit/main_window/classbrowser_hidden", 0,NULL);
 	classbrowser_update();
 }
 
 
 void classbrowser_hide(void)
 {
-	classbrowser_hidden_position = gnome_config_get_int ("gPHPEdit/main_window/classbrowser_size=100");
+	GConfClient *config;
+        config=gconf_client_get_default ();
+	GError *error = NULL;
+	classbrowser_hidden_position = gconf_client_get_int (config,"/gPHPEdit/main_window/classbrowser_size",&error);
+	if (classbrowser_hidden_position==0 && error!=NULL){
+	classbrowser_hidden_position=100;
+	}
 	//g_print("Width of class browser is %d\n", classbrowser_hidden_position);
 	gtk_paned_set_position(GTK_PANED(main_window.main_horizontal_pane),0);
-	gnome_config_set_int ("gPHPEdit/main_window/classbrowser_hidden",1);
-	gnome_config_sync();
+	gconf_client_set_int (config, "/gPHPEdit/main_window/classbrowser_hidden", 1,NULL);
 }
 
 void classbrowser_show_hide(GtkWidget *widget)
 {
 	gint hidden;
-	
-	hidden = gnome_config_get_int ("gPHPEdit/main_window/classbrowser_hidden=0");
+	GConfClient *config;
+        config=gconf_client_get_default ();
+	hidden = gconf_client_get_int (config,"/gPHPEdit/main_window/classbrowser_hidden",NULL);
 	if (hidden == 1)
 		classbrowser_show();
 	else

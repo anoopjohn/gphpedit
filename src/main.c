@@ -26,7 +26,6 @@
 #include <config.h>
 #endif
 
-//#include <libgnomevfs/gnome-vfs.h>
 #include <gio/gio.h>
 #include <stdarg.h>
 #include "main.h"
@@ -34,7 +33,7 @@
 #include "main_window_callbacks.h"
 #include "gphpedit_ipc.h"
 #include "templates.h"
-
+#include <gconf/gconf-client.h>
 
 GnomeProgram* gphpedit_program;
 
@@ -50,6 +49,8 @@ int main (int argc, char **argv)
 
 	gphpedit_program = gnome_program_init ("gPHPEdit", VERSION, LIBGNOMEUI_MODULE,
 	                                       argc, argv, NULL);
+
+        gconf_init(argc, argv, NULL);
 
 //	vfs_inited = gnome_vfs_init();
 //	g_assert(vfs_inited);

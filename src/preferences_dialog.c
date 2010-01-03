@@ -671,7 +671,7 @@ void get_control_values_to_highlight(gchar *setting_name, gchar **fontname, gint
 		g_string_printf(message, _("You have just changed the font to %s\n\nWould you like to use this font as the default for every element?"), gtk_combo_box_get_active_text(GTK_COMBO_BOX(preferences_dialog.font_combo)));
 		//gtk_combo_box_popdown(GTK_COMBO_BOX(preferences_dialog.font_combo));
 		dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_MESSAGE_QUESTION,
-				  GTK_BUTTONS_YES_NO, message->str);
+				  GTK_BUTTONS_YES_NO,"%s", message->str);
 		result = gtk_dialog_run (GTK_DIALOG (dialog));
 		gtk_widget_destroy (dialog);
 		change_font_global_callback(result, tempfontname->str);		
@@ -687,7 +687,7 @@ void get_control_values_to_highlight(gchar *setting_name, gchar **fontname, gint
 		g_string_printf(message, _("You have just changed the font size to %dpt\n\nWould you like to use this font size as the default for every element?"), newfontsize);
 		//gtk_combo_box_popdown(GTK_COMBO_BOX(preferences_dialog.size_combo));
 		dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_MESSAGE_QUESTION,
-				  GTK_BUTTONS_YES_NO, message->str);
+				  GTK_BUTTONS_YES_NO,"%s", message->str);
 		result = gtk_dialog_run (GTK_DIALOG (dialog));
 		gtk_widget_destroy (dialog);
 		change_size_global_callback(result, (gpointer)newfontsize);		
