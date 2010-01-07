@@ -1,0 +1,177 @@
+<!-- !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! -->
+	<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+	<html lang="en">
+	<head>
+<BASE HREF="http://www.dirac.org.wstub.archive.org/linux/gdb/">
+
+	<title>Peter's gdb Tutorial: Table Of Contents </title>
+	<link rel=STYLESHEET type="text/css" href="./inclusions/style.css" title="Style" />
+	</head>
+	<body>
+
+	<img src="inclusions/images/gnu-head.png" align="right" alt="" /><h1>Using GNU's GDB Debugger</h1><h1>Table Of Contents</h1><h4>By Peter Jay Salzman</h4><hr /><table width="100%"><tr><td align="left">Previous: <a href=""></a></td><td align="right">Next: <a href="00-Administrata.php">Administrata</a></td></tr></table><hr /><h3>Chapter 0: Administrata</h3>
+<ol>
+<li><a href="./00-Administrata.php#whywritethistutorial">Why Write This Tutorial?</a></li>
+<li><a href="./00-Administrata.php#acknowledgementsanddedication">Acknowledgements And Dedication</a></li>
+<li><a href="./00-Administrata.php#authorshipandcopyright">Authorship And Copyright</a></li>
+<li><a href="./00-Administrata.php#aboutexercises">About Exercises</a></li>
+<li><a href="./00-Administrata.php#thankyous">Thank Yous</a></li>
+<li><a href="./00-Administrata.php#aplugfortheeff">A Plug For The EFF</a></li>
+<li><a href="./00-Administrata.php#arequestforhelp">A Request For Help</a></li>
+</ol>
+<h3>Chapter 1: Introduction</h3>
+<ol>
+<li><a href="./01-Introduction.php#whatisadebugger">What Is A Debugger?</a></li>
+<li><a href="./01-Introduction.php#whynotuse<tt>printf()</tt>">Why Not Use <TT>printf()</TT>?</a></li>
+<li><a href="./01-Introduction.php#whatisgdb">What Is GDB?</a></li>
+<li><a href="./01-Introduction.php#othersymbolicdebuggers">Other Symbolic Debuggers</a></li>
+<ol><li><a href="./01-Introduction.php#debuggers">Debuggers</a></li>
+<li><a href="./01-Introduction.php#frontends">Front Ends</a></li>
+</ol></ol>
+<h3>Chapter 2: Memory Layout and the Stack</h3>
+<ol>
+<li><a href="./02a-Memory_Layout_And_The_Stack.php#wherearewegoingtogo">Where Are We Going To Go?</a></li>
+<li><a href="./02a-Memory_Layout_And_The_Stack.php#virtualmemory">Virtual Memory</a></li>
+<li><a href="./02a-Memory_Layout_And_The_Stack.php#memorylayout">Memory Layout</a></li>
+<li><a href="./02a-Memory_Layout_And_The_Stack.php#stackframesandthestack">Stack Frames And The Stack</a></li>
+<li><a href="./02a-Memory_Layout_And_The_Stack.php#thesymboltable">The Symbol Table</a></li>
+<li><a href="./02a-Memory_Layout_And_The_Stack.php#preparinganexecutablefordebugging">Preparing An Executable For Debugging</a></li>
+<li><a href="./02a-Memory_Layout_And_The_Stack.php#investigatingthestackwithgdb">Investigating The Stack With GDB</a></li>
+</ol>
+<h3>Interlude: Debugging With Your Brain</h3>
+<ol>
+<li><a href="./02b-Debugging_With_Your_Brain.php#pleasereadbeforecontinuing">Please Read Before Continuing</a></li>
+<li><a href="./02b-Debugging_With_Your_Brain.php#debuggingwithyourbrain">Debugging With Your Brain</a></li>
+</ol>
+<h3>Chapter 3: Initialization, Listing, And Running</h3>
+<ol>
+<li><a href="./03-Initialization,_Listing,_And_Running.php#wherearewenow">Where Are We Now?</a></li>
+<li><a href="./03-Initialization,_Listing,_And_Running.php#wherearewegoingtogo">Where Are We Going To Go?</a></li>
+<li><a href="./03-Initialization,_Listing,_And_Running.php#listingsourcecode">Listing Source Code</a></li>
+<li><a href="./03-Initialization,_Listing,_And_Running.php#settingthelistsize">Setting The List Size</a></li>
+<li><a href="./03-Initialization,_Listing,_And_Running.php#the<tt>.gdbinit</tt>file">The <TT>.gdbinit</TT> File</a></li>
+<li><a href="./03-Initialization,_Listing,_And_Running.php#gdbinitonmswindows">gdbinit  on MS  Windows</a></li>
+<li><a href="./03-Initialization,_Listing,_And_Running.php#runningaprogramingdb">Running A Program In GDB</a></li>
+<li><a href="./03-Initialization,_Listing,_And_Running.php#restartingaprogramingdb">Restarting A Program In GDB</a></li>
+</ol>
+<h3>Chapter 4: Breakpoints And Watchpoints</h3>
+<ol>
+<p><b>This chapter under massive reconstruction.</b></p><li><a href="./04-Breakpoints_And_Watchpoints.php#breaking">Breaking</a></li>
+<ol><li><a href="./04-Breakpoints_And_Watchpoints.php#settingbasicbreakpoints">Setting Basic Breakpoints</a></li>
+<li><a href="./04-Breakpoints_And_Watchpoints.php#byfunctionname">By Function Name</a></li>
+<li><a href="./04-Breakpoints_And_Watchpoints.php#bylinenumber">By Line Number</a></li>
+<li><a href="./04-Breakpoints_And_Watchpoints.php#byfileandlinenumber">By File And Line Number</a></li>
+<li><a href="./04-Breakpoints_And_Watchpoints.php#byaddress">By Address</a></li>
+<li><a href="./04-Breakpoints_And_Watchpoints.php#breakpointnumbers">Breakpoint Numbers</a></li>
+<li><a href="./04-Breakpoints_And_Watchpoints.php#removingbreakpoints">Removing Breakpoints</a></li>
+<li><a href="./04-Breakpoints_And_Watchpoints.php#enabling,disablingandignoring">Enabling, Disabling And Ignoring</a></li>
+<li><a href="./04-Breakpoints_And_Watchpoints.php#listingbreakpoints">Listing Breakpoints</a></li>
+</ol></ol>
+<h3>Chapter 5: Stepping and Resuming</h3>
+<ol>
+<p><b>This chapter under massive reconstruction.</b></p><li><a href="./05-Stepping_And_Resuming.php#breakpointsandwatchpoints">Breakpoints And Watchpoints</a></li>
+<li><a href="./05-Stepping_And_Resuming.php#settingbreakpointsinsinglefileprograms">Setting Breakpoints In Single File Programs</a></li>
+<li><a href="./05-Stepping_And_Resuming.php#settingbreakpointsinmultiplefileprograms">Setting Breakpoints In Multiple File Programs</a></li>
+<li><a href="./05-Stepping_And_Resuming.php#advancedbreaking">Advanced Breaking</a></li>
+<li><a href="./05-Stepping_And_Resuming.php#summaryofbreakpoints">Summary Of Breakpoints</a></li>
+<li><a href="./05-Stepping_And_Resuming.php#deletingbreakpoints">Deleting Breakpoints</a></li>
+<li><a href="./05-Stepping_And_Resuming.php#inspectingvariables">Inspecting Variables</a></li>
+<li><a href="./05-Stepping_And_Resuming.php#inspectingarraysandstructures">Inspecting Arrays And Structures</a></li>
+<li><a href="./05-Stepping_And_Resuming.php#advancedinspection">Advanced Inspection</a></li>
+<li><a href="./05-Stepping_And_Resuming.php#changingvariables">Changing Variables</a></li>
+<li><a href="./05-Stepping_And_Resuming.php#steppingthroughyourprogram">Stepping Through Your Program</a></li>
+<li><a href="./05-Stepping_And_Resuming.php#findingoutwhereyouareandlistingsourcecode">Finding Out Where You Are And Listing Source Code</a></li>
+</ol>
+<h3>Chapter 6: Debugging A Running Process</h3>
+<ol>
+<li><a href="./06-Debugging_A_Running_Process.php#debuggingarunningprocess">Debugging A Running Process</a></li>
+<li><a href="./06-Debugging_A_Running_Process.php#withcommandlinearguments">With Command Line Arguments</a></li>
+<li><a href="./06-Debugging_A_Running_Process.php#withtheattachcommand">With The Attach Command</a></li>
+<li><a href="./06-Debugging_A_Running_Process.php#processeswithoutdebuggingsymbols">Processes Without Debugging Symbols</a></li>
+</ol>
+<h3>Chapter 7: Debugging Ncurses Programs</h3>
+<ol>
+<li><a href="./07-Debugging_Ncurses_Programs.php#ncurses">Ncurses</a></li>
+<li><a href="./07-Debugging_Ncurses_Programs.php#gettingstarted">Getting Started</a></li>
+<li><a href="./07-Debugging_Ncurses_Programs.php#separatinginput/output">Separating Input/Output</a></li>
+</ol>
+<h3>Chapter 8: Other Stuff</h3>
+<ol>
+<li><a href="./08-Other_Stuff.php#officialsources">Official Sources</a></li>
+<li><a href="./08-Other_Stuff.php#othertutorials">Other Tutorials</a></li>
+<li><a href="./08-Other_Stuff.php#kudos">Kudos</a></li>
+<li><a href="./08-Other_Stuff.php#google">Google</a></li>
+</ol>
+<p>&nbsp;</p><br /><hr /><table width="100%"><tr><td width="33%" align="left"><img src="http://www.dirac.org/linux/gdb/inclusions/icons/prev.png" alt="back"/> &nbsp; Back: <a href=""></a></td><td align="left"><img src="http://www.dirac.org/linux/gdb/inclusions/icons/up.png" alt="up" />   &nbsp;<a href="http://www.dirac.org/linux/gdb">Up</a> to the TOC</td><td align="right">Next: <a href="00-Administrata.php">Administrata</a> &nbsp; <img src="http://www.dirac.org/linux/gdb/inclusions/icons/next.png" alt="next" /></td></tr><tr><td></td><td align="left"><img src="http://www.dirac.org/linux/gdb/inclusions/icons/email.png" alt="email" /> &nbsp;<a href="mailto:p@dirac.org">Email</a> comments and corrections<br /></td></tr><tr><td></td><td align="left"><img src="http://www.dirac.org/linux/gdb/inclusions/icons/printable.png" alt="printable" /> &nbsp;<a href="index.php?printable=yes">Printable</a> version</td><td></td></tr></table>
+	<br />
+	</body>
+	
+<!-- SOME LINK HREF'S ON THIS PAGE HAVE BEEN REWRITTEN BY THE WAYBACK MACHINE
+OF THE INTERNET ARCHIVE IN ORDER TO PRESERVE THE TEMPORAL INTEGRITY OF THE SESSION. -->
+
+
+<SCRIPT language="Javascript">
+<!--
+
+// FILE ARCHIVED ON 20080511001311 AND RETRIEVED FROM THE
+// INTERNET ARCHIVE ON 20100107045518.
+// JAVASCRIPT APPENDED BY WAYBACK MACHINE, COPYRIGHT INTERNET ARCHIVE.
+// ALL OTHER CONTENT MAY ALSO BE PROTECTED BY COPYRIGHT (17 U.S.C.
+// SECTION 108(a)(3)).
+
+   var sWayBackCGI = "http://web.archive.org/web/20080511001311/";
+
+   function xResolveUrl(url) {
+      var image = new Image();
+      image.src = url;
+      return image.src;
+   }
+   function xLateUrl(aCollection, sProp) {
+      var i = 0;
+      for(i = 0; i < aCollection.length; i++) {
+         var url = aCollection[i][sProp];         if (typeof(url) == "string") { 
+          if (url.indexOf("mailto:") == -1 &&
+             url.indexOf("javascript:") == -1
+             && url.length > 0) {
+            if(url.indexOf("http") != 0) {
+                url = xResolveUrl(url);
+            }
+            url = url.replace('.wstub.archive.org','');
+            aCollection[i][sProp] = sWayBackCGI + url;
+         }
+         }
+      }
+   }
+
+   xLateUrl(document.getElementsByTagName("IMG"),"src");
+   xLateUrl(document.getElementsByTagName("A"),"href");
+   xLateUrl(document.getElementsByTagName("AREA"),"href");
+   xLateUrl(document.getElementsByTagName("OBJECT"),"codebase");
+   xLateUrl(document.getElementsByTagName("OBJECT"),"data");
+   xLateUrl(document.getElementsByTagName("APPLET"),"codebase");
+   xLateUrl(document.getElementsByTagName("APPLET"),"archive");
+   xLateUrl(document.getElementsByTagName("EMBED"),"src");
+   xLateUrl(document.getElementsByTagName("BODY"),"background");
+   xLateUrl(document.getElementsByTagName("TD"),"background");
+   xLateUrl(document.getElementsByTagName("INPUT"),"src");
+   var forms = document.getElementsByTagName("FORM");
+   if (forms) {
+       var j = 0;
+       for (j = 0; j < forms.length; j++) {
+              f = forms[j];
+              if (typeof(f.action)  == "string") {
+                 if(typeof(f.method)  == "string") {
+                     if(typeof(f.method) != "post") {
+                        f.action = sWayBackCGI + f.action;
+                     }
+                  }
+              }
+        }
+    }
+
+
+//-->
+</SCRIPT>
+
+</html>

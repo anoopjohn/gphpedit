@@ -163,6 +163,9 @@ void gtk_scintilla_set_use_palette(GtkScintilla *sci, gint use_palette);
 #define SC_MARK_ARROWS 24
 #define SC_MARK_PIXMAP 25
 #define SC_MARK_FULLRECT 26
+#define SC_MARK_LEFTRECT 27
+#define SC_MARK_AVAILABLE 28
+#define SC_MARK_UNDERLINE 29
 #define SC_MARK_CHARACTER 10000
 #define SC_MARKNUM_FOLDEREND 25
 #define SC_MARKNUM_FOLDEROPENMID 26
@@ -188,6 +191,8 @@ void gtk_scintilla_marker_set_alpha(GtkScintilla *sci, int marker_number, int al
 #define SC_MARGIN_NUMBER 1
 #define SC_MARGIN_BACK 2
 #define SC_MARGIN_FORE 3
+#define SC_MARGIN_TEXT 4
+#define SC_MARGIN_RTEXT 5
 void gtk_scintilla_set_margin_type_n(GtkScintilla *sci, int margin, int margin_type);
 int gtk_scintilla_get_margin_type_n(GtkScintilla *sci, int margin);
 void gtk_scintilla_set_margin_width_n(GtkScintilla *sci, int margin, int pixel_width);
@@ -204,7 +209,7 @@ gint gtk_scintilla_get_margin_sensitive_n(GtkScintilla *sci, int margin);
 #define STYLE_INDENTGUIDE 37
 #define STYLE_CALLTIP 38
 #define STYLE_LASTPREDEFINED 39
-#define STYLE_MAX 127
+#define STYLE_MAX 255
 #define SC_CHARSET_ANSI 0
 #define SC_CHARSET_DEFAULT 1
 #define SC_CHARSET_BALTIC 186
@@ -239,6 +244,19 @@ void gtk_scintilla_style_set_underline(GtkScintilla *sci, int style, gint underl
 #define SC_CASE_MIXED 0
 #define SC_CASE_UPPER 1
 #define SC_CASE_LOWER 2
+glong gtk_scintilla_style_get_fore(GtkScintilla *sci, int style);
+glong gtk_scintilla_style_get_back(GtkScintilla *sci, int style);
+gint gtk_scintilla_style_get_bold(GtkScintilla *sci, int style);
+gint gtk_scintilla_style_get_italic(GtkScintilla *sci, int style);
+int gtk_scintilla_style_get_size(GtkScintilla *sci, int style);
+int gtk_scintilla_style_get_font(GtkScintilla *sci, int style, gchar * font_name);
+gint gtk_scintilla_style_get_eol_filled(GtkScintilla *sci, int style);
+gint gtk_scintilla_style_get_underline(GtkScintilla *sci, int style);
+int gtk_scintilla_style_get_case(GtkScintilla *sci, int style);
+int gtk_scintilla_style_get_character_set(GtkScintilla *sci, int style);
+gint gtk_scintilla_style_get_visible(GtkScintilla *sci, int style);
+gint gtk_scintilla_style_get_changeable(GtkScintilla *sci, int style);
+gint gtk_scintilla_style_get_hot_spot(GtkScintilla *sci, int style);
 void gtk_scintilla_style_set_case(GtkScintilla *sci, int style, int case_force);
 void gtk_scintilla_style_set_character_set(GtkScintilla *sci, int style, int character_set);
 void gtk_scintilla_style_set_hot_spot(GtkScintilla *sci, int style, gint hotspot);
@@ -246,6 +264,8 @@ void gtk_scintilla_set_sel_fore(GtkScintilla *sci, gint use_setting, glong fore)
 void gtk_scintilla_set_sel_back(GtkScintilla *sci, gint use_setting, glong back);
 int gtk_scintilla_get_sel_alpha(GtkScintilla *sci);
 void gtk_scintilla_set_sel_alpha(GtkScintilla *sci, int alpha);
+gint gtk_scintilla_get_sel_eol_filled(GtkScintilla *sci);
+void gtk_scintilla_set_sel_eol_filled(GtkScintilla *sci, gint filled);
 void gtk_scintilla_set_caret_fore(GtkScintilla *sci, glong fore);
 void gtk_scintilla_clear_all_cmd_keys(GtkScintilla *sci);
 void gtk_scintilla_set_styling_ex(GtkScintilla *sci, int length, const gchar * styles);
@@ -255,7 +275,6 @@ void gtk_scintilla_set_caret_period(GtkScintilla *sci, int period_milliseconds);
 void gtk_scintilla_set_word_chars(GtkScintilla *sci, const gchar * characters);
 void gtk_scintilla_begin_undo_action(GtkScintilla *sci);
 void gtk_scintilla_end_undo_action(GtkScintilla *sci);
-#define INDIC_MAX 7
 #define INDIC_PLAIN 0
 #define INDIC_SQUIGGLE 1
 #define INDIC_TT 2
@@ -264,6 +283,8 @@ void gtk_scintilla_end_undo_action(GtkScintilla *sci);
 #define INDIC_HIDDEN 5
 #define INDIC_BOX 6
 #define INDIC_ROUNDBOX 7
+#define INDIC_MAX 31
+#define INDIC_CONTAINER 8
 #define INDIC0_MASK 0x20
 #define INDIC1_MASK 0x40
 #define INDIC2_MASK 0x80
@@ -272,6 +293,8 @@ void gtk_scintilla_indic_set_style(GtkScintilla *sci, int indic, int style);
 int gtk_scintilla_indic_get_style(GtkScintilla *sci, int indic);
 void gtk_scintilla_indic_set_fore(GtkScintilla *sci, int indic, glong fore);
 glong gtk_scintilla_indic_get_fore(GtkScintilla *sci, int indic);
+void gtk_scintilla_indic_set_under(GtkScintilla *sci, int indic, gint under);
+gint gtk_scintilla_indic_get_under(GtkScintilla *sci, int indic);
 void gtk_scintilla_set_whitespace_fore(GtkScintilla *sci, gint use_setting, glong fore);
 void gtk_scintilla_set_whitespace_back(GtkScintilla *sci, gint use_setting, glong back);
 void gtk_scintilla_set_style_bits(GtkScintilla *sci, int bits);
@@ -323,8 +346,12 @@ glong gtk_scintilla_get_line_indent_position(GtkScintilla *sci, int line);
 int gtk_scintilla_get_column(GtkScintilla *sci, glong pos);
 void gtk_scintilla_set_h_scroll_bar(GtkScintilla *sci, gint show);
 gint gtk_scintilla_get_h_scroll_bar(GtkScintilla *sci);
-void gtk_scintilla_set_indentation_guides(GtkScintilla *sci, gint show);
-gint gtk_scintilla_get_indentation_guides(GtkScintilla *sci);
+#define SC_IV_NONE 0
+#define SC_IV_REAL 1
+#define SC_IV_LOOKFORWARD 2
+#define SC_IV_LOOKBOTH 3
+void gtk_scintilla_set_indentation_guides(GtkScintilla *sci, int indent_view);
+int gtk_scintilla_get_indentation_guides(GtkScintilla *sci);
 void gtk_scintilla_set_highlight_guide(GtkScintilla *sci, int column);
 int gtk_scintilla_get_highlight_guide(GtkScintilla *sci);
 int gtk_scintilla_get_line_end_position(GtkScintilla *sci, int line);
@@ -412,10 +439,6 @@ int gtk_scintilla_wrap_count(GtkScintilla *sci, int line);
 #define SC_FOLDLEVELBASE 0x400
 #define SC_FOLDLEVELWHITEFLAG 0x1000
 #define SC_FOLDLEVELHEADERFLAG 0x2000
-#define SC_FOLDLEVELBOXHEADERFLAG 0x4000
-#define SC_FOLDLEVELBOXFOOTERFLAG 0x8000
-#define SC_FOLDLEVELCONTRACTED 0x10000
-#define SC_FOLDLEVELUNINDENT 0x20000
 #define SC_FOLDLEVELNUMBERMASK 0x0FFF
 void gtk_scintilla_set_fold_level(GtkScintilla *sci, int line, int level);
 int gtk_scintilla_get_fold_level(GtkScintilla *sci, int line);
@@ -433,7 +456,6 @@ void gtk_scintilla_ensure_visible(GtkScintilla *sci, int line);
 #define SC_FOLDFLAG_LINEAFTER_EXPANDED 0x0008
 #define SC_FOLDFLAG_LINEAFTER_CONTRACTED 0x0010
 #define SC_FOLDFLAG_LEVELNUMBERS 0x0040
-#define SC_FOLDFLAG_BOX 0x0001
 void gtk_scintilla_set_fold_flags(GtkScintilla *sci, int flags);
 void gtk_scintilla_ensure_visible_enforce_policy(GtkScintilla *sci, int line);
 void gtk_scintilla_set_tab_indents(GtkScintilla *sci, gint tab_indents);
@@ -462,6 +484,11 @@ void gtk_scintilla_set_wrap_visual_flags_location(GtkScintilla *sci, int wrap_vi
 int gtk_scintilla_get_wrap_visual_flags_location(GtkScintilla *sci);
 void gtk_scintilla_set_wrap_start_indent(GtkScintilla *sci, int indent);
 int gtk_scintilla_get_wrap_start_indent(GtkScintilla *sci);
+#define SC_WRAPINDENT_FIXED 0
+#define SC_WRAPINDENT_SAME 1
+#define SC_WRAPINDENT_INDENT 2
+void gtk_scintilla_set_wrap_indent_mode(GtkScintilla *sci, int mode);
+int gtk_scintilla_get_wrap_indent_mode(GtkScintilla *sci);
 #define SC_CACHE_NONE 0
 #define SC_CACHE_CARET 1
 #define SC_CACHE_PAGE 2
@@ -470,6 +497,8 @@ void gtk_scintilla_set_layout_cache(GtkScintilla *sci, int mode);
 int gtk_scintilla_get_layout_cache(GtkScintilla *sci);
 void gtk_scintilla_set_scroll_width(GtkScintilla *sci, int pixel_width);
 int gtk_scintilla_get_scroll_width(GtkScintilla *sci);
+void gtk_scintilla_set_scroll_width_tracking(GtkScintilla *sci, gint tracking);
+gint gtk_scintilla_get_scroll_width_tracking(GtkScintilla *sci);
 int gtk_scintilla_text_width(GtkScintilla *sci, int style, const gchar * text);
 void gtk_scintilla_set_end_at_last_line(GtkScintilla *sci, gint end_at_last_line);
 gint gtk_scintilla_get_end_at_last_line(GtkScintilla *sci);
@@ -521,6 +550,7 @@ void gtk_scintilla_zoom_in(GtkScintilla *sci);
 void gtk_scintilla_zoom_out(GtkScintilla *sci);
 void gtk_scintilla_del_word_left(GtkScintilla *sci);
 void gtk_scintilla_del_word_right(GtkScintilla *sci);
+void gtk_scintilla_del_word_right_end(GtkScintilla *sci);
 void gtk_scintilla_line_cut(GtkScintilla *sci);
 void gtk_scintilla_line_delete(GtkScintilla *sci);
 void gtk_scintilla_line_transpose(GtkScintilla *sci);
@@ -574,6 +604,9 @@ void gtk_scintilla_release_document(GtkScintilla *sci, int doc);
 int gtk_scintilla_get_mod_event_mask(GtkScintilla *sci);
 void gtk_scintilla_set_focus(GtkScintilla *sci, gint focus);
 gint gtk_scintilla_get_focus(GtkScintilla *sci);
+#define SC_STATUS_OK 0
+#define SC_STATUS_FAILURE 1
+#define SC_STATUS_BADALLOC 2
 void gtk_scintilla_set_status(GtkScintilla *sci, int status_code);
 int gtk_scintilla_get_status(GtkScintilla *sci);
 void gtk_scintilla_set_mouse_down_captures(GtkScintilla *sci, gint captures);
@@ -606,9 +639,13 @@ void gtk_scintilla_set_y_caret_policy(GtkScintilla *sci, int caret_policy, int c
 void gtk_scintilla_set_print_wrap_mode(GtkScintilla *sci, int mode);
 int gtk_scintilla_get_print_wrap_mode(GtkScintilla *sci);
 void gtk_scintilla_set_hotspot_active_fore(GtkScintilla *sci, gint use_setting, glong fore);
+glong gtk_scintilla_get_hotspot_active_fore(GtkScintilla *sci);
 void gtk_scintilla_set_hotspot_active_back(GtkScintilla *sci, gint use_setting, glong back);
+glong gtk_scintilla_get_hotspot_active_back(GtkScintilla *sci);
 void gtk_scintilla_set_hotspot_active_underline(GtkScintilla *sci, gint underline);
+gint gtk_scintilla_get_hotspot_active_underline(GtkScintilla *sci);
 void gtk_scintilla_set_hotspot_single_line(GtkScintilla *sci, gint single_line);
+gint gtk_scintilla_get_hotspot_single_line(GtkScintilla *sci);
 void gtk_scintilla_para_down(GtkScintilla *sci);
 void gtk_scintilla_para_down_extend(GtkScintilla *sci);
 void gtk_scintilla_para_up(GtkScintilla *sci);
@@ -620,6 +657,7 @@ void gtk_scintilla_copy_text(GtkScintilla *sci, int length, const gchar * text);
 #define SC_SEL_STREAM 0
 #define SC_SEL_RECTANGLE 1
 #define SC_SEL_LINES 2
+#define SC_SEL_THIN 3
 void gtk_scintilla_set_selection_mode(GtkScintilla *sci, int mode);
 int gtk_scintilla_get_selection_mode(GtkScintilla *sci);
 glong gtk_scintilla_get_line_sel_start_position(GtkScintilla *sci, int line);
@@ -660,6 +698,108 @@ void gtk_scintilla_selection_duplicate(GtkScintilla *sci);
 #define SC_ALPHA_NOALPHA 256
 void gtk_scintilla_set_caret_line_back_alpha(GtkScintilla *sci, int alpha);
 int gtk_scintilla_get_caret_line_back_alpha(GtkScintilla *sci);
+#define CARETSTYLE_INVISIBLE 0
+#define CARETSTYLE_LINE 1
+#define CARETSTYLE_BLOCK 2
+void gtk_scintilla_set_caret_style(GtkScintilla *sci, int caret_style);
+int gtk_scintilla_get_caret_style(GtkScintilla *sci);
+void gtk_scintilla_set_indicator_current(GtkScintilla *sci, int indicator);
+int gtk_scintilla_get_indicator_current(GtkScintilla *sci);
+void gtk_scintilla_set_indicator_value(GtkScintilla *sci, int value);
+int gtk_scintilla_get_indicator_value(GtkScintilla *sci);
+void gtk_scintilla_indicator_fill_range(GtkScintilla *sci, int position, int fill_length);
+void gtk_scintilla_indicator_clear_range(GtkScintilla *sci, int position, int clear_length);
+int gtk_scintilla_indicator_all_on_for(GtkScintilla *sci, int position);
+int gtk_scintilla_indicator_value_at(GtkScintilla *sci, int indicator, int position);
+int gtk_scintilla_indicator_start(GtkScintilla *sci, int indicator, int position);
+int gtk_scintilla_indicator_end(GtkScintilla *sci, int indicator, int position);
+void gtk_scintilla_set_position_cache(GtkScintilla *sci, int size);
+int gtk_scintilla_get_position_cache(GtkScintilla *sci);
+void gtk_scintilla_copy_allow_line(GtkScintilla *sci);
+int gtk_scintilla_get_character_pointer(GtkScintilla *sci);
+void gtk_scintilla_set_keys_unicode(GtkScintilla *sci, gint keys_unicode);
+gint gtk_scintilla_get_keys_unicode(GtkScintilla *sci);
+void gtk_scintilla_indic_set_alpha(GtkScintilla *sci, int indicator, int alpha);
+int gtk_scintilla_indic_get_alpha(GtkScintilla *sci, int indicator);
+void gtk_scintilla_set_extra_ascent(GtkScintilla *sci, int extra_ascent);
+int gtk_scintilla_get_extra_ascent(GtkScintilla *sci);
+void gtk_scintilla_set_extra_descent(GtkScintilla *sci, int extra_descent);
+int gtk_scintilla_get_extra_descent(GtkScintilla *sci);
+int gtk_scintilla_marker_symbol_defined(GtkScintilla *sci, int marker_number);
+void gtk_scintilla_margin_set_text(GtkScintilla *sci, int line, const gchar * text);
+int gtk_scintilla_margin_get_text(GtkScintilla *sci, int line, gchar * text);
+void gtk_scintilla_margin_set_style(GtkScintilla *sci, int line, int style);
+int gtk_scintilla_margin_get_style(GtkScintilla *sci, int line);
+void gtk_scintilla_margin_set_styles(GtkScintilla *sci, int line, const gchar * styles);
+int gtk_scintilla_margin_get_styles(GtkScintilla *sci, int line, gchar * styles);
+void gtk_scintilla_margin_text_clear_all(GtkScintilla *sci);
+void gtk_scintilla_margin_set_style_offset(GtkScintilla *sci, int style);
+int gtk_scintilla_margin_get_style_offset(GtkScintilla *sci);
+void gtk_scintilla_annotation_set_text(GtkScintilla *sci, int line, const gchar * text);
+int gtk_scintilla_annotation_get_text(GtkScintilla *sci, int line, gchar * text);
+void gtk_scintilla_annotation_set_style(GtkScintilla *sci, int line, int style);
+int gtk_scintilla_annotation_get_style(GtkScintilla *sci, int line);
+void gtk_scintilla_annotation_set_styles(GtkScintilla *sci, int line, const gchar * styles);
+int gtk_scintilla_annotation_get_styles(GtkScintilla *sci, int line, gchar * styles);
+int gtk_scintilla_annotation_get_lines(GtkScintilla *sci, int line);
+void gtk_scintilla_annotation_clear_all(GtkScintilla *sci);
+#define ANNOTATION_HIDDEN 0
+#define ANNOTATION_STANDARD 1
+#define ANNOTATION_BOXED 2
+void gtk_scintilla_annotation_set_visible(GtkScintilla *sci, int visible);
+int gtk_scintilla_annotation_get_visible(GtkScintilla *sci);
+void gtk_scintilla_annotation_set_style_offset(GtkScintilla *sci, int style);
+int gtk_scintilla_annotation_get_style_offset(GtkScintilla *sci);
+#define UNDO_MAY_COALESCE 1
+void gtk_scintilla_add_undo_action(GtkScintilla *sci, int token, int flags);
+glong gtk_scintilla_char_position_from_point(GtkScintilla *sci, int x, int y);
+glong gtk_scintilla_char_position_from_point_close(GtkScintilla *sci, int x, int y);
+void gtk_scintilla_set_multiple_selection(GtkScintilla *sci, gint multiple_selection);
+gint gtk_scintilla_get_multiple_selection(GtkScintilla *sci);
+void gtk_scintilla_set_additional_selection_typing(GtkScintilla *sci, gint additional_selection_typing);
+gint gtk_scintilla_get_additional_selection_typing(GtkScintilla *sci);
+void gtk_scintilla_set_additional_carets_blink(GtkScintilla *sci, gint additional_carets_blink);
+gint gtk_scintilla_get_additional_carets_blink(GtkScintilla *sci);
+int gtk_scintilla_get_selections(GtkScintilla *sci);
+void gtk_scintilla_clear_selections(GtkScintilla *sci);
+int gtk_scintilla_set_selection(GtkScintilla *sci, int caret, int anchor);
+int gtk_scintilla_add_selection(GtkScintilla *sci, int caret, int anchor);
+void gtk_scintilla_set_main_selection(GtkScintilla *sci, int selection);
+int gtk_scintilla_get_main_selection(GtkScintilla *sci);
+void gtk_scintilla_set_selection_n_caret(GtkScintilla *sci, int selection, glong pos);
+glong gtk_scintilla_get_selection_n_caret(GtkScintilla *sci, int selection);
+void gtk_scintilla_set_selection_n_anchor(GtkScintilla *sci, int selection, glong pos_anchor);
+glong gtk_scintilla_get_selection_n_anchor(GtkScintilla *sci, int selection);
+void gtk_scintilla_set_selection_n_caret_virtual_space(GtkScintilla *sci, int selection, int space);
+int gtk_scintilla_get_selection_n_caret_virtual_space(GtkScintilla *sci, int selection);
+void gtk_scintilla_set_selection_n_anchor_virtual_space(GtkScintilla *sci, int selection, int space);
+int gtk_scintilla_get_selection_n_anchor_virtual_space(GtkScintilla *sci, int selection);
+void gtk_scintilla_set_selection_n_start(GtkScintilla *sci, int selection, glong pos);
+glong gtk_scintilla_get_selection_n_start(GtkScintilla *sci);
+glong gtk_scintilla_get_selection_n_end(GtkScintilla *sci);
+void gtk_scintilla_set_rectangular_selection_caret(GtkScintilla *sci, glong pos);
+glong gtk_scintilla_get_rectangular_selection_caret(GtkScintilla *sci);
+void gtk_scintilla_set_rectangular_selection_anchor(GtkScintilla *sci, glong pos_anchor);
+glong gtk_scintilla_get_rectangular_selection_anchor(GtkScintilla *sci);
+void gtk_scintilla_set_rectangular_selection_caret_virtual_space(GtkScintilla *sci, int space);
+int gtk_scintilla_get_rectangular_selection_caret_virtual_space(GtkScintilla *sci);
+void gtk_scintilla_set_rectangular_selection_anchor_virtual_space(GtkScintilla *sci, int space);
+int gtk_scintilla_get_rectangular_selection_anchor_virtual_space(GtkScintilla *sci);
+#define SCVS_NONE 0
+#define SCVS_RECTANGULARSELECTION 1
+#define SCVS_USERACCESSIBLE 2
+void gtk_scintilla_set_virtual_space_options(GtkScintilla *sci, int virtual_space_options);
+int gtk_scintilla_get_virtual_space_options(GtkScintilla *sci);
+void gtk_scintilla_set_rectangular_selection_modifier(GtkScintilla *sci, int modifier);
+int gtk_scintilla_get_rectangular_selection_modifier(GtkScintilla *sci);
+void gtk_scintilla_set_additional_sel_fore(GtkScintilla *sci, glong fore);
+void gtk_scintilla_set_additional_sel_back(GtkScintilla *sci, glong back);
+void gtk_scintilla_set_additional_sel_alpha(GtkScintilla *sci, int alpha);
+int gtk_scintilla_get_additional_sel_alpha(GtkScintilla *sci);
+void gtk_scintilla_set_additional_caret_fore(GtkScintilla *sci, glong fore);
+glong gtk_scintilla_get_additional_caret_fore(GtkScintilla *sci);
+void gtk_scintilla_rotate_selection(GtkScintilla *sci);
+void gtk_scintilla_swap_main_anchor_caret(GtkScintilla *sci);
 void gtk_scintilla_start_record(GtkScintilla *sci);
 void gtk_scintilla_stop_record(GtkScintilla *sci);
 void gtk_scintilla_set_lexer(GtkScintilla *sci, int lexer);
@@ -687,7 +827,13 @@ int gtk_scintilla_get_style_bits_needed(GtkScintilla *sci);
 #define SC_MOD_BEFOREINSERT 0x400
 #define SC_MOD_BEFOREDELETE 0x800
 #define SC_MULTILINEUNDOREDO 0x1000
-#define SC_MODEVENTMASKALL 0x1FFF
+#define SC_STARTACTION 0x2000
+#define SC_MOD_CHANGEINDICATOR 0x4000
+#define SC_MOD_CHANGELINESTATE 0x8000
+#define SC_MOD_CHANGEMARGIN 0x10000
+#define SC_MOD_CHANGEANNOTATION 0x20000
+#define SC_MOD_CONTAINER 0x40000
+#define SC_MODEVENTMASKALL 0x7FFFF
 #define SCEN_CHANGE 768
 #define SCEN_SETFOCUS 512
 #define SCEN_KILLFOCUS 256
@@ -708,10 +854,14 @@ int gtk_scintilla_get_style_bits_needed(GtkScintilla *sci);
 #define SCK_ADD 310
 #define SCK_SUBTRACT 311
 #define SCK_DIVIDE 312
+#define SCK_WIN 313
+#define SCK_RWIN 314
+#define SCK_MENU 315
 #define SCMOD_NORM 0
 #define SCMOD_SHIFT 1
 #define SCMOD_CTRL 2
 #define SCMOD_ALT 4
+#define SCMOD_SUPER 8
 #define SCLEX_CONTAINER 0
 #define SCLEX_NULL 1
 #define SCLEX_PYTHON 2
@@ -789,6 +939,25 @@ int gtk_scintilla_get_style_bits_needed(GtkScintilla *sci);
 #define SCLEX_INNOSETUP 76
 #define SCLEX_OPAL 77
 #define SCLEX_SPICE 78
+#define SCLEX_D 79
+#define SCLEX_CMAKE 80
+#define SCLEX_GAP 81
+#define SCLEX_PLM 82
+#define SCLEX_PROGRESS 83
+#define SCLEX_ABAQUS 84
+#define SCLEX_ASYMPTOTE 85
+#define SCLEX_R 86
+#define SCLEX_MAGIK 87
+#define SCLEX_POWERSHELL 88
+#define SCLEX_MYSQL 89
+#define SCLEX_PO 90
+#define SCLEX_TAL 91
+#define SCLEX_COBOL 92
+#define SCLEX_TACL 93
+#define SCLEX_SORCUS 94
+#define SCLEX_POWERPRO 95
+#define SCLEX_NIMROD 96
+#define SCLEX_SML 97
 #define SCLEX_AUTOMATIC 1000
 #define SCE_P_DEFAULT 0
 #define SCE_P_COMMENTLINE 1
@@ -826,6 +995,29 @@ int gtk_scintilla_get_style_bits_needed(GtkScintilla *sci);
 #define SCE_C_COMMENTDOCKEYWORD 17
 #define SCE_C_COMMENTDOCKEYWORDERROR 18
 #define SCE_C_GLOBALCLASS 19
+#define SCE_D_DEFAULT 0
+#define SCE_D_COMMENT 1
+#define SCE_D_COMMENTLINE 2
+#define SCE_D_COMMENTDOC 3
+#define SCE_D_COMMENTNESTED 4
+#define SCE_D_NUMBER 5
+#define SCE_D_WORD 6
+#define SCE_D_WORD2 7
+#define SCE_D_WORD3 8
+#define SCE_D_TYPEDEF 9
+#define SCE_D_STRING 10
+#define SCE_D_STRINGEOL 11
+#define SCE_D_CHARACTER 12
+#define SCE_D_OPERATOR 13
+#define SCE_D_IDENTIFIER 14
+#define SCE_D_COMMENTLINEDOC 15
+#define SCE_D_COMMENTDOCKEYWORD 16
+#define SCE_D_COMMENTDOCKEYWORDERROR 17
+#define SCE_D_STRINGB 18
+#define SCE_D_STRINGR 19
+#define SCE_D_WORD5 20
+#define SCE_D_WORD6 21
+#define SCE_D_WORD7 22
 #define SCE_TCL_DEFAULT 0
 #define SCE_TCL_COMMENT 1
 #define SCE_TCL_COMMENTLINE 2
@@ -991,6 +1183,9 @@ int gtk_scintilla_get_style_bits_needed(GtkScintilla *sci);
 #define SCE_PL_STRING_QR 29
 #define SCE_PL_STRING_QW 30
 #define SCE_PL_POD_VERB 31
+#define SCE_PL_SUB_PROTOTYPE 40
+#define SCE_PL_FORMAT_IDENT 41
+#define SCE_PL_FORMAT 42
 #define SCE_RB_DEFAULT 0
 #define SCE_RB_ERROR 1
 #define SCE_RB_COMMENTLINE 2
@@ -1096,6 +1291,7 @@ int gtk_scintilla_get_style_bits_needed(GtkScintilla *sci);
 #define SCE_ERR_ABSF 18
 #define SCE_ERR_TIDY 19
 #define SCE_ERR_JAVA_STACK 20
+#define SCE_ERR_VALUE 21
 #define SCE_BAT_DEFAULT 0
 #define SCE_BAT_COMMENT 1
 #define SCE_BAT_WORD 2
@@ -1118,6 +1314,7 @@ int gtk_scintilla_get_style_bits_needed(GtkScintilla *sci);
 #define SCE_DIFF_POSITION 4
 #define SCE_DIFF_DELETED 5
 #define SCE_DIFF_ADDED 6
+#define SCE_DIFF_CHANGED 7
 #define SCE_CONF_DEFAULT 0
 #define SCE_CONF_COMMENT 1
 #define SCE_CONF_NUMBER 2
@@ -1282,6 +1479,11 @@ int gtk_scintilla_get_style_bits_needed(GtkScintilla *sci);
 #define SCE_CSS_SINGLESTRING 14
 #define SCE_CSS_IDENTIFIER2 15
 #define SCE_CSS_ATTRIBUTE 16
+#define SCE_CSS_IDENTIFIER3 17
+#define SCE_CSS_PSEUDOELEMENT 18
+#define SCE_CSS_EXTENDED_IDENTIFIER 19
+#define SCE_CSS_EXTENDED_PSEUDOCLASS 20
+#define SCE_CSS_EXTENDED_PSEUDOELEMENT 21
 #define SCE_POV_DEFAULT 0
 #define SCE_POV_COMMENT 1
 #define SCE_POV_COMMENTLINE 2
@@ -1408,6 +1610,7 @@ int gtk_scintilla_get_style_bits_needed(GtkScintilla *sci);
 #define SCE_YAML_DOCUMENT 6
 #define SCE_YAML_TEXT 7
 #define SCE_YAML_ERROR 8
+#define SCE_YAML_OPERATOR 9
 #define SCE_TEX_DEFAULT 0
 #define SCE_TEX_SPECIAL 1
 #define SCE_TEX_GROUP 2
@@ -1583,6 +1786,7 @@ int gtk_scintilla_get_style_bits_needed(GtkScintilla *sci);
 #define SCE_CAML_OPERATOR 7
 #define SCE_CAML_NUMBER 8
 #define SCE_CAML_CHAR 9
+#define SCE_CAML_WHITE 10
 #define SCE_CAML_STRING 11
 #define SCE_CAML_COMMENT 12
 #define SCE_CAML_COMMENT1 13
@@ -1625,6 +1829,7 @@ int gtk_scintilla_get_style_bits_needed(GtkScintilla *sci);
 #define SCE_T3_USER1 17
 #define SCE_T3_USER2 18
 #define SCE_T3_USER3 19
+#define SCE_T3_BRACE 20
 #define SCE_REBOL_DEFAULT 0
 #define SCE_REBOL_COMMENTLINE 1
 #define SCE_REBOL_COMMENTBLOCK 2
@@ -1740,6 +1945,7 @@ int gtk_scintilla_get_style_bits_needed(GtkScintilla *sci);
 #define SCE_INNO_SECTION 4
 #define SCE_INNO_PREPROC 5
 #define SCE_INNO_PREPROC_INLINE 6
+#define SCE_INNO_INLINE_EXPANSION 6
 #define SCE_INNO_COMMENT_PASCAL 7
 #define SCE_INNO_KEYWORD_PASCAL 8
 #define SCE_INNO_KEYWORD_USER 9
@@ -1765,6 +1971,226 @@ int gtk_scintilla_get_style_bits_needed(GtkScintilla *sci);
 #define SCE_SPICE_DELIMITER 6
 #define SCE_SPICE_VALUE 7
 #define SCE_SPICE_COMMENTLINE 8
+#define SCE_CMAKE_DEFAULT 0
+#define SCE_CMAKE_COMMENT 1
+#define SCE_CMAKE_STRINGDQ 2
+#define SCE_CMAKE_STRINGLQ 3
+#define SCE_CMAKE_STRINGRQ 4
+#define SCE_CMAKE_COMMANDS 5
+#define SCE_CMAKE_PARAMETERS 6
+#define SCE_CMAKE_VARIABLE 7
+#define SCE_CMAKE_USERDEFINED 8
+#define SCE_CMAKE_WHILEDEF 9
+#define SCE_CMAKE_FOREACHDEF 10
+#define SCE_CMAKE_IFDEFINEDEF 11
+#define SCE_CMAKE_MACRODEF 12
+#define SCE_CMAKE_STRINGVAR 13
+#define SCE_CMAKE_NUMBER 14
+#define SCE_GAP_DEFAULT 0
+#define SCE_GAP_IDENTIFIER 1
+#define SCE_GAP_KEYWORD 2
+#define SCE_GAP_KEYWORD2 3
+#define SCE_GAP_KEYWORD3 4
+#define SCE_GAP_KEYWORD4 5
+#define SCE_GAP_STRING 6
+#define SCE_GAP_CHAR 7
+#define SCE_GAP_OPERATOR 8
+#define SCE_GAP_COMMENT 9
+#define SCE_GAP_NUMBER 10
+#define SCE_GAP_STRINGEOL 11
+#define SCE_PLM_DEFAULT 0
+#define SCE_PLM_COMMENT 1
+#define SCE_PLM_STRING 2
+#define SCE_PLM_NUMBER 3
+#define SCE_PLM_IDENTIFIER 4
+#define SCE_PLM_OPERATOR 5
+#define SCE_PLM_CONTROL 6
+#define SCE_PLM_KEYWORD 7
+#define SCE_4GL_DEFAULT 0
+#define SCE_4GL_NUMBER 1
+#define SCE_4GL_WORD 2
+#define SCE_4GL_STRING 3
+#define SCE_4GL_CHARACTER 4
+#define SCE_4GL_PREPROCESSOR 5
+#define SCE_4GL_OPERATOR 6
+#define SCE_4GL_IDENTIFIER 7
+#define SCE_4GL_BLOCK 8
+#define SCE_4GL_END 9
+#define SCE_4GL_COMMENT1 10
+#define SCE_4GL_COMMENT2 11
+#define SCE_4GL_COMMENT3 12
+#define SCE_4GL_COMMENT4 13
+#define SCE_4GL_COMMENT5 14
+#define SCE_4GL_COMMENT6 15
+#define SCE_4GL_DEFAULT_ 16
+#define SCE_4GL_NUMBER_ 17
+#define SCE_4GL_WORD_ 18
+#define SCE_4GL_STRING_ 19
+#define SCE_4GL_CHARACTER_ 20
+#define SCE_4GL_PREPROCESSOR_ 21
+#define SCE_4GL_OPERATOR_ 22
+#define SCE_4GL_IDENTIFIER_ 23
+#define SCE_4GL_BLOCK_ 24
+#define SCE_4GL_END_ 25
+#define SCE_4GL_COMMENT1_ 26
+#define SCE_4GL_COMMENT2_ 27
+#define SCE_4GL_COMMENT3_ 28
+#define SCE_4GL_COMMENT4_ 29
+#define SCE_4GL_COMMENT5_ 30
+#define SCE_4GL_COMMENT6_ 31
+#define SCE_ABAQUS_DEFAULT 0
+#define SCE_ABAQUS_COMMENT 1
+#define SCE_ABAQUS_COMMENTBLOCK 2
+#define SCE_ABAQUS_NUMBER 3
+#define SCE_ABAQUS_STRING 4
+#define SCE_ABAQUS_OPERATOR 5
+#define SCE_ABAQUS_WORD 6
+#define SCE_ABAQUS_PROCESSOR 7
+#define SCE_ABAQUS_COMMAND 8
+#define SCE_ABAQUS_SLASHCOMMAND 9
+#define SCE_ABAQUS_STARCOMMAND 10
+#define SCE_ABAQUS_ARGUMENT 11
+#define SCE_ABAQUS_FUNCTION 12
+#define SCE_ASY_DEFAULT 0
+#define SCE_ASY_COMMENT 1
+#define SCE_ASY_COMMENTLINE 2
+#define SCE_ASY_NUMBER 3
+#define SCE_ASY_WORD 4
+#define SCE_ASY_STRING 5
+#define SCE_ASY_CHARACTER 6
+#define SCE_ASY_OPERATOR 7
+#define SCE_ASY_IDENTIFIER 8
+#define SCE_ASY_STRINGEOL 9
+#define SCE_ASY_COMMENTLINEDOC 10
+#define SCE_ASY_WORD2 11
+#define SCE_R_DEFAULT 0
+#define SCE_R_COMMENT 1
+#define SCE_R_KWORD 2
+#define SCE_R_BASEKWORD 3
+#define SCE_R_OTHERKWORD 4
+#define SCE_R_NUMBER 5
+#define SCE_R_STRING 6
+#define SCE_R_STRING2 7
+#define SCE_R_OPERATOR 8
+#define SCE_R_IDENTIFIER 9
+#define SCE_R_INFIX 10
+#define SCE_R_INFIXEOL 11
+#define SCE_MAGIK_DEFAULT 0
+#define SCE_MAGIK_COMMENT 1
+#define SCE_MAGIK_HYPER_COMMENT 16
+#define SCE_MAGIK_STRING 2
+#define SCE_MAGIK_CHARACTER 3
+#define SCE_MAGIK_NUMBER 4
+#define SCE_MAGIK_IDENTIFIER 5
+#define SCE_MAGIK_OPERATOR 6
+#define SCE_MAGIK_FLOW 7
+#define SCE_MAGIK_CONTAINER 8
+#define SCE_MAGIK_BRACKET_BLOCK 9
+#define SCE_MAGIK_BRACE_BLOCK 10
+#define SCE_MAGIK_SQBRACKET_BLOCK 11
+#define SCE_MAGIK_UNKNOWN_KEYWORD 12
+#define SCE_MAGIK_KEYWORD 13
+#define SCE_MAGIK_PRAGMA 14
+#define SCE_MAGIK_SYMBOL 15
+#define SCE_POWERSHELL_DEFAULT 0
+#define SCE_POWERSHELL_COMMENT 1
+#define SCE_POWERSHELL_STRING 2
+#define SCE_POWERSHELL_CHARACTER 3
+#define SCE_POWERSHELL_NUMBER 4
+#define SCE_POWERSHELL_VARIABLE 5
+#define SCE_POWERSHELL_OPERATOR 6
+#define SCE_POWERSHELL_IDENTIFIER 7
+#define SCE_POWERSHELL_KEYWORD 8
+#define SCE_POWERSHELL_CMDLET 9
+#define SCE_POWERSHELL_ALIAS 10
+#define SCE_MYSQL_DEFAULT 0
+#define SCE_MYSQL_COMMENT 1
+#define SCE_MYSQL_COMMENTLINE 2
+#define SCE_MYSQL_VARIABLE 3
+#define SCE_MYSQL_SYSTEMVARIABLE 4
+#define SCE_MYSQL_KNOWNSYSTEMVARIABLE 5
+#define SCE_MYSQL_NUMBER 6
+#define SCE_MYSQL_MAJORKEYWORD 7
+#define SCE_MYSQL_KEYWORD 8
+#define SCE_MYSQL_DATABASEOBJECT 9
+#define SCE_MYSQL_PROCEDUREKEYWORD 10
+#define SCE_MYSQL_STRING 11
+#define SCE_MYSQL_SQSTRING 12
+#define SCE_MYSQL_DQSTRING 13
+#define SCE_MYSQL_OPERATOR 14
+#define SCE_MYSQL_FUNCTION 15
+#define SCE_MYSQL_IDENTIFIER 16
+#define SCE_MYSQL_QUOTEDIDENTIFIER 17
+#define SCE_MYSQL_USER1 18
+#define SCE_MYSQL_USER2 19
+#define SCE_MYSQL_USER3 20
+#define SCE_MYSQL_HIDDENCOMMAND 21
+#define SCE_PO_DEFAULT 0
+#define SCE_PO_COMMENT 1
+#define SCE_PO_MSGID 2
+#define SCE_PO_MSGID_TEXT 3
+#define SCE_PO_MSGSTR 4
+#define SCE_PO_MSGSTR_TEXT 5
+#define SCE_PO_MSGCTXT 6
+#define SCE_PO_MSGCTXT_TEXT 7
+#define SCE_PO_FUZZY 8
+#define SCE_PAS_DEFAULT 0
+#define SCE_PAS_IDENTIFIER 1
+#define SCE_PAS_COMMENT 2
+#define SCE_PAS_COMMENT2 3
+#define SCE_PAS_COMMENTLINE 4
+#define SCE_PAS_PREPROCESSOR 5
+#define SCE_PAS_PREPROCESSOR2 6
+#define SCE_PAS_NUMBER 7
+#define SCE_PAS_HEXNUMBER 8
+#define SCE_PAS_WORD 9
+#define SCE_PAS_STRING 10
+#define SCE_PAS_STRINGEOL 11
+#define SCE_PAS_CHARACTER 12
+#define SCE_PAS_OPERATOR 13
+#define SCE_PAS_ASM 14
+#define SCE_SORCUS_DEFAULT 0
+#define SCE_SORCUS_COMMAND 1
+#define SCE_SORCUS_PARAMETER 2
+#define SCE_SORCUS_COMMENTLINE 3
+#define SCE_SORCUS_STRING 4
+#define SCE_SORCUS_STRINGEOL 5
+#define SCE_SORCUS_IDENTIFIER 6
+#define SCE_SORCUS_OPERATOR 7
+#define SCE_SORCUS_NUMBER 8
+#define SCE_SORCUS_CONSTANT 9
+#define SCE_POWERPRO_DEFAULT 0
+#define SCE_POWERPRO_COMMENTBLOCK 1
+#define SCE_POWERPRO_COMMENTLINE 2
+#define SCE_POWERPRO_NUMBER 3
+#define SCE_POWERPRO_WORD 4
+#define SCE_POWERPRO_WORD2 5
+#define SCE_POWERPRO_WORD3 6
+#define SCE_POWERPRO_WORD4 7
+#define SCE_POWERPRO_DOUBLEQUOTEDSTRING 8
+#define SCE_POWERPRO_SINGLEQUOTEDSTRING 9
+#define SCE_POWERPRO_LINECONTINUE 10
+#define SCE_POWERPRO_OPERATOR 11
+#define SCE_POWERPRO_IDENTIFIER 12
+#define SCE_POWERPRO_STRINGEOL 13
+#define SCE_POWERPRO_VERBATIM 14
+#define SCE_POWERPRO_ALTQUOTE 15
+#define SCE_POWERPRO_FUNCTION 16
+#define SCE_SML_DEFAULT 0
+#define SCE_SML_IDENTIFIER 1
+#define SCE_SML_TAGNAME 2
+#define SCE_SML_KEYWORD 3
+#define SCE_SML_KEYWORD2 4
+#define SCE_SML_KEYWORD3 5
+#define SCE_SML_LINENUM 6
+#define SCE_SML_OPERATOR 7
+#define SCE_SML_NUMBER 8
+#define SCE_SML_CHAR 9
+#define SCE_SML_STRING 11
+#define SCE_SML_COMMENT 12
+#define SCE_SML_COMMENT1 13
+#define SCE_SML_COMMENT2 14
+#define SCE_SML_COMMENT3 15
 
 /* --- End of autogenerated code --- */
 

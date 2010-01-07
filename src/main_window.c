@@ -426,7 +426,8 @@ static void main_window_fill_panes(void)
 	//
 	main_window.chkOnlyCurFileFuncs = gtk_check_button_new_with_label(_("Parse only current file")); 
 	gtk_widget_show (main_window.chkOnlyCurFileFuncs);
-	gtk_box_pack_start(GTK_BOX(hbox), main_window.chkOnlyCurFileFuncs, FALSE, FALSE, 10);
+//	gtk_box_pack_start(GTK_BOX(hbox), main_window.chkOnlyCurFileFuncs, FALSE, FALSE, 10);
+	gtk_box_pack_start(GTK_BOX(hbox), main_window.chkOnlyCurFileFuncs, TRUE, TRUE, 10);
 //	gtk_box_pack_start(GTK_BOX(box), main_window.chkOnlyCurFileFuncs, FALSE, FALSE, 10);
 	gtk_box_pack_start(GTK_BOX(hbox), main_window.close_sidebar_button, FALSE, FALSE, 0);
 	gtk_widget_show(hbox);	
