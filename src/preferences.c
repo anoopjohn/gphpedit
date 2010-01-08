@@ -1327,7 +1327,6 @@ void save_classbrowser_position(void)
 
 void main_window_size_save_details()
 {
-        GError *error = NULL;
         GConfClient *config;
         config=gconf_client_get_default ();
         preferences.maximized = gconf_client_get_bool(config,"/gPHPEdit/main_window/maximized",NULL);
@@ -1350,8 +1349,7 @@ void preferences_save()
         g_string_printf(uri,"%s/%s",g_get_home_dir(),".gphpedit/");
         GConfClient *config;
         config=gconf_client_get_default ();
-        //gconf_client_add_dir(config,CONFIG_ROOT,GCONF_CLIENT_PRELOAD_NONE,NULL);
-
+        
         gconf_client_set_string(config, "/gPHPEdit/default_style/font",preferences.default_font,NULL);
 	gconf_client_set_int (config, "/gPHPEdit/default_style/fore", preferences.default_fore,NULL);
 	gconf_client_set_int (config,"/gPHPEdit/default_style/back", preferences.default_back,NULL);

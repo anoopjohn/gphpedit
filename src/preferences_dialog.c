@@ -30,7 +30,7 @@
 #include "templates.h"
 #include "edit_template.h"
 #include <gtkscintilla.h>
-
+#include <gnome.h>
 #define IS_FONT_NAME(name1, name2) strncmp(name1, name2, MIN(strlen(name1), strlen(name2))) == 0
 
 PreferencesDialog preferences_dialog;

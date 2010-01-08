@@ -442,7 +442,7 @@ GString *tab_help_try_filename(gchar *prefix, gchar *command, gchar *suffix)
 		long_filename = g_string_append(long_filename, suffix);
 	}
 	if (DEBUG_MODE) { g_print("DEBUG: tab.c:tab_help_try_filename:long_filename->str: %s\n", long_filename->str); }
-	if (g_file_exists(long_filename->str)) {
+	if (g_file_test(long_filename->str, G_FILE_TEST_EXISTS)){
 		return long_filename;
 	}
 	else {
@@ -455,7 +455,7 @@ GString *tab_help_try_filename(gchar *prefix, gchar *command, gchar *suffix)
 		long_filename = g_string_append(long_filename, suffix);
 	}
 	if (DEBUG_MODE) { g_print("DEBUG: tab.c:tab_help_try_filename:long_filename->str: %s\n", long_filename->str); }
-        if (g_file_exists(long_filename->str)) {
+        if (g_file_test(long_filename->str, G_FILE_TEST_EXISTS)){
 		return long_filename;
 	}
 

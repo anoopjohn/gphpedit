@@ -25,6 +25,7 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
+#include "stdlib.h"
 #include "main_window_callbacks.h"
 #include "find_replace.h"
 #include "main_window.h"
@@ -99,7 +100,7 @@ void session_reopen(void)
 	session_file = g_string_new( g_get_home_dir());
 	session_file = g_string_append(session_file, "/.gphpedit/session");
 	
-	if (g_file_exists(session_file->str)) {
+	if (g_file_test(session_file->str,G_FILE_TEST_EXISTS)){//g_file_exists(session_file->str)) {
 		fp = fopen(session_file->str, "r");
   		if (!fp) {	
 			g_print(_("ERROR: cannot open session file (%s)\n"), session_file->str);
@@ -1341,6 +1342,7 @@ void on_about1_activate(GtkWidget *widget)
   gtk_about_dialog_set_authors(GTK_ABOUT_DIALOG(dialog),(const gchar **) authors);
   gtk_about_dialog_set_translator_credits(GTK_ABOUT_DIALOG(dialog),translator_credits);
   gtk_about_dialog_set_documenters (GTK_ABOUT_DIALOG(dialog),(const gchar **) documenters);
+  gtk_window_set_icon(GTK_WINDOW(dialog), pixbuf);
   g_object_unref(pixbuf), pixbuf = NULL;
   gtk_dialog_run(GTK_DIALOG (dialog));
   gtk_widget_destroy(dialog);

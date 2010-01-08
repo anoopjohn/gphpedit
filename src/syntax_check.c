@@ -21,7 +21,7 @@
  
    The GNU General Public License is contained in the file COPYING.
 */
-
+#include "stdlib.h"
 #include "syntax_check.h"
 #include "preferences.h"
 #include "main_window.h"

@@ -28,7 +28,6 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
-//#include <libgnomevfs/gnome-vfs.h>
 #include <gio/gio.h>
 #include "main.h"
 #include "classbrowser.h"

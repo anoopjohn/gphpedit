@@ -34,7 +34,7 @@
 #include <signal.h>
 #include <fcntl.h>
 #include <stdlib.h>
-
+#include <errno.h>
 
 #define PIPE_PREFIX         "%s-gphpedit-"
 #define PIPE_PREFIX_FULL    "%s-gphpedit-%d"

@@ -25,15 +25,14 @@
 #ifndef MAIN_H
 #define MAIN_H
 
-#include <gnome.h>
+#include <gtk/gtk.h>
+#include <gdk/gdkkeysyms.h>
 #include <glib.h>
 #include <gtkscintilla.h>
-//#include <libgnome/gnome-i18n.h>
 #include <glib/gi18n.h>
 
 #define GPHPEDIT_PIXMAP_ICON "gphpedit.png"
 
-extern GnomeProgram* gphpedit_program;
 gboolean add (gpointer bla);
 gint debug(gchar *strMsg, ...);
 

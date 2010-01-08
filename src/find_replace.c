@@ -479,7 +479,7 @@ void replace_all_clicked(GtkButton *button, gpointer data)
 		g_string_sprintf(message, _("%d occurences of %s found, all replaced."), numfound, text);
 	}
 
-         replace_all_dialog = gtk_message_dialog_new(GTK_WINDOW(main_window.window),GTK_DIALOG_DESTROY_WITH_PARENT,GTK_MESSAGE_INFO,GTK_BUTTONS_OK,message->str);
+         replace_all_dialog = gtk_message_dialog_new(GTK_WINDOW(main_window.window),GTK_DIALOG_DESTROY_WITH_PARENT,GTK_MESSAGE_INFO,GTK_BUTTONS_OK,"%s",message->str);
          gtk_window_set_title(GTK_WINDOW(replace_all_dialog), "gphpedit");
          gtk_dialog_run(GTK_DIALOG(replace_all_dialog));
          gtk_widget_destroy(replace_all_dialog);

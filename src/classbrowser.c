@@ -21,7 +21,7 @@
  
    The GNU General Public License is contained in the file COPYING.
 */
-
+#include <errno.h>
 #include "classbrowser.h"
 #include "main_window.h"
 #include "main_window_callbacks.h"
@@ -241,7 +241,7 @@ void classbrowser_filelist_update(void)
 	for(li = filelist; li!= NULL; li = g_slist_next(li)) {
 		file = li->data;
 		if (file) {
-			if (!g_file_exists(file->filename)) {
+			if (!g_file_test(file->filename, G_FILE_TEST_EXISTS)){
 				classbrowser_filelist_remove(file);
 				li = g_slist_remove(filelist, file);
 			}

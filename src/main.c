@@ -35,26 +35,16 @@
 #include "templates.h"
 #include <gconf/gconf-client.h>
 
-GnomeProgram* gphpedit_program;
-
-
 int main (int argc, char **argv)
 {
-	//GError *error;
-//	gboolean vfs_inited;
 
 	bindtextdomain (GETTEXT_PACKAGE, PACKAGE_LOCALE_DIR);
 	bind_textdomain_codeset (GETTEXT_PACKAGE, "UTF-8");
 	textdomain (GETTEXT_PACKAGE);
 
-	gphpedit_program = gnome_program_init ("gPHPEdit", VERSION, LIBGNOMEUI_MODULE,
-	                                       argc, argv, NULL);
-
+        gtk_init(&argc, &argv);
         gconf_init(argc, argv, NULL);
-
-//	vfs_inited = gnome_vfs_init();
-//	g_assert(vfs_inited);
-
+        
 	preferences_load();
 
     /* Start of IPC communication */
@@ -75,7 +65,7 @@ int main (int argc, char **argv)
 	create_untitled_if_empty();
 
 	gtk_main();
-
+        
 	/* it makes sense to install sigterm handler that would call this too */
     shutdown_ipc ();
 
@@ -85,7 +75,6 @@ int main (int argc, char **argv)
 gint debug(char *formatstring, ...)
 {
   GtkWidget *dlg;
-//	int intReturn;
 	char *buf, *temp;
 	temp = (char*) calloc(500, sizeof(char));
 	buf = (char*) calloc(500, sizeof(char));

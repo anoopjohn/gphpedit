@@ -182,22 +182,33 @@ static gboolean non_letter_before(gchar *original, gchar *current, gchar *search
 	return FALSE;
 }
 
+gint str_sec_print(gchar *label, gchar *pstart, gchar *pend, guint line_number) {
+ 	gchar *teststring;
+ 	guint length;
+ 	length = pend - pstart + 1;
+  teststring = g_malloc(length + 1);
+  strncpy(teststring, pstart, length);
+  teststring[length]='\0';
+  g_print("%5d:%s: %s\n", line_number, label, teststring);
+  g_free(teststring);
+  return 0;
+}
 
 void classbrowser_parse_file(gchar *filename)
 {
 	gchar *file_contents;
 	gchar *o; // original pointer to start of contents
 	gchar *c; // current position within contents
-	
+#ifdef DEBUG_CLASSBROWSER	
 	//debug var
 	gchar *sss, *dss, *scs, *mcs, *hss;
-	
+#endif	
 
 	gboolean within_php;
 	gboolean within_single_line_comment;
 	gboolean within_multi_line_comment;
 	gboolean within_heredoc;
-	gboolean within_nowdoc;
+	//gboolean within_nowdoc;
 	gboolean within_single_string;
 	gboolean within_double_string;
 	guint brace_count;
@@ -507,14 +518,3 @@ void classbrowser_parse_file(gchar *filename)
 	g_free(file_contents);
 }
 
-gint str_sec_print(gchar *label, gchar *pstart, gchar *pend, guint line_number) {
- 	gchar *teststring;
- 	guint length;
- 	length = pend - pstart + 1;
-  teststring = g_malloc(length + 1);
-  strncpy(teststring, pstart, length);
-  teststring[length]='\0';
-  g_print("%5d:%s: %s\n", line_number, label, teststring);
-  g_free(teststring);
-  return 0;
-}

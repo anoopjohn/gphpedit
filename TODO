@@ -8,8 +8,6 @@ extensions preference.
 from position to find nearest PHP function. Should popup hint for function.
 Should also work for cases like: outer( inner(
 
-* Toolbars stop in the middle - Extend the toolbar borders to the edge of the window.
-
 * Class browser: handle the choice of parsing only current file
 in the configuration
 
