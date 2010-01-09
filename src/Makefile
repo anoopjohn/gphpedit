@@ -38,7 +38,7 @@ bin_PROGRAMS = gphpedit$(EXEEXT)
 subdir = src
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
-am__aclocal_m4_deps = $(top_srcdir)/configure.in
+am__aclocal_m4_deps = $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
@@ -52,7 +52,7 @@ am_gphpedit_OBJECTS = calltip.$(OBJEXT) classbrowser.$(OBJEXT) \
 	find_replace.$(OBJEXT) gphpedit_ipc.$(OBJEXT) \
 	grel2abs.$(OBJEXT) plugin.$(OBJEXT) main.$(OBJEXT) \
 	main_window.$(OBJEXT) main_window_callbacks.$(OBJEXT) \
-	preferences.$(OBJEXT) preferences_dialog.$(OBJEXT) project.$(OBJEXT)\
+	preferences.$(OBJEXT) preferences_dialog.$(OBJEXT) \
 	syntax_check.$(OBJEXT) tab.$(OBJEXT) tab_cxx.$(OBJEXT) \
 	tab_css.$(OBJEXT) tab_perl.$(OBJEXT) tab_php.$(OBJEXT) \
 	tab_python.$(OBJEXT) tab_sql.$(OBJEXT) tab_util.$(OBJEXT) \
@@ -89,15 +89,15 @@ DIST_SOURCES = $(gphpedit_SOURCES)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
-ACLOCAL = ${SHELL} /home/pepe/Desktop/anoopjohn-gphpedit-0070a04/missing --run aclocal-1.11
-ALL_LINGUAS = 
-AMTAR = ${SHELL} /home/pepe/Desktop/anoopjohn-gphpedit-0070a04/missing --run tar
+ACLOCAL = ${SHELL} /home/pepe/Desktop/gphpeditprueba/missing --run aclocal-1.11
+ALL_LINGUAS = de en es
+AMTAR = ${SHELL} /home/pepe/Desktop/gphpeditprueba/missing --run tar
 AR = ar
-AUTOCONF = ${SHELL} /home/pepe/Desktop/anoopjohn-gphpedit-0070a04/missing --run autoconf
-AUTOHEADER = ${SHELL} /home/pepe/Desktop/anoopjohn-gphpedit-0070a04/missing --run autoheader
-AUTOMAKE = ${SHELL} /home/pepe/Desktop/anoopjohn-gphpedit-0070a04/missing --run automake-1.11
+AUTOCONF = ${SHELL} /home/pepe/Desktop/gphpeditprueba/missing --run autoconf
+AUTOHEADER = ${SHELL} /home/pepe/Desktop/gphpeditprueba/missing --run autoheader
+AUTOMAKE = ${SHELL} /home/pepe/Desktop/gphpeditprueba/missing --run automake-1.11
 AWK = mawk
-CATALOGS = 
+CATALOGS =  de.gmo en.gmo es.gmo
 CATOBJEXT = .gmo
 CC = gcc
 CCDEPMODE = depmode=gcc3
@@ -112,6 +112,7 @@ CYGPATH_W = echo
 DATADIRNAME = share
 DEFS = -DHAVE_CONFIG_H
 DEPDIR = .deps
+DISABLE_DEPRECATED_CFLAGS = -DG_DISABLE_DEPRECATED -DGDK_DISABLE_DEPRECATED -DGTK_DISABLE_DEPRECATED -DGDK_PIXBUF_DISABLE_DEPRECATED -DGNOME_DISABLE_DEPRECATED
 DSYMUTIL = 
 DUMPBIN = 
 ECHO_C = 
@@ -121,10 +122,10 @@ EGREP = /bin/grep -E
 EXEEXT = 
 FGREP = /bin/grep -F
 GETTEXT_PACKAGE = gphpedit
-GMOFILES = 
+GMOFILES =  de.gmo en.gmo es.gmo
 GMSGFMT = /usr/bin/msgfmt
-GPHPEDIT_CFLAGS = -D_REENTRANT -DORBIT2=1 -pthread -I/usr/include/gtk-2.0 -I/usr/lib/gtk-2.0/include -I/usr/include/atk-1.0 -I/usr/include/cairo -I/usr/include/pango-1.0 -I/usr/include/pixman-1 -I/usr/include/freetype2 -I/usr/include/directfb -I/usr/include/libpng12 -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include -I/usr/include/libgnomeui-2.0 -I/usr/include/libart-2.0 -I/usr/include/gconf/2 -I/usr/include/gnome-keyring-1 -I/usr/include/libgnome-2.0 -I/usr/include/libbonoboui-2.0 -I/usr/include/libgnomecanvas-2.0 -I/usr/include/gnome-vfs-2.0 -I/usr/lib/gnome-vfs-2.0/include -I/usr/include/orbit-2.0 -I/usr/include/dbus-1.0 -I/usr/lib/dbus-1.0/include -I/usr/include/libbonobo-2.0 -I/usr/include/bonobo-activation-2.0 -I/usr/include/libxml2 -I/usr/include/gail-1.0 -I/usr/include/webkit-1.0 -I/usr/include/libsoup-2.4  
-GPHPEDIT_LIBS = -pthread -lgnomeui-2 -lSM -lICE -lbonoboui-2 -lgnomecanvas-2 -lgnome-2 -lpopt -lbonobo-2 -lbonobo-activation -lORBit-2 -lart_lgpl_2 -lgnomevfs-2 -lgconf-2 -lgthread-2.0 -lrt -lwebkit-1.0 -lgtk-x11-2.0 -lsoup-2.4 -lgdk-x11-2.0 -latk-1.0 -lpangoft2-1.0 -lgdk_pixbuf-2.0 -lm -lpangocairo-1.0 -lcairo -lpango-1.0 -lfreetype -lfontconfig -lgio-2.0 -lgobject-2.0 -lgmodule-2.0 -lglib-2.0  
+GPHPEDIT_CFLAGS = -D_REENTRANT -DORBIT2=1 -pthread -I/usr/include/gtk-2.0 -I/usr/lib/gtk-2.0/include -I/usr/include/atk-1.0 -I/usr/include/cairo -I/usr/include/pango-1.0 -I/usr/include/pixman-1 -I/usr/include/freetype2 -I/usr/include/directfb -I/usr/include/libpng12 -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include -I/usr/include/webkit-1.0 -I/usr/include/libsoup-2.4 -I/usr/include/libxml2 -I/usr/include/gconf/2 -I/usr/include/orbit-2.0 -I/usr/include/dbus-1.0 -I/usr/lib/dbus-1.0/include  
+GPHPEDIT_LIBS = -lwebkit-1.0 -lgtk-x11-2.0 -lsoup-2.4 -lgdk-x11-2.0 -latk-1.0 -lpangoft2-1.0 -lgdk_pixbuf-2.0 -lm -lpangocairo-1.0 -lcairo -lpango-1.0 -lfreetype -lfontconfig -lgio-2.0 -lgobject-2.0 -lgmodule-2.0 -lgconf-2 -lglib-2.0  
 GREP = /bin/grep
 INSTALL = /usr/bin/install -c
 INSTALL_DATA = ${INSTALL} -m 644
@@ -145,8 +146,8 @@ LIBTOOL = $(SHELL) $(top_builddir)/libtool
 LIPO = 
 LN_S = ln -s
 LTLIBOBJS = 
-MAINT = #
-MAKEINFO = ${SHELL} /home/pepe/Desktop/anoopjohn-gphpedit-0070a04/missing --run makeinfo
+MAINT = 
+MAKEINFO = ${SHELL} /home/pepe/Desktop/gphpeditprueba/missing --run makeinfo
 MKDIR_P = /bin/mkdir -p
 MKINSTALLDIRS = ./mkinstalldirs
 MSGFMT = /usr/bin/msgfmt
@@ -159,15 +160,15 @@ OBJEXT = o
 OTOOL = 
 OTOOL64 = 
 PACKAGE = gphpedit
-PACKAGE_BUGREPORT = 
-PACKAGE_NAME = 
-PACKAGE_STRING = 
-PACKAGE_TARNAME = 
+PACKAGE_BUGREPORT = https://savannah.nongnu.org/support/?group=gphpedit
+PACKAGE_NAME = gPHPEdit
+PACKAGE_STRING = gPHPEdit 0.9.96
+PACKAGE_TARNAME = gphpedit
 PACKAGE_URL = 
-PACKAGE_VERSION = 
+PACKAGE_VERSION = 0.9.96
 PATH_SEPARATOR = :
 PKG_CONFIG = /usr/bin/pkg-config
-POFILES = 
+POFILES =  de.po en.po es.po
 POSUB = po
 PO_IN_DATADIR_FALSE = 
 PO_IN_DATADIR_TRUE = 
@@ -179,10 +180,10 @@ STRIP = strip
 USE_NLS = yes
 VERSION = 0.9.96
 XGETTEXT = /usr/bin/xgettext
-abs_builddir = /home/pepe/Desktop/anoopjohn-gphpedit-0070a04/src
-abs_srcdir = /home/pepe/Desktop/anoopjohn-gphpedit-0070a04/src
-abs_top_builddir = /home/pepe/Desktop/anoopjohn-gphpedit-0070a04
-abs_top_srcdir = /home/pepe/Desktop/anoopjohn-gphpedit-0070a04
+abs_builddir = /home/pepe/Desktop/gphpeditprueba/src
+abs_srcdir = /home/pepe/Desktop/gphpeditprueba/src
+abs_top_builddir = /home/pepe/Desktop/gphpeditprueba
+abs_top_srcdir = /home/pepe/Desktop/gphpeditprueba
 ac_ct_CC = gcc
 ac_ct_CXX = g++
 ac_ct_DUMPBIN = 
@@ -200,7 +201,7 @@ build_vendor = pc
 builddir = .
 datadir = ${datarootdir}
 datarootdir = ${prefix}/share
-docdir = ${datarootdir}/doc/${PACKAGE}
+docdir = ${datarootdir}/doc/${PACKAGE_TARNAME}
 dvidir = ${docdir}
 exec_prefix = ${prefix}
 host = i686-pc-linux-gnu
@@ -211,7 +212,7 @@ host_vendor = pc
 htmldir = ${docdir}
 includedir = ${prefix}/include
 infodir = ${datarootdir}/info
-install_sh = ${SHELL} /home/pepe/Desktop/anoopjohn-gphpedit-0070a04/install-sh
+install_sh = ${SHELL} /home/pepe/Desktop/gphpeditprueba/install-sh
 libdir = ${exec_prefix}/lib
 libexecdir = ${exec_prefix}/libexec
 localedir = ${datarootdir}/locale
@@ -262,7 +263,6 @@ gphpedit_SOURCES = \
 	main_window.h		\
 	main_window_callbacks.c	\
 	main_window_callbacks.h	\
-	main_window_menu.h	\
 	preferences.c		\
 	preferences.h		\
 	preferences_dialog.c	\
@@ -297,7 +297,7 @@ all: all-am
 
 .SUFFIXES:
 .SUFFIXES: .c .cxx .lo .o .obj
-$(srcdir)/Makefile.in: # $(srcdir)/Makefile.am  $(am__configure_deps)
+$(srcdir)/Makefile.in:  $(srcdir)/Makefile.am  $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
 	    *$$dep*) \
@@ -322,9 +322,9 @@ Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 $(top_builddir)/config.status: $(top_srcdir)/configure $(CONFIG_STATUS_DEPENDENCIES)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 
-$(top_srcdir)/configure: # $(am__configure_deps)
+$(top_srcdir)/configure:  $(am__configure_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
-$(ACLOCAL_M4): # $(am__aclocal_m4_deps)
+$(ACLOCAL_M4):  $(am__aclocal_m4_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 $(am__aclocal_m4_deps):
 install-binPROGRAMS: $(bin_PROGRAMS)
@@ -392,7 +392,6 @@ include ./$(DEPDIR)/main.Po
 include ./$(DEPDIR)/main_window.Po
 include ./$(DEPDIR)/main_window_callbacks.Po
 include ./$(DEPDIR)/plugin.Po
-include ./$(DEPDIR)/folderbrowser.Po
 include ./$(DEPDIR)/preferences.Po
 include ./$(DEPDIR)/preferences_dialog.Po
 include ./$(DEPDIR)/syntax_check.Po

@@ -92,9 +92,9 @@ void tab_set_general_scintilla_properties(Editor *editor)
 
 	gtk_scintilla_set_code_page(GTK_SCINTILLA(editor->scintilla), 65001); // Unicode code page
 	
-	gtk_signal_connect (GTK_OBJECT (editor->scintilla), "save_point_reached", GTK_SIGNAL_FUNC (save_point_reached), NULL);
-	gtk_signal_connect (GTK_OBJECT (editor->scintilla), "save_point_left", GTK_SIGNAL_FUNC (save_point_left), NULL);
-	gtk_signal_connect (GTK_OBJECT (editor->scintilla), "macro_record", GTK_SIGNAL_FUNC (macro_record), NULL);
+	g_signal_connect (GTK_OBJECT (editor->scintilla), "save_point_reached", G_CALLBACK (save_point_reached), NULL);
+	g_signal_connect (GTK_OBJECT (editor->scintilla), "save_point_left", G_CALLBACK (save_point_left), NULL);
+	g_signal_connect (GTK_OBJECT (editor->scintilla), "macro_record", G_CALLBACK (macro_record), NULL);
 
 	//gtk_scintilla_set_sel_back(GTK_SCINTILLA(editor->scintilla), 1, 13434879);
         gtk_scintilla_set_sel_back(GTK_SCINTILLA(editor->scintilla),1,preferences.set_sel_back);
@@ -189,16 +189,16 @@ static void tab_set_folding(Editor *editor, gint folding)
 		gtk_scintilla_set_margin_type_n(GTK_SCINTILLA(main_window.current_editor->scintilla), 1, SC_MARGIN_SYMBOL);
 		gtk_scintilla_set_margin_width_n (GTK_SCINTILLA(main_window.current_editor->scintilla), 1, 14);
 		gtk_scintilla_set_margin_sensitive_n(GTK_SCINTILLA(main_window.current_editor->scintilla), 1, 1);
-		//gtk_signal_connect (GTK_OBJECT (editor->scintilla), "fold_clicked", GTK_SIGNAL_FUNC (fold_clicked), NULL);
-		gtk_signal_connect (GTK_OBJECT (editor->scintilla), "modified", GTK_SIGNAL_FUNC (handle_modified), NULL);
-		gtk_signal_connect (GTK_OBJECT (editor->scintilla), "margin_click", GTK_SIGNAL_FUNC (margin_clicked), NULL);
+		//g_signal_connect (GTK_OBJECT (editor->scintilla), "fold_clicked", G_CALLBACK (fold_clicked), NULL);
+		g_signal_connect (GTK_OBJECT (editor->scintilla), "modified", G_CALLBACK (handle_modified), NULL);
+		g_signal_connect (GTK_OBJECT (editor->scintilla), "margin_click", G_CALLBACK (margin_clicked), NULL);
 	}
 }
 
 static void tab_set_event_handlers(Editor *editor)
 {
-	gtk_signal_connect (GTK_OBJECT (editor->scintilla), "char_added", GTK_SIGNAL_FUNC (char_added), NULL);
-	gtk_signal_connect (GTK_OBJECT (editor->scintilla), "update_ui", GTK_SIGNAL_FUNC (update_ui), NULL);
+	g_signal_connect (GTK_OBJECT (editor->scintilla), "char_added", G_CALLBACK (char_added), NULL);
+	g_signal_connect (GTK_OBJECT (editor->scintilla), "update_ui", G_CALLBACK (update_ui), NULL);
 }
 
 void tab_file_write (GObject *source_object, GAsyncResult *res, gpointer user_data)
@@ -1098,8 +1098,8 @@ GtkWidget *get_close_tab_widget(Editor *editor) {
 	gtk_widget_modify_style (close_button, rcstyle);
 	gtk_rc_style_unref (rcstyle),
 
-	gtk_signal_connect(GTK_OBJECT(close_button), "clicked", GTK_SIGNAL_FUNC(on_tab_close_activate), editor);
-	gtk_signal_connect(GTK_OBJECT(hbox), "style-set", GTK_SIGNAL_FUNC(on_tab_close_set_style), close_button);
+	g_signal_connect(GTK_OBJECT(close_button), "clicked", G_CALLBACK(on_tab_close_activate), editor);
+	g_signal_connect(GTK_OBJECT(hbox), "style-set", G_CALLBACK(on_tab_close_set_style), close_button);
 	gtk_box_pack_start(GTK_BOX(hbox), editor->label, FALSE, FALSE, 0);
 	gtk_box_pack_end(GTK_BOX(hbox), close_button, FALSE, FALSE, 0);
 	gtk_widget_show(editor->label);

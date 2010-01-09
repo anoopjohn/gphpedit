@@ -38,7 +38,7 @@ bin_PROGRAMS = gphpedit$(EXEEXT)
 subdir = src
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
-am__aclocal_m4_deps = $(top_srcdir)/configure.in
+am__aclocal_m4_deps = $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
@@ -52,7 +52,7 @@ am_gphpedit_OBJECTS = calltip.$(OBJEXT) classbrowser.$(OBJEXT) \
 	find_replace.$(OBJEXT) gphpedit_ipc.$(OBJEXT) \
 	grel2abs.$(OBJEXT) plugin.$(OBJEXT) main.$(OBJEXT) \
 	main_window.$(OBJEXT) main_window_callbacks.$(OBJEXT) \
-	preferences.$(OBJEXT) preferences_dialog.$(OBJEXT) project.$(OBJEXT)\
+	preferences.$(OBJEXT) preferences_dialog.$(OBJEXT) \
 	syntax_check.$(OBJEXT) tab.$(OBJEXT) tab_cxx.$(OBJEXT) \
 	tab_css.$(OBJEXT) tab_perl.$(OBJEXT) tab_php.$(OBJEXT) \
 	tab_python.$(OBJEXT) tab_sql.$(OBJEXT) tab_util.$(OBJEXT) \
@@ -112,6 +112,7 @@ CYGPATH_W = @CYGPATH_W@
 DATADIRNAME = @DATADIRNAME@
 DEFS = @DEFS@
 DEPDIR = @DEPDIR@
+DISABLE_DEPRECATED_CFLAGS = @DISABLE_DEPRECATED_CFLAGS@
 DSYMUTIL = @DSYMUTIL@
 DUMPBIN = @DUMPBIN@
 ECHO_C = @ECHO_C@
@@ -262,7 +263,6 @@ gphpedit_SOURCES = \
 	main_window.h		\
 	main_window_callbacks.c	\
 	main_window_callbacks.h	\
-	main_window_menu.h	\
 	preferences.c		\
 	preferences.h		\
 	preferences_dialog.c	\
@@ -392,7 +392,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/main_window.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/main_window_callbacks.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/plugin.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/folderbrowser.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/preferences.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/preferences_dialog.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/syntax_check.Po@am__quote@

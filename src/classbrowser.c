@@ -692,10 +692,10 @@ void classbrowser_update(void)
 
 	classbrowser_remove_dead_wood();
 
-	press_event = gtk_signal_connect(GTK_OBJECT(main_window.classtreeview), "button_press_event",
-	                                 GTK_SIGNAL_FUNC(treeview_double_click), NULL);
-	release_event = gtk_signal_connect(GTK_OBJECT(main_window.classtreeview), "button_release_event",
-	                                   GTK_SIGNAL_FUNC(treeview_click_release), NULL);
+	press_event = g_signal_connect(GTK_OBJECT(main_window.classtreeview), "button_press_event",
+	                                 G_CALLBACK(treeview_double_click), NULL);
+	release_event = g_signal_connect(GTK_OBJECT(main_window.classtreeview), "button_release_event",
+	                                   G_CALLBACK(treeview_click_release), NULL);
 }
 
 

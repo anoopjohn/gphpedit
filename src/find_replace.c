@@ -294,19 +294,19 @@ void find_create(void)
 	gtk_widget_show (find_dialog.button5);
 	gtk_box_pack_start (GTK_BOX (find_dialog.hbox2), find_dialog.button5, TRUE, FALSE, 0);
 
-	gtk_signal_connect (GTK_OBJECT (find_dialog.button5),
-	                    "clicked", GTK_SIGNAL_FUNC (find_clicked), NULL);
+	g_signal_connect (GTK_OBJECT (find_dialog.button5),
+	                    "clicked", G_CALLBACK (find_clicked), NULL);
 
-	gtk_signal_connect (GTK_OBJECT (find_dialog.window1), "key_press_event", GTK_SIGNAL_FUNC (find_key_press_event), NULL);
+	g_signal_connect (GTK_OBJECT (find_dialog.window1), "key_press_event", G_CALLBACK (find_key_press_event), NULL);
 
 	// Hide the dialog box when the user clicks the cancel_button
-	//gtk_signal_connect_object (GTK_OBJECT (find_dialog.button4),
-	//                           "clicked", GTK_SIGNAL_FUNC (gtk_widget_hide), (gpointer) find_dialog.window1);
+	//g_signal_connect_object (GTK_OBJECT (find_dialog.button4),
+	//                           "clicked", G_CALLBACK (gtk_widget_hide), (gpointer) find_dialog.window1);
 	// Don't hide it, destroy it, the same as closing it (for consistency) - AJ 2005-10-14
-	gtk_signal_connect_object (GTK_OBJECT (find_dialog.button4),
-	                           "clicked", GTK_SIGNAL_FUNC (find_destroy), NULL);
+	g_signal_connect (GTK_OBJECT (find_dialog.button4),
+	                           "clicked", G_CALLBACK (find_destroy), NULL);
 							   
-	gtk_signal_connect(GTK_OBJECT(find_dialog.window1), "destroy", GTK_SIGNAL_FUNC(find_destroyed), NULL);
+	g_signal_connect(GTK_OBJECT(find_dialog.window1), "destroy", G_CALLBACK(find_destroyed), NULL);
 }
 
 // -----------------------------------------------------------------------------
@@ -708,21 +708,21 @@ void replace_create(void)
 	gtk_widget_show (replace_dialog.button9);
 	gtk_box_pack_start (GTK_BOX (replace_dialog.hbox8), replace_dialog.button9, TRUE, FALSE, 0);
 
-	gtk_signal_connect (GTK_OBJECT (replace_dialog.button8),
-	                    "clicked", GTK_SIGNAL_FUNC (replace_clicked), NULL);
+	g_signal_connect (GTK_OBJECT (replace_dialog.button8),
+	                    "clicked", G_CALLBACK (replace_clicked), NULL);
 
-	gtk_signal_connect (GTK_OBJECT (replace_dialog.button9),
-	                    "clicked", GTK_SIGNAL_FUNC (replace_all_clicked), NULL);
+	g_signal_connect (GTK_OBJECT (replace_dialog.button9),
+	                    "clicked", G_CALLBACK (replace_all_clicked), NULL);
 
-	gtk_signal_connect (GTK_OBJECT (replace_dialog.window2), "key_press_event", GTK_SIGNAL_FUNC (replace_key_press_event), NULL);
+	g_signal_connect (GTK_OBJECT (replace_dialog.window2), "key_press_event", G_CALLBACK (replace_key_press_event), NULL);
 
 	// Hide the dialog box when the user clicks the cancel_button
-	//gtk_signal_connect_object (GTK_OBJECT (replace_dialog.button7),
-	//                           "clicked", GTK_SIGNAL_FUNC (gtk_widget_hide), (gpointer) replace_dialog.window2);
+	//g_signal_connect (GTK_OBJECT (replace_dialog.button7),
+	//                           "clicked", G_CALLBACK (gtk_widget_hide), (gpointer) replace_dialog.window2);
 	// Don't hide it, destroy it, the same as closing it (for consistency) - AJ 2005-10-14
-	gtk_signal_connect_object (GTK_OBJECT (replace_dialog.button7),
-	                           "clicked", GTK_SIGNAL_FUNC (replace_destroy), NULL);
+	g_signal_connect (GTK_OBJECT (replace_dialog.button7),
+	                           "clicked", G_CALLBACK (replace_destroy), NULL);
 							   
-	gtk_signal_connect(GTK_OBJECT(replace_dialog.window2), "destroy",
-	                   GTK_SIGNAL_FUNC(replace_destroyed), NULL);
+	g_signal_connect(GTK_OBJECT(replace_dialog.window2), "destroy",
+	                   G_CALLBACK(replace_destroyed), NULL);
 }

@@ -50,10 +50,10 @@
 /* VOID:INT,INT,INT (marshal.list:1) */
 void
 scintilla_marshal_VOID__INT_INT_INT (GClosure     *closure,
-                                     GValue       *return_value G_GNUC_UNUSED,
+                                     GValue       *return_value,
                                      guint         n_param_values,
                                      const GValue *param_values,
-                                     gpointer      invocation_hint G_GNUC_UNUSED,
+                                     gpointer      invocation_hint,
                                      gpointer      marshal_data)
 {
   typedef void (*GMarshalFunc_VOID__INT_INT_INT) (gpointer     data1,
@@ -89,10 +89,10 @@ scintilla_marshal_VOID__INT_INT_INT (GClosure     *closure,
 /* VOID:INT,ULONG,LONG (marshal.list:2) */
 void
 scintilla_marshal_VOID__INT_ULONG_LONG (GClosure     *closure,
-                                        GValue       *return_value G_GNUC_UNUSED,
+                                        GValue       *return_value,
                                         guint         n_param_values,
                                         const GValue *param_values,
-                                        gpointer      invocation_hint G_GNUC_UNUSED,
+                                        gpointer      invocation_hint,
                                         gpointer      marshal_data)
 {
   typedef void (*GMarshalFunc_VOID__INT_ULONG_LONG) (gpointer     data1,
@@ -128,10 +128,10 @@ scintilla_marshal_VOID__INT_ULONG_LONG (GClosure     *closure,
 /* VOID:INT,INT (marshal.list:3) */
 void
 scintilla_marshal_VOID__INT_INT (GClosure     *closure,
-                                 GValue       *return_value G_GNUC_UNUSED,
+                                 GValue       *return_value,
                                  guint         n_param_values,
                                  const GValue *param_values,
-                                 gpointer      invocation_hint G_GNUC_UNUSED,
+                                 gpointer      invocation_hint,
                                  gpointer      marshal_data)
 {
   typedef void (*GMarshalFunc_VOID__INT_INT) (gpointer     data1,
@@ -165,10 +165,10 @@ scintilla_marshal_VOID__INT_INT (GClosure     *closure,
 /* VOID:INT,INT,STRING,INT,INT,INT,INT,INT (marshal.list:4) */
 void
 scintilla_marshal_VOID__INT_INT_STRING_INT_INT_INT_INT_INT (GClosure     *closure,
-                                                            GValue       *return_value G_GNUC_UNUSED,
+                                                            GValue       *return_value,
                                                             guint         n_param_values,
                                                             const GValue *param_values,
-                                                            gpointer      invocation_hint G_GNUC_UNUSED,
+                                                            gpointer      invocation_hint,
                                                             gpointer      marshal_data)
 {
   typedef void (*GMarshalFunc_VOID__INT_INT_STRING_INT_INT_INT_INT_INT) (gpointer     data1,

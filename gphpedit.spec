@@ -6,12 +6,12 @@ License: GPL
 Group: X11/Utilities
 Source: gphpedit-%{version}.tar.gz
 URL: http://www.gphpedit.org/
-BuildRequires: gtkhtml2
+BuildRequires: webkit-1.0
 BuildRoot: /var/tmp/%{name}-root               
 
 %description
 gPHPEdit is a GNOME2 editor dedicated to editing PHP files and other 
-supporting files like HTML/CSS.
+supporting files like HTML/CSS/JS.
 
 %prep
 rm -rf $RPM_BUILD_ROOT
