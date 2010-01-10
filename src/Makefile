@@ -14,9 +14,9 @@
 
 
 
-srcdir = /home/pepe/.wine/dosdevices/z:/home/pepe/Documentos/gphpedit/src
-top_srcdir = /home/pepe/.wine/dosdevices/z:/home/pepe/Documentos/gphpedit
-VPATH = /home/pepe/.wine/dosdevices/z:/home/pepe/Documentos/gphpedit/src
+srcdir = .
+top_srcdir = ..
+
 pkgdatadir = $(datadir)/gphpedit
 pkglibdir = $(libdir)/gphpedit
 pkgincludedir = $(includedir)/gphpedit
@@ -36,14 +36,14 @@ NORMAL_UNINSTALL = :
 PRE_UNINSTALL = :
 POST_UNINSTALL = :
 host_triplet = i686-pc-linux-gnu
-ACLOCAL = ${SHELL} /home/pepe/.wine/dosdevices/z:/home/pepe/Documentos/gphpedit/missing --run aclocal-1.7
+ACLOCAL = ${SHELL} /home/aneesh/gphpedit/source/gphpedit/missing --run aclocal-1.7
 AMDEP_FALSE = #
 AMDEP_TRUE = 
-AMTAR = ${SHELL} /home/pepe/.wine/dosdevices/z:/home/pepe/Documentos/gphpedit/missing --run tar
+AMTAR = ${SHELL} /home/aneesh/gphpedit/source/gphpedit/missing --run tar
 AR = ar
-AUTOCONF = ${SHELL} /home/pepe/.wine/dosdevices/z:/home/pepe/Documentos/gphpedit/missing --run autoconf
-AUTOHEADER = ${SHELL} /home/pepe/.wine/dosdevices/z:/home/pepe/Documentos/gphpedit/missing --run autoheader
-AUTOMAKE = ${SHELL} /home/pepe/.wine/dosdevices/z:/home/pepe/Documentos/gphpedit/missing --run automake-1.7
+AUTOCONF = ${SHELL} /home/aneesh/gphpedit/source/gphpedit/missing --run autoconf
+AUTOHEADER = ${SHELL} /home/aneesh/gphpedit/source/gphpedit/missing --run autoheader
+AUTOMAKE = ${SHELL} /home/aneesh/gphpedit/source/gphpedit/missing --run automake-1.7
 AWK = mawk
 CATALOGS = 
 CATOBJEXT = .gmo
@@ -71,8 +71,8 @@ FFLAGS =
 GETTEXT_PACKAGE = gphpedit
 GMOFILES = 
 GMSGFMT = /usr/bin/msgfmt
-GPHPEDIT_CFLAGS = -D_REENTRANT -DORBIT2=1 -pthread -I/usr/include/gtk-2.0 -I/usr/lib/gtk-2.0/include -I/usr/include/atk-1.0 -I/usr/include/cairo -I/usr/include/pango-1.0 -I/usr/include/pixman-1 -I/usr/include/freetype2 -I/usr/include/directfb -I/usr/include/libpng12 -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include -I/usr/include/libgnomeui-2.0 -I/usr/include/libart-2.0 -I/usr/include/gconf/2 -I/usr/include/gnome-keyring-1 -I/usr/include/libgnome-2.0 -I/usr/include/libbonoboui-2.0 -I/usr/include/libgnomecanvas-2.0 -I/usr/include/gnome-vfs-2.0 -I/usr/lib/gnome-vfs-2.0/include -I/usr/include/orbit-2.0 -I/usr/include/dbus-1.0 -I/usr/lib/dbus-1.0/include -I/usr/include/libbonobo-2.0 -I/usr/include/bonobo-activation-2.0 -I/usr/include/libxml2 -I/usr/include/gail-1.0 -I/usr/include/gtkhtml-2.0  
-GPHPEDIT_LIBS = -pthread -lgnomeui-2 -lSM -lICE -lbonoboui-2 -lgnomecanvas-2 -lgnome-2 -lpopt -lbonobo-2 -lbonobo-activation -lORBit-2 -lart_lgpl_2 -lgnomevfs-2 -lgconf-2 -lgthread-2.0 -lrt -lgtkhtml-2 -lgtk-x11-2.0 -lxml2 -lgdk-x11-2.0 -latk-1.0 -lpangoft2-1.0 -lgdk_pixbuf-2.0 -lm -lpangocairo-1.0 -lgio-2.0 -lcairo -lpango-1.0 -lfreetype -lfontconfig -lgobject-2.0 -lgmodule-2.0 -lglib-2.0  
+GPHPEDIT_CFLAGS = -D_REENTRANT -DORBIT2=1 -pthread -I/usr/include/gtk-2.0 -I/usr/lib/gtk-2.0/include -I/usr/include/atk-1.0 -I/usr/include/cairo -I/usr/include/pango-1.0 -I/usr/include/pixman-1 -I/usr/include/freetype2 -I/usr/include/directfb -I/usr/include/libpng12 -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include -I/usr/include/libgnomeui-2.0 -I/usr/include/libart-2.0 -I/usr/include/gconf/2 -I/usr/include/gnome-keyring-1 -I/usr/include/libgnome-2.0 -I/usr/include/libbonoboui-2.0 -I/usr/include/libgnomecanvas-2.0 -I/usr/include/gnome-vfs-2.0 -I/usr/lib/gnome-vfs-2.0/include -I/usr/include/orbit-2.0 -I/usr/include/dbus-1.0 -I/usr/lib/dbus-1.0/include -I/usr/include/libbonobo-2.0 -I/usr/include/bonobo-activation-2.0 -I/usr/include/libxml2 -I/usr/include/gail-1.0 -I/usr/include/webkit-1.0  
+GPHPEDIT_LIBS = -pthread -lgnomeui-2 -lSM -lICE -lbonoboui-2 -lgnomecanvas-2 -lgnome-2 -lpopt -lbonobo-2 -lbonobo-activation -lORBit-2 -lart_lgpl_2 -lgnomevfs-2 -lgconf-2 -lgthread-2.0 -lrt -lwebkit-1.0 -lgtk-x11-2.0 -lgdk-x11-2.0 -latk-1.0 -lpangoft2-1.0 -lgdk_pixbuf-2.0 -lm -lpangocairo-1.0 -lgio-2.0 -lcairo -lpango-1.0 -lfreetype -lfontconfig -lgobject-2.0 -lgmodule-2.0 -lglib-2.0  
 INSTALL_DATA = ${INSTALL} -m 644
 INSTALL_PROGRAM = ${INSTALL}
 INSTALL_SCRIPT = ${INSTALL}
@@ -113,8 +113,8 @@ LTLIBOBJS =
 MAINT = #
 MAINTAINER_MODE_FALSE = 
 MAINTAINER_MODE_TRUE = #
-MAKEINFO = ${SHELL} /home/pepe/.wine/dosdevices/z:/home/pepe/Documentos/gphpedit/missing --run makeinfo
-MKINSTALLDIRS = /home/pepe/.wine/dosdevices/z:/home/pepe/Documentos/gphpedit/mkinstalldirs
+MAKEINFO = ${SHELL} /home/aneesh/gphpedit/source/gphpedit/missing --run makeinfo
+MKINSTALLDIRS = ./mkinstalldirs
 MSGFMT = /usr/bin/msgfmt
 OBJEXT = o
 PACKAGE = gphpedit
@@ -164,7 +164,7 @@ host_os = linux-gnu
 host_vendor = pc
 includedir = ${prefix}/include
 infodir = ${prefix}/share/info
-install_sh = /home/pepe/.wine/dosdevices/z:/home/pepe/Documentos/gphpedit/install-sh
+install_sh = /home/aneesh/gphpedit/source/gphpedit/install-sh
 libdir = ${exec_prefix}/lib
 libexecdir = ${exec_prefix}/libexec
 localstatedir = ${prefix}/var
