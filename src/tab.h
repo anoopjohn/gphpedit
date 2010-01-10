@@ -28,13 +28,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
-//#include <libgtkhtml/gtkhtmlcontext.h>
-//#include <libgtkhtml/graphics/htmlpainter.h>
-//#include <libgtkhtml/layout/htmlbox.h>
-//#include <libgtkhtml/view/htmlview.h>
-//#include <libgtkhtml/gtkhtml.h>
-#include <libgnomevfs/gnome-vfs.h>
-
+#include <gio/gio.h>
 #include "main.h"
 #include "classbrowser.h"
 #include <webkit/webkit.h> 
@@ -55,8 +49,6 @@ typedef struct
 	GSList components;
 	GtkWidget *scintilla;
 	GtkWidget *help_scrolled_window;
-//	HtmlDocument *help_document;
-//	GtkWidget *help_view;
 	WebKitWebView *help_view;
 	gint scintilla_id;
 	gint file_mtime; // TODO: Change from a gint to something more meaningful
@@ -76,6 +68,7 @@ typedef struct
 	guint current_pos;
 	guint current_line;
 	guint file_size;
+	gchar* buffer;
 } Editor;
 
 typedef struct
@@ -122,7 +115,8 @@ gchar * editor_convert_to_local(Editor *editor);
 gboolean editor_is_local(Editor *editor);
 gchar *convert_to_full(gchar *filename);
 void str_replace(char *Str, char ToRp, char WithC);
-void tab_file_save_opened(GnomeVFSAsyncHandle *fd, GnomeVFSResult result, gpointer li_ptr);
+//void tab_file_save_opened(GnomeVFSAsyncHandle *fd, GnomeVFSResult result, gpointer li_ptr);
+void tab_file_save_opened(GObject *source_object, GAsyncResult *res, gpointer user_data);
 
 char *macro_message_to_string(gint message);
 

@@ -1,3 +1,12 @@
+2010-01-07  Rostagno Jose <joserostagno at hotmail.com>
+          * New Feature - Fullscreen mode support (sr #106708)
+          * New Feature - Added clean button to incremental search and goto gtkentry
+          * New Feature - Toolbar, statusbar and sidepanel show/hide toglebutton
+	  * Fixed Bug - Toolbars donot extend till window border. (sr #106647)
+	  * Fixed Bug - gnome-config replaced by Gconf
+	  * Fixed Bug - gnome-dialog replaced by Gtkdialog
+	  * Fixed Bug - gnome-vfs replaced by GIO/GVFS
+
 2009-11-28  Rostagno Jose <joserostagno at hotmail.com>
           * New Feature - Added Bookmarks
 	      * Fixed Bug - Remove gtkhtml2 dependency, now uses webkit

@@ -362,9 +362,8 @@ extern Preferences preferences;
 
 void preferences_load(void);
 void preferences_save(void);
-void preferences_show(void);
-//void main_window_size_save(void);
-void main_window_size_save_details();
+//void preferences_show(void);
+void main_window_size_save_details(void);
 
 void move_classbrowser_position(void);
 void save_classbrowser_position(void);

@@ -3771,8 +3771,8 @@ notify_cb (GtkWidget *w, gint param, gpointer notif, gpointer data)
                            signals[ZOOM], 0);
             break;
         default:
-            //g_warning ("GtkScintilla2: Notification code %d not handled!\n",
-            //           (gint) notification->nmhdr.code);
+            g_warning ("GtkScintilla2: Notification code %d not handled!\n",
+                       (gint) notification->nmhdr.code);
             break;
     }
 }

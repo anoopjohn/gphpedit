@@ -25,14 +25,14 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-#include <libgnomevfs/gnome-vfs.h>
-
+#include "stdlib.h"
 #include "main_window_callbacks.h"
 #include "find_replace.h"
 #include "main_window.h"
 #include "preferences_dialog.h"
 #include "tab.h"
 #include "templates.h"
+#include "project.h"
 
 
 gboolean is_app_closing = FALSE;
@@ -87,7 +87,6 @@ void session_save(void)
 	}
 }
 
-
 void session_reopen(void)
 {
 	GString *session_file;
@@ -101,7 +100,7 @@ void session_reopen(void)
 	session_file = g_string_new( g_get_home_dir());
 	session_file = g_string_append(session_file, "/.gphpedit/session");
 	
-	if (g_file_exists(session_file->str)) {
+	if (g_file_test(session_file->str,G_FILE_TEST_EXISTS)){//g_file_exists(session_file->str)) {
 		fp = fopen(session_file->str, "r");
   		if (!fp) {	
 			g_print(_("ERROR: cannot open session file (%s)\n"), session_file->str);
@@ -122,18 +121,21 @@ void session_reopen(void)
 				filename++;
 				focus_this_one = TRUE;
 			}
-
+			
 			if (strstr(filename, "phphelp:")) {
 				filename += 8;
 				target = g_string_new(filename);
 				tab_create_new(TAB_HELP, target);
 				g_string_free(target, TRUE);
+				
 				if (focus_this_one && (main_window.current_editor)) {
-					focus_tab = gtk_notebook_page_num(GTK_NOTEBOOK(main_window.notebook_editor),main_window.current_editor->help_scrolled_window);
+					//focus_tab = gtk_notebook_page_num(GTK_NOTEBOOK(main_window.notebook_editor),main_window.current_editor->help_scrolled_window);
+					//FIXME: seg fault if there's open a file and a TABHELP and the TABHELP GOT the focus
+					focus_tab = 0;
 				}
 			}
 			else {
-				switch_to_file_or_open(filename,0);
+                            	switch_to_file_or_open(filename,0);
 				if (focus_this_one && (main_window.current_editor)) {
 					focus_tab = gtk_notebook_page_num(GTK_NOTEBOOK(main_window.notebook_editor),main_window.current_editor->scintilla);
 				}
@@ -144,7 +146,6 @@ void session_reopen(void)
 		
 		fclose(fp);
 		gtk_notebook_set_current_page( GTK_NOTEBOOK(main_window.notebook_editor), focus_tab);
-
 		unlink(session_file->str);
 	}
 }
@@ -249,8 +250,11 @@ void main_window_resize(GtkWidget *widget, GtkAllocation *allocation, gpointer u
 void main_window_state_changed(GtkWidget *widget, GdkEventWindowState *event, gpointer user_data)
 {
 	gboolean maximized = GDK_WINDOW_STATE_MAXIMIZED && event->new_window_state;
-	gnome_config_set_bool("gPHPEdit/main_window/maximized", maximized);
-	gnome_config_sync();
+	GConfClient *config;
+        config=gconf_client_get_default ();
+        
+	gconf_client_set_bool (config,"/gPHPEdit/main_window/maximized", maximized,NULL);
+
 }
 
 gboolean classbrowser_accept_size(GtkPaned *paned, gpointer user_data)
@@ -259,8 +263,7 @@ gboolean classbrowser_accept_size(GtkPaned *paned, gpointer user_data)
 	return TRUE;
 }
 
-gint main_window_key_press_event(GtkWidget   *widget,
-								 GdkEventKey *event,gpointer user_data)
+gint main_window_key_press_event(GtkWidget   *widget, GdkEventKey *event,gpointer user_data)
 {
 	guint current_pos;
 	guint current_line;
@@ -326,16 +329,22 @@ gint main_window_key_press_event(GtkWidget   *widget,
 		}
 		else if ((event->state & GDK_CONTROL_MASK)==GDK_CONTROL_MASK && ((event->keyval == GDK_F2)))	{
 			///add a marker
+			//bugfix:segfault if type=TABHELP
+			if (main_window.current_editor && main_window.current_editor->type != TAB_HELP) {
 			current_pos = gtk_scintilla_get_current_pos(GTK_SCINTILLA(main_window.current_editor->scintilla));
 			current_line = gtk_scintilla_line_from_position(GTK_SCINTILLA(main_window.current_editor->scintilla), current_pos);
 			mod_marker(current_line);
+			}
 			return TRUE;
 		}
 		else if ((event->keyval == GDK_F2))	{
 			///find next marker
+			//bugfix:segfault if type=TABHELP
+			if (main_window.current_editor && main_window.current_editor->type != TAB_HELP) {
 			current_pos = gtk_scintilla_get_current_pos(GTK_SCINTILLA(main_window.current_editor->scintilla));
 			current_line = gtk_scintilla_line_from_position(GTK_SCINTILLA(main_window.current_editor->scintilla), current_pos);
 			find_next_marker(current_line);
+			}
 			return TRUE;
 		}
 		else if ((event->state & GDK_CONTROL_MASK)==GDK_CONTROL_MASK && (event->keyval == GDK_space) && 
@@ -372,7 +381,16 @@ void on_new1_activate(GtkWidget *widget)
 	// Create a new untitled tab
 	tab_create_new(TAB_FILE, NULL);
 }
-
+/*
+void on_newproj_activate(GtkWidget *widget){
+    // creates a new project
+    projwindow();
+}
+void on_openproj_activate(GtkWidget *widget){
+    //open a project
+   open_project();
+}
+*/
 
 void open_file_ok(GtkFileChooser *file_selection)
 {
@@ -392,10 +410,12 @@ void reopen_recent(GtkWidget *widget, gpointer data)
 {
 	gchar *filename;
 	GString *key;
-	
-	key = g_string_new("gPHPEdit/recent/");
-	g_string_append_printf(key, "%d=NOTFOUND", (gint)data); // Back to being gint from gulong due to compiler warning
-	filename = gnome_config_get_string (key->str);
+	GConfClient *config;
+        config=gconf_client_get_default ();
+
+	key = g_string_new("/gPHPEdit/recent/");
+	g_string_append_printf(key, "%d", (gint)data); // Back to being gint from gulong due to compiler warning
+	filename = gconf_client_get_string(config,key->str,NULL);
 	g_string_free(key, TRUE);
 
 	if (DEBUG_MODE) { g_print("DEBUG: main_window_callbacks.c:reopen_recent:filename: %s\n", filename); }
@@ -452,7 +472,6 @@ void on_openselected1_activate(GtkWidget *widget)
 	gchar *ac_buffer;
 	gint ac_length;
 	GString *file;
-	GnomeVFSURI *uri;
 
 	if (main_window.current_editor == NULL || main_window.current_editor->type == TAB_HELP) 
 		return;
@@ -480,12 +499,11 @@ void on_openselected1_activate(GtkWidget *widget)
 			else if (strstr(ac_buffer, "://")) {
 				file = g_string_new(ac_buffer);
 			}
-
-			uri = gnome_vfs_uri_new (file->str);
-			if (gnome_vfs_uri_exists (uri))
-				switch_to_file_or_open(file->str,0);
-			gnome_vfs_uri_unref (uri);
-			
+                        GFile *fi;
+                        fi=g_file_new_for_uri (file->str);
+                        if(g_file_query_exists (fi,NULL))
+			switch_to_file_or_open(file->str,0);
+			g_object_unref(fi);
 			
 			if (file) {
 				g_string_free(file, TRUE);
@@ -582,7 +600,10 @@ void on_open1_activate(GtkWidget *widget)
 	gtk_dialog_set_default_response (GTK_DIALOG(file_selection_box), GTK_RESPONSE_ACCEPT);	
 	//Add filters to the open dialog
 	add_file_filters(GTK_FILE_CHOOSER(file_selection_box));
-	last_opened_folder = gnome_config_get_string("gPHPEdit/general/last_opened_folder=NOTFOUND");
+	GConfClient *config;
+	GError *error = NULL;
+        config=gconf_client_get_default ();
+	last_opened_folder = gconf_client_get_string(config,"/gPHPEdit/general/last_opened_folder",&error);
 	if (DEBUG_MODE) { g_print("DEBUG: main_window_callbacks.c:on_open1_activate:last_opened_folder: %s\n", last_opened_folder); }
 	/* opening of multiple files at once */
 	gtk_file_chooser_set_select_multiple(GTK_FILE_CHOOSER(file_selection_box), TRUE);
@@ -593,7 +614,7 @@ void on_open1_activate(GtkWidget *widget)
 		gtk_file_chooser_set_current_folder_uri(GTK_FILE_CHOOSER(file_selection_box),  folder->str);
 		g_string_free(folder, TRUE);
 	}
-	else if (strcmp(last_opened_folder, "NOTFOUND")!=0) {
+	else if (!last_opened_folder){
 		gtk_file_chooser_set_current_folder_uri(GTK_FILE_CHOOSER(file_selection_box),  last_opened_folder);
 	}
 	
@@ -603,7 +624,6 @@ void on_open1_activate(GtkWidget *widget)
 	
 	gtk_widget_destroy(file_selection_box);
 }
-
 
 void save_file_as_confirm_overwrite(gint reply,gpointer data)
 {
@@ -635,18 +655,19 @@ void save_file_as_confirm_overwrite(gint reply,gpointer data)
 void save_file_as_ok(GtkFileChooser *file_selection_box)
 {
 	GString *filename;
-	GtkWidget *file_exists_dialog;
-	struct stat st;
-
+	//GtkWidget *file_exists_dialog;
+	//struct stat st;
+        //GFile *fi;
 	// Extract filename from the file selection dialog
 	filename = g_string_new(gtk_file_chooser_get_uri(file_selection_box));
-
-	if (stat (filename->str, &st) == 0) {
-		file_exists_dialog = gnome_question_dialog_modal(_("This file already exists, are you sure you want to overwrite it?"),
-			save_file_as_confirm_overwrite,filename);
-		gnome_dialog_run_and_close(GNOME_DIALOG(file_exists_dialog));
-	}
-	else {
+        //fi=g_file_new_for_uri (filename->str);
+	//if(g_file_query_exists (fi,NULL)) {
+       //if (stat (filename->str, &st) == 0) {
+		//file_exists_dialog = gnome_question_dialog_modal(_("This file already exists, are you sure you want to overwrite it?"),
+		//	save_file_as_confirm_overwrite,filename);
+		//gnome_dialog_run_and_close(GNOME_DIALOG(file_exists_dialog));
+	//}
+	//else {
 		// Set the filename of the current editor to be that
 		if (main_window.current_editor->filename) {
 			g_string_free(main_window.current_editor->filename, TRUE);
@@ -665,15 +686,15 @@ void save_file_as_ok(GtkFileChooser *file_selection_box)
 			main_window.current_editor->opened_from = NULL;
 		}
 		g_string_free(filename, FALSE);
-	}
+	//}
+        //g_object_unref(fi);
 }
 
 
 void on_save1_activate(GtkWidget *widget)
 {
 	gchar *filename = NULL;
-	GnomeVFSAsyncHandle *fg;
-	
+	GFile *file;
 	if (main_window.current_editor) {
 		filename = main_window.current_editor->filename->str;
 
@@ -682,7 +703,10 @@ void on_save1_activate(GtkWidget *widget)
 			on_save_as1_activate(widget);
 		}
 		else {
-			gnome_vfs_async_create(&fg, filename, GNOME_VFS_OPEN_WRITE, FALSE, 0755, GNOME_VFS_PRIORITY_DEFAULT, tab_file_save_opened, main_window.current_editor);
+                       GError *error;
+                       error=NULL;
+                       file=g_file_new_for_uri (filename);
+                       g_file_replace_async (file,NULL,TRUE,0,G_PRIORITY_DEFAULT,NULL, tab_file_save_opened, main_window.current_editor);
 		}
 	}
 }
@@ -748,8 +772,11 @@ void on_save_as1_activate(GtkWidget *widget)
 		gtk_file_chooser_set_local_only (GTK_FILE_CHOOSER(file_selection_box), FALSE);
 		gtk_file_chooser_set_do_overwrite_confirmation (GTK_FILE_CHOOSER(file_selection_box), TRUE);
 		gtk_dialog_set_default_response (GTK_DIALOG(file_selection_box), GTK_RESPONSE_ACCEPT);
-	
-		last_opened_folder = gnome_config_get_string("gPHPEdit/general/last_opened_folder=NOTFOUND");
+		
+		GConfClient *config;
+		GError *error = NULL;
+	        config=gconf_client_get_default ();
+		last_opened_folder = gconf_client_get_string(config,"/gPHPEdit/general/last_opened_folder",&error);
 		if (DEBUG_MODE) { g_print("DEBUG: main_window_callbacks.c:on_save_as1_activate:last_opened_folder: %s\n", last_opened_folder); }
 	
 		if (main_window.current_editor) {
@@ -758,7 +785,7 @@ void on_save_as1_activate(GtkWidget *widget)
 				gtk_file_chooser_set_uri(GTK_FILE_CHOOSER(file_selection_box), filename);
 			}
 			else {
-				if (strcmp(last_opened_folder, "NOTFOUND")!=0) {
+				if (!last_opened_folder){
 					if (DEBUG_MODE) { g_print("DEBUG: main_window_callbacks.c:on_save_as1_activate:Setting current_folder_uri to %s\n", last_opened_folder); }
 					gtk_file_chooser_set_current_folder_uri(GTK_FILE_CHOOSER(file_selection_box),  last_opened_folder);
 				}
@@ -772,15 +799,6 @@ void on_save_as1_activate(GtkWidget *widget)
 		gtk_widget_destroy(file_selection_box);		
 	}
 }
-
-void on_reload_confirm(gint reply,gpointer filename)
-{
-	if (reply==0) {
-		tab_load_file(main_window.current_editor);
-	}
-}
-
-
 void on_reload1_activate(GtkWidget *widget)
 {
 	GtkWidget *file_revert_dialog;
@@ -788,9 +806,14 @@ void on_reload1_activate(GtkWidget *widget)
 		return;
 
 	if (main_window.current_editor && (main_window.current_editor->saved == FALSE)) {
-		file_revert_dialog = gnome_question_dialog_modal(_("Are you sure you wish to reload the current file, losing your changes?"),
-							 on_reload_confirm,NULL);
-		gnome_dialog_run_and_close(GNOME_DIALOG(file_revert_dialog));
+                file_revert_dialog = gtk_message_dialog_new(GTK_WINDOW(main_window.window),GTK_DIALOG_DESTROY_WITH_PARENT,GTK_MESSAGE_QUESTION,GTK_BUTTONS_YES_NO,
+            _("Are you sure you wish to reload the current file, losing your changes?"));
+            gtk_window_set_title(GTK_WINDOW(file_revert_dialog), "Question");
+            gint result = gtk_dialog_run (GTK_DIALOG (file_revert_dialog));
+           if (result==GTK_RESPONSE_YES) {
+		tab_load_file(main_window.current_editor);
+        	}
+            gtk_widget_destroy(file_revert_dialog);
 	}
 	else if (main_window.current_editor) {
 		tab_load_file(main_window.current_editor);
@@ -819,7 +842,13 @@ void rename_file(GString *newfilename)
 {
 	// unlink old filename
 	// unlink((main_window.current_editor->filename->str));
-	gnome_vfs_unlink((const gchar *)main_window.current_editor->filename->str);
+        GFile *file;
+        GError *error;
+        file=g_file_new_for_uri ((const gchar *)main_window.current_editor->filename->str);
+        if (!g_file_delete (file,NULL,&error)){
+            g_print("GIO Error renaming file: %s\n",error->message);
+        }
+        
 	// set current_editor->filename
 	main_window.current_editor->filename=newfilename;
 	main_window.current_editor->short_filename = g_path_get_basename(newfilename->str);
@@ -828,33 +857,27 @@ void rename_file(GString *newfilename)
 	on_save1_activate(NULL);
 }
 
-
-void rename_file_overwrite_confirm(gint reply,gpointer filename)
-{
-	if (reply==0) {
-		// Call rename_file
-		rename_file(filename);
-	}
-}
-
-
-
 void rename_file_ok(GtkFileChooser *file_selection)
 {
 	GString *filename;
 	GtkWidget *file_exists_dialog;
-	struct stat st;
-
 	// Extract filename from the file chooser dialog
 	filename = g_string_new(gtk_file_chooser_get_uri(file_selection));
-
-	if (stat (filename->str, &st) == 0) {
-		file_exists_dialog = gnome_question_dialog_modal(_("This file already exists, are you sure you want to overwrite it?"),
-							 save_file_as_confirm_overwrite,filename);
-		gnome_dialog_run_and_close(GNOME_DIALOG(file_exists_dialog));
-	}
-
-	rename_file(filename);
+        GFile *file;
+        file=g_file_new_for_uri (filename->str);
+        if (g_file_query_exists (file,NULL)) {
+            file_exists_dialog = gtk_message_dialog_new(GTK_WINDOW(main_window.window),GTK_DIALOG_DESTROY_WITH_PARENT,GTK_MESSAGE_QUESTION,GTK_BUTTONS_YES_NO,
+            _("This file already exists, are you sure you want to overwrite it?"));
+            gtk_window_set_title(GTK_WINDOW(file_exists_dialog), "Question");
+            gint result = gtk_dialog_run (GTK_DIALOG (file_exists_dialog));
+           if (result==GTK_RESPONSE_YES) {
+		rename_file(filename);
+        	}
+            gtk_widget_destroy(file_exists_dialog);
+        } else {
+            rename_file(filename);
+        }
+        g_object_unref(file);
 }
 
 
@@ -942,16 +965,18 @@ void close_page(Editor *editor)
 gboolean try_save_page(Editor *editor, gboolean close_if_can)
 {
 	GtkWidget *confirm_dialog;
-	int ret;
+	gint ret;
 	GString *string;
-
-	string = g_string_new("");
+        string = g_string_new("");
 	g_string_printf(string, _("The file '%s' has not been saved since your last changes, are you sure you want to close it and lose these changes?"), editor->short_filename);
-	confirm_dialog = gnome_message_box_new (string->str,GNOME_MESSAGE_BOX_WARNING,
-		_("Close and _lose changes"), _("_Save file"), _("_Cancel closing"), NULL);
-	g_string_printf(string,_("Unsaved changes to '%s'"), editor->filename->str);
+        confirm_dialog=gtk_message_dialog_new (GTK_WINDOW(main_window.window),GTK_DIALOG_DESTROY_WITH_PARENT,GTK_MESSAGE_WARNING,GTK_BUTTONS_NONE,_("The file '%s' has not been saved since your last changes, are you sure you want to close it and lose these changes?"),editor->short_filename);
+        g_string_printf(string,_("Unsaved changes to '%s'"), editor->filename->str);
 	gtk_window_set_title(GTK_WINDOW(confirm_dialog), string->str);
-	ret = gnome_dialog_run (GNOME_DIALOG (confirm_dialog));
+        gtk_dialog_add_button (GTK_DIALOG(confirm_dialog),_("Close and _lose changes"),0);
+        gtk_dialog_add_button (GTK_DIALOG(confirm_dialog),_("_Save file"),1);
+        gtk_dialog_add_button (GTK_DIALOG(confirm_dialog),_("_Cancel closing"),2);
+        ret = gtk_dialog_run (GTK_DIALOG (confirm_dialog));
+        gtk_widget_destroy(confirm_dialog);
 	switch (ret) {
 		case 0:
 			if (close_if_can) {
@@ -1031,51 +1056,7 @@ void on_cut1_activate(GtkWidget *widget)
 	}
 	//gtk_scintilla_cut(GTK_SCINTILLA(main_window.current_editor->scintilla));
 }
-/*
-static gchar *gtkhtml2_selection_get_text (HtmlView *view)
-{
-	GSList *list = view->sel_list;
-	GString *str = g_string_new ("");
-	gchar *ptr;
 
-	if (view->sel_list == NULL)
-		return NULL;
-	
-	while (list) {
-		HtmlBoxText *text = HTML_BOX_TEXT (list->data);
-
-		list = list->next;
-		//
-		// Some boxes may not have any text
-		//
-		if (text->canon_text == NULL)
-			continue;
-		switch (text->selection) {
-		case HTML_BOX_TEXT_SELECTION_NONE:
-			g_assert_not_reached ();
-			break;
-		case HTML_BOX_TEXT_SELECTION_END:
-			g_string_append_len (str, (gchar *)text->canon_text, g_utf8_offset_to_pointer ((gchar *)text->canon_text, (glong)text->sel_end_index) - (gchar *)text->canon_text);
-			break;
-		case HTML_BOX_TEXT_SELECTION_START:
-			g_string_append_len (str, g_utf8_offset_to_pointer ((gchar *)text->canon_text, (glong)text->sel_start_index),
-					 g_utf8_offset_to_pointer ((gchar *)text->canon_text, (glong)text->length) - g_utf8_offset_to_pointer ((gchar *)text->canon_text, (glong)text->sel_start_index));
-			break;
-		case HTML_BOX_TEXT_SELECTION_FULL:
-			g_string_append_len (str, (gchar *)text->canon_text, g_utf8_offset_to_pointer ((gchar *)text->canon_text, (glong)text->length) - (gchar *)text->canon_text);
-			break;
-		case HTML_BOX_TEXT_SELECTION_BOTH:
-			g_string_append_len (str, g_utf8_offset_to_pointer ((gchar *)text->canon_text, (glong)MIN (text->sel_start_index, text->sel_end_index)),
-					g_utf8_offset_to_pointer ((gchar *)text->canon_text, (glong)MAX (text->sel_end_index, text->sel_start_index)) - 
-					g_utf8_offset_to_pointer ((gchar *)text->canon_text, (glong)MIN (text->sel_start_index, text->sel_end_index)));
-			break;
-		}
-	}
-	ptr = str->str;
-	g_string_free (str, FALSE);
-	return ptr;
-}
-*/
 void on_copy1_activate(GtkWidget *widget)
 {
 	gint wordStart;
@@ -1087,9 +1068,6 @@ void on_copy1_activate(GtkWidget *widget)
 		return;
 	
 	if (main_window.current_editor->type == TAB_HELP) {
-		//buffer = gtkhtml2_selection_get_text(HTML_VIEW(main_window.current_editor->help_view));
-		//gtk_clipboard_set_text(main_window.clipboard, buffer, 1);
-		//g_free(buffer);
 		 webkit_web_view_copy_clipboard (WEBKIT_WEB_VIEW(main_window.current_editor->help_view));
 	}
 	else {
@@ -1137,7 +1115,12 @@ void on_selectall1_activate(GtkWidget *widget)
 {
 	if (main_window.current_editor == NULL)
 		return;
+	if (main_window.current_editor->type == TAB_HELP){
+	//select text in help tab
+	webkit_web_view_select_all (WEBKIT_WEB_VIEW(main_window.current_editor->help_view));
+	} else {
 	gtk_scintilla_select_all(GTK_SCINTILLA(main_window.current_editor->scintilla));
+	}
 }
 
 
@@ -1320,7 +1303,15 @@ void context_help(GtkWidget *widget)
  */
 void on_about1_activate(GtkWidget *widget)
 {
-	const gchar *authors[] = {
+    GdkPixbuf *pixbuf = NULL;
+    GError *error = NULL;
+    pixbuf = gdk_pixbuf_new_from_file (PIXMAP_DIR "/" GPHPEDIT_PIXMAP_ICON, &error);
+
+	if (error) {
+		g_warning (G_STRLOC ": cannot open icon: %s", error->message);
+		g_error_free (error);
+	}
+  const gchar *authors[] = {
 								"Current Maintainer",
 								"Anoop John <anoop.john@zyxware.com>",
 								"",
@@ -1331,41 +1322,29 @@ void on_about1_activate(GtkWidget *widget)
 								"Jonh Wendell <wendell@bani.com.br>",
 								"Tim Jackson <tim@timj.co.uk>",
 								"Sven Herzberg <herzi@gnome-de.org>",
+                                                                "Jose Rostagno <rostagnojose@yahoo.com>",
 								NULL
 							 };
-	const gchar *documenters[] = {
-									 NULL
-								 };
-	gchar *translator_credits = _("translator_credits");
-	GtkWidget *about;
-	GdkPixbuf *pixbuf = NULL;
-	GError *error = NULL;
-
-	pixbuf = gdk_pixbuf_new_from_file (PIXMAP_DIR "/" GPHPEDIT_PIXMAP_ICON, &error);
-
-	if (error) {
-		g_warning (G_STRLOC ": cannot open icon: %s", error->message);
-		g_error_free (error);
-	}
-	about = gnome_about_new ("gPHPEdit", VERSION,
-							 _("Copyright  2003-2006 Andy Jeffries, 2009 Anoop John"),
-						 	 _("gPHPEdit is a GNOME2 editor specialised for editing PHP "
-							 "scripts and related files (HTML/CSS/JS)."),
-							 (const gchar **) authors,
-							 (const gchar **) documenters,
-							 strcmp (translator_credits, "translator_credits") != 0 ? translator_credits : NULL,
-							 pixbuf);
-	gtk_widget_show(about);
-
-	if (pixbuf) {
-		gdk_pixbuf_unref (pixbuf);
-	}
-		
-	gtk_window_set_transient_for (GTK_WINDOW (about), NULL);
-	/* This line causes a segfault - should be right but commented out!
-	gtk_signal_connect(GTK_OBJECT(about), "destroy",
-					   GTK_SIGNAL_FUNC(gtk_widget_destroyed), &about);*/
-	gtk_widget_show (about);
+  gchar *translator_credits = _("translator_credits");
+  const gchar *documenters[] = {NULL};
+  GtkWidget *dialog = gtk_about_dialog_new();
+  gtk_about_dialog_set_name(GTK_ABOUT_DIALOG(dialog), "gPHPEdit");
+  gtk_about_dialog_set_version(GTK_ABOUT_DIALOG(dialog), VERSION);
+  gtk_about_dialog_set_copyright(GTK_ABOUT_DIALOG(dialog),
+      _("Copyright  2003-2006 Andy Jeffries, 2009 Anoop John"));
+  gtk_about_dialog_set_comments(GTK_ABOUT_DIALOG(dialog),
+     _("gPHPEdit is a GNOME2 editor specialised for editing PHP "
+							 "scripts and related files (HTML/CSS/JS)."));
+  gtk_about_dialog_set_website(GTK_ABOUT_DIALOG(dialog),
+      "http://www.gphpedit.org/");
+  gtk_about_dialog_set_logo(GTK_ABOUT_DIALOG(dialog), pixbuf);
+  gtk_about_dialog_set_authors(GTK_ABOUT_DIALOG(dialog),(const gchar **) authors);
+  gtk_about_dialog_set_translator_credits(GTK_ABOUT_DIALOG(dialog),translator_credits);
+  gtk_about_dialog_set_documenters (GTK_ABOUT_DIALOG(dialog),(const gchar **) documenters);
+  gtk_window_set_icon(GTK_WINDOW(dialog), pixbuf);
+  g_object_unref(pixbuf), pixbuf = NULL;
+  gtk_dialog_run(GTK_DIALOG (dialog));
+  gtk_widget_destroy(dialog);
 }
 
 void on_notebook_switch_page (GtkNotebook *notebook, GtkNotebookPage *page,
@@ -1481,11 +1460,13 @@ gboolean is_valid_digits_only(gchar *text)
 void goto_line_int(gint line)
 {
 	gint current_pos;
-
+	//bugfix: seg fault if not scintilla
+	if (GTK_IS_SCINTILLA(main_window.current_editor->scintilla)){
 	gtk_scintilla_grab_focus(GTK_SCINTILLA(main_window.current_editor->scintilla));
 	gtk_scintilla_goto_line(GTK_SCINTILLA(main_window.current_editor->scintilla), line-1); // seems to be off by one...
 	current_pos = gtk_scintilla_get_current_pos(GTK_SCINTILLA(main_window.current_editor->scintilla));
 	gtk_scintilla_scroll_caret(GTK_SCINTILLA(main_window.current_editor->scintilla));
+	}
 }
 
 
@@ -1531,25 +1512,45 @@ void move_block(gint indentation_size)
 
 void block_indent(GtkWidget *widget)
 {
+//bugfix:segfault if not scintilla
+if (GTK_IS_SCINTILLA(main_window.current_editor->scintilla)){ 
 	move_block(preferences.indentation_size);
+}
 }
 
 
 void block_unindent(GtkWidget *widget)
 {
+//bugfix:segfault if not scintilla
+if (GTK_IS_SCINTILLA(main_window.current_editor->scintilla)){ 
 	move_block(0-preferences.indentation_size);
+}
 }
 //zoom in
 
 void zoom_in(GtkWidget *widget)
 {
-gtk_scintilla_zoom_in(GTK_SCINTILLA(main_window.current_editor->scintilla));
+//bugfix:segfault if not scintilla
+if (GTK_IS_SCINTILLA(main_window.current_editor->scintilla)){ 
+	gtk_scintilla_zoom_in(GTK_SCINTILLA(main_window.current_editor->scintilla));
+	}else{
+	if (WEBKIT_IS_WEB_VIEW(main_window.current_editor->help_view)){
+        	webkit_web_view_zoom_in (main_window.current_editor->help_view);
+	}
+	}
 }
 
 //zoom out
 void zoom_out(GtkWidget *widget)
 {
-gtk_scintilla_zoom_out(GTK_SCINTILLA(main_window.current_editor->scintilla));
+//bugfix:segfault if not scintilla
+if (GTK_IS_SCINTILLA(main_window.current_editor->scintilla)){
+	gtk_scintilla_zoom_out(GTK_SCINTILLA(main_window.current_editor->scintilla));
+	} else {
+	if (WEBKIT_IS_WEB_VIEW(main_window.current_editor->help_view)){
+        	webkit_web_view_zoom_out (main_window.current_editor->help_view);
+	}
+	}
 }
 
 //add marker
@@ -1565,16 +1566,22 @@ void delete_marker(int line)
 {
 gtk_scintilla_marker_delete(GTK_SCINTILLA(main_window.current_editor->scintilla), line, 1);
 }
+
 //add/delete a marker
 void mod_marker(int line){
+//bugfix:segfault if not scintilla
+if (GTK_IS_SCINTILLA(main_window.current_editor->scintilla)){
 	if (gtk_scintilla_marker_get(GTK_SCINTILLA(main_window.current_editor->scintilla),line)!=2){
 	add_marker(line);
 	}else{
 	delete_marker(line);
 	}
 }
+}
 //circle markers
 void find_next_marker(line_start){
+//bugfix:segfault if not scintilla
+if (GTK_IS_SCINTILLA(main_window.current_editor->scintilla)){
 gint line;
 //skip the current line
 line= gtk_scintilla_marker_next(GTK_SCINTILLA(main_window.current_editor->scintilla),line_start + 1, 2);
@@ -1592,6 +1599,7 @@ line= gtk_scintilla_marker_next(GTK_SCINTILLA(main_window.current_editor->scinti
 	//goto the marker posicion
 	goto_line_int(line+1);
 	}
+}
 }
 
 void syntax_check(GtkWidget *widget)
@@ -1611,31 +1619,86 @@ void syntax_check_clear(GtkWidget *widget)
 	gtk_widget_hide(main_window.scrolledwindow1);
 	gtk_widget_hide(main_window.lint_view);
 }
+/*
+void pressed_button_file_chooser(GtkButton *widget, gpointer data)
+ {
 
+ 	//GtkWidget *pParent;
+ 	GtkWidget *pFileSelection;
+
+ 	pFileSelection = gtk_file_chooser_dialog_new("Open...",
+ 	GTK_WINDOW(main_window.window),
+ 	GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER,
+ 	GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
+ 	GTK_STOCK_OPEN, GTK_RESPONSE_OK,
+ 	NULL);
+     gtk_window_set_modal(GTK_WINDOW(pFileSelection), TRUE);
+     // sets the label folder as start folder 
+     gchar *lbl;
+     lbl=(gchar*)gtk_button_get_label(GTK_BUTTON(main_window.button_dialog));
+     if (strcmp(lbl,"Workspace's directory")!=0){
+    gboolean res;
+    res=gtk_file_chooser_set_current_folder (GTK_FILE_CHOOSER(pFileSelection), lbl);
+    }
+ 	  sChemin=NULL;
+ 	  gchar*  sLabel;
+ 	  gchar*  sLabelUtf8;
+
+       switch(gtk_dialog_run(GTK_DIALOG(pFileSelection))) {
+         case GTK_RESPONSE_OK:
+
+             sChemin = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(pFileSelection));
+
+             break;
+         default:
+             break;
+     }
+    	gtk_widget_destroy(pFileSelection);
+    	if(sChemin!=NULL){
+ 	sLabel = g_strdup_printf("%s",sChemin);
+     sLabelUtf8 = g_locale_to_utf8(sLabel, -1, NULL, NULL, NULL);
+        gtk_button_set_label(GTK_BUTTON(widget), sLabelUtf8);
+ 	GtkTreeIter iter2;
+ 	GtkTreeIter* iter=NULL;
+ 	gtk_tree_store_clear(main_window.pTree);
+        gtk_tree_sortable_set_sort_func(GTK_TREE_SORTABLE(main_window.pTree), 1,filebrowser_sort_func, NULL, NULL);
+        gtk_tree_sortable_set_sort_column_id(GTK_TREE_SORTABLE(main_window.pTree), 1,GTK_SORT_ASCENDING);
+       create_tree(main_window.pTree,sChemin,iter,&iter2);
+    	}
+   }
+*/
 void classbrowser_show(void)
 {
 	gtk_paned_set_position(GTK_PANED(main_window.main_horizontal_pane),classbrowser_hidden_position);
 	//g_print("Width of class browser is %d\n", classbrowser_hidden_position);
-	gnome_config_set_int ("gPHPEdit/main_window/classbrowser_hidden",0);
-	gnome_config_sync();
+	GConfClient *config;
+        config=gconf_client_get_default ();
+        
+	gconf_client_set_int (config, "/gPHPEdit/main_window/classbrowser_hidden", 0,NULL);
 	classbrowser_update();
 }
 
 
 void classbrowser_hide(void)
 {
-	classbrowser_hidden_position = gnome_config_get_int ("gPHPEdit/main_window/classbrowser_size=100");
+	GConfClient *config;
+        config=gconf_client_get_default ();
+	GError *error = NULL;
+	classbrowser_hidden_position = gconf_client_get_int (config,"/gPHPEdit/main_window/classbrowser_size",&error);
+	if (classbrowser_hidden_position==0 && error!=NULL){
+	classbrowser_hidden_position=100;
+	}
 	//g_print("Width of class browser is %d\n", classbrowser_hidden_position);
 	gtk_paned_set_position(GTK_PANED(main_window.main_horizontal_pane),0);
-	gnome_config_set_int ("gPHPEdit/main_window/classbrowser_hidden",1);
-	gnome_config_sync();
+	gconf_client_set_int (config, "/gPHPEdit/main_window/classbrowser_hidden", 1,NULL);
 }
 
 void classbrowser_show_hide(GtkWidget *widget)
 {
 	gint hidden;
-	
-	hidden = gnome_config_get_int ("gPHPEdit/main_window/classbrowser_hidden=0");
+	GConfClient *config;
+        config=gconf_client_get_default ();
+	hidden = gconf_client_get_int (config,"/gPHPEdit/main_window/classbrowser_hidden",NULL);
 	if (hidden == 1)
 		classbrowser_show();
 	else

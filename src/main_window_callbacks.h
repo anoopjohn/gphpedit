@@ -24,11 +24,6 @@
 
 #ifndef MAIN_WINDOW_CALLBACKS_H
 #define MAIN_WINDOW_CALLBACKS_H
-/*
-#include <libgtkhtml/gtkhtml.h>
-#include <libgtkhtml/layout/htmlbox.h>
-#include <libgtkhtml/layout/htmlboxtext.h>
-*/
 #include <webkit/webkit.h> 
 #include "main.h"
 #include "tab.h"
@@ -47,6 +42,8 @@ void on_new1_activate(GtkWidget *widget);
 void open_file_ok(GtkFileChooser *file_selection);
 void reopen_recent(GtkWidget *widget, gpointer data);
 void on_open1_activate(GtkWidget *widget);
+//void on_newproj_activate(GtkWidget *widget);
+//void on_openproj_activate(GtkWidget *widget);
 void on_openselected1_activate(GtkWidget *widget);
 void save_file_as_confirm_overwrite(gint reply,gpointer filename);
 void save_file_as_ok(GtkFileChooser *file_selection_box);
@@ -112,6 +109,7 @@ gboolean classbrowser_accept_size(GtkPaned *paned, gpointer user_data);
 
 void keyboard_macro_startstop(GtkWidget *widget);
 void keyboard_macro_playback(GtkWidget *widget);
+void pressed_button_file_chooser(GtkButton *widget, gpointer data);
 void classbrowser_show(void);
 void classbrowser_hide(void);
 void classbrowser_show_hide(GtkWidget *widget);

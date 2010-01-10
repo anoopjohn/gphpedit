@@ -21,20 +21,16 @@
 
    The GNU General Public License is contained in the file COPYING.
 */
+#ifndef FOLDER_BROWSER_H
+#define FOLDER_BROWSER_H
 
-#ifndef GPHPEDIT_IPC_H
-#define GPHPEDIT_IPC_H
-
-#include <glib.h>
 #include "main_window.h"
+#include "main_window_callbacks.h"
+#include <libgnomevfs/gnome-vfs.h>
+#define MIME_ISDIR(string) (strcmp(string, "inode/directory")==0)
 
-G_BEGIN_DECLS
-
-
-gboolean poke_existing_instance (int argc, char **argv);
-void     shutdown_ipc (void);
-
-
-G_END_DECLS
-
+gchar *sChemin;
+void create_tree(GtkTreeStore *pTree,gchar *sChemin, GtkTreeIter *iter,GtkTreeIter *iter2);
+void tree_double_clicked(GtkTreeView *tree_view,GtkTreePath *path,GtkTreeViewColumn *column,gpointer user_data);
+gint filebrowser_sort_func(GtkTreeModel * model, GtkTreeIter * a, GtkTreeIter * b, gpointer user_data);
 #endif
