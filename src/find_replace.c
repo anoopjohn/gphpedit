@@ -31,6 +31,18 @@ FindDialog find_dialog;
 ReplaceDialog replace_dialog;
 GtkWidget *replace_prompt_dialog;
 
+GdkPixbuf *get_window_icon (void){
+GdkPixbuf *pixbuf = NULL;
+GError *error = NULL;
+pixbuf = gdk_pixbuf_new_from_file (PIXMAP_DIR "/" GPHPEDIT_PIXMAP_ICON, &error);
+if (error) {
+g_warning (G_STRLOC ": cannot open icon: %s", error->message);
+g_error_free (error);
+return NULL;
+}
+return pixbuf;
+}
+
 void find_destroy(GtkWidget *widget, gpointer data)
 {
 	gtk_widget_destroy(find_dialog.window1);
@@ -84,7 +96,8 @@ void find_clicked(GtkButton *button, gpointer data)
 		// Show message saying could not be found.
                   GtkWidget *dialog;
                    dialog = gtk_message_dialog_new(GTK_WINDOW(main_window.window),GTK_DIALOG_DESTROY_WITH_PARENT,GTK_MESSAGE_ERROR,GTK_BUTTONS_OK,_("The text \"%s\" was not found."), text);
-                    gtk_window_set_title(GTK_WINDOW(dialog), "gphpedit");
+                  gtk_window_set_title(GTK_WINDOW(dialog), "gphpedit");
+		  gtk_window_set_icon(GTK_WINDOW(dialog), get_window_icon());
                     gtk_dialog_run(GTK_DIALOG(dialog));
                     gtk_widget_destroy(dialog);
 	}
@@ -126,6 +139,7 @@ void find_create(void)
 	gtk_container_set_border_width (GTK_CONTAINER (find_dialog.window1), 6);
 	gtk_window_set_title (GTK_WINDOW (find_dialog.window1), _("Find"));
 	gtk_window_set_resizable (GTK_WINDOW (find_dialog.window1), FALSE);
+	gtk_window_set_icon (GTK_WINDOW (find_dialog.window1),get_window_icon());
 
 	find_dialog.vbox1 = gtk_vbox_new (FALSE, 0);
 	gtk_widget_show (find_dialog.vbox1);
@@ -294,19 +308,19 @@ void find_create(void)
 	gtk_widget_show (find_dialog.button5);
 	gtk_box_pack_start (GTK_BOX (find_dialog.hbox2), find_dialog.button5, TRUE, FALSE, 0);
 
-	g_signal_connect (GTK_OBJECT (find_dialog.button5),
+	g_signal_connect (G_OBJECT (find_dialog.button5),
 	                    "clicked", G_CALLBACK (find_clicked), NULL);
 
-	g_signal_connect (GTK_OBJECT (find_dialog.window1), "key_press_event", G_CALLBACK (find_key_press_event), NULL);
+	g_signal_connect (G_OBJECT (find_dialog.window1), "key_press_event", G_CALLBACK (find_key_press_event), NULL);
 
 	// Hide the dialog box when the user clicks the cancel_button
-	//g_signal_connect_object (GTK_OBJECT (find_dialog.button4),
+	//g_signal_connect_object (G_OBJECT (find_dialog.button4),
 	//                           "clicked", G_CALLBACK (gtk_widget_hide), (gpointer) find_dialog.window1);
 	// Don't hide it, destroy it, the same as closing it (for consistency) - AJ 2005-10-14
-	g_signal_connect (GTK_OBJECT (find_dialog.button4),
+	g_signal_connect (G_OBJECT (find_dialog.button4),
 	                           "clicked", G_CALLBACK (find_destroy), NULL);
 							   
-	g_signal_connect(GTK_OBJECT(find_dialog.window1), "destroy", G_CALLBACK(find_destroyed), NULL);
+	g_signal_connect(G_OBJECT(find_dialog.window1), "destroy", G_CALLBACK(find_destroyed), NULL);
 }
 
 // -----------------------------------------------------------------------------
@@ -368,6 +382,7 @@ void replace_clicked(GtkButton *button, gpointer data)
                  GtkWidget *dialog;
                  dialog = gtk_message_dialog_new(GTK_WINDOW(main_window.window),GTK_DIALOG_DESTROY_WITH_PARENT,GTK_MESSAGE_ERROR,GTK_BUTTONS_OK,_("The text \"%s\" was not found."), text);
                  gtk_window_set_title(GTK_WINDOW(dialog), "gphpedit");
+		 gtk_window_set_icon(GTK_WINDOW(dialog), get_window_icon());
                  gtk_dialog_run(GTK_DIALOG(dialog));
                  gtk_widget_destroy(dialog);
 	}
@@ -385,6 +400,7 @@ void replace_clicked(GtkButton *button, gpointer data)
                  replace_prompt_dialog = gtk_message_dialog_new(GTK_WINDOW(main_window.window),GTK_DIALOG_DESTROY_WITH_PARENT,GTK_MESSAGE_QUESTION,GTK_BUTTONS_YES_NO,
             _("Do you want to replace this occurence?"));
             gtk_window_set_title(GTK_WINDOW(replace_prompt_dialog), "Question");
+	    gtk_window_set_icon(GTK_WINDOW(replace_prompt_dialog), get_window_icon());
             gint result = gtk_dialog_run (GTK_DIALOG (replace_prompt_dialog));
             gint selection_start;
             gchar *replace;
@@ -481,6 +497,7 @@ void replace_all_clicked(GtkButton *button, gpointer data)
 
          replace_all_dialog = gtk_message_dialog_new(GTK_WINDOW(main_window.window),GTK_DIALOG_DESTROY_WITH_PARENT,GTK_MESSAGE_INFO,GTK_BUTTONS_OK,"%s",message->str);
          gtk_window_set_title(GTK_WINDOW(replace_all_dialog), "gphpedit");
+	 gtk_window_set_icon(GTK_WINDOW(replace_all_dialog), get_window_icon());
          gtk_dialog_run(GTK_DIALOG(replace_all_dialog));
          gtk_widget_destroy(replace_all_dialog);
 
@@ -514,6 +531,8 @@ void replace_create(void)
 	gtk_window_set_position (GTK_WINDOW(replace_dialog.window2),GTK_WIN_POS_CENTER);
 	gtk_container_set_border_width (GTK_CONTAINER (replace_dialog.window2), 6);
 	gtk_window_set_title (GTK_WINDOW (replace_dialog.window2), _("Find and Replace"));
+	gtk_window_set_icon(GTK_WINDOW(replace_dialog.window2), get_window_icon());
+        
 
 	replace_dialog.vbox10 = gtk_vbox_new (FALSE, 0);
 	gtk_widget_show (replace_dialog.vbox10);
@@ -708,21 +727,21 @@ void replace_create(void)
 	gtk_widget_show (replace_dialog.button9);
 	gtk_box_pack_start (GTK_BOX (replace_dialog.hbox8), replace_dialog.button9, TRUE, FALSE, 0);
 
-	g_signal_connect (GTK_OBJECT (replace_dialog.button8),
+	g_signal_connect (G_OBJECT (replace_dialog.button8),
 	                    "clicked", G_CALLBACK (replace_clicked), NULL);
 
-	g_signal_connect (GTK_OBJECT (replace_dialog.button9),
+	g_signal_connect (G_OBJECT (replace_dialog.button9),
 	                    "clicked", G_CALLBACK (replace_all_clicked), NULL);
 
-	g_signal_connect (GTK_OBJECT (replace_dialog.window2), "key_press_event", G_CALLBACK (replace_key_press_event), NULL);
+	g_signal_connect (G_OBJECT (replace_dialog.window2), "key_press_event", G_CALLBACK (replace_key_press_event), NULL);
 
 	// Hide the dialog box when the user clicks the cancel_button
-	//g_signal_connect (GTK_OBJECT (replace_dialog.button7),
+	//g_signal_connect (G_OBJECT (replace_dialog.button7),
 	//                           "clicked", G_CALLBACK (gtk_widget_hide), (gpointer) replace_dialog.window2);
 	// Don't hide it, destroy it, the same as closing it (for consistency) - AJ 2005-10-14
-	g_signal_connect (GTK_OBJECT (replace_dialog.button7),
+	g_signal_connect (G_OBJECT (replace_dialog.button7),
 	                           "clicked", G_CALLBACK (replace_destroy), NULL);
 							   
-	g_signal_connect(GTK_OBJECT(replace_dialog.window2), "destroy",
+	g_signal_connect(G_OBJECT(replace_dialog.window2), "destroy",
 	                   G_CALLBACK(replace_destroyed), NULL);
 }

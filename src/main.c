@@ -22,13 +22,13 @@
    The GNU General Public License is contained in the file COPYING.
 */
 
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
+//#ifdef HAVE_CONFIG_H
+//#include <config.h>
+//#endif
 
-#include <gio/gio.h>
 #include <stdarg.h>
 #include "main.h"
+#include <gio/gio.h>
 #include "main_window.h"
 #include "main_window_callbacks.h"
 #include "gphpedit_ipc.h"
@@ -37,11 +37,12 @@
 
 int main (int argc, char **argv)
 {
-
-	bindtextdomain (GETTEXT_PACKAGE, PACKAGE_LOCALE_DIR);
-	bind_textdomain_codeset (GETTEXT_PACKAGE, "UTF-8");
+#ifdef ENABLE_NLS
+	setlocale(LC_ALL, "");
+	bindtextdomain(GETTEXT_PACKAGE, PACKAGE_LOCALE_DIR);
+	bind_textdomain_codeset(GETTEXT_PACKAGE, "UTF-8");
 	textdomain (GETTEXT_PACKAGE);
-
+#endif							/* ENABLE_NLS */
         gtk_init(&argc, &argv);
         gconf_init(argc, argv, NULL);
         

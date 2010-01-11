@@ -198,8 +198,8 @@ void folderbrowser_create(MainWindow *main_window)
  				gtk_tree_store_clear(main_window->pTree);
                                 gtk_tree_sortable_set_sort_func(GTK_TREE_SORTABLE(main_window->pTree), 1,
 										filebrowser_sort_func, NULL, NULL);
-                                gtk_tree_sortable_set_sort_column_id(GTK_TREE_SORTABLE(main_window->pTree), 1,
-										 GTK_SORT_ASCENDING);
+                                gtk_tree_sortable_set_sort_column_id(GTK_TREE_SORTABLE(main_window->pTree), 1, GTK_SORT_ASCENDING);
+                                /*busco todos los archivo  de forma async y despues creo el arbol*/
  				create_tree(GTK_TREE_STORE(main_window->pTree),sChemin,iter,&iter2);
    	}
 }

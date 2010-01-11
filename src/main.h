@@ -21,15 +21,24 @@
  
    The GNU General Public License is contained in the file COPYING.
 */
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
 
 #ifndef MAIN_H
 #define MAIN_H
 
+#include <glib.h>
 #include <gtk/gtk.h>
 #include <gdk/gdkkeysyms.h>
-#include <glib.h>
 #include <gtkscintilla.h>
+
+#ifdef ENABLE_NLS
 #include <glib/gi18n.h>
+#else							/* ENABLE_NLS */
+#define _(String)(String)
+#define N_(String)(String)
+#endif							/* ENABLE_NLS */
 
 #define GPHPEDIT_PIXMAP_ICON "gphpedit.png"
 
