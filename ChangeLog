@@ -9,7 +9,7 @@
 
 2009-11-28  Rostagno Jose <joserostagno at hotmail.com>
           * New Feature - Added Bookmarks
-	  * Fixed Bug - Remove gtkhtml2 dependency, now uses webkit
+	      * Fixed Bug - Remove gtkhtml2 dependency, now uses webkit
 	
 2009-11-27  Rostagno Jose <joserostagno at hotmail.com>
 
@@ -18,9 +18,12 @@
           * New Feature - Added zoom-in/zoom-out buttons to the main toolbar
           * Fixed bug - The last line of text block is not indented.
           * New Feature - Added file filters to the open file dialog
-	  * Fixed Bug - Highlight colour in ubuntu. 
-	    Bug reported at https://bugs.launchpad.net/ubuntu/+source/gphpedit/+bug/73310
-	  * Added a close button [x] for side bar
+	      * Fixed Bug - Highlight colour in ubuntu. 
+	        Bug reported at https://bugs.launchpad.net/ubuntu/+source/gphpedit/+bug/73310
+	      * Added a close button [x] for side bar
+
+2009-12-11  Anish A <aneesh.nl@gmail.com>
+          * Fixed tab fold bug ( bug# 107084)
 
 2009-02-22  Anoop John <anoop.john at zyxware.com>
 

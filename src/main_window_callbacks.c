@@ -926,7 +926,6 @@ void set_active_tab(page_num)
  * 
  * @param editor - The editor object corresponding to the tab that is going to be closed.
  * @return void
- * 
  */
 
 void close_page(Editor *editor)
