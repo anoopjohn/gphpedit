@@ -26,12 +26,16 @@
 
 #include "main_window.h"
 #include "main_window_callbacks.h"
-//#include <libgnomevfs/gnome-vfs.h>
 #include <gio/gio.h>
 #define MIME_ISDIR(string) (strcmp(string, "inode/directory")==0)
+#define IS_MIME(stringa,stringb) (g_content_type_equals (stringa, stringb))
+#define IS_TEXT(stringa) (g_content_type_is_a (stringa, "text/*"))
+#define IS_APPLICATION(stringa) (g_content_type_is_a (stringa, "application/*") && !IS_MIME(stringa,"application/x-php"))
 
 gchar *sChemin;
 void create_tree(GtkTreeStore *pTree,gchar *sChemin, GtkTreeIter *iter,GtkTreeIter *iter2);
+//void folderbrowser_create(MainWindow *main_window);
+void update_folderbrowser (void);
 void tree_double_clicked(GtkTreeView *tree_view,GtkTreePath *path,GtkTreeViewColumn *column,gpointer user_data);
 gint filebrowser_sort_func(GtkTreeModel * model, GtkTreeIter * a, GtkTreeIter * b, gpointer user_data);
 #endif

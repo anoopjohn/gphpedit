@@ -134,6 +134,7 @@ void preferences_apply(void)
 	if (preferences.maximized) {
  		gtk_window_maximize(GTK_WINDOW(main_window.window));
 	}
+	
 }
 
 void preferences_load(void)
@@ -152,7 +153,7 @@ void preferences_load(void)
             preferences.marker_back=15908608;
             error=NULL;
         }
-        preferences.php_binary_location= gconf_client_get_string(config,"/gPHPEdit/locations/phpbinary",&error);
+	preferences.php_binary_location= gconf_client_get_string(config,"/gPHPEdit/locations/phpbinary",&error);
         if (!preferences.php_binary_location){
             preferences.php_binary_location="php";
             error=NULL;
@@ -1383,7 +1384,7 @@ void preferences_save()
 	gconf_client_set_bool (config,"/gPHPEdit/defaults/save_session", preferences.save_session,NULL);
 	gconf_client_set_bool (config,"/gPHPEdit/defaults/use_tabs_instead_spaces", preferences.use_tabs_instead_spaces,NULL);
 	gconf_client_set_bool (config,"/gPHPEdit/defaults/single_instance_only", preferences.single_instance_only,NULL);
-
+	
 	gconf_client_set_int (config,"/gPHPEdit/html_tag/back", preferences.html_tag_back,NULL);
 	gconf_client_set_int (config,"/gPHPEdit/html_tag/fore", preferences.html_tag_fore,NULL);
 	gconf_client_set_string (config,"/gPHPEdit/html_tag/font", preferences.html_tag_font,NULL);

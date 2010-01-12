@@ -29,7 +29,7 @@
 #include "calltip.h"
 #include "tab.h"
 #include <gconf/gconf-client.h>
-//#include "folderbrowser.h"
+#include "folderbrowser.h"
 
 #define NUM_PLUGINS_MAX 30
 #define NUM_REOPEN_MAX 20
@@ -195,8 +195,8 @@ enum {
     N_COLUMNS
 };
 
-
 extern MainWindow main_window;
+extern Mainmenu menu;
 extern gboolean DEBUG_MODE;
 void force_config_folder(void);
 

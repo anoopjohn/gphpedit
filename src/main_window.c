@@ -386,6 +386,7 @@ static void main_window_create_panes(void)
         
 	if (gconf_client_get_int (config,"/gPHPEdit/main_window/classbrowser_hidden",NULL) == 1)
 		classbrowser_hide();
+        g_object_unref(config);
 }
 
 static void main_window_fill_panes(void)
@@ -494,7 +495,7 @@ static void main_window_fill_panes(void)
 	gtk_label_set_justify (GTK_LABEL (label3), GTK_JUSTIFY_LEFT);
 	*/
 	// file browser code
-	//folderbrowser_create(&main_window);
+	folderbrowser_create(&main_window);
         main_window.scrolledwindow1 = gtk_scrolled_window_new (NULL, NULL);
 	gtk_paned_pack2 (GTK_PANED (main_window.main_vertical_pane), main_window.scrolledwindow1, FALSE, TRUE);
         main_window.lint_view = gtk_tree_view_new ();
@@ -1047,7 +1048,7 @@ void tog_classbrowser(GtkCheckMenuItem *checkmenuitem, gpointer user_data){
     classbrowser_show_hide(NULL);
 }
 
-void tog_statusbar(GtkWidget *widget, gpointer statusbar)
+void tog_statusbar(GtkWidget *widget, gpointer user_data)
 {
   if (gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(widget))) {
     gtk_widget_show(main_window.appbar);
@@ -1056,7 +1057,7 @@ void tog_statusbar(GtkWidget *widget, gpointer statusbar)
   }
 }
 
-void tog_maintoolbar(GtkWidget *widget, gpointer statusbar)
+void tog_maintoolbar(GtkWidget *widget, gpointer user_data)
 {
   if (gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(widget))) {
     gtk_widget_show(main_window.toolbar_main);
@@ -1065,7 +1066,7 @@ void tog_maintoolbar(GtkWidget *widget, gpointer statusbar)
   }
 }
 
-void tog_findtoolbar(GtkWidget *widget, gpointer statusbar)
+void tog_findtoolbar(GtkWidget *widget, gpointer user_data)
 {
   if (gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(widget))) {
     gtk_widget_show(main_window.toolbar_find);
@@ -1073,7 +1074,7 @@ void tog_findtoolbar(GtkWidget *widget, gpointer statusbar)
     gtk_widget_hide(main_window.toolbar_find);
   }
 }
-void tog_fullscreen(GtkWidget *widget, gpointer statusbar)
+void tog_fullscreen(GtkWidget *widget, gpointer user_data)
 {
   if (gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(widget))) {
     gtk_window_fullscreen (GTK_WINDOW(main_window.window));
@@ -1258,7 +1259,7 @@ GtkAccelGroup *accel_group = NULL;
   menu.sep6 = gtk_separator_menu_item_new();
   gtk_menu_shell_append(GTK_MENU_SHELL(menu.menuview), menu.sep6);
   
-  menu.tog_class = gtk_check_menu_item_new_with_label(_("Show class browser"));
+  menu.tog_class = gtk_check_menu_item_new_with_label(_("Show Side Panel"));
   if (classbrowser_status()==0){
   gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(menu.tog_class), TRUE);
   }else {
@@ -1355,9 +1356,6 @@ GtkAccelGroup *accel_group = NULL;
  
   gtk_box_pack_start (GTK_BOX (main_window.prinbox), menu.menubar, FALSE, FALSE, 0);
   gtk_widget_show_all (menu.menubar);
-
-  
-  
 
 }
 void main_window_create(void)

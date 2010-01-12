@@ -39,8 +39,8 @@ gphpedit_SOURCES = \
 	classbrowser.h		\
 	classbrowser_parse.c	\
 	classbrowser_parse.h	\
-##	folder_browser.h	\
-##	folder_browser.c	\
+	folderbrowser.h		\
+	folderbrowser.c		\
 ##	project.c		\
 ##	project.h		\
 	edit_template.c		\

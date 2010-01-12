@@ -112,6 +112,7 @@ typedef struct
   GtkWidget *cancel_button;
   GtkWidget *show_indentation_guides;
   GtkWidget *edge_mode;
+  GtkWidget *showfolderbrowser;
   GtkWidget *line_wrapping;
   GtkWidget *use_tabs_instead_spaces;
   GtkWidget *single_instance_only;

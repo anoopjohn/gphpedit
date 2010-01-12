@@ -32,7 +32,8 @@
 #include "preferences_dialog.h"
 #include "tab.h"
 #include "templates.h"
-#include "project.h"
+#include "folderbrowser.h"
+//#include "project.h"
 
 
 gboolean is_app_closing = FALSE;
@@ -845,7 +846,8 @@ void rename_file(GString *newfilename)
         GFile *file;
         GError *error;
         file=g_file_new_for_uri ((const gchar *)main_window.current_editor->filename->str);
-        if (!g_file_delete (file,NULL,&error)){
+        file=g_file_set_display_name (file,g_path_get_basename(newfilename->str),NULL,&error);
+        if (!file){
             g_print("GIO Error renaming file: %s\n",error->message);
         }
         
@@ -1619,7 +1621,7 @@ void syntax_check_clear(GtkWidget *widget)
 	gtk_widget_hide(main_window.scrolledwindow1);
 	gtk_widget_hide(main_window.lint_view);
 }
-/*
+
 void pressed_button_file_chooser(GtkButton *widget, gpointer data)
  {
 
@@ -1656,17 +1658,21 @@ void pressed_button_file_chooser(GtkButton *widget, gpointer data)
     	gtk_widget_destroy(pFileSelection);
     	if(sChemin!=NULL){
  	sLabel = g_strdup_printf("%s",sChemin);
-     sLabelUtf8 = g_locale_to_utf8(sLabel, -1, NULL, NULL, NULL);
+        sLabelUtf8 = g_locale_to_utf8(sLabel, -1, NULL, NULL, NULL);
         gtk_button_set_label(GTK_BUTTON(widget), sLabelUtf8);
- 	GtkTreeIter iter2;
+        /*store folder in config*/
+        GConfClient *config;
+        config=gconf_client_get_default ();
+        gconf_client_set_string (config,"/gPHPEdit/main_window/folderbrowser/folder", sChemin,NULL);
+        GtkTreeIter iter2;
  	GtkTreeIter* iter=NULL;
  	gtk_tree_store_clear(main_window.pTree);
         gtk_tree_sortable_set_sort_func(GTK_TREE_SORTABLE(main_window.pTree), 1,filebrowser_sort_func, NULL, NULL);
         gtk_tree_sortable_set_sort_column_id(GTK_TREE_SORTABLE(main_window.pTree), 1,GTK_SORT_ASCENDING);
-       create_tree(main_window.pTree,sChemin,iter,&iter2);
+        sChemin=convert_to_full(sChemin);
+        create_tree(main_window.pTree,sChemin,iter,&iter2);
     	}
    }
-*/
 void classbrowser_show(void)
 {
 	gtk_paned_set_position(GTK_PANED(main_window.main_horizontal_pane),classbrowser_hidden_position);
@@ -1699,6 +1705,7 @@ void classbrowser_show_hide(GtkWidget *widget)
 	GConfClient *config;
         config=gconf_client_get_default ();
 	hidden = gconf_client_get_int (config,"/gPHPEdit/main_window/classbrowser_hidden",NULL);
+        g_object_set (menu.tog_class,"active",hidden,NULL);
 	if (hidden == 1)
 		classbrowser_show();
 	else

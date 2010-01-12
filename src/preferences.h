@@ -56,6 +56,7 @@ typedef struct
 	gboolean save_session;
 	gboolean use_tabs_instead_spaces;
 	gboolean single_instance_only;
+	gboolean showfolderbrowser;
 
 	// Default formatting
 	gchar *default_font;

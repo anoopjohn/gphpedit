@@ -1388,7 +1388,7 @@ void preferences_dialog_create (void)
 	gtk_container_set_border_width (GTK_CONTAINER (preferences_dialog.save_session), 8);
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(preferences_dialog.save_session), temp_preferences.save_session);
 	g_signal_connect(G_OBJECT(GTK_CHECK_BUTTON(preferences_dialog.save_session)), "toggled", G_CALLBACK(on_save_session_toggle), NULL);
-	
+
 	preferences_dialog.single_instance_only = gtk_check_button_new_with_mnemonic (_("Only ever run 1 copy of gPHPEdit at a time"));
 	gtk_widget_show (preferences_dialog.single_instance_only);
 	gtk_box_pack_start (GTK_BOX (preferences_dialog.vbox6), preferences_dialog.single_instance_only, FALSE, FALSE, 0);

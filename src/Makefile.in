@@ -56,7 +56,7 @@ am_gphpedit_OBJECTS = calltip.$(OBJEXT) classbrowser.$(OBJEXT) \
 	syntax_check.$(OBJEXT) tab.$(OBJEXT) tab_cxx.$(OBJEXT) \
 	tab_css.$(OBJEXT) tab_perl.$(OBJEXT) tab_php.$(OBJEXT) \
 	tab_python.$(OBJEXT) tab_sql.$(OBJEXT) tab_util.$(OBJEXT) \
-	templates.$(OBJEXT)
+	templates.$(OBJEXT) folderbrowser.$(OBJEXT)
 gphpedit_OBJECTS = $(am_gphpedit_OBJECTS)
 am__DEPENDENCIES_1 =
 gphpedit_DEPENDENCIES = $(am__DEPENDENCIES_1) \
@@ -243,6 +243,8 @@ nodist_EXTRA_gphpedit_SOURCES = dummy.cxx
 gphpedit_SOURCES = \
 	calltip.c		\
 	calltip.h		\
+	folderbrowser.h		\
+	folderbrowser.c		\
 	classbrowser.c		\
 	classbrowser.h		\
 	classbrowser_parse.c	\
