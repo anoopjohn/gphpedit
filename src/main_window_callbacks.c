@@ -729,27 +729,27 @@ void on_saveall1_activate(GtkWidget *widget)
 			filename = editor->filename->str;
 			if (strcmp(filename, _("Untitled"))!=0) {
 				text_length = gtk_scintilla_get_length(GTK_SCINTILLA(editor->scintilla));
-	
+
 				write_buffer = g_malloc0(text_length+1); // Include terminating null
-	
+
 				if (write_buffer == NULL) {
 					g_warning ("%s", _("Cannot allocate write buffer"));
 					return;
 				}
-	
+
 				if ((stream = fopen (filename, "w")) == NULL) {
 					g_message (_("Cannot open '%s' for writing"), editor->filename->str);
 					return;
 				}
-	
+
 				gtk_scintilla_get_text(GTK_SCINTILLA(editor->scintilla), text_length+1, write_buffer);
-	
+
 				status = fwrite (write_buffer, text_length, 1, stream);
-	
+
 				fclose (stream);
-	
+
 				g_free (write_buffer);
-	
+
 				gtk_scintilla_set_save_point (GTK_SCINTILLA(editor->scintilla));
 			}
 		}
@@ -834,7 +834,9 @@ void on_tab_close_set_style(GtkWidget *hbox, GtkWidget *button)
 									&w,
 									&h);
 	//debug("%d-%d", w, h);
+        if (button){
 	gtk_widget_set_size_request(button, w+2, h+2);
+        }
 }
 
 
@@ -920,8 +922,25 @@ void set_active_tab(page_num)
 	main_window.current_editor = new_current_editor;
 
 	update_app_title();
-}
 
+        }
+void update_zoom_level(void){
+gint p=0;
+if (GTK_IS_SCINTILLA(main_window.current_editor->scintilla)){
+        p= gtk_scintilla_get_zoom(GTK_SCINTILLA(main_window.current_editor->scintilla));
+        p= (p*10) + 100;
+}else{
+	if (WEBKIT_IS_WEB_VIEW(main_window.current_editor->help_view)){
+                gfloat d= webkit_web_view_get_zoom_level (main_window.current_editor->help_view);
+                p=d*100;
+                }
+}
+GString *label_caption;
+label_caption = g_string_new("Zoom:");
+g_string_printf (label_caption,"%s%d","Zoom:",p);
+label_caption = g_string_append(label_caption, "%");
+gtk_label_set_text (GTK_LABEL(main_window.zoomlabel),label_caption->str);
+}
 /**
  * Close a tab in the Editor. Removes the notebook page, frees the editor object,
  * and sets the active tab correcty
@@ -1023,6 +1042,7 @@ void on_close1_activate(GtkWidget *widget)
 		try_close_page(main_window.current_editor);
 		classbrowser_update();
 		update_app_title();
+                update_zoom_level();
 		if (!gtk_tree_selection_get_selected (main_window.classtreeselect, NULL, &iter)) {
 			gtk_label_set_text(GTK_LABEL(main_window.treeviewlabel), _("FILE:"));
 		}
@@ -1535,11 +1555,12 @@ void zoom_in(GtkWidget *widget)
 //bugfix:segfault if not scintilla
 if (GTK_IS_SCINTILLA(main_window.current_editor->scintilla)){ 
 	gtk_scintilla_zoom_in(GTK_SCINTILLA(main_window.current_editor->scintilla));
-	}else{
+}else{
 	if (WEBKIT_IS_WEB_VIEW(main_window.current_editor->help_view)){
         	webkit_web_view_zoom_in (main_window.current_editor->help_view);
-	}
-	}
+                }
+}
+update_zoom_level();
 }
 
 //zoom out
@@ -1553,6 +1574,21 @@ if (GTK_IS_SCINTILLA(main_window.current_editor->scintilla)){
         	webkit_web_view_zoom_out (main_window.current_editor->help_view);
 	}
 	}
+update_zoom_level();
+}
+
+void zoom_100(GtkWidget *widget)
+{
+//bugfix:segfault if not scintilla
+if (GTK_IS_SCINTILLA(main_window.current_editor->scintilla)){
+	gtk_scintilla_set_zoom(GTK_SCINTILLA(main_window.current_editor->scintilla), 0);
+	} else {
+	if (WEBKIT_IS_WEB_VIEW(main_window.current_editor->help_view)){
+        	webkit_web_view_zoom_out (main_window.current_editor->help_view);
+                webkit_web_view_set_zoom_level (main_window.current_editor->help_view, 1);
+	}
+	}
+update_zoom_level();
 }
 
 //add marker

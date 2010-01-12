@@ -128,6 +128,7 @@ typedef struct
 	GtkWidget *toolbar_main_button_unindent;
 	GtkWidget *toolbar_main_button_zoom_in;
 	GtkWidget *toolbar_main_button_zoom_out;
+        GtkWidget *toolbar_main_button_zoom_100;
 	GtkWidget *toolbar_find;
 	GtkWidget *toolbar_find_search_label;
 	GtkWidget *toolbar_find_search_entry;
@@ -139,6 +140,7 @@ typedef struct
 	GtkWidget *main_horizontal_pane;
 
 	GtkWidget *appbar;
+        GtkWidget *zoomlabel;
 
 	GtkWidget *notebook_manager;
 	GtkWidget *notebook_editor;

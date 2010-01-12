@@ -467,7 +467,10 @@ GString *tab_help_try_filename(gchar *prefix, gchar *command, gchar *suffix)
 GString *tab_help_find_helpfile(gchar *command)
 {
 	GString *long_filename = NULL;
-	
+        //FIX: avoid duplicated call
+        if (strstr(command,"/usr/")!=NULL){
+            return long_filename;
+        }
 	// For Debian, Ubuntu and sensible distrubutions...
 	long_filename = tab_help_try_filename("/usr/share/doc/php-doc/html/function.", command, ".html");
 	if (long_filename)
@@ -530,8 +533,8 @@ GString *tab_help_find_helpfile(gchar *command)
 	if (long_filename)
 		return long_filename;
 
-	g_print(_("Help for function not found: %s\n"), command);
-	
+        g_print(_("Help for function not found: %s\n"), command);
+        
 	return long_filename;
 }
 //return a substring skip n char from str

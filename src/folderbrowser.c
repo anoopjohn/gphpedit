@@ -323,7 +323,7 @@ void popup_create_dir(void){
   void
   view_popup_menu (GtkWidget *treeview, GdkEventButton *event, gpointer userdata)
   {
-    GtkWidget *menu, *menuopen,*menurename,*menudelete,*menucreate;
+    GtkWidget *menu, *menuopen,*menurename,*menudelete,*menucreate,*sep;
 
     menu = gtk_menu_new();
 
@@ -343,6 +343,9 @@ void popup_create_dir(void){
     g_signal_connect(menudelete, "activate", (GCallback) popup_delete_file, NULL);
     gtk_menu_shell_append(GTK_MENU_SHELL(menu), menudelete);
 
+    sep = gtk_separator_menu_item_new();
+    gtk_menu_shell_append(GTK_MENU_SHELL(menu), sep);
+  
     menucreate = gtk_menu_item_new_with_label(_("Create New Directory"));
     g_signal_connect(menucreate, "activate", (GCallback) popup_create_dir, NULL);
     gtk_menu_shell_append(GTK_MENU_SHELL(menu), menucreate);
