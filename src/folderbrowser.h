@@ -36,6 +36,7 @@ gchar *sChemin;
 void create_tree(GtkTreeStore *pTree,gchar *sChemin, GtkTreeIter *iter,GtkTreeIter *iter2);
 //void folderbrowser_create(MainWindow *main_window);
 void update_folderbrowser (void);
+void update_folderbrowser_signal (GFileMonitor *monitor,GFile *file,GFile *other_file, GFileMonitorEvent event_type, gpointer user_data);
 void tree_double_clicked(GtkTreeView *tree_view,GtkTreePath *path,GtkTreeViewColumn *column,gpointer user_data);
 gint filebrowser_sort_func(GtkTreeModel * model, GtkTreeIter * a, GtkTreeIter * b, gpointer user_data);
 #endif

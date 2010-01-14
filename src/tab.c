@@ -318,6 +318,9 @@ void tab_file_read(GObject *source_object, GAsyncResult *res, gpointer user_data
             g_print(_("GIO Error: %s\n"),error->message);
             return;
         }
+        if(editor->file_size!=bytes_read){
+            g_print(_("Error loading file:%s\nFile was loaded partially\nPress Shift + Ctrl + R to reload the file\n"),editor->filename->str);
+        }
 	// Clear scintilla buffer
 	gtk_scintilla_clear_all(GTK_SCINTILLA (editor->scintilla));
 	
@@ -368,6 +371,7 @@ void tab_file_opened (GObject *source_object, GAsyncResult *res, gpointer user_d
         }
 	editor->file_size= g_file_info_get_size (info);
         g_object_unref(info);
+        editor->isreadonly=isreadonly(file);
         // Open file
         g_file_read_async (file,G_PRIORITY_DEFAULT,NULL,tab_file_opened, editor);
 }
@@ -1009,7 +1013,7 @@ gboolean tab_create_new(gint type, GString *filename)
 			abs_path = g_strdup(filename->str);
 		}
                 file=g_file_new_for_uri (abs_path);
-                if (!uri_is_local(abs_path)){
+                if (!uri_is_local_or_http(abs_path)){
                     GError *error2=NULL;
                     GMount *ex= g_file_find_enclosing_mount (file,NULL,&error2);
                     if (!ex){
@@ -1029,7 +1033,7 @@ gboolean tab_create_new(gint type, GString *filename)
                 }
 		if(!g_file_query_exists (file,NULL) && type!=TAB_HELP) {
 			dialog_message = g_string_new("");
-			g_string_sprintf(dialog_message, _("The file %s was not found.\n\nWould you like to create it as an empty document?"), filename->str);
+			g_string_printf(dialog_message, _("The file %s was not found.\n\nWould you like to create it as an empty document?"), filename->str);
 			result = yes_no_dialog(_("File not found"), dialog_message->str);
 			g_string_free(dialog_message, TRUE);
                         g_object_unref(file);
@@ -1136,8 +1140,8 @@ GtkWidget *get_close_tab_widget(Editor *editor) {
 	rcstyle = gtk_rc_style_new ();
 	rcstyle->xthickness = rcstyle->ythickness = 0;
 	gtk_widget_modify_style (close_button, rcstyle);
-	gtk_rc_style_unref (rcstyle),
-
+	//gtk_rc_style_unref (rcstyle),
+        g_object_unref(rcstyle);
 	g_signal_connect(G_OBJECT(close_button), "clicked", G_CALLBACK(on_tab_close_activate), editor);
 	g_signal_connect(G_OBJECT(hbox), "style-set", G_CALLBACK(on_tab_close_set_style), close_button);
 	gtk_box_pack_start(GTK_BOX(hbox), editor->label, FALSE, FALSE, 0);
@@ -1779,25 +1783,31 @@ gboolean editor_is_local(Editor *editor)
 	gchar *filename;
 	
 	filename = (editor->filename)->str;
-	if (g_strncasecmp(filename, "file://", MIN(strlen(filename), 7))==0) {
+	if (g_ascii_strncasecmp(filename, "file://", MIN(strlen(filename), 7))==0) {
 		return TRUE;	
 	}
-	if (g_strncasecmp(filename, "/", MIN(strlen(filename), 1))==0) {
+	if (g_ascii_strncasecmp(filename, "/", MIN(strlen(filename), 1))==0) {
 		return TRUE;	
 	}
 
 	g_print("FALSE - not local!!!");
 	return FALSE;
 }
-gboolean uri_is_local(gchar *uri)
+gboolean uri_is_local_or_http(gchar *uri)
 {
 	gchar *filename;
 
 	filename = uri;
-	if (g_strncasecmp(filename, "file://", MIN(strlen(filename), 7))==0) {
+	if (g_ascii_strncasecmp(filename, "file://", MIN(strlen(filename), 7))==0) {
 		return TRUE;
 	}
-	if (g_strncasecmp(filename, "/", MIN(strlen(filename), 1))==0) {
+        if (g_ascii_strncasecmp(filename, "http://", MIN(strlen(filename), 7))==0) {
+		return TRUE;
+	}
+        if (g_ascii_strncasecmp(filename, "https://", MIN(strlen(filename), 7))==0) {
+		return TRUE;
+	}
+	if (g_ascii_strncasecmp(filename, "/", MIN(strlen(filename), 1))==0) {
 		return TRUE;
 	}
 
@@ -1812,7 +1822,7 @@ gchar * editor_convert_to_local(Editor *editor)
 		return NULL;
 	}
 	filename = editor->filename->str;
-	if (g_strncasecmp(filename, "file://", MIN(strlen(filename), 7))==0) {
+	if (g_ascii_strncasecmp(filename, "file://", MIN(strlen(filename), 7))==0) {
 		filename += 7;
 	}
 	
@@ -1842,4 +1852,17 @@ gchar *convert_to_full(gchar *filename)
 	new_filename = gstr_filename->str;
 	g_string_free(gstr_filename, FALSE);
 	return new_filename;
+}
+gboolean isreadonly(GFile *file){
+    GFileInfo *info;
+    GError *error=NULL;
+    gboolean result;
+    info=g_file_query_info (file, "access::can-write", G_FILE_QUERY_INFO_NONE,NULL, &error);
+    if (!info){
+        g_print("Can't get write permision. GIO Error:%s\n",error->message);
+        return TRUE;
+    }
+    result= !g_file_info_get_attribute_boolean (info,"access::can-write");
+    g_object_unref(info);
+    return result;
 }

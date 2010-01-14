@@ -502,9 +502,9 @@ void get_current_highlighting_settings(gchar *name)
 }
 
 
-void on_element_entry_changed(GtkEntry *entry, gpointer data)
+void on_element_entry_changed(GtkComboBox *widget, gpointer     user_data)
 {
-	current_highlighting_element = (gchar *)gtk_entry_get_text(GTK_ENTRY(entry));
+	current_highlighting_element =  gtk_combo_box_get_active_text (widget);
 	get_current_highlighting_settings(current_highlighting_element);
 }
 
@@ -676,7 +676,7 @@ void get_control_values_to_highlight(gchar *setting_name, gchar **fontname, gint
 	tempfontname = g_string_new(gtk_combo_box_get_active_text(GTK_COMBO_BOX(preferences_dialog.font_combo)));
 	tempfontname = g_string_prepend(tempfontname, "!");
 	
-	if (g_strncasecmp(*fontname, tempfontname->str, MIN(strlen(*fontname), strlen((tempfontname->str))))!=0) {
+	if (g_ascii_strncasecmp(*fontname, tempfontname->str, MIN(strlen(*fontname), strlen((tempfontname->str))))!=0) {
 		message = g_string_new(NULL);
 		g_string_printf(message, _("You have just changed the font to %s\n\nWould you like to use this font as the default for every element?"), gtk_combo_box_get_active_text(GTK_COMBO_BOX(preferences_dialog.font_combo)));
                 dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_MESSAGE_QUESTION,
@@ -1540,19 +1540,23 @@ void preferences_dialog_create (void)
 	gtk_widget_show (preferences_dialog.frame1);
 	gtk_box_pack_start (GTK_BOX (preferences_dialog.vbox10), preferences_dialog.frame1, TRUE, TRUE, 0);
 	
-	preferences_dialog.element_combo = gtk_combo_new ();
+	preferences_dialog.element_combo = gtk_combo_box_entry_new_text ();
 	gtk_widget_show (preferences_dialog.element_combo);
 	gtk_container_add (GTK_CONTAINER (preferences_dialog.frame1), preferences_dialog.element_combo);
 	gtk_container_set_border_width (GTK_CONTAINER (preferences_dialog.element_combo), 8);
-	gtk_combo_set_popdown_strings (GTK_COMBO (preferences_dialog.element_combo), preferences_dialog.highlighting_elements);
-	current_highlighting_element = preferences_dialog.highlighting_elements->data;
-	g_signal_connect (G_OBJECT (GTK_COMBO (preferences_dialog.element_combo)->entry), "changed",
+        GList *walk = NULL;
+        for (walk = preferences_dialog.highlighting_elements; walk != NULL; walk = g_list_next (walk)) {
+             g_object_set_qdata (G_OBJECT (preferences_dialog.element_combo), g_quark_from_string (walk->data),
+			GINT_TO_POINTER (gtk_tree_model_iter_n_children (gtk_combo_box_get_model (GTK_COMBO_BOX(preferences_dialog.element_combo)), NULL)));
+             
+		gtk_combo_box_append_text (GTK_COMBO_BOX(preferences_dialog.element_combo),walk->data);
+	}
+	gtk_combo_box_set_active (GTK_COMBO_BOX(preferences_dialog.element_combo),0);
+	current_highlighting_element = g_list_first(preferences_dialog.highlighting_elements)->data;
+	g_signal_connect (G_OBJECT (GTK_COMBO_BOX (preferences_dialog.element_combo)), "changed",
                       G_CALLBACK (on_element_entry_changed),
                       NULL);
 	g_list_free (preferences_dialog.highlighting_elements);
-	
-	preferences_dialog.combo_entry4 = GTK_COMBO (preferences_dialog.element_combo)->entry;
-	gtk_widget_show (preferences_dialog.combo_entry4);
 	
 	preferences_dialog.label39 = gtk_label_new (_("Element"));
 	gtk_widget_show (preferences_dialog.label39);

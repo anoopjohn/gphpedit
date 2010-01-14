@@ -77,7 +77,6 @@ typedef struct
   GtkWidget *label45;
   GtkWidget *frame1;
   GtkWidget *element_combo;
-  GtkWidget *combo_entry4;
   GtkWidget *label39;
   GtkWidget *label30;
   GtkWidget *vbox7;

@@ -1425,7 +1425,7 @@ void on_about1_activate(GtkWidget *widget)
   gchar *translator_credits = _("translator_credits");
   const gchar *documenters[] = {NULL};
   GtkWidget *dialog = gtk_about_dialog_new();
-  gtk_about_dialog_set_name(GTK_ABOUT_DIALOG(dialog), "gPHPEdit");
+  gtk_about_dialog_set_program_name(GTK_ABOUT_DIALOG(dialog), "gPHPEdit");
   gtk_about_dialog_set_version(GTK_ABOUT_DIALOG(dialog), VERSION);
   gtk_about_dialog_set_copyright(GTK_ABOUT_DIALOG(dialog),
       _("Copyright  2003-2006 Andy Jeffries, 2009 Anoop John"));

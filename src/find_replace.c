@@ -474,13 +474,13 @@ void replace_all_clicked(GtkButton *button, gpointer data)
 
 	message = g_string_new("");
 	if (numfound==0) {
-		g_string_sprintf(message, _("%s not found, no replacements made."), text);
+		g_string_printf(message, _("%s not found, no replacements made."), text);
 	}
 	else if (numfound==1) {
-		g_string_sprintf(message, _("1 occurence of %s found, replaced."), text);
+		g_string_printf(message, _("1 occurence of %s found, replaced."), text);
 	}
 	else {
-		g_string_sprintf(message, _("%d occurences of %s found, all replaced."), numfound, text);
+		g_string_printf(message, _("%d occurences of %s found, all replaced."), numfound, text);
 	}
 
          replace_all_dialog = gtk_message_dialog_new(GTK_WINDOW(main_window.window),GTK_DIALOG_DESTROY_WITH_PARENT,GTK_MESSAGE_INFO,GTK_BUTTONS_OK,"%s",message->str);

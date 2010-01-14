@@ -35,7 +35,7 @@ gchar *merge_font (gchar *modifier)
 	sf = g_strsplit (modifier, "-", -1);
 
 	for (i = 1; (df[i] != NULL) && (sf[i] != NULL); i++) {
-		if (g_strcasecmp (sf[i], "*") != 0)
+		if (g_ascii_strcasecmp (sf[i], "*") != 0)
 			g_stpcpy (df[i], sf[i]);
 	}
 

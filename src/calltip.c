@@ -126,7 +126,7 @@ GString *get_api_line(GtkWidget *scintilla, gint wordStart, gint wordEnd)
 		//a partial match will result in an incorrect tooltip. So we 
 		//have to use strcmp and not strncasecmp
 		if (strcmp(function_name, buffer)==0) {
-			g_string_sprintf(calltip, "%s %s %s\n%s", return_value, function_name, params, description);
+			g_string_printf(calltip, "%s %s %s\n%s", return_value, function_name, params, description);
 			g_free (buffer);
 			g_free(copy_line);
 			return calltip;

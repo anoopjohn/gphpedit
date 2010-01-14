@@ -30,7 +30,7 @@ typedef struct {
 
 } POPUPDATA;
 POPUPDATA pop;
-
+GFileMonitor *monitor;
 void update_folderbrowser (void){
     GtkTreeIter iter2;
     GtkTreeIter* iter=NULL;
@@ -55,13 +55,13 @@ void tree_double_clicked(GtkTreeView *tree_view,GtkTreePath *path,GtkTreeViewCol
         gchar *mime;
      gtk_tree_model_get (model, &iter,1, &nfile,2,&mime, -1);
 
- 	GtkTreeIter* parentiter=(GtkTreeIter*)malloc(sizeof(GtkTreeIter));
+ 	GtkTreeIter* parentiter=(GtkTreeIter*)g_malloc(sizeof(GtkTreeIter));
  	while(gtk_tree_model_iter_parent(model,parentiter,&iter)){
  		gchar *rom;
      	gtk_tree_model_get (model, parentiter, 1, &rom, -1);
  		nfile = g_build_path (G_DIR_SEPARATOR_S, rom, nfile, NULL);
  		iter=*parentiter;
- 		parentiter=(GtkTreeIter*)malloc(sizeof(GtkTreeIter));
+ 		parentiter=(GtkTreeIter*)g_malloc(sizeof(GtkTreeIter));
  	}
      gchar* file_name = g_build_path (G_DIR_SEPARATOR_S, sChemin, nfile, NULL);
      if (!MIME_ISDIR(mime))
@@ -197,8 +197,15 @@ while (info){
    }
    info=g_file_enumerator_next_file (files,NULL,&error);
     }
+error=NULL;
+/*monitorear el directorio*/
+monitor= g_file_monitor_directory (file,G_FILE_MONITOR_NONE,NULL,&error);
+g_signal_connect(monitor, "changed", (GCallback) update_folderbrowser_signal, NULL);
 g_object_unref(files);
 g_object_unref(file);
+}
+void update_folderbrowser_signal (GFileMonitor *monitor,GFile *file,GFile *other_file, GFileMonitorEvent event_type, gpointer user_data){
+    update_folderbrowser ();
 }
 void popup_open_file(gchar *filename){
     switch_to_file_or_open(filename, 0);
@@ -254,7 +261,8 @@ void popup_rename_file(void){
     GtkWidget *label1 = gtk_label_new (_("New Filename"));
     gtk_widget_show (label1);
     gtk_container_add (GTK_CONTAINER (hbox1),label1);
-    GtkWidget *text_filename = gtk_entry_new_with_max_length(20);
+    GtkWidget *text_filename = gtk_entry_new();
+    gtk_entry_set_max_length (GTK_ENTRY(text_filename),20);
     gtk_entry_set_width_chars(GTK_ENTRY(text_filename),21);
     gtk_entry_set_text (GTK_ENTRY(text_filename),(gchar *)g_file_info_get_display_name (info));
     gtk_widget_show (text_filename);
@@ -287,7 +295,8 @@ void popup_create_dir(void){
     GtkWidget *label1 = gtk_label_new (_("Directory Name"));
     gtk_widget_show (label1);
     gtk_container_add (GTK_CONTAINER (hbox1),label1);
-    GtkWidget *text_filename = gtk_entry_new_with_max_length(20);
+    GtkWidget *text_filename = gtk_entry_new();
+    gtk_entry_set_max_length (GTK_ENTRY(text_filename),20);
     gtk_entry_set_width_chars(GTK_ENTRY(text_filename),21);
     gtk_widget_show (text_filename);
     gtk_container_add (GTK_CONTAINER (hbox1),text_filename);
@@ -398,13 +407,13 @@ void popup_create_dir(void){
         gchar *mime;
         gtk_tree_model_get (model, &iter,1, &nfile,2,&mime, -1);
 
- 	GtkTreeIter* parentiter=(GtkTreeIter*)malloc(sizeof(GtkTreeIter));
+ 	GtkTreeIter* parentiter=(GtkTreeIter*)g_malloc(sizeof(GtkTreeIter));
  	while(gtk_tree_model_iter_parent(model,parentiter,&iter)){
  		gchar *rom;
      	gtk_tree_model_get (model, parentiter, 1, &rom, -1);
  		nfile = g_build_path (G_DIR_SEPARATOR_S, rom, nfile, NULL);
  		iter=*parentiter;
- 		parentiter=(GtkTreeIter*)malloc(sizeof(GtkTreeIter));
+ 		parentiter=(GtkTreeIter*)g_malloc(sizeof(GtkTreeIter));
  	}
      gchar* file_name = g_build_path (G_DIR_SEPARATOR_S, sChemin, nfile, NULL);
      pop.filename=file_name;
@@ -492,7 +501,7 @@ void folderbrowser_create(MainWindow *main_window)
 	gtk_button_set_image(GTK_BUTTON(main_window->close_sidebar_button), main_window->close_image);
 	gtk_button_set_relief(GTK_BUTTON(main_window->close_sidebar_button), GTK_RELIEF_NONE);
 	gtk_button_set_focus_on_click(GTK_BUTTON(main_window->close_sidebar_button), FALSE);
-	gtk_signal_connect(GTK_OBJECT(main_window->close_sidebar_button), "clicked", G_CALLBACK (classbrowser_show_hide),NULL);
+	g_signal_connect(G_OBJECT(main_window->close_sidebar_button), "clicked", G_CALLBACK (classbrowser_show_hide),NULL);
 	gtk_widget_show(main_window->close_image);
 	gtk_widget_show(main_window->close_sidebar_button);
 	gtk_box_pack_end(GTK_BOX(hbox), main_window->close_sidebar_button, FALSE, FALSE, 0);
@@ -515,3 +524,4 @@ void folderbrowser_create(MainWindow *main_window)
  				create_tree(GTK_TREE_STORE(main_window->pTree),sChemin,iter,&iter2);
    	}
 }
+

@@ -27,7 +27,6 @@
 #endif
 #include "stdlib.h"
 #include "main_window.h"
-//#include "main_window_menu.h"
 #include "tab.h"
 #include "main_window_callbacks.h"
 #include "preferences.h"
@@ -35,7 +34,7 @@
 #include "plugin.h"
 #include "templates.h"
 #define PLUGINSTARTPOS 6
-
+#define BUGREPORTLINK "https://savannah.nongnu.org/support/?group=gphpedit"
 MainWindow main_window;
 Mainmenu menu;
 GIOChannel* inter_gphpedit_io;
@@ -90,9 +89,11 @@ gboolean channel_pass_filename_callback(GIOChannel *source, GIOCondition conditi
 {
 	guint size;
 	gchar buf[1024];
-
-	g_io_channel_read(inter_gphpedit_io, buf, sizeof(buf), &size);
-	//g_print("Passed %s\n", buf);
+        GError *error=NULL;
+        if (g_io_channel_read_chars (inter_gphpedit_io,buf,sizeof(buf), &size,&error)!=G_IO_STATUS_NORMAL){
+            g_print("Error reading GIO Chanel. Error:%s\n",error->message);
+        }
+	g_print("Passed %s\n", buf);
 	tab_create_new(TAB_FILE, g_string_new(buf));
 	return FALSE;
 }
@@ -352,7 +353,8 @@ static void main_window_create_toolbars(void)
 	gtk_toolbar_insert(GTK_TOOLBAR(main_window.toolbar_find), GTK_TOOL_ITEM (item), -1);
 	gtk_widget_show(GTK_WIDGET(item));
 
-	main_window.toolbar_find_goto_entry = gtk_entry_new_with_max_length(8);
+	main_window.toolbar_find_goto_entry = gtk_entry_new();
+        gtk_entry_set_max_length (GTK_ENTRY(main_window.toolbar_find_goto_entry),8);
 	gtk_entry_set_width_chars(GTK_ENTRY(main_window.toolbar_find_goto_entry),9);
         gtk_entry_set_icon_from_stock (GTK_ENTRY(main_window.toolbar_find_goto_entry),GTK_ENTRY_ICON_SECONDARY,GTK_STOCK_CLEAR);
         g_signal_connect (G_OBJECT (main_window.toolbar_find_goto_entry), "icon-press", G_CALLBACK (on_cleanicon_press), NULL);
@@ -521,7 +523,7 @@ static void main_window_fill_panes(void)
 								NULL);
 	gtk_tree_view_append_column (GTK_TREE_VIEW (main_window.lint_view), main_window.lint_column);
 	//gtk_tree_view_set_headers_visible (GTK_TREE_VIEW (main_window.lint_view), FALSE);
-	gtk_widget_set_usize(main_window.lint_view,80,80);
+        gtk_widget_set_size_request (main_window.lint_view, 80,80);
 	main_window.lint_select = gtk_tree_view_get_selection (GTK_TREE_VIEW (main_window.lint_view));
 	gtk_tree_selection_set_mode (main_window.lint_select, GTK_SELECTION_SINGLE);
 	g_signal_connect (G_OBJECT (main_window.lint_select), "changed",
@@ -908,25 +910,25 @@ void plugin_exec(gint plugin_num)
 		
 		//g_print("COMMAND: %s\nSTDOUT:%s\nOUTPUT: %s\n", command_line->str, stdout, data);
 		
-		if (g_strncasecmp(stdout, "INSERT", MIN(strlen(stdout), 6))==0) {
+		if (g_ascii_strncasecmp(stdout, "INSERT", MIN(strlen(stdout), 6))==0) {
 			if (data) {
 				gtk_scintilla_insert_text(GTK_SCINTILLA(main_window.current_editor->scintilla), 
 					gtk_scintilla_get_current_pos(GTK_SCINTILLA(main_window.current_editor->scintilla)), data);
 			}
 		}
-		else if (g_strncasecmp(stdout, "REPLACE", MIN(strlen(stdout), 7))==0) {
+		else if (g_ascii_strncasecmp(stdout, "REPLACE", MIN(strlen(stdout), 7))==0) {
 			if (data) {
 				gtk_scintilla_replace_sel(GTK_SCINTILLA(main_window.current_editor->scintilla), data);
 			}
 		}
-		else if (g_strncasecmp(stdout, "MESSAGE", MIN(strlen(stdout),7))==0) {
+		else if (g_ascii_strncasecmp(stdout, "MESSAGE", MIN(strlen(stdout),7))==0) {
 				info_dialog(plugin->name, data);
 		}
-		else if (g_strncasecmp(stdout, "OPEN", MIN(strlen(stdout), 4))==0) {
+		else if (g_ascii_strncasecmp(stdout, "OPEN", MIN(strlen(stdout), 4))==0) {
 			if (DEBUG_MODE) { g_print("DEBUG: main_window.c:plugin_exec: Opening file :date: %s\n", data); }
 			switch_to_file_or_open(data, 0);
 		}
-		else if (g_strncasecmp(stdout, "DEBUG", MIN(strlen(stdout), 5))==0) {
+		else if (g_ascii_strncasecmp(stdout, "DEBUG", MIN(strlen(stdout), 5))==0) {
 			debug_dump_editors();
 			DEBUG_MODE = TRUE;
 		}
@@ -1116,6 +1118,11 @@ gboolean delete_hint(GtkWidget *widget, GdkEventCrossing *event, gpointer user_d
 void install_menu_hint(GtkWidget *widget, gchar *message){
   g_signal_connect(G_OBJECT(widget), "enter-notify-event", G_CALLBACK(show_hint), message);
   g_signal_connect(G_OBJECT(widget), "leave-notify-event", G_CALLBACK(delete_hint), NULL);
+}
+void bugreport(void){
+    GdkScreen *screen;
+    screen = gtk_widget_get_screen (GTK_WIDGET (main_window.window));
+    gtk_show_uri (screen, BUGREPORTLINK, GDK_CURRENT_TIME, NULL);
 }
 void main_window_create_menu(void){
     int i;
@@ -1439,6 +1446,11 @@ GtkAccelGroup *accel_group = NULL;
   gtk_widget_add_accelerator(menu.phphelp, "activate", accel_group, GDK_F1, 0, GTK_ACCEL_VISIBLE);
   gtk_menu_shell_append(GTK_MENU_SHELL(menu.menuhelp), menu.phphelp);
 
+  menu.bugreport= gtk_menu_item_new_with_mnemonic(_("_Report a bug in gPHPEdit"));
+  g_signal_connect(G_OBJECT(menu.bugreport), "activate", G_CALLBACK(bugreport), NULL);
+  install_menu_hint(menu.bugreport, _("Go to bug report page to report a bug"));
+  gtk_menu_shell_append(GTK_MENU_SHELL(menu.menuhelp), menu.bugreport);
+
   menu.abouthelp= gtk_image_menu_item_new_from_stock(GTK_STOCK_ABOUT, NULL);
   g_signal_connect(G_OBJECT(menu.abouthelp), "activate", G_CALLBACK(on_about1_activate), NULL);
   install_menu_hint(menu.abouthelp, _("Shows info about gPHPEdit"));
@@ -1494,7 +1506,12 @@ if (GTK_IS_SCINTILLA(main_window.current_editor->scintilla)){
     gtk_widget_set_sensitive (main_window.toolbar_main_button_replace, TRUE);
     gtk_widget_set_sensitive (main_window.toolbar_main_button_indent, TRUE);
     gtk_widget_set_sensitive (main_window.toolbar_main_button_unindent, TRUE);
-    gtk_widget_set_sensitive (main_window.toolbar_main_button_save, TRUE);
+    if (main_window.current_editor->isreadonly){
+        gtk_widget_set_sensitive (main_window.toolbar_main_button_save, FALSE);
+    } else {
+        gtk_widget_set_sensitive (main_window.toolbar_main_button_save, TRUE);
+    }
+    
     gtk_widget_set_sensitive (main_window.toolbar_main_button_save_as, TRUE);
     gtk_widget_set_sensitive (main_window.toolbar_find_search_entry, TRUE);
     gtk_widget_set_sensitive (main_window.toolbar_find_goto_entry, TRUE);
@@ -1502,7 +1519,11 @@ if (GTK_IS_SCINTILLA(main_window.current_editor->scintilla)){
     gtk_widget_set_sensitive (menu.code, TRUE);
     gtk_widget_set_sensitive (menu.cut, TRUE);
     gtk_widget_set_sensitive (menu.paste, TRUE);
-    gtk_widget_set_sensitive (menu.save, TRUE);
+    if (main_window.current_editor->isreadonly){
+        gtk_widget_set_sensitive (menu.save, FALSE);
+    } else {
+        gtk_widget_set_sensitive (menu.save, TRUE);
+    }
     gtk_widget_set_sensitive (menu.saveas, TRUE);
     gtk_widget_set_sensitive (menu.reload, TRUE);
     gtk_widget_set_sensitive (menu.rename, TRUE);
