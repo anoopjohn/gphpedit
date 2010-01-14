@@ -31,18 +31,6 @@ FindDialog find_dialog;
 ReplaceDialog replace_dialog;
 GtkWidget *replace_prompt_dialog;
 
-GdkPixbuf *get_window_icon (void){
-GdkPixbuf *pixbuf = NULL;
-GError *error = NULL;
-pixbuf = gdk_pixbuf_new_from_file (PIXMAP_DIR "/" GPHPEDIT_PIXMAP_ICON, &error);
-if (error) {
-g_warning (G_STRLOC ": cannot open icon: %s", error->message);
-g_error_free (error);
-return NULL;
-}
-return pixbuf;
-}
-
 void find_destroy(GtkWidget *widget, gpointer data)
 {
 	gtk_widget_destroy(find_dialog.window1);

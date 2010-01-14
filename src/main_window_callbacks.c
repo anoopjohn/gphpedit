@@ -517,10 +517,26 @@ void add_file_filters(GtkFileChooser *chooser){
         GtkFileFilter *filter;
 	//creates a new file filter
 	filter = gtk_file_filter_new ();
-	gtk_file_filter_set_name (filter, _("PHP files (*.php *.inc)"));
+        GString *caption;
+	GString *ext_pattern = NULL;
+
+	caption = g_string_new(_("PHP files ("));
+	gchar **php_file_extensions;
+	gint i;
+	php_file_extensions = g_strsplit(preferences.php_file_extensions,",",-1);
+
+        for (i = 0; php_file_extensions[i] != NULL; i++) {
+			//make file pattern
+                        ext_pattern=g_string_new("*.");
+                        ext_pattern=g_string_append(ext_pattern, php_file_extensions[i]);
+                        caption =g_string_append(caption, " ");
+                        caption =g_string_append(caption, ext_pattern->str);
+                        gtk_file_filter_add_pattern(filter, ext_pattern->str);
+		}
+        g_strfreev(php_file_extensions);
+        caption =g_string_append(caption, ")");
+        gtk_file_filter_set_name (filter, caption->str);
 	//add a pattern to the filter
-        gtk_file_filter_add_pattern(filter, "*.php");
-        gtk_file_filter_add_pattern(filter, "*.inc");
 	gtk_file_chooser_add_filter (GTK_FILE_CHOOSER (chooser),
 				     filter);
 	//set default filter to the dialog
@@ -528,10 +544,11 @@ void add_file_filters(GtkFileChooser *chooser){
 				     filter);
 
 	filter = gtk_file_filter_new ();
-	gtk_file_filter_set_name (filter, _("HTML files (*.html *.htm *.xhtml)"));
+	gtk_file_filter_set_name (filter, _("HTML files (*.html *.htm *.xhtml *tpl)"));
         gtk_file_filter_add_pattern(filter, "*.html");
         gtk_file_filter_add_pattern(filter, "*.htm");
         gtk_file_filter_add_pattern(filter, "*.xhtml");
+        gtk_file_filter_add_pattern(filter, "*.tpl");
 	gtk_file_chooser_add_filter (GTK_FILE_CHOOSER (chooser),
 				     filter);
 	filter = gtk_file_filter_new ();
@@ -941,6 +958,7 @@ g_string_printf (label_caption,"%s%d","Zoom:",p);
 label_caption = g_string_append(label_caption, "%");
 gtk_label_set_text (GTK_LABEL(main_window.zoomlabel),label_caption->str);
 }
+
 /**
  * Close a tab in the Editor. Removes the notebook page, frees the editor object,
  * and sets the active tab correcty
@@ -980,6 +998,23 @@ void close_page(Editor *editor)
 	g_string_free(editor->filename, TRUE);
 	g_free(editor);
 	gtk_notebook_remove_page(GTK_NOTEBOOK(main_window.notebook_editor), page_num_closing);
+}
+
+/**
+ * get_window_icon
+ * returns a pixbuf with gphpedit icon
+ * @return GdkPixbuf
+ */
+GdkPixbuf *get_window_icon (void){
+GdkPixbuf *pixbuf = NULL;
+GError *error = NULL;
+pixbuf = gdk_pixbuf_new_from_file (PIXMAP_DIR "/" GPHPEDIT_PIXMAP_ICON, &error);
+if (error) {
+g_warning (G_STRLOC ": cannot open icon: %s", error->message);
+g_error_free (error);
+return NULL;
+}
+return pixbuf;
 }
 
 
@@ -1119,6 +1154,54 @@ void on_paste_got_from_cliboard(GtkClipboard *clipboard, const gchar *text, gpoi
 	gtk_scintilla_colourise(GTK_SCINTILLA(main_window.current_editor->scintilla), 0, -1);
 }
 
+void selectiontoupper(void){
+    gint wordStart;
+	gint wordEnd;
+	gint length;
+	gchar *buffer;
+
+	if (main_window.current_editor == NULL)
+		return;
+
+	if (main_window.current_editor->type == TAB_HELP) {
+		 webkit_web_view_copy_clipboard (WEBKIT_WEB_VIEW(main_window.current_editor->help_view));
+	}
+	else {
+		wordStart = gtk_scintilla_get_selection_start(GTK_SCINTILLA(main_window.current_editor->scintilla));
+		wordEnd = gtk_scintilla_get_selection_end(GTK_SCINTILLA(main_window.current_editor->scintilla));
+		if (wordStart != wordEnd) {
+			buffer = gtk_scintilla_get_text_range (GTK_SCINTILLA(main_window.current_editor->scintilla), wordStart, wordEnd, &length);
+                        //buffer to upper
+                        buffer=g_utf8_strup (buffer,strlen(buffer));
+                        //replace sel
+                        gtk_scintilla_replace_sel(GTK_SCINTILLA(main_window.current_editor->scintilla), buffer);
+                }
+        }
+}
+void selectiontolower(void){
+    gint wordStart;
+	gint wordEnd;
+	gint length;
+	gchar *buffer;
+
+	if (main_window.current_editor == NULL)
+		return;
+
+	if (main_window.current_editor->type == TAB_HELP) {
+		 webkit_web_view_copy_clipboard (WEBKIT_WEB_VIEW(main_window.current_editor->help_view));
+	}
+	else {
+		wordStart = gtk_scintilla_get_selection_start(GTK_SCINTILLA(main_window.current_editor->scintilla));
+		wordEnd = gtk_scintilla_get_selection_end(GTK_SCINTILLA(main_window.current_editor->scintilla));
+		if (wordStart != wordEnd) {
+			buffer = gtk_scintilla_get_text_range (GTK_SCINTILLA(main_window.current_editor->scintilla), wordStart, wordEnd, &length);
+                        //buffer to upper
+                        buffer=g_utf8_strdown (buffer,strlen(buffer));
+                        //replace sel
+                        gtk_scintilla_replace_sel(GTK_SCINTILLA(main_window.current_editor->scintilla), buffer);
+                }
+        }
+}
 void on_paste1_activate(GtkWidget *widget)
 {
 	if (main_window.current_editor == NULL || main_window.current_editor->type == TAB_HELP)
@@ -1325,14 +1408,6 @@ void context_help(GtkWidget *widget)
  */
 void on_about1_activate(GtkWidget *widget)
 {
-    GdkPixbuf *pixbuf = NULL;
-    GError *error = NULL;
-    pixbuf = gdk_pixbuf_new_from_file (PIXMAP_DIR "/" GPHPEDIT_PIXMAP_ICON, &error);
-
-	if (error) {
-		g_warning (G_STRLOC ": cannot open icon: %s", error->message);
-		g_error_free (error);
-	}
   const gchar *authors[] = {
 								"Current Maintainer",
 								"Anoop John <anoop.john@zyxware.com>",
@@ -1359,12 +1434,11 @@ void on_about1_activate(GtkWidget *widget)
 							 "scripts and related files (HTML/CSS/JS)."));
   gtk_about_dialog_set_website(GTK_ABOUT_DIALOG(dialog),
       "http://www.gphpedit.org/");
-  gtk_about_dialog_set_logo(GTK_ABOUT_DIALOG(dialog), pixbuf);
+  gtk_about_dialog_set_logo(GTK_ABOUT_DIALOG(dialog),get_window_icon ());
   gtk_about_dialog_set_authors(GTK_ABOUT_DIALOG(dialog),(const gchar **) authors);
   gtk_about_dialog_set_translator_credits(GTK_ABOUT_DIALOG(dialog),translator_credits);
   gtk_about_dialog_set_documenters (GTK_ABOUT_DIALOG(dialog),(const gchar **) documenters);
-  gtk_window_set_icon(GTK_WINDOW(dialog), pixbuf);
-  g_object_unref(pixbuf), pixbuf = NULL;
+  gtk_window_set_icon(GTK_WINDOW(dialog), get_window_icon ());
   gtk_dialog_run(GTK_DIALOG (dialog));
   gtk_widget_destroy(dialog);
 }
@@ -1671,6 +1745,7 @@ void pressed_button_file_chooser(GtkButton *widget, gpointer data)
  	GTK_STOCK_OPEN, GTK_RESPONSE_OK,
  	NULL);
      gtk_window_set_modal(GTK_WINDOW(pFileSelection), TRUE);
+     gtk_file_chooser_set_local_only (GTK_FILE_CHOOSER(pFileSelection), FALSE);
      // sets the label folder as start folder 
      gchar *lbl;
      lbl=(gchar*)gtk_button_get_label(GTK_BUTTON(main_window.button_dialog));

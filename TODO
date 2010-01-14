@@ -1,16 +1,9 @@
 BUGS TO FIX
 ===========
 
-* Filters for the open/save dialogs, but for PHP filter must use the PHP file
-extensions preference.
-
 * Changing cursor position (either by keypress or mouse click) should reparse back
 from position to find nearest PHP function. Should popup hint for function.
 Should also work for cases like: outer( inner(
-
-* Toolbars stop in the middle - Extend the toolbar borders to the edge of the window.
-
-* Add close button for the side bar
 
 * Class browser: handle the choice of parsing only current file
 in the configuration

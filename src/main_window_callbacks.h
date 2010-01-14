@@ -100,6 +100,9 @@ void syntax_check_clear(GtkWidget *widget);
 void lint_row_activated (GtkTreeSelection *selection, gpointer data);
 void goto_line_int(gint line);
 void goto_line(gchar *text);
+GdkPixbuf *get_window_icon (void);
+void selectiontoupper(void);
+void selectiontolower(void);
 gboolean on_notebook_focus_tab(GtkNotebook *notebook,
                                GtkNotebookTab arg1, gpointer user_data);
 void on_reload1_activate(GtkWidget *widget);

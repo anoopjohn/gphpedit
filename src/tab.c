@@ -205,7 +205,7 @@ void tab_file_write (GObject *source_object, GAsyncResult *res, gpointer user_da
 {
         Editor *editor = (Editor *)user_data;
         gssize bytes;
-        GError *error;
+        GError *error=NULL;
         bytes= g_output_stream_write_finish((GOutputStream *)source_object,res,&error);
         if (bytes==-1){
             g_print(_("GIO Error: %s\n"),error->message);
@@ -270,13 +270,23 @@ void tab_validate_buffer_and_insert(gpointer buffer, Editor *editor)
 		editor->converted_to_utf8 = FALSE;
 	}
 	else {
-		// Used for testing as my locale isn't set
-		// converted_text = g_convert(buffer, nchars, "UTF-8", "ISO-8859-15", NULL, &utf8_size, &error);
+		
 		converted_text = g_locale_to_utf8(buffer, editor->file_size, NULL, &utf8_size, &error);
 		if (error != NULL) {
+                        gssize nchars=strlen(buffer);
+                        // if locale isn't set
+                        error=NULL;
+                        converted_text = g_convert(buffer, nchars, "UTF-8", "ISO-8859-15", NULL, &utf8_size, &error);
+                        if (error!=NULL){
 			g_print(_("gPHPEdit UTF-8 Error: %s\n"), error->message);
 			g_error_free(error);
-			gtk_scintilla_add_text(GTK_SCINTILLA (editor->scintilla), editor->file_size, buffer);
+                        gtk_scintilla_add_text(GTK_SCINTILLA (editor->scintilla), editor->file_size, buffer);
+                        } else {
+                        g_print(_("Converted to UTF-8 size: %d\n"), utf8_size);
+			gtk_scintilla_add_text(GTK_SCINTILLA (editor->scintilla), utf8_size, converted_text);
+			g_free(converted_text);
+			editor->converted_to_utf8 = TRUE;
+                        }
 		}
 		else {
 			g_print(_("Converted to UTF-8 size: %d\n"), utf8_size);
@@ -301,8 +311,7 @@ void tab_file_read(GObject *source_object, GAsyncResult *res, gpointer user_data
 {
         Editor *editor = (Editor *)user_data;
         gssize bytes_read;
-        GError *error;
-        error=NULL;
+        GError *error=NULL;
         bytes_read=g_input_stream_read_finish ((GInputStream *)source_object,res,&error);
 
         if (!bytes_read){
@@ -330,7 +339,7 @@ void tab_file_opened (GObject *source_object, GAsyncResult *res, gpointer user_d
 {
         Editor *editor = (Editor *)user_data;
 	GFileInputStream *input;
-        GError *error;
+        GError *error=NULL;
         input=g_file_read_finish ((GFile *)source_object,res,&error);
         if (!input){
             g_print(_("GIO Error: %s\n"),error->message);
@@ -344,8 +353,7 @@ void tab_file_opened (GObject *source_object, GAsyncResult *res, gpointer user_d
 {
         GFile *file;
         GFileInfo *info;
-        GError *error;
-        error=NULL;
+        GError *error=NULL;
 	
 	// Store current position for returning to
 	editor->current_pos = gtk_scintilla_get_current_pos(GTK_SCINTILLA(editor->scintilla));
@@ -597,6 +605,7 @@ gboolean tab_create_help(Editor *editor, GString *filename)
 	if (!long_filename) {
 		dialog = gtk_message_dialog_new (NULL, GTK_DIALOG_MODAL, GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE,
 			_("Could not find the required command in the online help"));
+                gtk_window_set_icon(GTK_WINDOW(dialog), get_window_icon());
 		gtk_dialog_run (GTK_DIALOG (dialog));
 		gtk_widget_destroy (dialog);
 		return FALSE;
@@ -966,7 +975,16 @@ void close_saved_empty_Untitled()
 		}
 	}
 }
-
+gchar *recordar;
+void openfile_mount(GObject *source_object,GAsyncResult *res,gpointer user_data) {
+	GError *error=NULL;
+	if (g_file_mount_enclosing_volume_finish((GFile *)source_object,res,&error)) {
+		/* open again */
+              switch_to_file_or_open(recordar, 0);
+	} else {
+            g_print(_("Error mounting volume. GIO error:%s\n"),error->message);
+	}
+}
 
 /* Create a new tab and return TRUE if a tab was created */
 gboolean tab_create_new(gint type, GString *filename)
@@ -991,6 +1009,24 @@ gboolean tab_create_new(gint type, GString *filename)
 			abs_path = g_strdup(filename->str);
 		}
                 file=g_file_new_for_uri (abs_path);
+                if (!uri_is_local(abs_path)){
+                    GError *error2=NULL;
+                    GMount *ex= g_file_find_enclosing_mount (file,NULL,&error2);
+                    if (!ex){
+                        if (error2->code== G_IO_ERROR_NOT_MOUNTED){
+                        g_print(_("Error filesystem not mounted.\nMounting filesystem, this will take a few seconds...\n"));
+                        GMountOperation *gmo;
+                        gmo= gtk_mount_operation_new(GTK_WINDOW(main_window.window));
+                        recordar=g_strdup(filename->str);
+                        g_file_mount_enclosing_volume (file, G_MOUNT_MOUNT_NONE,gmo,NULL, openfile_mount, recordar);
+                        error2=NULL;
+                        return FALSE;
+                        }
+                        g_print(_("Error opening file GIO error:%s\n"),error2->message);
+                        error2=NULL;
+                        return FALSE;
+                    }
+                }
 		if(!g_file_query_exists (file,NULL) && type!=TAB_HELP) {
 			dialog_message = g_string_new("");
 			g_string_sprintf(dialog_message, _("The file %s was not found.\n\nWould you like to create it as an empty document?"), filename->str);
@@ -1753,7 +1789,21 @@ gboolean editor_is_local(Editor *editor)
 	g_print("FALSE - not local!!!");
 	return FALSE;
 }
+gboolean uri_is_local(gchar *uri)
+{
+	gchar *filename;
 
+	filename = uri;
+	if (g_strncasecmp(filename, "file://", MIN(strlen(filename), 7))==0) {
+		return TRUE;
+	}
+	if (g_strncasecmp(filename, "/", MIN(strlen(filename), 1))==0) {
+		return TRUE;
+	}
+
+	//g_print("FALSE - not local!!!");
+	return FALSE;
+}
 gchar * editor_convert_to_local(Editor *editor)
 {
 	gchar *filename;

@@ -68,6 +68,10 @@ typedef struct
   GtkWidget *replace;
   GtkWidget *indent;
   GtkWidget *unindent;
+  GtkWidget *sept;
+  GtkWidget *sepd;
+  GtkWidget *upper;
+  GtkWidget *lower;
   GtkWidget *preferences;
 
   GtkWidget *view;
@@ -201,7 +205,7 @@ extern MainWindow main_window;
 extern Mainmenu menu;
 extern gboolean DEBUG_MODE;
 void force_config_folder(void);
-
+void update_controls(void);
 void main_window_create(void);
 void main_window_open_command_line_files(char **argv, gint argc);
 void update_app_title(void);

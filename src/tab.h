@@ -113,6 +113,7 @@ void debug_dump_editors(void);
 void register_file_opened(gchar *filename);
 gchar * editor_convert_to_local(Editor *editor);
 gboolean editor_is_local(Editor *editor);
+gboolean uri_is_local(gchar *uri);
 gchar *convert_to_full(gchar *filename);
 void str_replace(char *Str, char ToRp, char WithC);
 //void tab_file_save_opened(GnomeVFSAsyncHandle *fd, GnomeVFSResult result, gpointer li_ptr);

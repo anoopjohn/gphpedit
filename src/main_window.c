@@ -410,12 +410,12 @@ static void main_window_fill_panes(void)
 	GtkCellRenderer *renderer;
 	GtkTreeViewColumn *column;
 	gint pos;
-	//Commented out as panes aren't used yet AJ 2003-01-21 TODO: replace old style code with new main_window.* code
-	GtkWidget *notebook_manager;
+
+        GtkWidget *notebook_manager;
 	notebook_manager = gtk_notebook_new ();
 	main_window.notebook_manager= gtk_notebook_new ();
 	gtk_notebook_set_tab_pos (GTK_NOTEBOOK (main_window.notebook_manager), GTK_POS_BOTTOM);
-	gtk_widget_set_usize(main_window.notebook_manager,200,400);
+	gtk_widget_set_size_request (main_window.notebook_manager, 200,400);
 	gtk_widget_show (main_window.notebook_manager);
 	box = gtk_vbox_new(FALSE, 0);
 	gtk_widget_show(box);
@@ -535,8 +535,8 @@ static void main_window_fill_panes(void)
 	GTK_WIDGET_UNSET_FLAGS (main_window.notebook_editor, GTK_RECEIVES_DEFAULT);
 	gtk_widget_show (main_window.notebook_editor);
 	gtk_paned_pack2 (GTK_PANED (main_window.main_horizontal_pane), main_window.notebook_editor, TRUE, TRUE);
-        gtk_widget_set_usize(main_window.notebook_editor,400,400);
-	g_signal_connect (G_OBJECT (main_window.notebook_editor), "switch_page", G_CALLBACK (on_notebook_switch_page), NULL);
+        gtk_widget_set_size_request (main_window.notebook_editor, 400,400);
+        g_signal_connect (G_OBJECT (main_window.notebook_editor), "switch_page", G_CALLBACK (on_notebook_switch_page), NULL);
 	g_signal_connect (G_OBJECT (main_window.notebook_editor), "focus-tab", G_CALLBACK (on_notebook_focus_tab), NULL);
 }
 
@@ -674,11 +674,13 @@ void update_app_title(void)
 				g_string_append(title, _(" - gPHPEdit"));
 			}
                         update_zoom_level();
+                        update_controls();
 		}
 		else if(main_window.current_editor->type == TAB_HELP) {
 			title = g_string_new("Help: ");
 			title = g_string_append(title, main_window.current_editor->help_function);
                         update_zoom_level();
+                        update_controls();
 		}
 		//If there is no file opened set the name as gPHPEdit
 		else {
@@ -1283,6 +1285,24 @@ GtkAccelGroup *accel_group = NULL;
   gtk_widget_add_accelerator(menu.unindent, "activate", accel_group, GDK_i, GDK_SHIFT_MASK | GDK_CONTROL_MASK |GDK_MOD1_MASK, GTK_ACCEL_VISIBLE);
   gtk_menu_shell_append(GTK_MENU_SHELL(menu.menuedit), menu.unindent);
 
+  menu.sept = gtk_separator_menu_item_new();
+  gtk_menu_shell_append(GTK_MENU_SHELL(menu.menuedit), menu.sept);
+
+  menu.upper = gtk_menu_item_new_with_mnemonic(_("_ToUpper"));
+  g_signal_connect(G_OBJECT(menu.upper), "activate", G_CALLBACK(selectiontoupper), NULL);
+  install_menu_hint(menu.upper, _("Convert the current selection text to upper case"));
+  gtk_widget_add_accelerator(menu.upper, "activate", accel_group, GDK_u, GDK_CONTROL_MASK, GTK_ACCEL_VISIBLE);
+  gtk_menu_shell_append(GTK_MENU_SHELL(menu.menuedit), menu.upper);
+
+  menu.lower = gtk_menu_item_new_with_mnemonic(_("_ToLower"));
+  g_signal_connect(G_OBJECT(menu.lower), "activate", G_CALLBACK(selectiontolower), NULL);
+  install_menu_hint(menu.lower, _("Convert the current selection text to lower case"));
+  gtk_widget_add_accelerator(menu.lower, "activate", accel_group, GDK_l, GDK_CONTROL_MASK, GTK_ACCEL_VISIBLE);
+  gtk_menu_shell_append(GTK_MENU_SHELL(menu.menuedit), menu.lower);
+
+  menu.sepd = gtk_separator_menu_item_new();
+  gtk_menu_shell_append(GTK_MENU_SHELL(menu.menuedit), menu.sepd);
+
   menu.preferences = gtk_image_menu_item_new_from_stock(GTK_STOCK_PREFERENCES, NULL);
   g_signal_connect(G_OBJECT(menu.preferences), "activate", G_CALLBACK(on_preferences1_activate), NULL);
   install_menu_hint(menu.preferences, _("Application Config"));
@@ -1461,4 +1481,72 @@ void main_window_create(void)
 	gtk_widget_show(main_window.window);
 
 	update_app_title();
+}
+
+void update_controls(void){
+if (GTK_IS_SCINTILLA(main_window.current_editor->scintilla)){
+    //TODO: Deactivate save controls if file is read only
+    //activate toolbar items
+    gtk_widget_set_sensitive (main_window.toolbar_main_button_cut, TRUE);
+    gtk_widget_set_sensitive (main_window.toolbar_main_button_paste, TRUE);
+    gtk_widget_set_sensitive (main_window.toolbar_main_button_undo, TRUE);
+    gtk_widget_set_sensitive (main_window.toolbar_main_button_redo, TRUE);
+    gtk_widget_set_sensitive (main_window.toolbar_main_button_replace, TRUE);
+    gtk_widget_set_sensitive (main_window.toolbar_main_button_indent, TRUE);
+    gtk_widget_set_sensitive (main_window.toolbar_main_button_unindent, TRUE);
+    gtk_widget_set_sensitive (main_window.toolbar_main_button_save, TRUE);
+    gtk_widget_set_sensitive (main_window.toolbar_main_button_save_as, TRUE);
+    gtk_widget_set_sensitive (main_window.toolbar_find_search_entry, TRUE);
+    gtk_widget_set_sensitive (main_window.toolbar_find_goto_entry, TRUE);
+    //activate menu items
+    gtk_widget_set_sensitive (menu.code, TRUE);
+    gtk_widget_set_sensitive (menu.cut, TRUE);
+    gtk_widget_set_sensitive (menu.paste, TRUE);
+    gtk_widget_set_sensitive (menu.save, TRUE);
+    gtk_widget_set_sensitive (menu.saveas, TRUE);
+    gtk_widget_set_sensitive (menu.reload, TRUE);
+    gtk_widget_set_sensitive (menu.rename, TRUE);
+    gtk_widget_set_sensitive (menu.indent, TRUE);
+    gtk_widget_set_sensitive (menu.unindent, TRUE);
+    gtk_widget_set_sensitive (menu.replace, TRUE);
+    gtk_widget_set_sensitive (menu.plugin, TRUE);
+    gtk_widget_set_sensitive (menu.undo, TRUE);
+    gtk_widget_set_sensitive (menu.redo, TRUE);
+    gtk_widget_set_sensitive (menu.phphelp, TRUE);
+    gtk_widget_set_sensitive (menu.upper, TRUE);
+    gtk_widget_set_sensitive (menu.lower, TRUE);
+    
+}else{
+	if (WEBKIT_IS_WEB_VIEW(main_window.current_editor->help_view)){
+            //deactivate toolbar items
+            gtk_widget_set_sensitive (main_window.toolbar_main_button_cut, FALSE);
+            gtk_widget_set_sensitive (main_window.toolbar_main_button_paste, FALSE);
+            gtk_widget_set_sensitive (main_window.toolbar_main_button_undo, FALSE);
+            gtk_widget_set_sensitive (main_window.toolbar_main_button_redo, FALSE);
+            gtk_widget_set_sensitive (main_window.toolbar_main_button_replace, FALSE);
+            gtk_widget_set_sensitive (main_window.toolbar_main_button_indent, FALSE);
+            gtk_widget_set_sensitive (main_window.toolbar_main_button_unindent, FALSE);
+            gtk_widget_set_sensitive (main_window.toolbar_main_button_save, FALSE);
+            gtk_widget_set_sensitive (main_window.toolbar_main_button_save_as, FALSE);
+            gtk_widget_set_sensitive (main_window.toolbar_find_search_entry, FALSE);
+            gtk_widget_set_sensitive (main_window.toolbar_find_goto_entry, FALSE);
+            //deactivate menu items
+            gtk_widget_set_sensitive (menu.code, FALSE);
+            gtk_widget_set_sensitive (menu.cut, FALSE);
+            gtk_widget_set_sensitive (menu.paste, FALSE);
+            gtk_widget_set_sensitive (menu.save, FALSE);
+            gtk_widget_set_sensitive (menu.saveas, FALSE);
+            gtk_widget_set_sensitive (menu.reload, FALSE);
+            gtk_widget_set_sensitive (menu.rename, FALSE);
+            gtk_widget_set_sensitive (menu.indent, FALSE);
+            gtk_widget_set_sensitive (menu.unindent, FALSE);
+            gtk_widget_set_sensitive (menu.replace, FALSE);
+            gtk_widget_set_sensitive (menu.plugin, FALSE);
+            gtk_widget_set_sensitive (menu.undo, FALSE);
+            gtk_widget_set_sensitive (menu.redo, FALSE);
+            gtk_widget_set_sensitive (menu.phphelp, FALSE);
+            gtk_widget_set_sensitive (menu.upper, FALSE);
+            gtk_widget_set_sensitive (menu.lower, FALSE);
+            }
+}
 }
