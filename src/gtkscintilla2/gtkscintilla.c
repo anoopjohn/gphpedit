@@ -51,7 +51,8 @@ enum {
 
 static void gtk_scintilla_class_init (GtkScintillaClass *klass);
 static void gtk_scintilla_init       (GtkScintilla      *sci);
-static void gtk_scintilla_destroy    (GtkObject         *object);
+static void gtk_scintilla_dispose    (GObject *gobject);
+static void gtk_scintilla_finalize (GObject *gobject);
 static void notify_cb                (GtkWidget         *w,
                                       gint               param,
                                       gpointer           notif,
@@ -92,12 +93,12 @@ gtk_scintilla_get_type (void)
 static void
 gtk_scintilla_class_init (GtkScintillaClass *klass)
 {
-    GtkObjectClass *object_class;
+    GObjectClass *object_class;
     
-    object_class = (GtkObjectClass *) klass;
+    object_class = G_OBJECT_CLASS (klass);
     parent_class = g_type_class_peek_parent (klass);
-
-    object_class->destroy = gtk_scintilla_destroy;
+    object_class->dispose = gtk_scintilla_dispose;
+    object_class->finalize = gtk_scintilla_finalize;
     
     signals[STYLE_NEEDED] =
         g_signal_new ("style_needed",
@@ -292,17 +293,24 @@ gtk_scintilla_init (GtkScintilla *sci)
 }
 
 static void
-gtk_scintilla_destroy (GtkObject *object)
+gtk_scintilla_dispose (GObject *gobject)
 {
-    g_return_if_fail (object != NULL);
-    g_return_if_fail (GTK_IS_SCINTILLA (object));
+    g_return_if_fail (gobject != NULL);
+    g_return_if_fail (GTK_IS_SCINTILLA (gobject));
+}
+static void
+gtk_scintilla_finalize (GObject *gobject)
+{
+    g_return_if_fail (gobject != NULL);
+    g_return_if_fail (GTK_IS_SCINTILLA (gobject));
+    scintilla_release_resources();
 }
 
 GtkWidget *gtk_scintilla_new (void)
 {
     GtkScintilla *scintilla;
     
-    scintilla = (GtkScintilla *) gtk_type_new (gtk_scintilla_get_type ());
+    scintilla = (GtkScintilla *) g_object_new (gtk_scintilla_get_type (),NULL);
     
     return GTK_WIDGET (scintilla);
 }
@@ -3771,8 +3779,8 @@ notify_cb (GtkWidget *w, gint param, gpointer notif, gpointer data)
                            signals[ZOOM], 0);
             break;
         default:
-            g_warning ("GtkScintilla2: Notification code %d not handled!\n",
-                       (gint) notification->nmhdr.code);
+            //g_warning ("GtkScintilla2: Notification code %d not handled!\n",
+            //           (gint) notification->nmhdr.code);
             break;
     }
 }

@@ -29,10 +29,10 @@ extern "C" {
 #endif
 
 #define GTK_TYPE_SCINTILLA            (gtk_scintilla_get_type ())
-#define GTK_SCINTILLA(obj)            (GTK_CHECK_CAST ((obj), GTK_TYPE_SCINTILLA, GtkScintilla))
-#define GTK_SCINTILLA_CLASS(klass)    (GTK_CHECK_CLASS_CAST ((klass), GTK_TYPE_SCINTILLA, GtkScintillaClass))
-#define GTK_IS_SCINTILLA(obj)         (GTK_CHECK_TYPE ((obj), GTK_TYPE_SCINTILLA))
-#define GTK_IS_SCINTILLA_CLASS(klass) (GTK_CHECK_CLASS_TYPE ((klass), GTK_TYPE_SCINTILLA))
+#define GTK_SCINTILLA(obj)            (G_TYPE_CHECK_INSTANCE_CAST ((obj), GTK_TYPE_SCINTILLA, GtkScintilla))
+#define GTK_SCINTILLA_CLASS(klass)    (G_TYPE_CHECK_CLASS_CAST  ((klass), GTK_TYPE_SCINTILLA, GtkScintillaClass))
+#define GTK_IS_SCINTILLA(obj)         (G_TYPE_CHECK_INSTANCE_TYPE ((obj), GTK_TYPE_SCINTILLA))
+#define GTK_IS_SCINTILLA_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), GTK_TYPE_SCINTILLA))
 
 typedef struct _GtkScintilla      GtkScintilla;
 typedef struct _GtkScintillaClass GtkScintillaClass;
