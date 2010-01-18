@@ -17,17 +17,39 @@ dnl You should have received a copy of the GNU General Public License along
 dnl with this program; if not, write to the Free Software Foundation, Inc.,
 dnl 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
 dnl
+AC_PREREQ([2.64])
+AC_INIT(gPHPEdit, 0.9.96, https://savannah.nongnu.org/support/?group=gphpedit)
+AC_CONFIG_SRCDIR([config.h.in]) dnl maybe change to src/main.c
+AC_CONFIG_HEADERS([config.h])
+AC_CONFIG_MACRO_DIR([m4])
+AM_INIT_AUTOMAKE
+AM_MAINTAINER_MODE([enable])
 
-AC_INIT(src)
-AM_CONFIG_HEADER(config.h)
-AM_INIT_AUTOMAKE(gphpedit, 0.9.96)
-
-AM_MAINTAINER_MODE
-
-AC_PROG_CC
+# Checks for programs.
 AC_PROG_CXX
+AC_PROG_AWK
+AC_PROG_CC
+AC_PROG_CPP
+AC_PROG_INSTALL
+AC_PROG_LN_S
+AC_PROG_MAKE_SET
+AC_LIBTOOL_DLOPEN
 AC_PROG_LIBTOOL
 AC_PROG_INTLTOOL
+
+# Checks for libraries.
+
+# Checks for header files.
+AC_CHECK_HEADERS([fcntl.h stddef.h stdlib.h string.h unistd.h])
+
+# Checks for typedefs, structures, and compiler characteristics.
+AC_HEADER_STDBOOL
+AC_C_INLINE
+AC_TYPE_PID_T
+AC_TYPE_SIZE_T
+
+# Checks for library functions.
+AC_CHECK_FUNCS([isascii mblen memmove memset mkfifo strchr strncasecmp strrchr strstr strtol])
 
 dnl  --------------
 dnl | dependencies |-----------------------------------------------------------
@@ -35,12 +57,8 @@ dnl  --------------
 
 PKG_CHECK_MODULES(GPHPEDIT,[
 	gtk+-2.0
-	libgnomeui-2.0
-	gnome-vfs-2.0
 	webkit-1.0
-dnl	libgtkhtml-2.0
-dnl	libgnomeprint-2.2
-dnl	libgnomeprintui-2.2
+	gconf-2.0
 	])
 
 AC_SUBST(GPHPEDIT_CFLAGS)
@@ -57,7 +75,7 @@ AC_SUBST(GETTEXT_PACKAGE)
 AC_DEFINE_UNQUOTED(GETTEXT_PACKAGE,"$GETTEXT_PACKAGE",[The package name, for gettext])
 
 dnl Please keep this in alphabetical order
-ALL_LINGUAS=""
+ALL_LINGUAS="de es"
 
 AM_GLIB_GNU_GETTEXT
 
@@ -73,8 +91,15 @@ AC_DEFINE_UNQUOTED(PACKAGE_LOCALE_DIR, "$PACKAGE_LOCALE_DIR",
 AC_MSG_RESULT("$PACKAGE_LOCALE_DIR")
 
 dnl ---------------------------------------------------------------------------
-
-AC_OUTPUT([
+dnl check for deprecated flags
+   DISABLE_DEPRECATED_CFLAGS="\
+-DG_DISABLE_DEPRECATED \
+-DGDK_DISABLE_DEPRECATED \
+-DGTK_DISABLE_DEPRECATED \
+-DGDK_PIXBUF_DISABLE_DEPRECATED \
+-DGNOME_DISABLE_DEPRECATED"
+   AC_SUBST(DISABLE_DEPRECATED_CFLAGS)
+AC_CONFIG_FILES([
 Makefile
 gphpedit.desktop
 gphpedit.spec
@@ -84,3 +109,5 @@ pixmaps/Makefile
 po/Makefile.in
 src/Makefile
 ])
+AC_OUTPUT
+

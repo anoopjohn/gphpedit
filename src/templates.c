@@ -69,14 +69,13 @@ GString *template_get_filename(void)
 
 void template_db_open(void)
 {
-	GString *template_filename;
+    GString *template_filename;
 	FILE *fp;
 	char buf[16384];
 	
 	template_filename = template_get_filename();
 	  
-    templates = g_hash_table_new(g_str_hash, g_str_equal);
-	 
+       templates = g_hash_table_new(g_str_hash, g_str_equal);
 	fp = fopen(template_filename->str, "r");
   	if (!fp) {	
 		fp = template_db_create(template_filename->str);
@@ -85,10 +84,10 @@ void template_db_open(void)
 			return;
 		}
 	}
-
+        
 	while(fgets(buf, sizeof(buf), fp)) {
         gchar *key, *value;
-		gpointer *old_key=NULL, *old_value=NULL;
+	gpointer *old_key=NULL, *old_value=NULL;
         
 		/* get the first and the second field */
         key = (gpointer)strtok(buf, "\t");

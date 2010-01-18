@@ -24,11 +24,6 @@
 
 #ifndef MAIN_WINDOW_CALLBACKS_H
 #define MAIN_WINDOW_CALLBACKS_H
-/*
-#include <libgtkhtml/gtkhtml.h>
-#include <libgtkhtml/layout/htmlbox.h>
-#include <libgtkhtml/layout/htmlboxtext.h>
-*/
 #include <webkit/webkit.h> 
 #include "main.h"
 #include "tab.h"
@@ -47,6 +42,8 @@ void on_new1_activate(GtkWidget *widget);
 void open_file_ok(GtkFileChooser *file_selection);
 void reopen_recent(GtkWidget *widget, gpointer data);
 void on_open1_activate(GtkWidget *widget);
+//void on_newproj_activate(GtkWidget *widget);
+//void on_openproj_activate(GtkWidget *widget);
 void on_openselected1_activate(GtkWidget *widget);
 void save_file_as_confirm_overwrite(gint reply,gpointer filename);
 void save_file_as_ok(GtkFileChooser *file_selection_box);
@@ -80,6 +77,8 @@ void force_perl(GtkWidget *widget);
 void force_python(GtkWidget *widget);
 void zoom_in(GtkWidget *widget);
 void zoom_out(GtkWidget *widget);
+void zoom_100(GtkWidget *widget);
+void update_zoom_level(void);
 void can_undo(GtkWidget *widget);
 void on_notebook_switch_page (GtkNotebook *notebook, GtkNotebookPage *page,
                               gint page_num, gpointer user_data);
@@ -101,6 +100,9 @@ void syntax_check_clear(GtkWidget *widget);
 void lint_row_activated (GtkTreeSelection *selection, gpointer data);
 void goto_line_int(gint line);
 void goto_line(gchar *text);
+GdkPixbuf *get_window_icon (void);
+void selectiontoupper(void);
+void selectiontolower(void);
 gboolean on_notebook_focus_tab(GtkNotebook *notebook,
                                GtkNotebookTab arg1, gpointer user_data);
 void on_reload1_activate(GtkWidget *widget);
@@ -112,6 +114,7 @@ gboolean classbrowser_accept_size(GtkPaned *paned, gpointer user_data);
 
 void keyboard_macro_startstop(GtkWidget *widget);
 void keyboard_macro_playback(GtkWidget *widget);
+void pressed_button_file_chooser(GtkButton *widget, gpointer data);
 void classbrowser_show(void);
 void classbrowser_hide(void);
 void classbrowser_show_hide(GtkWidget *widget);

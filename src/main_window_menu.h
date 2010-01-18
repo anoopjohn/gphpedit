@@ -28,7 +28,7 @@
 #include "main_window_callbacks.h"
 #include <libgnome/gnome-i18n.h>
 
-
+/*
 static GnomeUIInfo recent_menu[] =
 	{
 		GNOMEUIINFO_ITEM_DATA("New Window", "Create a new text viewer window", reopen_recent, (gpointer)0, NULL),
@@ -53,7 +53,7 @@ static GnomeUIInfo recent_menu[] =
 		GNOMEUIINFO_ITEM_DATA("New Window", "Create a new text viewer window", reopen_recent, (gpointer)19, NULL),
         GNOMEUIINFO_END		
 	};		
-#define NUM_REOPEN_MAX 20
+//#define NUM_REOPEN_MAX 20
 
 static GnomeUIInfo plugin_menu[] =
 	{
@@ -89,7 +89,7 @@ static GnomeUIInfo plugin_menu[] =
 		GNOMEUIINFO_ITEM_DATA("Run Plugin", "Run this plugin", run_plugin, (gpointer)29, NULL),
 		GNOMEUIINFO_END		
 	};	
-#define NUM_PLUGINS_MAX 30
+//#define NUM_PLUGINS_MAX 30
 
 static GnomeUIInfo file1_menu_uiinfo[] =
     {
@@ -130,13 +130,13 @@ static GnomeUIInfo edit1_menu_uiinfo[] =
         GNOMEUIINFO_MENU_PREFERENCES_ITEM (on_preferences1_activate, NULL),
         GNOMEUIINFO_END
     };
-
+*/
 /*static GnomeUIInfo project1_menu_uiinfo[] =
 {
   { GNOME_APP_UI_ITEM, "_Not used yet", "Not used yet", NULL, NULL,NULL, 0, 0, 'u', GDK_MOD1_MASK },
   GNOMEUIINFO_END
 };*/
-
+/*
 static GnomeUIInfo force1_menu_uiinfo[] =
     {
         { GNOME_APP_UI_ITEM, N_("PHP/HTML/XML"), N_("Force syntax highlighting to PHP/HTML/XML mode"), force_php, NULL,NULL, 0, 0, 0, 0 },
@@ -183,5 +183,5 @@ static GnomeUIInfo menubar1_uiinfo[] =
         GNOMEUIINFO_MENU_HELP_TREE (help1_menu_uiinfo),
         GNOMEUIINFO_END
     };
-
+*/
 #endif

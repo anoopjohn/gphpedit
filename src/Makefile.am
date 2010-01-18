@@ -39,6 +39,10 @@ gphpedit_SOURCES = \
 	classbrowser.h		\
 	classbrowser_parse.c	\
 	classbrowser_parse.h	\
+	folderbrowser.h		\
+	folderbrowser.c		\
+##	project.c		\
+##	project.h		\
 	edit_template.c		\
 	edit_template.h		\
 	find_replace.c		\
@@ -55,7 +59,7 @@ gphpedit_SOURCES = \
 	main_window.h		\
 	main_window_callbacks.c	\
 	main_window_callbacks.h	\
-	main_window_menu.h	\
+##	main_window_menu.h	\
 	preferences.c		\
 	preferences.h		\
 	preferences_dialog.c	\

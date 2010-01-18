@@ -21,7 +21,7 @@
  
    The GNU General Public License is contained in the file COPYING.
 */
-
+#include "stdlib.h"
 #include "syntax_check.h"
 #include "preferences.h"
 #include "main_window.h"
@@ -78,7 +78,7 @@ void syntax_add_lines(gchar *output)
 				line_start += (indent/preferences.indentation_size);
 	
 				line_end = gtk_scintilla_get_line_end_position(GTK_SCINTILLA(main_window.current_editor->scintilla), atoi(line_number)-1);
-	
+			
 				gtk_scintilla_start_styling(GTK_SCINTILLA(main_window.current_editor->scintilla), line_start, 128);
 				gtk_scintilla_set_styling(GTK_SCINTILLA(main_window.current_editor->scintilla), line_end-line_start, INDIC2_MASK);
 			}
@@ -160,7 +160,7 @@ void syntax_check_run(void)
 		command_line = g_string_append(command_line, " -q -l -d html_errors=Off -f ");
 		command_line = g_string_append(command_line, filename->str);
 
-		//g_print("%s\n", command_line->str);
+		g_print("eject:%s\n", command_line->str);
 
 		output = run_php_lint(command_line->str);
 		g_string_free(command_line, TRUE);

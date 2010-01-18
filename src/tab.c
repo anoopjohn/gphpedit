@@ -37,7 +37,7 @@
 #include "main_window_callbacks.h"
 #include "preferences.h"
 #include "grel2abs.h"
-
+#include <gconf/gconf-client.h>
 
 GSList *editors;
 guint completion_timer_id;
@@ -92,13 +92,12 @@ void tab_set_general_scintilla_properties(Editor *editor)
 
 	gtk_scintilla_set_code_page(GTK_SCINTILLA(editor->scintilla), 65001); // Unicode code page
 	
-	gtk_signal_connect (GTK_OBJECT (editor->scintilla), "save_point_reached", GTK_SIGNAL_FUNC (save_point_reached), NULL);
-	gtk_signal_connect (GTK_OBJECT (editor->scintilla), "save_point_left", GTK_SIGNAL_FUNC (save_point_left), NULL);
-	gtk_signal_connect (GTK_OBJECT (editor->scintilla), "macro_record", GTK_SIGNAL_FUNC (macro_record), NULL);
+	g_signal_connect (G_OBJECT (editor->scintilla), "save_point_reached", G_CALLBACK (save_point_reached), NULL);
+	g_signal_connect (G_OBJECT (editor->scintilla), "save_point_left", G_CALLBACK (save_point_left), NULL);
+	g_signal_connect (G_OBJECT (editor->scintilla), "macro_record", G_CALLBACK (macro_record), NULL);
 
 	//gtk_scintilla_set_sel_back(GTK_SCINTILLA(editor->scintilla), 1, 13434879);
-gtk_scintilla_set_sel_back(GTK_SCINTILLA(editor->scintilla), 1, gnome_config_get_int ("gPHPEdit/default_style/selection=11250603"));
-
+        gtk_scintilla_set_sel_back(GTK_SCINTILLA(editor->scintilla),1,preferences.set_sel_back);
 
 	tab_set_configured_scintilla_properties(GTK_SCINTILLA(editor->scintilla), preferences);
 	gtk_widget_show (editor->scintilla);
@@ -190,88 +189,48 @@ static void tab_set_folding(Editor *editor, gint folding)
 		gtk_scintilla_set_margin_type_n(GTK_SCINTILLA(main_window.current_editor->scintilla), 1, SC_MARGIN_SYMBOL);
 		gtk_scintilla_set_margin_width_n (GTK_SCINTILLA(main_window.current_editor->scintilla), 1, 14);
 		gtk_scintilla_set_margin_sensitive_n(GTK_SCINTILLA(main_window.current_editor->scintilla), 1, 1);
-		//gtk_signal_connect (GTK_OBJECT (editor->scintilla), "fold_clicked", GTK_SIGNAL_FUNC (fold_clicked), NULL);
-		gtk_signal_connect (GTK_OBJECT (editor->scintilla), "modified", GTK_SIGNAL_FUNC (handle_modified), NULL);
-		gtk_signal_connect (GTK_OBJECT (editor->scintilla), "margin_click", GTK_SIGNAL_FUNC (margin_clicked), NULL);
+		//g_signal_connect (G_OBJECT (editor->scintilla), "fold_clicked", G_CALLBACK (fold_clicked), NULL);
+		g_signal_connect (G_OBJECT (editor->scintilla), "modified", G_CALLBACK (handle_modified), NULL);
+		g_signal_connect (G_OBJECT (editor->scintilla), "margin_click", G_CALLBACK (margin_clicked), NULL);
 	}
 }
 
 static void tab_set_event_handlers(Editor *editor)
 {
-	gtk_signal_connect (GTK_OBJECT (editor->scintilla), "char_added", GTK_SIGNAL_FUNC (char_added), NULL);
-	gtk_signal_connect (GTK_OBJECT (editor->scintilla), "update_ui", GTK_SIGNAL_FUNC (update_ui), NULL);
+	g_signal_connect (G_OBJECT (editor->scintilla), "char_added", G_CALLBACK (char_added), NULL);
+	g_signal_connect (G_OBJECT (editor->scintilla), "update_ui", G_CALLBACK (update_ui), NULL);
 }
 
-void report_vfs_error(gchar *name, gchar *desc, GnomeVFSResult result, GtkWindow *win)
+void tab_file_write (GObject *source_object, GAsyncResult *res, gpointer user_data)
 {
-	GtkDialog *dialog;
-	gchar *err_title, *err_message;
-	
-	if (name) {
-		err_title = g_strdup_printf(_("File access error:\n %s: "), name);
-	}
-	else {
-		err_title = g_strdup_printf(_("File access error: \n"));
-	}
-	
-	if (result < GNOME_VFS_NUM_ERRORS) {
-		err_message = g_strdup(gnome_vfs_result_to_string(result));
-	}
-	else {
-		err_message = g_strdup_printf("%s\n", desc ? desc : "");
-	}
-	dialog = GTK_DIALOG(gtk_message_dialog_new(win, GTK_DIALOG_DESTROY_WITH_PARENT, GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE, "%s %s", err_title, err_message));
-	g_signal_connect_swapped(dialog, "response", G_CALLBACK(gtk_widget_destroy), dialog);
-	g_object_set(dialog, "title", "", NULL);
-	gtk_widget_show_all(GTK_WIDGET(dialog));
-	g_free(err_title);
-	g_free(err_message);
-}
-
-void tab_file_closed(GnomeVFSAsyncHandle *fd, GnomeVFSResult result, gpointer li_ptr)
-{
-	//Editor *editor = (Editor *)li_ptr;
-
-	if (result != GNOME_VFS_OK) {
-		g_print(_("VFS Error: %s\n"), gnome_vfs_result_to_string (result));
-		//gnome_vfs_print_error(result, editor->filename->str);
-	}
-	session_save();
-}
-
-void tab_file_write(GnomeVFSAsyncHandle *fd, GnomeVFSResult result, gconstpointer buffer, GnomeVFSFileSize bytes_requested, GnomeVFSFileSize bytes_received, gpointer li_ptr)
-{
-  	Editor *editor = (Editor *)li_ptr;
-	
-	if (result != GNOME_VFS_OK) {
-		g_print(_("VFS Error: %s\n"), gnome_vfs_result_to_string (result));
-		//gnome_vfs_print_error(result, editor->filename->str);
-		return;
-	}
-	
-	gnome_vfs_async_close (fd, tab_file_closed, li_ptr);
+        Editor *editor = (Editor *)user_data;
+        gssize bytes;
+        GError *error=NULL;
+        bytes= g_output_stream_write_finish((GOutputStream *)source_object,res,&error);
+        if (bytes==-1){
+            g_print(_("GIO Error: %s\n"),error->message);
+            return;
+        }
+        g_output_stream_close ((GOutputStream *) source_object,NULL,&error);
 	gtk_scintilla_set_save_point (GTK_SCINTILLA(editor->scintilla));
 	register_file_opened(editor->filename->str);
 	classbrowser_update();
 	session_save();
 }
 
-void tab_file_save_opened(GnomeVFSAsyncHandle *fd, GnomeVFSResult result, gpointer li_ptr)
+void tab_file_save_opened(GObject *source_object, GAsyncResult *res, gpointer user_data)
 {
 	gchar *write_buffer = NULL;
 	gsize text_length;
 	GError *error = NULL;
 	gchar *converted_text = NULL;
 	gsize utf8_size; // was guint
-	//GnomeVFSFileSize bytes_written;
-	//Editor *editor = (Editor *)li_ptr;
-	
-	if (result != GNOME_VFS_OK) {
- 		g_print(_("VFS Error: %s\n"), gnome_vfs_result_to_string (result));
-		//gnome_vfs_print_error(result, editor->filename->str);
-		return;
-	}
-
+        GFileOutputStream *file;
+        file=g_file_replace_finish ((GFile *)source_object,res,&error);
+        if (!file){
+            g_print(_("GIO Error: %s\n"),error->message);
+            return;
+        }
 	text_length = gtk_scintilla_get_length(GTK_SCINTILLA(main_window.current_editor->scintilla));
 
 	write_buffer = g_malloc0(text_length+1); // Include terminating null
@@ -282,8 +241,7 @@ void tab_file_save_opened(GnomeVFSAsyncHandle *fd, GnomeVFSResult result, gpoint
 	}
 
 	gtk_scintilla_get_text(GTK_SCINTILLA(main_window.current_editor->scintilla), text_length+1, write_buffer);
-
-	// If we converted to UTF-8 when loading, convert back to the locale to save
+        // If we converted to UTF-8 when loading, convert back to the locale to save
 	if (main_window.current_editor->converted_to_utf8) {
 		converted_text = g_locale_from_utf8(write_buffer, text_length, NULL, &utf8_size, &error);
 		if (error != NULL) {
@@ -296,10 +254,8 @@ void tab_file_save_opened(GnomeVFSAsyncHandle *fd, GnomeVFSResult result, gpoint
 			write_buffer = converted_text;
 			text_length = utf8_size;
 		}
-	}
-		
-	gnome_vfs_async_write (fd, write_buffer, text_length, tab_file_write, li_ptr);
-	//g_free (write_buffer);
+        }
+        g_output_stream_write_async ((GOutputStream *)file,write_buffer,text_length,G_PRIORITY_DEFAULT,NULL,tab_file_write, user_data);
 }
 
 void tab_validate_buffer_and_insert(gpointer buffer, Editor *editor)
@@ -314,13 +270,23 @@ void tab_validate_buffer_and_insert(gpointer buffer, Editor *editor)
 		editor->converted_to_utf8 = FALSE;
 	}
 	else {
-		// Used for testing as my locale isn't set
-		// converted_text = g_convert(buffer, nchars, "UTF-8", "ISO-8859-15", NULL, &utf8_size, &error);
+		
 		converted_text = g_locale_to_utf8(buffer, editor->file_size, NULL, &utf8_size, &error);
 		if (error != NULL) {
+                        gssize nchars=strlen(buffer);
+                        // if locale isn't set
+                        error=NULL;
+                        converted_text = g_convert(buffer, nchars, "UTF-8", "ISO-8859-15", NULL, &utf8_size, &error);
+                        if (error!=NULL){
 			g_print(_("gPHPEdit UTF-8 Error: %s\n"), error->message);
 			g_error_free(error);
-			gtk_scintilla_add_text(GTK_SCINTILLA (editor->scintilla), editor->file_size, buffer);
+                        gtk_scintilla_add_text(GTK_SCINTILLA (editor->scintilla), editor->file_size, buffer);
+                        } else {
+                        g_print(_("Converted to UTF-8 size: %d\n"), utf8_size);
+			gtk_scintilla_add_text(GTK_SCINTILLA (editor->scintilla), utf8_size, converted_text);
+			g_free(converted_text);
+			editor->converted_to_utf8 = TRUE;
+                        }
 		}
 		else {
 			g_print(_("Converted to UTF-8 size: %d\n"), utf8_size);
@@ -341,26 +307,30 @@ void tab_reset_scintilla_after_open(Editor *editor)
 	gtk_scintilla_grab_focus(GTK_SCINTILLA(editor->scintilla));
 }
 
-void tab_file_read(GnomeVFSAsyncHandle *fd, GnomeVFSResult result, gpointer buffer, GnomeVFSFileSize bytes_requested, GnomeVFSFileSize bytes_received, gpointer li_ptr)
+void tab_file_read(GObject *source_object, GAsyncResult *res, gpointer user_data)
 {
-	Editor *editor = (Editor *)li_ptr;
+        Editor *editor = (Editor *)user_data;
+        gssize bytes_read;
+        GError *error=NULL;
+        bytes_read=g_input_stream_read_finish ((GInputStream *)source_object,res,&error);
 
-	if ((result != GNOME_VFS_OK) && (result != GNOME_VFS_ERROR_EOF)) {
-		g_print(_("VFS Error: %s\n"), gnome_vfs_result_to_string (result));
-		//gnome_vfs_print_error(result, editor->filename->str);
-		return;
-	}
-
+        if (!bytes_read){
+            g_print(_("GIO Error: %s\n"),error->message);
+            return;
+        }
+        if(editor->file_size!=bytes_read){
+            g_print(_("Error loading file:%s\nFile was loaded partially\nPress Shift + Ctrl + R to reload the file\n"),editor->filename->str);
+        }
 	// Clear scintilla buffer
 	gtk_scintilla_clear_all(GTK_SCINTILLA (editor->scintilla));
 	
 	//g_print("BUFFER=\n%s\n-------------------------------------------\n", buffer);
 	
-	tab_validate_buffer_and_insert(buffer, editor);
+	tab_validate_buffer_and_insert(editor->buffer, editor);
 	tab_reset_scintilla_after_open(editor);
 	
-	g_free(buffer);
-	gnome_vfs_async_close(fd, tab_file_closed, li_ptr);
+	g_free(editor->buffer);
+        g_input_stream_close ((GInputStream *)source_object,NULL,&error);
 	if (gotoline_after_reload) {
 		goto_line_int(gotoline_after_reload);
 		gotoline_after_reload = 0;
@@ -368,45 +338,42 @@ void tab_file_read(GnomeVFSAsyncHandle *fd, GnomeVFSResult result, gpointer buff
 	tab_check_php_file(editor);
 }
 
-void tab_file_opened(GnomeVFSAsyncHandle *fd, GnomeVFSResult result, gpointer li_ptr)
+void tab_file_opened (GObject *source_object, GAsyncResult *res, gpointer user_data)
 {
-	gpointer buffer;
-	Editor *editor = (Editor *)li_ptr;
-	
-	if (result != GNOME_VFS_OK) {
-		g_print(_("VFS Error: %s\n"), gnome_vfs_result_to_string (result));
-		//gnome_vfs_print_error(result, editor->filename->str);
-		return;
-	}
-	
-	buffer = g_malloc(editor->file_size);
-	gnome_vfs_async_read(fd, buffer, editor->file_size, tab_file_read, li_ptr);
+        Editor *editor = (Editor *)user_data;
+	GFileInputStream *input;
+        GError *error=NULL;
+        input=g_file_read_finish ((GFile *)source_object,res,&error);
+        if (!input){
+            g_print(_("GIO Error: %s\n"),error->message);
+            return;
+        }
+	editor->buffer = g_malloc(editor->file_size);
+       g_input_stream_read_async ((GInputStream *)input, editor->buffer,editor->file_size,G_PRIORITY_DEFAULT,NULL,tab_file_read, editor);
 }
 
  void tab_load_file(Editor *editor)
 {
-	GnomeVFSFileInfo *file_stats;
-	GnomeVFSResult result;
-	GnomeVFSAsyncHandle *fd;
+        GFile *file;
+        GFileInfo *info;
+        GError *error=NULL;
 	
 	// Store current position for returning to
 	editor->current_pos = gtk_scintilla_get_current_pos(GTK_SCINTILLA(editor->scintilla));
 	editor->current_line = gtk_scintilla_line_from_position(GTK_SCINTILLA(editor->scintilla), editor->current_pos);
 
 	// Try getting file size
-	file_stats = gnome_vfs_file_info_new();
-	result = gnome_vfs_get_file_info(editor->filename->str, file_stats, GNOME_VFS_FILE_INFO_FOLLOW_LINKS);
-	if (result != GNOME_VFS_OK) {
-		// Print error and return if no
-		g_print(_("VFS Error: %s\n"), gnome_vfs_result_to_string (result));
-		//gnome_vfs_print_error(result, editor->filename->str);
-		return;
-	}
-	
-	editor->file_size = file_stats->size;
-	
-	// Open file
-	gnome_vfs_async_open(&fd, editor->filename->str, GNOME_VFS_OPEN_READ, GNOME_VFS_PRIORITY_DEFAULT, tab_file_opened, editor);
+        file=g_file_new_for_uri (convert_to_full(editor->filename->str));
+        info=g_file_query_info (file,G_FILE_ATTRIBUTE_STANDARD_SIZE,0,NULL,&error);
+
+        if (!info){
+            g_warning (_("Could not get the file info. GIO error: %s \n"), error->message);
+        }
+	editor->file_size= g_file_info_get_size (info);
+        g_object_unref(info);
+        editor->isreadonly=isreadonly(file);
+        // Open file
+        g_file_read_async (file,G_PRIORITY_DEFAULT,NULL,tab_file_opened, editor);
 }
 
 
@@ -435,19 +402,23 @@ void str_replace(char *Str, char ToRp, char WithC)
 
 void tab_help_load_file(Editor *editor, GString *filename)
 {
-	struct stat st;
-	size_t size;
-	FILE *fp;
-	gchar *buffer;
-	guint nchars;
- 
-	if (stat (filename->str, &st) != 0)
-	{
-		g_warning (_("Could not stat the file %s"), filename->str);
-		//die();
-	}
-	size = st.st_size;
- 
+        GFile *file;
+        GFileInfo *info;
+        GError *error;
+        gchar *buffer;
+        goffset size;
+        guint nchars;
+        GFileInputStream *input;
+        error=NULL;
+        
+        file=g_file_new_for_uri (convert_to_full(filename->str));
+        info=g_file_query_info (file,G_FILE_ATTRIBUTE_STANDARD_SIZE,0,NULL,&error);
+
+        if (!info){
+            g_warning (_("Could not stat the file %s. GIO error: %s \n"), filename->str,error->message);
+        }
+        size= g_file_info_get_size (info);
+        g_object_unref(info);
 	buffer = (gchar *)g_malloc (size);
 	if (buffer == NULL && size != 0)
 	{
@@ -455,66 +426,40 @@ void tab_help_load_file(Editor *editor, GString *filename)
 		g_warning (_("This file is too big. Unable to allocate memory."));
 		//die();
 	}
-	fp = fopen (filename->str, "rb");
-	if (!fp)
-	{
-		g_free (buffer);
-		//die();
-	}
-	
-	// Crude way of loading, but faster
-	nchars = fread (buffer, 1, size, fp);
-	
+	input=g_file_read (file,NULL,&error);
+        if (input ==NULL){
+            g_print("Error reading file. GIO error:%s\n",error->message);
+            g_free (buffer);
+        }
+	nchars= g_input_stream_read ((GInputStream *)input,buffer,size,NULL,&error);
+        if (nchars ==-1){
+            g_print("Error reading file. GIO error:%s\n",error->message);
+        }
 	if (size != nchars) g_warning (_("File size and loaded size not matching"));
-	webkit_web_view_load_string (WEBKIT_WEB_VIEW(editor->help_view),buffer,"text/html", "UTF-8", filename);
-	//html_document_clear(editor->help_document);
-	//html_document_open_stream(editor->help_document, "text/html");
-	//html_document_write_stream(editor->help_document, buffer, nchars);
-	//html_document_close_stream(editor->help_document);
- 
+	webkit_web_view_load_string (WEBKIT_WEB_VIEW(editor->help_view),buffer,"text/html", "UTF-8", filename->str);
 	g_free (buffer);
-	fclose (fp);
-	
+	g_object_unref(input);
+        g_object_unref(file);
 }
 
 
-/*static gboolean tab_help_url_requested(GtkWidget * html, const gchar * url, gpointer stream)
-{
-	Editor *data;
-	GString *filename;
-
-	g_print ("REQUESTED %s\n", url);
-
-	filename = g_string_new(url);
-
-	data = editor_find_from_help(html);
-	tab_help_load_file(data, filename);
-
-	data->filename = g_string_new(filename->str);
-	data->filename = g_string_prepend(data->filename, "Help: ");
-
-	data->short_filename = data->filename->str;
-	update_app_title;
-	return TRUE;
-}*/
 
 GString *tab_help_try_filename(gchar *prefix, gchar *command, gchar *suffix)
 {
 	GString *long_filename;
-	
+        
 	long_filename = g_string_new(command);
 	long_filename = g_string_prepend(long_filename, prefix);
-	//if (suffix) {
-	//	long_filename = g_string_append(long_filename, suffix);
-	//}
+	if (suffix) {
+		long_filename = g_string_append(long_filename, suffix);
+	}
 	if (DEBUG_MODE) { g_print("DEBUG: tab.c:tab_help_try_filename:long_filename->str: %s\n", long_filename->str); }
-	if (g_file_exists(long_filename->str)) {
+	if (g_file_test(long_filename->str, G_FILE_TEST_EXISTS)){
 		return long_filename;
 	}
 	else {
 		g_string_free(long_filename, TRUE);
 	}
-
 	long_filename = g_string_new(command);
 	str_replace(long_filename->str, '_', '-');
 	long_filename = g_string_prepend(long_filename, prefix);
@@ -522,7 +467,7 @@ GString *tab_help_try_filename(gchar *prefix, gchar *command, gchar *suffix)
 		long_filename = g_string_append(long_filename, suffix);
 	}
 	if (DEBUG_MODE) { g_print("DEBUG: tab.c:tab_help_try_filename:long_filename->str: %s\n", long_filename->str); }
-	if (g_file_exists(long_filename->str)) {
+        if (g_file_test(long_filename->str, G_FILE_TEST_EXISTS)){
 		return long_filename;
 	}
 
@@ -534,7 +479,10 @@ GString *tab_help_try_filename(gchar *prefix, gchar *command, gchar *suffix)
 GString *tab_help_find_helpfile(gchar *command)
 {
 	GString *long_filename = NULL;
-	
+        //FIX: avoid duplicated call
+        if (strstr(command,"/usr/")!=NULL){
+            return long_filename;
+        }
 	// For Debian, Ubuntu and sensible distrubutions...
 	long_filename = tab_help_try_filename("/usr/share/doc/php-doc/html/function.", command, ".html");
 	if (long_filename)
@@ -597,8 +545,8 @@ GString *tab_help_find_helpfile(gchar *command)
 	if (long_filename)
 		return long_filename;
 
-	g_print(_("Help for function not found: %s\n"), command);
-	
+        g_print(_("Help for function not found: %s\n"), command);
+        
 	return long_filename;
 }
 //return a substring skip n char from str
@@ -614,21 +562,19 @@ subst[i] = '\0';
 
 static void webkit_link_clicked (WebKitWebView *view, WebKitWebFrame *frame, WebKitNetworkRequest *request,Editor *editor)
 {
-g_signal_stop_emission_by_name (WEBKIT_WEB_VIEW (view), "navigation-requested");
-gchar *uri=webkit_network_request_get_uri(request);
+gchar *uri= (gchar *)webkit_network_request_get_uri(request);
 if (uri){
 GString *filename;
-if( strstr(uri, "#")!=NULL){
-// it's a direction like filename.html#refpoint
 char *resp;
 int cant;
+if( strstr(uri, "#")!=NULL){
+// it's a direction like filename.html#refpoint
 resp = strchr(uri,'#');
 cant=resp-uri; //len filename without refpoint
 substring(uri, uri, 0, cant); //skips refpoint part
 }
 filename=tab_help_find_helpfile(uri);
 if (filename) {
-		//editor = editor_find_from_help((HtmlDocument *)obj);
 		tab_help_load_file(editor, filename);
 		
 		g_string_free(editor->filename, TRUE);
@@ -642,7 +588,6 @@ if (filename) {
 		//g_free(editor->help_function);
 		editor->short_filename = g_strconcat("Help: ", uri, NULL);
 		editor->help_function = g_strdup(uri);
-		
 		gtk_label_set_text(GTK_LABEL(editor->label), editor->short_filename);
 		
 		update_app_title();
@@ -650,36 +595,6 @@ if (filename) {
 }
 }
 
-/* 
-static void tab_help_link_clicked(GObject *obj, const gchar *url,Editor *editor)
-{
-
-	GString *filename;
-
-	filename = tab_help_find_helpfile((gchar *)url);
-	g_print("file::%s",filename);
-	if (filename) {
-		//editor = editor_find_from_help((HtmlDocument *)obj);
-		tab_help_load_file(editor, filename);
-		
-		g_string_free(editor->filename, TRUE);
-		
-		editor->filename = g_string_new(filename->str);
-		editor->filename = g_string_prepend(editor->filename, _("Help: "));
-		
-		//TODO: These strings are not being freed. The app crashes when the free
-		//is uncommented stating that there were duplicate free calls.
-		//g_free(editor->short_filename);
-		//g_free(editor->help_function);
-		editor->short_filename = g_strconcat("Help: ", url, NULL);
-		editor->help_function = g_strdup(url);
-		
-		gtk_label_set_text(GTK_LABEL(editor->label), editor->short_filename);
-		
-		update_app_title();
-	}
-}
-*/
 
 gboolean tab_create_help(Editor *editor, GString *filename)
 {
@@ -694,6 +609,7 @@ gboolean tab_create_help(Editor *editor, GString *filename)
 	if (!long_filename) {
 		dialog = gtk_message_dialog_new (NULL, GTK_DIALOG_MODAL, GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE,
 			_("Could not find the required command in the online help"));
+                gtk_window_set_icon(GTK_WINDOW(dialog), get_window_icon());
 		gtk_dialog_run (GTK_DIALOG (dialog));
 		gtk_widget_destroy (dialog);
 		return FALSE;
@@ -707,8 +623,6 @@ gboolean tab_create_help(Editor *editor, GString *filename)
 		editor->saved = TRUE;
 		gtk_widget_show (editor->label);
 		editor->help_view= WEBKIT_WEB_VIEW(webkit_web_view_new ());
-//		editor->help_document = html_document_new();
-		//editor->help_view = html_view_new();
 		editor->help_scrolled_window = gtk_scrolled_window_new(NULL, NULL);
 		gtk_container_add(GTK_CONTAINER(editor->help_scrolled_window), GTK_WIDGET(editor->help_view));
 	
@@ -719,10 +633,6 @@ gboolean tab_create_help(Editor *editor, GString *filename)
 		g_signal_connect(G_OBJECT(editor->help_view), "navigation-requested",
 			 G_CALLBACK(webkit_link_clicked),editor);
 
-//		g_signal_connect(G_OBJECT(editor->help_document), "link-clicked",
-//			 G_CALLBACK(tab_help_link_clicked), NULL);
-
-//		html_view_set_document(HTML_VIEW(editor->help_view), editor->help_document);
 		gtk_widget_show_all(editor->help_scrolled_window);
 		
 		editor_tab = get_close_tab_widget(editor);
@@ -734,51 +644,35 @@ gboolean tab_create_help(Editor *editor, GString *filename)
 
 void info_dialog (gchar *title, gchar *message)
 {
-	GtkWidget *dialog, *label;
-	int button;
-
-	dialog = gnome_dialog_new (
-	             title,
-	             GNOME_STOCK_BUTTON_OK,
-	             NULL);
-	gnome_dialog_set_parent(GNOME_DIALOG (dialog), GTK_WINDOW(main_window.window));
-
-	label = gtk_label_new (message);
-	gtk_widget_show(label);
-	gtk_box_pack_start (GTK_BOX (GNOME_DIALOG (dialog)->vbox), label, TRUE, TRUE, 0);
-
+	GtkWidget *dialog;
+	gint button;
+       	        dialog = gtk_message_dialog_new(GTK_WINDOW(main_window.window),GTK_DIALOG_DESTROY_WITH_PARENT,GTK_MESSAGE_INFO,GTK_BUTTONS_OK,"%s",
+            message);
+            gtk_window_set_title(GTK_WINDOW(dialog), title);
+            button = gtk_dialog_run (GTK_DIALOG (dialog));
+            gtk_widget_destroy(dialog);
 	/*
 	 * Run the dialog and wait for the user to select yes or no.
 	 * If the user closes the window with the window manager, we
-	 * will get a -1 return value
+	 * will get a -4 return value
 	 */
-	button = gnome_dialog_run_and_close (GNOME_DIALOG (dialog));
-	
 }
 
 gint yes_no_dialog (gchar *title, gchar *message)
 {
-	GtkWidget *dialog, *label;
-	int button;
-
-	dialog = gnome_dialog_new (
-	             title,
-	             GNOME_STOCK_BUTTON_YES,
-	             GNOME_STOCK_BUTTON_NO,
-	             NULL);
-	gnome_dialog_set_parent(GNOME_DIALOG (dialog), GTK_WINDOW(main_window.window));
-
-	label = gtk_label_new (message);
-	gtk_widget_show(label);
-	gtk_box_pack_start (GTK_BOX (GNOME_DIALOG (dialog)->vbox), label, TRUE, TRUE, 0);
-
+	GtkWidget *dialog;
+	gint button;
+       	dialog = gtk_message_dialog_new(GTK_WINDOW(main_window.window),GTK_DIALOG_DESTROY_WITH_PARENT,GTK_MESSAGE_INFO,GTK_BUTTONS_YES_NO,"%s",
+            message);
+            gtk_window_set_title(GTK_WINDOW(dialog), title);
+            button = gtk_dialog_run (GTK_DIALOG (dialog));
+         gtk_widget_destroy(dialog);
 	/*
 	 * Run the dialog and wait for the user to select yes or no.
 	 * If the user closes the window with the window manager, we
-	 * will get a -1 return value
+	 * will get a -4 return value
 	 */
-	button = gnome_dialog_run_and_close (GNOME_DIALOG (dialog));
-
+         
 	return button;
 }
 
@@ -867,8 +761,6 @@ gboolean is_php_file_from_filename(gchar *filename)
 	
 	return is_php;
 }
-
-
 
 gboolean is_css_file(gchar *filename)
 {
@@ -1033,10 +925,10 @@ void register_file_opened(gchar *filename)
 	tmp_filename = g_string_new(filename);
 
 	folder = get_folder(tmp_filename);
-	gnome_config_set_string("gPHPEdit/general/last_opened_folder",  folder->str);
-	g_string_free(folder, TRUE);
-	gnome_config_sync();
-
+        GConfClient *config;
+        config=gconf_client_get_default ();
+        gconf_client_set_string (config,"/gPHPEdit/general/last_opened_folder",folder->str,NULL);
+        g_string_free(folder, TRUE);
 	g_string_free(tmp_filename, TRUE);
 }
 
@@ -1087,7 +979,16 @@ void close_saved_empty_Untitled()
 		}
 	}
 }
-
+gchar *recordar;
+void openfile_mount(GObject *source_object,GAsyncResult *res,gpointer user_data) {
+	GError *error=NULL;
+	if (g_file_mount_enclosing_volume_finish((GFile *)source_object,res,&error)) {
+		/* open again */
+              switch_to_file_or_open(recordar, 0);
+	} else {
+            g_print(_("Error mounting volume. GIO error:%s\n"),error->message);
+	}
+}
 
 /* Create a new tab and return TRUE if a tab was created */
 gboolean tab_create_new(gint type, GString *filename)
@@ -1100,10 +1001,8 @@ gboolean tab_create_new(gint type, GString *filename)
 	gchar *cwd;
 	gboolean result;
 	gboolean file_created = FALSE;
-	GnomeVFSURI *uri = NULL;
-  //gchar *buffer = NULL;
-
-	if (DEBUG_MODE) { g_print("DEBUG: tab.c:tab_create_new:filename->str: %s\n", filename->str); }
+        GFile *file;
+        if (DEBUG_MODE) { g_print("DEBUG: tab.c:tab_create_new:filename->str: %s\n", filename->str); }
 	if (filename != NULL) {
 		if (strstr(filename->str, ":")==NULL) {
 			cwd = g_get_current_dir();
@@ -1113,16 +1012,33 @@ gboolean tab_create_new(gint type, GString *filename)
 		else {
 			abs_path = g_strdup(filename->str);
 		}
-
-		uri = gnome_vfs_uri_new(abs_path);
-		if (!gnome_vfs_uri_exists(uri) && type!=TAB_HELP) {
+                file=g_file_new_for_uri (abs_path);
+                if (!uri_is_local_or_http(abs_path)){
+                    GError *error2=NULL;
+                    GMount *ex= g_file_find_enclosing_mount (file,NULL,&error2);
+                    if (!ex){
+                        if (error2->code== G_IO_ERROR_NOT_MOUNTED){
+                        g_print(_("Error filesystem not mounted.\nMounting filesystem, this will take a few seconds...\n"));
+                        GMountOperation *gmo;
+                        gmo= gtk_mount_operation_new(GTK_WINDOW(main_window.window));
+                        recordar=g_strdup(filename->str);
+                        g_file_mount_enclosing_volume (file, G_MOUNT_MOUNT_NONE,gmo,NULL, openfile_mount, recordar);
+                        error2=NULL;
+                        return FALSE;
+                        }
+                        g_print(_("Error opening file GIO error:%s\n"),error2->message);
+                        error2=NULL;
+                        return FALSE;
+                    }
+                }
+		if(!g_file_query_exists (file,NULL) && type!=TAB_HELP) {
 			dialog_message = g_string_new("");
-			g_string_sprintf(dialog_message, _("The file %s was not found.\n\nWould you like to create it as an empty document?"), filename->str);
+			g_string_printf(dialog_message, _("The file %s was not found.\n\nWould you like to create it as an empty document?"), filename->str);
 			result = yes_no_dialog(_("File not found"), dialog_message->str);
 			g_string_free(dialog_message, TRUE);
-			gnome_vfs_uri_unref(uri);
-			if (result != 0) {
-				return FALSE;
+                        g_object_unref(file);
+			if (result != -8){//0) {
+                            return FALSE;
 			}
 			file_created = TRUE;
 		}
@@ -1133,7 +1049,7 @@ gboolean tab_create_new(gint type, GString *filename)
 	
 	editor = tab_new_editor();
 	editor->type = type;
-
+	
 	if (editor->type == TAB_HELP) {
 		if (!tab_create_help(editor, filename)) {
 			// Couldn't find the help file, don't keep the editor
@@ -1142,6 +1058,7 @@ gboolean tab_create_new(gint type, GString *filename)
 		else {
 			editor->saved = TRUE;
 		}
+
 	}
 	else {
 		editor->type = TAB_FILE;
@@ -1175,21 +1092,18 @@ gboolean tab_create_new(gint type, GString *filename)
 			}
 			editor->is_untitled=TRUE;
 		}
-
 		// Hmmm, I had the same error as the following comment.  A reshuffle here and upgrading GtkScintilla2 to 0.1.0 seems to have fixed it
 		if (!GTK_WIDGET_VISIBLE (editor->scintilla))
 			gtk_widget_show (editor->scintilla);
-
+		
 		editor_tab = get_close_tab_widget(editor);
-
 		gtk_notebook_append_page (GTK_NOTEBOOK (main_window.notebook_editor), editor->scintilla, editor_tab);
  		gtk_scintilla_set_save_point(GTK_SCINTILLA(editor->scintilla));
 		tab_set_event_handlers(editor);
-
+		
 		/* Possible problem on the next line, one user reports: 
 			assertion `GTK_WIDGET_ANCHORED (widget) || GTK_IS_INVISIBLE (widget)' failed */
 		gtk_notebook_set_current_page (GTK_NOTEBOOK (main_window.notebook_editor), -1);
-
 		gtk_scintilla_goto_pos(GTK_SCINTILLA(editor->scintilla), 0);
 		gtk_scintilla_grab_focus(GTK_SCINTILLA(editor->scintilla));
 		main_window.current_editor = editor;
@@ -1226,10 +1140,10 @@ GtkWidget *get_close_tab_widget(Editor *editor) {
 	rcstyle = gtk_rc_style_new ();
 	rcstyle->xthickness = rcstyle->ythickness = 0;
 	gtk_widget_modify_style (close_button, rcstyle);
-	gtk_rc_style_unref (rcstyle),
-
-	gtk_signal_connect(GTK_OBJECT(close_button), "clicked", GTK_SIGNAL_FUNC(on_tab_close_activate), editor);
-	gtk_signal_connect(GTK_OBJECT(hbox), "style-set", GTK_SIGNAL_FUNC(on_tab_close_set_style), close_button);
+	//gtk_rc_style_unref (rcstyle),
+        g_object_unref(rcstyle);
+	g_signal_connect(G_OBJECT(close_button), "clicked", G_CALLBACK(on_tab_close_activate), editor);
+	g_signal_connect(G_OBJECT(hbox), "style-set", G_CALLBACK(on_tab_close_set_style), close_button);
 	gtk_box_pack_start(GTK_BOX(hbox), editor->label, FALSE, FALSE, 0);
 	gtk_box_pack_end(GTK_BOX(hbox), close_button, FALSE, FALSE, 0);
 	gtk_widget_show(editor->label);
@@ -1262,12 +1176,10 @@ Editor *editor_find_from_help(void *help)
 
 	for (walk = editors; walk != NULL; walk = g_slist_next (walk)) {
 		editor = walk->data;
-		//if (((void *)(editor->help_document) == (void *)help) || ((void *)(editor->help_scrolled_window) == (void *)help)) {
-		if ((void *)(editor->help_view) == help || (void *)(editor->help_scrolled_window == help)) {
+		if ((void *)(editor->help_scrolled_window == help)) {
 			return walk->data;
 		}
 	}
-
 	return NULL;
 }
 
@@ -1349,9 +1261,8 @@ void fold_expand(GtkWidget *scintilla, gint line, gboolean doExpand, gboolean fo
 	
 	lineMaxSubord = gtk_scintilla_get_last_child(GTK_SCINTILLA(scintilla), line, level & SC_FOLDLEVELNUMBERMASK);
 
-	line++;
-
 	while (line <= lineMaxSubord) {
+		line++;
 		if (force) {
 			if (visLevels > 0) {
 				gtk_scintilla_show_lines(GTK_SCINTILLA(scintilla), line, line);
@@ -1439,7 +1350,6 @@ if(margin!=1){
 }else{
 	gint line;
 	line = gtk_scintilla_line_from_position(GTK_SCINTILLA(scintilla), position);
-//	add_marker(current_line);
 	mod_marker(line);
 }
 }
@@ -1873,17 +1783,37 @@ gboolean editor_is_local(Editor *editor)
 	gchar *filename;
 	
 	filename = (editor->filename)->str;
-	if (g_strncasecmp(filename, "file://", MIN(strlen(filename), 7))==0) {
+	if (g_ascii_strncasecmp(filename, "file://", MIN(strlen(filename), 7))==0) {
 		return TRUE;	
 	}
-	if (g_strncasecmp(filename, "/", MIN(strlen(filename), 1))==0) {
+	if (g_ascii_strncasecmp(filename, "/", MIN(strlen(filename), 1))==0) {
 		return TRUE;	
 	}
 
 	g_print("FALSE - not local!!!");
 	return FALSE;
 }
+gboolean uri_is_local_or_http(gchar *uri)
+{
+	gchar *filename;
 
+	filename = uri;
+	if (g_ascii_strncasecmp(filename, "file://", MIN(strlen(filename), 7))==0) {
+		return TRUE;
+	}
+        if (g_ascii_strncasecmp(filename, "http://", MIN(strlen(filename), 7))==0) {
+		return TRUE;
+	}
+        if (g_ascii_strncasecmp(filename, "https://", MIN(strlen(filename), 7))==0) {
+		return TRUE;
+	}
+	if (g_ascii_strncasecmp(filename, "/", MIN(strlen(filename), 1))==0) {
+		return TRUE;
+	}
+
+	//g_print("FALSE - not local!!!");
+	return FALSE;
+}
 gchar * editor_convert_to_local(Editor *editor)
 {
 	gchar *filename;
@@ -1892,7 +1822,7 @@ gchar * editor_convert_to_local(Editor *editor)
 		return NULL;
 	}
 	filename = editor->filename->str;
-	if (g_strncasecmp(filename, "file://", MIN(strlen(filename), 7))==0) {
+	if (g_ascii_strncasecmp(filename, "file://", MIN(strlen(filename), 7))==0) {
 		filename += 7;
 	}
 	
@@ -1922,4 +1852,17 @@ gchar *convert_to_full(gchar *filename)
 	new_filename = gstr_filename->str;
 	g_string_free(gstr_filename, FALSE);
 	return new_filename;
+}
+gboolean isreadonly(GFile *file){
+    GFileInfo *info;
+    GError *error=NULL;
+    gboolean result;
+    info=g_file_query_info (file, "access::can-write", G_FILE_QUERY_INFO_NONE,NULL, &error);
+    if (!info){
+        g_print("Can't get write permision. GIO Error:%s\n",error->message);
+        return TRUE;
+    }
+    result= !g_file_info_get_attribute_boolean (info,"access::can-write");
+    g_object_unref(info);
+    return result;
 }

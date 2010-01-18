@@ -91,7 +91,7 @@ binary-arch: build install
 #	dh_installcron
 #	dh_installinfo
 	dh_installman
-	dh_desktop
+#	dh_desktop
 	dh_link
 	dh_strip
 	dh_compress

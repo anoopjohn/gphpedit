@@ -56,6 +56,7 @@ typedef struct
 	gboolean save_session;
 	gboolean use_tabs_instead_spaces;
 	gboolean single_instance_only;
+	gboolean showfolderbrowser;
 
 	// Default formatting
 	gchar *default_font;
@@ -362,9 +363,8 @@ extern Preferences preferences;
 
 void preferences_load(void);
 void preferences_save(void);
-void preferences_show(void);
-//void main_window_size_save(void);
-void main_window_size_save_details();
+//void preferences_show(void);
+void main_window_size_save_details(void);
 
 void move_classbrowser_position(void);
 void save_classbrowser_position(void);

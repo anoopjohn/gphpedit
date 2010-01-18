@@ -22,37 +22,30 @@
    The GNU General Public License is contained in the file COPYING.
 */
 
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
-
-#include <libgnomevfs/gnome-vfs.h>
+//#ifdef HAVE_CONFIG_H
+//#include <config.h>
+//#endif
+#include <stdlib.h>
 #include <stdarg.h>
 #include "main.h"
+#include <gio/gio.h>
 #include "main_window.h"
 #include "main_window_callbacks.h"
 #include "gphpedit_ipc.h"
 #include "templates.h"
-
-
-GnomeProgram* gphpedit_program;
-
+#include <gconf/gconf-client.h>
 
 int main (int argc, char **argv)
 {
-	//GError *error;
-	gboolean vfs_inited;
-
-	bindtextdomain (GETTEXT_PACKAGE, PACKAGE_LOCALE_DIR);
-	bind_textdomain_codeset (GETTEXT_PACKAGE, "UTF-8");
+#ifdef ENABLE_NLS
+	setlocale(LC_ALL, "");
+	bindtextdomain(GETTEXT_PACKAGE, PACKAGE_LOCALE_DIR);
+	bind_textdomain_codeset(GETTEXT_PACKAGE, "UTF-8");
 	textdomain (GETTEXT_PACKAGE);
-
-	gphpedit_program = gnome_program_init ("gPHPEdit", VERSION, LIBGNOMEUI_MODULE,
-	                                       argc, argv, NULL);
-
-	vfs_inited = gnome_vfs_init();
-	g_assert(vfs_inited);
-
+#endif							/* ENABLE_NLS */
+        gtk_init(&argc, &argv);
+        gconf_init(argc, argv, NULL);
+        
 	preferences_load();
 
     /* Start of IPC communication */
@@ -73,7 +66,7 @@ int main (int argc, char **argv)
 	create_untitled_if_empty();
 
 	gtk_main();
-
+        
 	/* it makes sense to install sigterm handler that would call this too */
     shutdown_ipc ();
 
@@ -83,7 +76,6 @@ int main (int argc, char **argv)
 gint debug(char *formatstring, ...)
 {
   GtkWidget *dlg;
-	int intReturn;
 	char *buf, *temp;
 	temp = (char*) calloc(500, sizeof(char));
 	buf = (char*) calloc(500, sizeof(char));
@@ -122,7 +114,7 @@ gint debug(char *formatstring, ...)
 			}
 		}
 	}
-  dlg = gtk_message_dialog_new (main_window.window,
+  dlg = gtk_message_dialog_new (GTK_WINDOW(main_window.window),
                                 GTK_DIALOG_DESTROY_WITH_PARENT,
                                 GTK_MESSAGE_INFO,
                                 GTK_BUTTONS_CLOSE,
