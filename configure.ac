@@ -58,7 +58,7 @@ dnl  --------------
 PKG_CHECK_MODULES(GPHPEDIT,[
 	gtk+-2.0
 	webkit-1.0
-	gconf-2.0 >= 1.1.11
+	gconf-2.0
 	])
 
 AC_SUBST(GPHPEDIT_CFLAGS)
@@ -75,7 +75,7 @@ AC_SUBST(GETTEXT_PACKAGE)
 AC_DEFINE_UNQUOTED(GETTEXT_PACKAGE,"$GETTEXT_PACKAGE",[The package name, for gettext])
 
 dnl Please keep this in alphabetical order
-ALL_LINGUAS="de en es"
+ALL_LINGUAS="de es"
 
 AM_GLIB_GNU_GETTEXT
 

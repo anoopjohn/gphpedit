@@ -1,33 +1,3 @@
-gphpedit (0.9.96-2) unstable; urgency=low
-	  * Fixed bug - Take out gtkhtml2 dependency, now uses webkit
-	    see http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=549029
-	  * New Feature - Added Bookmarks (ctrl + f2 add/remove, f2 circle bookmarks)
-          * Updated toolbar code with the new gtk+ functions
-          * New Feature - Added indent/unindent buttons to the main toolbar
-          * New Feature - Added zoom-in/zoom-out buttons to the main toolbar
-          * Fixed bug - The last line of text block is not indented.
-          * New Feature - Added file filters to the open file dialog
-	  * Fixed Bug - Highlight colour in ubuntu. 
-	    Bug reported at https://bugs.launchpad.net/ubuntu/+source/gphpedit/+bug/73310
-	  * Added a close button [x] for side bar
-          * Moved gphpedit sources to GPLv3
-          * Added a close button [x] for each tab
-          * Fixed crash on incremental search while in help tab. 
-            Bug reported at http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=304207
-          * Fixed bug - Nowdoc and heredoc tokens were ruining syntax
-            highlighting. Corrected to handle these tokens properly.
-          * Fixed bug - incorrect tool tips that were being shown
-            with partial matches with php function names. Modified to
-            show tooltip only for full match
-          * New Feature - Sorted list of class browser functions. The
-            classbrowser functions were not listed in alphabetical
-            order. This has been changed to alphabetical listing.
-          * New Feature - Added the ability to restrict the classbrowser
-            function listing for only the current tab.
-          * Corrected incorrect highlighting of braces, bug reported at
-            http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=303798
-          * Added GPL notices correctly in source files
- -- Jose Rostagno <joserostagno@hotmail.com>  Fri, 27 Nov 2009 18:59:42 +0200
 gphpedit (0.9.91-5) unstable; urgency=low
 
   * Add patch from Ubuntu to prevent segfault when checking if an empty
