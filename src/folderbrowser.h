@@ -27,11 +27,14 @@
 #include "main_window.h"
 #include "main_window_callbacks.h"
 #include <gio/gio.h>
-#define MIME_ISDIR(string) (strcmp(string, "inode/directory")==0)
+#define DIRMIME "inode/directory"
+#define MIME_ISDIR(string) (strcmp(string, DIRMIME)==0)
 #define IS_MIME(stringa,stringb) (g_content_type_equals (stringa, stringb))
 #define IS_TEXT(stringa) (g_content_type_is_a (stringa, "text/*"))
 #define IS_APPLICATION(stringa) (g_content_type_is_a (stringa, "application/*") && !IS_MIME(stringa,"application/x-php"))
-
+#define DEFAULT_DIR (N_("Workspace's directory"))
+#define IS_DEFAULT_DIR(a) (strcmp(a,DEFAULT_DIR)==0)
+#define FOLDER_INFOFLAGS "standard::type,standard::is-backup,standard::display-name,standard::icon,standard::content-type"
 gchar *sChemin;
 void create_tree(GtkTreeStore *pTree,gchar *sChemin, GtkTreeIter *iter,GtkTreeIter *iter2);
 //void folderbrowser_create(MainWindow *main_window);

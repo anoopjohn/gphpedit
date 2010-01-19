@@ -1735,7 +1735,6 @@ void syntax_check_clear(GtkWidget *widget)
 void pressed_button_file_chooser(GtkButton *widget, gpointer data)
  {
 
- 	//GtkWidget *pParent;
  	GtkWidget *pFileSelection;
 
  	pFileSelection = gtk_file_chooser_dialog_new("Open...",
@@ -1749,7 +1748,7 @@ void pressed_button_file_chooser(GtkButton *widget, gpointer data)
      // sets the label folder as start folder 
      gchar *lbl;
      lbl=(gchar*)gtk_button_get_label(GTK_BUTTON(main_window.button_dialog));
-     if (strcmp(lbl,"Workspace's directory")!=0){
+     if (!IS_DEFAULT_DIR(lbl)){
     gboolean res;
     res=gtk_file_chooser_set_current_folder (GTK_FILE_CHOOSER(pFileSelection), lbl);
     }
@@ -1767,7 +1766,7 @@ void pressed_button_file_chooser(GtkButton *widget, gpointer data)
              break;
      }
     	gtk_widget_destroy(pFileSelection);
-    	if(sChemin!=NULL){
+    	if(sChemin && !IS_DEFAULT_DIR(sChemin)){
  	sLabel = g_strdup_printf("%s",sChemin);
         sLabelUtf8 = g_locale_to_utf8(sLabel, -1, NULL, NULL, NULL);
         gtk_button_set_label(GTK_BUTTON(widget), sLabelUtf8);

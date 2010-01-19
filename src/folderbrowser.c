@@ -21,25 +21,47 @@
 
    The GNU General Public License is contained in the file COPYING.
 */
+/* ******* FOLDERBROWSER DESIGN ********
+Folderbrowser has a treeview to show the directory struct. This treeview has a column for the pixmap
+and the name (both shown to the user), but also the mimetype of the file (not shown). 
 
+Folderbrowser has the following features:
+-Remember last folder
+-Autorefresh when directory contents changes
+-Popup menu
+-AutoSort (directories go before files, files are sorted by name and at last by extension)
+-Double click in treeview open files and expand/collapse treerow for directories
+-Only displays files which could be opened by the editor
+*/
 //TODO:DRAG AND DROP HANDLING
+//TODO:Async Update
 #include "folderbrowser.h"
 typedef struct {
   gchar *filename;
   gchar *mime;
-
 } POPUPDATA;
 POPUPDATA pop;
+
 GFileMonitor *monitor;
+
 void update_folderbrowser (void){
     GtkTreeIter iter2;
     GtkTreeIter* iter=NULL;
     gtk_tree_store_clear(main_window.pTree);
-    gtk_tree_sortable_set_sort_func(GTK_TREE_SORTABLE(main_window.pTree), 1,
-									filebrowser_sort_func, NULL, NULL);
+    gtk_tree_sortable_set_sort_func(GTK_TREE_SORTABLE(main_window.pTree), 1, filebrowser_sort_func, NULL, NULL);
     gtk_tree_sortable_set_sort_column_id(GTK_TREE_SORTABLE(main_window.pTree), 1, GTK_SORT_ASCENDING);
-    create_tree(GTK_TREE_STORE(main_window.pTree),sChemin,iter,&iter2);
+	if (sChemin && !IS_DEFAULT_DIR(sChemin)){
+	    create_tree(GTK_TREE_STORE(main_window.pTree),sChemin,iter,&iter2);
+	}
 }
+
+/*
+ * tree_double_clicked
+ *
+ *   this function handles double click signal of folderbrowser treeview:
+ *   if selected item is a file then open it
+ *   if selected file is a directory force expand/collapse treerow
+ */
 
 void tree_double_clicked(GtkTreeView *tree_view,GtkTreePath *path,GtkTreeViewColumn *column,gpointer user_data)
  {
@@ -47,7 +69,7 @@ void tree_double_clicked(GtkTreeView *tree_view,GtkTreePath *path,GtkTreeViewCol
  	GtkTreeSelection *select;
  	GtkTreeIter iter;
   	select = gtk_tree_view_get_selection(tree_view);
-  	if(sChemin==NULL)
+  	if(!sChemin)
         sChemin=(gchar*)gtk_button_get_label(GTK_BUTTON(main_window.button_dialog));
   if(gtk_tree_selection_get_selected (select, &model, &iter))
   {
@@ -79,7 +101,7 @@ void tree_double_clicked(GtkTreeView *tree_view,GtkTreePath *path,GtkTreeViewCol
 /*
  * filebrowser_sort_func
  *
- * this function is the sort function, and has the following  features:
+ *   this function is the sort function, and has the following  features:
  * - directories go before files
  * - files are first sorted without extension, only equal names are sorted by extension
  *
@@ -127,6 +149,12 @@ gint filebrowser_sort_func(GtkTreeModel * model, GtkTreeIter * a, GtkTreeIter * 
 	return retval;
 }
 
+/*
+ * icon_name_from_icon
+ *
+ *   this function returns the icon name of a Gicon
+ *   for the current gtk default icon theme
+ */
 
 static gchar *icon_name_from_icon(GIcon *icon) {
 	gchar *icon_name=NULL;
@@ -155,52 +183,69 @@ static gchar *icon_name_from_icon(GIcon *icon) {
         return icon_name;
 }
 
+/*
+ *   create tree
+ *
+ *   this function fill folderbrowser tree and start folderbrowser autorefresh
+ */
 void create_tree(GtkTreeStore *pTree, gchar *sChemin, GtkTreeIter *iter, GtkTreeIter *iter2){
-   // g_print("path:%s\n",sChemin);
     GFile *file;
     file= g_file_new_for_uri (sChemin);
-    
+	//path don't exist?
+    if (!g_file_query_exists (file,NULL)){
+        gtk_button_set_label(GTK_BUTTON(main_window.button_dialog), DEFAULT_DIR);
+	return;
+	}
     GFileEnumerator *files;
     GError *error=NULL;
-
-    files=g_file_enumerate_children (file,"standard::type,standard::is-backup,standard::display-name,standard::icon,standard::content-type",G_FILE_QUERY_INFO_NOFOLLOW_SYMLINKS,NULL,&error);
+    files=g_file_enumerate_children (file,FOLDER_INFOFLAGS,G_FILE_QUERY_INFO_NOFOLLOW_SYMLINKS,NULL,&error);
     if (!files){
-    g_print("Error getting files. GIO Error:%s\n",error->message);
-    return ;
+    g_print(_("Error getting folderbrowser files. GIO Error:%s\n"),error->message);
+    gtk_button_set_label(GTK_BUTTON(main_window.button_dialog), DEFAULT_DIR);
+    return;
 }
 GFileInfo *info;
+// Get fileinfo
 info=g_file_enumerator_next_file (files,NULL,&error);
 while (info){
     GdkPixbuf *p_file_image = NULL;
    if (g_file_info_get_file_type (info)==G_FILE_TYPE_DIRECTORY){
+       if (!g_file_info_get_is_hidden (info)){
        p_file_image =gtk_icon_theme_load_icon (gtk_icon_theme_get_default (), "folder", 16, 0, NULL);
-       gtk_tree_store_insert_with_values(GTK_TREE_STORE(pTree), iter2, iter, 0, 0, p_file_image, 1, g_file_info_get_display_name (info),2, "inode/directory",-1);
+       gtk_tree_store_insert_with_values(GTK_TREE_STORE(pTree), iter2, iter, 0, 0, p_file_image, 1, g_file_info_get_display_name (info),2, DIRMIME,-1);
        GtkTreeIter iter_new;
        gchar *next_dir = NULL;
        next_dir = g_build_path (G_DIR_SEPARATOR_S, sChemin, g_file_info_get_display_name (info), NULL);
+       error=NULL;
+	//Start file monitor for folderbrowser autorefresh
+	monitor= g_file_monitor_directory (file,G_FILE_MONITOR_NONE,NULL,&error);
+	if (!monitor){
+	g_print(_("Error initing folderbrowser autorefresh. GIO Error:%s\n"),error->message);
+	return;
+	}else{
+	g_signal_connect(monitor, "changed", (GCallback) update_folderbrowser_signal, NULL);
+	}
        //g_print("next:%s\n",next_dir);
        create_tree(pTree,next_dir, iter2, &iter_new);
+       }
    } else {
        //don't show hidden files
        if (!g_file_info_get_is_hidden (info)  && !g_file_info_get_is_backup (info)){
             const char *mime;
             mime=g_file_info_get_content_type (info);
             if (IS_TEXT(mime) && !IS_APPLICATION(mime)){
-            //("mime:%s\n",mime);
-            GIcon *icon= g_file_info_get_icon (info);
-            p_file_image =gtk_icon_theme_load_icon (gtk_icon_theme_get_default (), icon_name_from_icon(icon), 16, 0, NULL);
+            //("mimetype:%s\n",mime);
+            GIcon *icon= g_file_info_get_icon (info); // get iconname 
+            p_file_image =gtk_icon_theme_load_icon (gtk_icon_theme_get_default (), icon_name_from_icon(icon), 16, 0, NULL); // get icon of size 16px
             gtk_tree_store_insert_with_values(GTK_TREE_STORE(pTree), iter2, iter, 0, 0, p_file_image, 1, g_file_info_get_display_name (info),2,mime,-1);
             g_object_unref(info);
             }
        }
      
    }
+   // Get fileinfo
    info=g_file_enumerator_next_file (files,NULL,&error);
-    }
-error=NULL;
-/*monitorear el directorio*/
-monitor= g_file_monitor_directory (file,G_FILE_MONITOR_NONE,NULL,&error);
-g_signal_connect(monitor, "changed", (GCallback) update_folderbrowser_signal, NULL);
+}
 g_object_unref(files);
 g_object_unref(file);
 }
@@ -210,6 +255,17 @@ void update_folderbrowser_signal (GFileMonitor *monitor,GFile *file,GFile *other
 void popup_open_file(gchar *filename){
     switch_to_file_or_open(filename, 0);
 }
+
+/*
+ * popup_delete_file
+ *
+ *   This function is the delete function of the folderbrowser popup menu, and has the following  features:
+ * - Promp before delete the file
+ * - Send file to trash if filesystem support that feature
+ * - Delete file if filesystem don't support send to trash feature
+ *
+ */
+
 void popup_delete_file(void){
  GtkWidget *dialog;
  gint button;
@@ -227,18 +283,19 @@ void popup_delete_file(void){
     if (!g_file_trash (fi,NULL,&error)){
         if (error->code == G_IO_ERROR_NOT_SUPPORTED){
             if (!g_file_delete (fi,NULL,&error)){
-            g_print("GIO Error deleting file: %s\n",error->message);
+            g_print(_("GIO Error deleting file: %s\n"),error->message);
             } else {
             update_folderbrowser();
             }
         } else {
-         g_print("GIO Error deleting file: %s\n",error->message);
+         g_print(_("GIO Error deleting file: %s\n"),error->message);
         }
         } else {
         update_folderbrowser();
         }
     }
 }
+
 void popup_rename_file(void){
     GFile *fi;
     GError *error=NULL;
@@ -247,7 +304,7 @@ void popup_rename_file(void){
     fi=g_file_new_for_uri (filename);
     GFileInfo *info= g_file_query_info (fi, "standard::display-name",G_FILE_QUERY_INFO_NOFOLLOW_SYMLINKS, NULL,&error);
     if (!info){
-        g_print("Error renaming file. GIO Error:%s\n",error->message);
+        g_print(_("Error renaming file. GIO Error:%s\n"),error->message);
         return ;
     }
     GtkWidget *window;
@@ -328,6 +385,16 @@ void popup_create_dir(void){
     gtk_widget_destroy(window);
     }
 }
+/*
+ * view_popup_menu
+ *
+ *   This function shows a popup menu with the following features:
+ * - Open File
+ * - Rename File
+ * - Delete File
+ * - Create New directory
+ *
+ */
 
   void
   view_popup_menu (GtkWidget *treeview, GdkEventButton *event, gpointer userdata)
@@ -435,6 +502,15 @@ void popup_create_dir(void){
     return TRUE; /* we handled this */
   }
 
+/*
+ * folderbrowser_create
+ *
+ *   Create folderbrowser widget and append it to the side bar
+ *   Folderbrowser treeview has 3 columns:
+ *   --icon column
+ *   --filename column
+ *   --mimetype column (hide for users)
+ */
 
 void folderbrowser_create(MainWindow *main_window)
  {
@@ -481,7 +557,7 @@ void folderbrowser_create(MainWindow *main_window)
              GError *error = NULL;
              sChemin= gconf_client_get_string(config,"/gPHPEdit/main_window/folderbrowser/folder",&error);
              if (!sChemin){
-                 main_window->button_dialog = gtk_button_new_with_label (_("Workspace's directory"));
+                 main_window->button_dialog = gtk_button_new_with_label (DEFAULT_DIR);
              } else {
              main_window->button_dialog = gtk_button_new_with_label (sChemin);
              }
@@ -513,8 +589,8 @@ void folderbrowser_create(MainWindow *main_window)
 	gtk_widget_show_all(main_window->folder);
         gint pos;
        	pos=gtk_notebook_insert_page (GTK_NOTEBOOK(main_window->notebook_manager), main_window->folder, label, 1);
-        if(sChemin){
-                                sChemin=convert_to_full(sChemin);
+        if(sChemin && !IS_DEFAULT_DIR(sChemin)){
+                                sChemin=convert_to_full(sChemin); /*necesary for gfile*/
  				GtkTreeIter iter2;
 				GtkTreeIter* iter=NULL;
  				gtk_tree_store_clear(main_window->pTree);

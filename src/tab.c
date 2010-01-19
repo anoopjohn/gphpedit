@@ -228,8 +228,13 @@ void tab_file_save_opened(GObject *source_object, GAsyncResult *res, gpointer us
         GFileOutputStream *file;
         file=g_file_replace_finish ((GFile *)source_object,res,&error);
         if (!file){
+	    if (error->code==G_IO_ERROR_CANT_CREATE_BACKUP){
+	    g_file_replace_async ((GFile *)source_object,NULL,FALSE,0,G_PRIORITY_DEFAULT,NULL, tab_file_save_opened, main_window.current_editor);
+	    return;
+	    }else{
             g_print(_("GIO Error: %s\n"),error->message);
             return;
+	    }
         }
 	text_length = gtk_scintilla_get_length(GTK_SCINTILLA(main_window.current_editor->scintilla));
 

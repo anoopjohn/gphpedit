@@ -450,7 +450,7 @@ static void main_window_fill_panes(void)
 	//
 	main_window.chkOnlyCurFileFuncs = gtk_check_button_new_with_label(_("Parse only current file")); 
 	gtk_widget_show (main_window.chkOnlyCurFileFuncs);
-	gtk_box_pack_start(GTK_BOX(hbox), main_window.chkOnlyCurFileFuncs, FALSE, FALSE, 10);
+	gtk_box_pack_start(GTK_BOX(hbox), main_window.chkOnlyCurFileFuncs, TRUE, TRUE, 10);
 //	gtk_box_pack_start(GTK_BOX(box), main_window.chkOnlyCurFileFuncs, FALSE, FALSE, 10);
 	gtk_box_pack_start(GTK_BOX(box), hbox, FALSE, FALSE, 10);
 	g_signal_connect (G_OBJECT (main_window.chkOnlyCurFileFuncs), "clicked",
@@ -510,8 +510,6 @@ static void main_window_fill_panes(void)
 	gtk_notebook_set_tab_label (GTK_NOTEBOOK (notebook_manager), gtk_notebook_get_nth_page (GTK_NOTEBOOK (notebook_manager), 2), label3);
 	gtk_label_set_justify (GTK_LABEL (label3), GTK_JUSTIFY_LEFT);
 	*/
-	// file browser code
-	folderbrowser_create(&main_window);
         main_window.scrolledwindow1 = gtk_scrolled_window_new (NULL, NULL);
 	gtk_paned_pack2 (GTK_PANED (main_window.main_vertical_pane), main_window.scrolledwindow1, FALSE, TRUE);
         main_window.lint_view = gtk_tree_view_new ();
@@ -1153,11 +1151,13 @@ GtkAccelGroup *accel_group = NULL;
   g_signal_connect(G_OBJECT(menu.newi), "activate", G_CALLBACK(on_new1_activate), NULL);
   install_menu_hint(menu.newi, _("Creates a new file"));
   gtk_widget_add_accelerator(menu.newi, "activate", accel_group, GDK_n, GDK_CONTROL_MASK, GTK_ACCEL_VISIBLE);
+
   menu.open = gtk_image_menu_item_new_from_stock(GTK_STOCK_OPEN, NULL);
   g_signal_connect(G_OBJECT(menu.open), "activate", G_CALLBACK(on_open1_activate), NULL);
   install_menu_hint(menu.open, _("Open a file"));
   gtk_widget_add_accelerator(menu.open, "activate", accel_group, GDK_o, GDK_CONTROL_MASK, GTK_ACCEL_VISIBLE);
   gtk_menu_shell_append(GTK_MENU_SHELL(menu.menunew), menu.open);
+
   menu.opensel = gtk_menu_item_new_with_mnemonic(_("_Open selected file"));
   g_signal_connect(G_OBJECT(menu.opensel), "activate", G_CALLBACK(on_openselected1_activate), NULL);
   install_menu_hint(menu.opensel, _("Open a file with the name currently selected in the editor"));
@@ -1462,7 +1462,6 @@ GtkAccelGroup *accel_group = NULL;
 }
 void main_window_create(void)
 {
-
         main_window.window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
         gtk_window_set_title(GTK_WINDOW(main_window.window), _("gPHPEdit"));
         gtk_window_set_default_size(GTK_WINDOW(main_window.window), 230, 150);
@@ -1475,11 +1474,9 @@ void main_window_create(void)
         main_window_create_panes();
         main_window_fill_panes();
         main_window_create_appbar();
-        
 	main_window_update_reopen_menu();
-	
+
 	plugin_setup_menu();
-	
 	function_list_prepare();
 
 	g_signal_connect (G_OBJECT (main_window.window), "delete_event", G_CALLBACK(main_window_delete_event), NULL);
@@ -1493,11 +1490,12 @@ void main_window_create(void)
 	gtk_widget_show(main_window.window);
 
 	update_app_title();
+	// folder browser init
+	folderbrowser_create(&main_window);
 }
 
 void update_controls(void){
 if (GTK_IS_SCINTILLA(main_window.current_editor->scintilla)){
-    //TODO: Deactivate save controls if file is read only
     //activate toolbar items
     gtk_widget_set_sensitive (main_window.toolbar_main_button_cut, TRUE);
     gtk_widget_set_sensitive (main_window.toolbar_main_button_paste, TRUE);
