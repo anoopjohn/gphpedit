@@ -81,6 +81,9 @@ typedef struct
   GtkWidget *viewfullscreen;
   GtkWidget *tog_class;
   GtkWidget *sep6;
+  GtkWidget *zoomin;
+  GtkWidget *zoomout;
+  GtkWidget *zoom100;
   
   GtkWidget *code;
   GtkWidget *syntax;
