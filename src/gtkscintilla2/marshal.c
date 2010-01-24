@@ -1,7 +1,7 @@
 
 #include	<glib-object.h>
 
-
+#define G_ENABLE_DEBUG
 #ifdef G_ENABLE_DEBUG
 #define g_marshal_value_peek_boolean(v)  g_value_get_boolean (v)
 #define g_marshal_value_peek_char(v)     g_value_get_char (v)

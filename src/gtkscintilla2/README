@@ -14,11 +14,6 @@ GtkScintilla2 addresses both:
  - It is a true GtkWidget subclass with a GTK+2 API
 
 
-  Since I'm not a very good programmer and I am moving my firsts steps in
-C/Linux/GTK+2/GNOME2 you should have a little patience and help me in reporting
-bugs (solutions are better ;) or pointing out things that should be done in a
-different way.
-
   There is no documentation for GtkScintilla2 yet, but the function names are
 very close to Scintilla's signals so you can use native Scintilla's documents.
 
@@ -41,6 +36,8 @@ That's all folks!
 
 
  ---
+GtkScintilla2 is developed and maintained by:
+ - Jose Rostagno <joserostagno@hotmail.com>
 
 GtkScintilla2 is developed and maintained by:
  - Dennis J Houy <djhouy@paw.co.za>
