@@ -26,7 +26,6 @@
 #define TAB_H
 
 #include <sys/types.h>
-//#include <sys/stat.h>
 #include <fcntl.h>
 #include <gio/gio.h>
 #include "main.h"
@@ -115,7 +114,6 @@ void register_file_opened(gchar *filename);
 gchar * editor_convert_to_local(Editor *editor);
 gboolean editor_is_local(Editor *editor);
 gboolean uri_is_local_or_http(gchar *uri);
-gboolean isreadonly(GFile *file);
 gchar *convert_to_full(gchar *filename);
 void str_replace(char *Str, char ToRp, char WithC);
 void tab_file_save_opened(GObject *source_object, GAsyncResult *res, gpointer user_data);

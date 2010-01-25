@@ -386,10 +386,9 @@ void tab_file_opened (GObject *source_object, GAsyncResult *res, gpointer user_d
         return;
         }
         /*initial file size, needed for buffer size*/
-	info=g_file_query_info (file,G_FILE_ATTRIBUTE_STANDARD_SIZE,0,NULL,&error);
         editor->file_size= g_file_info_get_size (info);
+        editor->isreadonly= !g_file_info_get_attribute_boolean (info,"access::can-write");
         g_object_unref(info);
-        editor->isreadonly=isreadonly(file);
         // Open file
         g_file_read_async (file,G_PRIORITY_DEFAULT,NULL,tab_file_opened, editor);
 }
@@ -1872,16 +1871,4 @@ gchar *convert_to_full(gchar *filename)
 	g_string_free(gstr_filename, FALSE);
 	return new_filename;
 }
-gboolean isreadonly(GFile *file){
-    GFileInfo *info;
-    GError *error=NULL;
-    gboolean result;
-    info=g_file_query_info (file, "access::can-write", G_FILE_QUERY_INFO_NONE,NULL, &error);
-    if (!info){
-        g_print("Can't get write permision. GIO Error:%s\n",error->message);
-        return TRUE;
-    }
-    result= !g_file_info_get_attribute_boolean (info,"access::can-write");
-    g_object_unref(info);
-    return result;
-}
+
