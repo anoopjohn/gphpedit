@@ -38,7 +38,10 @@ bin_PROGRAMS = gphpedit$(EXEEXT)
 subdir = src
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
-am__aclocal_m4_deps = $(top_srcdir)/configure.ac
+am__aclocal_m4_deps = $(top_srcdir)/m4/intltool.m4 \
+	$(top_srcdir)/m4/libtool.m4 $(top_srcdir)/m4/ltoptions.m4 \
+	$(top_srcdir)/m4/ltsugar.m4 $(top_srcdir)/m4/ltversion.m4 \
+	$(top_srcdir)/m4/lt~obsolete.m4 $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
@@ -48,15 +51,16 @@ CONFIG_CLEAN_VPATH_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS)
 am_gphpedit_OBJECTS = calltip.$(OBJEXT) classbrowser.$(OBJEXT) \
-	classbrowser_parse.$(OBJEXT) edit_template.$(OBJEXT) \
-	find_replace.$(OBJEXT) gphpedit_ipc.$(OBJEXT) \
-	grel2abs.$(OBJEXT) plugin.$(OBJEXT) main.$(OBJEXT) \
-	main_window.$(OBJEXT) main_window_callbacks.$(OBJEXT) \
+	classbrowser_parse.$(OBJEXT) folderbrowser.$(OBJEXT) \
+	edit_template.$(OBJEXT) find_replace.$(OBJEXT) \
+	gphpedit_ipc.$(OBJEXT) grel2abs.$(OBJEXT) plugin.$(OBJEXT) \
+	main.$(OBJEXT) main_window.$(OBJEXT) \
+	main_window_callbacks.$(OBJEXT) menu.$(OBJEXT) \
 	preferences.$(OBJEXT) preferences_dialog.$(OBJEXT) \
 	syntax_check.$(OBJEXT) tab.$(OBJEXT) tab_cxx.$(OBJEXT) \
 	tab_css.$(OBJEXT) tab_perl.$(OBJEXT) tab_php.$(OBJEXT) \
 	tab_python.$(OBJEXT) tab_sql.$(OBJEXT) tab_util.$(OBJEXT) \
-	templates.$(OBJEXT) folderbrowser.$(OBJEXT)
+	templates.$(OBJEXT)
 gphpedit_OBJECTS = $(am_gphpedit_OBJECTS)
 am__DEPENDENCIES_1 =
 gphpedit_DEPENDENCIES = $(am__DEPENDENCIES_1) \
@@ -243,12 +247,12 @@ nodist_EXTRA_gphpedit_SOURCES = dummy.cxx
 gphpedit_SOURCES = \
 	calltip.c		\
 	calltip.h		\
-	folderbrowser.h		\
-	folderbrowser.c		\
 	classbrowser.c		\
 	classbrowser.h		\
 	classbrowser_parse.c	\
 	classbrowser_parse.h	\
+	folderbrowser.h		\
+	folderbrowser.c		\
 	edit_template.c		\
 	edit_template.h		\
 	find_replace.c		\
@@ -265,6 +269,8 @@ gphpedit_SOURCES = \
 	main_window.h		\
 	main_window_callbacks.c	\
 	main_window_callbacks.h	\
+	menu.h			\
+	menu.c			\
 	preferences.c		\
 	preferences.h		\
 	preferences_dialog.c	\
@@ -388,11 +394,13 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dummy.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/edit_template.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/find_replace.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/folderbrowser.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gphpedit_ipc.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/grel2abs.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/main.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/main_window.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/main_window_callbacks.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/menu.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/plugin.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/preferences.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/preferences_dialog.Po@am__quote@

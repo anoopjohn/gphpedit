@@ -63,7 +63,7 @@ void session_save(void)
 			g_print(_("ERROR: cannot save session to %s\n"), session_file->str);
 			return;
 		}
-
+ 
 		for(walk = editors; walk!= NULL; walk = g_slist_next(walk)) {
 			editor = walk->data;
 			if (editor) {
@@ -101,7 +101,7 @@ void session_reopen(void)
 	session_file = g_string_new( g_get_home_dir());
 	session_file = g_string_append(session_file, "/.gphpedit/session");
 	
-	if (g_file_test(session_file->str,G_FILE_TEST_EXISTS)){//g_file_exists(session_file->str)) {
+	if (g_file_test(session_file->str,G_FILE_TEST_EXISTS)){
 		fp = fopen(session_file->str, "r");
   		if (!fp) {	
 			g_print(_("ERROR: cannot open session file (%s)\n"), session_file->str);
@@ -136,7 +136,7 @@ void session_reopen(void)
 				}
 			}
 			else {
-                            	switch_to_file_or_open(filename,0);
+                                switch_to_file_or_open(filename,0);
 				if (focus_this_one && (main_window.current_editor)) {
 					focus_tab = gtk_notebook_page_num(GTK_NOTEBOOK(main_window.notebook_editor),main_window.current_editor->scintilla);
 				}
@@ -169,9 +169,9 @@ void main_window_destroy_event(GtkWidget *widget, gpointer data)
 	//g_io_channel_unref(inter_gphpedit_io);
 	//unlink("/tmp/gphpedit.sock");
 	quit_application();
-	
+        g_slice_free(Mainmenu, main_window.menu); /* free menu struct*/
 	// Old code had a main_window_delete_event call in here, not necessary, Gtk/GNOME does that anyway...
-	gtk_main_quit();
+        gtk_main_quit();
 }
 
 
@@ -244,7 +244,6 @@ gboolean main_window_delete_event(GtkWidget *widget,
 
 void main_window_resize(GtkWidget *widget, GtkAllocation *allocation, gpointer user_data)
 {
-	//main_window_size_save_details(allocation->x, allocation->y, allocation->width, allocation->height);
 	main_window_size_save_details();
 }
 
@@ -253,7 +252,6 @@ void main_window_state_changed(GtkWidget *widget, GdkEventWindowState *event, gp
 	gboolean maximized = GDK_WINDOW_STATE_MAXIMIZED && event->new_window_state;
 	GConfClient *config;
         config=gconf_client_get_default ();
-        
 	gconf_client_set_bool (config,"/gPHPEdit/main_window/maximized", maximized,NULL);
 
 }
@@ -392,7 +390,6 @@ void on_openproj_activate(GtkWidget *widget){
    open_project();
 }
 */
-
 void open_file_ok(GtkFileChooser *file_selection)
 {
 	GSList *filenames; 
@@ -481,7 +478,7 @@ void on_openselected1_activate(GtkWidget *widget)
 	wordStart = gtk_scintilla_get_selection_start(GTK_SCINTILLA(main_window.current_editor->scintilla));
 	wordEnd = gtk_scintilla_get_selection_end(GTK_SCINTILLA(main_window.current_editor->scintilla));
 	ac_buffer = gtk_scintilla_get_text_range (GTK_SCINTILLA(main_window.current_editor->scintilla), wordStart, wordEnd, &ac_length);
-
+        if (wordStart!=wordEnd){
 	for(li = editors; li!= NULL; li = g_slist_next(li)) {
 		editor = li->data;
 		if (editor) {
@@ -511,6 +508,7 @@ void on_openselected1_activate(GtkWidget *widget)
 			}
 		}
 	}
+        }
 }
 void add_file_filters(GtkFileChooser *chooser){
 	//store file filter
@@ -625,15 +623,14 @@ void on_open1_activate(GtkWidget *widget)
 	if (DEBUG_MODE) { g_print("DEBUG: main_window_callbacks.c:on_open1_activate:last_opened_folder: %s\n", last_opened_folder); }
 	/* opening of multiple files at once */
 	gtk_file_chooser_set_select_multiple(GTK_FILE_CHOOSER(file_selection_box), TRUE);
-	
 	if (main_window.current_editor && !main_window.current_editor->is_untitled) {
 		folder = get_folder(main_window.current_editor->filename);
 		if (DEBUG_MODE) { g_print("DEBUG: main_window_callbacks.c:on_open1_activate:folder: %s\n", folder->str); }
-		gtk_file_chooser_set_current_folder_uri(GTK_FILE_CHOOSER(file_selection_box),  folder->str);
+                gtk_file_chooser_set_current_folder_uri(GTK_FILE_CHOOSER(file_selection_box),  folder->str);
 		g_string_free(folder, TRUE);
 	}
 	else if (!last_opened_folder){
-		gtk_file_chooser_set_current_folder_uri(GTK_FILE_CHOOSER(file_selection_box),  last_opened_folder);
+	gtk_file_chooser_set_current_folder_uri(GTK_FILE_CHOOSER(file_selection_box),  last_opened_folder);
 	}
 	
 	if (gtk_dialog_run(GTK_DIALOG(file_selection_box)) == GTK_RESPONSE_ACCEPT) {
@@ -803,7 +800,7 @@ void on_save_as1_activate(GtkWidget *widget)
 				gtk_file_chooser_set_uri(GTK_FILE_CHOOSER(file_selection_box), filename);
 			}
 			else {
-				if (!last_opened_folder){
+                            if (!last_opened_folder){
 					if (DEBUG_MODE) { g_print("DEBUG: main_window_callbacks.c:on_save_as1_activate:Setting current_folder_uri to %s\n", last_opened_folder); }
 					gtk_file_chooser_set_current_folder_uri(GTK_FILE_CHOOSER(file_selection_box),  last_opened_folder);
 				}
@@ -952,11 +949,9 @@ if (GTK_IS_SCINTILLA(main_window.current_editor->scintilla)){
                 p=d*100;
                 }
 }
-GString *label_caption;
-label_caption = g_string_new("Zoom:");
-g_string_printf (label_caption,"%s%d","Zoom:",p);
-label_caption = g_string_append(label_caption, "%");
-gtk_label_set_text (GTK_LABEL(main_window.zoomlabel),label_caption->str);
+gchar *caption=g_strdup_printf("%s%d%s","Zoom:",p,"%");
+gtk_label_set_text (GTK_LABEL(main_window.zoomlabel),caption);
+g_free(caption);
 }
 
 /**
@@ -996,7 +991,8 @@ void close_page(Editor *editor)
 	}
 	set_active_tab(page_num);
 	g_string_free(editor->filename, TRUE);
-	g_free(editor);
+	//g_free(editor);
+        g_slice_free(Editor,editor);
 	gtk_notebook_remove_page(GTK_NOTEBOOK(main_window.notebook_editor), page_num_closing);
 }
 
@@ -1425,7 +1421,7 @@ void on_about1_activate(GtkWidget *widget)
   gchar *translator_credits = _("translator_credits");
   const gchar *documenters[] = {NULL};
   GtkWidget *dialog = gtk_about_dialog_new();
-  gtk_about_dialog_set_program_name(GTK_ABOUT_DIALOG(dialog), "gPHPEdit");
+  gtk_about_dialog_set_program_name(GTK_ABOUT_DIALOG(dialog), PACKAGE_NAME);
   gtk_about_dialog_set_version(GTK_ABOUT_DIALOG(dialog), VERSION);
   gtk_about_dialog_set_copyright(GTK_ABOUT_DIALOG(dialog),
       _("Copyright  2003-2006 Andy Jeffries, 2009 Anoop John"));
@@ -1815,7 +1811,7 @@ void classbrowser_show_hide(GtkWidget *widget)
 	GConfClient *config;
         config=gconf_client_get_default ();
 	hidden = gconf_client_get_int (config,"/gPHPEdit/main_window/classbrowser_hidden",NULL);
-        g_object_set (menu.tog_class,"active",hidden,NULL);
+        g_object_set (main_window.menu->tog_class,"active",hidden,NULL);
 	if (hidden == 1)
 		classbrowser_show();
 	else

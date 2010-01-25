@@ -59,7 +59,8 @@ gphpedit_SOURCES = \
 	main_window.h		\
 	main_window_callbacks.c	\
 	main_window_callbacks.h	\
-##	main_window_menu.h	\
+	menu.h			\
+	menu.c			\
 	preferences.c		\
 	preferences.h		\
 	preferences_dialog.c	\

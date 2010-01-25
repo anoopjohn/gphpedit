@@ -26,7 +26,7 @@
 #define TAB_H
 
 #include <sys/types.h>
-#include <sys/stat.h>
+//#include <sys/stat.h>
 #include <fcntl.h>
 #include <gio/gio.h>
 #include "main.h"
