@@ -24,7 +24,7 @@
 
 #define PLAT_GTK 1
 #include <gtkscintilla.h>
-
+#include "folderbrowser.h"
 #include "tab.h"
 #include "tab_php.h"
 #include "tab_css.h"
@@ -37,8 +37,9 @@
 #include "main_window_callbacks.h"
 #include "preferences.h"
 #include "grel2abs.h"
-#include <gconf/gconf-client.h>
 
+#include <gconf/gconf-client.h>
+#define INFO_FLAGS "standard::display-name,standard::content-type,standard::edit-name,standard::size,access::can-write,access::can-delete"
 GSList *editors;
 guint completion_timer_id;
 gboolean completion_timer_set;
@@ -85,7 +86,6 @@ void debug_dump_editors(void)
 void tab_set_general_scintilla_properties(Editor *editor)
 {
 	gtk_scintilla_set_backspace_unindents(GTK_SCINTILLA(editor->scintilla), 1);
-
 	gtk_scintilla_autoc_set_choose_single(GTK_SCINTILLA (editor->scintilla), FALSE);
 	gtk_scintilla_autoc_set_ignore_case(GTK_SCINTILLA (editor->scintilla), TRUE);
 	gtk_scintilla_autoc_set_drop_rest_of_word(GTK_SCINTILLA (editor->scintilla), FALSE);
@@ -95,10 +95,8 @@ void tab_set_general_scintilla_properties(Editor *editor)
 	g_signal_connect (G_OBJECT (editor->scintilla), "save_point_reached", G_CALLBACK (save_point_reached), NULL);
 	g_signal_connect (G_OBJECT (editor->scintilla), "save_point_left", G_CALLBACK (save_point_left), NULL);
 	g_signal_connect (G_OBJECT (editor->scintilla), "macro_record", G_CALLBACK (macro_record), NULL);
-
 	//gtk_scintilla_set_sel_back(GTK_SCINTILLA(editor->scintilla), 1, 13434879);
         gtk_scintilla_set_sel_back(GTK_SCINTILLA(editor->scintilla),1,preferences.set_sel_back);
-
 	tab_set_configured_scintilla_properties(GTK_SCINTILLA(editor->scintilla), preferences);
 	gtk_widget_show (editor->scintilla);
 }
@@ -106,8 +104,7 @@ void tab_set_general_scintilla_properties(Editor *editor)
 void tab_set_configured_scintilla_properties(GtkScintilla *scintilla, Preferences prefs)
 {
 	gint width;
-
-	width = gtk_scintilla_text_width(scintilla, STYLE_LINENUMBER, "_99999");
+        width = gtk_scintilla_text_width(scintilla, STYLE_LINENUMBER, "_99999");
 	gtk_scintilla_set_margin_width_n(scintilla, 0, width);
 	gtk_scintilla_set_margin_width_n (scintilla, 1, 0);
 	gtk_scintilla_set_margin_width_n (scintilla, 2, 0);
@@ -118,9 +115,10 @@ void tab_set_configured_scintilla_properties(GtkScintilla *scintilla, Preference
 	else {
 		gtk_scintilla_set_h_scroll_bar(scintilla, 1);
 	}
-	gtk_scintilla_style_set_font (scintilla, STYLE_LINENUMBER, prefs.line_number_font);
-	gtk_scintilla_style_set_fore (scintilla, STYLE_LINENUMBER, prefs.line_number_fore);
-	gtk_scintilla_style_set_back (scintilla, STYLE_LINENUMBER, prefs.line_number_back);
+        
+    gtk_scintilla_style_set_font (scintilla, STYLE_LINENUMBER, prefs.line_number_font);
+    gtk_scintilla_style_set_fore (scintilla, STYLE_LINENUMBER, prefs.line_number_fore);
+    gtk_scintilla_style_set_back (scintilla, STYLE_LINENUMBER, prefs.line_number_back);
     gtk_scintilla_style_set_size (scintilla, STYLE_LINENUMBER, prefs.line_number_size);
 
     gtk_scintilla_set_indentation_guides (scintilla, prefs.show_indentation_guides);
@@ -228,8 +226,13 @@ void tab_file_save_opened(GObject *source_object, GAsyncResult *res, gpointer us
         GFileOutputStream *file;
         file=g_file_replace_finish ((GFile *)source_object,res,&error);
         if (!file){
+	    if (error->code==G_IO_ERROR_CANT_CREATE_BACKUP){
+	    g_file_replace_async ((GFile *)source_object,NULL,FALSE,0,G_PRIORITY_DEFAULT,NULL, tab_file_save_opened, main_window.current_editor);
+	    return;
+	    }else{
             g_print(_("GIO Error: %s\n"),error->message);
             return;
+	    }
         }
 	text_length = gtk_scintilla_get_length(GTK_SCINTILLA(main_window.current_editor->scintilla));
 
@@ -362,16 +365,30 @@ void tab_file_opened (GObject *source_object, GAsyncResult *res, gpointer user_d
 	editor->current_pos = gtk_scintilla_get_current_pos(GTK_SCINTILLA(editor->scintilla));
 	editor->current_line = gtk_scintilla_line_from_position(GTK_SCINTILLA(editor->scintilla), editor->current_pos);
 
-	// Try getting file size
+        // Try getting file size
         file=g_file_new_for_uri (convert_to_full(editor->filename->str));
-        info=g_file_query_info (file,G_FILE_ATTRIBUTE_STANDARD_SIZE,0,NULL,&error);
-
+        info= g_file_query_info (file,INFO_FLAGS,G_FILE_QUERY_INFO_NONE, NULL,&error);
         if (!info){
             g_warning (_("Could not get the file info. GIO error: %s \n"), error->message);
+            return;
         }
-	editor->file_size= g_file_info_get_size (info);
+
+        const char*contenttype= g_file_info_get_content_type (info);
+        /*we could open text based types so if it not a text based content don't open and displays error*/
+        if (!IS_TEXT(contenttype) || IS_APPLICATION(contenttype)){
+        g_print("Sorry, I can open this kind of file.\n");
+        editor->filename = g_string_new(_("Untitled"));
+	editor->short_filename = g_strdup(editor->filename->str);
+	if (main_window.current_editor) {
+	editor->opened_from = get_folder(main_window.current_editor->filename);
+	}
+	editor->is_untitled=TRUE;
+        return;
+        }
+        /*initial file size, needed for buffer size*/
+        editor->file_size= g_file_info_get_size (info);
+        editor->isreadonly= !g_file_info_get_attribute_boolean (info,"access::can-write");
         g_object_unref(info);
-        editor->isreadonly=isreadonly(file);
         // Open file
         g_file_read_async (file,G_PRIORITY_DEFAULT,NULL,tab_file_opened, editor);
 }
@@ -380,7 +397,7 @@ void tab_file_opened (GObject *source_object, GAsyncResult *res, gpointer user_d
 Editor *tab_new_editor(void)
 {
 	Editor *editor;
-	editor = (Editor *)g_malloc0(sizeof(Editor));
+	editor = (Editor *)g_slice_new0(Editor);
 	editors = g_slist_append(editors, editor);
 	return editor;
 }
@@ -1046,7 +1063,7 @@ gboolean tab_create_new(gint type, GString *filename)
 	// When a new tab request is processed if the only current tab is an untitled
 	// and unmodified tab then close it 
 	// close_saved_empty_Untitled();
-	
+        
 	editor = tab_new_editor();
 	editor->type = type;
 	
@@ -1063,11 +1080,11 @@ gboolean tab_create_new(gint type, GString *filename)
 	else {
 		editor->type = TAB_FILE;
 		editor->scintilla = gtk_scintilla_new();
-		tab_set_general_scintilla_properties(editor);
+                tab_set_general_scintilla_properties(editor);
 
 		editor->label = gtk_label_new (_("Untitled"));
 		gtk_widget_show (editor->label);
-
+                
 		if (abs_path != NULL) {
 			editor->filename = g_string_new(abs_path);
 			editor->short_filename = g_path_get_basename(editor->filename->str);
@@ -1085,13 +1102,14 @@ gboolean tab_create_new(gint type, GString *filename)
 			editor->is_untitled=FALSE;
 		}
 		else {
-			editor->filename = g_string_new(_("Untitled"));
+                    	editor->filename = g_string_new(_("Untitled"));
 			editor->short_filename = g_strdup(editor->filename->str);
 			if (main_window.current_editor) {
 				editor->opened_from = get_folder(main_window.current_editor->filename);
 			}
 			editor->is_untitled=TRUE;
 		}
+                
 		// Hmmm, I had the same error as the following comment.  A reshuffle here and upgrading GtkScintilla2 to 0.1.0 seems to have fixed it
 		if (!GTK_WIDGET_VISIBLE (editor->scintilla))
 			gtk_widget_show (editor->scintilla);
@@ -1853,16 +1871,4 @@ gchar *convert_to_full(gchar *filename)
 	g_string_free(gstr_filename, FALSE);
 	return new_filename;
 }
-gboolean isreadonly(GFile *file){
-    GFileInfo *info;
-    GError *error=NULL;
-    gboolean result;
-    info=g_file_query_info (file, "access::can-write", G_FILE_QUERY_INFO_NONE,NULL, &error);
-    if (!info){
-        g_print("Can't get write permision. GIO Error:%s\n",error->message);
-        return TRUE;
-    }
-    result= !g_file_info_get_attribute_boolean (info,"access::can-write");
-    g_object_unref(info);
-    return result;
-}
+

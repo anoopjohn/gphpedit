@@ -21,4 +21,5 @@ src/tab_python.c
 src/tab_sql.c
 src/tab_util.c
 src/templates.c
+src/menu.c
 gphpedit.desktop.in

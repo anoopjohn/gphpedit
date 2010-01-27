@@ -69,26 +69,32 @@ dnl ---------------------------------------------------------------------------
 dnl  ------------------
 dnl | language support |-------------------------------------------------------
 dnl  ------------------
+dnl ================================================================
+dnl Gettext stuff.
+dnl ================================================================
 
 GETTEXT_PACKAGE=gphpedit
 AC_SUBST(GETTEXT_PACKAGE)
-AC_DEFINE_UNQUOTED(GETTEXT_PACKAGE,"$GETTEXT_PACKAGE",[The package name, for gettext])
+AC_DEFINE_UNQUOTED(GETTEXT_PACKAGE,"$GETTEXT_PACKAGE", [Gettext package])
+
+AM_GLIB_GNU_GETTEXT
 
 dnl Please keep this in alphabetical order
 ALL_LINGUAS="de es"
 
-AM_GLIB_GNU_GETTEXT
+dnl AM_GLIB_GNU_GETTEXT
+dnl AM_GNU_GETTEXT
 
 dnl AM_GLIB_GNU_GETTEXT sets $DATADIRNAME
-AC_MSG_CHECKING(locale directory)
-if test "x$prefix" = "xNONE"; then
+ AC_MSG_CHECKING(locale directory)
+ if test "x$prefix" = "xNONE"; then
   PACKAGE_LOCALE_DIR=$ac_default_prefix/share/locale
-else
+ else
   PACKAGE_LOCALE_DIR=$prefix/share/locale
-fi
-AC_DEFINE_UNQUOTED(PACKAGE_LOCALE_DIR, "$PACKAGE_LOCALE_DIR",
+ fi
+ AC_DEFINE_UNQUOTED(PACKAGE_LOCALE_DIR, "$PACKAGE_LOCALE_DIR",
 	[The directory in which gphpedit's locale data will be stored])
-AC_MSG_RESULT("$PACKAGE_LOCALE_DIR")
+ AC_MSG_RESULT("$PACKAGE_LOCALE_DIR")
 
 dnl ---------------------------------------------------------------------------
 dnl check for deprecated flags

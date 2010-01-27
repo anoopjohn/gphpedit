@@ -30,91 +30,13 @@
 #include "tab.h"
 #include <gconf/gconf-client.h>
 #include "folderbrowser.h"
-
-#define NUM_PLUGINS_MAX 30
-#define NUM_REOPEN_MAX 20
-typedef struct
-{
-  GtkWidget *menubar;
-  GtkWidget *menunew;
-  GtkWidget *menuedit;
-  GtkWidget *menuview;
-  GtkWidget *menucode;
-  GtkWidget *file;
-  GtkWidget *newi;
-  GtkWidget *open;
-  GtkWidget *opensel;
-  GtkWidget *reload;
-  GtkWidget *save;
-  GtkWidget *saveas;
-  GtkWidget *saveall;
-  GtkWidget *rename;
-  GtkWidget *close;
-  GtkWidget *quit;
-
-  GtkWidget *edit;
-  GtkWidget *sep;
-  GtkWidget *sep1;
-  GtkWidget *sep2;
-  GtkWidget *undo;
-  GtkWidget *redo;
-  GtkWidget *copy;
-  GtkWidget *cut;
-  GtkWidget *paste;
-  GtkWidget *selectall;
-  GtkWidget *sep3;
-  GtkWidget *sep4;
-  GtkWidget *find;
-  GtkWidget *replace;
-  GtkWidget *indent;
-  GtkWidget *unindent;
-  GtkWidget *sept;
-  GtkWidget *sepd;
-  GtkWidget *upper;
-  GtkWidget *lower;
-  GtkWidget *preferences;
-
-  GtkWidget *view;
-  GtkWidget *viewmaintoolbar;
-  GtkWidget *viewfindtoolbar;
-  GtkWidget *viewstatusbar;
-  GtkWidget *viewfullscreen;
-  GtkWidget *tog_class;
-  GtkWidget *sep6;
-  
-  GtkWidget *code;
-  GtkWidget *syntax;
-  GtkWidget *clearsyntax;
-  GtkWidget *sep5;
-  GtkWidget *record;
-  GtkWidget *playback;
-  GtkWidget *force;
-  GtkWidget *menuforce;
-  GtkWidget *forcephp;
-  GtkWidget *forcecss;
-  GtkWidget *forcecxx;
-  GtkWidget *forcesql;
-  GtkWidget *forceperl;
-  GtkWidget *forcepython;
-  GtkWidget *menuplugin;
-  GtkWidget *plugin;
-  GtkWidget *plugins[NUM_PLUGINS_MAX];
-  GtkWidget *recent[NUM_REOPEN_MAX];
-  GtkWidget *reciente;
-  GtkWidget *menureciente;
-  GtkWidget *menuhelp;
-  GtkWidget *help;
-  GtkWidget *phphelp;
-  GtkWidget *bugreport;
-  GtkWidget *abouthelp;
-}
-Mainmenu;
+#include "menu.h"
 
 typedef struct
 {
 	GtkWidget *window;
-
         GtkWidget *prinbox;
+        Mainmenu *menu;
         GtkWidget *toolbar_main;
 	GtkWidget *toolbar_main_button_new;
 	GtkWidget *toolbar_main_button_open;
@@ -203,7 +125,6 @@ enum {
 };
 
 extern MainWindow main_window;
-extern Mainmenu menu;
 extern gboolean DEBUG_MODE;
 void force_config_folder(void);
 void update_controls(void);
