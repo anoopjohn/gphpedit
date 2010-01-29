@@ -957,24 +957,21 @@ gboolean switch_to_file_or_open(gchar *filename, gint line_number)
 	
 	// need to check if filename is local before adding to the listen
 	filename = convert_to_full(filename);
-	
 	for (walk = editors; walk!=NULL; walk = g_slist_next(walk)) {
 		editor = walk->data;
 		if (strcmp(editor->filename->str, filename)==0) {
 			gtk_notebook_set_current_page( GTK_NOTEBOOK(main_window.notebook_editor), gtk_notebook_page_num(GTK_NOTEBOOK(main_window.notebook_editor),editor->scintilla));
 			main_window.current_editor = editor;
-			gotoline_after_reload = line_number;
-			on_reload1_activate(NULL);
+                        gotoline_after_reload = line_number;
+			//on_reload1_activate(NULL);
+                        goto_line_int(line_number);
 			return TRUE;
 		}
 	}
-
 	gotoline_after_create_tab = line_number;
 	tmp_filename = g_string_new(filename);
-	tab_create_new(TAB_FILE, tmp_filename);
-
-	g_string_free(tmp_filename, TRUE);
-	
+        tab_create_new(TAB_FILE, tmp_filename);
+        g_string_free(tmp_filename, TRUE);
 	register_file_opened(filename);
 	session_save();
 	return TRUE;
