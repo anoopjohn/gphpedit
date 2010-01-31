@@ -36,6 +36,7 @@
 #define IS_DEFAULT_DIR(a) (strcmp(a,DEFAULT_DIR)==0)
 #define FOLDER_INFOFLAGS "standard::type,standard::is-backup,standard::display-name,standard::icon,standard::content-type"
 gchar *sChemin;
+void init_folderbrowser(GtkTreeStore *pTree, gchar *filename, GtkTreeIter *iter, GtkTreeIter *iter2);
 void create_tree(GtkTreeStore *pTree,gchar *sChemin, GtkTreeIter *iter,GtkTreeIter *iter2);
 //void folderbrowser_create(MainWindow *main_window);
 void update_folderbrowser (void);

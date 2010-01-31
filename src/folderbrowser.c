@@ -31,20 +31,24 @@ Folderbrowser has the following features:
 -Popup menu
 -AutoSort (directories go before files, files are sorted by name and at last by extension)
 -Double click in treeview open files and expand/collapse treerow for directories
+-Keypress capture: press delete will delete current selected file/folder; press enter will open current selected file/folder
 -Only displays files which could be opened by the editor
 */
 //TODO:DRAG AND DROP HANDLING
 //TODO:Async Update
 #include "folderbrowser.h"
+//#define DEBUGFOLDERBROWSER
 typedef struct {
   gchar *filename;
   gchar *mime;
 } POPUPDATA;
 POPUPDATA pop;
-
 GFileMonitor *monitor;
 
 void update_folderbrowser (void){
+    #ifdef DEBUGFOLDERBROWSER
+    g_print("DEBUG::UPDATING FOLDERBROWSER");
+    #endif
     GtkTreeIter iter2;
     GtkTreeIter* iter=NULL;
     gtk_tree_store_clear(main_window.pTree);
@@ -62,18 +66,17 @@ void update_folderbrowser (void){
  *   if selected item is a file then open it
  *   if selected file is a directory force expand/collapse treerow
  */
-
 void tree_double_clicked(GtkTreeView *tree_view,GtkTreePath *path,GtkTreeViewColumn *column,gpointer user_data)
  {
  	GtkTreeModel *model;
  	GtkTreeSelection *select;
  	GtkTreeIter iter;
-  	select = gtk_tree_view_get_selection(tree_view);
+        select = gtk_tree_view_get_selection(tree_view);
   	if(!sChemin)
         sChemin=(gchar*)gtk_button_get_label(GTK_BUTTON(main_window.button_dialog));
   if(gtk_tree_selection_get_selected (select, &model, &iter))
   {
- 	gchar *nfile;
+       	gchar *nfile;
         gchar *mime;
      gtk_tree_model_get (model, &iter,1, &nfile,2,&mime, -1);
 
@@ -116,7 +119,11 @@ gint filebrowser_sort_func(GtkTreeModel * model, GtkTreeIter * a, GtkTreeIter * 
 	gtk_tree_model_get((GtkTreeModel *)model, b, 1, &nameb,2, &mimeb,-1);
         isdira = (mimea && MIME_ISDIR(mimea));
 	isdirb = (mimeb && MIME_ISDIR(mimeb));
-	/*g_print("isdira=%d, mimea=%s, isdirb=%d, mimeb=%s\n",isdira,mimea,isdirb,mimeb);*/
+         #ifdef DEBUGFOLDERBROWSER
+        g_print("DEBUG::UPDATING FOLDERBROWSER\n");
+        g_print("isdira=%d, mimea=%s, isdirb=%d, mimeb=%s\n",isdira,mimea,isdirb,mimeb);
+        #endif
+	
 	if (isdira == isdirb) {		/* both files, or both directories */
 		if (namea == nameb) {
 			retval = 0;			/* both NULL */
@@ -183,6 +190,55 @@ static gchar *icon_name_from_icon(GIcon *icon) {
         return icon_name;
 }
 
+void add_file(GtkTreeStore *pTree, GFileInfo *info, GtkTreeIter *iter, GtkTreeIter *iter2){
+    GdkPixbuf *p_file_image = NULL;
+          //don't show hidden files
+       if (!g_file_info_get_is_hidden (info)  && !g_file_info_get_is_backup (info)){
+            const char *mime;
+            mime=g_file_info_get_content_type (info);
+            if (IS_TEXT(mime) && !IS_APPLICATION(mime)){
+              #ifdef DEBUGFOLDERBROWSER
+              g_print("DEBUG::ADD file to folderbrowser; Mime:%s\n",mime);
+              #endif
+            GIcon *icon= g_file_info_get_icon (info); // get iconname 
+            p_file_image =gtk_icon_theme_load_icon (gtk_icon_theme_get_default (), icon_name_from_icon(icon), 16, 0, NULL); // get icon of size 16px
+            gtk_tree_store_insert_with_values(GTK_TREE_STORE(pTree), iter2, iter, 0, 0, p_file_image, 1, g_file_info_get_display_name (info),2,mime,-1);
+            g_object_unref(info);
+            }
+       }
+ while (gtk_events_pending ())
+	  gtk_main_iteration ();
+
+}
+void add_folder(GtkTreeStore *pTree, gchar *sChemin,GFileInfo *info, GtkTreeIter *iter, GtkTreeIter *iter2){
+   GdkPixbuf *p_file_image = NULL;
+   if (g_file_info_get_file_type (info)==G_FILE_TYPE_DIRECTORY){
+       if (!g_file_info_get_is_hidden (info)){
+       p_file_image =gtk_icon_theme_load_icon (gtk_icon_theme_get_default (), "folder", 16, 0, NULL);
+       gtk_tree_store_insert_with_values(GTK_TREE_STORE(pTree), iter2, iter, 0, 0, p_file_image, 1, g_file_info_get_display_name (info),2, DIRMIME,-1);
+       GtkTreeIter iter_new;
+       gchar *folder=(gchar *)g_file_info_get_display_name (info);
+       gchar *next_dir = NULL;
+       next_dir = g_build_path (G_DIR_SEPARATOR_S, sChemin, folder, NULL);
+       #ifdef DEBUGFOLDERBROWSER
+       g_print("DEBUG::folderbrowser next dir:%s\n",next_dir);
+       #endif
+       //if has dot in name pos 0 don't process
+       if(folder[0]!='.'){
+       GFile *file;
+       file= g_file_new_for_uri (next_dir);
+       if (g_file_query_exists (file,NULL)){
+            g_object_unref(file);
+            create_tree(pTree,next_dir, iter2, &iter_new);
+       } else {
+           g_object_unref(file);
+       }
+       }
+       while (gtk_events_pending ())
+	gtk_main_iteration ();
+       }
+}
+}
 /*
  *   create tree
  *
@@ -191,11 +247,6 @@ static gchar *icon_name_from_icon(GIcon *icon) {
 void create_tree(GtkTreeStore *pTree, gchar *sChemin, GtkTreeIter *iter, GtkTreeIter *iter2){
     GFile *file;
     file= g_file_new_for_uri (sChemin);
-	//path don't exist?
-    if (!g_file_query_exists (file,NULL)){
-        gtk_button_set_label(GTK_BUTTON(main_window.button_dialog), DEFAULT_DIR);
-	return;
-	}
     GFileEnumerator *files;
     GError *error=NULL;
     files=g_file_enumerate_children (file,FOLDER_INFOFLAGS,G_FILE_QUERY_INFO_NOFOLLOW_SYMLINKS,NULL,&error);
@@ -208,40 +259,21 @@ GFileInfo *info;
 // Get fileinfo
 info=g_file_enumerator_next_file (files,NULL,&error);
 while (info){
-    GdkPixbuf *p_file_image = NULL;
    if (g_file_info_get_file_type (info)==G_FILE_TYPE_DIRECTORY){
-       if (!g_file_info_get_is_hidden (info)){
-       p_file_image =gtk_icon_theme_load_icon (gtk_icon_theme_get_default (), "folder", 16, 0, NULL);
-       gtk_tree_store_insert_with_values(GTK_TREE_STORE(pTree), iter2, iter, 0, 0, p_file_image, 1, g_file_info_get_display_name (info),2, DIRMIME,-1);
-       GtkTreeIter iter_new;
-       gchar *next_dir = NULL;
-       next_dir = g_build_path (G_DIR_SEPARATOR_S, sChemin, g_file_info_get_display_name (info), NULL);
-       error=NULL;
-	//Start file monitor for folderbrowser autorefresh
-	monitor= g_file_monitor_directory (file,G_FILE_MONITOR_NONE,NULL,&error);
+      add_folder(pTree, sChemin,info, iter, iter2);
+      if (error!=NULL){
+       //error=NULL;
+       //Start file monitor for folderbrowser autorefresh
+       monitor= g_file_monitor_directory (file,G_FILE_MONITOR_NONE,NULL,&error);
 	if (!monitor){
 	g_print(_("Error initing folderbrowser autorefresh. GIO Error:%s\n"),error->message);
 	return;
 	}else{
 	g_signal_connect(monitor, "changed", (GCallback) update_folderbrowser_signal, NULL);
 	}
-       //g_print("next:%s\n",next_dir);
-       create_tree(pTree,next_dir, iter2, &iter_new);
-       }
+      }
    } else {
-       //don't show hidden files
-       if (!g_file_info_get_is_hidden (info)  && !g_file_info_get_is_backup (info)){
-            const char *mime;
-            mime=g_file_info_get_content_type (info);
-            if (IS_TEXT(mime) && !IS_APPLICATION(mime)){
-            //("mimetype:%s\n",mime);
-            GIcon *icon= g_file_info_get_icon (info); // get iconname 
-            p_file_image =gtk_icon_theme_load_icon (gtk_icon_theme_get_default (), icon_name_from_icon(icon), 16, 0, NULL); // get icon of size 16px
-            gtk_tree_store_insert_with_values(GTK_TREE_STORE(pTree), iter2, iter, 0, 0, p_file_image, 1, g_file_info_get_display_name (info),2,mime,-1);
-            g_object_unref(info);
-            }
-       }
-     
+      add_file(pTree, info,iter, iter2);
    }
    // Get fileinfo
    info=g_file_enumerator_next_file (files,NULL,&error);
@@ -373,7 +405,10 @@ void popup_create_dir(void){
         filename= g_build_path (G_DIR_SEPARATOR_S, convert_to_full(pop.filename), name, NULL);
         config=g_file_new_for_uri (filename);
     }
-    //g_print("newdir:%s",filename);
+    #ifdef DEBUGFOLDERBROWSER
+    g_print("DEBUG::New directory:%s",filename);
+    #endif
+    
     if (!g_file_make_directory (config, NULL, &error)){
             g_print(_("Error creating folder. GIO error:%s\n"), error->message);
             gtk_widget_destroy(window);
@@ -502,6 +537,44 @@ void popup_create_dir(void){
     return TRUE; /* we handled this */
   }
 
+  gboolean key_press (GtkWidget   *widget, GdkEventKey *event, gpointer     user_data){
+      if (event->keyval==GDK_Delete || event->keyval==GDK_Return){
+      	GtkTreeModel *model;
+ 	GtkTreeSelection *select;
+ 	GtkTreeIter iter;
+        select = gtk_tree_view_get_selection(GTK_TREE_VIEW(widget));
+  	if(!sChemin)
+        sChemin=(gchar*)gtk_button_get_label(GTK_BUTTON(main_window.button_dialog));
+  if(gtk_tree_selection_get_selected (select, &model, &iter))
+  {
+       	gchar *nfile;
+        gchar *mime;
+     gtk_tree_model_get (model, &iter,1, &nfile,2,&mime, -1);
+
+ 	GtkTreeIter* parentiter=(GtkTreeIter*)g_malloc(sizeof(GtkTreeIter));
+ 	while(gtk_tree_model_iter_parent(model,parentiter,&iter)){
+ 		gchar *rom;
+     	gtk_tree_model_get (model, parentiter, 1, &rom, -1);
+ 		nfile = g_build_path (G_DIR_SEPARATOR_S, rom, nfile, NULL);
+ 		iter=*parentiter;
+ 		parentiter=(GtkTreeIter*)g_malloc(sizeof(GtkTreeIter));
+ 	}
+     gchar* file_name = g_build_path (G_DIR_SEPARATOR_S, sChemin, nfile, NULL);
+     if (event->keyval==GDK_Delete){
+         //delete file
+         pop.filename=file_name;
+         pop.mime=mime;
+         popup_delete_file();
+     }else {
+         //open file
+         if (!MIME_ISDIR(mime))
+         switch_to_file_or_open(file_name, 0);
+         }
+     }
+      }
+  }
+      return TRUE;
+  }
 /*
  * folderbrowser_create
  *
@@ -533,7 +606,7 @@ void folderbrowser_create(MainWindow *main_window)
  	g_signal_connect(G_OBJECT(main_window->pListView), "row-activated", G_CALLBACK(tree_double_clicked), NULL);
         g_signal_connect(G_OBJECT(main_window->pListView), "button-press-event", (GCallback) view_onButtonPressed, NULL);
         g_signal_connect(G_OBJECT(main_window->pListView), "popup-menu", (GCallback) view_onPopupMenu, NULL);
-
+        g_signal_connect(G_OBJECT(main_window->pListView), "key-press-event", G_CALLBACK(key_press), NULL);
  	pColumn=NULL;
  	pCellRenderer=NULL;
         pCellRenderer = gtk_cell_renderer_text_new();
@@ -564,7 +637,6 @@ void folderbrowser_create(MainWindow *main_window)
         }
         g_object_unref(config);
  	g_signal_connect(G_OBJECT(main_window->button_dialog), "pressed", G_CALLBACK(pressed_button_file_chooser), NULL);
-
         gtk_widget_set_size_request (main_window->pListView,80,450);
  	//Close button for the side bar
 	GtkWidget *hbox;
@@ -597,7 +669,28 @@ void folderbrowser_create(MainWindow *main_window)
                                 gtk_tree_sortable_set_sort_func(GTK_TREE_SORTABLE(main_window->pTree), 1,
 										filebrowser_sort_func, NULL, NULL);
                                 gtk_tree_sortable_set_sort_column_id(GTK_TREE_SORTABLE(main_window->pTree), 1, GTK_SORT_ASCENDING);
- 				create_tree(GTK_TREE_STORE(main_window->pTree),sChemin,iter,&iter2);
-   	}
+				init_folderbrowser(GTK_TREE_STORE(main_window->pTree),sChemin,iter,&iter2);
+   }
 }
-
+void init_folderbrowser(GtkTreeStore *pTree, gchar *filename, GtkTreeIter *iter, GtkTreeIter *iter2){
+    GFile *file;
+    GError *error=NULL;
+    file= g_file_new_for_uri (filename);
+	//path don't exist?
+    if (!g_file_query_exists (file,NULL)){
+        gtk_button_set_label(GTK_BUTTON(main_window.button_dialog), DEFAULT_DIR);
+	return;
+    }
+    GFileInfo *info =g_file_query_info (file,G_FILE_ATTRIBUTE_ACCESS_CAN_READ, G_FILE_QUERY_INFO_NOFOLLOW_SYMLINKS,NULL,&error);
+    if (!info){
+    g_print("ERROR initing folderbrowser:%s\n",error->message);
+    gtk_button_set_label(GTK_BUTTON(main_window.button_dialog), DEFAULT_DIR);
+    return;
+    }
+    if (!g_file_info_get_attribute_boolean (info, G_FILE_ATTRIBUTE_ACCESS_CAN_READ)){
+    g_print("Error Don't have read access for current folderbrowser path.\n");
+    gtk_button_set_label(GTK_BUTTON(main_window.button_dialog), DEFAULT_DIR);
+    return;
+    }
+    create_tree(GTK_TREE_STORE(main_window.pTree),sChemin,iter,iter2);
+}
