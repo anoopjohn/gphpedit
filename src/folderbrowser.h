@@ -43,4 +43,8 @@ void update_folderbrowser (void);
 void update_folderbrowser_signal (GFileMonitor *monitor,GFile *file,GFile *other_file, GFileMonitorEvent event_type, gpointer user_data);
 void tree_double_clicked(GtkTreeView *tree_view,GtkTreePath *path,GtkTreeViewColumn *column,gpointer user_data);
 gint filebrowser_sort_func(GtkTreeModel * model, GtkTreeIter * a, GtkTreeIter * b, gpointer user_data);
+void fb_file_v_drag_data_received(GtkWidget * widget, GdkDragContext * context, gint x,  gint y, GtkSelectionData * data, guint info, guint time,gpointer user_data);
+void copy_async_lcb(GObject *source_object,GAsyncResult *res,gpointer user_data);
+void copy_uris_async(GFile *destdir, GSList *sources);
+void copy_files_async(GFile *destdir, gchar *sources);
 #endif

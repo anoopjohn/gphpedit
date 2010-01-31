@@ -33,10 +33,11 @@ Folderbrowser has the following features:
 -Double click in treeview open files and expand/collapse treerow for directories
 -Keypress capture: press delete will delete current selected file/folder; press enter will open current selected file/folder
 -Only displays files which could be opened by the editor
+-Drag and drop: if you drop uri into the folderbrowser these files will be copied to current folderbrowser folder
 */
-//TODO:DRAG AND DROP HANDLING
 //TODO:Async Update
 #include "folderbrowser.h"
+#include "tab.h"
 //#define DEBUGFOLDERBROWSER
 typedef struct {
   gchar *filename;
@@ -45,6 +46,10 @@ typedef struct {
 POPUPDATA pop;
 GFileMonitor *monitor;
 
+enum {
+	TARGET_URI_LIST,
+	TARGET_STRING
+};
 void update_folderbrowser (void){
     #ifdef DEBUGFOLDERBROWSER
     g_print("DEBUG::UPDATING FOLDERBROWSER");
@@ -567,7 +572,7 @@ void popup_create_dir(void){
          popup_delete_file();
      }else {
          //open file
-         if (!MIME_ISDIR(mime))
+         if (!MIME_ISDIR(mime)){
          switch_to_file_or_open(file_name, 0);
          }
      }
@@ -607,6 +612,14 @@ void folderbrowser_create(MainWindow *main_window)
         g_signal_connect(G_OBJECT(main_window->pListView), "button-press-event", (GCallback) view_onButtonPressed, NULL);
         g_signal_connect(G_OBJECT(main_window->pListView), "popup-menu", (GCallback) view_onPopupMenu, NULL);
         g_signal_connect(G_OBJECT(main_window->pListView), "key-press-event", G_CALLBACK(key_press), NULL);
+        const GtkTargetEntry drag_dest_types[] = {
+		{"text/uri-list", 0, TARGET_URI_LIST},
+		{"STRING", 0, TARGET_STRING},
+	};
+        gtk_drag_dest_set(main_window->pListView, (GTK_DEST_DEFAULT_ALL), drag_dest_types, 2,
+					  (GDK_ACTION_DEFAULT | GDK_ACTION_COPY));
+	g_signal_connect(G_OBJECT(main_window->pListView), "drag_data_received", G_CALLBACK(fb_file_v_drag_data_received),NULL);
+
  	pColumn=NULL;
  	pCellRenderer=NULL;
         pCellRenderer = gtk_cell_renderer_text_new();
@@ -694,3 +707,166 @@ void init_folderbrowser(GtkTreeStore *pTree, gchar *filename, GtkTreeIter *iter,
     }
     create_tree(GTK_TREE_STORE(main_window.pTree),sChemin,iter,iter2);
 }
+
+void fb_file_v_drag_data_received(GtkWidget * widget, GdkDragContext * context, gint x,  gint y, GtkSelectionData * data, guint info, guint time,gpointer user_data)
+{
+
+	gchar *stringdata;
+	GFile *destdir = g_file_new_for_path ((gchar*)gtk_button_get_label(GTK_BUTTON(main_window.button_dialog)));
+	g_object_ref(destdir);
+
+	g_signal_stop_emission_by_name(widget, "drag_data_received");
+	if ((data->length == 0) || (data->format != 8)
+		|| ((info != TARGET_STRING) && (info != TARGET_URI_LIST))) {
+		gtk_drag_finish(context, FALSE, TRUE, time);
+		return;
+	}
+	stringdata = g_strndup((gchar *) data->data, data->length);
+	g_print("fb2_file_v_drag_data_received, stringdata='%s', len=%d\n", stringdata, data->length);
+	if (destdir) {
+		if (strchr(stringdata, '\n') == NULL) {	/* no newlines, probably a single file */
+			GSList *list = NULL;
+			GFile *uri;
+			uri = g_file_new_for_commandline_arg(stringdata);
+			list = g_slist_append(list, uri);
+        		copy_uris_async(destdir, list);
+			g_slist_free(list);
+			g_object_unref(uri);
+		} else {
+                    /* there are newlines, probably this is a list of uri's */
+			copy_files_async(destdir, stringdata);
+		}
+		g_object_unref(destdir);
+		gtk_drag_finish(context, TRUE, TRUE, time);
+	} else {
+		gtk_drag_finish(context, FALSE, TRUE, time);
+	}
+	g_free(stringdata);
+}
+/************************/
+/**
+ * trunc_on_char:
+ * @string: a #gchar * to truncate
+ * @which_char: a #gchar with the char to truncate on
+ *
+ * Returns a pointer to the same string which is truncated at the first
+ * occurence of which_char
+ *
+ * Return value: the same gchar * as passed to the function
+ **/
+gchar *trunc_on_char(gchar * string, gchar which_char)
+{
+	gchar *tmpchar = string;
+	while(*tmpchar) {
+		if (*tmpchar == which_char) {
+			*tmpchar = '\0';
+			return string;
+		}
+		tmpchar++;
+	}
+	return string;
+}
+/********************/
+ typedef struct {
+ GSList *sourcelist;
+ GFile *destdir;
+ GFile *curfile, *curdest;
+ } Tcopyfile;
+
+  static gboolean copy_uris_process_queue(Tcopyfile *cf);
+  void copy_async_lcb(GObject *source_object,GAsyncResult *res,gpointer user_data) {
+  Tcopyfile *cf = user_data;
+  gboolean done;
+  GError *error=NULL;
+ /* fill in the blanks */
+  	done = g_file_copy_finish(cf->curfile,res,&error);
+
+  	if (!done) {
+  		if (error->code == G_IO_ERROR_EXISTS) {
+  			gint retval;
+  			gchar *tmpstr, *dispname;
+                        GFileInfo *info =g_file_query_info (cf->curfile,"standard::display-name", G_FILE_QUERY_INFO_NOFOLLOW_SYMLINKS,NULL,NULL);
+  			dispname = (gchar *)g_file_info_get_display_name (info);
+  			tmpstr = g_strdup_printf(_("%s cannot be copied, it already exists, overwrite?"),dispname);
+  			retval = yes_no_dialog (_("Overwrite file?"), tmpstr);
+  			g_free(tmpstr);
+  			g_free(dispname);
+  			if (retval != -8) {
+  				g_file_copy_async(cf->curfile,cf->curdest,G_FILE_COPY_OVERWRITE,
+  					G_PRIORITY_LOW,NULL,
+  					NULL,NULL,
+  					copy_async_lcb,cf);
+  				return;
+  			}
+                }else {
+                    g_print("ERROR copying file::%s\n",error->message);
+                }
+  	}
+  	g_object_unref(cf->curfile);
+  	g_object_unref(cf->curdest);
+  	if (!copy_uris_process_queue(cf)) {
+  		update_folderbrowser();
+  		g_object_unref(cf->destdir);
+  		g_free(cf);
+  	}
+  }
+
+  static gboolean copy_uris_process_queue(Tcopyfile *cf) {
+  	if (cf->sourcelist) {
+  		GFile *uri, *dest;
+  		char *tmp;
+
+  		uri = cf->sourcelist->data;
+  		cf->sourcelist = g_slist_remove(cf->sourcelist, uri);
+  		tmp = g_file_get_basename(uri);
+  		dest = g_file_get_child(cf->destdir,tmp);
+  		g_free(tmp);
+
+  		cf->curfile = uri;
+  		cf->curdest = dest;
+  		g_file_copy_async(uri,dest,G_FILE_COPY_NONE,
+  				G_PRIORITY_LOW,NULL,
+  				NULL,NULL,
+  				copy_async_lcb,cf);
+
+  		return TRUE;
+  	}
+  	return FALSE;
+  }
+
+  void copy_uris_async(GFile *destdir, GSList *sources) {
+  	Tcopyfile *cf;
+  	GSList *tmplist;
+  	cf = g_new0(Tcopyfile,1);
+  	//cf->bfwin = bfwin;
+  	cf->destdir = destdir;
+  	g_object_ref(cf->destdir);
+  	cf->sourcelist = g_slist_copy(sources);
+  	tmplist = cf->sourcelist;
+  	while (tmplist) {
+  		g_object_ref(tmplist->data);
+  		tmplist = tmplist->next;
+  	}
+  	copy_uris_process_queue(cf);
+  }
+void copy_files_async(GFile *destdir, gchar *sources) {
+  	Tcopyfile *cf;
+  	gchar **splitted, **tmp;
+  	cf = g_new0(Tcopyfile,1);
+  	//cf->bfwin = bfwin;
+  	cf->destdir = destdir;
+  	g_object_ref(cf->destdir);
+  	/* create the source and destlist ! */
+  	tmp = splitted = g_strsplit(sources, "\n",0);
+  	while (*tmp) {
+  		trunc_on_char(trunc_on_char(*tmp, '\r'), '\n');
+  		if (strlen(*tmp) > 1) {
+  			GFile *src;
+                        src = g_file_new_for_commandline_arg(*tmp);
+  			cf->sourcelist = g_slist_append(cf->sourcelist, src);
+  		}
+  		tmp++;
+  	}
+  	g_strfreev(splitted);
+  	copy_uris_process_queue(cf);
+  }
