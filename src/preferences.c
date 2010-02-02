@@ -184,7 +184,11 @@ void preferences_load(void)
             error=NULL;
         }
 	preferences.show_indentation_guides = gconf_client_get_int (config,"/gPHPEdit/defaults/showindentationguides",NULL);
-	preferences.show_folding = gconf_client_get_int (config,"/gPHPEdit/defaults/showfolding",NULL);
+	preferences.show_folding = gconf_client_get_bool (config,"/gPHPEdit/defaults/showfolding",&error);
+	if (preferences.show_folding==0 && error!=NULL){
+	preferences.show_folding=TRUE;
+	error=NULL;
+	}
 	preferences.edge_mode = gconf_client_get_int (config,"/gPHPEdit/defaults/edgemode",NULL);
 	preferences.edge_column = gconf_client_get_int (config,"/gPHPEdit/defaults/edgecolumn",&error);
         if (preferences.edge_column==0 && error!=NULL){
@@ -1298,7 +1302,7 @@ void preferences_load(void)
         }
 	preferences.sql_identifier_bold = gconf_client_get_bool(config,"/gPHPEdit/sql_identifier/bold",NULL);
 	preferences.sql_identifier_italic = gconf_client_get_bool(config,"/gPHPEdit/sql_identifier/italic",NULL);
-
+        
         check_for_pango_fonts();
 }
 
@@ -1706,5 +1710,7 @@ void preferences_save()
 	gconf_client_set_int (config,"/gPHPEdit/sql_identifier/size", preferences.sql_identifier_size,NULL);
 	gconf_client_set_bool (config,"/gPHPEdit/sql_identifier/italic", preferences.sql_identifier_italic,NULL);
 	gconf_client_set_bool (config,"/gPHPEdit/sql_identifier/bold", preferences.sql_identifier_bold,NULL);
+
+	gconf_client_suggest_sync (config,NULL);
         g_string_free (uri, TRUE);
 }

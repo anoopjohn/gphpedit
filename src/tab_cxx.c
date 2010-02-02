@@ -79,8 +79,9 @@ void scintilla_cxx_set_lexer(GtkScintilla *scintilla, Preferences prefs)
     gtk_scintilla_set_edge_column (scintilla, prefs.edge_column);
     gtk_scintilla_set_edge_colour (scintilla, prefs.edge_colour);
 
-	gtk_scintilla_set_keywords(scintilla, 0, "asm auto bool break case catch char class const const_cast continue default delete do double dynamic_cast else enum explicit export extern false float for friend goto if inline int long mutable namespace new operator private protected public register reinterpret_cast return short signed sizeof static static_cast struct switch template this throw true try typedef typeid typename union unsigned using virtual void volatile wchar_t while addindex addtogroup anchor arg attention author b brief bug c class code date def defgroup deprecated dontinclude e em endcode endhtmlonly endif endlatexonly endlink endverbatim enum example exception file hideinitializer htmlinclude htmlonly if image include ingroup internal invariant interface latexonly li line link mainpage name namespace nosubgrouping note overload p page par param post pre ref relates remarks return retval sa section see showinitializer since skip skipline struct subsection test throw todo typedef union until var verbatim verbinclude version warning weakgroup");
+	gtk_scintilla_set_keywords(scintilla, 0, "asm auto bool break case catch char class const const_cast continue default delete do double dynamic_cast else enum explicit export extern false float for friend goto if inline int long mutable namespace new operator private protected public register reinterpret_cast return short signed sizeof static static_cast struct switch template this throw true try typedef typeid typename union unsigned using virtual void volatile wchar_t while addindex addtogroup anchor arg attention author b brief bug c class code date def defgroup deprecated dontinclude e em endcode endhtmlonly endif endlatexonly endlink endverbatim enum example exception file hideinitializer htmlinclude htmlonly if image include ingroup internal invariant interface latexonly li line link mainpage name namespace nosubgrouping note overload p page par param post pre ref relates remarks return retval sa section see showinitializer since skip skipline struct subsection test throw todo typedef union until var verbatim verbinclude version warning weakgroup printf scanf");
 	
+    gtk_scintilla_set_keywords(scintilla, 1, "strstr strlen strcmp clrscr gotoXY FILE stat memcpy memmove memccpy memset strncpy strcpy strdup strndup fclose fopen freopen fdopen remove rename rewind tmpfile clearerr feof ferror fflush fflush fgetpos fgetc fgets fputc fputs ftell fseek fsetpos fread fwrite getc getchar gets fprintf sprintf vprintf perror putc putchar fputchar fscanf sscanf setbuf setvbuf tmpnam ungetc puts atof atoi atol strtod strtol strtoul rand srand malloc calloc realloc free abort atexit exit getenv system bsearch qsort abs div ldiv");
     gtk_scintilla_style_set_fore (scintilla, SCE_C_STRING, prefs.php_hstring_fore);
     gtk_scintilla_style_set_font (scintilla, SCE_C_STRING, prefs.php_hstring_font);
     gtk_scintilla_style_set_back (scintilla, SCE_C_STRING, prefs.php_hstring_back);
@@ -95,12 +96,12 @@ void scintilla_cxx_set_lexer(GtkScintilla *scintilla, Preferences prefs)
     gtk_scintilla_style_set_italic (scintilla, SCE_C_CHARACTER, prefs.php_simplestring_italic);
     gtk_scintilla_style_set_bold (scintilla, SCE_C_CHARACTER, prefs.php_simplestring_bold);
 
-	gtk_scintilla_style_set_font (scintilla, SCE_C_WORD, prefs.php_word_font);
-	gtk_scintilla_style_set_fore (scintilla, SCE_C_WORD, prefs.php_word_fore);
-    gtk_scintilla_style_set_back (scintilla, SCE_C_WORD, prefs.php_word_back);
-    gtk_scintilla_style_set_size (scintilla, SCE_C_WORD, prefs.php_word_size);
-    gtk_scintilla_style_set_italic (scintilla, SCE_C_WORD, prefs.php_word_italic);
-    gtk_scintilla_style_set_bold (scintilla, SCE_C_WORD, prefs.php_word_bold);
+	gtk_scintilla_style_set_font (scintilla, SCE_C_WORD, prefs.php_variable_font);
+	gtk_scintilla_style_set_fore (scintilla, SCE_C_WORD, prefs.php_variable_fore);
+    gtk_scintilla_style_set_back (scintilla, SCE_C_WORD, prefs.php_variable_back);
+    gtk_scintilla_style_set_size (scintilla, SCE_C_WORD, prefs.php_variable_size);
+    gtk_scintilla_style_set_italic (scintilla, SCE_C_WORD, prefs.php_variable_italic);
+    gtk_scintilla_style_set_bold (scintilla, SCE_C_WORD, prefs.php_variable_bold);
 
     gtk_scintilla_style_set_fore (scintilla, SCE_C_NUMBER, prefs.php_number_fore);
     gtk_scintilla_style_set_font (scintilla, SCE_C_NUMBER, prefs.php_number_font);
@@ -109,13 +110,7 @@ void scintilla_cxx_set_lexer(GtkScintilla *scintilla, Preferences prefs)
     gtk_scintilla_style_set_italic (scintilla, SCE_C_NUMBER, prefs.php_number_italic);
     gtk_scintilla_style_set_bold (scintilla, SCE_C_NUMBER, prefs.php_number_bold);
 
-    /*gtk_scintilla_style_set_fore (scintilla, SCE_C_IDENTIFIER, prefs.php_variable_fore);
-    gtk_scintilla_style_set_font (scintilla, SCE_C_IDENTIFIER, prefs.php_variable_font);
-    gtk_scintilla_style_set_back (scintilla, SCE_C_IDENTIFIER, prefs.php_variable_back);
-    gtk_scintilla_style_set_size (scintilla, SCE_C_IDENTIFIER, prefs.php_variable_size);
-    gtk_scintilla_style_set_italic (scintilla, SCE_C_IDENTIFIER, prefs.php_variable_italic);
-    gtk_scintilla_style_set_bold (scintilla, SCE_C_IDENTIFIER, prefs.php_variable_bold);*/
-	gtk_scintilla_style_set_fore (scintilla, SCE_C_IDENTIFIER, prefs.php_default_fore);
+    gtk_scintilla_style_set_fore (scintilla, SCE_C_IDENTIFIER, prefs.php_default_fore);
     gtk_scintilla_style_set_font (scintilla, SCE_C_IDENTIFIER, prefs.php_default_font);
     gtk_scintilla_style_set_back (scintilla, SCE_C_IDENTIFIER, prefs.php_default_back);
     gtk_scintilla_style_set_size (scintilla, SCE_C_IDENTIFIER, prefs.php_default_size);
@@ -136,6 +131,52 @@ void scintilla_cxx_set_lexer(GtkScintilla *scintilla, Preferences prefs)
     gtk_scintilla_style_set_italic (scintilla, SCE_C_COMMENTLINE, prefs.php_comment_line_italic);
     gtk_scintilla_style_set_bold (scintilla, SCE_C_COMMENTLINE, prefs.php_comment_line_bold);
 
+    gtk_scintilla_style_set_fore (scintilla, SCE_C_PREPROCESSOR, prefs.html_script_fore);
+    gtk_scintilla_style_set_font (scintilla, SCE_C_PREPROCESSOR, prefs.html_script_font);
+    gtk_scintilla_style_set_back (scintilla, SCE_C_PREPROCESSOR, prefs.html_script_back);
+    gtk_scintilla_style_set_size (scintilla, SCE_C_PREPROCESSOR, prefs.html_script_size);
+    gtk_scintilla_style_set_italic (scintilla, SCE_C_PREPROCESSOR, prefs.html_script_italic);
+    gtk_scintilla_style_set_bold (scintilla, SCE_C_PREPROCESSOR, TRUE);
+
+    gtk_scintilla_style_set_fore (scintilla, SCE_C_OPERATOR, prefs.css_operator_fore);
+    gtk_scintilla_style_set_font (scintilla, SCE_C_OPERATOR, prefs.css_operator_font);
+    gtk_scintilla_style_set_back (scintilla, SCE_C_OPERATOR, prefs.css_operator_back);
+    gtk_scintilla_style_set_size (scintilla, SCE_C_OPERATOR, prefs.css_operator_size);
+    gtk_scintilla_style_set_italic (scintilla, SCE_C_OPERATOR, prefs.css_operator_italic);
+    gtk_scintilla_style_set_bold (scintilla, SCE_C_OPERATOR, prefs.css_operator_bold);
+ 
+    gtk_scintilla_style_set_fore (scintilla, SCE_C_REGEX, prefs.css_pseudoclass_fore);
+    gtk_scintilla_style_set_font (scintilla, SCE_C_REGEX, prefs.css_pseudoclass_font);
+    gtk_scintilla_style_set_back (scintilla, SCE_C_REGEX, prefs.css_pseudoclass_back);
+    gtk_scintilla_style_set_size (scintilla, SCE_C_REGEX, prefs.css_pseudoclass_size);
+    gtk_scintilla_style_set_italic (scintilla, SCE_C_REGEX, prefs.css_pseudoclass_italic);
+    gtk_scintilla_style_set_bold (scintilla, SCE_C_REGEX, prefs.css_pseudoclass_bold);
+
+    gtk_scintilla_style_set_fore (scintilla, SCE_C_UUID, prefs.css_id_fore);
+    gtk_scintilla_style_set_font (scintilla, SCE_C_UUID, prefs.css_id_font);
+    gtk_scintilla_style_set_back (scintilla, SCE_C_UUID, prefs.css_id_back);
+    gtk_scintilla_style_set_size (scintilla, SCE_C_UUID, prefs.css_id_size);
+    gtk_scintilla_style_set_italic (scintilla, SCE_C_UUID, prefs.css_id_italic);
+    gtk_scintilla_style_set_bold (scintilla, SCE_C_UUID, prefs.css_id_bold);
+    
+    gtk_scintilla_style_set_fore (scintilla, SCE_C_VERBATIM, prefs.css_important_fore);
+    gtk_scintilla_style_set_font (scintilla, SCE_C_VERBATIM, prefs.css_important_font);
+    gtk_scintilla_style_set_back (scintilla, SCE_C_VERBATIM, prefs.css_important_back);
+    gtk_scintilla_style_set_size (scintilla, SCE_C_VERBATIM, prefs.css_important_size);
+    gtk_scintilla_style_set_italic (scintilla, SCE_C_VERBATIM, prefs.css_important_italic);
+    gtk_scintilla_style_set_bold (scintilla, SCE_C_VERBATIM, prefs.css_important_bold);
+    
+    gtk_scintilla_style_set_fore (scintilla, SCE_C_GLOBALCLASS, prefs.javascript_keyword_fore);
+    gtk_scintilla_style_set_font (scintilla, SCE_C_GLOBALCLASS, prefs.javascript_keyword_font);
+    gtk_scintilla_style_set_back (scintilla, SCE_C_GLOBALCLASS, prefs.javascript_keyword_back);
+    gtk_scintilla_style_set_size (scintilla, SCE_C_GLOBALCLASS, prefs.javascript_keyword_size);
+    gtk_scintilla_style_set_italic (scintilla, SCE_C_GLOBALCLASS, prefs.javascript_keyword_italic);
+    gtk_scintilla_style_set_bold (scintilla, SCE_C_GLOBALCLASS, prefs.javascript_keyword_bold);
+
+	gtk_scintilla_indic_set_style(scintilla, 0, INDIC_SQUIGGLE);
+	gtk_scintilla_indic_set_fore(scintilla, 0, scintilla_color(255,0,0));
+
+	gtk_scintilla_set_property(scintilla, "fold.html", "1");
 	gtk_scintilla_set_property(scintilla, "fold", "1");
 	gtk_scintilla_colourise(scintilla, 0, -1);
 }

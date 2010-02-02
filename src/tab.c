@@ -143,6 +143,12 @@ void tab_set_configured_scintilla_properties(GtkScintilla *scintilla, Preference
     gtk_scintilla_style_set_bold (scintilla, STYLE_DEFAULT, prefs.default_bold);
     gtk_scintilla_style_set_fore (scintilla, STYLE_DEFAULT, prefs.default_fore);
     gtk_scintilla_style_set_back (scintilla, STYLE_DEFAULT, prefs.default_back);
+
+    //makers margin settings
+    gtk_scintilla_set_margin_type_n(GTK_SCINTILLA(scintilla), 1, SC_MARGIN_SYMBOL);
+    gtk_scintilla_set_margin_width_n (GTK_SCINTILLA(scintilla), 1, 14);
+    gtk_scintilla_set_margin_sensitive_n(GTK_SCINTILLA(scintilla), 1, 1);
+    g_signal_connect (G_OBJECT (scintilla), "margin_click", G_CALLBACK (margin_clicked), NULL);
 }
 
 
@@ -183,13 +189,9 @@ static void tab_set_folding(Editor *editor, gint folding)
 		
 		gtk_scintilla_set_margin_width_n (GTK_SCINTILLA(editor->scintilla), 2, 14);
 		
-		//makers margin settings
-		gtk_scintilla_set_margin_type_n(GTK_SCINTILLA(main_window.current_editor->scintilla), 1, SC_MARGIN_SYMBOL);
-		gtk_scintilla_set_margin_width_n (GTK_SCINTILLA(main_window.current_editor->scintilla), 1, 14);
-		gtk_scintilla_set_margin_sensitive_n(GTK_SCINTILLA(main_window.current_editor->scintilla), 1, 1);
 		//g_signal_connect (G_OBJECT (editor->scintilla), "fold_clicked", G_CALLBACK (fold_clicked), NULL);
 		g_signal_connect (G_OBJECT (editor->scintilla), "modified", G_CALLBACK (handle_modified), NULL);
-		g_signal_connect (G_OBJECT (editor->scintilla), "margin_click", G_CALLBACK (margin_clicked), NULL);
+		//g_signal_connect (G_OBJECT (editor->scintilla), "margin_click", G_CALLBACK (margin_clicked), NULL);
 	}
 }
 
@@ -331,8 +333,7 @@ void tab_file_read(GObject *source_object, GAsyncResult *res, gpointer user_data
 	
 	tab_validate_buffer_and_insert(editor->buffer, editor);
 	tab_reset_scintilla_after_open(editor);
-	
-	g_free(editor->buffer);
+        g_free(editor->buffer);
         g_input_stream_close ((GInputStream *)source_object,NULL,&error);
 	if (gotoline_after_reload) {
 		goto_line_int(gotoline_after_reload);
@@ -429,10 +430,10 @@ void tab_help_load_file(Editor *editor, GString *filename)
         error=NULL;
         
         file=g_file_new_for_uri (convert_to_full(filename->str));
-        info=g_file_query_info (file,G_FILE_ATTRIBUTE_STANDARD_SIZE,0,NULL,&error);
-
+	info=g_file_query_info (file,G_FILE_ATTRIBUTE_STANDARD_SIZE,0,NULL,&error);
         if (!info){
-            g_warning (_("Could not stat the file %s. GIO error: %s \n"), filename->str,error->message);
+            g_warning (_("Could not get file info for file %s. GIO error: %s \n"), filename->str,error->message);
+		return;
         }
         size= g_file_info_get_size (info);
         g_object_unref(info);
@@ -442,11 +443,13 @@ void tab_help_load_file(Editor *editor, GString *filename)
 		// This is funny in unix, but never hurts 
 		g_warning (_("This file is too big. Unable to allocate memory."));
 		//die();
+		return;
 	}
 	input=g_file_read (file,NULL,&error);
         if (input ==NULL){
             g_print("Error reading file. GIO error:%s\n",error->message);
             g_free (buffer);
+	return;
         }
 	nchars= g_input_stream_read ((GInputStream *)input,buffer,size,NULL,&error);
         if (nchars ==-1){
@@ -874,6 +877,7 @@ void set_editor_to_cxx(Editor *editor)
 {
 	tab_cxx_set_lexer(editor);
 	editor->type = TAB_CXX;
+	tab_set_folding(editor, TRUE);
 }
 
 void set_editor_to_perl(Editor *editor)
@@ -1060,10 +1064,8 @@ gboolean tab_create_new(gint type, GString *filename)
 	// When a new tab request is processed if the only current tab is an untitled
 	// and unmodified tab then close it 
 	// close_saved_empty_Untitled();
-        
-	editor = tab_new_editor();
+        editor = tab_new_editor();
 	editor->type = type;
-	
 	if (editor->type == TAB_HELP) {
 		if (!tab_create_help(editor, filename)) {
 			// Couldn't find the help file, don't keep the editor
@@ -1076,27 +1078,25 @@ gboolean tab_create_new(gint type, GString *filename)
 	}
 	else {
 		editor->type = TAB_FILE;
-		editor->scintilla = gtk_scintilla_new();
+                editor->scintilla = gtk_scintilla_new();
                 tab_set_general_scintilla_properties(editor);
-
-		editor->label = gtk_label_new (_("Untitled"));
+                editor->label = gtk_label_new (_("Untitled"));
 		gtk_widget_show (editor->label);
                 
 		if (abs_path != NULL) {
 			editor->filename = g_string_new(abs_path);
 			editor->short_filename = g_path_get_basename(editor->filename->str);
-			if (!file_created) {
+                        if (!file_created) {
 				tab_load_file(editor);
 			}
-
-			//tab_check_php_file(editor);
+                        //tab_check_php_file(editor);
 			tab_check_css_file(editor);
 			tab_check_cxx_file(editor);
 			tab_check_perl_file(editor);
 			tab_check_python_file(editor);
 			tab_check_sql_file(editor);
-			classbrowser_update();
-			editor->is_untitled=FALSE;
+                        classbrowser_update();
+                        editor->is_untitled=FALSE;
 		}
 		else {
                     	editor->filename = g_string_new(_("Untitled"));
@@ -1124,12 +1124,11 @@ gboolean tab_create_new(gint type, GString *filename)
 		main_window.current_editor = editor;
 
 		if (gotoline_after_create_tab) {
-			goto_line_int(gotoline_after_create_tab);
+                    	goto_line_int(gotoline_after_create_tab);
 			gotoline_after_create_tab = 0;
 		}
 		editor->saved=TRUE;
 	}
-
 	update_app_title();
 
 	g_free(abs_path);
@@ -1356,9 +1355,7 @@ void margin_clicked (GtkWidget *scintilla, gint modifiers, gint position, gint m
 {
 if(margin!=1){
 	gint line;
-	
 	line = gtk_scintilla_line_from_position(GTK_SCINTILLA(scintilla), position);
-
 	if (preferences.show_folding && margin == 2) {
 		fold_clicked(scintilla, line, modifiers);
 	}
