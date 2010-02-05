@@ -2,6 +2,7 @@
 
    Copyright (C) 2003, 2004, 2005 Andy Jeffries <andy at gphpedit.org>
    Copyright (C) 2009 Anoop John <anoop dot john at zyxware.com>
+   Copyright (C) 2009 José Rostagno (for vijona.com.ar)   
 
    For more information or to find the latest release, visit our 
    website at http://www.gphpedit.org/
@@ -254,7 +255,7 @@ void main_window_create_menu(void){
   main_window.menu->sep = create_separator_item(main_window.menu->menunew);
   main_window.menu->save=create_stock_menu_item(main_window.menu->save,main_window.menu->menunew,GTK_STOCK_SAVE, _("Save the file currently selected in the editor"), GDK_s, GDK_CONTROL_MASK);
   g_signal_connect(G_OBJECT(main_window.menu->save), "activate", G_CALLBACK(on_save1_activate), NULL);
-  main_window.menu->saveas=create_stock_menu_item(main_window.menu->saveas,main_window.menu->menunew,GTK_STOCK_SAVE, _("Save the file currently selected in the editor"), GDK_s, GDK_SHIFT_MASK | GDK_CONTROL_MASK);
+  main_window.menu->saveas=create_stock_menu_item(main_window.menu->saveas,main_window.menu->menunew,GTK_STOCK_SAVE_AS, _("Save the file currently selected in the editor"), GDK_s, GDK_SHIFT_MASK | GDK_CONTROL_MASK);
   g_signal_connect(G_OBJECT(main_window.menu->saveas), "activate", G_CALLBACK(on_save_as1_activate), NULL);
   main_window.menu->saveall = create_mnemonic_menu_item(main_window.menu->saveall ,main_window.menu->menunew,_("Save A_ll"), _("Save all open unsaved files"), GDK_a, GDK_SHIFT_MASK | GDK_MOD1_MASK);
   g_signal_connect(G_OBJECT(main_window.menu->saveall), "activate", G_CALLBACK(on_saveall1_activate), NULL);
