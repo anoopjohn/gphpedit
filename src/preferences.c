@@ -25,81 +25,61 @@
 #include "preferences.h"
 #include "main_window.h"
 #include "main.h"
+//debug macro
+//#define DEBUG
 
+#define DEFAULT_FONT_SIZE 12
+#define DEFAULT_FONT "!Sans"
+#define DEFAULT_PHP_EXTENSIONS "php,inc,phtml,php3,xml,htm,html"
+#define DEFAULT_BACK_COLOR 16777215
 Preferences preferences;
-void check_for_pango_fonts(void)
-{
-        GtkWidget *dialog;
 
-	// This is crap - it should use a nice function and pass in a pointer to each font element for freeing and resetting
-	// but it's been far too long since I used pointers that in-depth - Andy.
-
-	if (strstr(preferences.default_font, "*") != NULL) {	
-		dialog = gtk_message_dialog_new (NULL,
-                                  GTK_DIALOG_MODAL,
-				  GTK_MESSAGE_ERROR,
-                                  GTK_BUTTONS_CLOSE,
-                                  _("Your old settings used non-Pango (modern) fonts.  gPHPEdit no longer supports old fonts, your preferences have been updated."));
-		gtk_dialog_run (GTK_DIALOG (dialog));
-		gtk_widget_destroy (dialog);
-
-		// Only need to set the font names, the colours will be the same, and in 
-		// previous versions size, italic and bold weren't set so they will have
-		// been set using gconf
-		
-		preferences.default_font = "!Sans";
-		preferences.line_number_font = "!Sans";
-		preferences.html_tag_font = "!Sans";
-		preferences.html_tag_unknown_font = "!Sans";
-		preferences.html_attribute_font = "!Sans";
-		preferences.html_attribute_unknown_font = "!Sans";
-		preferences.html_number_font = "!Sans";
-		preferences.html_single_string_font = "!Sans";
-		preferences.html_double_string_font = "!Sans";
-		preferences.html_comment_font = "!Sans";
-		preferences.html_entity_font = "!Sans";
-		preferences.html_script_font = "!Sans";
-		preferences.html_question_font = "!Sans";
-		preferences.html_value_font = "!Sans";
-		preferences.javascript_comment_font = "!Sans";
-		preferences.javascript_comment_line_font = "!Sans";
-		preferences.javascript_comment_doc_font = "!Sans";
-		preferences.javascript_word_font = "!Sans";
-		preferences.javascript_keyword_font = "!Sans";
-		preferences.javascript_doublestring_font = "!Sans";
-		preferences.javascript_singlestring_font = "!Sans";
-		preferences.javascript_symbols_font = "!Sans";
-		preferences.php_default_font = "!Sans";
-		preferences.php_hstring_font = "!Sans";
-		preferences.php_simplestring_font = "!Sans";
-		preferences.php_word_font = "!Sans";
-		preferences.php_number_font = "!Sans";
-		preferences.php_variable_font = "!Sans";
-		preferences.php_comment_font = "!Sans";
-		preferences.php_comment_line_font = "!Sans";
-		preferences.css_tag_font = "!Sans";
-		preferences.css_class_font = "!Sans";
-		preferences.css_pseudoclass_font = "!Sans";
-		preferences.css_unknown_pseudoclass_font = "!Sans";
-		preferences.css_operator_font = "!Sans";
-		preferences.css_identifier_font = "!Sans";
-		preferences.css_unknown_identifier_font = "!Sans";
-		preferences.css_value_font = "!Sans";
-		preferences.css_comment_font = "!Sans";
-		preferences.css_id_font = "!Sans";
-		preferences.css_important_font = "!Sans";
-		preferences.css_directive_font = "!Sans";
-		preferences.sql_word_font = "!Sans";
-		preferences.sql_string_font = "!Sans";
-		preferences.sql_operator_font = "!Sans";
-		preferences.sql_comment_font = "!Sans";
-		preferences.sql_number_font = "!Sans";
-		preferences.sql_identifier_font = "!Sans";
-
-                preferences_save();
-	}
+gchar *get_string(GConfClient *client,gchar *key,gchar *default_font){
+GError *error=NULL;
+gchar *temp= gconf_client_get_string(client,key,NULL);
+        if (!temp || error!=NULL){
+            return default_font;
+        }
+	return temp;
 }
 
+gint get_size(GConfClient *client,gchar *key,gint default_size){
+gint temp= gconf_client_get_int (client,key,NULL);
+        if (temp==0){
+            return 12;
+        }
+return temp;
+}
+gint getcolor(GConfClient *client,gchar *key,gchar *subdir,gint default_color){
+        GFile *config;
+        GError *error;
+        error=NULL;
+        gchar *uri=g_strdup_printf("%s/%s/%s",g_get_home_dir(),".gconf/gPHPEdit",subdir);
+        #ifdef DEBUG
+        g_print("uri:%s \n",uri);
+        #endif
+        config=g_file_new_for_path (uri);
+        if(!g_file_query_exists (config,NULL)){
+            #ifdef DEBUG
+            g_print("key %s don't exist. load default value\n",key);
+            #endif
+            g_object_unref(config);
+            //load default value
+            return default_color;
+        }else {
+            g_object_unref(config);
+            //load key value
+            GError *error=NULL;
+            gint temp;
+            temp = gconf_client_get_int (client,key,&error);
+            if (error!=NULL){
+                //return default value
+                return default_color;
+            } else {
+                return temp;
+            }
+        }
+}
 
 void preferences_apply(void)
 {
@@ -143,43 +123,27 @@ void preferences_load(void)
         config=gconf_client_get_default ();
         GError *error = NULL;
         gconf_client_get_int (config,"/gPHPEdit/main_window/x",&error);
-        preferences.set_sel_back = gconf_client_get_int (config,"/gPHPEdit/default_style/selection",&error);
-        if (preferences.set_sel_back==0 && error!=NULL){
-            preferences.set_sel_back=11250603;
-            error=NULL;
-        }
-        preferences.marker_back = gconf_client_get_int (config,"/gPHPEdit/default_style/bookmark",&error);
-        if (preferences.marker_back==0 && error!=NULL){
-            preferences.marker_back=15908608;
-            error=NULL;
-        }
-	preferences.php_binary_location= gconf_client_get_string(config,"/gPHPEdit/locations/phpbinary",&error);
-        if (!preferences.php_binary_location){
-            preferences.php_binary_location="php";
-            error=NULL;
-        }
-        preferences.shared_source_location = gconf_client_get_string(config,"/gPHPEdit/locations/shared_source",&error);
-        if (!preferences.shared_source_location){
-            preferences.shared_source_location="";
-            error=NULL;
-        }
-	preferences.indentation_size = gconf_client_get_int (config,"/gPHPEdit/defaults/indentationsize",&error);
-        if (preferences.indentation_size==0 && error!=NULL){
+        preferences.set_sel_back = getcolor(config,"/gPHPEdit/default_style/selection","default_style",11250603);
+        preferences.marker_back = getcolor(config,"/gPHPEdit/default_style/bookmark","default_style",15908608);
+        preferences.php_binary_location= get_string(config,"/gPHPEdit/locations/phpbinary","php");
+        preferences.shared_source_location = get_string(config,"/gPHPEdit/locations/shared_source","");
+        preferences.indentation_size = gconf_client_get_int (config,"/gPHPEdit/defaults/indentationsize",&error);
+        if (preferences.indentation_size==0){
             preferences.indentation_size=4;
             error=NULL;
         }
 	preferences.tab_size = gconf_client_get_int (config,"/gPHPEdit/defaults/tabsize",&error);
-        if (preferences.tab_size==0 && error!=NULL){
+        if (preferences.tab_size==0){
             preferences.tab_size=4;
             error=NULL;
         }
 	preferences.auto_complete_delay = gconf_client_get_int (config,"/gPHPEdit/defaults/auto_complete_delay",&error);
-        if (preferences.auto_complete_delay==0 && error!=NULL){
+        if (preferences.auto_complete_delay==0){
             preferences.auto_complete_delay=500;
             error=NULL;
         }
 	preferences.calltip_delay = gconf_client_get_int (config,"/gPHPEdit/defaults/calltip_delay",&error);
-        if (preferences.calltip_delay==0 && error!=NULL){
+        if (preferences.calltip_delay==0){
             preferences.calltip_delay=500;
             error=NULL;
         }
@@ -217,1093 +181,443 @@ void preferences_load(void)
             error=NULL;
         }
         preferences.single_instance_only = gconf_client_get_bool(config,"/gPHPEdit/defaults/single_instance_only",NULL);
-        preferences.php_file_extensions = gconf_client_get_string(config,"/gPHPEdit/defaults/php_file_extensions",&error);
-        if (!preferences.php_file_extensions){
-            preferences.php_file_extensions="php,inc,phtml,php3,xml,htm,html";
-            error=NULL;
-        }
-	preferences.default_font = gconf_client_get_string(config,"/gPHPEdit/default_style/font",&error);
-        if (!preferences.default_font){
-            preferences.default_font="!Sans";
-            error=NULL;
-        }
-	preferences.default_fore = gconf_client_get_int (config,"/gPHPEdit/default_style/fore",NULL);
-	preferences.default_back = gconf_client_get_int (config,"/gPHPEdit/default_style/back",&error);
-        if (preferences.default_back==0 && error!=NULL){
-            preferences.default_back=16777215;
-            error=NULL;
-        }
-	preferences.default_size = gconf_client_get_int (config,"/gPHPEdit/default_style/size",&error);
-        if (preferences.default_size==0 && error!=NULL){
-            preferences.default_size=12;
-            error=NULL;
-        }
+        preferences.php_file_extensions = get_string(config,"/gPHPEdit/defaults/php_file_extensions",DEFAULT_PHP_EXTENSIONS);
+        
+        preferences.default_font = get_string(config,"/gPHPEdit/default_style/font",DEFAULT_FONT);
+	preferences.default_fore = getcolor(config,"/gPHPEdit/default_style/fore","default_style",0);
+	preferences.default_back = getcolor(config,"/gPHPEdit/default_style/back","default_style",DEFAULT_BACK_COLOR);
+        preferences.default_size = get_size(config,"/gPHPEdit/default_style/size",DEFAULT_FONT_SIZE);
 	preferences.default_bold = gconf_client_get_bool(config,"/gPHPEdit/default_style/bold",NULL);
 	preferences.default_italic = gconf_client_get_bool(config,"/gPHPEdit/default_style/italic",NULL);
 	
-	preferences.line_number_font = gconf_client_get_string(config,"/gPHPEdit/line_numbers/font",&error);
-        if (!preferences.line_number_font){
-            preferences.line_number_font="!Sans";
-            error=NULL;
-        }
-	preferences.line_number_fore = gconf_client_get_int (config,"/gPHPEdit/line_numbers/fore",NULL);
-	preferences.line_number_back = gconf_client_get_int (config,"/gPHPEdit/line_numbers/back",&error);
-         if (preferences.line_number_back==0 && error!=NULL){
-            preferences.line_number_back=11053224;
-            error=NULL;
-        }
-	preferences.line_number_size = gconf_client_get_int (config,"/gPHPEdit/line_numbers/size",&error);
-         if (preferences.line_number_size==0 && error!=NULL){
-            preferences.line_number_size=12;
-            error=NULL;
-        }
+	preferences.line_number_font = get_string(config,"/gPHPEdit/line_numbers/font",DEFAULT_FONT);
+	preferences.line_number_fore = getcolor(config,"/gPHPEdit/line_numbers/fore","line_numbers",0);
+	preferences.line_number_back = getcolor(config,"/gPHPEdit/line_numbers/back","line_numbers",11053224);
+        preferences.line_number_size = get_size(config,"/gPHPEdit/line_numbers/size",DEFAULT_FONT_SIZE);
 	preferences.line_number_bold = gconf_client_get_bool(config,"/gPHPEdit/line_numbers/bold",NULL);
 	preferences.line_number_italic = gconf_client_get_bool(config,"/gPHPEdit/line_numbers/italic",NULL);
 
-	preferences.html_tag_back = gconf_client_get_int (config,"/gPHPEdit/html_tag/back",&error);
-        if (preferences.html_tag_back==0 && error!=NULL){
-            preferences.html_tag_back=16777215;
-            error=NULL;
-        }
-	preferences.html_tag_fore = gconf_client_get_int (config,"/gPHPEdit/html_tag/fore",&error);
-        if (preferences.html_tag_fore==0 && error!=NULL){
-            preferences.html_tag_fore=7553164;
-            error=NULL;
-        }
-	preferences.html_tag_font = gconf_client_get_string(config,"/gPHPEdit/html_tag/font",&error);
-        if (!preferences.html_tag_font){
-            preferences.html_tag_font="!Sans";
-            error=NULL;
-        }
-	preferences.html_tag_size = gconf_client_get_int (config,"/gPHPEdit/html_tag/size",&error);
-         if (preferences.html_tag_size==0 && error!=NULL){
-            preferences.html_tag_size=12;
-            error=NULL;
-        }
+	preferences.html_tag_back = getcolor(config,"/gPHPEdit/html_tag/back","html_tag",DEFAULT_BACK_COLOR);
+        preferences.html_tag_fore = getcolor(config,"/gPHPEdit/html_tag/fore","html_tag",7553164);
+        preferences.html_tag_font = get_string(config,"/gPHPEdit/html_tag/font",DEFAULT_FONT);
+	preferences.html_tag_size = get_size(config,"/gPHPEdit/html_tag/size",DEFAULT_FONT_SIZE);
 	preferences.html_tag_bold = gconf_client_get_bool(config,"/gPHPEdit/html_tag/bold",NULL);
 	preferences.html_tag_italic = gconf_client_get_bool(config,"/gPHPEdit/html_tag/italic",NULL);
 
-	preferences.html_tag_unknown_back = gconf_client_get_int (config,"/gPHPEdit/html_tag_unknown/back",&error);
-         if (preferences.html_tag_unknown_back==0 && error!=NULL){
-            preferences.html_tag_unknown_back=16777215;
-            error=NULL;
-        }
-	preferences.html_tag_unknown_fore = gconf_client_get_int (config,"/gPHPEdit/html_tag_unknown/fore",&error);
-        if (preferences.html_tag_unknown_fore==0 && error!=NULL){
-            preferences.html_tag_unknown_fore=7553164;
-            error=NULL;
-        }
-	preferences.html_tag_unknown_font = gconf_client_get_string(config,"/gPHPEdit/html_tag_unknown/font",&error);
-        if (!preferences.html_tag_unknown_font){
-            preferences.html_tag_unknown_font="!Sans";
-            error=NULL;
-        }
-	preferences.html_tag_unknown_size = gconf_client_get_int (config,"/gPHPEdit/html_tag_unknown/size",&error);
-         if (preferences.html_tag_unknown_size==0 && error!=NULL){
-            preferences.html_tag_unknown_size=12;
-            error=NULL;
-        }
+	preferences.html_tag_unknown_back = getcolor(config,"/gPHPEdit/html_tag_unknown/back","html_tag_unknown",DEFAULT_BACK_COLOR);
+        preferences.html_tag_unknown_fore = getcolor(config,"/gPHPEdit/html_tag_unknown/fore","html_tag_unknown",7553164);
+        preferences.html_tag_unknown_font = get_string(config,"/gPHPEdit/html_tag_unknown/font",DEFAULT_FONT);
+	preferences.html_tag_unknown_size = get_size(config,"/gPHPEdit/html_tag_unknown/size",DEFAULT_FONT_SIZE);
 	preferences.html_tag_unknown_bold = gconf_client_get_bool(config,"/gPHPEdit/html_tag_unknown/bold",NULL);
 	preferences.html_tag_unknown_italic = gconf_client_get_bool(config,"/gPHPEdit/html_tag_unknown/italic",NULL);
 
-	preferences.html_attribute_back = gconf_client_get_int (config,"/gPHPEdit/html_attribute/back",&error);
-        if (preferences.html_attribute_back==0 && error!=NULL){
-            preferences.html_attribute_back=16777215;
-            error=NULL;
-        }
-	preferences.html_attribute_fore = gconf_client_get_int (config,"/gPHPEdit/html_attribute/fore",&error);
-        if (preferences.html_attribute_fore==0 && error!=NULL){
-            preferences.html_attribute_fore=9204544;
-            error=NULL;
-        }
-	preferences.html_attribute_font = gconf_client_get_string(config,"/gPHPEdit/html_attribute/font",&error);
-        if (!preferences.html_attribute_font){
-            preferences.html_attribute_font="!Sans";
-            error=NULL;
-        }
-	preferences.html_attribute_size = gconf_client_get_int (config,"/gPHPEdit/html_attribute/size",&error);
-         if (preferences.html_attribute_size==0 && error!=NULL){
-            preferences.html_attribute_size=12;
-            error=NULL;
-        }
+	preferences.html_attribute_back = getcolor(config,"/gPHPEdit/html_attribute/back","html_attribute",DEFAULT_BACK_COLOR);
+        preferences.html_attribute_fore = getcolor(config,"/gPHPEdit/html_attribute/fore","html_attribute",9204544);
+        preferences.html_attribute_font = get_string(config,"/gPHPEdit/html_attribute/font",DEFAULT_FONT);
+	preferences.html_attribute_size = get_size(config,"/gPHPEdit/html_attribute/size",DEFAULT_FONT_SIZE);
 	preferences.html_attribute_bold = gconf_client_get_bool(config,"/gPHPEdit/html_attribute/bold",NULL);
 	preferences.html_attribute_italic = gconf_client_get_bool(config,"/gPHPEdit/html_attribute/italic",NULL);
 
-	preferences.html_attribute_unknown_back = gconf_client_get_int (config,"/gPHPEdit/html_attribute_unknown/back",&error);
-        if (preferences.html_attribute_unknown_back==0 && error!=NULL){
-            preferences.html_attribute_unknown_back=16777215;
-            error=NULL;
-        }
-	preferences.html_attribute_unknown_fore = gconf_client_get_int (config,"/gPHPEdit/html_attribute_unknown/fore",&error);
-        if (preferences.html_attribute_unknown_fore==0 && error!=NULL){
-            preferences.html_attribute_unknown_fore=7472544;
-            error=NULL;
-        }
-	preferences.html_attribute_unknown_font = gconf_client_get_string(config,"/gPHPEdit/html_attribute_unknown/font",&error);
-        if (!preferences.html_attribute_unknown_font){
-            preferences.html_attribute_unknown_font="!Sans";
-            error=NULL;
-        }
-	preferences.html_attribute_unknown_size = gconf_client_get_int (config,"/gPHPEdit/html_attribute_unknown/size",&error);
-         if (preferences.html_attribute_unknown_size==0 && error!=NULL){
-            preferences.html_attribute_unknown_size=12;
-            error=NULL;
-        }
+	preferences.html_attribute_unknown_back = getcolor(config,"/gPHPEdit/html_attribute_unknown/back","html_attribute_unknown",DEFAULT_BACK_COLOR);
+        preferences.html_attribute_unknown_fore = getcolor(config,"/gPHPEdit/html_attribute_unknown/fore","html_attribute_unknown",7472544);
+        preferences.html_attribute_unknown_font = get_string(config,"/gPHPEdit/html_attribute_unknown/font",DEFAULT_FONT);
+	preferences.html_attribute_unknown_size = get_size(config,"/gPHPEdit/html_attribute_unknown/size",DEFAULT_FONT_SIZE);
 	preferences.html_attribute_unknown_bold = gconf_client_get_bool(config,"/gPHPEdit/html_attribute_unknown/bold",NULL);
 	preferences.html_attribute_unknown_italic = gconf_client_get_bool(config,"/gPHPEdit/html_attribute_unknown/italic",NULL);
 
-	preferences.html_number_back = gconf_client_get_int (config,"/gPHPEdit/html_number/back",&error);
-        if (preferences.html_number_back==0 && error!=NULL){
-            preferences.html_number_back=16777215;
-            error=NULL;
-        }
-	preferences.html_number_fore = gconf_client_get_int (config,"/gPHPEdit/html_number/fore",&error);
-        if (preferences.html_number_fore==0 && error!=NULL){
-            preferences.html_number_fore=9204544;
-            error=NULL;
-        }
-	preferences.html_number_font = gconf_client_get_string(config,"/gPHPEdit/html_number/font",&error);
-        if (!preferences.html_number_font){
-            preferences.html_number_font="!Sans";
-            error=NULL;
-        }
-	preferences.html_number_size = gconf_client_get_int (config,"/gPHPEdit/html_number/size",&error);
-        if (preferences.html_number_size==0 && error!=NULL){
-            preferences.html_number_size=12;
-            error=NULL;
-        }
+	preferences.html_number_back = getcolor(config,"/gPHPEdit/html_number/back","html_number",DEFAULT_BACK_COLOR);
+        preferences.html_number_fore = getcolor(config,"/gPHPEdit/html_number/fore","html_number",9204544);
+        preferences.html_number_font = get_string(config,"/gPHPEdit/html_number/font",DEFAULT_FONT);
+	preferences.html_number_size = get_size(config,"/gPHPEdit/html_number/size",DEFAULT_FONT_SIZE);
 	preferences.html_number_bold = gconf_client_get_bool(config,"/gPHPEdit/html_number/bold",NULL);
 	preferences.html_number_italic = gconf_client_get_bool(config,"/gPHPEdit/html_number/italic",NULL);
 
-	preferences.html_single_string_back = gconf_client_get_int (config,"/gPHPEdit/html_single_string/back",&error);
-        if (preferences.html_single_string_back==0 && error!=NULL){
-            preferences.html_single_string_back=16777215;
-            error=NULL;
-        }
-	preferences.html_single_string_fore = gconf_client_get_int (config,"/gPHPEdit/html_single_string/fore",&error);
-        if (preferences.html_single_string_back==0 && error!=NULL){
-            preferences.html_single_string_fore=32768;
-            error=NULL;
-        }
-	preferences.html_single_string_font = gconf_client_get_string(config,"/gPHPEdit/html_single_string/font",&error);
-        if (!preferences.html_single_string_font){
-            preferences.html_single_string_font="!Sans";
-            error=NULL;
-        }
-	preferences.html_single_string_size = gconf_client_get_int (config,"/gPHPEdit/html_single_string/size",&error);
-        if (preferences.html_single_string_size==0 && error!=NULL){
-            preferences.html_single_string_size=12;
-            error=NULL;
-        }
+	preferences.html_single_string_back = getcolor(config,"/gPHPEdit/html_single_string/back","html_single_string",DEFAULT_BACK_COLOR);
+        preferences.html_single_string_fore = getcolor(config,"/gPHPEdit/html_single_string/fore","html_single_string",32768);
+        preferences.html_single_string_font = get_string(config,"/gPHPEdit/html_single_string/font",DEFAULT_FONT);
+	preferences.html_single_string_size = get_size(config,"/gPHPEdit/html_single_string/size",DEFAULT_FONT_SIZE);
 	preferences.html_single_string_bold = gconf_client_get_bool(config,"/gPHPEdit/html_single_string/bold",NULL);
 	preferences.html_single_string_italic = gconf_client_get_bool(config,"/gPHPEdit/html_single_string/italic",NULL);
 
-	preferences.html_double_string_back = gconf_client_get_int (config,"/gPHPEdit/html_double_string/back",&error);
-        if (preferences.html_double_string_back==0 && error!=NULL){
-            preferences.html_double_string_back=16777215;
-            error=NULL;
-        }
-	preferences.html_double_string_fore = gconf_client_get_int (config,"/gPHPEdit/html_double_string/fore",&error);
-        if (preferences.html_double_string_fore==0 && error!=NULL){
-            preferences.html_double_string_fore=32768;
-            error=NULL;
-        }
-	preferences.html_double_string_font = gconf_client_get_string(config,"/gPHPEdit/html_double_string/font",&error);
-        if (!preferences.html_double_string_font){
-            preferences.html_double_string_font="!Sans";
-            error=NULL;
-        }
-	preferences.html_double_string_size = gconf_client_get_int (config,"/gPHPEdit/html_double_string/size",&error);
-        if (preferences.html_double_string_size==0 && error!=NULL){
-            preferences.html_double_string_size=12;
-            error=NULL;
-        }
+	preferences.html_double_string_back = getcolor(config,"/gPHPEdit/html_double_string/back","html_double_string",DEFAULT_BACK_COLOR);
+        preferences.html_double_string_fore = getcolor(config,"/gPHPEdit/html_double_string/fore","html_double_string",32768);
+        preferences.html_double_string_font = get_string(config,"/gPHPEdit/html_double_string/font",DEFAULT_FONT);
+	preferences.html_double_string_size = get_size(config,"/gPHPEdit/html_double_string/size",DEFAULT_FONT_SIZE);
 	preferences.html_double_string_bold = gconf_client_get_bool(config,"/gPHPEdit/html_double_string/bold",NULL);
 	preferences.html_double_string_italic = gconf_client_get_bool(config,"/gPHPEdit/html_double_string/italic",NULL);
 
-	preferences.html_comment_back = gconf_client_get_int (config,"/gPHPEdit/html_comment/back",&error);
-        if (preferences.html_comment_back==0 && error!=NULL){
-            preferences.html_comment_back=16777215;
-            error=NULL;
-        }
-	preferences.html_comment_fore = gconf_client_get_int (config,"/gPHPEdit/html_comment/fore",&error);
-        if (preferences.html_comment_fore==0 && error!=NULL){
-            preferences.html_comment_fore=842125504;
-            error=NULL;
-        }
-        preferences.html_comment_font = gconf_client_get_string(config,"/gPHPEdit/html_comment/font",&error);
-        if (!preferences.html_comment_font){
-            preferences.html_comment_font="!Sans";
-            error=NULL;
-        }
-	preferences.html_comment_size = gconf_client_get_int (config,"/gPHPEdit/html_comment/back",&error);
-        if (preferences.html_comment_size==0 && error!=NULL){
-            preferences.html_comment_size=12;
-            error=NULL;
-        }
+	preferences.html_comment_back = getcolor(config,"/gPHPEdit/html_comment/back","html_comment",DEFAULT_BACK_COLOR);
+        preferences.html_comment_fore = getcolor(config,"/gPHPEdit/html_comment/fore","html_comment",842125504);
+        preferences.html_comment_font = get_string(config,"/gPHPEdit/html_comment/font",DEFAULT_FONT);
+	preferences.html_comment_size = get_size(config,"/gPHPEdit/html_comment/size",DEFAULT_FONT_SIZE);
 	preferences.html_comment_bold = gconf_client_get_bool(config,"/gPHPEdit/html_comment/bold",NULL);
 	preferences.html_comment_italic = gconf_client_get_bool(config,"/gPHPEdit/html_comment/italic",NULL);
 
-	preferences.html_entity_back =  gconf_client_get_int (config,"/gPHPEdit/html_entity/back",&error);
-        if (preferences.html_entity_back==0 && error!=NULL){
-            preferences.html_entity_back=16777215;
-            error=NULL;
-        }
-	preferences.html_entity_fore =  gconf_client_get_int (config,"/gPHPEdit/html_entity/fore",&error);
-        if (preferences.html_entity_fore==0 && error!=NULL){
-            preferences.html_entity_fore=8421504;
-            error=NULL;
-        }
-	preferences.html_entity_font = gconf_client_get_string(config,"/gPHPEdit/html_entity/font",&error);
-        if (!preferences.html_entity_font){
-            preferences.html_entity_font="!Sans";
-            error=NULL;
-        }
-	preferences.html_entity_size =  gconf_client_get_int (config,"/gPHPEdit/html_entity/size",&error);
-        if (preferences.html_entity_size==0 && error!=NULL){
-            preferences.html_entity_size=12;
-            error=NULL;
-        }
+	preferences.html_entity_back =  getcolor(config,"/gPHPEdit/html_entity/back","html_entity",DEFAULT_BACK_COLOR);
+        preferences.html_entity_fore =  getcolor(config,"/gPHPEdit/html_entity/fore","html_entity",8421504);
+        preferences.html_entity_font = get_string(config,"/gPHPEdit/html_entity/font",DEFAULT_FONT);
+	preferences.html_entity_size = get_size(config,"/gPHPEdit/html_entity/size",DEFAULT_FONT_SIZE);
         preferences.html_entity_bold = gconf_client_get_bool(config,"/gPHPEdit/html_entity/bold",NULL);
 	preferences.html_entity_italic = gconf_client_get_bool(config,"/gPHPEdit/html_entity/italic",NULL);
 
-	preferences.html_script_back = gconf_client_get_int (config,"/gPHPEdit/html_script/back",&error);
-        if (preferences.html_script_back==0 && error!=NULL){
-            preferences.html_script_back=16777215;
-            error=NULL;
-        }
-	preferences.html_script_fore = gconf_client_get_int (config,"/gPHPEdit/html_script/fore",&error);
-        if (preferences.html_script_fore==0 && error!=NULL){
-            preferences.html_script_fore=7553165;
-            error=NULL;
-        }
-	preferences.html_script_font = gconf_client_get_string(config,"/gPHPEdit/html_script/font",&error);
-        if (!preferences.html_script_font){
-            preferences.html_script_font="!Sans";
-            error=NULL;
-        }
-	preferences.html_script_size = gconf_client_get_int (config,"/gPHPEdit/html_script/size",&error);
-        if (preferences.html_script_size==0 && error!=NULL){
-            preferences.html_script_size=12;
-            error=NULL;
-        }
+	preferences.html_script_back = getcolor(config,"/gPHPEdit/html_script/back","html_script",DEFAULT_BACK_COLOR);
+        preferences.html_script_fore = getcolor(config,"/gPHPEdit/html_script/fore","html_script",7553165);
+        preferences.html_script_font = get_string(config,"/gPHPEdit/html_script/font",DEFAULT_FONT);
+	preferences.html_script_size = get_size(config,"/gPHPEdit/html_script/size",DEFAULT_FONT_SIZE);
 	preferences.html_script_bold = gconf_client_get_bool(config,"/gPHPEdit/html_script/bold",NULL);
 	preferences.html_script_italic = gconf_client_get_bool(config,"/gPHPEdit/html_script/italic",NULL);
 
-	preferences.html_question_back = gconf_client_get_int (config,"/gPHPEdit/html_question/back",&error);
-        if (preferences.html_question_back==0 && error!=NULL){
-            preferences.html_question_back=16777215;
-            error=NULL;
-        }
-	preferences.html_question_fore = gconf_client_get_int (config,"/gPHPEdit/html_question/fore",&error);
-        if (error!=NULL){
-            preferences.html_question_fore=7553165;
-            error=NULL;
-        }
-	preferences.html_question_font = gconf_client_get_string(config,"/gPHPEdit/html_question/font",&error);
-        if (!preferences.html_question_font){
-            preferences.html_question_font="!Sans";
-            error=NULL;
-        }
-	preferences.html_question_size = gconf_client_get_int (config,"/gPHPEdit/html_question/size",&error);
-        if (preferences.html_question_size==0 && error!=NULL){
-            preferences.html_question_size=12;
-            error=NULL;
-        }
+	preferences.html_question_back = getcolor(config,"/gPHPEdit/html_question/back","html_question",DEFAULT_BACK_COLOR);
+        preferences.html_question_fore = getcolor(config,"/gPHPEdit/html_question/fore","html_question",7553165);
+	preferences.html_question_font = get_string(config,"/gPHPEdit/html_question/font",DEFAULT_FONT);
+	preferences.html_question_size = get_size(config,"/gPHPEdit/html_question/size",DEFAULT_FONT_SIZE);
 	preferences.html_question_bold = gconf_client_get_bool(config,"/gPHPEdit/html_question/bold",NULL);
 	preferences.html_question_italic = gconf_client_get_bool(config,"/gPHPEdit/html_question/italic",NULL);
 
-	preferences.html_value_back = gconf_client_get_int (config,"/gPHPEdit/html_value/back",&error);
-        if (preferences.html_value_back==0 && error!=NULL){
-            preferences.html_value_back=16777215;
-            error=NULL;
-        }
-	preferences.html_value_fore = gconf_client_get_int (config,"/gPHPEdit/html_script/fore",&error);
-        if (preferences.html_value_back==0 && error!=NULL){
-            preferences.html_value_fore=21632;
-            error=NULL;
-        }
-	preferences.html_value_font = gconf_client_get_string(config,"/gPHPEdit/html_script/font",&error);
-        if (!preferences.html_value_font){
-            preferences.html_value_font="!Sans";
-            error=NULL;
-        }
-	preferences.html_value_size = gconf_client_get_int (config,"/gPHPEdit/html_value/size",&error);
-        if (preferences.html_value_back==0 && error!=NULL){
-            preferences.html_value_size=12;
-            error=NULL;
-        }
+	preferences.html_value_back = getcolor(config,"/gPHPEdit/html_value/back","html_value",DEFAULT_BACK_COLOR);
+        preferences.html_value_fore = getcolor(config,"/gPHPEdit/html_value/fore","html_value",21632);
+        preferences.html_value_font = get_string(config,"/gPHPEdit/html_script/font",DEFAULT_FONT);
+	preferences.html_value_size = get_size(config,"/gPHPEdit/html_value/size",DEFAULT_FONT_SIZE);
 	preferences.html_value_bold = gconf_client_get_bool(config,"/gPHPEdit/html_value/bold",NULL);
 	preferences.html_value_italic = gconf_client_get_bool(config,"/gPHPEdit/html_value/italic",NULL);
 
-	preferences.javascript_comment_back = gconf_client_get_int (config,"/gPHPEdit/javascript_comment/back",&error);
-        if (preferences.javascript_comment_back==0 && error!=NULL){
-            preferences.javascript_comment_back=16777215;
-            error=NULL;
-        }
-	preferences.javascript_comment_fore = gconf_client_get_int (config,"/gPHPEdit/javascript_comment/fore",&error);
-       if (preferences.javascript_comment_fore==0 && error!=NULL){
-            preferences.javascript_comment_fore=8421504;
-            error=NULL;
-        }
-	preferences.javascript_comment_font = gconf_client_get_string(config,"/gPHPEdit/javascript_comment/font",&error);
-        if (!preferences.javascript_comment_font){
-            preferences.javascript_comment_font="!Sans";
-            error=NULL;
-        }
-	preferences.javascript_comment_size = gconf_client_get_int (config,"/gPHPEdit/javascript_comment/size",&error);
-        if (preferences.javascript_comment_size==0 && error!=NULL){
-            preferences.javascript_comment_size=12;
-            error=NULL;
-        }
+	preferences.javascript_comment_back = getcolor(config,"/gPHPEdit/javascript_comment/back","javascript_comment",DEFAULT_BACK_COLOR);
+        preferences.javascript_comment_fore = getcolor(config,"/gPHPEdit/javascript_comment/fore","javascript_comment",8421504);
+        preferences.javascript_comment_font = get_string(config,"/gPHPEdit/javascript_comment/font",DEFAULT_FONT);
+	preferences.javascript_comment_size = get_size(config,"/gPHPEdit/javascript_comment/size",DEFAULT_FONT_SIZE);
 	preferences.javascript_comment_bold = gconf_client_get_bool(config,"/gPHPEdit/javascript_comment/bold",NULL);
 	preferences.javascript_comment_italic = gconf_client_get_bool(config,"/gPHPEdit/javascript_comments/italic",NULL);
 
-	preferences.javascript_comment_line_back = gconf_client_get_int (config,"/gPHPEdit/javascript_comment_line/back",&error);
-        if (preferences.javascript_comment_line_back==0 && error!=NULL){
-            preferences.javascript_comment_line_back=16777215;
-            error=NULL;
-        }
-	preferences.javascript_comment_line_fore = gconf_client_get_int (config,"/gPHPEdit/javascript_comment_line/fore",&error);
-        if (preferences.javascript_comment_line_back==0 && error!=NULL){
-            preferences.javascript_comment_line_back=8421504;
-            error=NULL;
-        }
-	preferences.javascript_comment_line_font = gconf_client_get_string(config,"/gPHPEdit/javascript_comment_line/font",&error);
-        if (!preferences.javascript_comment_line_font){
-            preferences.javascript_comment_line_font="!Sans";
-            error=NULL;
-        }
-	preferences.javascript_comment_line_size = gconf_client_get_int (config,"/gPHPEdit/javascript_comment_line/size",&error);
-        if (preferences.javascript_comment_line_size==0 && error!=NULL){
-            preferences.javascript_comment_line_size=12;
-            error=NULL;
-        }
+	preferences.javascript_comment_line_back = getcolor(config,"/gPHPEdit/javascript_comment_line/back","javascript_comment_line",DEFAULT_BACK_COLOR);
+        preferences.javascript_comment_line_fore = getcolor(config,"/gPHPEdit/javascript_comment_line/fore","javascript_comment_line",8421504);
+        preferences.javascript_comment_line_font = get_string(config,"/gPHPEdit/javascript_comment_line/font",DEFAULT_FONT);
+	preferences.javascript_comment_line_size = get_size(config,"/gPHPEdit/javascript_comment_line/size",DEFAULT_FONT_SIZE);
 	preferences.javascript_comment_line_bold = gconf_client_get_bool(config,"/gPHPEdit/javascript_comment_line/bold",NULL);
 	preferences.javascript_comment_line_italic = gconf_client_get_bool(config,"/gPHPEdit/javascript_comment_line/italic",NULL);
 
-	preferences.javascript_comment_doc_back = gconf_client_get_int (config,"/gPHPEdit/javascript_comment_doc/back",&error);
-        if (preferences.javascript_comment_doc_back==0 && error!=NULL){
-            preferences.javascript_comment_doc_back=16777215;
-            error=NULL;
-        }
-	preferences.javascript_comment_doc_fore = gconf_client_get_int (config,"/gPHPEdit/javascript_comment_doc/fore",&error);
-        if (preferences.javascript_comment_doc_fore==0 && error!=NULL){
-            preferences.javascript_comment_line_fore=8355712;
-            error=NULL;
-        }
-	preferences.javascript_comment_doc_font = gconf_client_get_string(config,"/gPHPEdit/javascript_comment_doc/font",&error);
-        if (!preferences.javascript_comment_doc_font){
-            preferences.javascript_comment_doc_font="!Sans";
-            error=NULL;
-        }
-	preferences.javascript_comment_doc_size = gconf_client_get_int (config,"/gPHPEdit/javascript_comment_doc/size",&error);
-        if (preferences.javascript_comment_doc_size==0 && error!=NULL){
-            preferences.javascript_comment_doc_size=12;
-            error=NULL;
-        }
+	preferences.javascript_comment_doc_back = getcolor(config,"/gPHPEdit/javascript_comment_doc/back","javascript_comment_doc",DEFAULT_BACK_COLOR);
+        preferences.javascript_comment_doc_fore = getcolor(config,"/gPHPEdit/javascript_comment_doc/fore","javascript_comment_doc",8355712);
+        preferences.javascript_comment_doc_font = get_string(config,"/gPHPEdit/javascript_comment_doc/font",DEFAULT_FONT);
+	preferences.javascript_comment_doc_size = get_size(config,"/gPHPEdit/javascript_comment_doc/size",DEFAULT_FONT_SIZE);
         preferences.javascript_comment_doc_bold = gconf_client_get_bool(config,"/gPHPEdit/javascript_comments_doc/bold",NULL);
 	preferences.javascript_comment_doc_italic = gconf_client_get_bool(config,"/gPHPEdit/javascript_comments_doc/italic",NULL);
 
-	preferences.javascript_word_back = gconf_client_get_int (config,"/gPHPEdit/javascript_word/back",&error);
-        if (preferences.javascript_word_back==0 && error!=NULL){
-            preferences.javascript_word_back=16777215;
-            error=NULL;
-        }
-	preferences.javascript_word_fore = gconf_client_get_int (config,"/gPHPEdit/javascript_word/fore",&error);
-        if (preferences.javascript_word_fore==0 && error!=NULL){
-            preferences.javascript_word_fore=9204544;
-            error=NULL;
-        }
-	preferences.javascript_word_font = gconf_client_get_string(config,"/gPHPEdit/javascript_word/font",&error);
-        if (!preferences.javascript_word_font){
-            preferences.javascript_word_font="!Sans";
-            error=NULL;
-        }
-	preferences.javascript_word_size = gconf_client_get_int (config,"/gPHPEdit/javascript_word/size",&error);
-        if (preferences.javascript_word_size==0 && error!=NULL){
-            preferences.javascript_word_size=12;
-            error=NULL;
-        }
+	preferences.javascript_word_back = getcolor(config,"/gPHPEdit/javascript_word/back","javascript_word",DEFAULT_BACK_COLOR);
+        preferences.javascript_word_fore = getcolor(config,"/gPHPEdit/javascript_word/fore","javascript_word",9204544);
+        preferences.javascript_word_font = get_string(config,"/gPHPEdit/javascript_word/font",DEFAULT_FONT);
+	preferences.javascript_word_size = get_size(config,"/gPHPEdit/javascript_word/size",DEFAULT_FONT_SIZE);
 	preferences.javascript_word_bold = gconf_client_get_bool(config,"/gPHPEdit/javascript_word/bold",NULL);
 	preferences.javascript_word_italic = gconf_client_get_bool(config,"/gPHPEdit/javascript_word/italic",NULL);
 
-	preferences.javascript_keyword_back = gconf_client_get_int (config,"/gPHPEdit/javascript_keyword/back",&error);
-        if (preferences.javascript_keyword_back==0 && error!=NULL){
-            preferences.javascript_keyword_back=16777215;
-            error=NULL;
-        }
-	preferences.javascript_keyword_fore = gconf_client_get_int (config,"/gPHPEdit/javascript_keyword/fore",&error);
-        if (preferences.javascript_keyword_fore==0 && error!=NULL){
-            preferences.javascript_keyword_fore=8388608;
-            error=NULL;
-        }
-	preferences.javascript_keyword_font = gconf_client_get_string(config,"/gPHPEdit/javascript_keyword/font",&error);
-        if (!preferences.javascript_keyword_font){
-            preferences.javascript_keyword_font="!Sans";
-            error=NULL;
-        }
-	preferences.javascript_keyword_size = gconf_client_get_int (config,"/gPHPEdit/javascript_keyword/size",&error);
-        if (preferences.javascript_keyword_size==0 && error!=NULL){
-            preferences.javascript_keyword_size=12;
-            error=NULL;
-        }
-	preferences.javascript_keyword_bold = gconf_client_get_bool(config,"/gPHPEdit/javascript_keyword/bold",NULL);
+	preferences.javascript_keyword_back = getcolor(config,"/gPHPEdit/javascript_keyword/back","javascript_keyword",DEFAULT_BACK_COLOR);
+        preferences.javascript_keyword_fore = getcolor(config,"/gPHPEdit/javascript_keyword/fore","javascript_doublestring",8388608);
+        preferences.javascript_keyword_font = get_string(config,"/gPHPEdit/javascript_keyword/font",DEFAULT_FONT);
+	preferences.javascript_keyword_size = get_size(config,"/gPHPEdit/javascript_keyword/size",DEFAULT_FONT_SIZE);
+        preferences.javascript_keyword_bold = gconf_client_get_bool(config,"/gPHPEdit/javascript_keyword/bold",NULL);
 	preferences.javascript_keyword_italic = gconf_client_get_bool(config,"/gPHPEdit/javascript_keyword/italic",NULL);
 
-	preferences.javascript_doublestring_back = gconf_client_get_int (config,"/gPHPEdit/javascript_doublestring/back",&error);
-        if (preferences.javascript_doublestring_back==0 && error!=NULL){
-            preferences.javascript_doublestring_back=16777215;
-            error=NULL;
-        }
-	preferences.javascript_doublestring_fore = gconf_client_get_int (config,"/gPHPEdit/javascript_doublestring/fore",&error);
-        if (preferences.javascript_doublestring_fore==0 && error!=NULL){
-            preferences.javascript_doublestring_fore=8388608;
-            error=NULL;
-        }
-	preferences.javascript_doublestring_font = gconf_client_get_string(config,"/gPHPEdit/javascript_doublestring/font",&error);
-        if (!preferences.javascript_doublestring_font){
-            preferences.javascript_doublestring_font="!Sans";
-            error=NULL;
-        }
-	preferences.javascript_doublestring_size = gconf_client_get_int (config,"/gPHPEdit/javascript_doublestring/size",&error);
-        if (preferences.javascript_doublestring_size==0 && error!=NULL){
-            preferences.javascript_doublestring_size=12;
-            error=NULL;
-        }
+	preferences.javascript_doublestring_back = getcolor(config,"/gPHPEdit/javascript_doublestring/back","javascript_doublestring",DEFAULT_BACK_COLOR);
+        preferences.javascript_doublestring_fore = getcolor(config,"/gPHPEdit/javascript_doublestring/fore","javascript_doublestring",8388608);
+	preferences.javascript_doublestring_font = get_string(config,"/gPHPEdit/javascript_doublestring/font",DEFAULT_FONT);
+	preferences.javascript_doublestring_size = get_size(config,"/gPHPEdit/javascript_doublestring/size",DEFAULT_FONT_SIZE);
 	preferences.javascript_doublestring_bold = gconf_client_get_bool(config,"/gPHPEdit/javascript_doublestring/bold",NULL);
 	preferences.javascript_doublestring_italic = gconf_client_get_bool(config,"/gPHPEdit/javascript_doublestring/italic",NULL);
 
-	preferences.javascript_singlestring_back = gconf_client_get_int (config,"/gPHPEdit/javascript_singlestring/back",&error);
-        if (preferences.javascript_singlestring_back==0 && error!=NULL){
-            preferences.javascript_singlestring_back=16777215;
-            error=NULL;
-        }
-	preferences.javascript_singlestring_fore = gconf_client_get_int (config,"/gPHPEdit/javascript_singlestring/fore",&error);
-         if (preferences.javascript_singlestring_fore==0 && error!=NULL){
-            preferences.javascript_singlestring_fore=8388608;
-            error=NULL;
-        }
-	preferences.javascript_singlestring_font = gconf_client_get_string(config,"/gPHPEdit/javascript_singlestring/font",&error);
-        if (!preferences.javascript_singlestring_font){
-            preferences.javascript_singlestring_font="!Sans";
-            error=NULL;
-        }
-	preferences.javascript_singlestring_size = gconf_client_get_int (config,"/gPHPEdit/javascript_singlestring/size",&error);
-        if (preferences.javascript_singlestring_size==0 && error!=NULL){
-            preferences.javascript_singlestring_size=12;
-            error=NULL;
-        }
+	preferences.javascript_singlestring_back = getcolor(config,"/gPHPEdit/javascript_singlestring/back","javascript_singlestring",DEFAULT_BACK_COLOR);
+        preferences.javascript_singlestring_fore = getcolor(config,"/gPHPEdit/javascript_singlestring/fore","javascript_singlestring",8388608);
+        preferences.javascript_singlestring_font = get_string(config,"/gPHPEdit/javascript_singlestring/font",DEFAULT_FONT);
+	preferences.javascript_singlestring_size = get_size(config,"/gPHPEdit/javascript_singlestring/size",DEFAULT_FONT_SIZE);
 	preferences.javascript_singlestring_bold = gconf_client_get_bool(config,"/gPHPEdit/javascript_singlestring/bold",NULL);
 	preferences.javascript_singlestring_italic = gconf_client_get_bool(config,"/gPHPEdit/javascript_singlestring/bold",NULL);
 
-	preferences.javascript_symbols_back = gconf_client_get_int (config,"/gPHPEdit/javascript_symbols/back",&error);
-        if (preferences.javascript_symbols_back==0 && error!=NULL){
-            preferences.javascript_symbols_back=16777215;
-            error=NULL;
-        }
-	preferences.javascript_symbols_fore = gconf_client_get_int (config,"/gPHPEdit/javascript_symbols/fore",&error);
-         if (preferences.javascript_symbols_fore==0 && error!=NULL){
-            preferences.javascript_symbols_fore=8355712;
-            error=NULL;
-        }
-	preferences.javascript_symbols_font = gconf_client_get_string(config,"/gPHPEdit/javascript_symbols/font",&error);
-        if (!preferences.javascript_symbols_font){
-            preferences.javascript_symbols_font="!Sans";
-            error=NULL;
-        }
-	preferences.javascript_symbols_size = gconf_client_get_int (config,"/gPHPEdit/javascript_symbols/size",&error);
-        if (preferences.javascript_symbols_size==0 && error!=NULL){
-            preferences.javascript_symbols_size=12;
-            error=NULL;
-        }
+	preferences.javascript_symbols_back = getcolor(config,"/gPHPEdit/javascript_symbols/back","javascript_symbols",DEFAULT_BACK_COLOR);
+        preferences.javascript_symbols_fore = getcolor(config,"/gPHPEdit/javascript_symbols/fore","javascript_symbols",8355712);
+        preferences.javascript_symbols_font = get_string(config,"/gPHPEdit/javascript_symbols/font",DEFAULT_FONT);
+	preferences.javascript_symbols_size = get_size(config,"/gPHPEdit/javascript_symbols/size",DEFAULT_FONT_SIZE);
 	preferences.javascript_symbols_bold = gconf_client_get_bool(config,"/gPHPEdit/javascript_symbols/bold",NULL);
 	preferences.javascript_symbols_italic = gconf_client_get_bool(config,"/gPHPEdit/javascript_symbols/italic",NULL);
 
-	preferences.php_default_font = gconf_client_get_string(config,"/gPHPEdit/php_default_style/font",&error);
-        if (!preferences.php_default_font){
-            preferences.php_default_font="!Sans";
-            error=NULL;
-        }
-	preferences.php_default_fore = gconf_client_get_int (config,"/gPHPEdit/php_default_style/fore",&error);
-        if (preferences.php_default_fore==0 && error!=NULL){
-            preferences.php_default_fore=1052688;
-            error=NULL;
-        }
-	preferences.php_default_back = gconf_client_get_int (config,"/gPHPEdit/php_default_style/back",&error);
-        if (preferences.php_default_back==0 && error!=NULL){
-            preferences.php_default_back=16777215;
-            error=NULL;
-        }
-	preferences.php_default_size = gconf_client_get_int (config,"/gPHPEdit/php_default_style/size",&error);
-        if (preferences.php_default_size==0 && error!=NULL){
-            preferences.php_default_size=12;
-            error=NULL;
-        }
+	preferences.php_default_font = get_string(config,"/gPHPEdit/php_default_style/font",DEFAULT_FONT);
+	preferences.php_default_fore = getcolor(config,"/gPHPEdit/php_default_style/fore","php_default_style",1052688);
+        preferences.php_default_back = getcolor(config,"/gPHPEdit/php_default_style/back","php_default_style",DEFAULT_BACK_COLOR);
+        preferences.php_default_size = get_size(config,"/gPHPEdit/php_default_style/size",DEFAULT_FONT_SIZE);
 	preferences.php_default_bold = gconf_client_get_bool(config,"/gPHPEdit/php_default_style/bold",NULL);
 	preferences.php_default_italic = gconf_client_get_bool(config,"/gPHPEdit/php_default_style/italic",NULL);
 
-	preferences.php_hstring_fore = gconf_client_get_int (config,"/gPHPEdit/php_hstring/fore",&error);
-         if (preferences.php_hstring_fore==0 && error!=NULL){
-            preferences.php_hstring_fore=8388736;
-            error=NULL;
-        }
-	preferences.php_hstring_font = gconf_client_get_string(config,"/gPHPEdit/php_hstring/font",&error);
-        if (!preferences.php_hstring_font){
-            preferences.php_hstring_font="!Sans";
-            error=NULL;
-        }
-	preferences.php_hstring_back = gconf_client_get_int (config,"/gPHPEdit/php_hstring/back",&error);
-        if (preferences.php_hstring_back==0 && error!=NULL){
-            preferences.php_hstring_back=16777215;
-            error=NULL;
-        }
-	preferences.php_hstring_size = gconf_client_get_int (config,"/gPHPEdit/php_hstring/size",&error);
-        if (preferences.php_hstring_size==0 && error!=NULL){
-            preferences.php_hstring_size=12;
-            error=NULL;
-        }
+	preferences.php_hstring_fore = getcolor(config,"/gPHPEdit/php_hstring/fore","php_hstring",8388736);
+        preferences.php_hstring_font = get_string(config,"/gPHPEdit/php_hstring/font",DEFAULT_FONT);
+	preferences.php_hstring_back = getcolor(config,"/gPHPEdit/php_hstring/back","php_hstring",DEFAULT_BACK_COLOR);
+        preferences.php_hstring_size = get_size(config,"/gPHPEdit/php_hstring/size",DEFAULT_FONT_SIZE);
 	preferences.php_hstring_bold = gconf_client_get_bool(config,"/gPHPEdit/php_hstring/bold",NULL);
 	preferences.php_hstring_italic = gconf_client_get_bool(config,"/gPHPEdit/php_hstring/italic",NULL);
 
-	preferences.php_simplestring_fore = gconf_client_get_int (config,"/gPHPEdit/php_simplestring/fore",&error);
-        if (preferences.php_simplestring_fore==0 && error!=NULL){
-            preferences.php_simplestring_fore=8388736;
-            error=NULL;
-        }
-	preferences.php_simplestring_font = gconf_client_get_string(config,"/gPHPEdit/php_simplestring/font",&error);
-        if (!preferences.php_simplestring_font){
-            preferences.php_simplestring_font="!Sans";
-            error=NULL;
-        }
-	preferences.php_simplestring_back = gconf_client_get_int (config,"/gPHPEdit/php_simplestring/back",&error);
-        if (preferences.php_simplestring_back==0 && error!=NULL){
-            preferences.php_simplestring_back=16777215;
-            error=NULL;
-        }
-	preferences.php_simplestring_size = gconf_client_get_int (config,"/gPHPEdit/php_simplestring/size",&error);
-        if (preferences.php_simplestring_size==0 && error!=NULL){
-            preferences.php_simplestring_size=12;
-            error=NULL;
-        }
+	preferences.php_simplestring_fore = getcolor(config,"/gPHPEdit/php_simplestring/fore","php_simplestring",8388736);
+        preferences.php_simplestring_font = get_string(config,"/gPHPEdit/php_simplestring/font",DEFAULT_FONT);
+	preferences.php_simplestring_back = getcolor(config,"/gPHPEdit/php_simplestring/back","php_simplestring",DEFAULT_BACK_COLOR);
+        preferences.php_simplestring_size = get_size(config,"/gPHPEdit/php_simplestring/size",DEFAULT_FONT_SIZE);
 	preferences.php_simplestring_bold = gconf_client_get_bool(config,"/gPHPEdit/php_simplestring/bold",NULL);
 	preferences.php_simplestring_italic = gconf_client_get_bool(config,"/gPHPEdit/php_simplestring/italic",NULL);
 
-	preferences.php_word_fore = gconf_client_get_int (config,"/gPHPEdit/php_word/fore",NULL);
-	preferences.php_word_font = gconf_client_get_string(config,"/gPHPEdit/php_simplestring/font",&error);
-        if (!preferences.php_word_font){
-            preferences.php_word_font="!Sans";
-            error=NULL;
-        }
-	preferences.php_word_back = gconf_client_get_int (config,"/gPHPEdit/php_word/back",&error);
-        if (preferences.php_word_back==0 && error!=NULL){
-            preferences.php_word_back=16777215;
-            error=NULL;
-        }
-	preferences.php_word_size = gconf_client_get_int (config,"/gPHPEdit/php_word/size",&error);
-        if (preferences.php_word_size==0 && error!=NULL){
-            preferences.php_word_size=12;
-            error=NULL;
-        }
+	preferences.php_word_fore = getcolor(config,"/gPHPEdit/php_word/fore","php_word",0);
+	preferences.php_word_font = get_string(config,"/gPHPEdit/php_word/font",DEFAULT_FONT);
+	preferences.php_word_back = getcolor(config,"/gPHPEdit/php_word/back","php_word",DEFAULT_BACK_COLOR);
+        preferences.php_word_size = get_size(config,"/gPHPEdit/php_word/size",DEFAULT_FONT_SIZE);
 	preferences.php_word_bold = gconf_client_get_bool(config,"/gPHPEdit/php_word/bold",NULL);
 	preferences.php_word_italic = gconf_client_get_bool(config,"/gPHPEdit/php_word/italic",NULL);
 
-	preferences.php_number_fore = gconf_client_get_int (config,"/gPHPEdit/php_number/fore",&error);
-        if (preferences.php_number_fore==0 && error!=NULL){
-            preferences.php_number_fore=9204544;
-            error=NULL;
-        }
-	preferences.php_number_font = gconf_client_get_string(config,"/gPHPEdit/php_number/font",&error);
-        if (!preferences.php_number_font){
-            preferences.php_number_font="!Sans";
-            error=NULL;
-        }
-	preferences.php_number_back = gconf_client_get_int (config,"/gPHPEdit/php_number/back",&error);
-        if (preferences.php_number_back==0 && error!=NULL){
-            preferences.php_number_back=16777215;
-            error=NULL;
-        }
-	preferences.php_number_size = gconf_client_get_int (config,"/gPHPEdit/php_number/size",&error);
-        if (preferences.php_number_size==0 && error!=NULL){
-            preferences.php_number_size=12;
-            error=NULL;
-        }
+	preferences.php_number_fore = getcolor(config,"/gPHPEdit/php_number/fore","php_number",9204544);
+        preferences.php_number_font = get_string(config,"/gPHPEdit/php_number/font",DEFAULT_FONT);
+	preferences.php_number_back = getcolor(config,"/gPHPEdit/php_number/back","php_number",DEFAULT_BACK_COLOR);
+        preferences.php_number_size = get_size(config,"/gPHPEdit/php_number/size",DEFAULT_FONT_SIZE);
 	preferences.php_number_bold = gconf_client_get_bool(config,"/gPHPEdit/php_number/bold",NULL);
 	preferences.php_number_italic = gconf_client_get_bool(config,"/gPHPEdit/php_number/italic",NULL);
 
-	preferences.php_variable_fore = gconf_client_get_int (config,"/gPHPEdit/php_variable/fore",&error);
-        if (preferences.php_variable_fore==0 && error!=NULL){
-            preferences.php_variable_fore=16746496;
-            error=NULL;
-        }
-	preferences.php_variable_font = gconf_client_get_string(config,"/gPHPEdit/php_variable/font",&error);
-        if (!preferences.php_variable_font){
-            preferences.php_variable_font="!Sans";
-            error=NULL;
-        }
-	preferences.php_variable_back = gconf_client_get_int (config,"/gPHPEdit/php_variable/back",&error);
-        if (preferences.php_variable_back==0 && error!=NULL){
-            preferences.php_variable_back=16777215;
-            error=NULL;
-        }
-	preferences.php_variable_size = gconf_client_get_int (config,"/gPHPEdit/php_variable/size",&error);
-        if (preferences.php_variable_size==0 && error!=NULL){
-            preferences.php_variable_size=12;
-            error=NULL;
-        }
+	preferences.php_variable_fore = getcolor(config,"/gPHPEdit/php_variable/fore","php_variable",16746496);
+        preferences.php_variable_font = get_string(config,"/gPHPEdit/php_variable/font",DEFAULT_FONT);
+	preferences.php_variable_back = getcolor(config,"/gPHPEdit/php_variable/back","php_variable",DEFAULT_BACK_COLOR);
+        preferences.php_variable_size = get_size(config,"/gPHPEdit/php_variable/size",DEFAULT_FONT_SIZE);
 	preferences.php_variable_bold = gconf_client_get_bool(config,"/gPHPEdit/php_variable/bold",NULL);
 	preferences.php_variable_italic = gconf_client_get_bool(config,"/gPHPEdit/php_variable/italic",NULL);
 
-	preferences.php_comment_fore = gconf_client_get_int (config,"/gPHPEdit/php_comment/fore",&error);
-        if (preferences.php_comment_fore==0 && error!=NULL){
-            preferences.php_comment_fore=8421594;
-            error=NULL;
-        }
-	preferences.php_comment_font = gconf_client_get_string(config,"/gPHPEdit/php_comment/font",&error);
-        if (!preferences.php_comment_font){
-            preferences.php_comment_font="!Sans";
-            error=NULL;
-        }
-	preferences.php_comment_back = gconf_client_get_int (config,"/gPHPEdit/php_comment/back",&error);
-        if (preferences.php_comment_back==0 && error!=NULL){
-            preferences.php_comment_back=16777215;
-            error=NULL;
-        }
-	preferences.php_comment_size = gconf_client_get_int (config,"/gPHPEdit/php_comment/size",&error);
-        if (preferences.php_comment_size==0 && error!=NULL){
-            preferences.php_comment_size=12;
-            error=NULL;
-        }
+	preferences.php_comment_fore = getcolor(config,"/gPHPEdit/php_comment/fore","php_comment",8421594);
+        preferences.php_comment_font = get_string(config,"/gPHPEdit/php_comment/font",DEFAULT_FONT);
+	preferences.php_comment_back = getcolor(config,"/gPHPEdit/php_comment/back","php_comment",DEFAULT_BACK_COLOR);
+        preferences.php_comment_size = get_size(config,"/gPHPEdit/php_comment/size",DEFAULT_FONT_SIZE);
 	preferences.php_comment_bold = gconf_client_get_bool(config,"/gPHPEdit/php_comment/bold",NULL);
 	preferences.php_comment_italic = gconf_client_get_bool(config,"/gPHPEdit/php_comment/italic",NULL);
 
-	preferences.php_comment_line_fore = gconf_client_get_int (config,"/gPHPEdit/php_comment_line/fore",&error);
-        if (preferences.php_comment_line_fore==0 && error!=NULL){
-            preferences.php_comment_line_fore=8421504;
-            error=NULL;
-        }
-	preferences.php_comment_line_font = gconf_client_get_string(config,"/gPHPEdit/php_comment_line/font",&error);
-        if (!preferences.php_comment_line_font){
-            preferences.php_comment_line_font="!Sans";
-            error=NULL;
-        }
-	preferences.php_comment_line_back = gconf_client_get_int (config,"/gPHPEdit/php_comment_line/back",&error);
-        if (preferences.php_comment_line_back==0 && error!=NULL){
-            preferences.php_comment_line_back=16777215;
-            error=NULL;
-        }
-	preferences.php_comment_line_size = gconf_client_get_int (config,"/gPHPEdit/php_comment_line/back",&error);
-        if (preferences.php_comment_line_size==0 && error!=NULL){
-            preferences.php_comment_line_size=12;
-            error=NULL;
-        }
+	preferences.php_comment_line_fore = getcolor(config,"/gPHPEdit/php_comment_line/fore","php_comment_line",8421504);
+        preferences.php_comment_line_font = get_string(config,"/gPHPEdit/php_comment_line/font",DEFAULT_FONT);
+	preferences.php_comment_line_back = getcolor(config,"/gPHPEdit/php_comment_line/back","php_comment_line",DEFAULT_BACK_COLOR);
+        preferences.php_comment_line_size = get_size(config,"/gPHPEdit/php_comment_line/size",DEFAULT_FONT_SIZE);
 	preferences.php_comment_line_bold = gconf_client_get_bool(config,"/gPHPEdit/php_comment_line/bold",NULL);
 	preferences.php_comment_line_italic = gconf_client_get_bool(config,"/gPHPEdit/php_comment_line/italic",NULL);
 
-	preferences.css_tag_back = gconf_client_get_int (config,"/gPHPEdit/css_tag/back",&error);
-         if (preferences.css_tag_back==0 && error!=NULL){
-            preferences.css_tag_back=16777215;
-            error=NULL;
-        }
-	preferences.css_tag_font = gconf_client_get_string(config,"/gPHPEdit/css_tag/font",&error);
-        if (!preferences.css_tag_font){
-            preferences.css_tag_font="!Sans";
-            error=NULL;
-        }
-	preferences.css_tag_fore = gconf_client_get_int (config,"/gPHPEdit/css_tag/fore",&error);
-        if (preferences.css_tag_fore==0 && error!=NULL){
-            preferences.css_tag_fore=8388608;
-            error=NULL;
-        }
-	preferences.css_tag_size = gconf_client_get_int (config,"/gPHPEdit/css_tag/size",&error);
-        if (preferences.css_tag_size==0 && error!=NULL){
-            preferences.css_tag_size=12;
-            error=NULL;
-        }
+	preferences.css_tag_back = getcolor(config,"/gPHPEdit/css_tag/back","css_tag",DEFAULT_BACK_COLOR);
+        preferences.css_tag_font = get_string(config,"/gPHPEdit/css_tag/font",DEFAULT_FONT);
+	preferences.css_tag_fore = getcolor(config,"/gPHPEdit/css_tag/fore","css_tag",8388608);
+        preferences.css_tag_size = get_size(config,"/gPHPEdit/css_tag/size",DEFAULT_FONT_SIZE);
 	preferences.css_tag_bold = gconf_client_get_bool(config,"/gPHPEdit/css_tag/bold",NULL);
 	preferences.css_tag_italic = gconf_client_get_bool(config,"/gPHPEdit/css_tag/italic",NULL);
 	
-	preferences.css_class_fore = gconf_client_get_int (config,"/gPHPEdit/css_class/fore",&error);
-        if (preferences.css_class_fore==0 && error!=NULL){
-            preferences.css_class_fore=8388608;
-            error=NULL;
-        }
-	preferences.css_class_font = gconf_client_get_string(config,"/gPHPEdit/css_class/font",&error);
-        if (!preferences.css_class_font){
-            preferences.css_class_font="!Sans";
-            error=NULL;
-        }
-	preferences.css_class_back = gconf_client_get_int (config,"/gPHPEdit/css_class/back",&error);
-        if (preferences.css_class_back==0 && error!=NULL){
-            preferences.css_class_back=16777215;
-            error=NULL;
-        }
-	preferences.css_class_size = gconf_client_get_int (config,"/gPHPEdit/css_class/size",&error);
-        if (preferences.css_class_size==0 && error!=NULL){
-            preferences.css_class_size=12;
-            error=NULL;
-        }
+	preferences.css_class_fore = getcolor(config,"/gPHPEdit/css_class/fore","css_class",8388608);
+        preferences.css_class_font = get_string(config,"/gPHPEdit/css_class/font",DEFAULT_FONT);
+	preferences.css_class_back = getcolor(config,"/gPHPEdit/css_class/back","css_class",DEFAULT_BACK_COLOR);
+        preferences.css_class_size = get_size(config,"/gPHPEdit/css_class/size",DEFAULT_FONT_SIZE);
 	preferences.css_class_bold = gconf_client_get_bool(config,"/gPHPEdit/css_class/bold",NULL);
 	preferences.css_class_italic = gconf_client_get_bool(config,"/gPHPEdit/css_class/italic",NULL);
 	
-	preferences.css_pseudoclass_back = gconf_client_get_int (config,"/gPHPEdit/css_pseudoclass/back",&error);
-        if (preferences.css_pseudoclass_back==0 && error!=NULL){
-            preferences.css_pseudoclass_back=16777215;
-            error=NULL;
-        }
-	preferences.css_pseudoclass_font = gconf_client_get_string(config,"/gPHPEdit/css_pseudoclass/font",&error);
-        if (!preferences.css_pseudoclass_font){
-            preferences.css_pseudoclass_font="!Sans";
-            error=NULL;
-        }
-	preferences.css_pseudoclass_fore = gconf_client_get_int (config,"/gPHPEdit/css_pseudoclass/fore",&error);
-        if (preferences.css_pseudoclass_fore==0 && error!=NULL){
-            preferences.css_pseudoclass_fore=8388608;
-            error=NULL;
-        }
-	preferences.css_pseudoclass_size = gconf_client_get_int (config,"/gPHPEdit/css_pseudoclass/size",&error);
-        if (preferences.css_pseudoclass_size==0 && error!=NULL){
-            preferences.css_pseudoclass_size=12;
-            error=NULL;
-        }
+	preferences.css_pseudoclass_back = getcolor(config,"/gPHPEdit/css_pseudoclass/back","css_pseudoclass",DEFAULT_BACK_COLOR);
+        preferences.css_pseudoclass_font = get_string(config,"/gPHPEdit/css_pseudoclass/font",DEFAULT_FONT);
+	preferences.css_pseudoclass_fore = getcolor(config,"/gPHPEdit/css_pseudoclass/fore","css_pseudoclass",8388608);
+        preferences.css_pseudoclass_size = get_size(config,"/gPHPEdit/css_pseudoclass/size",DEFAULT_FONT_SIZE);
 	preferences.css_pseudoclass_bold = gconf_client_get_bool(config,"/gPHPEdit/css_pseudoclass/bold",NULL);
 	preferences.css_pseudoclass_italic = gconf_client_get_bool(config,"/gPHPEdit/css_pseudoclass/italic",NULL);
 	
-	preferences.css_unknown_pseudoclass_fore = gconf_client_get_int (config,"/gPHPEdit/css_unknown_line/fore",&error);
-        if (preferences.css_unknown_pseudoclass_fore==0 && error!=NULL){
-            preferences.css_unknown_pseudoclass_fore=16711680;
-            error=NULL;
-        }
-	preferences.css_unknown_pseudoclass_font = gconf_client_get_string(config,"/gPHPEdit/css_unknown_line/font",&error);
-        if (!preferences.css_unknown_pseudoclass_font){
-            preferences.css_unknown_pseudoclass_font="!Sans";
-            error=NULL;
-        }
-	preferences.css_unknown_pseudoclass_back = gconf_client_get_int (config,"/gPHPEdit/css_unknown_line/back",&error);
-        if (preferences.css_unknown_pseudoclass_back==0 && error!=NULL){
-            preferences.css_unknown_pseudoclass_back=16777215;
-            error=NULL;
-        }
-	preferences.css_unknown_pseudoclass_size = gconf_client_get_int (config,"/gPHPEdit/css_unknown_line/size",&error);
-        if (preferences.css_pseudoclass_size==0 && error!=NULL){
-            preferences.css_unknown_pseudoclass_size=12;
-            error=NULL;
-        }
-	preferences.css_unknown_pseudoclass_bold = gconf_client_get_bool(config,"/gPHPEdit/css_unknown_line/bold",NULL);
-	preferences.css_unknown_pseudoclass_italic = gconf_client_get_bool(config,"/gPHPEdit/css_unknown_line/italic",NULL);
+	preferences.css_unknown_pseudoclass_fore = getcolor(config,"/gPHPEdit/css_unknown_pseudoclass/fore","css_unknown_pseudoclass",16711680);
+        preferences.css_unknown_pseudoclass_font = get_string(config,"/gPHPEdit/css_unknown_pseudoclass/font",DEFAULT_FONT);
+	preferences.css_unknown_pseudoclass_back = getcolor(config,"/gPHPEdit/css_unknown_pseudoclass/back","css_unknown_pseudoclass",DEFAULT_BACK_COLOR);
+        preferences.css_unknown_pseudoclass_size = get_size(config,"/gPHPEdit/css_unknown_pseudoclass/size",DEFAULT_FONT_SIZE);
+	preferences.css_unknown_pseudoclass_bold = gconf_client_get_bool(config,"/gPHPEdit/css_unknown_pseudoclass/bold",NULL);
+	preferences.css_unknown_pseudoclass_italic = gconf_client_get_bool(config,"/gPHPEdit/css_unknown_pseudoclass/italic",NULL);
 	
-	preferences.css_operator_fore = gconf_client_get_int (config,"/gPHPEdit/css_operator/fore",&error);
-        if (preferences.css_operator_fore==0 && error!=NULL){
-            preferences.css_operator_fore=128;
-            error=NULL;
-        }
-	preferences.css_operator_font = gconf_client_get_string(config,"/gPHPEdit/css_operator/font",&error);
-        if (!preferences.css_operator_font){
-            preferences.css_operator_font="!Sans";
-            error=NULL;
-        }
-	preferences.css_operator_back = gconf_client_get_int (config,"/gPHPEdit/css_operator/back",&error);
-        if (preferences.css_operator_back==0 && error!=NULL){
-            preferences.css_operator_back=16777215;
-            error=NULL;
-        }
-	preferences.css_operator_size = gconf_client_get_int (config,"/gPHPEdit/css_operator/size",&error);
-        if (preferences.css_operator_size==0 && error!=NULL){
-            preferences.css_operator_size=12;
-            error=NULL;
-        }
+	preferences.css_operator_fore = getcolor(config,"/gPHPEdit/css_operator/fore","css_operator",128);
+        preferences.css_operator_font = get_string(config,"/gPHPEdit/css_operator/font",DEFAULT_FONT);
+	preferences.css_operator_back = getcolor(config,"/gPHPEdit/css_operator/back","css_operator",DEFAULT_BACK_COLOR);
+        preferences.css_operator_size = get_size(config,"/gPHPEdit/css_operator/size",DEFAULT_FONT_SIZE);
 	preferences.css_operator_bold = gconf_client_get_bool(config,"/gPHPEdit/css_operator/bold",NULL);
 	preferences.css_operator_italic = gconf_client_get_bool(config,"/gPHPEdit/css_operator/italic",NULL);
 	
 	preferences.css_identifier_fore = gconf_client_get_int (config,"/gPHPEdit/css_identifier/fore",NULL);
-	preferences.css_identifier_font = gconf_client_get_string(config,"/gPHPEdit/css_identifier/font",&error);
-        if (!preferences.css_identifier_font){
-            preferences.css_identifier_font="!Sans";
-            error=NULL;
-        }
-	preferences.css_identifier_back = gconf_client_get_int (config,"/gPHPEdit/css_identifier/back",&error);
-        if (preferences.css_identifier_back==0 && error!=NULL){
-            preferences.css_identifier_back=16777215;
-            error=NULL;
-        }
-	preferences.css_identifier_size = gconf_client_get_int (config,"/gPHPEdit/css_identifier/size",&error);
-        if (preferences.css_identifier_size==0 && error!=NULL){
-            preferences.css_identifier_size=12;
-            error=NULL;
-        }
+	preferences.css_identifier_font = get_string(config,"/gPHPEdit/css_identifier/font",DEFAULT_FONT);
+	preferences.css_identifier_back = getcolor(config,"/gPHPEdit/css_identifier/back","css_identifier",DEFAULT_BACK_COLOR);
+        preferences.css_identifier_size = get_size(config,"/gPHPEdit/css_identifier/size",DEFAULT_FONT_SIZE);
 	preferences.css_identifier_bold = gconf_client_get_bool(config,"/gPHPEdit/css_identifier/bold",NULL);
 	preferences.css_identifier_italic = gconf_client_get_bool(config,"/gPHPEdit/css_identifier/italic",NULL);
 	
-	preferences.css_unknown_identifier_fore = gconf_client_get_int (config,"/gPHPEdit/css_unknown_identifier/fore",&error);
-        if (preferences.css_unknown_identifier_fore==0 && error!=NULL){
-            preferences.css_unknown_identifier_fore=16711680;
-            error=NULL;
-        }
-	preferences.css_unknown_identifier_font = gconf_client_get_string(config,"/gPHPEdit/css_unknown_identifier/font",&error);
-        if (!preferences.css_unknown_identifier_font){
-            preferences.css_unknown_identifier_font="!Sans";
-            error=NULL;
-        }
-	preferences.css_unknown_identifier_back = gconf_client_get_int (config,"/gPHPEdit/css_unknown_identifier/back",&error);
-        if (preferences.css_unknown_identifier_back==0 && error!=NULL){
-            preferences.css_unknown_identifier_back=16777215;
-            error=NULL;
-        }
-	preferences.css_unknown_identifier_size = gconf_client_get_int (config,"/gPHPEdit/css_unknown_identifier/size",&error);
-        if (preferences.css_unknown_identifier_size==0 && error!=NULL){
-            preferences.css_unknown_identifier_size=12;
-            error=NULL;
-        }
+	preferences.css_unknown_identifier_fore = getcolor(config,"/gPHPEdit/css_unknown_identifier/fore","css_unknown_identifier",16711680);
+        preferences.css_unknown_identifier_font = get_string(config,"/gPHPEdit/css_unknown_identifier/font",DEFAULT_FONT);
+	preferences.css_unknown_identifier_back = getcolor(config,"/gPHPEdit/css_unknown_identifier/back","css_unknown_identifier",DEFAULT_BACK_COLOR);
+        preferences.css_unknown_identifier_size = get_size(config,"/gPHPEdit/css_unknown_identifier/size",DEFAULT_FONT_SIZE);
 	preferences.css_unknown_identifier_bold = gconf_client_get_bool(config,"/gPHPEdit/css_unknown_identifier/bold",NULL);
 	preferences.css_unknown_identifier_italic = gconf_client_get_bool(config,"/gPHPEdit/css_unknown_identifier/italic",NULL);
 	
-	preferences.css_value_fore = gconf_client_get_int (config,"/gPHPEdit/css_value/fore",&error);
-        if (preferences.css_value_fore==0 && error!=NULL){
-            preferences.css_value_fore=8388736;
-            error=NULL;
-        }
-	preferences.css_value_font = gconf_client_get_string(config,"/gPHPEdit/css_value/font",&error);
-        if (!preferences.css_value_font){
-            preferences.css_value_font="!Sans";
-            error=NULL;
-        }
-	preferences.css_value_back = gconf_client_get_int (config,"/gPHPEdit/css_value/back",&error);
-        if (preferences.css_value_back==0 && error!=NULL){
-            preferences.css_value_back=16777215;
-            error=NULL;
-        }
-	preferences.css_value_size = gconf_client_get_int (config,"/gPHPEdit/css_value/size",&error);
-        if (preferences.css_value_size==0 && error!=NULL){
-            preferences.css_value_size=12;
-            error=NULL;
-        }
+	preferences.css_value_fore = getcolor(config,"/gPHPEdit/css_value/fore","css_value",8388736);
+        preferences.css_value_font = get_string(config,"/gPHPEdit/css_value/font",DEFAULT_FONT);
+	preferences.css_value_back = getcolor(config,"/gPHPEdit/css_value/back","css_value",DEFAULT_BACK_COLOR);
+        preferences.css_value_size = get_size(config,"/gPHPEdit/css_value/size",DEFAULT_FONT_SIZE);
 	preferences.css_value_bold = gconf_client_get_bool(config,"/gPHPEdit/css_value/bold",NULL);
 	preferences.css_value_italic = gconf_client_get_bool(config,"/gPHPEdit/css_value/italic",NULL);
 	
-	preferences.css_comment_fore = gconf_client_get_int (config,"/gPHPEdit/css_comment/fore",&error);
-        if (preferences.css_comment_fore==0 && error!=NULL){
-            preferences.css_comment_fore=84215504;
-            error=NULL;
-        }
-	preferences.css_comment_font = gconf_client_get_string(config,"/gPHPEdit/css_comment/font",&error);
-        if (!preferences.css_comment_font){
-            preferences.css_comment_font="!Sans";
-            error=NULL;
-        }
-	preferences.css_comment_back = gconf_client_get_int (config,"/gPHPEdit/css_comment/back",&error);
-        if (preferences.css_comment_back==0 && error!=NULL){
-            preferences.css_comment_back=16777215;
-            error=NULL;
-        }
-	preferences.css_comment_size = gconf_client_get_int (config,"/gPHPEdit/css_comment/size",&error);
-        if (preferences.css_comment_size==0 && error!=NULL){
-            preferences.css_comment_size=12;
-            error=NULL;
-        }
+	preferences.css_comment_fore = getcolor(config,"/gPHPEdit/css_comment/fore","css_comment",84215504);
+        preferences.css_comment_font = get_string(config,"/gPHPEdit/css_comment/font",DEFAULT_FONT);
+	preferences.css_comment_back = getcolor(config,"/gPHPEdit/css_comment/back","css_comment",DEFAULT_BACK_COLOR);
+        preferences.css_comment_size = get_size(config,"/gPHPEdit/css_comment/size",DEFAULT_FONT_SIZE);
 	preferences.css_comment_bold = gconf_client_get_bool(config,"/gPHPEdit/css_comment/bold",NULL);
 	preferences.css_comment_italic = gconf_client_get_bool(config,"/gPHPEdit/css_comment/italic",NULL);
 	
-	preferences.css_id_font = gconf_client_get_string(config,"/gPHPEdit/css_id/font",&error);
-        if (!preferences.css_id_font){
-            preferences.css_id_font="!Sans";
-            error=NULL;
-        }
-	preferences.css_id_fore = gconf_client_get_int (config,"/gPHPEdit/css_id/fore",&error);
-        if (preferences.css_id_fore==0 && error!=NULL){
-            preferences.css_id_fore=8388608;
-            error=NULL;
-        }
-	preferences.css_id_back = gconf_client_get_int (config,"/gPHPEdit/css_id/back",&error);
-        if (preferences.css_id_back==0 && error!=NULL){
-            preferences.css_id_back=16777215;
-            error=NULL;
-        }
-	preferences.css_id_size = gconf_client_get_int (config,"/gPHPEdit/css_id/size",&error);
-        if (preferences.css_id_size==0 && error!=NULL){
-            preferences.css_id_size=12;
-            error=NULL;
-        }
+	preferences.css_id_font = get_string(config,"/gPHPEdit/css_id/font",DEFAULT_FONT);
+	preferences.css_id_fore = getcolor(config,"/gPHPEdit/css_id/fore","css_id",8388608);
+        preferences.css_id_back = getcolor(config,"/gPHPEdit/css_id/back","css_id",DEFAULT_BACK_COLOR);
+        preferences.css_id_size = get_size(config,"/gPHPEdit/css_id/size",DEFAULT_FONT_SIZE);
 	preferences.css_id_bold = gconf_client_get_bool(config,"/gPHPEdit/css_id/bold",NULL);
 	preferences.css_id_italic = gconf_client_get_bool(config,"/gPHPEdit/css_id/italic",NULL);
 	
-	preferences.css_important_font = gconf_client_get_string(config,"/gPHPEdit/css_important/font",&error);
-        if (!preferences.css_important_font){
-            preferences.css_important_font="!Sans";
-            error=NULL;
-        }
-	preferences.css_important_fore = gconf_client_get_int (config,"/gPHPEdit/css_important/fore",&error);
-        if (preferences.css_important_fore==0 && error!=NULL){
-            preferences.css_important_fore=255;
-            error=NULL;
-        }
-	preferences.css_important_back = gconf_client_get_int (config,"/gPHPEdit/css_important/back",&error);
-        if (preferences.css_important_back==0 && error!=NULL){
-            preferences.css_important_back=16777215;
-            error=NULL;
-        }
-	preferences.css_important_size = gconf_client_get_int (config,"/gPHPEdit/css_important/size",&error);
-        if (preferences.css_important_size==0 && error!=NULL){
-            preferences.css_important_size=12;
-            error=NULL;
-        }
+	preferences.css_important_font = get_string(config,"/gPHPEdit/css_important/font",DEFAULT_FONT);
+	preferences.css_important_fore = getcolor(config,"/gPHPEdit/css_important/fore","css_important",255);
+        preferences.css_important_back = getcolor(config,"/gPHPEdit/css_important/back","css_important",DEFAULT_BACK_COLOR);
+        preferences.css_important_size = get_size(config,"/gPHPEdit/css_important/size",DEFAULT_FONT_SIZE);
 	preferences.css_important_bold = gconf_client_get_bool(config,"/gPHPEdit/css_important/bold",NULL);
 	preferences.css_important_italic = gconf_client_get_bool(config,"/gPHPEdit/css_important/italic",NULL);
 	
-	preferences.css_directive_fore = gconf_client_get_int (config,"/gPHPEdit/css_directive/fore",&error);
-        if (preferences.css_directive_fore==0 && error!=NULL){
-            preferences.css_directive_fore=32768;
-            error=NULL;
-        }
-	preferences.css_directive_font = gconf_client_get_string(config,"/gPHPEdit/css_directive/font",&error);
-        if (!preferences.css_directive_font){
-            preferences.css_directive_font="!Sans";
-            error=NULL;
-        }
-	preferences.css_directive_back = gconf_client_get_int (config,"/gPHPEdit/css_directive/back",&error);
-        if (preferences.css_directive_back==0 && error!=NULL){
-            preferences.css_directive_back=16777215;
-            error=NULL;
-        }
-	preferences.css_directive_size = gconf_client_get_int (config,"/gPHPEdit/css_directive/size",&error);
-        if (preferences.css_directive_size==0 && error!=NULL){
-            preferences.css_directive_size=12;
-            error=NULL;
-        }
+	preferences.css_directive_fore = getcolor(config,"/gPHPEdit/css_directive/fore","css_directive",32768);
+        preferences.css_directive_font = get_string(config,"/gPHPEdit/css_directive/font",DEFAULT_FONT);
+	preferences.css_directive_back = getcolor(config,"/gPHPEdit/css_directive/back","css_directive",DEFAULT_BACK_COLOR);
+        preferences.css_directive_size = get_size(config,"/gPHPEdit/css_directive/size",DEFAULT_FONT_SIZE);
 	preferences.css_directive_bold = gconf_client_get_bool(config,"/gPHPEdit/css_directive/bold",NULL);
 	preferences.css_directive_italic = gconf_client_get_bool(config,"/gPHPEdit/css_directive/italic",NULL);
-
         
-	preferences.sql_word_fore = gconf_client_get_int (config,"/gPHPEdit/sql_word/fore",NULL);
-        preferences.sql_word_font = gconf_client_get_string(config,"/gPHPEdit/sql_word/font",&error);
-        if (!preferences.sql_word_font){
-            preferences.sql_word_font="!Sans";
-            error=NULL;
-        }
-        preferences.sql_word_back = gconf_client_get_int (config,"/gPHPEdit/sql_word/back",&error);
-        if (preferences.sql_word_back==0 && error!=NULL){
-            preferences.sql_word_back=16777215;
-            error=NULL;
-        }
-	preferences.sql_word_size = gconf_client_get_int (config,"/gPHPEdit/sql_word/size",&error);
-        if (preferences.sql_word_size==0 && error!=NULL){
-            preferences.sql_word_size=12;
-            error=NULL;
-        }
+	preferences.sql_word_fore =  getcolor(config,"/gPHPEdit/sql_word/fore","sql_word",0);
+        preferences.sql_word_font = get_string(config,"/gPHPEdit/sql_word/font",DEFAULT_FONT);
+        preferences.sql_word_back = getcolor(config,"/gPHPEdit/sql_word/back","sql_word",DEFAULT_BACK_COLOR);
+        preferences.sql_word_size = get_size(config,"/gPHPEdit/sql_word/size",DEFAULT_FONT_SIZE);
 	preferences.sql_word_bold = gconf_client_get_bool(config,"/gPHPEdit/sql_word/bold",NULL);
 	preferences.sql_word_italic = gconf_client_get_bool(config,"/gPHPEdit/sql_word/italic",NULL);
         
-	preferences.sql_string_fore = gconf_client_get_int (config,"/gPHPEdit/sql_string/fore",&error);
-        if (preferences.sql_string_fore==0 && error!=NULL){
-            preferences.sql_string_fore=8388736;
-            error=NULL;
-        }
-	preferences.sql_string_font = gconf_client_get_string(config,"/gPHPEdit/sql_string/font",&error);
-        if (!preferences.sql_string_font){
-            preferences.sql_string_font="!Sans";
-            error=NULL;
-        }
-	preferences.sql_string_back = gconf_client_get_int (config,"/gPHPEdit/sql_string/back",&error);
-        if (preferences.sql_string_back==0 && error!=NULL){
-            preferences.sql_string_back=16777215;
-            error=NULL;
-        }
-	preferences.sql_string_size = gconf_client_get_int (config,"/gPHPEdit/sql_string/size",&error);
-        if (preferences.sql_string_size==0 && error!=NULL){
-            preferences.sql_string_size=12;
-            error=NULL;
-        }
+	preferences.sql_string_fore = getcolor(config,"/gPHPEdit/sql_string/fore","sql_string",8388736);
+        preferences.sql_string_font = get_string(config,"/gPHPEdit/sql_string/font",DEFAULT_FONT);
+	preferences.sql_string_back = getcolor(config,"/gPHPEdit/sql_string/back","sql_string",DEFAULT_BACK_COLOR);
+        preferences.sql_string_size = get_size(config,"/gPHPEdit/sql_string/size",DEFAULT_FONT_SIZE);
 	preferences.sql_string_bold = gconf_client_get_bool(config,"/gPHPEdit/sql_string/bold",NULL);
 	preferences.sql_string_italic = gconf_client_get_bool(config,"/gPHPEdit/sql_string/italic",NULL);
 	
-	preferences.sql_operator_fore = gconf_client_get_int (config,"/gPHPEdit/sql_operator/fore",NULL);
-	preferences.sql_operator_font = gconf_client_get_string(config,"/gPHPEdit/sql_operator/font",&error);
-        if (!preferences.sql_operator_font){
-            preferences.sql_operator_font="!Sans";
-            error=NULL;
-        }
-	preferences.sql_operator_back = gconf_client_get_int (config,"/gPHPEdit/sql_operator/back",&error);
-        if (preferences.sql_operator_back==0 && error!=NULL){
-            preferences.sql_operator_fore=16777215;
-            error=NULL;
-        }
-	preferences.sql_operator_size = gconf_client_get_int (config,"/gPHPEdit/sql_operator/size",&error);
-        if (preferences.sql_operator_size==0 && error!=NULL){
-            preferences.sql_operator_size=12;
-            error=NULL;
-        }
+	preferences.sql_operator_fore = getcolor(config,"/gPHPEdit/sql_operator/fore","sql_operator",0);
+	preferences.sql_operator_font = get_string(config,"/gPHPEdit/sql_operator/font",DEFAULT_FONT);
+	preferences.sql_operator_back = getcolor(config,"/gPHPEdit/sql_operator/back","sql_operator",DEFAULT_BACK_COLOR);
+        preferences.sql_operator_size = get_size(config,"/gPHPEdit/sql_operator/size",DEFAULT_FONT_SIZE);
 	preferences.sql_operator_bold = gconf_client_get_bool(config,"/gPHPEdit/sql_operator/bold",NULL);
 	preferences.sql_operator_italic = gconf_client_get_bool(config,"/gPHPEdit/sql_operator/italic",NULL);
 	
-	preferences.sql_comment_fore = gconf_client_get_int (config,"/gPHPEdit/sql_comment/fore",&error);
-        if (preferences.sql_comment_fore==0 && error!=NULL){
-            preferences.sql_comment_fore=8421504;
-            error=NULL;
-        }
-	preferences.sql_comment_font = gconf_client_get_string(config,"/gPHPEdit/sql_comment/font",&error);
-        if (!preferences.sql_comment_font){
-            preferences.sql_comment_font="!Sans";
-            error=NULL;
-        }
-	preferences.sql_comment_back = gconf_client_get_int (config,"/gPHPEdit/sql_comment/back",&error);
-        if (preferences.sql_comment_back==0 && error!=NULL){
-            preferences.sql_comment_back=16777215;
-            error=NULL;
-        }
-	preferences.sql_comment_size = gconf_client_get_int (config,"/gPHPEdit/sql_comment/size",&error);
-        if (preferences.sql_comment_size==0 && error!=NULL){
-            preferences.sql_comment_size=12;
-            error=NULL;
-        }
+	preferences.sql_comment_fore = getcolor(config,"/gPHPEdit/sql_comment/fore","sql_comment",8421504);
+        preferences.sql_comment_font = get_string(config,"/gPHPEdit/sql_comment/font",DEFAULT_FONT);
+	preferences.sql_comment_back = getcolor(config,"/gPHPEdit/sql_comment/back","sql_comment",DEFAULT_BACK_COLOR);
+        preferences.sql_comment_size = get_size(config,"/gPHPEdit/sql_comment/size",DEFAULT_FONT_SIZE);
 	preferences.sql_comment_bold = gconf_client_get_bool(config,"/gPHPEdit/sql_comment/bold",NULL);
 	preferences.sql_comment_italic = gconf_client_get_bool(config,"/gPHPEdit/sql_comment/italic",NULL);
 	
-	preferences.sql_number_fore = gconf_client_get_int (config,"/gPHPEdit/sql_number/fore",&error);
-        if (preferences.sql_number_fore==0 && error!=NULL){
-            preferences.sql_number_fore=9204544;
-            error=NULL;
-        }
-	preferences.sql_number_font = gconf_client_get_string(config,"/gPHPEdit/sql_number/font",&error);
-        if (!preferences.sql_number_font){
-            preferences.sql_number_font="!Sans";
-            error=NULL;
-        }
-	preferences.sql_number_back = gconf_client_get_int (config,"/gPHPEdit/sql_number/back",&error);
-        if (preferences.sql_number_back==0 && error!=NULL){
-            preferences.sql_number_back=16777215;
-            error=NULL;
-        }
-	preferences.sql_number_size = gconf_client_get_int (config,"/gPHPEdit/sql_number/size",&error);
-        if (preferences.sql_number_size==0 &&error!=NULL){
-            preferences.sql_number_size=12;
-            error=NULL;
-        }
+	preferences.sql_number_fore = getcolor(config,"/gPHPEdit/sql_number/fore","sql_number",9204544);
+        preferences.sql_number_font = get_string(config,"/gPHPEdit/sql_number/font",DEFAULT_FONT);
+	preferences.sql_number_back = getcolor(config,"/gPHPEdit/sql_number/back","sql_number",DEFAULT_BACK_COLOR);
+        preferences.sql_number_size = get_size(config,"/gPHPEdit/sql_number/size",DEFAULT_FONT_SIZE);
 	preferences.sql_number_bold = gconf_client_get_bool(config,"/gPHPEdit/sql_number/bold",NULL);
 	preferences.sql_number_italic = gconf_client_get_bool(config,"/gPHPEdit/sql_number/italic",NULL);
 	
-	preferences.sql_identifier_fore = gconf_client_get_int (config,"/gPHPEdit/sql_identifier/fore",&error);
-        if (preferences.sql_identifier_fore==0 &&error!=NULL){
-            preferences.sql_identifier_fore=16746496;
-            error=NULL;
-        }
-	preferences.sql_identifier_font = gconf_client_get_string(config,"/gPHPEdit/sql_identifier/font",&error);
-        if (!preferences.sql_identifier_font){
-            preferences.sql_identifier_font="!Sans";
-            error=NULL;
-        }
-	preferences.sql_identifier_back = gconf_client_get_int (config,"/gPHPEdit/sql_identifier/back",&error);
-        if (preferences.sql_identifier_back==0 && error!=NULL){
-            preferences.sql_identifier_fore=16777215;
-            error=NULL;
-        }
-	preferences.sql_identifier_size = gconf_client_get_int (config,"/gPHPEdit/sql_identifier/size",&error);
-        if (preferences.sql_identifier_size==0 && error!=NULL){
-            preferences.sql_identifier_size=12;
-            error=NULL;
-        }
+	preferences.sql_identifier_fore = getcolor(config,"/gPHPEdit/sql_identifier/fore","sql_identifier",16746496);
+	preferences.sql_identifier_font = get_string(config,"/gPHPEdit/sql_identifier/font",DEFAULT_FONT);
+	preferences.sql_identifier_back = getcolor(config,"/gPHPEdit/sql_identifier/back","sql_identifier",DEFAULT_BACK_COLOR);
+        preferences.sql_identifier_size = get_size(config,"/gPHPEdit/sql_identifier/size",DEFAULT_FONT_SIZE);
 	preferences.sql_identifier_bold = gconf_client_get_bool(config,"/gPHPEdit/sql_identifier/bold",NULL);
 	preferences.sql_identifier_italic = gconf_client_get_bool(config,"/gPHPEdit/sql_identifier/italic",NULL);
         
-        check_for_pango_fonts();
+	preferences.c_default_fore = getcolor(config,"/gPHPEdit/c_default/fore","c_default",1052688);
+        preferences.c_default_font = get_string(config,"/gPHPEdit/c_default/font",DEFAULT_FONT);
+	preferences.c_default_back = getcolor(config,"/gPHPEdit/c_default/back","c_default",DEFAULT_BACK_COLOR);
+        preferences.c_default_size = get_size(config,"/gPHPEdit/c_default/size",DEFAULT_FONT_SIZE);
+	preferences.c_default_bold = gconf_client_get_bool(config,"/gPHPEdit/c_default/bold",NULL);
+	preferences.c_default_italic = gconf_client_get_bool(config,"/gPHPEdit/c_default/italic",NULL);
+
+	preferences.c_string_fore = getcolor(config,"/gPHPEdit/c_string/fore","c_string",8388736);
+        preferences.c_string_font = get_string(config,"/gPHPEdit/c_string/font",DEFAULT_FONT);
+	preferences.c_string_back = getcolor(config,"/gPHPEdit/c_string/back","c_string",DEFAULT_BACK_COLOR);
+	preferences.c_string_size = get_size(config,"/gPHPEdit/c_string/size",DEFAULT_FONT_SIZE);
+	preferences.c_string_bold = gconf_client_get_bool(config,"/gPHPEdit/c_string/bold",NULL);
+	preferences.c_string_italic = gconf_client_get_bool(config,"/gPHPEdit/c_string/italic",NULL);
+
+        preferences.c_character_fore = getcolor(config,"/gPHPEdit/c_character/fore","c_character",8388736);
+        preferences.c_character_font = get_string(config,"/gPHPEdit/c_character/font",DEFAULT_FONT);
+	preferences.c_character_back = getcolor(config,"/gPHPEdit/c_character/back","c_character",DEFAULT_BACK_COLOR);
+	preferences.c_character_size = get_size(config,"/gPHPEdit/c_character/size",DEFAULT_FONT_SIZE);
+	preferences.c_character_bold = gconf_client_get_bool(config,"/gPHPEdit/c_character/bold",NULL);
+	preferences.c_character_italic = gconf_client_get_bool(config,"/gPHPEdit/c_character/italic",NULL);
+
+        preferences.c_word_fore = getcolor(config,"/gPHPEdit/c_word/fore","c_word",16746496);
+        preferences.c_word_font = get_string(config,"/gPHPEdit/c_word/font",DEFAULT_FONT);
+	preferences.c_word_back = getcolor(config,"/gPHPEdit/c_word/back","c_word",DEFAULT_BACK_COLOR);
+	preferences.c_word_size = get_size(config,"/gPHPEdit/c_word/size",DEFAULT_FONT_SIZE);
+	preferences.c_word_bold = gconf_client_get_bool(config,"/gPHPEdit/c_word/bold",NULL);
+	preferences.c_word_italic = gconf_client_get_bool(config,"/gPHPEdit/c_word/italic",NULL);
+
+        preferences.c_commentline_fore = getcolor(config,"/gPHPEdit/c_commentline/fore","c_commentline",8421504);
+        preferences.c_commentline_font = get_string(config,"/gPHPEdit/c_commentline/font",DEFAULT_FONT);
+	preferences.c_commentline_back = getcolor(config,"/gPHPEdit/c_commentline/back","c_commentline",DEFAULT_BACK_COLOR);
+	preferences.c_commentline_size = get_size(config,"/gPHPEdit/c_commentline/size",DEFAULT_FONT_SIZE);
+	preferences.c_commentline_bold = gconf_client_get_bool(config,"/gPHPEdit/c_commentline/bold",NULL);
+	preferences.c_commentline_italic = gconf_client_get_bool(config,"/gPHPEdit/c_commentline/italic",NULL);
+
+        preferences.c_number_fore = getcolor(config,"/gPHPEdit/c_number/fore","c_number",9204544);
+        preferences.c_number_font = get_string(config,"/gPHPEdit/c_number/font",DEFAULT_FONT);
+	preferences.c_number_back = getcolor(config,"/gPHPEdit/c_number/back","c_number",DEFAULT_BACK_COLOR);
+	preferences.c_number_size = get_size(config,"/gPHPEdit/c_number/size",DEFAULT_FONT_SIZE);
+	preferences.c_number_bold = gconf_client_get_bool(config,"/gPHPEdit/c_number/bold",NULL);
+	preferences.c_number_italic = gconf_client_get_bool(config,"/gPHPEdit/c_number/italic",NULL);
+
+        preferences.c_identifier_fore = getcolor(config,"/gPHPEdit/c_identifier/fore","c_identifier",1052688);
+        preferences.c_identifier_font = get_string(config,"/gPHPEdit/c_identifier/font",DEFAULT_FONT);
+	preferences.c_identifier_back = getcolor(config,"/gPHPEdit/c_identifier/back","c_identifier",DEFAULT_BACK_COLOR);
+	preferences.c_identifier_size = get_size(config,"/gPHPEdit/c_identifier/size",DEFAULT_FONT_SIZE);
+	preferences.c_identifier_bold = gconf_client_get_bool(config,"/gPHPEdit/c_identifier/bold",NULL);
+	preferences.c_identifier_italic = gconf_client_get_bool(config,"/gPHPEdit/c_identifier/italic",NULL);
+
+        preferences.c_comment_fore = getcolor(config,"/gPHPEdit/c_comment/fore","c_comment",8421594);
+        preferences.c_comment_font = get_string(config,"/gPHPEdit/c_comment/font",DEFAULT_FONT);
+	preferences.c_comment_back = getcolor(config,"/gPHPEdit/c_comment/back","c_comment",DEFAULT_BACK_COLOR);
+	preferences.c_comment_size = get_size(config,"/gPHPEdit/c_comment/size",DEFAULT_FONT_SIZE);
+	preferences.c_comment_bold = gconf_client_get_bool(config,"/gPHPEdit/c_comment/bold",NULL);
+	preferences.c_comment_italic = gconf_client_get_bool(config,"/gPHPEdit/c_comment/italic",NULL);
+
+        preferences.c_preprocesor_fore = getcolor(config,"/gPHPEdit/c_preprocesor/fore","c_preprocesor",7553165);
+        preferences.c_preprocesor_font = get_string(config,"/gPHPEdit/c_preprocesor/font",DEFAULT_FONT);
+	preferences.c_preprocesor_back = getcolor(config,"/gPHPEdit/c_preprocesor/back","c_preprocesor",DEFAULT_BACK_COLOR);
+	preferences.c_preprocesor_size = get_size(config,"/gPHPEdit/c_preprocesor/size",DEFAULT_FONT_SIZE);
+	preferences.c_preprocesor_bold = gconf_client_get_bool(config,"/gPHPEdit/c_preprocesor/bold",NULL);
+	preferences.c_preprocesor_italic = gconf_client_get_bool(config,"/gPHPEdit/c_preprocesor/italic",NULL);
+
+        preferences.c_operator_fore = getcolor(config,"/gPHPEdit/c_operator/fore","c_operator",128);
+        preferences.c_operator_font = get_string(config,"/gPHPEdit/c_operator/font",DEFAULT_FONT);
+	preferences.c_operator_back = getcolor(config,"/gPHPEdit/c_operator/back","c_operator",DEFAULT_BACK_COLOR);
+	preferences.c_operator_size = get_size(config,"/gPHPEdit/c_operator/size",DEFAULT_FONT_SIZE);
+	preferences.c_operator_bold = gconf_client_get_bool(config,"/gPHPEdit/c_operator/bold",NULL);
+	preferences.c_operator_italic = gconf_client_get_bool(config,"/gPHPEdit/c_operator/italic",NULL);
+
+        preferences.c_regex_fore = getcolor(config,"/gPHPEdit/c_regex/fore","c_regex",8388608);
+        preferences.c_regex_font = get_string(config,"/gPHPEdit/c_regex/font",DEFAULT_FONT);
+	preferences.c_regex_back = getcolor(config,"/gPHPEdit/c_regex/back","c_regex",DEFAULT_BACK_COLOR);
+	preferences.c_regex_size = get_size(config,"/gPHPEdit/c_regex/size",DEFAULT_FONT_SIZE);
+	preferences.c_regex_bold = gconf_client_get_bool(config,"/gPHPEdit/c_regex/bold",NULL);
+	preferences.c_regex_italic = gconf_client_get_bool(config,"/gPHPEdit/c_regex/italic",NULL);
+
+        preferences.c_uuid_fore = getcolor(config,"/gPHPEdit/c_uuid/fore","c_uuid",8388608);
+        preferences.c_uuid_font = get_string(config,"/gPHPEdit/c_uuid/font",DEFAULT_FONT);
+	preferences.c_uuid_back = getcolor(config,"/gPHPEdit/c_uuid/back","c_uuid",DEFAULT_BACK_COLOR);
+	preferences.c_uuid_size = get_size(config,"/gPHPEdit/c_uuid/size",DEFAULT_FONT_SIZE);
+	preferences.c_uuid_bold = gconf_client_get_bool(config,"/gPHPEdit/c_uuid/bold",NULL);
+	preferences.c_uuid_italic = gconf_client_get_bool(config,"/gPHPEdit/c_uuid/italic",NULL);
+
+        preferences.c_verbatim_fore = getcolor(config,"/gPHPEdit/c_verbatim/fore","c_verbatim",255);
+        preferences.c_verbatim_font = get_string(config,"/gPHPEdit/c_verbatim/font",DEFAULT_FONT);
+	preferences.c_verbatim_back = getcolor(config,"/gPHPEdit/c_verbatim/back","c_verbatim",DEFAULT_BACK_COLOR);
+	preferences.c_verbatim_size = get_size(config,"/gPHPEdit/c_verbatim/size",DEFAULT_FONT_SIZE);
+	preferences.c_verbatim_bold = gconf_client_get_bool(config,"/gPHPEdit/c_verbatim/bold",NULL);
+	preferences.c_verbatim_italic = gconf_client_get_bool(config,"/gPHPEdit/c_verbatim/italic",NULL);
+        
+        preferences.c_globalclass_fore = getcolor(config,"/gPHPEdit/c_globalclass/fore","c_globalclass",8388608);
+        preferences.c_globalclass_font = get_string(config,"/gPHPEdit/c_globalclass/font",DEFAULT_FONT);
+	preferences.c_globalclass_back = getcolor(config,"/gPHPEdit/c_globalclass/back","c_globalclass",DEFAULT_BACK_COLOR);
+	preferences.c_globalclass_size = get_size(config,"/gPHPEdit/c_globalclass/size",DEFAULT_FONT_SIZE);
+	preferences.c_globalclass_bold = gconf_client_get_bool(config,"/gPHPEdit/c_globalclass/bold",NULL);
+	preferences.c_globalclass_italic = gconf_client_get_bool(config,"/gPHPEdit/c_globalclass/italic",NULL);
+
+	gconf_client_clear_cache(config);
 }
 
 
@@ -1648,15 +962,15 @@ void preferences_save()
 	gconf_client_set_bool (config,"/gPHPEdit/css_comment/italic", preferences.css_comment_italic,NULL);
 	gconf_client_set_bool (config,"/gPHPEdit/css_comment/bold", preferences.css_comment_bold,NULL);
 
-	gconf_client_set_string (config,"/gPHPEdit/css_id/fore", preferences.css_id_font,NULL);
-	gconf_client_set_int (config,"/gPHPEdit/css_id/font", preferences.css_id_fore,NULL);
+	gconf_client_set_string (config,"/gPHPEdit/css_id/font", preferences.css_id_font,NULL);
+	gconf_client_set_int (config,"/gPHPEdit/css_id/fore", preferences.css_id_fore,NULL);
 	gconf_client_set_int (config,"/gPHPEdit/css_id/back", preferences.css_id_back,NULL);
 	gconf_client_set_int (config,"/gPHPEdit/css_id/size", preferences.css_id_size,NULL);
 	gconf_client_set_bool (config,"/gPHPEdit/css_id/italic", preferences.css_id_italic,NULL);
 	gconf_client_set_bool (config,"/gPHPEdit/css_id/bold", preferences.css_id_bold,NULL);
 
-	gconf_client_set_string (config,"/gPHPEdit/css_important/fore", preferences.css_important_font,NULL);
-	gconf_client_set_int (config,"/gPHPEdit/css_important/font", preferences.css_important_fore,NULL);
+	gconf_client_set_string (config,"/gPHPEdit/css_important/font", preferences.css_important_font,NULL);
+	gconf_client_set_int (config,"/gPHPEdit/css_important/fore", preferences.css_important_fore,NULL);
 	gconf_client_set_int (config,"/gPHPEdit/css_important/back", preferences.css_important_back,NULL);
 	gconf_client_set_int (config,"/gPHPEdit/css_important/size", preferences.css_important_size,NULL);
 	gconf_client_set_bool (config,"/gPHPEdit/css_important/italic", preferences.css_important_italic,NULL);
@@ -1711,6 +1025,99 @@ void preferences_save()
 	gconf_client_set_bool (config,"/gPHPEdit/sql_identifier/italic", preferences.sql_identifier_italic,NULL);
 	gconf_client_set_bool (config,"/gPHPEdit/sql_identifier/bold", preferences.sql_identifier_bold,NULL);
 
-	gconf_client_suggest_sync (config,NULL);
+        gconf_client_set_int (config,"/gPHPEdit/c_default/fore", preferences.c_default_fore,NULL);
+	gconf_client_set_string (config,"/gPHPEdit/c_default/font", preferences.c_default_font,NULL);
+	gconf_client_set_int (config,"/gPHPEdit/c_default/back", preferences.c_default_back,NULL);
+	gconf_client_set_int (config,"/gPHPEdit/c_default/size", preferences.c_default_size,NULL);
+	gconf_client_set_bool (config,"/gPHPEdit/c_default/italic", preferences.c_default_italic,NULL);
+	gconf_client_set_bool (config,"/gPHPEdit/c_default/bold", preferences.c_default_bold,NULL);
+
+        gconf_client_set_int (config,"/gPHPEdit/c_string/fore", preferences.c_string_fore,NULL);
+	gconf_client_set_string (config,"/gPHPEdit/c_string/font", preferences.c_string_font,NULL);
+	gconf_client_set_int (config,"/gPHPEdit/c_string/back", preferences.c_string_back,NULL);
+	gconf_client_set_int (config,"/gPHPEdit/c_string/size", preferences.c_string_size,NULL);
+	gconf_client_set_bool (config,"/gPHPEdit/c_string/italic", preferences.c_string_italic,NULL);
+	gconf_client_set_bool (config,"/gPHPEdit/c_string/bold", preferences.c_string_bold,NULL);
+
+       	gconf_client_set_int (config,"/gPHPEdit/c_character/fore", preferences.c_character_fore,NULL);
+	gconf_client_set_string (config,"/gPHPEdit/c_character/font", preferences.c_character_font,NULL);
+	gconf_client_set_int (config,"/gPHPEdit/c_character/back", preferences.c_character_back,NULL);
+	gconf_client_set_int (config,"/gPHPEdit/c_character/size", preferences.c_character_size,NULL);
+	gconf_client_set_bool (config,"/gPHPEdit/c_character/italic", preferences.c_character_italic,NULL);
+	gconf_client_set_bool (config,"/gPHPEdit/c_character/bold", preferences.c_character_bold,NULL);
+
+        gconf_client_set_int (config,"/gPHPEdit/c_word/fore", preferences.c_word_fore,NULL);
+	gconf_client_set_string (config,"/gPHPEdit/c_word/font", preferences.c_word_font,NULL);
+	gconf_client_set_int (config,"/gPHPEdit/c_word/back", preferences.c_word_back,NULL);
+	gconf_client_set_int (config,"/gPHPEdit/c_word/size", preferences.c_word_size,NULL);
+	gconf_client_set_bool (config,"/gPHPEdit/c_word/italic", preferences.c_word_italic,NULL);
+	gconf_client_set_bool (config,"/gPHPEdit/c_word/bold", preferences.c_word_bold,NULL);
+
+        gconf_client_set_int (config,"/gPHPEdit/c_number/fore", preferences.c_number_fore,NULL);
+	gconf_client_set_string (config,"/gPHPEdit/c_number/font", preferences.c_number_font,NULL);
+	gconf_client_set_int (config,"/gPHPEdit/c_number/back", preferences.c_number_back,NULL);
+	gconf_client_set_int (config,"/gPHPEdit/c_number/size", preferences.c_number_size,NULL);
+	gconf_client_set_bool (config,"/gPHPEdit/c_number/italic", preferences.c_number_italic,NULL);
+	gconf_client_set_bool (config,"/gPHPEdit/c_number/bold", preferences.c_number_bold,NULL);
+
+        gconf_client_set_int (config,"/gPHPEdit/c_identifier/fore", preferences.c_identifier_fore,NULL);
+	gconf_client_set_string (config,"/gPHPEdit/c_identifier/font", preferences.c_identifier_font,NULL);
+	gconf_client_set_int (config,"/gPHPEdit/c_identifier/back", preferences.c_identifier_back,NULL);
+	gconf_client_set_int (config,"/gPHPEdit/c_identifier/size", preferences.c_identifier_size,NULL);
+	gconf_client_set_bool (config,"/gPHPEdit/c_identifier/italic", preferences.c_identifier_italic,NULL);
+	gconf_client_set_bool (config,"/gPHPEdit/c_identifier/bold", preferences.c_identifier_bold,NULL);
+
+        gconf_client_set_int (config,"/gPHPEdit/c_comment/fore", preferences.c_comment_fore,NULL);
+	gconf_client_set_string (config,"/gPHPEdit/c_comment/font", preferences.c_comment_font,NULL);
+	gconf_client_set_int (config,"/gPHPEdit/c_comment/back", preferences.c_comment_back,NULL);
+	gconf_client_set_int (config,"/gPHPEdit/c_comment/size", preferences.c_comment_size,NULL);
+	gconf_client_set_bool (config,"/gPHPEdit/c_comment/italic", preferences.c_comment_italic,NULL);
+	gconf_client_set_bool (config,"/gPHPEdit/c_comment/bold", preferences.c_comment_bold,NULL);
+
+        gconf_client_set_int (config,"/gPHPEdit/c_preprocesor/fore", preferences.c_preprocesor_fore,NULL);
+	gconf_client_set_string (config,"/gPHPEdit/c_preprocesor/font", preferences.c_preprocesor_font,NULL);
+	gconf_client_set_int (config,"/gPHPEdit/c_preprocesor/back", preferences.c_preprocesor_back,NULL);
+	gconf_client_set_int (config,"/gPHPEdit/c_preprocesor/size", preferences.c_preprocesor_size,NULL);
+	gconf_client_set_bool (config,"/gPHPEdit/c_preprocesor/italic", preferences.c_preprocesor_italic,NULL);
+	gconf_client_set_bool (config,"/gPHPEdit/c_preprocesor/bold", preferences.c_preprocesor_bold,NULL);
+
+        gconf_client_set_int (config,"/gPHPEdit/c_operator/fore", preferences.c_operator_fore,NULL);
+	gconf_client_set_string (config,"/gPHPEdit/c_operator/font", preferences.c_operator_font,NULL);
+	gconf_client_set_int (config,"/gPHPEdit/c_operator/back", preferences.c_operator_back,NULL);
+	gconf_client_set_int (config,"/gPHPEdit/c_operator/size", preferences.c_operator_size,NULL);
+	gconf_client_set_bool (config,"/gPHPEdit/c_operator/italic", preferences.c_operator_italic,NULL);
+	gconf_client_set_bool (config,"/gPHPEdit/c_operator/bold", preferences.c_operator_bold,NULL);
+
+        gconf_client_set_int (config,"/gPHPEdit/c_regex/fore", preferences.c_regex_fore,NULL);
+	gconf_client_set_string (config,"/gPHPEdit/c_regex/font", preferences.c_regex_font,NULL);
+	gconf_client_set_int (config,"/gPHPEdit/c_regex/back", preferences.c_regex_back,NULL);
+	gconf_client_set_int (config,"/gPHPEdit/c_regex/size", preferences.c_regex_size,NULL);
+	gconf_client_set_bool (config,"/gPHPEdit/c_regex/italic", preferences.c_regex_italic,NULL);
+	gconf_client_set_bool (config,"/gPHPEdit/c_regex/bold", preferences.c_regex_bold,NULL);
+
+        gconf_client_set_int (config,"/gPHPEdit/c_uuid/fore", preferences.c_uuid_fore,NULL);
+	gconf_client_set_string (config,"/gPHPEdit/c_uuid/font", preferences.c_uuid_font,NULL);
+	gconf_client_set_int (config,"/gPHPEdit/c_uuid/back", preferences.c_uuid_back,NULL);
+	gconf_client_set_int (config,"/gPHPEdit/c_uuid/size", preferences.c_uuid_size,NULL);
+	gconf_client_set_bool (config,"/gPHPEdit/c_uuid/italic", preferences.c_uuid_italic,NULL);
+	gconf_client_set_bool (config,"/gPHPEdit/c_uuid/bold", preferences.c_uuid_bold,NULL);
+
+
+        gconf_client_set_int (config,"/gPHPEdit/c_verbatim/fore", preferences.c_verbatim_fore,NULL);
+	gconf_client_set_string (config,"/gPHPEdit/c_verbatim/font", preferences.c_verbatim_font,NULL);
+	gconf_client_set_int (config,"/gPHPEdit/c_verbatim/back", preferences.c_verbatim_back,NULL);
+	gconf_client_set_int (config,"/gPHPEdit/c_verbatim/size", preferences.c_verbatim_size,NULL);
+	gconf_client_set_bool (config,"/gPHPEdit/c_verbatim/italic", preferences.c_verbatim_italic,NULL);
+	gconf_client_set_bool (config,"/gPHPEdit/c_verbatim/bold", preferences.c_verbatim_bold,NULL);
+
+        gconf_client_set_int (config,"/gPHPEdit/c_globalclass/fore", preferences.c_globalclass_fore,NULL);
+	gconf_client_set_string (config,"/gPHPEdit/c_globalclass/font", preferences.c_globalclass_font,NULL);
+	gconf_client_set_int (config,"/gPHPEdit/c_globalclass/back", preferences.c_globalclass_back,NULL);
+	gconf_client_set_int (config,"/gPHPEdit/c_globalclass/size", preferences.c_globalclass_size,NULL);
+	gconf_client_set_bool (config,"/gPHPEdit/c_globalclass/italic", preferences.c_globalclass_italic,NULL);
+	gconf_client_set_bool (config,"/gPHPEdit/c_globalclass/bold", preferences.c_globalclass_bold,NULL);
+
+        gconf_client_suggest_sync (config,NULL);
         g_string_free (uri, TRUE);
+        gconf_client_clear_cache(config);
 }
