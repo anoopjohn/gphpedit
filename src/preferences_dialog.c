@@ -33,6 +33,18 @@
 
 #define IS_FONT_NAME(name1, name2) strncmp(name1, name2, MIN(strlen(name1), strlen(name2))) == 0
 
+gint correct_color(gint16 color){
+    gint8 tmpclr =color >> 8;
+    gint clr;
+    if (tmpclr < 0) {
+	int temp=256 + (int)tmpclr;
+	clr=temp;
+	} else {
+	clr=tmpclr;
+	}
+return clr;
+}
+
 PreferencesDialog preferences_dialog;
 Preferences temp_preferences;
 gchar *current_highlighting_element = NULL;
@@ -253,6 +265,7 @@ void set_controls_to_highlight(gchar *setting_name, gchar *fontname, gint fontsi
         color.red = (fore & 0xff) << 8;
         color.green = ((fore & 0xff00) >> 8) << 8;
         color.blue = ((fore & 0xff0000) >> 16) << 8;
+
         gtk_color_button_set_color (GTK_COLOR_BUTTON(preferences_dialog.foreground_colour), &color);
 
         color.red = (back & 0xff) << 8;
@@ -260,11 +273,6 @@ void set_controls_to_highlight(gchar *setting_name, gchar *fontname, gint fontsi
         color.blue = ((back & 0xff0000) >> 16) << 8;
         gtk_color_button_set_color (GTK_COLOR_BUTTON(preferences_dialog.background_colour), &color);
 
-	//gnome_color_picker_set_i8(GNOME_COLOR_PICKER(preferences_dialog.foreground_colour),
-	//	(fore & 0xff), (fore & 0xff00) >> 8, (fore & 0xff0000) >> 16, 0);
-	
-	//gnome_color_picker_set_i8(GNOME_COLOR_PICKER(preferences_dialog.background_colour),
-		//(back & 0xff), (back & 0xff00) >> 8, (back & 0xff0000) >> 16, 0);
 	preferences_dialog.changing_highlight_element=FALSE;
 }
 
@@ -776,7 +784,6 @@ void change_size_global_callback(gint reply,gpointer data)
 void get_control_values_to_highlight(gchar *setting_name, gchar **fontname, gint *fontsize, gboolean *bold, gboolean *italic, gint *fore, gint *back)
 {
 	GString *tempfontname;
-	//guint8 red, blue, green, alpha;
 	GtkWidget *dialog;
 	GString *message;
 	gint newfontsize; // Back to being a gint, g_string_printf complains
@@ -818,18 +825,18 @@ void get_control_values_to_highlight(gchar *setting_name, gchar **fontname, gint
 	*bold = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(preferences_dialog.bold_button));
 	*italic = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(preferences_dialog.italic_button));
 	
-	//gnome_color_picker_get_i8(GNOME_COLOR_PICKER(preferences_dialog.foreground_colour), &red, &blue, &green, &alpha);
         GdkColor color;
         gtk_color_button_get_color (GTK_COLOR_BUTTON(preferences_dialog.foreground_colour),&color);
-	//*fore = (green<<16) | (blue<<8) | red;
-        guint16 alpha= gtk_color_button_get_alpha (GTK_COLOR_BUTTON(preferences_dialog.foreground_colour));
-        *fore = alpha << 24 | (color.green<<16) | (color.blue<<8) | color.red;
-	//gnome_color_picker_get_i8(GNOME_COLOR_PICKER(preferences_dialog.background_colour), &red, &blue, &green, &alpha);
-        gtk_color_button_get_color (GTK_COLOR_BUTTON(preferences_dialog.background_colour),&color);
-        alpha= gtk_color_button_get_alpha (GTK_COLOR_BUTTON(preferences_dialog.background_colour));
-	//*back = (green<<16) | (blue<<8) | red;
-        *back = alpha << 24 | (color.green<<16) | (color.blue<<8) | color.red;
+	gint red=correct_color(color.red);
+	gint blue=correct_color(color.blue);
+	gint green=correct_color(color.green);
+	*fore = (green<<16) | (blue<<8) | red;
 
+        gtk_color_button_get_color (GTK_COLOR_BUTTON(preferences_dialog.background_colour),&color);
+	red=correct_color(color.red);
+	blue=correct_color(color.blue);
+	green=correct_color(color.green);        
+	*back = (green<<16) | (blue<<8) | red;
 	// Debug print for preferences being set
 	//g_print("Setting %s: %s %d %d %d %d %d\n", setting_name, *fontname, *fontsize, *bold, *italic, *fore, *back);	
 }
@@ -1196,20 +1203,13 @@ void on_edge_colour_changed(GtkColorButton *widget, gpointer user_data)
 {
     GdkColor color;
     gtk_color_button_get_color (widget,&color);
-    guint16 alpha= gtk_color_button_get_alpha (widget);
-    temp_preferences.edge_colour = alpha << 24 | color.green << 16 | color.blue <<8 | color.red;
-}
-/*
-void on_edge_colour_changed(GnomeColorPicker *cp, guint red, guint green, guint blue, guint alpha, gpointer userdate)
-{
-	guint8 ired, iblue, igreen, ialpha;
 
-	gnome_color_picker_get_i8(GNOME_COLOR_PICKER(preferences_dialog.edge_colour), &ired, &iblue, &igreen, &ialpha);
-	temp_preferences.edge_colour = (igreen<<16) | (iblue<<8) | ired;
-
+gint red=correct_color(color.red);
+gint blue=correct_color(color.blue);
+gint green=correct_color(color.green);
+temp_preferences.edge_colour = red | (green << 8) | (blue << 16);
 }
 
-*/
 void on_tab_size_changed(GtkRange *range, gpointer user_data)
 {
 	temp_preferences.tab_size = (int)(gtk_range_get_adjustment(range)->value);	
@@ -1538,18 +1538,15 @@ void preferences_dialog_create (void)
 	gtk_widget_show (preferences_dialog.label33);
 	gtk_box_pack_start (GTK_BOX (preferences_dialog.hbox15), preferences_dialog.label33, FALSE, FALSE, 8);
 
-        GdkColor color;
-        color.red = (temp_preferences.edge_colour & 0xff);
-        color.green = (temp_preferences.edge_colour & 0xff00) >> 8;
-        color.blue = (temp_preferences.edge_colour & 0xff0000) >> 16;
-        
+ 	GdkColor color;
+        color.red = (temp_preferences.edge_colour & 0xff) << 8;
+        color.green = ((temp_preferences.edge_colour & 0xff00) >> 8) << 8;
+        color.blue = ((temp_preferences.edge_colour & 0xff0000) >> 16) << 8;	
 	preferences_dialog.edge_colour = gtk_color_button_new_with_color (&color);
-        gtk_color_button_set_use_alpha (GTK_COLOR_BUTTON(preferences_dialog.edge_colour),FALSE);
+	gtk_color_button_set_color (GTK_COLOR_BUTTON(preferences_dialog.edge_colour),&color);
+
 	gtk_widget_show (preferences_dialog.edge_colour);
 	gtk_box_pack_start (GTK_BOX (preferences_dialog.hbox15), preferences_dialog.edge_colour, FALSE, FALSE, 0);
-	//gnome_color_picker_set_i8(GNOME_COLOR_PICKER(preferences_dialog.edge_colour),
-	//	(temp_preferences.edge_colour & 0xff), (temp_preferences.edge_colour & 0xff00) >> 8, (temp_preferences.edge_colour & 0xff0000) >> 16, 0);
-	//g_signal_connect(G_OBJECT(GNOME_COLOR_PICKER(preferences_dialog.edge_colour)), "color-set", G_CALLBACK(on_edge_colour_changed), NULL);
 	g_signal_connect(G_OBJECT(GTK_COLOR_BUTTON(preferences_dialog.edge_colour)), "color-set", G_CALLBACK(on_edge_colour_changed), NULL);
 	preferences_dialog.hbox16 = gtk_hbox_new (FALSE, 0);
 	gtk_widget_show (preferences_dialog.hbox16);
@@ -1652,7 +1649,6 @@ void preferences_dialog_create (void)
 	gtk_widget_show (preferences_dialog.background_colour);
 	gtk_box_pack_start (GTK_BOX (preferences_dialog.hbox24), preferences_dialog.background_colour, FALSE, FALSE, 0);
 	gtk_container_set_border_width (GTK_CONTAINER (preferences_dialog.background_colour), 8);
-	//g_signal_connect(G_OBJECT(GNOME_COLOR_PICKER(preferences_dialog.background_colour)), "color-set", G_CALLBACK(on_back_changed), NULL);
         g_signal_connect(G_OBJECT(GTK_COLOR_BUTTON(preferences_dialog.background_colour)), "color-set", G_CALLBACK(on_fore_changed), NULL);
 	
 	preferences_dialog.label41 = gtk_label_new (_("Colours"));
