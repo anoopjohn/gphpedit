@@ -1,3 +1,20 @@
+2010-02-04  Rostagno Jose <joserostagno at hotmail.com>
+          * Fixed Bug - GTKScintilla Completely migrated from old GtkObject implementation to Gobject.
+          * Fixed Bug - Delete duplicated function to load window icon.
+          * Fixed Bug - if nothing is selected the function open selected tries to open a 
+folder
+          * New Feature - could change toolbar icon sizes
+          * Fixed Bug - Only open text based mimetypes.
+          * Fixed Bug - Update spanish translation. 
+          * Fixed Bug - Class browser does not take you to function definitions (sr #106646)
+          * New Feature - keypress event in folder browser
+          * New Feature - folderbrowser Drag and Drop handling
+          * New Feature - Implement C/C++ Hightligthing
+          * New Feature - Implement C/C++ Folding
+          * Fixed Bug - Default preferences wasn't load corrrectly
+          * Fixed Bug - The background colour seems to have become black.
+          * Fixed Bug - Incorrect color when change color from preferences dialog.
+
 2010-01-12  Rostagno Jose <joserostagno at hotmail.com>
           * New Feature - Folderbrowser
           * New Feature - Current zoom level in statusbar

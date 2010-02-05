@@ -18,7 +18,7 @@ dnl with this program; if not, write to the Free Software Foundation, Inc.,
 dnl 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
 dnl
 AC_PREREQ([2.64])
-AC_INIT(gPHPEdit, 0.9.96, https://savannah.nongnu.org/support/?group=gphpedit)
+AC_INIT(gPHPEdit, 0.9.97, https://savannah.nongnu.org/support/?group=gphpedit)
 AC_CONFIG_SRCDIR([config.h.in]) dnl maybe change to src/main.c
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_MACRO_DIR([m4])

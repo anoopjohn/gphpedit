@@ -1,3 +1,10 @@
+gphpedit (0.9.97) karmic; urgency=low
+
+  * New upstream release
+    - See changelog for bugfixes and improvement
+
+ -- Jose Rostagno <joserostagno@hotmail.com>  Fri, 05 Feb 2010 14:03:16 +0300
+
 gphpedit (0.9.91-5) unstable; urgency=low
 
   * Add patch from Ubuntu to prevent segfault when checking if an empty
