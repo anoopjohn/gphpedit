@@ -210,19 +210,19 @@ void get_current_preferences(void)
 	highlighting_list = g_list_append(highlighting_list, _("SQL Comment"));
 
 	highlighting_list = g_list_append(highlighting_list, _("C Default"));
-        highlighting_list = g_list_append(highlighting_list, _("C string"));
-        highlighting_list = g_list_append(highlighting_list, _("C character"));
-        highlighting_list = g_list_append(highlighting_list, _("C word"));
-        highlighting_list = g_list_append(highlighting_list, _("C number"));
-        highlighting_list = g_list_append(highlighting_list, _("C identifier"));
-        highlighting_list = g_list_append(highlighting_list, _("C comment"));
-        highlighting_list = g_list_append(highlighting_list, _("C commentline"));
-        highlighting_list = g_list_append(highlighting_list, _("C preprocessor"));
-        highlighting_list = g_list_append(highlighting_list, _("C operator"));
-        highlighting_list = g_list_append(highlighting_list, _("C regex"));
-        highlighting_list = g_list_append(highlighting_list, _("C uuid"));
-        highlighting_list = g_list_append(highlighting_list, _("C verbatim"));
-        highlighting_list = g_list_append(highlighting_list, _("C globalclass"));
+        highlighting_list = g_list_append(highlighting_list, _("C String"));
+        highlighting_list = g_list_append(highlighting_list, _("C Character"));
+        highlighting_list = g_list_append(highlighting_list, _("C Word"));
+        highlighting_list = g_list_append(highlighting_list, _("C Number"));
+        highlighting_list = g_list_append(highlighting_list, _("C Identifier"));
+        highlighting_list = g_list_append(highlighting_list, _("C Comment"));
+        highlighting_list = g_list_append(highlighting_list, _("C Commentline"));
+        highlighting_list = g_list_append(highlighting_list, _("C Preprocessor"));
+        highlighting_list = g_list_append(highlighting_list, _("C Operator"));
+        highlighting_list = g_list_append(highlighting_list, _("C Regex"));
+        highlighting_list = g_list_append(highlighting_list, _("C UUID"));
+        highlighting_list = g_list_append(highlighting_list, _("C Verbatim"));
+        highlighting_list = g_list_append(highlighting_list, _("C Globalclass"));
 
 	preferences_dialog.highlighting_elements = highlighting_list;
 }
