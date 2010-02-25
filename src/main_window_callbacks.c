@@ -1551,13 +1551,14 @@ gboolean is_valid_digits_only(gchar *text)
 
 void goto_line_int(gint line)
 {
-	gint current_pos;
+	//gint current_pos;
 	//bugfix: seg fault if not scintilla
 	if (GTK_IS_SCINTILLA(main_window.current_editor->scintilla)){
 	gtk_scintilla_grab_focus(GTK_SCINTILLA(main_window.current_editor->scintilla));
+        gtk_scintilla_goto_line(GTK_SCINTILLA(main_window.current_editor->scintilla), line + gtk_scintilla_lines_on_screen(GTK_SCINTILLA(main_window.current_editor->scintilla))); //move some lines to center in screen
 	gtk_scintilla_goto_line(GTK_SCINTILLA(main_window.current_editor->scintilla), line-1); // seems to be off by one...
-	current_pos = gtk_scintilla_get_current_pos(GTK_SCINTILLA(main_window.current_editor->scintilla));
-	gtk_scintilla_scroll_caret(GTK_SCINTILLA(main_window.current_editor->scintilla));
+	//current_pos = gtk_scintilla_get_current_pos(GTK_SCINTILLA(main_window.current_editor->scintilla));
+	//gtk_scintilla_scroll_caret(GTK_SCINTILLA(main_window.current_editor->scintilla));
 	}
 }
 

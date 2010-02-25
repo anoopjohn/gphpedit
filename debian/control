@@ -1,7 +1,7 @@
 Source: gphpedit
 Section: gnome
 Priority: optional
-Maintainer: Lior Kaplan <kaplan@debian.org>
+Maintainer: Jose Rostagno <joserostagno@hotmail.com>
 Build-Depends: debhelper (>= 5.0.0), gconf2,libgconf2-dev, libwebkit-dev, libxml-parser-perl,intltool
 Standards-Version: 3.8.3
 Homepage: http://www.gphpedit.org/

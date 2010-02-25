@@ -33,7 +33,7 @@
 #include "classbrowser.h"
 #include "plugin.h"
 #include "templates.h"
-#include "project.h"
+
 MainWindow main_window;
 GIOChannel* inter_gphpedit_io;
 guint inter_gphpedit_event_id;
