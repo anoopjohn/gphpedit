@@ -830,13 +830,13 @@ void get_control_values_to_highlight(gchar *setting_name, gchar **fontname, gint
 	gint red=correct_color(color.red);
 	gint blue=correct_color(color.blue);
 	gint green=correct_color(color.green);
-	*fore = (green<<16) | (blue<<8) | red;
+	*fore = (blue<<16) | (green<<8) | red;
 
         gtk_color_button_get_color (GTK_COLOR_BUTTON(preferences_dialog.background_colour),&color);
 	red=correct_color(color.red);
 	blue=correct_color(color.blue);
 	green=correct_color(color.green);        
-	*back = (green<<16) | (blue<<8) | red;
+	*back = (blue<<16) | (green<<8) | red;
 	// Debug print for preferences being set
 	//g_print("Setting %s: %s %d %d %d %d %d\n", setting_name, *fontname, *fontsize, *bold, *italic, *fore, *back);	
 }
@@ -1201,13 +1201,13 @@ void on_back_changed(GtkColorButton *widget, gpointer user_data)
 
 void on_edge_colour_changed(GtkColorButton *widget, gpointer user_data)
 {
-    GdkColor color;
-    gtk_color_button_get_color (widget,&color);
+  GdkColor color;
+  gtk_color_button_get_color (widget,&color);
 
-gint red=correct_color(color.red);
-gint blue=correct_color(color.blue);
-gint green=correct_color(color.green);
-temp_preferences.edge_colour = red | (green << 8) | (blue << 16);
+  gint red=correct_color(color.red);
+  gint blue=correct_color(color.blue);
+  gint green=correct_color(color.green);
+  temp_preferences.edge_colour = red | (green << 8) | (blue << 16);
 }
 
 void on_tab_size_changed(GtkRange *range, gpointer user_data)
