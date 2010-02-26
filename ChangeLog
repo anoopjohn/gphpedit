@@ -1,8 +1,11 @@
+2009-02-26  Anoop John <anoop.john at zyxware.com>
+
+          * New Feature - Added color picker for selection background color
+            
 2010-02-04  Rostagno Jose <joserostagno at hotmail.com>
           * Fixed Bug - GTKScintilla Completely migrated from old GtkObject implementation to Gobject.
           * Fixed Bug - Delete duplicated function to load window icon.
-          * Fixed Bug - if nothing is selected the function open selected tries to open a 
-folder
+          * Fixed Bug - if nothing is selected the function open selected tries to open a folder
           * New Feature - could change toolbar icon sizes
           * Fixed Bug - Only open text based mimetypes.
           * Fixed Bug - Update spanish translation. 
@@ -11,34 +14,34 @@ folder
           * New Feature - folderbrowser Drag and Drop handling
           * New Feature - Implement C/C++ Hightligthing
           * New Feature - Implement C/C++ Folding
-          * Fixed Bug - Default preferences wasn't load corrrectly
+          * Fixed Bug - Default preferences wasn't loading corrrectly
           * Fixed Bug - The background colour seems to have become black.
           * Fixed Bug - Incorrect color when change color from preferences dialog.
 
 2010-01-12  Rostagno Jose <joserostagno at hotmail.com>
           * New Feature - Folderbrowser
           * New Feature - Current zoom level in statusbar
-	  * Fixed Bug - PHP files filter, now uses php file extensions from preferences
-	  * New feature - ToUpper, ToLower function
-	  * New Feature - Toolbar and menu items disabled on TAB_HELP and read-only files
-	  * Fixed Bug - Code cleanup remove deprecated GDK,GTK and GLIB macros and functions
-	  * Fixed Bug - Loading http and https uris from command line
-	  * Fixed Bug - Take out libgnome,libgnomeui,libbonobo and libbonoboui dependencies
-	  * Fixed Bug - Open files across smb gvfs fails (sr #107099)
+          * Fixed Bug - PHP files filter, now uses php file extensions from preferences
+          * New feature - ToUpper, ToLower function
+          * New Feature - Toolbar and menu items disabled on TAB_HELP and read-only files
+          * Fixed Bug - Code cleanup remove deprecated GDK,GTK and GLIB macros and functions
+          * Fixed Bug - Loading http and https uris from command line
+          * Fixed Bug - Take out libgnome,libgnomeui,libbonobo and libbonoboui dependencies
+          * Fixed Bug - Open files across smb gvfs fails (sr #107099)
 
 2010-01-07  Rostagno Jose <joserostagno at hotmail.com>
           * New Feature - Fullscreen mode support (sr #106708)
           * New Feature - Added clean button to incremental search and goto gtkentry
           * New Feature - Toolbar, statusbar and sidepanel show/hide toglebutton
-	  * Fixed Bug - Toolbars donot extend till window border. (sr #106647)
-	  * Fixed Bug - gnome-config replaced by Gconf
-	  * Fixed Bug - gnome-dialog replaced by Gtkdialog
-	  * Fixed Bug - gnome-vfs replaced by GIO/GVFS
+          * Fixed Bug - Toolbars donot extend till window border. (sr #106647)
+          * Fixed Bug - gnome-config replaced by Gconf
+          * Fixed Bug - gnome-dialog replaced by Gtkdialog
+          * Fixed Bug - gnome-vfs replaced by GIO/GVFS
 
 2009-11-28  Rostagno Jose <joserostagno at hotmail.com>
           * New Feature - Added Bookmarks
-	  * Fixed Bug - Remove gtkhtml2 dependency, now uses webkit.
-	
+          * Fixed Bug - Remove gtkhtml2 dependency, now uses webkit.
+        
 2009-11-27  Rostagno Jose <joserostagno at hotmail.com>
 
           * Updated toolbar code with the new gtk+ functions
@@ -46,11 +49,12 @@ folder
           * New Feature - Added zoom-in/zoom-out buttons to the main toolbar and menu
           * Fixed bug - The last line of text block is not indented.
           * New Feature - Added file filters to the open file dialog
-	  * Fixed Bug - Highlight colour in ubuntu. 
-	  Bug reported at https://bugs.launchpad.net/ubuntu/+source/gphpedit/+bug/73310
-	  * Added a close button [x] for side bar
+          * Fixed Bug - Highlight colour in ubuntu. 
+            Bug reported at https://bugs.launchpad.net/ubuntu/+source/gphpedit/+bug/73310
+          * Added a close button [x] for side bar
 
-2009-12-11  Anish A <aneesh.nl@gmail.com>
+2009-11-12  Anish A <aneesh.nl@gmail.com>
+
           * Fixed tab fold bug ( bug# 107084)
 
 2009-02-22  Anoop John <anoop.john at zyxware.com>
