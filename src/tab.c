@@ -95,8 +95,6 @@ void tab_set_general_scintilla_properties(Editor *editor)
 	g_signal_connect (G_OBJECT (editor->scintilla), "save_point_reached", G_CALLBACK (save_point_reached), NULL);
 	g_signal_connect (G_OBJECT (editor->scintilla), "save_point_left", G_CALLBACK (save_point_left), NULL);
 	g_signal_connect (G_OBJECT (editor->scintilla), "macro_record", G_CALLBACK (macro_record), NULL);
-	//gtk_scintilla_set_sel_back(GTK_SCINTILLA(editor->scintilla), 1, 13434879);
-        gtk_scintilla_set_sel_back(GTK_SCINTILLA(editor->scintilla),1,preferences.set_sel_back);
 	tab_set_configured_scintilla_properties(GTK_SCINTILLA(editor->scintilla), preferences);
 	gtk_widget_show (editor->scintilla);
 }
@@ -104,7 +102,7 @@ void tab_set_general_scintilla_properties(Editor *editor)
 void tab_set_configured_scintilla_properties(GtkScintilla *scintilla, Preferences prefs)
 {
 	gint width;
-        width = gtk_scintilla_text_width(scintilla, STYLE_LINENUMBER, "_99999");
+	width = gtk_scintilla_text_width(scintilla, STYLE_LINENUMBER, "_99999");
 	gtk_scintilla_set_margin_width_n(scintilla, 0, width);
 	gtk_scintilla_set_margin_width_n (scintilla, 1, 0);
 	gtk_scintilla_set_margin_width_n (scintilla, 2, 0);
@@ -115,40 +113,40 @@ void tab_set_configured_scintilla_properties(GtkScintilla *scintilla, Preference
 	else {
 		gtk_scintilla_set_h_scroll_bar(scintilla, 1);
 	}
-        
-    gtk_scintilla_style_set_font (scintilla, STYLE_LINENUMBER, prefs.line_number_font);
-    gtk_scintilla_style_set_fore (scintilla, STYLE_LINENUMBER, prefs.line_number_fore);
-    gtk_scintilla_style_set_back (scintilla, STYLE_LINENUMBER, prefs.line_number_back);
-    gtk_scintilla_style_set_size (scintilla, STYLE_LINENUMBER, prefs.line_number_size);
+		    
+	gtk_scintilla_style_set_font (scintilla, STYLE_LINENUMBER, prefs.line_number_font);
+	gtk_scintilla_style_set_fore (scintilla, STYLE_LINENUMBER, prefs.line_number_fore);
+	gtk_scintilla_style_set_back (scintilla, STYLE_LINENUMBER, prefs.line_number_back);
+	gtk_scintilla_style_set_size (scintilla, STYLE_LINENUMBER, prefs.line_number_size);
 
-    gtk_scintilla_set_indentation_guides (scintilla, prefs.show_indentation_guides);
-    gtk_scintilla_set_edge_mode (scintilla, prefs.edge_mode);
-    gtk_scintilla_set_edge_column (scintilla, prefs.edge_column);
-    gtk_scintilla_set_edge_colour (scintilla, prefs.edge_colour);
+	gtk_scintilla_set_indentation_guides (scintilla, prefs.show_indentation_guides);
+	gtk_scintilla_set_edge_mode (scintilla, prefs.edge_mode);
+	gtk_scintilla_set_edge_column (scintilla, prefs.edge_column);
+	gtk_scintilla_set_edge_colour (scintilla, prefs.edge_colour);
+	gtk_scintilla_set_sel_back(scintilla, 1, prefs.set_sel_back);
+	gtk_scintilla_set_caret_fore (scintilla, 0);
+	gtk_scintilla_set_caret_width (scintilla, 2);
+	gtk_scintilla_set_caret_period (scintilla, 250);
 
-    gtk_scintilla_set_caret_fore (scintilla, 0);
-    gtk_scintilla_set_caret_width (scintilla, 2);
-    gtk_scintilla_set_caret_period (scintilla, 250);
-
-    gtk_scintilla_autoc_set_choose_single (scintilla, TRUE);
-    gtk_scintilla_set_use_tabs (scintilla, prefs.use_tabs_instead_spaces);
-    gtk_scintilla_set_tab_indents (scintilla, 1);
-    gtk_scintilla_set_backspace_unindents (scintilla, 1);
+	gtk_scintilla_autoc_set_choose_single (scintilla, TRUE);
+	gtk_scintilla_set_use_tabs (scintilla, prefs.use_tabs_instead_spaces);
+	gtk_scintilla_set_tab_indents (scintilla, 1);
+	gtk_scintilla_set_backspace_unindents (scintilla, 1);
 	gtk_scintilla_set_tab_width (scintilla, prefs.indentation_size);
-    gtk_scintilla_set_indent (scintilla, prefs.tab_size);
+	gtk_scintilla_set_indent (scintilla, prefs.tab_size);
 
-    gtk_scintilla_style_set_font (scintilla, STYLE_DEFAULT, prefs.default_font);
-    gtk_scintilla_style_set_size (scintilla, STYLE_DEFAULT, prefs.default_size);
-    gtk_scintilla_style_set_italic (scintilla, STYLE_DEFAULT, prefs.default_italic);
-    gtk_scintilla_style_set_bold (scintilla, STYLE_DEFAULT, prefs.default_bold);
-    gtk_scintilla_style_set_fore (scintilla, STYLE_DEFAULT, prefs.default_fore);
-    gtk_scintilla_style_set_back (scintilla, STYLE_DEFAULT, prefs.default_back);
+	gtk_scintilla_style_set_font (scintilla, STYLE_DEFAULT, prefs.default_font);
+	gtk_scintilla_style_set_size (scintilla, STYLE_DEFAULT, prefs.default_size);
+	gtk_scintilla_style_set_italic (scintilla, STYLE_DEFAULT, prefs.default_italic);
+	gtk_scintilla_style_set_bold (scintilla, STYLE_DEFAULT, prefs.default_bold);
+	gtk_scintilla_style_set_fore (scintilla, STYLE_DEFAULT, prefs.default_fore);
+	gtk_scintilla_style_set_back (scintilla, STYLE_DEFAULT, prefs.default_back);
 
-    //makers margin settings
-    gtk_scintilla_set_margin_type_n(GTK_SCINTILLA(scintilla), 1, SC_MARGIN_SYMBOL);
-    gtk_scintilla_set_margin_width_n (GTK_SCINTILLA(scintilla), 1, 14);
-    gtk_scintilla_set_margin_sensitive_n(GTK_SCINTILLA(scintilla), 1, 1);
-    g_signal_connect (G_OBJECT (scintilla), "margin_click", G_CALLBACK (margin_clicked), NULL);
+	//makers margin settings
+	gtk_scintilla_set_margin_type_n(GTK_SCINTILLA(scintilla), 1, SC_MARGIN_SYMBOL);
+	gtk_scintilla_set_margin_width_n (GTK_SCINTILLA(scintilla), 1, 14);
+	gtk_scintilla_set_margin_sensitive_n(GTK_SCINTILLA(scintilla), 1, 1);
+	g_signal_connect (G_OBJECT (scintilla), "margin_click", G_CALLBACK (margin_clicked), NULL);
 }
 
 
