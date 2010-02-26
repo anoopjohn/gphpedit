@@ -123,7 +123,7 @@ void preferences_load(void)
         config=gconf_client_get_default ();
         GError *error = NULL;
         gconf_client_get_int (config,"/gPHPEdit/main_window/x",&error);
-        preferences.set_sel_back = getcolor(config,"/gPHPEdit/default_style/selection","default_style",11250603);
+        preferences.set_sel_back = getcolor(config,"/gPHPEdit/default_style/selection","default_style",13421772);
         preferences.marker_back = getcolor(config,"/gPHPEdit/default_style/bookmark","default_style",15908608);
         preferences.php_binary_location= get_string(config,"/gPHPEdit/locations/phpbinary","php");
         preferences.shared_source_location = get_string(config,"/gPHPEdit/locations/shared_source","");
