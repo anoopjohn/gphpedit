@@ -1534,7 +1534,7 @@ void preferences_dialog_create (void)
 	gtk_widget_show (preferences_dialog.label33);
 	gtk_box_pack_start (GTK_BOX (preferences_dialog.hbox15), preferences_dialog.label33, FALSE, FALSE, 8);
 
-	 GdkColor color;
+	GdkColor color;
 	color.red = (temp_preferences.edge_colour & 0xff) << 8;
 	color.green = ((temp_preferences.edge_colour & 0xff00) >> 8) << 8;
 	color.blue = ((temp_preferences.edge_colour & 0xff0000) >> 16) << 8;	
