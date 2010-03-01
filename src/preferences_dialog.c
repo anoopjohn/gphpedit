@@ -33,19 +33,6 @@
 
 #define IS_FONT_NAME(name1, name2) strncmp(name1, name2, MIN(strlen(name1), strlen(name2))) == 0
 
-gint correct_color(gint16 color) {
-	gint8 tmpclr = color >> 8;
-	gint clr;
-	if (tmpclr < 0) {
-		int temp=256 + (int)tmpclr;
-		clr=temp;
-	} 
-	else {
-		clr=tmpclr;
-	}
-	return clr;
-}
-
 PreferencesDialog preferences_dialog;
 Preferences temp_preferences;
 gchar *current_highlighting_element = NULL;
@@ -824,16 +811,10 @@ void get_control_values_to_highlight(gchar *setting_name, gchar **fontname, gint
 	
 	GdkColor color;
 	gtk_color_button_get_color (GTK_COLOR_BUTTON(preferences_dialog.foreground_colour),&color);
-	gint red=correct_color(color.red);
-	gint blue=correct_color(color.blue);
-	gint green=correct_color(color.green);
-	*fore = (blue<<16) | (green<<8) | red;
+	*fore = (color.blue<<16) | (color.green<<8) | color.red;
 
 	gtk_color_button_get_color (GTK_COLOR_BUTTON(preferences_dialog.background_colour),&color);
-	red=correct_color(color.red);
-	blue=correct_color(color.blue);
-	green=correct_color(color.green);				
-	*back = (blue<<16) | (green<<8) | red;
+	*back = (color.blue<<16) | (color.green<<8) | color.red;
 	// Debug print for preferences being set
 	//g_print("Setting %s: %s %d %d %d %d %d\n", setting_name, *fontname, *fontsize, *bold, *italic, *fore, *back);	
 }
@@ -1198,10 +1179,7 @@ void on_edge_colour_changed(GtkColorButton *widget, gpointer user_data)
 	GdkColor color;
 	gtk_color_button_get_color (widget,&color);
 
-	gint red=correct_color(color.red);
-	gint blue=correct_color(color.blue);
-	gint green=correct_color(color.green);
-	temp_preferences.edge_colour = red | (green << 8) | (blue << 16);
+	temp_preferences.edge_colour = color.red | (color.green << 8) | (color.blue << 16);
 }
 
 /**
@@ -1213,10 +1191,7 @@ void on_sel_back_changed(GtkColorButton *widget, gpointer user_data)
 	GdkColor color;
 	gtk_color_button_get_color (widget, &color);
 
-	gint red = correct_color(color.red);
-	gint blue = correct_color(color.blue);
-	gint green = correct_color(color.green);
-	temp_preferences.set_sel_back = red | (green << 8) | (blue << 16);
+	temp_preferences.set_sel_back = color.red | (color.green << 8) | (color.blue << 16);
 }
 
 void on_tab_size_changed(GtkRange *range, gpointer user_data)
