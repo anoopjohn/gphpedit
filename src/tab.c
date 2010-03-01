@@ -239,7 +239,7 @@ void tab_file_save_opened(Editor *editor,GFile *file)
 
 	gtk_scintilla_get_text(GTK_SCINTILLA(editor->scintilla), text_length+1, write_buffer);
         // If we converted to UTF-8 when loading, convert back to the locale to save
-	if (main_window.editor->converted_to_utf8) {
+	if (editor->converted_to_utf8) {
 		converted_text = g_locale_from_utf8(write_buffer, text_length, NULL, &utf8_size, &error);
 		if (error != NULL) {
 			g_print(_("UTF-8 Error: %s\n"), error->message);
