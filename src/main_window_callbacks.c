@@ -712,7 +712,7 @@ void on_save1_activate(GtkWidget *widget)
                        GError *error;
                        error=NULL;
                        file=g_file_new_for_uri (filename);
-                       g_file_replace_async (file,NULL,TRUE,0,G_PRIORITY_DEFAULT,NULL, tab_file_save_opened, main_window.current_editor);
+			tab_file_save_opened(main_window.current_editor,file);
 		}
 	}
 }

@@ -211,39 +211,26 @@ static void tab_set_event_handlers(Editor *editor)
 void tab_file_write (GObject *source_object, GAsyncResult *res, gpointer user_data)
 {
         Editor *editor = (Editor *)user_data;
-        gssize bytes;
         GError *error=NULL;
-        bytes= g_output_stream_write_finish(G_OUTPUT_STREAM(source_object),res,&error);
-        if (bytes==-1){
+        if(!g_file_replace_contents_finish ((GFile *)source_object,res,NULL,&error)){
             g_print(_("GIO Error: %s\n"),error->message);
             return;
         }
-        g_output_stream_close (G_OUTPUT_STREAM(source_object),NULL,&error);
 	gtk_scintilla_set_save_point (GTK_SCINTILLA(editor->scintilla));
 	register_file_opened(editor->filename->str);
 	classbrowser_update();
 	session_save();
 }
 
-void tab_file_save_opened(GObject *source_object, GAsyncResult *res, gpointer user_data)
+void tab_file_save_opened(Editor *editor,GFile *file)
 {
 	gchar *write_buffer = NULL;
 	gsize text_length;
 	GError *error = NULL;
 	gchar *converted_text = NULL;
 	gsize utf8_size; // was guint
-        GFileOutputStream *file;
-        file=g_file_replace_finish ((GFile *)source_object,res,&error);
-        if (!file){
-	    if (error->code==G_IO_ERROR_CANT_CREATE_BACKUP){
-	    g_file_replace_async ((GFile *)source_object,NULL,FALSE,0,G_PRIORITY_DEFAULT,NULL, tab_file_save_opened, main_window.current_editor);
-	    return;
-	    }else{
-            g_print(_("GIO Error: %s\n"),error->message);
-            return;
-	    }
-        }
-	text_length = gtk_scintilla_get_length(GTK_SCINTILLA(main_window.current_editor->scintilla));
+
+	text_length = gtk_scintilla_get_length(GTK_SCINTILLA(editor->scintilla));
 
 	write_buffer = g_malloc0(text_length+1); // Include terminating null
 
@@ -252,9 +239,9 @@ void tab_file_save_opened(GObject *source_object, GAsyncResult *res, gpointer us
 		return;
 	}
 
-	gtk_scintilla_get_text(GTK_SCINTILLA(main_window.current_editor->scintilla), text_length+1, write_buffer);
+	gtk_scintilla_get_text(GTK_SCINTILLA(editor->scintilla), text_length+1, write_buffer);
         // If we converted to UTF-8 when loading, convert back to the locale to save
-	if (main_window.current_editor->converted_to_utf8) {
+	if (main_window.editor->converted_to_utf8) {
 		converted_text = g_locale_from_utf8(write_buffer, text_length, NULL, &utf8_size, &error);
 		if (error != NULL) {
 			g_print(_("UTF-8 Error: %s\n"), error->message);
@@ -267,7 +254,7 @@ void tab_file_save_opened(GObject *source_object, GAsyncResult *res, gpointer us
 			text_length = utf8_size;
 		}
         }
-       g_output_stream_write_async (G_OUTPUT_STREAM (file),write_buffer,text_length,G_PRIORITY_DEFAULT,NULL,tab_file_write, user_data);
+       g_file_replace_contents_async (file,write_buffer,text_length,NULL,FALSE,G_FILE_CREATE_NONE,NULL,tab_file_write,editor);
 }
 
 void tab_validate_buffer_and_insert(gpointer buffer, Editor *editor)
