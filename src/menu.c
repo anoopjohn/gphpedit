@@ -2,7 +2,7 @@
 
    Copyright (C) 2003, 2004, 2005 Andy Jeffries <andy at gphpedit.org>
    Copyright (C) 2009 Anoop John <anoop dot john at zyxware.com>
-   Copyright (C) 2009 José Rostagno (for vijona.com.ar)   
+   Copyright (C) 2009 José Rostagno (for vijona.com.ar) 
 
    For more information or to find the latest release, visit our 
    website at http://www.gphpedit.org/
@@ -23,12 +23,12 @@
    The GNU General Public License is contained in the file COPYING.
 */
 
+
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
 #include "main_window.h"
 #include "main_window_callbacks.h"
-//#include "project.h"
 /*needed for menu hints*/
 guint context_id;
 guint message_id;
@@ -72,9 +72,9 @@ void tog_statusbar(GtkWidget *widget, gpointer user_data)
 void tog_maintoolbar(GtkWidget *widget, gpointer user_data)
 {
   if (gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(widget))) {
-    gtk_widget_show(main_window.toolbar_main);
+    gtk_widget_show(main_window.toolbar_main->toolbar);
   } else {
-    gtk_widget_hide(main_window.toolbar_main);
+    gtk_widget_hide(main_window.toolbar_main->toolbar);
   }
 }
 
@@ -85,9 +85,9 @@ void tog_maintoolbar(GtkWidget *widget, gpointer user_data)
 void tog_findtoolbar(GtkWidget *widget, gpointer user_data)
 {
   if (gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(widget))) {
-    gtk_widget_show(main_window.toolbar_find);
+    gtk_widget_show(main_window.toolbar_find->toolbar);
   } else {
-    gtk_widget_hide(main_window.toolbar_find);
+    gtk_widget_hide(main_window.toolbar_find->toolbar);
   }
 }
 /*
@@ -221,7 +221,6 @@ void main_window_create_menu(void){
   main_window.menu->menunew = gtk_menu_new();
   main_window.menu->menuedit = gtk_menu_new();
   main_window.menu->menuview = gtk_menu_new();
-//  main_window.menu->menuproject = gtk_menu_new();
   main_window.menu->menucode = gtk_menu_new();
   main_window.menu->menuplugin = gtk_menu_new();
   main_window.menu->menuhelp = gtk_menu_new();
@@ -363,19 +362,6 @@ main_window.menu->tog_class =create_check_menu_item(main_window.menu->tog_class,
   main_window.menu->sepd = create_separator_item(main_window.menu->menuview);  
   main_window.menu->preferences=create_stock_menu_item(main_window.menu->preferences,main_window.menu->menuview,GTK_STOCK_PREFERENCES, _("Application Config"), GDK_F5, 0);
   g_signal_connect(G_OBJECT(main_window.menu->preferences), "activate", G_CALLBACK(on_preferences1_activate), NULL);
-  /*Menu project*/
-/*
-  main_window.menu->project = gtk_menu_item_new_with_mnemonic(_("_Project"));
-  gtk_menu_item_set_submenu(GTK_MENU_ITEM(main_window.menu->project), main_window.menu->menuproject);
-  gtk_menu_shell_append(GTK_MENU_SHELL(main_window.menu->menubar), main_window.menu->project);
-
-  main_window.menu->newp = create_mnemonic_menu_item(main_window.menu->newp,main_window.menu->menuproject,_("_New Project"), _("Create a new gPHPEdit project"),GDK_n, GDK_SHIFT_MASK | GDK_CONTROL_MASK);
-  g_signal_connect(G_OBJECT(main_window.menu->newp), "activate", G_CALLBACK(on_newproj_activate), NULL);
-  main_window.menu->openp = create_mnemonic_menu_item(main_window.menu->openp,main_window.menu->menuproject,_("_Open Project"), _("Open a gPHPEdit project"),GDK_o, GDK_SHIFT_MASK | GDK_CONTROL_MASK);
-  g_signal_connect(G_OBJECT(main_window.menu->openp), "activate", G_CALLBACK(on_openproj_activate), NULL);
-  main_window.menu->closep = create_mnemonic_menu_item(main_window.menu->closep,main_window.menu->menuproject,_("_Close Project"), _("Close Current project"),GDK_w, GDK_SHIFT_MASK | GDK_CONTROL_MASK);
-  g_signal_connect(G_OBJECT(main_window.menu->closep), "activate", G_CALLBACK(close_current_project), NULL);
-*/
   /*menu code*/
   main_window.menu->code = gtk_menu_item_new_with_mnemonic(_("_Code"));
   gtk_menu_item_set_submenu(GTK_MENU_ITEM(main_window.menu->code), main_window.menu->menucode);

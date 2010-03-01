@@ -10,7 +10,7 @@ msgstr ""
 "Project-Id-Version: 0.9.96\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2010-01-24 23:41-0300\n"
-"PO-Revision-Date: 2010-01-24 23:54-0300\n"
+"PO-Revision-Date: 2010-01-25 22:45-0300\n"
 "Last-Translator: jose rostagno <joserostagno@hotmail.com>\n"
 "Language-Team: español <none@none.com>\n"
 "MIME-Version: 1.0\n"
@@ -398,6 +398,8 @@ msgid ""
 "gPHPEdit is a GNOME2 editor specialised for editing PHP scripts and related "
 "files (HTML/CSS/JS)."
 msgstr ""
+"gPHPEdit es un editor de GNOME2 especializado en editar specialised for "
+"editing PHP scripts and related files (HTML/CSS/JS)."
 
 #: ../src/main_window_callbacks.c:1483
 #, c-format
@@ -434,43 +436,43 @@ msgstr "Etiqueta HTML"
 #: ../src/preferences_dialog.c:278 ../src/preferences_dialog.c:739
 #: ../src/preferences_dialog.c:740
 msgid "HTML Unknown Tag"
-msgstr ""
+msgstr "Etiqueta HTML desconocida"
 
 #: ../src/preferences_dialog.c:147 ../src/preferences_dialog.c:282
 #: ../src/preferences_dialog.c:283 ../src/preferences_dialog.c:744
 #: ../src/preferences_dialog.c:745
 msgid "HTML Attribute"
-msgstr ""
+msgstr "Atributo HTML"
 
 #: ../src/preferences_dialog.c:148 ../src/preferences_dialog.c:287
 #: ../src/preferences_dialog.c:288 ../src/preferences_dialog.c:749
 #: ../src/preferences_dialog.c:750
 msgid "HTML Unknown Attribute"
-msgstr ""
+msgstr "Atributo HTML desconocido"
 
 #: ../src/preferences_dialog.c:149 ../src/preferences_dialog.c:292
 #: ../src/preferences_dialog.c:293 ../src/preferences_dialog.c:754
 #: ../src/preferences_dialog.c:755
 msgid "HTML Number"
-msgstr ""
+msgstr "Numero HTML"
 
 #: ../src/preferences_dialog.c:150 ../src/preferences_dialog.c:297
 #: ../src/preferences_dialog.c:298 ../src/preferences_dialog.c:759
 #: ../src/preferences_dialog.c:760
 msgid "HTML Single-quoted String"
-msgstr ""
+msgstr "Cadena HTML con comillas simples"
 
 #: ../src/preferences_dialog.c:151 ../src/preferences_dialog.c:302
 #: ../src/preferences_dialog.c:303 ../src/preferences_dialog.c:764
 #: ../src/preferences_dialog.c:765
 msgid "HTML Double-quoted String"
-msgstr ""
+msgstr "Cadena HTML con comillas dobles"
 
 #: ../src/preferences_dialog.c:152 ../src/preferences_dialog.c:307
 #: ../src/preferences_dialog.c:308 ../src/preferences_dialog.c:769
 #: ../src/preferences_dialog.c:770
 msgid "HTML Comment"
-msgstr ""
+msgstr "Comentario HTML"
 
 #: ../src/preferences_dialog.c:153 ../src/preferences_dialog.c:312
 #: ../src/preferences_dialog.c:313 ../src/preferences_dialog.c:774
@@ -482,7 +484,7 @@ msgstr ""
 #: ../src/preferences_dialog.c:318 ../src/preferences_dialog.c:779
 #: ../src/preferences_dialog.c:780
 msgid "HTML Script"
-msgstr ""
+msgstr "Script HTML"
 
 #: ../src/preferences_dialog.c:155 ../src/preferences_dialog.c:322
 #: ../src/preferences_dialog.c:323 ../src/preferences_dialog.c:784
@@ -494,7 +496,7 @@ msgstr ""
 #: ../src/preferences_dialog.c:328 ../src/preferences_dialog.c:789
 #: ../src/preferences_dialog.c:790
 msgid "HTML Value"
-msgstr ""
+msgstr "Valor HTML"
 
 #. Font drop down elements : JavaScript
 #: ../src/preferences_dialog.c:159 ../src/preferences_dialog.c:332
@@ -605,7 +607,7 @@ msgstr ""
 #: ../src/preferences_dialog.c:418 ../src/preferences_dialog.c:879
 #: ../src/preferences_dialog.c:880
 msgid "CSS Class"
-msgstr ""
+msgstr "Clase CSS"
 
 #: ../src/preferences_dialog.c:181 ../src/preferences_dialog.c:422
 #: ../src/preferences_dialog.c:423 ../src/preferences_dialog.c:884
@@ -623,7 +625,7 @@ msgstr ""
 #: ../src/preferences_dialog.c:433 ../src/preferences_dialog.c:894
 #: ../src/preferences_dialog.c:895
 msgid "CSS Operator"
-msgstr ""
+msgstr "Operador CSS"
 
 #: ../src/preferences_dialog.c:184 ../src/preferences_dialog.c:437
 #: ../src/preferences_dialog.c:438 ../src/preferences_dialog.c:899
@@ -641,7 +643,7 @@ msgstr ""
 #: ../src/preferences_dialog.c:448 ../src/preferences_dialog.c:909
 #: ../src/preferences_dialog.c:910
 msgid "CSS Value"
-msgstr ""
+msgstr "Valor CSS"
 
 #: ../src/preferences_dialog.c:187 ../src/preferences_dialog.c:452
 #: ../src/preferences_dialog.c:453 ../src/preferences_dialog.c:914
@@ -653,7 +655,7 @@ msgstr ""
 #: ../src/preferences_dialog.c:458 ../src/preferences_dialog.c:919
 #: ../src/preferences_dialog.c:920
 msgid "CSS ID"
-msgstr ""
+msgstr "ID CSS"
 
 #: ../src/preferences_dialog.c:189 ../src/preferences_dialog.c:462
 #: ../src/preferences_dialog.c:463 ../src/preferences_dialog.c:924
@@ -672,25 +674,25 @@ msgstr ""
 #: ../src/preferences_dialog.c:473 ../src/preferences_dialog.c:934
 #: ../src/preferences_dialog.c:935
 msgid "SQL Word"
-msgstr ""
+msgstr "Palabra SQL"
 
 #: ../src/preferences_dialog.c:194 ../src/preferences_dialog.c:477
 #: ../src/preferences_dialog.c:478 ../src/preferences_dialog.c:939
 #: ../src/preferences_dialog.c:940
 msgid "SQL Identifier"
-msgstr ""
+msgstr "Identificador SQL"
 
 #: ../src/preferences_dialog.c:195 ../src/preferences_dialog.c:482
 #: ../src/preferences_dialog.c:483 ../src/preferences_dialog.c:944
 #: ../src/preferences_dialog.c:945
 msgid "SQL Number"
-msgstr ""
+msgstr "Numero SQL"
 
 #: ../src/preferences_dialog.c:196 ../src/preferences_dialog.c:487
 #: ../src/preferences_dialog.c:488 ../src/preferences_dialog.c:949
 #: ../src/preferences_dialog.c:950
 msgid "SQL String"
-msgstr ""
+msgstr "Cadena SQL"
 
 #: ../src/preferences_dialog.c:197 ../src/preferences_dialog.c:492
 #: ../src/preferences_dialog.c:493 ../src/preferences_dialog.c:954
@@ -819,7 +821,7 @@ msgstr "Extensiones de archivos PHP reconocidas:"
 
 #: ../src/preferences_dialog.c:1610
 msgid "Shared library path(s):"
-msgstr ""
+msgstr "Ruta a la librería(s) compartida(s):"
 
 #: ../src/preferences_dialog.c:1625
 msgid "Delay (calltip/function list):"
@@ -980,7 +982,7 @@ msgstr "_Abrir archivo selecionado"
 
 #: ../src/menu.c:239
 msgid "Open a file with the name currently selected in the editor"
-msgstr ""
+msgstr "Abrir un archivo con el nombre actualmente seleccionado en el editor"
 
 #: ../src/menu.c:242
 msgid "_Recent Files"
@@ -1172,7 +1174,7 @@ msgstr "_Nuevo Proyecto"
 
 #: ../src/menu.c:370
 msgid "Create a new gPHPEdit project"
-msgstr ""
+msgstr "Crear un nuevo proyecto de gPHPEdit"
 
 #: ../src/menu.c:372
 msgid "_Open Project"
@@ -1180,7 +1182,7 @@ msgstr "_Abrir Proyecto"
 
 #: ../src/menu.c:372
 msgid "Open a gPHPEdit project"
-msgstr ""
+msgstr "Abrir un proyecto de gPHPEdit"
 
 #: ../src/menu.c:374
 msgid "_Close Project"
@@ -1209,7 +1211,7 @@ msgstr "_Limpiar comprobación de sintaxis"
 
 #: ../src/menu.c:383
 msgid "Remove the syntax check window"
-msgstr ""
+msgstr "Oculta la ventana de comprobación de sintaxis"
 
 #: ../src/menu.c:386
 msgid "_Record keyboard macro start/stop"

@@ -69,6 +69,7 @@ void scintilla_php_set_lexer(GtkScintilla *scintilla, Preferences prefs)
 	gtk_scintilla_style_set_font (scintilla, SCE_H_TAG, prefs.html_tag_font);
     gtk_scintilla_style_set_fore (scintilla, SCE_H_TAG, prefs.html_tag_fore);
     gtk_scintilla_style_set_size (scintilla, SCE_H_TAG, prefs.html_tag_size);
+
     gtk_scintilla_style_set_italic (scintilla, SCE_H_TAG, prefs.html_tag_italic);
     gtk_scintilla_style_set_bold (scintilla, SCE_H_TAG, prefs.html_tag_bold);
 	
@@ -213,8 +214,6 @@ void scintilla_php_set_lexer(GtkScintilla *scintilla, Preferences prefs)
     gtk_scintilla_style_set_italic (scintilla, SCE_HPHP_HSTRING, prefs.php_hstring_italic);
     gtk_scintilla_style_set_bold (scintilla, SCE_HPHP_HSTRING, prefs.php_hstring_bold);
 	
-	// TODO change default_* to correct ones and add in for every property.
-	// Also, remove all calls to merge_font as this won't be required
     gtk_scintilla_style_set_fore (scintilla, SCE_HPHP_SIMPLESTRING, prefs.php_simplestring_fore);
     gtk_scintilla_style_set_font (scintilla, SCE_HPHP_SIMPLESTRING, prefs.php_simplestring_font);
     gtk_scintilla_style_set_back (scintilla, SCE_HPHP_SIMPLESTRING, prefs.php_simplestring_back);
@@ -222,8 +221,8 @@ void scintilla_php_set_lexer(GtkScintilla *scintilla, Preferences prefs)
     gtk_scintilla_style_set_italic (scintilla, SCE_HPHP_SIMPLESTRING, prefs.php_simplestring_italic);
     gtk_scintilla_style_set_bold (scintilla, SCE_HPHP_SIMPLESTRING, prefs.php_simplestring_bold);
 
-	gtk_scintilla_style_set_font (scintilla, SCE_HPHP_WORD, prefs.php_word_font);
-	gtk_scintilla_style_set_fore (scintilla, SCE_HPHP_WORD, prefs.php_word_fore);
+    gtk_scintilla_style_set_font (scintilla, SCE_HPHP_WORD, prefs.php_word_font);
+    gtk_scintilla_style_set_fore (scintilla, SCE_HPHP_WORD, prefs.php_word_fore);
     gtk_scintilla_style_set_back (scintilla, SCE_HPHP_WORD, prefs.php_word_back);
     gtk_scintilla_style_set_size (scintilla, SCE_HPHP_WORD, prefs.php_word_size);
     gtk_scintilla_style_set_italic (scintilla, SCE_HPHP_WORD, prefs.php_word_italic);

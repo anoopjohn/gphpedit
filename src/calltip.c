@@ -29,7 +29,7 @@
 #endif
 
 GSList *api_list;
-GString *calltip;
+GString *calltip=NULL;
 #define MAX_API_LINE_LENGTH 16384
 
 
@@ -78,9 +78,6 @@ void function_list_prepare(void)
 {
 	FILE *apifile;
 	char buffer[MAX_API_LINE_LENGTH];
-	GString *line;
-
-	calltip = g_string_new("");
 
 	apifile = fopen("/usr/share/gphpedit/php-gphpedit.api", "r");
 	if (apifile == NULL) {
@@ -89,7 +86,7 @@ void function_list_prepare(void)
 	
 	if( apifile != NULL ) {
 		while( fgets( buffer, MAX_API_LINE_LENGTH, apifile ) != NULL ) {
-			line = g_string_new_len(buffer, strlen(buffer)-1);
+			GString *line = g_string_new_len(buffer, strlen(buffer)-1);
 			api_list = g_slist_append(api_list, line);
 		}
 		fclose( apifile );
@@ -126,6 +123,7 @@ GString *get_api_line(GtkWidget *scintilla, gint wordStart, gint wordEnd)
 		//a partial match will result in an incorrect tooltip. So we 
 		//have to use strcmp and not strncasecmp
 		if (strcmp(function_name, buffer)==0) {
+			calltip = g_string_new(NULL);
 			g_string_printf(calltip, "%s %s %s\n%s", return_value, function_name, params, description);
 			g_free (buffer);
 			g_free(copy_line);

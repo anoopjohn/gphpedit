@@ -21,7 +21,9 @@
  
    The GNU General Public License is contained in the file COPYING.
 */
-
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
 #define PLAT_GTK 1
 #include <gtkscintilla.h>
 #include "folderbrowser.h"
@@ -189,6 +191,11 @@ static void tab_set_folding(Editor *editor, gint folding)
 		
 		gtk_scintilla_set_margin_width_n (GTK_SCINTILLA(editor->scintilla), 2, 14);
 		
+/*		//makers margin settings
+		gtk_scintilla_set_margin_type_n(GTK_SCINTILLA(main_window.current_editor->scintilla), 1, SC_MARGIN_SYMBOL);
+		gtk_scintilla_set_margin_width_n (GTK_SCINTILLA(main_window.current_editor->scintilla), 1, 14);
+		gtk_scintilla_set_margin_sensitive_n(GTK_SCINTILLA(main_window.current_editor->scintilla), 1, 1);
+*/
 		//g_signal_connect (G_OBJECT (editor->scintilla), "fold_clicked", G_CALLBACK (fold_clicked), NULL);
 		g_signal_connect (G_OBJECT (editor->scintilla), "modified", G_CALLBACK (handle_modified), NULL);
 		//g_signal_connect (G_OBJECT (editor->scintilla), "margin_click", G_CALLBACK (margin_clicked), NULL);
@@ -206,12 +213,12 @@ void tab_file_write (GObject *source_object, GAsyncResult *res, gpointer user_da
         Editor *editor = (Editor *)user_data;
         gssize bytes;
         GError *error=NULL;
-        bytes= g_output_stream_write_finish((GOutputStream *)source_object,res,&error);
+        bytes= g_output_stream_write_finish(G_OUTPUT_STREAM(source_object),res,&error);
         if (bytes==-1){
             g_print(_("GIO Error: %s\n"),error->message);
             return;
         }
-        g_output_stream_close ((GOutputStream *) source_object,NULL,&error);
+        g_output_stream_close (G_OUTPUT_STREAM(source_object),NULL,&error);
 	gtk_scintilla_set_save_point (GTK_SCINTILLA(editor->scintilla));
 	register_file_opened(editor->filename->str);
 	classbrowser_update();
@@ -260,22 +267,20 @@ void tab_file_save_opened(GObject *source_object, GAsyncResult *res, gpointer us
 			text_length = utf8_size;
 		}
         }
-        g_output_stream_write_async ((GOutputStream *)file,write_buffer,text_length,G_PRIORITY_DEFAULT,NULL,tab_file_write, user_data);
+       g_output_stream_write_async (G_OUTPUT_STREAM (file),write_buffer,text_length,G_PRIORITY_DEFAULT,NULL,tab_file_write, user_data);
 }
 
 void tab_validate_buffer_and_insert(gpointer buffer, Editor *editor)
 {
-	gchar *converted_text;
-	gsize utf8_size;// was guint
-	GError *error = NULL;
-	
 	if (g_utf8_validate(buffer, editor->file_size, NULL)) {
 		//g_print("Valid UTF8 according to gnome\n");
 		gtk_scintilla_add_text(GTK_SCINTILLA (editor->scintilla), editor->file_size, buffer);
 		editor->converted_to_utf8 = FALSE;
 	}
 	else {
-		
+		gchar *converted_text;
+		gsize utf8_size;// was guint
+		GError *error = NULL;			
 		converted_text = g_locale_to_utf8(buffer, editor->file_size, NULL, &utf8_size, &error);
 		if (error != NULL) {
                         gssize nchars=strlen(buffer);
@@ -286,20 +291,14 @@ void tab_validate_buffer_and_insert(gpointer buffer, Editor *editor)
 			g_print(_("gPHPEdit UTF-8 Error: %s\n"), error->message);
 			g_error_free(error);
                         gtk_scintilla_add_text(GTK_SCINTILLA (editor->scintilla), editor->file_size, buffer);
-                        } else {
-                        g_print(_("Converted to UTF-8 size: %d\n"), utf8_size);
-			gtk_scintilla_add_text(GTK_SCINTILLA (editor->scintilla), utf8_size, converted_text);
-			g_free(converted_text);
-			editor->converted_to_utf8 = TRUE;
-                        }
+			return;
+               		}
 		}
-		else {
 			g_print(_("Converted to UTF-8 size: %d\n"), utf8_size);
 			gtk_scintilla_add_text(GTK_SCINTILLA (editor->scintilla), utf8_size, converted_text);
 			g_free(converted_text);
 			editor->converted_to_utf8 = TRUE;
 		}
-	}
 }
 
 void tab_reset_scintilla_after_open(Editor *editor)
@@ -312,48 +311,29 @@ void tab_reset_scintilla_after_open(Editor *editor)
 	gtk_scintilla_grab_focus(GTK_SCINTILLA(editor->scintilla));
 }
 
-void tab_file_read(GObject *source_object, GAsyncResult *res, gpointer user_data)
+void tab_file_opened (GObject *source_object, GAsyncResult *res, gpointer user_data)
 {
-        Editor *editor = (Editor *)user_data;
-        gssize bytes_read;
         GError *error=NULL;
-        bytes_read=g_input_stream_read_finish ((GInputStream *)source_object,res,&error);
-
-        if (!bytes_read){
-            g_print(_("GIO Error: %s\n"),error->message);
-            return;
-        }
-        if(editor->file_size!=bytes_read){
-            g_print(_("Error loading file:%s\nFile was loaded partially\nPress Shift + Ctrl + R to reload the file\n"),editor->filename->str);
-        }
+        Editor *editor = (Editor *)user_data;
+	editor->buffer = g_malloc(editor->file_size);
+ if (!g_file_load_contents_finish ((GFile *) source_object,res,&(editor->buffer),&(editor->file_size),NULL,&error)) {
+	g_print("Error reading file. Gio error:%s",error->message);
+	return;
+	}
+        g_print("Loaded %d bytes\n",editor->file_size);
 	// Clear scintilla buffer
 	gtk_scintilla_clear_all(GTK_SCINTILLA (editor->scintilla));
-	
+
 	//g_print("BUFFER=\n%s\n-------------------------------------------\n", buffer);
-	
+
 	tab_validate_buffer_and_insert(editor->buffer, editor);
 	tab_reset_scintilla_after_open(editor);
         g_free(editor->buffer);
-        g_input_stream_close ((GInputStream *)source_object,NULL,&error);
 	if (gotoline_after_reload) {
 		goto_line_int(gotoline_after_reload);
 		gotoline_after_reload = 0;
 	}
 	tab_check_php_file(editor);
-}
-
-void tab_file_opened (GObject *source_object, GAsyncResult *res, gpointer user_data)
-{
-        Editor *editor = (Editor *)user_data;
-	GFileInputStream *input;
-        GError *error=NULL;
-        input=g_file_read_finish ((GFile *)source_object,res,&error);
-        if (!input){
-            g_print(_("GIO Error: %s\n"),error->message);
-            return;
-        }
-	editor->buffer = g_malloc(editor->file_size);
-       g_input_stream_read_async ((GInputStream *)input, editor->buffer,editor->file_size,G_PRIORITY_DEFAULT,NULL,tab_file_read, editor);
 }
 
  void tab_load_file(Editor *editor)
@@ -391,7 +371,8 @@ void tab_file_opened (GObject *source_object, GAsyncResult *res, gpointer user_d
         editor->isreadonly= !g_file_info_get_attribute_boolean (info,"access::can-write");
         g_object_unref(info);
         // Open file
-        g_file_read_async (file,G_PRIORITY_DEFAULT,NULL,tab_file_opened, editor);
+        /*it's all ok, read file*/
+        g_file_load_contents_async (file,NULL,tab_file_opened,editor);
 }
 
 
@@ -451,7 +432,7 @@ void tab_help_load_file(Editor *editor, GString *filename)
             g_free (buffer);
 	return;
         }
-	nchars= g_input_stream_read ((GInputStream *)input,buffer,size,NULL,&error);
+	nchars= g_input_stream_read (G_INPUT_STREAM(input),buffer,size,NULL,&error);
         if (nchars ==-1){
             g_print("Error reading file. GIO error:%s\n",error->message);
         }
@@ -469,7 +450,7 @@ GString *tab_help_try_filename(gchar *prefix, gchar *command, gchar *suffix)
 	GString *long_filename;
         
 	long_filename = g_string_new(command);
-	long_filename = g_string_prepend(long_filename, prefix);
+        long_filename = g_string_prepend(long_filename, prefix);
 	if (suffix) {
 		long_filename = g_string_append(long_filename, suffix);
 	}
@@ -503,7 +484,7 @@ GString *tab_help_find_helpfile(gchar *command)
         if (strstr(command,"/usr/")!=NULL){
             return long_filename;
         }
-	// For Debian, Ubuntu and sensible distrubutions...
+/*	// For Debian, Ubuntu and sensible distrubutions...
 	long_filename = tab_help_try_filename("/usr/share/doc/php-doc/html/function.", command, ".html");
 	if (long_filename)
 		return long_filename;
@@ -564,10 +545,23 @@ GString *tab_help_find_helpfile(gchar *command)
 	long_filename = tab_help_try_filename("/usr/doc/php-docs-4.2.3/html/", command, NULL);
 	if (long_filename)
 		return long_filename;
-
+*/
+        //FIXME: only if PHP_DOC_DIR is defined??
+        gchar *temp= NULL;
+        temp=g_strdup_printf ("%s/%s",PHP_DOC_DIR,"function.");
+        long_filename = tab_help_try_filename(temp, command, ".html");
+	if (long_filename)
+		return long_filename; //FIXME: free memory???
+        temp=g_strdup_printf ("%s/%s",PHP_DOC_DIR,"ref.");
+	long_filename = tab_help_try_filename(PHP_DOC_DIR, command, ".html");
+	if (long_filename)
+		return long_filename;
+        temp=g_strdup_printf ("%s/",PHP_DOC_DIR); //FIXME: free memory???
+	long_filename = tab_help_try_filename(temp, command, NULL);
+	if (long_filename)
+		return long_filename;
         g_print(_("Help for function not found: %s\n"), command);
-        
-	return long_filename;
+        return long_filename;
 }
 //return a substring skip n char from str
 void substring(char *str, char *subst, int start, int lenght)

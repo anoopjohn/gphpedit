@@ -266,7 +266,7 @@ info=g_file_enumerator_next_file (files,NULL,&error);
 while (info){
    if (g_file_info_get_file_type (info)==G_FILE_TYPE_DIRECTORY){
       add_folder(pTree, sChemin,info, iter, iter2);
-      if (error!=NULL){
+      if (!error){
        //error=NULL;
        //Start file monitor for folderbrowser autorefresh
        monitor= g_file_monitor_directory (file,G_FILE_MONITOR_NONE,NULL,&error);
@@ -838,7 +838,6 @@ gchar *trunc_on_char(gchar * string, gchar which_char)
   	Tcopyfile *cf;
   	GSList *tmplist;
   	cf = g_new0(Tcopyfile,1);
-  	//cf->bfwin = bfwin;
   	cf->destdir = destdir;
   	g_object_ref(cf->destdir);
   	cf->sourcelist = g_slist_copy(sources);
@@ -853,7 +852,6 @@ void copy_files_async(GFile *destdir, gchar *sources) {
   	Tcopyfile *cf;
   	gchar **splitted, **tmp;
   	cf = g_new0(Tcopyfile,1);
-  	//cf->bfwin = bfwin;
   	cf->destdir = destdir;
   	g_object_ref(cf->destdir);
   	/* create the source and destlist ! */

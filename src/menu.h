@@ -2,7 +2,8 @@
 
    Copyright (C) 2003, 2004, 2005 Andy Jeffries <andy at gphpedit.org>
    Copyright (C) 2009 Anoop John <anoop dot john at zyxware.com>
-   Copyright (C) 2009 José Rostagno (for vijona.com.ar)   
+   Copyright (C) 2009 José Rostagno (for vijona.com.ar) 
+
    For more information or to find the latest release, visit our 
    website at http://www.gphpedit.org/
 
@@ -36,7 +37,6 @@ typedef struct
   GtkWidget *menunew;
   GtkWidget *menuedit;
   GtkWidget *menuview;
-  GtkWidget *menuproject;
   GtkWidget *menucode;
   GtkWidget *file;
   GtkWidget *newi;
@@ -90,12 +90,7 @@ typedef struct
   GtkWidget *sizesmall;
   GtkWidget *sepd;
   GtkWidget *preferences;
-/*
-  GtkWidget *project;
-  GtkWidget *openp;
-  GtkWidget *newp;
-  GtkWidget *closep;
-*/
+
   GtkWidget *code;
   GtkWidget *syntax;
   GtkWidget *clearsyntax;

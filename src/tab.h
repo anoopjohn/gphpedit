@@ -118,7 +118,7 @@ gchar *convert_to_full(gchar *filename);
 void str_replace(char *Str, char ToRp, char WithC);
 void tab_file_save_opened(GObject *source_object, GAsyncResult *res, gpointer user_data);
 char *macro_message_to_string(gint message);
-
+gint yes_no_dialog (gchar *title, gchar *message);
 void set_editor_to_php(Editor *editor);
 void set_editor_to_css(Editor *editor);
 void set_editor_to_sql(Editor *editor);

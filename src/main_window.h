@@ -31,41 +31,21 @@
 #include <gconf/gconf-client.h>
 #include "folderbrowser.h"
 #include "menu.h"
+#include "toolbar.h"
 
 typedef struct
 {
 	GtkWidget *window;
         GtkWidget *prinbox;
+	/* menu */
         Mainmenu *menu;
-        GtkWidget *toolbar_main;
-	GtkWidget *toolbar_main_button_new;
-	GtkWidget *toolbar_main_button_open;
-	GtkWidget *toolbar_main_button_save;
-	GtkWidget *toolbar_main_button_save_as;
-	GtkWidget *toolbar_main_button_close;
-	GtkWidget *toolbar_main_button_undo;
-	GtkWidget *toolbar_main_button_redo;
-	GtkWidget *toolbar_main_button_cut;
-	GtkWidget *toolbar_main_button_copy;
-	GtkWidget *toolbar_main_button_paste;
-	GtkWidget *toolbar_main_button_find;
-	GtkWidget *toolbar_main_button_replace;
-	GtkToolItem *toolbar_separator;
-	GtkWidget *toolbar_main_button_indent;
-	GtkWidget *toolbar_main_button_unindent;
-	GtkWidget *toolbar_main_button_zoom_in;
-	GtkWidget *toolbar_main_button_zoom_out;
-        GtkWidget *toolbar_main_button_zoom_100;
-	GtkWidget *toolbar_find;
-	GtkWidget *toolbar_find_search_label;
-	GtkWidget *toolbar_find_search_entry;
-	GtkWidget *toolbar_find_goto_label;
-	GtkWidget *toolbar_find_goto_entry;
-        GtkWidget *cleanimg;
+	/* toolbars */
+	Maintoolbar *toolbar_main;
+	Findtoolbar *toolbar_find;
 
 	GtkWidget *main_vertical_pane;
 	GtkWidget *main_horizontal_pane;
-
+	/* status bar */
 	GtkWidget *appbar;
         GtkWidget *zoomlabel;
 
