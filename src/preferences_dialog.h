@@ -41,9 +41,14 @@ typedef struct
   GtkWidget *label32;
   GtkWidget *tab_size;
   GtkWidget *tabs_not_spaces;
+  /*Edge color*/
   GtkWidget *hbox15;
   GtkWidget *label33;
   GtkWidget *edge_colour;
+  /*Selection background color*/
+  GtkWidget *hbox27;
+  GtkWidget *label46;
+  GtkWidget *sel_back;
   GtkWidget *hbox16;
   GtkWidget *label34;
   GtkWidget *edge_column;

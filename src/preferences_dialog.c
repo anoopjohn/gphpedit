@@ -1,25 +1,25 @@
 /* This file is part of gPHPEdit, a GNOME2 PHP Editor.
  
-   Copyright (C) 2003, 2004, 2005 Andy Jeffries <andy at gphpedit.org>
-   Copyright (C) 2009 Anoop John <anoop dot john at zyxware.com>
-	  
-   For more information or to find the latest release, visit our 
-   website at http://www.gphpedit.org/
+	 Copyright (C) 2003, 2004, 2005 Andy Jeffries <andy at gphpedit.org>
+	 Copyright (C) 2009 Anoop John <anoop dot john at zyxware.com>
+		
+	 For more information or to find the latest release, visit our 
+	 website at http://www.gphpedit.org/
  
-   gPHPEdit is free software: you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation, either version 3 of the License, or
-   (at your option) any later version.
+	 gPHPEdit is free software: you can redistribute it and/or modify
+	 it under the terms of the GNU General Public License as published by
+	 the Free Software Foundation, either version 3 of the License, or
+	 (at your option) any later version.
 
-   gPHPEdit is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
+	 gPHPEdit is distributed in the hope that it will be useful,
+	 but WITHOUT ANY WARRANTY; without even the implied warranty of
+	 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	See the
+	 GNU General Public License for more details.
 
-   You should have received a copy of the GNU General Public License
-   along with gPHPEdit.  If not, see <http://www.gnu.org/licenses/>.
+	 You should have received a copy of the GNU General Public License
+	 along with gPHPEdit.	If not, see <http://www.gnu.org/licenses/>.
  
-   The GNU General Public License is contained in the file COPYING.
+	 The GNU General Public License is contained in the file COPYING.
 */
 #include "stdlib.h"
 #include "preferences_dialog.h"
@@ -33,16 +33,17 @@
 
 #define IS_FONT_NAME(name1, name2) strncmp(name1, name2, MIN(strlen(name1), strlen(name2))) == 0
 
-gint correct_color(gint16 color){
-    gint8 tmpclr =color >> 8;
-    gint clr;
-    if (tmpclr < 0) {
-	int temp=256 + (int)tmpclr;
-	clr=temp;
-	} else {
-	clr=tmpclr;
+gint correct_color(gint16 color) {
+	gint8 tmpclr = color >> 8;
+	gint clr;
+	if (tmpclr < 0) {
+		int temp=256 + (int)tmpclr;
+		clr=temp;
+	} 
+	else {
+		clr=tmpclr;
 	}
-return clr;
+	return clr;
 }
 
 PreferencesDialog preferences_dialog;
@@ -54,7 +55,7 @@ static int cmp_families (const void *a, const void *b)
 {
 	const char *a_name = pango_font_family_get_name (*(PangoFontFamily **)a);
 	const char *b_name = pango_font_family_get_name (*(PangoFontFamily **)b);
-  
+	
 	return g_utf8_collate (a_name, b_name);
 }
 
@@ -63,7 +64,7 @@ static GList * get_font_names()
 	PangoFontFamily **families;
 	gint n_families, i;
 	GList *fonts = NULL;
-  
+	
 	pango_context_list_families (gtk_widget_get_pango_context (GTK_WIDGET (main_window.window)),
 		&families, &n_families);
 	qsort (families, n_families, sizeof (PangoFontFamily *), cmp_families);
@@ -71,7 +72,7 @@ static GList * get_font_names()
 	for (i=0; i<n_families; i++) {
 		const gchar *name = pango_font_family_get_name (families[i]);
 		fonts = g_list_append(fonts, (gchar *)name);
-    }
+	}
 	
 	return fonts;
 }
@@ -80,7 +81,7 @@ static GList *get_font_sizes()
 {
 	GList *sizes = NULL;
 	
-	// Again, there's gotta be a nicer way to do this!!!!  AJ 2004-02-09
+	// Again, there's gotta be a nicer way to do this!!!!	AJ 2004-02-09
 	
 	sizes = g_list_append(sizes, "6");
 	sizes = g_list_append(sizes, "8");
@@ -107,7 +108,7 @@ GString *create_sample_text()
 	ret = g_string_new("<?php\n\n");
 
 	ret = g_string_append(ret, "/* A class to implement a car\n");
-	ret = g_string_append(ret, "   by Mr Somebody */\n\n");
+	ret = g_string_append(ret, "	 by Mr Somebody */\n\n");
 	ret = g_string_append(ret, "class Car extends Vehicle\n");
 	ret = g_string_append(ret, "	implements EAccident\n");
 	ret = g_string_append(ret, "{\n");
@@ -132,11 +133,11 @@ GString *create_sample_text()
 
 	ret = g_string_append(ret, "<html>\n");
 	ret = g_string_append(ret, " <head>\n");
-	ret = g_string_append(ret, "  <title>My test page</title>\n");
+	ret = g_string_append(ret, "	<title>My test page</title>\n");
 	ret = g_string_append(ret, " </head>\n\n");
  
 	ret = g_string_append(ret, " <body>\n");
-	ret = g_string_append(ret, "  <h1 class='winter'>Test</h1>\n");
+	ret = g_string_append(ret, "	<h1 class='winter'>Test</h1>\n");
 	ret = g_string_append(ret, " </body>\n");
 	ret = g_string_append(ret, "</html>	\n");
 	return ret;
@@ -210,23 +211,22 @@ void get_current_preferences(void)
 	highlighting_list = g_list_append(highlighting_list, _("SQL Comment"));
 
 	highlighting_list = g_list_append(highlighting_list, _("C Default"));
-        highlighting_list = g_list_append(highlighting_list, _("C string"));
-        highlighting_list = g_list_append(highlighting_list, _("C character"));
-        highlighting_list = g_list_append(highlighting_list, _("C word"));
-        highlighting_list = g_list_append(highlighting_list, _("C number"));
-        highlighting_list = g_list_append(highlighting_list, _("C identifier"));
-        highlighting_list = g_list_append(highlighting_list, _("C comment"));
-        highlighting_list = g_list_append(highlighting_list, _("C commentline"));
-        highlighting_list = g_list_append(highlighting_list, _("C preprocessor"));
-        highlighting_list = g_list_append(highlighting_list, _("C operator"));
-        highlighting_list = g_list_append(highlighting_list, _("C regex"));
-        highlighting_list = g_list_append(highlighting_list, _("C uuid"));
-        highlighting_list = g_list_append(highlighting_list, _("C verbatim"));
-        highlighting_list = g_list_append(highlighting_list, _("C globalclass"));
+	highlighting_list = g_list_append(highlighting_list, _("C String"));
+	highlighting_list = g_list_append(highlighting_list, _("C Character"));
+	highlighting_list = g_list_append(highlighting_list, _("C Word"));
+	highlighting_list = g_list_append(highlighting_list, _("C Number"));
+	highlighting_list = g_list_append(highlighting_list, _("C Identifier"));
+	highlighting_list = g_list_append(highlighting_list, _("C Comment"));
+	highlighting_list = g_list_append(highlighting_list, _("C Commentline"));
+	highlighting_list = g_list_append(highlighting_list, _("C Preprocessor"));
+	highlighting_list = g_list_append(highlighting_list, _("C Operator"));
+	highlighting_list = g_list_append(highlighting_list, _("C Regex"));
+	highlighting_list = g_list_append(highlighting_list, _("C UUID"));
+	highlighting_list = g_list_append(highlighting_list, _("C Verbatim"));
+	highlighting_list = g_list_append(highlighting_list, _("C Globalclass"));
 
 	preferences_dialog.highlighting_elements = highlighting_list;
 }
-
 
 void set_current_preferences(void)
 {
@@ -260,18 +260,18 @@ void set_controls_to_highlight(gchar *setting_name, gchar *fontname, gint fontsi
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(preferences_dialog.bold_button), bold);
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(preferences_dialog.italic_button), italic);
 
-        GdkColor color;
+	GdkColor color;
 
-        color.red = (fore & 0xff) << 8;
-        color.green = ((fore & 0xff00) >> 8) << 8;
-        color.blue = ((fore & 0xff0000) >> 16) << 8;
+	color.red = (fore & 0xff) << 8;
+	color.green = ((fore & 0xff00) >> 8) << 8;
+	color.blue = ((fore & 0xff0000) >> 16) << 8;
 
-        gtk_color_button_set_color (GTK_COLOR_BUTTON(preferences_dialog.foreground_colour), &color);
+	gtk_color_button_set_color (GTK_COLOR_BUTTON(preferences_dialog.foreground_colour), &color);
 
-        color.red = (back & 0xff) << 8;
-        color.green = ((back & 0xff00) >> 8) << 8;
-        color.blue = ((back & 0xff0000) >> 16) << 8;
-        gtk_color_button_set_color (GTK_COLOR_BUTTON(preferences_dialog.background_colour), &color);
+	color.red = (back & 0xff) << 8;
+	color.green = ((back & 0xff00) >> 8) << 8;
+	color.blue = ((back & 0xff0000) >> 16) << 8;
+	gtk_color_button_set_color (GTK_COLOR_BUTTON(preferences_dialog.background_colour), &color);
 
 	preferences_dialog.changing_highlight_element=FALSE;
 }
@@ -527,81 +527,78 @@ void get_current_highlighting_settings(gchar *name)
 			temp_preferences.c_default_bold, temp_preferences.c_default_italic,
 			temp_preferences.c_default_fore, temp_preferences.c_default_back);
 	}
-        if (IS_FONT_NAME(current_highlighting_element, _("C string"))) {
-		set_controls_to_highlight(_("C string"), temp_preferences.c_string_font, temp_preferences.c_string_size,
+	if (IS_FONT_NAME(current_highlighting_element, _("C String"))) {
+		set_controls_to_highlight(_("C String"), temp_preferences.c_string_font, temp_preferences.c_string_size,
 			temp_preferences.c_string_bold, temp_preferences.c_string_italic,
 			temp_preferences.c_string_fore, temp_preferences.c_string_back);
 	}
-        if (IS_FONT_NAME(current_highlighting_element, _("C character"))) {
-		set_controls_to_highlight(_("C character"), temp_preferences.c_character_font, temp_preferences.c_character_size,
+	if (IS_FONT_NAME(current_highlighting_element, _("C Character"))) {
+		set_controls_to_highlight(_("C Character"), temp_preferences.c_character_font, temp_preferences.c_character_size,
 			temp_preferences.c_character_bold, temp_preferences.c_character_italic,
 			temp_preferences.c_character_fore, temp_preferences.c_character_back);
 	}
-        if (IS_FONT_NAME(current_highlighting_element, _("C word"))) {
-		set_controls_to_highlight(_("C word"), temp_preferences.c_word_font, temp_preferences.c_word_size,
+	if (IS_FONT_NAME(current_highlighting_element, _("C Word"))) {
+		set_controls_to_highlight(_("C Word"), temp_preferences.c_word_font, temp_preferences.c_word_size,
 			temp_preferences.c_word_bold, temp_preferences.c_word_italic,
 			temp_preferences.c_word_fore, temp_preferences.c_word_back);
 	}
-        if (IS_FONT_NAME(current_highlighting_element, _("C number"))) {
-		set_controls_to_highlight(_("C number"), temp_preferences.c_number_font, temp_preferences.c_number_size,
+	if (IS_FONT_NAME(current_highlighting_element, _("C Number"))) {
+		set_controls_to_highlight(_("C Number"), temp_preferences.c_number_font, temp_preferences.c_number_size,
 			temp_preferences.c_number_bold, temp_preferences.c_number_italic,
 			temp_preferences.c_number_fore, temp_preferences.c_number_back);
 	}
-        if (IS_FONT_NAME(current_highlighting_element, _("C identifier"))) {
-		set_controls_to_highlight(_("C identifier"), temp_preferences.c_identifier_font, temp_preferences.c_identifier_size,
+	if (IS_FONT_NAME(current_highlighting_element, _("C Identifier"))) {
+		set_controls_to_highlight(_("C Identifier"), temp_preferences.c_identifier_font, temp_preferences.c_identifier_size,
 			temp_preferences.c_identifier_bold, temp_preferences.c_identifier_italic,
 			temp_preferences.c_identifier_fore, temp_preferences.c_identifier_back);
 	}
-        if (IS_FONT_NAME(current_highlighting_element, _("C comment"))) {
-		set_controls_to_highlight(_("C comment"), temp_preferences.c_comment_font, temp_preferences.c_comment_size,
+	if (IS_FONT_NAME(current_highlighting_element, _("C Comment"))) {
+		set_controls_to_highlight(_("C Comment"), temp_preferences.c_comment_font, temp_preferences.c_comment_size,
 			temp_preferences.c_comment_bold, temp_preferences.c_comment_italic,
 			temp_preferences.c_comment_fore, temp_preferences.c_comment_back);
 	}
-        if (IS_FONT_NAME(current_highlighting_element, _("C commentline"))) {
-		set_controls_to_highlight(_("C commentline"), temp_preferences.c_commentline_font, temp_preferences.c_commentline_size,
+	if (IS_FONT_NAME(current_highlighting_element, _("C Commentline"))) {
+		set_controls_to_highlight(_("C Commentline"), temp_preferences.c_commentline_font, temp_preferences.c_commentline_size,
 			temp_preferences.c_commentline_bold, temp_preferences.c_commentline_italic,
 			temp_preferences.c_commentline_fore, temp_preferences.c_commentline_back);
 	}
-        if (IS_FONT_NAME(current_highlighting_element, _("C preprocesor"))) {
-		set_controls_to_highlight(_("C preprocesor"), temp_preferences.c_preprocesor_font, temp_preferences.c_preprocesor_size,
+	if (IS_FONT_NAME(current_highlighting_element, _("C Preprocesor"))) {
+		set_controls_to_highlight(_("C Preprocesor"), temp_preferences.c_preprocesor_font, temp_preferences.c_preprocesor_size,
 			temp_preferences.c_preprocesor_bold, temp_preferences.c_preprocesor_italic,
 			temp_preferences.c_preprocesor_fore, temp_preferences.c_preprocesor_back);
 	}
-        if (IS_FONT_NAME(current_highlighting_element, _("C operator"))) {
-		set_controls_to_highlight(_("C operator"), temp_preferences.c_operator_font, temp_preferences.c_operator_size,
+	if (IS_FONT_NAME(current_highlighting_element, _("C Operator"))) {
+		set_controls_to_highlight(_("C Operator"), temp_preferences.c_operator_font, temp_preferences.c_operator_size,
 			temp_preferences.c_operator_bold, temp_preferences.c_operator_italic,
 			temp_preferences.c_operator_fore, temp_preferences.c_operator_back);
 	}
-        if (IS_FONT_NAME(current_highlighting_element, _("C regex"))) {
-		set_controls_to_highlight(_("C regex"), temp_preferences.c_regex_font, temp_preferences.c_regex_size,
+	if (IS_FONT_NAME(current_highlighting_element, _("C Regex"))) {
+		set_controls_to_highlight(_("C Regex"), temp_preferences.c_regex_font, temp_preferences.c_regex_size,
 			temp_preferences.c_regex_bold, temp_preferences.c_regex_italic,
 			temp_preferences.c_regex_fore, temp_preferences.c_regex_back);
 	}
-        if (IS_FONT_NAME(current_highlighting_element, _("C uuid"))) {
-		set_controls_to_highlight(_("C uuid"), temp_preferences.c_uuid_font, temp_preferences.c_uuid_size,
+	if (IS_FONT_NAME(current_highlighting_element, _("C UUID"))) {
+		set_controls_to_highlight(_("C UUID"), temp_preferences.c_uuid_font, temp_preferences.c_uuid_size,
 			temp_preferences.c_uuid_bold, temp_preferences.c_uuid_italic,
 			temp_preferences.c_uuid_fore, temp_preferences.c_uuid_back);
 	}
-        if (IS_FONT_NAME(current_highlighting_element, _("C verbatim"))) {
-		set_controls_to_highlight(_("C verbatim"), temp_preferences.c_verbatim_font, temp_preferences.c_verbatim_size,
+	if (IS_FONT_NAME(current_highlighting_element, _("C Verbatim"))) {
+		set_controls_to_highlight(_("C Verbatim"), temp_preferences.c_verbatim_font, temp_preferences.c_verbatim_size,
 			temp_preferences.c_verbatim_bold, temp_preferences.c_verbatim_italic,
 			temp_preferences.c_verbatim_fore, temp_preferences.c_verbatim_back);
 	}
-        if (IS_FONT_NAME(current_highlighting_element, _("C globalclass"))) {
-		set_controls_to_highlight(_("C globalclass"), temp_preferences.c_globalclass_font, temp_preferences.c_globalclass_size,
+	if (IS_FONT_NAME(current_highlighting_element, _("C Globalclass"))) {
+		set_controls_to_highlight(_("C Globalclass"), temp_preferences.c_globalclass_font, temp_preferences.c_globalclass_size,
 			temp_preferences.c_globalclass_bold, temp_preferences.c_globalclass_italic,
 			temp_preferences.c_globalclass_fore, temp_preferences.c_globalclass_back);
 	}
 }
 
-
-void on_element_entry_changed(GtkComboBox *widget, gpointer     user_data)
+void on_element_entry_changed(GtkComboBox *widget, gpointer		 user_data)
 {
-	current_highlighting_element =  gtk_combo_box_get_active_text (widget);
+	current_highlighting_element =	gtk_combo_box_get_active_text (widget);
 	get_current_highlighting_settings(current_highlighting_element);
 }
-
-
 
 void apply_preferences(GtkButton *button, gpointer data)
 {
@@ -630,7 +627,7 @@ void ok_clicked(GtkButton *button, gpointer data)
 }
 
 
-void change_font_global_callback(gint reply,gpointer data)
+void change_font_global_callback(gint reply, gpointer data)
 {
 	gchar *fontname;
 
@@ -687,19 +684,19 @@ void change_font_global_callback(gint reply,gpointer data)
 		temp_preferences.sql_number_font = fontname;
 		temp_preferences.sql_identifier_font = fontname;
 		temp_preferences.c_default_font=fontname;
-                temp_preferences.c_string_font=fontname;
-                temp_preferences.c_character_font=fontname;
-                temp_preferences.c_word_font=fontname;
-                temp_preferences.c_number_font=fontname;
-                temp_preferences.c_identifier_font=fontname;
-                temp_preferences.c_comment_font=fontname;
-                temp_preferences.c_commentline_font=fontname;
-                temp_preferences.c_preprocesor_font=fontname;
-                temp_preferences.c_operator_font=fontname;
-                temp_preferences.c_regex_font=fontname;
-                temp_preferences.c_uuid_font=fontname;
-                temp_preferences.c_verbatim_font=fontname;
-                temp_preferences.c_globalclass_font=fontname;
+		temp_preferences.c_string_font=fontname;
+		temp_preferences.c_character_font=fontname;
+		temp_preferences.c_word_font=fontname;
+		temp_preferences.c_number_font=fontname;
+		temp_preferences.c_identifier_font=fontname;
+		temp_preferences.c_comment_font=fontname;
+		temp_preferences.c_commentline_font=fontname;
+		temp_preferences.c_preprocesor_font=fontname;
+		temp_preferences.c_operator_font=fontname;
+		temp_preferences.c_regex_font=fontname;
+		temp_preferences.c_uuid_font=fontname;
+		temp_preferences.c_verbatim_font=fontname;
+		temp_preferences.c_globalclass_font=fontname;
 	}
 	
 	scintilla_php_set_lexer(GTK_SCINTILLA(preferences_dialog.highlighting_editor->scintilla), temp_preferences);
@@ -763,19 +760,19 @@ void change_size_global_callback(gint reply,gpointer data)
 		temp_preferences.sql_number_size = fontsize;
 		temp_preferences.sql_identifier_size = fontsize;
 		temp_preferences.c_default_size=fontsize;
-                temp_preferences.c_string_size=fontsize;
-                temp_preferences.c_character_size=fontsize;
-                temp_preferences.c_word_size=fontsize;
-                temp_preferences.c_number_size=fontsize;
-                temp_preferences.c_identifier_size=fontsize;
-                temp_preferences.c_comment_size=fontsize;
-                temp_preferences.c_commentline_size=fontsize;
-                temp_preferences.c_preprocesor_size=fontsize;
-                temp_preferences.c_operator_size=fontsize;
-                temp_preferences.c_regex_size=fontsize;
-                temp_preferences.c_uuid_size=fontsize;
-                temp_preferences.c_verbatim_size=fontsize;
-                temp_preferences.c_globalclass_size=fontsize;
+		temp_preferences.c_string_size=fontsize;
+		temp_preferences.c_character_size=fontsize;
+		temp_preferences.c_word_size=fontsize;
+		temp_preferences.c_number_size=fontsize;
+		temp_preferences.c_identifier_size=fontsize;
+		temp_preferences.c_comment_size=fontsize;
+		temp_preferences.c_commentline_size=fontsize;
+		temp_preferences.c_preprocesor_size=fontsize;
+		temp_preferences.c_operator_size=fontsize;
+		temp_preferences.c_regex_size=fontsize;
+		temp_preferences.c_uuid_size=fontsize;
+		temp_preferences.c_verbatim_size=fontsize;
+		temp_preferences.c_globalclass_size=fontsize;
 	}
 	scintilla_php_set_lexer(GTK_SCINTILLA(preferences_dialog.highlighting_editor->scintilla), temp_preferences);
 }
@@ -799,8 +796,8 @@ void get_control_values_to_highlight(gchar *setting_name, gchar **fontname, gint
 	if (g_ascii_strncasecmp(*fontname, tempfontname->str, MIN(strlen(*fontname), strlen((tempfontname->str))))!=0) {
 		message = g_string_new(NULL);
 		g_string_printf(message, _("You have just changed the font to %s\n\nWould you like to use this font as the default for every element?"), gtk_combo_box_get_active_text(GTK_COMBO_BOX(preferences_dialog.font_combo)));
-                dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_MESSAGE_QUESTION,
-				  GTK_BUTTONS_YES_NO,"%s", message->str);
+		dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_MESSAGE_QUESTION,
+			GTK_BUTTONS_YES_NO,"%s", message->str);
 		result = gtk_dialog_run (GTK_DIALOG (dialog));
 		gtk_widget_destroy (dialog);
 		change_font_global_callback(result, tempfontname->str);		
@@ -815,7 +812,7 @@ void get_control_values_to_highlight(gchar *setting_name, gchar **fontname, gint
 		message = g_string_new(NULL);
 		g_string_printf(message, _("You have just changed the font size to %dpt\n\nWould you like to use this font size as the default for every element?"), newfontsize);
 		dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_MESSAGE_QUESTION,
-				  GTK_BUTTONS_YES_NO,"%s", message->str);
+			GTK_BUTTONS_YES_NO,"%s", message->str);
 		result = gtk_dialog_run (GTK_DIALOG (dialog));
 		gtk_widget_destroy (dialog);
 		change_size_global_callback(result, (gpointer)newfontsize);		
@@ -825,18 +822,18 @@ void get_control_values_to_highlight(gchar *setting_name, gchar **fontname, gint
 	*bold = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(preferences_dialog.bold_button));
 	*italic = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(preferences_dialog.italic_button));
 	
-        GdkColor color;
-        gtk_color_button_get_color (GTK_COLOR_BUTTON(preferences_dialog.foreground_colour),&color);
+	GdkColor color;
+	gtk_color_button_get_color (GTK_COLOR_BUTTON(preferences_dialog.foreground_colour),&color);
 	gint red=correct_color(color.red);
 	gint blue=correct_color(color.blue);
 	gint green=correct_color(color.green);
-	*fore = (green<<16) | (blue<<8) | red;
+	*fore = (blue<<16) | (green<<8) | red;
 
-        gtk_color_button_get_color (GTK_COLOR_BUTTON(preferences_dialog.background_colour),&color);
+	gtk_color_button_get_color (GTK_COLOR_BUTTON(preferences_dialog.background_colour),&color);
 	red=correct_color(color.red);
 	blue=correct_color(color.blue);
-	green=correct_color(color.green);        
-	*back = (green<<16) | (blue<<8) | red;
+	green=correct_color(color.green);				
+	*back = (blue<<16) | (green<<8) | red;
 	// Debug print for preferences being set
 	//g_print("Setting %s: %s %d %d %d %d %d\n", setting_name, *fontname, *fontsize, *bold, *italic, *fore, *back);	
 }
@@ -1088,67 +1085,67 @@ void set_current_highlighting_font()
 			&temp_preferences.c_default_bold, &temp_preferences.c_default_italic,
 			&temp_preferences.c_default_fore, &temp_preferences.c_default_back);
 	}
-         if (IS_FONT_NAME(current_highlighting_element, _("C string"))) {
+	if (IS_FONT_NAME(current_highlighting_element, _("C string"))) {
 		get_control_values_to_highlight(_("C string"), &temp_preferences.c_string_font, &temp_preferences.c_string_size,
 			&temp_preferences.c_string_bold, &temp_preferences.c_string_italic,
 			&temp_preferences.c_string_fore, &temp_preferences.c_string_back);
 	}
-        if (IS_FONT_NAME(current_highlighting_element, _("C character"))) {
+	if (IS_FONT_NAME(current_highlighting_element, _("C character"))) {
 		get_control_values_to_highlight(_("C character"), &temp_preferences.c_character_font, &temp_preferences.c_character_size,
 			&temp_preferences.c_character_bold, &temp_preferences.c_character_italic,
 			&temp_preferences.c_character_fore, &temp_preferences.c_character_back);
 	}
-        if (IS_FONT_NAME(current_highlighting_element, _("C word"))) {
+	if (IS_FONT_NAME(current_highlighting_element, _("C word"))) {
 		get_control_values_to_highlight(_("C word"), &temp_preferences.c_word_font, &temp_preferences.c_word_size,
 			&temp_preferences.c_word_bold, &temp_preferences.c_word_italic,
 			&temp_preferences.c_word_fore, &temp_preferences.c_word_back);
 	}
-        if (IS_FONT_NAME(current_highlighting_element, _("C number"))) {
+	if (IS_FONT_NAME(current_highlighting_element, _("C number"))) {
 		get_control_values_to_highlight(_("C number"), &temp_preferences.c_number_font, &temp_preferences.c_number_size,
 			&temp_preferences.c_number_bold, &temp_preferences.c_number_italic,
 			&temp_preferences.c_number_fore, &temp_preferences.c_number_back);
 	}
-        if (IS_FONT_NAME(current_highlighting_element, _("C identifier"))) {
+	if (IS_FONT_NAME(current_highlighting_element, _("C identifier"))) {
 		get_control_values_to_highlight(_("C identifier"), &temp_preferences.c_identifier_font, &temp_preferences.c_identifier_size,
 			&temp_preferences.c_identifier_bold, &temp_preferences.c_identifier_italic,
 			&temp_preferences.c_identifier_fore, &temp_preferences.c_identifier_back);
 	}
-        if (IS_FONT_NAME(current_highlighting_element, _("C comment"))) {
+	if (IS_FONT_NAME(current_highlighting_element, _("C comment"))) {
 		get_control_values_to_highlight(_("C comment"), &temp_preferences.c_comment_font, &temp_preferences.c_comment_size,
 			&temp_preferences.c_comment_bold, &temp_preferences.c_comment_italic,
 			&temp_preferences.c_comment_fore, &temp_preferences.c_comment_back);
 	}
-        if (IS_FONT_NAME(current_highlighting_element, _("C commentline"))) {
+	if (IS_FONT_NAME(current_highlighting_element, _("C commentline"))) {
 		get_control_values_to_highlight(_("C commentline"), &temp_preferences.c_commentline_font, &temp_preferences.c_commentline_size,
 			&temp_preferences.c_commentline_bold, &temp_preferences.c_commentline_italic,
 			&temp_preferences.c_commentline_fore, &temp_preferences.c_commentline_back);
 	}
-        if (IS_FONT_NAME(current_highlighting_element, _("C preprocesor"))) {
+	if (IS_FONT_NAME(current_highlighting_element, _("C preprocesor"))) {
 		get_control_values_to_highlight(_("C preprocesor"), &temp_preferences.c_preprocesor_font, &temp_preferences.c_preprocesor_size,
 			&temp_preferences.c_preprocesor_bold, &temp_preferences.c_preprocesor_italic,
 			&temp_preferences.c_preprocesor_fore, &temp_preferences.c_preprocesor_back);
 	}
-        if (IS_FONT_NAME(current_highlighting_element, _("C operator"))) {
+	if (IS_FONT_NAME(current_highlighting_element, _("C operator"))) {
 		get_control_values_to_highlight(_("C operator"), &temp_preferences.c_operator_font, &temp_preferences.c_operator_size,
 			&temp_preferences.c_operator_bold, &temp_preferences.c_operator_italic,
 			&temp_preferences.c_operator_fore, &temp_preferences.c_operator_back);
 	}
-        if (IS_FONT_NAME(current_highlighting_element, _("C regex"))) {
+	if (IS_FONT_NAME(current_highlighting_element, _("C regex"))) {
 		get_control_values_to_highlight(_("C regex"), &temp_preferences.c_regex_font, &temp_preferences.c_regex_size,
 			&temp_preferences.c_regex_bold, &temp_preferences.c_regex_italic,
 			&temp_preferences.c_regex_fore, &temp_preferences.c_regex_back);
 	}
-        if (IS_FONT_NAME(current_highlighting_element, _("C uuid"))) {
+	if (IS_FONT_NAME(current_highlighting_element, _("C uuid"))) {
 		get_control_values_to_highlight(_("C uuid"), &temp_preferences.c_uuid_font, &temp_preferences.c_uuid_size,
 			&temp_preferences.c_uuid_bold, &temp_preferences.c_uuid_italic,
 			&temp_preferences.c_uuid_fore, &temp_preferences.c_uuid_back);
 	}
-        if (IS_FONT_NAME(current_highlighting_element, _("C verbatim"))) {
+	if (IS_FONT_NAME(current_highlighting_element, _("C verbatim"))) {
 		get_control_values_to_highlight(_("C verbatim"), &temp_preferences.c_verbatim_font, &temp_preferences.c_verbatim_size,
 			&temp_preferences.c_verbatim_bold, &temp_preferences.c_verbatim_italic,
 			&temp_preferences.c_verbatim_fore, &temp_preferences.c_verbatim_back);
 	}
-        if (IS_FONT_NAME(current_highlighting_element, _("C globalclass"))) {
+	if (IS_FONT_NAME(current_highlighting_element, _("C globalclass"))) {
 		get_control_values_to_highlight(_("C globalclass"), &temp_preferences.c_globalclass_font, &temp_preferences.c_globalclass_size,
 			&temp_preferences.c_globalclass_bold, &temp_preferences.c_globalclass_italic,
 			&temp_preferences.c_globalclass_fore, &temp_preferences.c_globalclass_back);
@@ -1161,24 +1158,20 @@ void on_bold_toggle(GtkToggleButton *togglebutton, gpointer user_data)
 	set_current_highlighting_font();
 }
 
-
 void on_italic_toggle(GtkToggleButton *togglebutton, gpointer user_data)
 {
 	set_current_highlighting_font();
 }
-
 
 void on_fontname_entry_changed(GtkEntry *Entry, gpointer data)
 {
 	set_current_highlighting_font();
 }
 
-
 void on_fontsize_entry_changed(GtkEntry *Entry, gpointer data)
 {
 	set_current_highlighting_font();
 }
-
 
 void preferences_window_destroyed(GtkWidget *widget, gpointer data)
 {
@@ -1186,28 +1179,44 @@ void preferences_window_destroyed(GtkWidget *widget, gpointer data)
 	preferences_dialog.window = NULL;
 }
 
-
 void on_fore_changed(GtkColorButton *widget, gpointer user_data)
 {
 	set_current_highlighting_font();
 }
-
 
 void on_back_changed(GtkColorButton *widget, gpointer user_data)
 {
 	set_current_highlighting_font();
 }
 
-
+/**
+ * Callback registered for setting the edge color from 
+ * preferences dialog.
+ */
 void on_edge_colour_changed(GtkColorButton *widget, gpointer user_data)
 {
-    GdkColor color;
-    gtk_color_button_get_color (widget,&color);
+	GdkColor color;
+	gtk_color_button_get_color (widget,&color);
 
-gint red=correct_color(color.red);
-gint blue=correct_color(color.blue);
-gint green=correct_color(color.green);
-temp_preferences.edge_colour = red | (green << 8) | (blue << 16);
+	gint red=correct_color(color.red);
+	gint blue=correct_color(color.blue);
+	gint green=correct_color(color.green);
+	temp_preferences.edge_colour = red | (green << 8) | (blue << 16);
+}
+
+/**
+ * Callback registered for setting the selection background color from 
+ * preferences dialog.
+ */
+void on_sel_back_changed(GtkColorButton *widget, gpointer user_data)
+{
+	GdkColor color;
+	gtk_color_button_get_color (widget, &color);
+
+	gint red = correct_color(color.red);
+	gint blue = correct_color(color.blue);
+	gint green = correct_color(color.green);
+	temp_preferences.set_sel_back = red | (green << 8) | (blue << 16);
 }
 
 void on_tab_size_changed(GtkRange *range, gpointer user_data)
@@ -1216,31 +1225,26 @@ void on_tab_size_changed(GtkRange *range, gpointer user_data)
 	temp_preferences.indentation_size = temp_preferences.tab_size;	
 }
 
-
 void on_calltip_delay_changed(GtkRange *range, gpointer user_data)
 {
 	temp_preferences.calltip_delay = (int)(gtk_range_get_adjustment(range)->value);	
 	temp_preferences.auto_complete_delay = (int)(gtk_range_get_adjustment(range)->value);	
 }
 
-
 void on_edge_column_changed(GtkRange *range, gpointer user_data)
 {
 	temp_preferences.edge_column = (int)(gtk_range_get_adjustment(range)->value);	
 }
-
 
 void on_show_indentation_guides_toggle(GtkToggleButton *togglebutton, gpointer user_data)
 {
 	temp_preferences.show_indentation_guides = gtk_toggle_button_get_active(togglebutton);	
 }
 
-
 void on_edge_mode_toggle(GtkToggleButton *togglebutton, gpointer user_data)
 {
 	temp_preferences.edge_mode = gtk_toggle_button_get_active(togglebutton);	
 }
-
 
 void on_line_wrapping_toggle(GtkToggleButton *togglebutton, gpointer user_data)
 {
@@ -1251,7 +1255,6 @@ void on_use_tabs_instead_spaces_toggle(GtkToggleButton *togglebutton, gpointer u
 {
 	temp_preferences.use_tabs_instead_spaces = gtk_toggle_button_get_active(togglebutton);	
 }
-
 
 void on_save_session_toggle(GtkToggleButton *togglebutton, gpointer user_data)
 {
@@ -1268,7 +1271,6 @@ void on_php_binary_location_changed (GtkEntry *entry, gpointer user_data)
 	temp_preferences.php_binary_location = g_strdup(gtk_entry_get_text(entry));
 }
 
-
 void on_php_file_extensions_changed (GtkEntry *entry, gpointer user_data)
 {
 	temp_preferences.php_file_extensions = g_strdup(gtk_entry_get_text(entry));
@@ -1279,16 +1281,14 @@ void on_shared_source_changed (GtkEntry *entry, gpointer user_data)
 	temp_preferences.shared_source_location = g_strdup(gtk_entry_get_text(entry));
 }
 
-
 void update_template_display(gchar *template)
 {
-  GtkTextBuffer *buffer;
+	GtkTextBuffer *buffer;
 
-  buffer = gtk_text_view_get_buffer (GTK_TEXT_VIEW (preferences_dialog.template_sample));
+	buffer = gtk_text_view_get_buffer (GTK_TEXT_VIEW (preferences_dialog.template_sample));
 
-  gtk_text_buffer_set_text (buffer, template, -1);	
+	gtk_text_buffer_set_text (buffer, template, -1);	
 }
-
 
 static void add_to_template_list(gpointer key, gpointer value, gpointer user_data)
 {
@@ -1297,7 +1297,6 @@ static void add_to_template_list(gpointer key, gpointer value, gpointer user_dat
 	gtk_list_store_append (preferences_dialog.template_store, &iter);
 	gtk_list_store_set (preferences_dialog.template_store, &iter,0, (gchar *)key, -1);
 }
-
 
 void add_templates_to_store(void)
 {
@@ -1397,7 +1396,7 @@ void delete_template_clicked(GtkButton *button, gpointer data)
 
 	confirm_dialog = gtk_message_dialog_new(GTK_WINDOW(main_window.window),GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
 		GTK_MESSAGE_QUESTION, GTK_BUTTONS_YES_NO,
-        _("Are you sure you want to delete template %s?"),current_key);
+				_("Are you sure you want to delete template %s?"),current_key);
 	// confirm deletion with dialog
 	if (gtk_dialog_run(GTK_DIALOG(confirm_dialog)) == GTK_RESPONSE_YES) {
 		// delete from templates
@@ -1416,10 +1415,7 @@ void delete_template_clicked(GtkButton *button, gpointer data)
 		gtk_list_store_clear(preferences_dialog.template_store);
 		gtk_tree_view_set_model(GTK_TREE_VIEW(preferences_dialog.Templates), model);
 		g_object_unref(model);
-		
-		
 		add_templates_to_store();*/
-		
 	}
 	
 	// destroy dialog
@@ -1436,7 +1432,7 @@ void template_row_activated(GtkTreeSelection *selection, gpointer data)
 		g_free(current_key);
 	}
 	//g_print("a\n");
-    if (gtk_tree_selection_get_selected (selection, &model, &iter)) {
+		if (gtk_tree_selection_get_selected (selection, &model, &iter)) {
 		gtk_tree_model_get (model, &iter, 0, &current_key, -1);
 
 		// display template content
@@ -1450,21 +1446,20 @@ void template_row_activated(GtkTreeSelection *selection, gpointer data)
 }
 
 static void templates_treeview_add_column(void)
-{  
+{	
 	GtkCellRenderer *renderer;
 	GtkTreeViewColumn *column;
 
 	/* column for description */
 	renderer = gtk_cell_renderer_text_new ();
- 	column = gtk_tree_view_column_new_with_attributes (_("Name/Shortcut"),
-						     renderer,
-						     "text",
-						     0,
-						     NULL);
+	 column = gtk_tree_view_column_new_with_attributes (_("Name/Shortcut"),
+								 renderer,
+								 "text",
+								 0,
+								 NULL);
 	gtk_tree_view_column_set_sort_column_id (column, 0);
- 	gtk_tree_view_append_column (GTK_TREE_VIEW(preferences_dialog.Templates), column);
+	 gtk_tree_view_append_column (GTK_TREE_VIEW(preferences_dialog.Templates), column);
 }
-
 
 void preferences_dialog_create (void)
 {
@@ -1500,7 +1495,7 @@ void preferences_dialog_create (void)
 	gtk_box_pack_start (GTK_BOX (preferences_dialog.hbox14), preferences_dialog.tab_size, TRUE, TRUE, 0);
 	gtk_scale_set_digits (GTK_SCALE (preferences_dialog.tab_size), 0);
 	g_signal_connect (G_OBJECT (GTK_HSCALE (preferences_dialog.tab_size)), "value_changed",
-                    G_CALLBACK (on_tab_size_changed), NULL);
+										G_CALLBACK (on_tab_size_changed), NULL);
 	
 	preferences_dialog.show_indentation_guides = gtk_check_button_new_with_mnemonic (_("Show indentation guides"));
 	gtk_widget_show (preferences_dialog.show_indentation_guides);
@@ -1530,6 +1525,7 @@ void preferences_dialog_create (void)
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(preferences_dialog.edge_mode), temp_preferences.edge_mode);
 	g_signal_connect(G_OBJECT(GTK_CHECK_BUTTON(preferences_dialog.edge_mode)), "toggled", G_CALLBACK(on_edge_mode_toggle), NULL);
 	
+	/*Begin: Right Hand Edge Color*/
 	preferences_dialog.hbox15 = gtk_hbox_new (FALSE, 0);
 	gtk_widget_show (preferences_dialog.hbox15);
 	gtk_box_pack_start (GTK_BOX (preferences_dialog.vbox6), preferences_dialog.hbox15, FALSE, TRUE, 0);
@@ -1538,16 +1534,39 @@ void preferences_dialog_create (void)
 	gtk_widget_show (preferences_dialog.label33);
 	gtk_box_pack_start (GTK_BOX (preferences_dialog.hbox15), preferences_dialog.label33, FALSE, FALSE, 8);
 
- 	GdkColor color;
-        color.red = (temp_preferences.edge_colour & 0xff) << 8;
-        color.green = ((temp_preferences.edge_colour & 0xff00) >> 8) << 8;
-        color.blue = ((temp_preferences.edge_colour & 0xff0000) >> 16) << 8;	
+	GdkColor color;
+	color.red = (temp_preferences.edge_colour & 0xff) << 8;
+	color.green = ((temp_preferences.edge_colour & 0xff00) >> 8) << 8;
+	color.blue = ((temp_preferences.edge_colour & 0xff0000) >> 16) << 8;	
 	preferences_dialog.edge_colour = gtk_color_button_new_with_color (&color);
 	gtk_color_button_set_color (GTK_COLOR_BUTTON(preferences_dialog.edge_colour),&color);
 
 	gtk_widget_show (preferences_dialog.edge_colour);
 	gtk_box_pack_start (GTK_BOX (preferences_dialog.hbox15), preferences_dialog.edge_colour, FALSE, FALSE, 0);
 	g_signal_connect(G_OBJECT(GTK_COLOR_BUTTON(preferences_dialog.edge_colour)), "color-set", G_CALLBACK(on_edge_colour_changed), NULL);
+	/*End: Right Hand Edge Color*/
+	
+	/*Begin: Selection Color*/
+	preferences_dialog.hbox27 = gtk_hbox_new (FALSE, 0);
+	gtk_widget_show (preferences_dialog.hbox27);
+	gtk_box_pack_start (GTK_BOX (preferences_dialog.vbox6), preferences_dialog.hbox27, FALSE, TRUE, 0);
+	
+	preferences_dialog.label46 = gtk_label_new (_("Selection colour:"));
+	gtk_widget_show (preferences_dialog.label46);
+	gtk_box_pack_start (GTK_BOX (preferences_dialog.hbox27), preferences_dialog.label46, FALSE, FALSE, 8);
+
+	 GdkColor sel_back;
+	sel_back.red = (temp_preferences.set_sel_back & 0xff) << 8;
+	sel_back.green = ((temp_preferences.set_sel_back & 0xff00) >> 8) << 8;
+	sel_back.blue = ((temp_preferences.set_sel_back & 0xff0000) >> 16) << 8;	
+	preferences_dialog.sel_back = gtk_color_button_new_with_color (&sel_back);
+	gtk_color_button_set_color (GTK_COLOR_BUTTON(preferences_dialog.sel_back),&sel_back);
+
+	gtk_widget_show (preferences_dialog.sel_back);
+	gtk_box_pack_start (GTK_BOX (preferences_dialog.hbox27), preferences_dialog.sel_back, FALSE, FALSE, 0);
+	g_signal_connect(G_OBJECT(GTK_COLOR_BUTTON(preferences_dialog.sel_back)), "color-set", G_CALLBACK(on_sel_back_changed), NULL);
+	/*End: Selection Color*/
+	
 	preferences_dialog.hbox16 = gtk_hbox_new (FALSE, 0);
 	gtk_widget_show (preferences_dialog.hbox16);
 	gtk_box_pack_start (GTK_BOX (preferences_dialog.vbox6), preferences_dialog.hbox16, FALSE, TRUE, 0);
@@ -1561,7 +1580,7 @@ void preferences_dialog_create (void)
 	gtk_box_pack_start (GTK_BOX (preferences_dialog.hbox16), preferences_dialog.edge_column, TRUE, TRUE, 0);
 	gtk_scale_set_digits (GTK_SCALE (preferences_dialog.edge_column), 0);
 	g_signal_connect (G_OBJECT (GTK_HSCALE (preferences_dialog.edge_column)), "value_changed",
-                    G_CALLBACK (on_edge_column_changed), NULL);
+										G_CALLBACK (on_edge_column_changed), NULL);
 	
 	preferences_dialog.save_session = gtk_check_button_new_with_mnemonic (_("Save session (including open files) on exit"));
 	gtk_widget_show (preferences_dialog.save_session);
@@ -1631,7 +1650,7 @@ void preferences_dialog_create (void)
 	gtk_widget_show (preferences_dialog.label42);
 	gtk_box_pack_start (GTK_BOX (preferences_dialog.hbox23), preferences_dialog.label42, FALSE, FALSE, 0);
 	
-        preferences_dialog.foreground_colour = gtk_color_button_new();//gnome_color_picker_new ();
+	preferences_dialog.foreground_colour = gtk_color_button_new();//gnome_color_picker_new ();
 	gtk_widget_show (preferences_dialog.foreground_colour);
 	gtk_box_pack_start (GTK_BOX (preferences_dialog.hbox23), preferences_dialog.foreground_colour, FALSE, FALSE, 0);
 	gtk_container_set_border_width (GTK_CONTAINER (preferences_dialog.foreground_colour), 8);
@@ -1645,11 +1664,11 @@ void preferences_dialog_create (void)
 	gtk_widget_show (preferences_dialog.label43);
 	gtk_box_pack_start (GTK_BOX (preferences_dialog.hbox24), preferences_dialog.label43, FALSE, FALSE, 0);
 	
-        preferences_dialog.background_colour = gtk_color_button_new();//gnome_color_picker_new ();
+	preferences_dialog.background_colour = gtk_color_button_new();//gnome_color_picker_new ();
 	gtk_widget_show (preferences_dialog.background_colour);
 	gtk_box_pack_start (GTK_BOX (preferences_dialog.hbox24), preferences_dialog.background_colour, FALSE, FALSE, 0);
 	gtk_container_set_border_width (GTK_CONTAINER (preferences_dialog.background_colour), 8);
-        g_signal_connect(G_OBJECT(GTK_COLOR_BUTTON(preferences_dialog.background_colour)), "color-set", G_CALLBACK(on_fore_changed), NULL);
+	g_signal_connect(G_OBJECT(GTK_COLOR_BUTTON(preferences_dialog.background_colour)), "color-set", G_CALLBACK(on_fore_changed), NULL);
 	
 	preferences_dialog.label41 = gtk_label_new (_("Colours"));
 	gtk_widget_show (preferences_dialog.label41);
@@ -1690,8 +1709,8 @@ void preferences_dialog_create (void)
 		gtk_combo_box_append_text (GTK_COMBO_BOX (preferences_dialog.font_combo), items->data);
 	}
 	g_signal_connect (G_OBJECT (GTK_COMBO_BOX (preferences_dialog.font_combo)), "changed",
-                      G_CALLBACK (on_fontname_entry_changed),
-                      NULL);
+											G_CALLBACK (on_fontname_entry_changed),
+											NULL);
 	g_list_free (comboitems);
 
 	preferences_dialog.size_combo = gtk_combo_box_entry_new_text ();
@@ -1708,8 +1727,8 @@ void preferences_dialog_create (void)
 		//g_print("Appending Font Size: %s, %d\n", items->data, g_quark_from_string(items->data));
 	}
 	g_signal_connect (G_OBJECT (GTK_COMBO_BOX (preferences_dialog.size_combo)), "changed",
-                      G_CALLBACK (on_fontsize_entry_changed),
-                      NULL);
+											G_CALLBACK (on_fontsize_entry_changed),
+											NULL);
 	g_list_free (comboitems);
 	
 	preferences_dialog.label44 = gtk_label_new (_("Font"));
@@ -1724,18 +1743,17 @@ void preferences_dialog_create (void)
 	gtk_widget_show (preferences_dialog.element_combo);
 	gtk_container_add (GTK_CONTAINER (preferences_dialog.frame1), preferences_dialog.element_combo);
 	gtk_container_set_border_width (GTK_CONTAINER (preferences_dialog.element_combo), 8);
-        GList *walk = NULL;
-        for (walk = preferences_dialog.highlighting_elements; walk != NULL; walk = g_list_next (walk)) {
-             g_object_set_qdata (G_OBJECT (preferences_dialog.element_combo), g_quark_from_string (walk->data),
-			GINT_TO_POINTER (gtk_tree_model_iter_n_children (gtk_combo_box_get_model (GTK_COMBO_BOX(preferences_dialog.element_combo)), NULL)));
-             
+	GList *walk = NULL;
+	for (walk = preferences_dialog.highlighting_elements; walk != NULL; walk = g_list_next (walk)) {
+		g_object_set_qdata (G_OBJECT (preferences_dialog.element_combo), g_quark_from_string (walk->data),
+		GINT_TO_POINTER (gtk_tree_model_iter_n_children (gtk_combo_box_get_model (GTK_COMBO_BOX(preferences_dialog.element_combo)), NULL)));
 		gtk_combo_box_append_text (GTK_COMBO_BOX(preferences_dialog.element_combo),walk->data);
 	}
 	gtk_combo_box_set_active (GTK_COMBO_BOX(preferences_dialog.element_combo),0);
 	current_highlighting_element = g_list_first(preferences_dialog.highlighting_elements)->data;
 	g_signal_connect (G_OBJECT (GTK_COMBO_BOX (preferences_dialog.element_combo)), "changed",
-                      G_CALLBACK (on_element_entry_changed),
-                      NULL);
+											G_CALLBACK (on_element_entry_changed),
+											NULL);
 	g_list_free (preferences_dialog.highlighting_elements);
 	
 	preferences_dialog.label39 = gtk_label_new (_("Element"));
@@ -1764,11 +1782,11 @@ void preferences_dialog_create (void)
 	gtk_box_pack_start (GTK_BOX (preferences_dialog.hbox17), preferences_dialog.php_file_entry, TRUE, TRUE, 0);
 	gtk_entry_set_text(GTK_ENTRY(preferences_dialog.php_file_entry), temp_preferences.php_binary_location);
 	g_signal_connect(G_OBJECT(preferences_dialog.php_file_entry),
-                       "changed",
-                       G_CALLBACK(on_php_binary_location_changed),
-                       NULL);
+											 "changed",
+											 G_CALLBACK(on_php_binary_location_changed),
+											 NULL);
 
-        preferences_dialog.hbox18 = gtk_hbox_new (FALSE, 0);
+	preferences_dialog.hbox18 = gtk_hbox_new (FALSE, 0);
 	gtk_widget_show (preferences_dialog.hbox18);
 	gtk_box_pack_start (GTK_BOX (preferences_dialog.vbox7), preferences_dialog.hbox18, FALSE, TRUE, 8);
 	
@@ -1781,7 +1799,7 @@ void preferences_dialog_create (void)
 	gtk_box_pack_start (GTK_BOX (preferences_dialog.hbox18), preferences_dialog.file_extensions, TRUE, TRUE, 0);
 	gtk_entry_set_text(GTK_ENTRY(preferences_dialog.file_extensions), temp_preferences.php_file_extensions);
 	g_signal_connect(G_OBJECT(preferences_dialog.file_extensions),
-    		"changed", G_CALLBACK(on_php_file_extensions_changed),NULL);
+										"changed", G_CALLBACK(on_php_file_extensions_changed),NULL);
 
 	preferences_dialog.hbox26 = gtk_hbox_new (FALSE, 0);
 	gtk_widget_show (preferences_dialog.hbox26);
@@ -1796,7 +1814,7 @@ void preferences_dialog_create (void)
 	gtk_box_pack_start (GTK_BOX (preferences_dialog.hbox26), preferences_dialog.shared_source, TRUE, TRUE, 0);
 	gtk_entry_set_text(GTK_ENTRY(preferences_dialog.shared_source), temp_preferences.shared_source_location);
 	g_signal_connect(G_OBJECT(preferences_dialog.shared_source),
-    		"changed", G_CALLBACK(on_shared_source_changed),NULL);
+									 "changed", G_CALLBACK(on_shared_source_changed),NULL);
 
 	preferences_dialog.hbox19 = gtk_hbox_new (FALSE, 0);
 	gtk_widget_show (preferences_dialog.hbox19);
@@ -1810,7 +1828,7 @@ void preferences_dialog_create (void)
 	gtk_widget_show (preferences_dialog.delay);
 	gtk_box_pack_start (GTK_BOX (preferences_dialog.hbox19), preferences_dialog.delay, TRUE, TRUE, 0);
 	g_signal_connect (G_OBJECT (GTK_HSCALE (preferences_dialog.delay)), "value_changed",
-                    G_CALLBACK (on_calltip_delay_changed), NULL);
+										G_CALLBACK (on_calltip_delay_changed), NULL);
 	
 	preferences_dialog.hbox20 = gtk_hbox_new (FALSE, 0);
 	gtk_widget_show (preferences_dialog.hbox20);
@@ -1840,14 +1858,14 @@ void preferences_dialog_create (void)
 	// Can't unref it because I need to add to it later....
 	templates_treeview_add_column();
 	
-    gtk_tree_view_set_search_column (GTK_TREE_VIEW (preferences_dialog.Templates),0);
+	gtk_tree_view_set_search_column (GTK_TREE_VIEW (preferences_dialog.Templates),0);
 	gtk_widget_show (preferences_dialog.Templates);
 	gtk_container_add (GTK_CONTAINER (preferences_dialog.scrolledwindow1), preferences_dialog.Templates);
 
 	preferences_dialog.template_selection = gtk_tree_view_get_selection (GTK_TREE_VIEW (preferences_dialog.Templates));
 	gtk_tree_selection_set_mode (preferences_dialog.template_selection, GTK_SELECTION_SINGLE);
 	g_signal_connect (G_OBJECT (preferences_dialog.template_selection), "changed",
-		G_CALLBACK (template_row_activated), NULL);
+										G_CALLBACK (template_row_activated), NULL);
 
 	preferences_dialog.vbox9 = gtk_vbox_new (TRUE, 0);
 	gtk_widget_show (preferences_dialog.vbox9);
@@ -1889,7 +1907,7 @@ void preferences_dialog_create (void)
 	//gtk_box_pack_end (GTK_BOX (GTK_DIALOG(preferences_dialog.window)->action_area), preferences_dialog.apply_button, FALSE, FALSE, 4);
 	gtk_container_add (GTK_CONTAINER (GTK_DIALOG(preferences_dialog.window)->action_area),preferences_dialog.apply_button);
 	g_signal_connect (G_OBJECT (preferences_dialog.apply_button),
-	                    "clicked", G_CALLBACK (apply_preferences), NULL);
+											"clicked", G_CALLBACK (apply_preferences), NULL);
 	
 	get_current_highlighting_settings(current_highlighting_element);
 }
