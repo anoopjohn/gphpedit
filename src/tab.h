@@ -54,6 +54,7 @@ typedef struct
 	GString *filename;
 	gchar *short_filename;
 	gboolean isreadonly;
+	GdkPixbuf *file_icon;
 	gchar *help_function;
 	GString *opened_from;
 	gint last_parsed_time; // TODO: Change to something more meaningful

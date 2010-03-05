@@ -41,7 +41,7 @@
 #include "grel2abs.h"
 
 #include <gconf/gconf-client.h>
-#define INFO_FLAGS "standard::display-name,standard::content-type,standard::edit-name,standard::size,access::can-write,access::can-delete"
+#define INFO_FLAGS "standard::display-name,standard::content-type,standard::edit-name,standard::size,access::can-write,access::can-delete,standard::icon"
 GSList *editors;
 guint completion_timer_id;
 gboolean completion_timer_set;
@@ -296,6 +296,40 @@ void tab_reset_scintilla_after_open(Editor *editor)
 	gtk_scintilla_grab_focus(GTK_SCINTILLA(editor->scintilla));
 }
 
+/*
+ * icon_name_from_icon
+ *
+ *   this function returns the icon name of a Gicon
+ *   for the current gtk default icon theme
+ */
+
+static gchar *icon_name_from_icon(GIcon *icon) {
+	gchar *icon_name=NULL;
+	if (icon && G_IS_THEMED_ICON(icon)) {
+		GStrv names;
+
+		g_object_get(icon, "names", &names, NULL);
+		if (names && names[0]) {
+			GtkIconTheme *icon_theme;
+			int i;
+			icon_theme = gtk_icon_theme_get_default();
+			for (i = 0; i < g_strv_length (names); i++) {
+				if (gtk_icon_theme_has_icon(icon_theme, names[i])) {
+					icon_name = g_strdup(names[i]);
+					break;
+				}
+			}
+			g_strfreev (names);
+		}
+	} else {
+		icon_name = g_strdup("application-text");
+	}
+        if (!icon_name){
+           icon_name=g_strdup("application-text");
+       }
+        return icon_name;
+}
+
 void tab_file_opened (GObject *source_object, GAsyncResult *res, gpointer user_data)
 {
         GError *error=NULL;
@@ -354,13 +388,18 @@ void tab_file_opened (GObject *source_object, GAsyncResult *res, gpointer user_d
         /*initial file size, needed for buffer size*/
         editor->file_size= g_file_info_get_size (info);
         editor->isreadonly= !g_file_info_get_attribute_boolean (info,"access::can-write");
-        g_object_unref(info);
+	GIcon *icon= g_file_info_get_icon (info); /* get Gicon for mimetype*/
+	editor->file_icon=gtk_icon_theme_load_icon (gtk_icon_theme_get_default (), icon_name_from_icon(icon), GTK_ICON_SIZE_MENU, 0, NULL); // get icon of size menu
+	g_object_unref(info);
         // Open file
         /*it's all ok, read file*/
         g_file_load_contents_async (file,NULL,tab_file_opened,editor);
 }
 
-
+/**
+* tab_new_editor
+* creates and allocate a new editor must be freed when no longer needed
+*/
 Editor *tab_new_editor(void)
 {
 	Editor *editor;
@@ -369,7 +408,10 @@ Editor *tab_new_editor(void)
 	return editor;
 }
 
-
+/**
+* str_replace
+* replaces tpRp with withc in the string
+*/
 void str_replace(char *Str, char ToRp, char WithC)
 {
 	int i = 0;
@@ -1084,6 +1126,8 @@ gboolean tab_create_new(gint type, GString *filename)
 				editor->opened_from = get_folder(main_window.current_editor->filename);
 			}
 			editor->is_untitled=TRUE;
+			/* set default text icon */
+			editor->file_icon= gtk_icon_theme_load_icon (gtk_icon_theme_get_default (), "text-plain", GTK_ICON_SIZE_MENU, 0, NULL); // get icon of size menu
 		}
                 
 		// Hmmm, I had the same error as the following comment.  A reshuffle here and upgrading GtkScintilla2 to 0.1.0 seems to have fixed it
@@ -1137,6 +1181,11 @@ GtkWidget *get_close_tab_widget(Editor *editor) {
         g_object_unref(rcstyle);
 	g_signal_connect(G_OBJECT(close_button), "clicked", G_CALLBACK(on_tab_close_activate), editor);
 	g_signal_connect(G_OBJECT(hbox), "style-set", G_CALLBACK(on_tab_close_set_style), close_button);
+	/* load file icon */
+	g_print("called:%p",editor->file_icon);
+	GtkWidget *icon= gtk_image_new_from_pixbuf (editor->file_icon);
+	gtk_widget_show (icon);
+	gtk_box_pack_start(GTK_BOX(hbox), icon, FALSE, FALSE, 0);
 	gtk_box_pack_start(GTK_BOX(hbox), editor->label, FALSE, FALSE, 0);
 	gtk_box_pack_end(GTK_BOX(hbox), close_button, FALSE, FALSE, 0);
 	gtk_widget_show(editor->label);
