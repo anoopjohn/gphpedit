@@ -458,6 +458,7 @@ void tab_help_load_file(Editor *editor, GString *filename)
         }
 	if (size != nchars) g_warning (_("File size and loaded size not matching"));
 	webkit_web_view_load_string (WEBKIT_WEB_VIEW(editor->help_view),buffer,"text/html", "UTF-8", filename->str);
+
 	g_free (buffer);
         g_object_unref(file);
 }
@@ -490,7 +491,6 @@ GString *tab_help_try_filename(gchar *prefix, gchar *command, gchar *suffix)
         if (g_file_test(long_filename->str, G_FILE_TEST_EXISTS)){
 		return long_filename;
 	}
-
 	g_string_free(long_filename, TRUE);
 	return NULL;
 }
@@ -623,12 +623,23 @@ if (filename) {
 		//g_free(editor->help_function);
 		editor->short_filename = g_strconcat("Help: ", uri, NULL);
 		editor->help_function = g_strdup(uri);
-		gtk_label_set_text(GTK_LABEL(editor->label), editor->short_filename);
-		update_app_title();
 		return true;
 	}
 }
  return false;
+}
+
+static void
+notify_title_cb (WebKitWebView* web_view, GParamSpec* pspec, Editor *editor)
+{
+   char *main_title = g_strdup (webkit_web_view_get_title(web_view));
+   if (main_title){
+   editor->short_filename = g_strconcat("Help: ", main_title, NULL);
+   if (editor->help_function) g_free(editor->help_function);
+   editor->help_function = main_title;
+   gtk_label_set_text(GTK_LABEL(editor->label), editor->short_filename);
+   update_app_title();
+   }
 }
 
 
@@ -668,7 +679,7 @@ gboolean tab_create_help(Editor *editor, GString *filename)
 
 		g_signal_connect(G_OBJECT(editor->help_view), "navigation-policy-decision-requested",
 			 G_CALLBACK(webkit_link_clicked),editor);
-
+		g_signal_connect (G_OBJECT(editor->help_view), "notify::title", G_CALLBACK (notify_title_cb), editor);
 		gtk_widget_show_all(editor->help_scrolled_window);
 		
 		editor_tab = get_close_tab_widget(editor);
