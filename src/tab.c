@@ -430,43 +430,35 @@ void tab_help_load_file(Editor *editor, GString *filename)
 {
         GFile *file;
         GFileInfo *info;
-        GError *error;
+        GError *error=NULL;
         gchar *buffer;
         goffset size;
-        guint nchars;
-        GFileInputStream *input;
-        error=NULL;
-        
+        gsize nchars;
+
         file=g_file_new_for_uri (convert_to_full(filename->str));
 	info=g_file_query_info (file,"standard::size,standard::icon",0,NULL,&error);
         if (!info){
             g_warning (_("Could not get file info for file %s. GIO error: %s \n"), filename->str,error->message);
-		return;
+	    return;
         }
         size= g_file_info_get_size (info);
 	GIcon *icon= g_file_info_get_icon (info); /* get Gicon for mimetype*/
 	editor->file_icon=gtk_icon_theme_load_icon (gtk_icon_theme_get_default (), icon_name_from_icon(icon), GTK_ICON_SIZE_MENU, 0, NULL); // get icon of size menu
         g_object_unref(info);
-	buffer = (gchar *)g_malloc (size);
+	buffer = (gchar *)g_malloc (size+1); /*include termination null*/
 	if (buffer == NULL && size != 0)
 	{
 		g_warning (_("This file is too big. Unable to allocate memory."));
 		return;
 	}
-	input=g_file_read (file,NULL,&error);
-        if (input ==NULL){
-            g_print("Error reading file. GIO error:%s\n",error->message);
-            g_free (buffer);
+        if (!g_file_load_contents (file,NULL,&buffer, &nchars,NULL,&error)){
+        g_print("Error reading file. GIO error:%s\n",error->message);
+        g_free (buffer);
 	return;
-        }
-	nchars= g_input_stream_read (G_INPUT_STREAM(input),buffer,size,NULL,&error);
-        if (nchars ==-1){
-            g_print("Error reading file. GIO error:%s\n",error->message);
         }
 	if (size != nchars) g_warning (_("File size and loaded size not matching"));
 	webkit_web_view_load_string (WEBKIT_WEB_VIEW(editor->help_view),buffer,"text/html", "UTF-8", filename->str);
 	g_free (buffer);
-	g_object_unref(input);
         g_object_unref(file);
 }
 
@@ -601,14 +593,17 @@ subst[i] = str[start+i];
 subst[i] = '\0';
 } 
 
-static void webkit_link_clicked (WebKitWebView *view, WebKitWebFrame *frame, WebKitNetworkRequest *request,Editor *editor)
+gboolean webkit_link_clicked (WebKitWebView *web_view, WebKitWebFrame *frame, WebKitNetworkRequest *request,
+                                                        WebKitWebNavigationAction *navigation_action,
+                                                        WebKitWebPolicyDecision   *policy_decision,
+                                                        Editor *editor)
 {
 gchar *uri= (gchar *)webkit_network_request_get_uri(request);
 if (uri){
 GString *filename;
 char *resp;
 int cant;
-if( strstr(uri, "#")!=NULL){
+if(strstr(uri, "#")!=NULL){
 // it's a direction like filename.html#refpoint
 resp = strchr(uri,'#');
 cant=resp-uri; //len filename without refpoint
@@ -617,9 +612,8 @@ substring(uri, uri, 0, cant); //skips refpoint part
 filename=tab_help_find_helpfile(uri);
 if (filename) {
 		tab_help_load_file(editor, filename);
-		
 		g_string_free(editor->filename, TRUE);
-		
+
 		editor->filename = g_string_new(filename->str);
 		editor->filename = g_string_prepend(editor->filename, _("Help: "));
 		
@@ -630,10 +624,11 @@ if (filename) {
 		editor->short_filename = g_strconcat("Help: ", uri, NULL);
 		editor->help_function = g_strdup(uri);
 		gtk_label_set_text(GTK_LABEL(editor->label), editor->short_filename);
-		
 		update_app_title();
+		return true;
 	}
 }
+ return false;
 }
 
 
@@ -671,7 +666,7 @@ gboolean tab_create_help(Editor *editor, GString *filename)
 		
 		//debug("%s - %s", long_filename, caption->str);
 
-		g_signal_connect(G_OBJECT(editor->help_view), "navigation-requested",
+		g_signal_connect(G_OBJECT(editor->help_view), "navigation-policy-decision-requested",
 			 G_CALLBACK(webkit_link_clicked),editor);
 
 		gtk_widget_show_all(editor->help_scrolled_window);
