@@ -438,19 +438,19 @@ void tab_help_load_file(Editor *editor, GString *filename)
         error=NULL;
         
         file=g_file_new_for_uri (convert_to_full(filename->str));
-	info=g_file_query_info (file,G_FILE_ATTRIBUTE_STANDARD_SIZE,0,NULL,&error);
+	info=g_file_query_info (file,"standard::size,standard::icon",0,NULL,&error);
         if (!info){
             g_warning (_("Could not get file info for file %s. GIO error: %s \n"), filename->str,error->message);
 		return;
         }
         size= g_file_info_get_size (info);
+	GIcon *icon= g_file_info_get_icon (info); /* get Gicon for mimetype*/
+	editor->file_icon=gtk_icon_theme_load_icon (gtk_icon_theme_get_default (), icon_name_from_icon(icon), GTK_ICON_SIZE_MENU, 0, NULL); // get icon of size menu
         g_object_unref(info);
 	buffer = (gchar *)g_malloc (size);
 	if (buffer == NULL && size != 0)
 	{
-		// This is funny in unix, but never hurts 
 		g_warning (_("This file is too big. Unable to allocate memory."));
-		//die();
 		return;
 	}
 	input=g_file_read (file,NULL,&error);
@@ -1182,7 +1182,6 @@ GtkWidget *get_close_tab_widget(Editor *editor) {
 	g_signal_connect(G_OBJECT(close_button), "clicked", G_CALLBACK(on_tab_close_activate), editor);
 	g_signal_connect(G_OBJECT(hbox), "style-set", G_CALLBACK(on_tab_close_set_style), close_button);
 	/* load file icon */
-	g_print("called:%p",editor->file_icon);
 	GtkWidget *icon= gtk_image_new_from_pixbuf (editor->file_icon);
 	gtk_widget_show (icon);
 	gtk_box_pack_start(GTK_BOX(hbox), icon, FALSE, FALSE, 0);
