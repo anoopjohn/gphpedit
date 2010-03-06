@@ -565,17 +565,16 @@ GString *tab_help_find_helpfile(gchar *command)
 	if (long_filename)
 		return long_filename;
 */
-        //FIXME: only if PHP_DOC_DIR is defined??
         gchar *temp= NULL;
         temp=g_strdup_printf ("%s/%s",PHP_DOC_DIR,"function.");
         long_filename = tab_help_try_filename(temp, command, ".html");
 	if (long_filename)
-		return long_filename; //FIXME: free memory???
+		return long_filename; //FIXME: free temp???
         temp=g_strdup_printf ("%s/%s",PHP_DOC_DIR,"ref.");
 	long_filename = tab_help_try_filename(PHP_DOC_DIR, command, ".html");
 	if (long_filename)
 		return long_filename;
-        temp=g_strdup_printf ("%s/",PHP_DOC_DIR); //FIXME: free memory???
+        temp=g_strdup_printf ("%s/",PHP_DOC_DIR); //FIXME: free temp???
 	long_filename = tab_help_try_filename(temp, command, NULL);
 	if (long_filename)
 		return long_filename;
@@ -589,7 +588,6 @@ int i;
 
 for(i=0; i<lenght && start+i<strlen(str); i++)
 subst[i] = str[start+i];
-
 subst[i] = '\0';
 } 
 
@@ -1008,22 +1006,6 @@ gboolean switch_to_file_or_open(gchar *filename, gint line_number)
 	return TRUE;
 }
 
-
-void close_saved_empty_Untitled()
-{
-	Editor *editor;
-	gint length;
-
-	if (editors) {
-		editor = editors->data;
-		if (editor->is_untitled && editor->saved) {
-			length = gtk_scintilla_get_length(GTK_SCINTILLA(editor->scintilla));
-			if (length == 0) {
-				try_close_page(editor);
-			}
-		}
-	}
-}
 gchar *recordar;
 void openfile_mount(GObject *source_object,GAsyncResult *res,gpointer user_data) {
 	GError *error=NULL;
