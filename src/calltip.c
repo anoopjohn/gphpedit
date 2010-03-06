@@ -33,18 +33,7 @@ GString *calltip=NULL;
 #define MAX_API_LINE_LENGTH 16384
 
 
-gchar *css_keywords[] = {"font-family", "font-style", "font-variant", "font-weight",
-                         "font-size", "font", "color", "background-color", "background-image",
-                         "background-repeat", "background-attachment", "background-position", "background",
-                         "word-spacing", "letter-spacing", "text-decoration", "vertical-align",
-                         "text-transform", "text-align", "text-indent", "line-height", "margin-top",
-                         "margin-right", "margin-bottom", "margin-left", "margin padding-top",
-                         "padding-right", "padding-bottom", "padding-left", "padding", "border-top-width",
-                         "border-right-width", "border-bottom-width", "border-left-width", "border-width",
-                         "border-top", "border-right", "border-bottom", "border-left", "border",
-                         "border-color", "border-style", "width", "height", "float", "clear", "display",
-                         "white-space", "list-style-type", "list-style-image", "list-style-position",
-                         "list-style", "position", "left", "right", "top", "bottom", NULL};
+gchar *css_keywords[] = {"color","background-color", "background-image", "background-repeat", "background-attachment","background-position"," background", "font-family", "font-style","font-variant","font-weight", "font-size","font","word-spacing", "letter-spacing","text-decoration","vertical-align","text-transform","text-align","text-indent","line-height","margin-top","margin-right","margin-bottom","margin-left","margin","padding-top","padding-right","padding-bottom","padding-left","padding","border-top-width","border-right-width","border-bottom-width","border-left-width","border-width","border-top","border-right","border-bottom","border-left","border","border-color","border-style","width","height","float","clear","display","white-space","list-style-type","list-style-image","list-style-position","list-style","border-top-color","border-right-color","border-bottom-color","border-left-color","border-color","border-top-style","border-right-style","border-bottom-style","border-left-style","top","right","bottom left","position","z-index","direction","unicode-bidi","min-width","max-width","min-height","max-height","overflow","clip","visibility","content","quotes","counter-reset","counter-increment","marker-offset","size marks","page-break-before","page-break-after","page-break-inside","page","orphans", "widows","font-stretch","font-size-adjust","unicode-range","units-per-em","src","stemv","stemh","slope","cap-height","x-height","ascent","descent","widths","bbox","definition-src","baseline","centerline","mathline","topline","text-shadow","caption-side","table-layout","border-collapse","border-spacing","empty-cells","speak-header","cursor","outline","outline-width","outline-style","outline-color","volume","speak","pause-before","pause-after","pause","cue-before","cue-after","cue","play-during","azimuth","elevation","speech-rate","voice-family","pitch","pitch-range","stress","richness","speak-punctuation","speak-numeral",NULL};
 
 gchar *sql_keywords[] = {"ADD", "ALL", "ALTER", "ANALYZE", "AND", "AS", "ASC", "ASENSITIVE", "AUTO_INCREMENT", 
 						 "BDB", "BEFORE", "BERKELEYDB", "BETWEEN", "BIGINT", "BINARY", "BLOB", "BOTH", "BTREE",
