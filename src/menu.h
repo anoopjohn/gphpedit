@@ -115,6 +115,7 @@ typedef struct
   GtkWidget *help;
   GtkWidget *phphelp;
   GtkWidget *bugreport;
+  GtkWidget *translate;
   GtkWidget *abouthelp;
 }
 Mainmenu;

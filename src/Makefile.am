@@ -28,7 +28,7 @@ bin_PROGRAMS = gphpedit
 AM_CFLAGS = \
 	$(WEBKIT_CFLAGS) $(GTK_CFLAGS) $(GCONF_CFLAGS) \
 	-I$(top_srcdir)/src/gtkscintilla2 \
-	-g -O0 -Wall -DGTK -DSCI_LEXER \
+	-Wall -DGTK -DSCI_LEXER \
 	-DPIXMAP_DIR=\""$(datadir)/pixmaps"\"
 
 nodist_EXTRA_gphpedit_SOURCES = dummy.cxx
