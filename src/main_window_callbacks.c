@@ -73,10 +73,20 @@ void session_save(void)
 						fputs(editor->filename->str, fp);
 						fputs("\n", fp);
 					}
-					else { // it's a help page
+					else {
+						if (editor->type==TAB_HELP){
+						// it's a help page
 						fputs("phphelp:", fp);
 						fputs(editor->help_function, fp);
 						fputs("\n", fp);
+						} else {
+						// it's a preview page
+						fputs("preview:", fp);
+						gchar *temp=editor->filename->str;
+						temp+=9;
+						fputs(temp, fp);
+						fputs("\n", fp);
+						}
 					}
 				}
 			}
@@ -132,8 +142,17 @@ void session_reopen(void)
 					//FIXME: seg fault if there's open a file and a TABHELP and the TABHELP GOT the focus
 					focus_tab = 0;
 				}
-			}
-			else {
+			} else if (strstr(filename, "preview:")) {
+				filename += 8;
+				target = g_string_new(filename);
+				tab_create_new(TAB_PREVIEW, target);
+				g_string_free(target, TRUE);
+				if (focus_this_one && (main_window.current_editor)) {
+					//focus_tab = gtk_notebook_page_num(GTK_NOTEBOOK(main_window.notebook_editor),main_window.current_editor->help_scrolled_window);
+					//FIXME: seg fault if there's open a file and a TABHELP and the TABHELP GOT the focus
+					focus_tab = 0;
+					}
+			} else {
                             	switch_to_file_or_open(filename,0);
 				if (focus_this_one && (main_window.current_editor)) {
 					focus_tab = gtk_notebook_page_num(GTK_NOTEBOOK(main_window.notebook_editor),main_window.current_editor->scintilla);

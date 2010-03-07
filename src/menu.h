@@ -83,6 +83,8 @@ typedef struct
   GtkWidget *zoomout;
   GtkWidget *zoom100;
   GtkWidget *sep8;
+  GtkWidget *seppr;
+  GtkWidget *preview;
   GSList *iconsizegroup;
   GtkWidget *Ticonsizemenu;
   GtkWidget *Ticonsize;

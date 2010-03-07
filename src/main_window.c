@@ -855,6 +855,16 @@ if (GTK_IS_SCINTILLA(main_window.current_editor->scintilla)){
     gtk_widget_set_sensitive (main_window.menu->phphelp, TRUE);
     gtk_widget_set_sensitive (main_window.menu->upper, TRUE);
     gtk_widget_set_sensitive (main_window.menu->lower, TRUE);
+	/* only show preview in html files */
+    if (main_window.current_editor->contenttype){
+	    if (strcmp(main_window.current_editor->contenttype,"text/html")==0){
+    	    gtk_widget_set_sensitive (main_window.menu->preview, TRUE);
+	    } else {
+	    gtk_widget_set_sensitive (main_window.menu->preview, FALSE);
+	    }
+    } else {
+    gtk_widget_set_sensitive (main_window.menu->preview, FALSE);
+    }
     
 }else{
 	if (WEBKIT_IS_WEB_VIEW(main_window.current_editor->help_view)){
@@ -887,6 +897,7 @@ if (GTK_IS_SCINTILLA(main_window.current_editor->scintilla)){
             gtk_widget_set_sensitive (main_window.menu->phphelp, FALSE);
             gtk_widget_set_sensitive (main_window.menu->upper, FALSE);
             gtk_widget_set_sensitive (main_window.menu->lower, FALSE);
+            gtk_widget_set_sensitive (main_window.menu->preview, FALSE);
             }
 }
 }

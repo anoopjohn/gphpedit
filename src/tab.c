@@ -39,7 +39,6 @@
 #include "main_window_callbacks.h"
 #include "preferences.h"
 #include "grel2abs.h"
-
 #include <gconf/gconf-client.h>
 #define INFO_FLAGS "standard::display-name,standard::content-type,standard::edit-name,standard::size,access::can-write,access::can-delete,standard::icon"
 GSList *editors;
@@ -339,7 +338,7 @@ void tab_file_opened (GObject *source_object, GAsyncResult *res, gpointer user_d
 	g_print("Error reading file. Gio error:%s",error->message);
 	return;
 	}
-        g_print("Loaded %d bytes\n",editor->file_size);
+        //g_print("Loaded %d bytes\n",editor->file_size);
 	// Clear scintilla buffer
 	gtk_scintilla_clear_all(GTK_SCINTILLA (editor->scintilla));
 
@@ -388,6 +387,7 @@ void tab_file_opened (GObject *source_object, GAsyncResult *res, gpointer user_d
         /*initial file size, needed for buffer size*/
         editor->file_size= g_file_info_get_size (info);
         editor->isreadonly= !g_file_info_get_attribute_boolean (info,"access::can-write");
+	editor->contenttype=g_strdup(contenttype);
 	GIcon *icon= g_file_info_get_icon (info); /* get Gicon for mimetype*/
 	editor->file_icon=gtk_icon_theme_load_icon (gtk_icon_theme_get_default (), icon_name_from_icon(icon), GTK_ICON_SIZE_MENU, 0, NULL); // get icon of size menu
 	g_object_unref(info);
@@ -607,12 +607,21 @@ resp = strchr(uri,'#');
 cant=resp-uri; //len filename without refpoint
 substring(uri, uri, 0, cant); //skips refpoint part
 }
-filename=tab_help_find_helpfile(uri);
+if (editor->type==TAB_HELP){ filename=tab_help_find_helpfile(uri);
+}
+else{
+	if (strstr(uri,".htm")==NULL){
+	     return TRUE;
+	     } else {
+	     filename=g_string_new(uri);
+	     }
+}
 if (filename) {
 		tab_help_load_file(editor, filename);
 		g_string_free(editor->filename, TRUE);
 
 		editor->filename = g_string_new(filename->str);
+		if (editor->type==TAB_HELP){
 		editor->filename = g_string_prepend(editor->filename, _("Help: "));
 		
 		//TODO: These strings are not being freed. The app crashes when the free
@@ -620,6 +629,10 @@ if (filename) {
 		//g_free(editor->short_filename);
 		//g_free(editor->help_function);
 		editor->short_filename = g_strconcat("Help: ", uri, NULL);
+		} else {
+		editor->filename = g_string_prepend(editor->filename, _("Preview: "));
+		editor->short_filename = g_strconcat("Preview: ", uri, NULL);
+		}
 		editor->help_function = g_strdup(uri);
 		return true;
 	}
@@ -632,7 +645,11 @@ notify_title_cb (WebKitWebView* web_view, GParamSpec* pspec, Editor *editor)
 {
    char *main_title = g_strdup (webkit_web_view_get_title(web_view));
    if (main_title){
+   if (editor->type==TAB_HELP){
    editor->short_filename = g_strconcat("Help: ", main_title, NULL);
+   } else {
+   editor->short_filename = g_strconcat("Preview: ", main_title, NULL);
+   }
    if (editor->help_function) g_free(editor->help_function);
    editor->help_function = main_title;
    gtk_label_set_text(GTK_LABEL(editor->label), editor->short_filename);
@@ -666,6 +683,7 @@ gboolean tab_create_help(Editor *editor, GString *filename)
 		editor->label = gtk_label_new (caption->str);
 		editor->is_untitled = FALSE;
 		editor->saved = TRUE;
+		editor->contenttype="text/plain";
 		gtk_widget_show (editor->label);
 		editor->help_view= WEBKIT_WEB_VIEW(webkit_web_view_new ());
 		editor->help_scrolled_window = gtk_scrolled_window_new(NULL, NULL);
@@ -684,6 +702,41 @@ gboolean tab_create_help(Editor *editor, GString *filename)
 		gtk_notebook_append_page (GTK_NOTEBOOK (main_window.notebook_editor), editor->help_scrolled_window, editor_tab);
 		gtk_notebook_set_current_page (GTK_NOTEBOOK (main_window.notebook_editor), -1);
 	}
+	return TRUE;
+}
+
+gboolean tab_create_preview(Editor *editor, GString *filename)
+{
+	GString *caption;
+	GtkWidget *editor_tab;
+ 
+	caption = g_string_new(filename->str);
+	caption = g_string_prepend(caption, _("Preview: "));
+
+	editor->short_filename = caption->str;
+	editor->help_function = g_strdup(filename->str);
+	editor->filename = caption;
+	editor->label = gtk_label_new (caption->str);
+	editor->is_untitled = FALSE;
+	editor->saved = TRUE;
+	gtk_widget_show (editor->label);
+	editor->help_view= WEBKIT_WEB_VIEW(webkit_web_view_new ());
+	editor->help_scrolled_window = gtk_scrolled_window_new(NULL, NULL);
+	gtk_container_add(GTK_CONTAINER(editor->help_scrolled_window), GTK_WIDGET(editor->help_view));
+	
+        tab_help_load_file(editor, filename);
+
+	//debug("%s - %s", long_filename, caption->str);
+
+	g_signal_connect(G_OBJECT(editor->help_view), "navigation-policy-decision-requested",
+			 G_CALLBACK(webkit_link_clicked),editor);
+	g_signal_connect (G_OBJECT(editor->help_view), "notify::title", G_CALLBACK (notify_title_cb), editor);
+	gtk_widget_show_all(editor->help_scrolled_window);
+		
+	editor_tab = get_close_tab_widget(editor);
+	gtk_notebook_append_page (GTK_NOTEBOOK (main_window.notebook_editor), editor->help_scrolled_window, editor_tab);
+	gtk_notebook_set_current_page (GTK_NOTEBOOK (main_window.notebook_editor), -1);
+
 	return TRUE;
 }
 
@@ -1053,7 +1106,7 @@ gboolean tab_create_new(gint type, GString *filename)
                         error2=NULL;
                         return FALSE;
                         }
-                        g_print(_("Error opening file GIO error:%s\n"),error2->message);
+                        g_print(_("Error opening file GIO error:%s\nfile:%s"),error2->message,abs_path);
                         error2=NULL;
                         return FALSE;
                     }
@@ -1064,7 +1117,7 @@ gboolean tab_create_new(gint type, GString *filename)
 			result = yes_no_dialog(_("File not found"), dialog_message->str);
 			g_string_free(dialog_message, TRUE);
                         g_object_unref(file);
-			if (result != -8){//0) {
+			if (result != -8){
                             return FALSE;
 			}
 			file_created = TRUE;
@@ -1076,7 +1129,8 @@ gboolean tab_create_new(gint type, GString *filename)
         editor = tab_new_editor();
 	editor->type = type;
 	if (editor->type == TAB_HELP) {
-		if (!tab_create_help(editor, filename)) {
+
+                if (!tab_create_help(editor, filename)) {
 			// Couldn't find the help file, don't keep the editor
 			editors = g_slist_remove(editors, editor);
 		}
@@ -1084,8 +1138,15 @@ gboolean tab_create_new(gint type, GString *filename)
 			editor->saved = TRUE;
 		}
 
-	}
-	else {
+        } else if (editor->type== TAB_PREVIEW) {
+            if (!tab_create_preview(editor, filename)) {
+			// Couldn't find the help file, don't keep the editor
+			editors = g_slist_remove(editors, editor);
+		}
+		else {
+			editor->saved = TRUE;
+		}
+        } else {
 		editor->type = TAB_FILE;
                 editor->scintilla = gtk_scintilla_new();
                 tab_set_general_scintilla_properties(editor);

@@ -104,6 +104,14 @@ void tog_fullscreen(GtkWidget *widget, gpointer user_data)
   }
 }
 /*
+ * ShowPreview
+ * Preview Current Document
+*/
+void showpreview (GtkWidget *widget, gpointer user_data)
+{
+tab_create_new(TAB_PREVIEW, main_window.current_editor->filename);
+}
+/*
  *size_change
  * Changes toolbar icon sizes
 */
@@ -368,7 +376,9 @@ main_window.menu->tog_class =create_check_menu_item(main_window.menu->tog_class,
   main_window.menu->sizesmall=gtk_radio_menu_item_new_with_mnemonic (main_window.menu->iconsizegroup,_("Small Icons"));
   main_window.menu->iconsizegroup = gtk_radio_menu_item_get_group (GTK_RADIO_MENU_ITEM (main_window.menu->sizesmall));
   gtk_menu_shell_append(GTK_MENU_SHELL(main_window.menu->Ticonsizemenu), main_window.menu->sizesmall);
-
+  main_window.menu->seppr = create_separator_item(main_window.menu->menuview);  
+  main_window.menu->preview = create_mnemonic_menu_item(main_window.menu->preview ,main_window.menu->menuview,_("_Show Preview"), _("Preview the Document"), 0, 0);
+  g_signal_connect(G_OBJECT(main_window.menu->preview), "activate", G_CALLBACK(showpreview), NULL);
   main_window.menu->sepd = create_separator_item(main_window.menu->menuview);  
   main_window.menu->preferences=create_stock_menu_item(main_window.menu->preferences,main_window.menu->menuview,GTK_STOCK_PREFERENCES, _("Application Config"), GDK_F5, 0);
   g_signal_connect(G_OBJECT(main_window.menu->preferences), "activate", G_CALLBACK(on_preferences1_activate), NULL);

@@ -40,7 +40,7 @@
 #define TAB_CXX 6
 #define TAB_PERL 7
 #define TAB_PYTHON 8
-
+#define TAB_PREVIEW 9
 
 typedef struct
 {
@@ -69,6 +69,7 @@ typedef struct
 	guint current_pos;
 	guint current_line;
 	guint file_size;
+        const char*contenttype;
 	gchar* buffer;
 } Editor;
 
