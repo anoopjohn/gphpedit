@@ -21,6 +21,9 @@
  
    The GNU General Public License is contained in the file COPYING.
 */
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
 
 #include "preferences.h"
 #include "main_window.h"
@@ -28,8 +31,6 @@
 //debug macro
 //#define DEBUG
 
-#define DEFAULT_FONT_SIZE 12
-#define DEFAULT_FONT "!Sans"
 #define DEFAULT_PHP_EXTENSIONS "php,inc,phtml,php3,xml,htm,html"
 #define DEFAULT_BACK_COLOR 16777215
 Preferences preferences;
