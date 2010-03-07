@@ -59,7 +59,9 @@ void syntax_add_lines(gchar *output)
 
 	first_error = 0;
 	copy = output;
-
+	gtk_scintilla_set_indicator_current(GTK_SCINTILLA(main_window.current_editor->scintilla), 20);
+	gtk_scintilla_indic_set_style(GTK_SCINTILLA(main_window.current_editor->scintilla), 20, INDIC_SQUIGGLE);
+	gtk_scintilla_indic_set_fore(GTK_SCINTILLA(main_window.current_editor->scintilla), 20, 0x0000ff);
 	while ((token = strtok(copy, "\n"))) {
 		if ((strncmp(token, "PHP Warning:  ", MIN(strlen(token), 14))!=0) && (strncmp(token, "Content-type", MIN(strlen(token), 12))!=0)) { 
 			gtk_list_store_append (main_window.lint_store, &iter);
@@ -78,9 +80,10 @@ void syntax_add_lines(gchar *output)
 				line_start += (indent/preferences.indentation_size);
 	
 				line_end = gtk_scintilla_get_line_end_position(GTK_SCINTILLA(main_window.current_editor->scintilla), atoi(line_number)-1);
-			
-				gtk_scintilla_start_styling(GTK_SCINTILLA(main_window.current_editor->scintilla), line_start, 128);
-				gtk_scintilla_set_styling(GTK_SCINTILLA(main_window.current_editor->scintilla), line_end-line_start, INDIC2_MASK);
+							
+//				gtk_scintilla_start_styling(GTK_SCINTILLA(main_window.current_editor->scintilla), line_start, 128);
+//				gtk_scintilla_set_styling(GTK_SCINTILLA(main_window.current_editor->scintilla), line_end-line_start, INDIC2_MASK);
+				gtk_scintilla_indicator_fill_range(GTK_SCINTILLA(main_window.current_editor->scintilla), line_start, line_end-line_start);
 			}
 			else {
 				g_print("Line number is 0\n");
@@ -168,9 +171,10 @@ void syntax_check_run(void)
 		
 		main_window.lint_store = gtk_list_store_new (1, G_TYPE_STRING);
 
-		gtk_scintilla_start_styling(GTK_SCINTILLA(main_window.current_editor->scintilla), 0, INDIC2_MASK);
-		gtk_scintilla_set_styling(GTK_SCINTILLA(main_window.current_editor->scintilla),
-		                          gtk_scintilla_get_length(GTK_SCINTILLA(main_window.current_editor->scintilla)), 0);
+//		gtk_scintilla_start_styling(GTK_SCINTILLA(main_window.current_editor->scintilla), 0, INDIC2_MASK);
+//		gtk_scintilla_set_styling(GTK_SCINTILLA(main_window.current_editor->scintilla),
+//		                          gtk_scintilla_get_length(GTK_SCINTILLA(main_window.current_editor->scintilla)), 0);
+	gtk_scintilla_indicator_clear_range(GTK_SCINTILLA(main_window.current_editor->scintilla), 0, gtk_scintilla_get_text_length(GTK_SCINTILLA(main_window.current_editor->scintilla)));
 
 		gtk_list_store_clear(main_window.lint_store);
 		if (output) {
