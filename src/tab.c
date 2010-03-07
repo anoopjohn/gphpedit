@@ -565,6 +565,9 @@ GString *tab_help_find_helpfile(gchar *command)
 	if (long_filename)
 		return long_filename;
 */
+#ifndef PHP_DOC_DIR
+#define PHP_DOC_DIR ""
+#endif
         gchar *temp= NULL;
         temp=g_strdup_printf ("%s/%s",PHP_DOC_DIR,"function.");
         long_filename = tab_help_try_filename(temp, command, ".html");
