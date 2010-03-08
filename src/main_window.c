@@ -33,7 +33,6 @@
 #include "classbrowser.h"
 #include "plugin.h"
 #include "templates.h"
-
 MainWindow main_window;
 GIOChannel* inter_gphpedit_io;
 guint inter_gphpedit_event_id;
@@ -97,193 +96,31 @@ gboolean channel_pass_filename_callback(GIOChannel *source, GIOCondition conditi
 
 void force_config_folder(void)
 {
-        GFile *config;
-        GError *error;
-        error=NULL;
-        GString *uri;
-        uri = g_string_new ("");
-        g_string_printf(uri,"%s/%s",g_get_home_dir(),".gphpedit");
-        config=g_file_new_for_path (uri->str);
-        g_string_free (uri, TRUE);
+        GError *error=NULL;
+	GFile *config;
+	gchar *uri=g_strdup_printf("%s/%s",g_get_home_dir(),".gphpedit");
+        config=g_file_new_for_path (uri);
+	g_free(uri);
         if (!g_file_make_directory (config, NULL, &error)){
-            if (error->code !=2){
-            g_print(_("Unable to create ~/.gphpedit/ (%d) %s"), error->code,error->message);
-            exit(-1);
-            }
-        }
-        error=NULL;
-        uri = g_string_new ("");
-        g_string_printf(uri,"%s/%s/%s",g_get_home_dir(),".gphpedit","plugins");
-        config=g_file_new_for_path (uri->str);
-        g_string_free (uri, TRUE);
-        if (!g_file_make_directory (config, NULL, &error)){
-            //if error code = 2 dir already exist
             if (error->code !=2){
             g_print(_("Unable to create ~/.gphpedit/ (%d) %s"), error->code,error->message);
             exit(-1);
             }
         }
 	g_object_unref(config);
+	error=NULL;
+        gchar *plu=g_strdup_printf("%s/%s/%s",g_get_home_dir(),".gphpedit","plugins");
+	GFile *plugin=g_file_new_for_path (plu);
+	g_free(plu);
+        if (!g_file_make_directory (plugin, NULL, &error)){
+            //if error code = 2 dir already exist
+            if (error->code !=2){
+            g_print(_("Unable to create ~/.gphpedit/ (%d) %s"), error->code,error->message);
+            exit(-1);
+            }
+        }
+	g_object_unref(plugin);
 }
-
-void on_cleanicon_press (GtkEntry *entry, GtkEntryIconPosition icon_pos, GdkEvent *event, gpointer user_data){
-    gtk_entry_set_text (entry,"");
-}
-GtkWidget *create_toolbar_stock_item(GtkWidget *toolitem,GtkWidget *toolbar,const gchar *stock_id, gchar *tooltip_text){
-	toolitem = GTK_WIDGET(gtk_tool_button_new_from_stock(stock_id));
-	gtk_tool_item_set_tooltip_text(GTK_TOOL_ITEM (toolitem), tooltip_text);
-  	gtk_toolbar_insert(GTK_TOOLBAR(toolbar), GTK_TOOL_ITEM (toolitem), -1);
-	gtk_widget_show (toolitem);
-        return toolitem;
-}
-
-static void main_window_create_toolbars(void)
-{
-	
-        // Create the Main Toolbar
-	main_window.toolbar_main = gtk_toolbar_new ();
-	gtk_widget_show (main_window.toolbar_main);
-        gtk_box_pack_start (GTK_BOX (main_window.prinbox), main_window.toolbar_main, FALSE, FALSE, 0);
-        
-	gtk_container_set_border_width (GTK_CONTAINER (main_window.toolbar_main), 0);
-	gtk_toolbar_set_style (GTK_TOOLBAR (main_window.toolbar_main), GTK_TOOLBAR_ICONS);
-	gtk_toolbar_set_show_arrow (GTK_TOOLBAR (main_window.toolbar_main), TRUE);
-
-
-	// Add the File operations to the Main Toolbar
-	main_window.toolbar_main_button_new= create_toolbar_stock_item(main_window.toolbar_main_button_new,main_window.toolbar_main,GTK_STOCK_NEW, _("New File"));
-	main_window.toolbar_main_button_open= create_toolbar_stock_item(main_window.toolbar_main_button_open,main_window.toolbar_main,GTK_STOCK_OPEN, _("Open File"));
-        main_window.toolbar_main_button_save= create_toolbar_stock_item(main_window.toolbar_main_button_save,main_window.toolbar_main,GTK_STOCK_SAVE, _("Save current File"));
-	main_window.toolbar_main_button_save_as= create_toolbar_stock_item(main_window.toolbar_main_button_save_as,main_window.toolbar_main,GTK_STOCK_SAVE_AS, _("Save File As..."));
-	main_window.toolbar_main_button_close= create_toolbar_stock_item(main_window.toolbar_main_button_close,main_window.toolbar_main,GTK_STOCK_CLOSE, _("Close Current File"));
-	g_signal_connect (G_OBJECT (main_window.toolbar_main_button_open), "clicked", G_CALLBACK (on_open1_activate), NULL);
-	g_signal_connect (G_OBJECT (main_window.toolbar_main_button_new), "clicked", G_CALLBACK (on_new1_activate), NULL);
-	g_signal_connect (G_OBJECT (main_window.toolbar_main_button_save), "clicked", G_CALLBACK (on_save1_activate), NULL);
-	g_signal_connect (G_OBJECT (main_window.toolbar_main_button_save_as), "clicked", G_CALLBACK (on_save_as1_activate), NULL);
-	g_signal_connect (G_OBJECT (main_window.toolbar_main_button_close), "clicked", G_CALLBACK (on_close1_activate), NULL);
-
-	main_window.toolbar_separator=gtk_separator_tool_item_new();
-	gtk_toolbar_insert(GTK_TOOLBAR(main_window.toolbar_main), GTK_TOOL_ITEM (main_window.toolbar_separator), -1);
-	gtk_widget_show (GTK_WIDGET(main_window.toolbar_separator));
-	// Add the Undo operations to the Main Toolbar
-        main_window.toolbar_main_button_undo= create_toolbar_stock_item(main_window.toolbar_main_button_undo,main_window.toolbar_main,GTK_STOCK_UNDO, _("Undo last change"));
-	main_window.toolbar_main_button_redo= create_toolbar_stock_item(main_window.toolbar_main_button_redo,main_window.toolbar_main,GTK_STOCK_REDO, _("Redo last change"));
-        g_signal_connect (G_OBJECT (main_window.toolbar_main_button_undo), "clicked", G_CALLBACK (on_undo1_activate), NULL);
-	g_signal_connect (G_OBJECT (main_window.toolbar_main_button_redo), "clicked", G_CALLBACK (on_redo1_activate), NULL);
-
-	main_window.toolbar_separator=gtk_separator_tool_item_new();
-	gtk_toolbar_insert(GTK_TOOLBAR(main_window.toolbar_main), GTK_TOOL_ITEM (main_window.toolbar_separator), -1);
-	gtk_widget_show (GTK_WIDGET(main_window.toolbar_separator));
-
-	// Add the Clipboard operations to the Main Toolbar
-        main_window.toolbar_main_button_cut= create_toolbar_stock_item(main_window.toolbar_main_button_cut,main_window.toolbar_main,GTK_STOCK_CUT, _("Cut Current Selection"));
-	g_signal_connect (G_OBJECT (main_window.toolbar_main_button_cut), "clicked", G_CALLBACK (on_cut1_activate), NULL);
-	main_window.toolbar_main_button_copy= create_toolbar_stock_item(main_window.toolbar_main_button_copy,main_window.toolbar_main,GTK_STOCK_COPY, _("Copy Current Selection"));
-	g_signal_connect (G_OBJECT (main_window.toolbar_main_button_copy), "clicked", G_CALLBACK (on_copy1_activate), NULL);
-	main_window.toolbar_main_button_paste= create_toolbar_stock_item(main_window.toolbar_main_button_paste,main_window.toolbar_main,GTK_STOCK_PASTE, _("Paste text from clipboard"));
-	g_signal_connect (G_OBJECT (main_window.toolbar_main_button_paste), "clicked", G_CALLBACK (on_paste1_activate), NULL);
-	
-	main_window.toolbar_separator=gtk_separator_tool_item_new();
-	gtk_toolbar_insert(GTK_TOOLBAR(main_window.toolbar_main), GTK_TOOL_ITEM (main_window.toolbar_separator), -1);
-	gtk_widget_show (GTK_WIDGET(main_window.toolbar_separator));
-	// Add the Search operations to the Main Toolbar
-        main_window.toolbar_main_button_find= create_toolbar_stock_item(main_window.toolbar_main_button_find,main_window.toolbar_main,GTK_STOCK_FIND, _("Find text"));
-	g_signal_connect (G_OBJECT (main_window.toolbar_main_button_find), "clicked", G_CALLBACK (on_find1_activate), NULL);
-
-        main_window.toolbar_main_button_replace= create_toolbar_stock_item(main_window.toolbar_main_button_replace,main_window.toolbar_main,GTK_STOCK_FIND_AND_REPLACE, _("Replace Text"));
-	g_signal_connect (G_OBJECT (main_window.toolbar_main_button_replace), "clicked", G_CALLBACK (on_replace1_activate), NULL);
-	
-	main_window.toolbar_separator=gtk_separator_tool_item_new();
-	gtk_toolbar_insert(GTK_TOOLBAR(main_window.toolbar_main), GTK_TOOL_ITEM (main_window.toolbar_separator), -1);
-	gtk_widget_show (GTK_WIDGET(main_window.toolbar_separator));
-
-	// Add the indent/unindent operations to the Main Toolbar	
-	/*indent block*/
-        main_window.toolbar_main_button_indent= create_toolbar_stock_item(main_window.toolbar_main_button_indent,main_window.toolbar_main,GTK_STOCK_INDENT, _("Indent Selected Text"));
-	g_signal_connect (G_OBJECT (main_window.toolbar_main_button_indent), "clicked", G_CALLBACK (block_indent), NULL);
-	/*unindent block*/
-        main_window.toolbar_main_button_unindent= create_toolbar_stock_item(main_window.toolbar_main_button_unindent,main_window.toolbar_main,GTK_STOCK_UNINDENT, _("Unindent Selected Text"));
-	g_signal_connect (G_OBJECT (main_window.toolbar_main_button_unindent), "clicked", G_CALLBACK (block_unindent), NULL);
-	
-	main_window.toolbar_separator=gtk_separator_tool_item_new();
-	gtk_toolbar_insert(GTK_TOOLBAR(main_window.toolbar_main), GTK_TOOL_ITEM (main_window.toolbar_separator), -1);
-	gtk_widget_show (GTK_WIDGET(main_window.toolbar_separator));
-        // Add Zoom operations to the main Toolbar
-	//zoom in
-        main_window.toolbar_main_button_zoom_in= create_toolbar_stock_item(main_window.toolbar_main_button_zoom_in,main_window.toolbar_main,GTK_STOCK_ZOOM_IN, _("Increases Zoom level"));
-	g_signal_connect (G_OBJECT (main_window.toolbar_main_button_zoom_in), "clicked", G_CALLBACK (zoom_in), NULL);
-	//zoom out
-        main_window.toolbar_main_button_zoom_out= create_toolbar_stock_item(main_window.toolbar_main_button_zoom_out,main_window.toolbar_main,GTK_STOCK_ZOOM_OUT, _("Decreases Zoom level"));
-	g_signal_connect (G_OBJECT (main_window.toolbar_main_button_zoom_out), "clicked", G_CALLBACK (zoom_out), NULL);
-	//zoom 100%
-        main_window.toolbar_main_button_zoom_100= create_toolbar_stock_item(main_window.toolbar_main_button_zoom_100,main_window.toolbar_main,GTK_STOCK_ZOOM_100, _("Zoom 100%"));
-	g_signal_connect (G_OBJECT (main_window.toolbar_main_button_zoom_100), "clicked", G_CALLBACK (zoom_100), NULL);
-	// Create the Search Toolbar
-	
-	GtkToolItem *item;
-
-	main_window.toolbar_find = gtk_toolbar_new ();
-	gtk_widget_show (main_window.toolbar_find);
-	gtk_toolbar_set_show_arrow (GTK_TOOLBAR (main_window.toolbar_find), FALSE);
-	gtk_container_set_border_width (GTK_CONTAINER (main_window.toolbar_find), 0);
-        gtk_box_pack_start (GTK_BOX (main_window.prinbox), main_window.toolbar_find, FALSE, FALSE, 0);
-
-	main_window.toolbar_find_search_label = gtk_label_new(_("Search for: "));
-	gtk_widget_show(main_window.toolbar_find_search_label);
-	item=gtk_tool_item_new();
-	gtk_tool_item_set_expand (item, FALSE);
-	gtk_container_add (GTK_CONTAINER (item), main_window.toolbar_find_search_label);
-	gtk_toolbar_insert(GTK_TOOLBAR(main_window.toolbar_find), GTK_TOOL_ITEM (item), -1);
-	gtk_widget_show(GTK_WIDGET(item));
-
-	item=gtk_tool_item_new();
-	gtk_tool_item_set_expand (item, FALSE);
-	main_window.toolbar_find_search_entry = gtk_entry_new();
-	gtk_widget_show(main_window.toolbar_find_search_entry);
-	gtk_container_add (GTK_CONTAINER (item), main_window.toolbar_find_search_entry);
-	gtk_tool_item_set_tooltip_text(GTK_TOOL_ITEM (item), _("Incremental search"));
-        gtk_entry_set_icon_from_stock (GTK_ENTRY(main_window.toolbar_find_search_entry),GTK_ENTRY_ICON_SECONDARY,GTK_STOCK_CLEAR);
-        g_signal_connect (G_OBJECT (main_window.toolbar_find_search_entry), "icon-press", G_CALLBACK (on_cleanicon_press), NULL);
-	gtk_toolbar_insert(GTK_TOOLBAR(main_window.toolbar_find), GTK_TOOL_ITEM (item), -1);
-	gtk_widget_show(GTK_WIDGET(item));
-
-	g_signal_connect_after(G_OBJECT(main_window.toolbar_find_search_entry), "insert_text", G_CALLBACK(inc_search_typed), NULL);
-	g_signal_connect_after(G_OBJECT(main_window.toolbar_find_search_entry), "key_release_event", G_CALLBACK(inc_search_key_release_event), NULL);
-	g_signal_connect_after(G_OBJECT(main_window.toolbar_find_search_entry), "activate", G_CALLBACK(inc_search_activate), NULL);
-	main_window.toolbar_separator=gtk_separator_tool_item_new();
-	gtk_toolbar_insert(GTK_TOOLBAR(main_window.toolbar_find), GTK_TOOL_ITEM (main_window.toolbar_separator), -1);
-	gtk_widget_show (GTK_WIDGET(main_window.toolbar_separator));
-	
-	main_window.toolbar_find_goto_label = gtk_label_new(_("Go to line: "));
-	gtk_widget_show(main_window.toolbar_find_goto_label);
-	item=gtk_tool_item_new();
-	gtk_tool_item_set_expand (item, FALSE);
-	gtk_container_add (GTK_CONTAINER (item), main_window.toolbar_find_goto_label);
-	gtk_toolbar_insert(GTK_TOOLBAR(main_window.toolbar_find), GTK_TOOL_ITEM (item), -1);
-	gtk_widget_show(GTK_WIDGET(item));
-
-	main_window.toolbar_find_goto_entry = gtk_entry_new();
-        gtk_entry_set_max_length (GTK_ENTRY(main_window.toolbar_find_goto_entry),8);
-	gtk_entry_set_width_chars(GTK_ENTRY(main_window.toolbar_find_goto_entry),9);
-        gtk_entry_set_icon_from_stock (GTK_ENTRY(main_window.toolbar_find_goto_entry),GTK_ENTRY_ICON_SECONDARY,GTK_STOCK_CLEAR);
-        g_signal_connect (G_OBJECT (main_window.toolbar_find_goto_entry), "icon-press", G_CALLBACK (on_cleanicon_press), NULL);
-	gtk_widget_show(main_window.toolbar_find_goto_entry);
-	item=gtk_tool_item_new();
-	gtk_tool_item_set_expand (item, FALSE);
-	gtk_container_add (GTK_CONTAINER (item), main_window.toolbar_find_goto_entry);
-	gtk_tool_item_set_tooltip_text(GTK_TOOL_ITEM (item), _("Go to line"));
-	gtk_toolbar_insert(GTK_TOOLBAR(main_window.toolbar_find), GTK_TOOL_ITEM (item), -1);
-	gtk_widget_show(GTK_WIDGET(item));
-
-	g_signal_connect_after(G_OBJECT(main_window.toolbar_find_goto_entry), "activate", G_CALLBACK(goto_line_activate), NULL);
-	/*sincronice with menu items*/
-       if (gtk_toolbar_get_icon_size (GTK_TOOLBAR (main_window.toolbar_main))==GTK_ICON_SIZE_SMALL_TOOLBAR){
-       gtk_check_menu_item_set_active (GTK_CHECK_MENU_ITEM (main_window.menu->sizesmall), TRUE);
-       }else {
-       gtk_check_menu_item_set_active (GTK_CHECK_MENU_ITEM (main_window.menu->sizebig), TRUE);
-       }
-}
-
 
 static void main_window_create_appbar(void)
 {
@@ -570,13 +407,11 @@ void update_app_title(void)
 		    && main_window.current_editor->filename) {
 			//debug("Full Name - %s, Short Name - %s", main_window.current_editor->filename->str, main_window.current_editor->short_filename);
 			//title = get_differing_part_editor(main_window.current_editor);
-			title = g_string_new("");
-			title = g_string_append(title, main_window.current_editor->short_filename);
-			title = g_string_append(title, "(");
-			dir = g_path_get_dirname(main_window.current_editor->filename->str);
-			title = g_string_append(title, dir);
+			char *str = NULL;
+			title = g_string_new(str);
+		        dir = g_path_get_dirname(main_window.current_editor->filename->str);
+			g_string_printf (title,"%s (%s)",main_window.current_editor->short_filename,dir);
 			g_free(dir);
-			title = g_string_append(title, ")");
 			//debug("Title - %s, Short name - %s", title->str, main_window.current_editor->short_filename);
 			if (main_window.current_editor->saved == TRUE) {
 				g_string_append(title, _(" - gPHPEdit"));
@@ -955,7 +790,8 @@ void main_window_create(void)
         
 	preferences_apply();
         main_window_create_menu();
-        main_window_create_toolbars();
+	main_window_create_maintoolbar();
+	main_window_create_findtoolbar();
         main_window_create_panes();
         main_window_fill_panes();
         main_window_create_appbar();
@@ -982,22 +818,22 @@ void main_window_create(void)
 void update_controls(void){
 if (GTK_IS_SCINTILLA(main_window.current_editor->scintilla)){
     //activate toolbar items
-    gtk_widget_set_sensitive (main_window.toolbar_main_button_cut, TRUE);
-    gtk_widget_set_sensitive (main_window.toolbar_main_button_paste, TRUE);
-    gtk_widget_set_sensitive (main_window.toolbar_main_button_undo, TRUE);
-    gtk_widget_set_sensitive (main_window.toolbar_main_button_redo, TRUE);
-    gtk_widget_set_sensitive (main_window.toolbar_main_button_replace, TRUE);
-    gtk_widget_set_sensitive (main_window.toolbar_main_button_indent, TRUE);
-    gtk_widget_set_sensitive (main_window.toolbar_main_button_unindent, TRUE);
+    gtk_widget_set_sensitive (main_window.toolbar_main->button_cut, TRUE);
+    gtk_widget_set_sensitive (main_window.toolbar_main->button_paste, TRUE);
+    gtk_widget_set_sensitive (main_window.toolbar_main->button_undo, TRUE);
+    gtk_widget_set_sensitive (main_window.toolbar_main->button_redo, TRUE);
+    gtk_widget_set_sensitive (main_window.toolbar_main->button_replace, TRUE);
+    gtk_widget_set_sensitive (main_window.toolbar_main->button_indent, TRUE);
+    gtk_widget_set_sensitive (main_window.toolbar_main->button_unindent, TRUE);
     if (main_window.current_editor->isreadonly){
-        gtk_widget_set_sensitive (main_window.toolbar_main_button_save, FALSE);
+        gtk_widget_set_sensitive (main_window.toolbar_main->button_save, FALSE);
     } else {
-        gtk_widget_set_sensitive (main_window.toolbar_main_button_save, TRUE);
+        gtk_widget_set_sensitive (main_window.toolbar_main->button_save, TRUE);
     }
     
-    gtk_widget_set_sensitive (main_window.toolbar_main_button_save_as, TRUE);
-    gtk_widget_set_sensitive (main_window.toolbar_find_search_entry, TRUE);
-    gtk_widget_set_sensitive (main_window.toolbar_find_goto_entry, TRUE);
+    gtk_widget_set_sensitive (main_window.toolbar_main->button_save_as, TRUE);
+    gtk_widget_set_sensitive (main_window.toolbar_find->search_entry, TRUE);
+    gtk_widget_set_sensitive (main_window.toolbar_find->goto_entry, TRUE);
     //activate menu items
     gtk_widget_set_sensitive (main_window.menu->code, TRUE);
     gtk_widget_set_sensitive (main_window.menu->cut, TRUE);
@@ -1019,21 +855,31 @@ if (GTK_IS_SCINTILLA(main_window.current_editor->scintilla)){
     gtk_widget_set_sensitive (main_window.menu->phphelp, TRUE);
     gtk_widget_set_sensitive (main_window.menu->upper, TRUE);
     gtk_widget_set_sensitive (main_window.menu->lower, TRUE);
+	/* only show preview in html files */
+    if (main_window.current_editor->contenttype){
+	    if (strcmp(main_window.current_editor->contenttype,"text/html")==0){
+    	    gtk_widget_set_sensitive (main_window.menu->preview, TRUE);
+	    } else {
+	    gtk_widget_set_sensitive (main_window.menu->preview, FALSE);
+	    }
+    } else {
+    gtk_widget_set_sensitive (main_window.menu->preview, FALSE);
+    }
     
 }else{
 	if (WEBKIT_IS_WEB_VIEW(main_window.current_editor->help_view)){
             //deactivate toolbar items
-            gtk_widget_set_sensitive (main_window.toolbar_main_button_cut, FALSE);
-            gtk_widget_set_sensitive (main_window.toolbar_main_button_paste, FALSE);
-            gtk_widget_set_sensitive (main_window.toolbar_main_button_undo, FALSE);
-            gtk_widget_set_sensitive (main_window.toolbar_main_button_redo, FALSE);
-            gtk_widget_set_sensitive (main_window.toolbar_main_button_replace, FALSE);
-            gtk_widget_set_sensitive (main_window.toolbar_main_button_indent, FALSE);
-            gtk_widget_set_sensitive (main_window.toolbar_main_button_unindent, FALSE);
-            gtk_widget_set_sensitive (main_window.toolbar_main_button_save, FALSE);
-            gtk_widget_set_sensitive (main_window.toolbar_main_button_save_as, FALSE);
-            gtk_widget_set_sensitive (main_window.toolbar_find_search_entry, FALSE);
-            gtk_widget_set_sensitive (main_window.toolbar_find_goto_entry, FALSE);
+            gtk_widget_set_sensitive (main_window.toolbar_main->button_cut, FALSE);
+            gtk_widget_set_sensitive (main_window.toolbar_main->button_paste, FALSE);
+            gtk_widget_set_sensitive (main_window.toolbar_main->button_undo, FALSE);
+            gtk_widget_set_sensitive (main_window.toolbar_main->button_redo, FALSE);
+            gtk_widget_set_sensitive (main_window.toolbar_main->button_replace, FALSE);
+            gtk_widget_set_sensitive (main_window.toolbar_main->button_indent, FALSE);
+            gtk_widget_set_sensitive (main_window.toolbar_main->button_unindent, FALSE);
+            gtk_widget_set_sensitive (main_window.toolbar_main->button_save, FALSE);
+            gtk_widget_set_sensitive (main_window.toolbar_main->button_save_as, FALSE);
+            gtk_widget_set_sensitive (main_window.toolbar_find->search_entry, FALSE);
+            gtk_widget_set_sensitive (main_window.toolbar_find->goto_entry, FALSE);
             //deactivate menu items
             gtk_widget_set_sensitive (main_window.menu->code, FALSE);
             gtk_widget_set_sensitive (main_window.menu->cut, FALSE);
@@ -1051,6 +897,7 @@ if (GTK_IS_SCINTILLA(main_window.current_editor->scintilla)){
             gtk_widget_set_sensitive (main_window.menu->phphelp, FALSE);
             gtk_widget_set_sensitive (main_window.menu->upper, FALSE);
             gtk_widget_set_sensitive (main_window.menu->lower, FALSE);
+            gtk_widget_set_sensitive (main_window.menu->preview, FALSE);
             }
 }
 }

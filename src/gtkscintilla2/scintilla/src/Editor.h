@@ -98,8 +98,8 @@ public:
  */
 class Editor : public DocWatcher {
 	// Private so Editor objects can not be copied
-	Editor(const Editor &) : DocWatcher() {}
-	Editor &operator=(const Editor &) { return *this; }
+	Editor(const Editor &);
+	Editor &operator=(const Editor &);
 
 protected:	// ScintillaBase subclass needs access to much of Editor
 
@@ -143,6 +143,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	bool multipleSelection;
 	bool additionalSelectionTyping;
 	bool additionalCaretsBlink;
+	bool additionalCaretsVisible;
 
 	int virtualSpaceOptions;
 
@@ -282,6 +283,7 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	SelectionPosition SelectionStart();
 	SelectionPosition SelectionEnd();
 	void SetRectangularRange();
+	void ThinRectangularRange();
 	void InvalidateSelection(SelectionRange newMain, bool invalidateWholeSelection=false);
 	void SetSelection(SelectionPosition currentPos_, SelectionPosition anchor_);
 	void SetSelection(int currentPos_, int anchor_);
@@ -482,6 +484,8 @@ protected:	// ScintillaBase subclass needs access to much of Editor
 	sptr_t StyleGetMessage(unsigned int iMessage, uptr_t wParam, sptr_t lParam);
 
 	static const char *StringFromEOLMode(int eolMode);
+
+	static sptr_t StringResult(sptr_t lParam, const char *val);
 
 public:
 	// Public so the COM thunks can access it.

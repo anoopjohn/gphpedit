@@ -40,7 +40,7 @@
 #define TAB_CXX 6
 #define TAB_PERL 7
 #define TAB_PYTHON 8
-
+#define TAB_PREVIEW 9
 
 typedef struct
 {
@@ -54,6 +54,7 @@ typedef struct
 	GString *filename;
 	gchar *short_filename;
 	gboolean isreadonly;
+	GdkPixbuf *file_icon;
 	gchar *help_function;
 	GString *opened_from;
 	gint last_parsed_time; // TODO: Change to something more meaningful
@@ -68,6 +69,7 @@ typedef struct
 	guint current_pos;
 	guint current_line;
 	guint file_size;
+        const char*contenttype;
 	gchar* buffer;
 } Editor;
 
@@ -116,9 +118,9 @@ gboolean editor_is_local(Editor *editor);
 gboolean uri_is_local_or_http(gchar *uri);
 gchar *convert_to_full(gchar *filename);
 void str_replace(char *Str, char ToRp, char WithC);
-void tab_file_save_opened(GObject *source_object, GAsyncResult *res, gpointer user_data);
+void tab_file_save_opened(Editor *editor,GFile *file);
 char *macro_message_to_string(gint message);
-
+gint yes_no_dialog (gchar *title, gchar *message);
 void set_editor_to_php(Editor *editor);
 void set_editor_to_css(Editor *editor);
 void set_editor_to_sql(Editor *editor);

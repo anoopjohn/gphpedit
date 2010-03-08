@@ -33,7 +33,6 @@
 #include "tab.h"
 #include "templates.h"
 #include "folderbrowser.h"
-//#include "project.h"
 
 
 gboolean is_app_closing = FALSE;
@@ -63,8 +62,7 @@ void session_save(void)
 			g_print(_("ERROR: cannot save session to %s\n"), session_file->str);
 			return;
 		}
- 
-		for(walk = editors; walk!= NULL; walk = g_slist_next(walk)) {
+                for(walk = editors; walk!= NULL; walk = g_slist_next(walk)) {
 			editor = walk->data;
 			if (editor) {
 				if (!editor->is_untitled) {
@@ -75,10 +73,20 @@ void session_save(void)
 						fputs(editor->filename->str, fp);
 						fputs("\n", fp);
 					}
-					else { // it's a help page
+					else {
+						if (editor->type==TAB_HELP){
+						// it's a help page
 						fputs("phphelp:", fp);
 						fputs(editor->help_function, fp);
 						fputs("\n", fp);
+						} else {
+						// it's a preview page
+						fputs("preview:", fp);
+						gchar *temp=editor->filename->str;
+						temp+=9;
+						fputs(temp, fp);
+						fputs("\n", fp);
+						}
 					}
 				}
 			}
@@ -134,9 +142,18 @@ void session_reopen(void)
 					//FIXME: seg fault if there's open a file and a TABHELP and the TABHELP GOT the focus
 					focus_tab = 0;
 				}
-			}
-			else {
-                                switch_to_file_or_open(filename,0);
+			} else if (strstr(filename, "preview:")) {
+				filename += 8;
+				target = g_string_new(filename);
+				tab_create_new(TAB_PREVIEW, target);
+				g_string_free(target, TRUE);
+				if (focus_this_one && (main_window.current_editor)) {
+					//focus_tab = gtk_notebook_page_num(GTK_NOTEBOOK(main_window.notebook_editor),main_window.current_editor->help_scrolled_window);
+					//FIXME: seg fault if there's open a file and a TABHELP and the TABHELP GOT the focus
+					focus_tab = 0;
+					}
+			} else {
+                            	switch_to_file_or_open(filename,0);
 				if (focus_this_one && (main_window.current_editor)) {
 					focus_tab = gtk_notebook_page_num(GTK_NOTEBOOK(main_window.notebook_editor),main_window.current_editor->scintilla);
 				}
@@ -170,6 +187,8 @@ void main_window_destroy_event(GtkWidget *widget, gpointer data)
 	//unlink("/tmp/gphpedit.sock");
 	quit_application();
         g_slice_free(Mainmenu, main_window.menu); /* free menu struct*/
+        g_slice_free(Maintoolbar, main_window.toolbar_main); /* free toolbar struct*/
+        g_slice_free(Findtoolbar, main_window.toolbar_find); /* free toolbar struct*/
 	// Old code had a main_window_delete_event call in here, not necessary, Gtk/GNOME does that anyway...
         gtk_main_quit();
 }
@@ -306,15 +325,15 @@ gint main_window_key_press_event(GtkWidget   *widget, GdkEventKey *event,gpointe
 				wordEnd = gtk_scintilla_get_selection_end(GTK_SCINTILLA(main_window.current_editor->scintilla));
 				if (wordStart != wordEnd && (wordEnd-wordStart)<=25) {
 					   search_buffer = gtk_scintilla_get_text_range (GTK_SCINTILLA(main_window.current_editor->scintilla), wordStart, wordEnd, &search_length);
-					   gtk_entry_set_text(GTK_ENTRY(main_window.toolbar_find_search_entry), search_buffer);
+					   gtk_entry_set_text(GTK_ENTRY(main_window.toolbar_find->search_entry), search_buffer);
 				}
-				gtk_widget_grab_focus(GTK_WIDGET(main_window.toolbar_find_search_entry));
+				gtk_widget_grab_focus(GTK_WIDGET(main_window.toolbar_find->search_entry));
 				//gtk_editable_select_region(GTK_EDITABLE(main_window.toolbar_find_search_entry),0, -1);
 			}
 			return TRUE;
 		}
 		else if ((event->state & GDK_CONTROL_MASK)==GDK_CONTROL_MASK && ((event->keyval == GDK_g) || (event->keyval == GDK_G))) {
-			gtk_widget_grab_focus(GTK_WIDGET(main_window.toolbar_find_goto_entry));
+			gtk_widget_grab_focus(GTK_WIDGET(main_window.toolbar_find->goto_entry));
 			return TRUE;
 		}
 		else if (((event->state & (GDK_CONTROL_MASK | GDK_SHIFT_MASK))==(GDK_CONTROL_MASK | GDK_SHIFT_MASK)) && (event->keyval == GDK_space)) {
@@ -380,16 +399,7 @@ void on_new1_activate(GtkWidget *widget)
 	// Create a new untitled tab
 	tab_create_new(TAB_FILE, NULL);
 }
-/*
-void on_newproj_activate(GtkWidget *widget){
-    // creates a new project
-    projwindow();
-}
-void on_openproj_activate(GtkWidget *widget){
-    //open a project
-   open_project();
-}
-*/
+
 void open_file_ok(GtkFileChooser *file_selection)
 {
 	GSList *filenames; 
@@ -630,7 +640,7 @@ void on_open1_activate(GtkWidget *widget)
 		g_string_free(folder, TRUE);
 	}
 	else if (!last_opened_folder){
-	gtk_file_chooser_set_current_folder_uri(GTK_FILE_CHOOSER(file_selection_box),  last_opened_folder);
+		gtk_file_chooser_set_current_folder_uri(GTK_FILE_CHOOSER(file_selection_box),  last_opened_folder);
 	}
 	
 	if (gtk_dialog_run(GTK_DIALOG(file_selection_box)) == GTK_RESPONSE_ACCEPT) {
@@ -721,7 +731,7 @@ void on_save1_activate(GtkWidget *widget)
                        GError *error;
                        error=NULL;
                        file=g_file_new_for_uri (filename);
-                       g_file_replace_async (file,NULL,TRUE,0,G_PRIORITY_DEFAULT,NULL, tab_file_save_opened, main_window.current_editor);
+			tab_file_save_opened(main_window.current_editor,file);
 		}
 	}
 }
@@ -816,11 +826,10 @@ void on_save_as1_activate(GtkWidget *widget)
 }
 void on_reload1_activate(GtkWidget *widget)
 {
-	GtkWidget *file_revert_dialog;
 	if (main_window.current_editor == NULL || main_window.current_editor->type == TAB_HELP) 
 		return;
-
 	if (main_window.current_editor && (main_window.current_editor->saved == FALSE)) {
+		GtkWidget *file_revert_dialog;
                 file_revert_dialog = gtk_message_dialog_new(GTK_WINDOW(main_window.window),GTK_DIALOG_DESTROY_WITH_PARENT,GTK_MESSAGE_QUESTION,GTK_BUTTONS_YES_NO,
             _("Are you sure you wish to reload the current file, losing your changes?"));
             gtk_window_set_title(GTK_WINDOW(file_revert_dialog), "Question");
@@ -970,7 +979,7 @@ void close_page(Editor *editor)
 
 	if (GTK_IS_SCINTILLA(editor->scintilla)) {
 		page_num_closing = gtk_notebook_page_num(GTK_NOTEBOOK(main_window.notebook_editor),editor->scintilla);
-		g_free(editor->short_filename);
+		//g_free(editor->short_filename);
 	}
 	else {
 		page_num_closing = gtk_notebook_page_num(GTK_NOTEBOOK(main_window.notebook_editor),editor->help_scrolled_window);
@@ -991,7 +1000,6 @@ void close_page(Editor *editor)
 	}
 	set_active_tab(page_num);
 	g_string_free(editor->filename, TRUE);
-	//g_free(editor);
         g_slice_free(Editor,editor);
 	gtk_notebook_remove_page(GTK_NOTEBOOK(main_window.notebook_editor), page_num_closing);
 }
@@ -1002,14 +1010,8 @@ void close_page(Editor *editor)
  * @return GdkPixbuf
  */
 GdkPixbuf *get_window_icon (void){
-GdkPixbuf *pixbuf = NULL;
-GError *error = NULL;
-pixbuf = gdk_pixbuf_new_from_file (PIXMAP_DIR "/" GPHPEDIT_PIXMAP_ICON, &error);
-if (error) {
-g_warning (G_STRLOC ": cannot open icon: %s", error->message);
-g_error_free (error);
-return NULL;
-}
+//GError *error = NULL;
+GdkPixbuf *pixbuf = gdk_pixbuf_new_from_file (PIXMAP_DIR "/" GPHPEDIT_PIXMAP_ICON, NULL);
 return pixbuf;
 }
 
@@ -1159,10 +1161,7 @@ void selectiontoupper(void){
 	if (main_window.current_editor == NULL)
 		return;
 
-	if (main_window.current_editor->type == TAB_HELP) {
-		 webkit_web_view_copy_clipboard (WEBKIT_WEB_VIEW(main_window.current_editor->help_view));
-	}
-	else {
+	if (main_window.current_editor->type != TAB_HELP) {
 		wordStart = gtk_scintilla_get_selection_start(GTK_SCINTILLA(main_window.current_editor->scintilla));
 		wordEnd = gtk_scintilla_get_selection_end(GTK_SCINTILLA(main_window.current_editor->scintilla));
 		if (wordStart != wordEnd) {
@@ -1183,10 +1182,7 @@ void selectiontolower(void){
 	if (main_window.current_editor == NULL)
 		return;
 
-	if (main_window.current_editor->type == TAB_HELP) {
-		 webkit_web_view_copy_clipboard (WEBKIT_WEB_VIEW(main_window.current_editor->help_view));
-	}
-	else {
+	if (main_window.current_editor->type != TAB_HELP) {
 		wordStart = gtk_scintilla_get_selection_start(GTK_SCINTILLA(main_window.current_editor->scintilla));
 		wordEnd = gtk_scintilla_get_selection_end(GTK_SCINTILLA(main_window.current_editor->scintilla));
 		if (wordStart != wordEnd) {
@@ -1670,6 +1666,7 @@ gtk_scintilla_marker_set_back(GTK_SCINTILLA(main_window.current_editor->scintill
 gtk_scintilla_marker_set_fore(GTK_SCINTILLA(main_window.current_editor->scintilla), 1, 101);
 gtk_scintilla_marker_add(GTK_SCINTILLA(main_window.current_editor->scintilla), line, 1);
 }
+
 //delete marker
 void delete_marker(int line)
 {
@@ -1777,7 +1774,7 @@ void pressed_button_file_chooser(GtkButton *widget, gpointer data)
         gtk_tree_sortable_set_sort_func(GTK_TREE_SORTABLE(main_window.pTree), 1,filebrowser_sort_func, NULL, NULL);
         gtk_tree_sortable_set_sort_column_id(GTK_TREE_SORTABLE(main_window.pTree), 1,GTK_SORT_ASCENDING);
         sChemin=convert_to_full(sChemin);
-        create_tree(main_window.pTree,sChemin,iter,&iter2);
+        init_folderbrowser(main_window.pTree,sChemin,iter,&iter2);
     	}
    }
 void classbrowser_show(void)
@@ -1855,14 +1852,11 @@ gint treeview_double_click(GtkWidget *widget, GdkEventButton *event, gpointer fu
 		if (gtk_tree_selection_get_selected (main_window.classtreeselect, NULL, &iter)) {
 			gtk_tree_model_get (GTK_TREE_MODEL(main_window.classtreestore), &iter, FILENAME_COLUMN, &filename, LINE_NUMBER_COLUMN, &line_number, -1);
 			if (filename) {
-				switch_to_file_or_open(filename, line_number);
+                        	switch_to_file_or_open(filename, line_number);
 				g_free (filename);
 			}
 		}
 	}
-
-
-
 	return FALSE;
 }
 
