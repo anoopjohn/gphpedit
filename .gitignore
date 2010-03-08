@@ -21,3 +21,5 @@ stamp-h1
 src/gphpedit
 autom4te.cache
 patches
+gphpedit.spec
+po/stamp-it
