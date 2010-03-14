@@ -788,10 +788,11 @@ void main_window_create(void)
         gtk_window_set_position(GTK_WINDOW(main_window.window), GTK_WIN_POS_CENTER);
         gtk_window_set_icon(GTK_WINDOW(main_window.window), get_window_icon());
         
-	/* integrate widgets with new argb themes */
+	/*Set RGBA colormap*/
 	GdkScreen *screen= gtk_widget_get_screen (main_window.window);
 	GdkColormap *colormap= gdk_screen_get_rgba_colormap (screen);
-	if (colormap) gtk_widget_set_default_colormap (colormap);
+	if (colormap && gdk_screen_is_composited (screen)) gtk_widget_set_default_colormap (colormap);
+	/*End set RGBA colormap*/
 
 
 	preferences_apply();
