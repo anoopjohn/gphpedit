@@ -34,7 +34,6 @@
 #include "templates.h"
 #include "folderbrowser.h"
 
-
 gboolean is_app_closing = FALSE;
 gint classbrowser_hidden_position;
 
@@ -1424,8 +1423,9 @@ void on_about1_activate(GtkWidget *widget)
   gtk_about_dialog_set_comments(GTK_ABOUT_DIALOG(dialog),
      _("gPHPEdit is a GNOME2 editor specialised for editing PHP "
 							 "scripts and related files (HTML/CSS/JS)."));
-  gtk_about_dialog_set_website(GTK_ABOUT_DIALOG(dialog),
-      "http://www.gphpedit.org/");
+#ifdef PACKAGE_URL
+  gtk_about_dialog_set_website(GTK_ABOUT_DIALOG(dialog),PACKAGE_URL);
+#endif
   gtk_about_dialog_set_logo(GTK_ABOUT_DIALOG(dialog),get_window_icon ());
   gtk_about_dialog_set_authors(GTK_ABOUT_DIALOG(dialog),(const gchar **) authors);
   gtk_about_dialog_set_translator_credits(GTK_ABOUT_DIALOG(dialog),translator_credits);
