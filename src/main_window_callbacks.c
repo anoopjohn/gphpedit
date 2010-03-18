@@ -1770,10 +1770,7 @@ void pressed_button_file_chooser(GtkButton *widget, gpointer data)
         gconf_client_set_string (config,"/gPHPEdit/main_window/folderbrowser/folder", sChemin,NULL);
         GtkTreeIter iter2;
  	GtkTreeIter* iter=NULL;
- 	gtk_tree_store_clear(main_window.pTree);
-        gtk_tree_sortable_set_sort_func(GTK_TREE_SORTABLE(main_window.pTree), 1,filebrowser_sort_func, NULL, NULL);
-        gtk_tree_sortable_set_sort_column_id(GTK_TREE_SORTABLE(main_window.pTree), 1,GTK_SORT_ASCENDING);
-        sChemin=convert_to_full(sChemin);
+ 	sChemin=convert_to_full(sChemin);
         init_folderbrowser(main_window.pTree,sChemin,iter,&iter2);
     	}
    }
