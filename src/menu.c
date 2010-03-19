@@ -29,7 +29,6 @@
 #endif
 #include "main_window.h"
 #include "main_window_callbacks.h"
-#define TRANSLATE_URL "https://www.transifex.net/projects/p/gphpedit/c/main/"
 /*needed for menu hints*/
 guint context_id;
 guint message_id;
@@ -162,6 +161,7 @@ void bugreport(void){
     screen = gtk_widget_get_screen (GTK_WIDGET (main_window.window));
     gtk_show_uri (screen, PACKAGE_BUGREPORT, GDK_CURRENT_TIME, NULL);
 }
+#ifdef TRANSLATE_URL
 /*
  * translate
  * launch default system browser with tranlation page
@@ -171,6 +171,7 @@ void translate(void){
     screen = gtk_widget_get_screen (GTK_WIDGET (main_window.window));
     gtk_show_uri (screen, TRANSLATE_URL, GDK_CURRENT_TIME, NULL);
 }
+#endif
 /*
  * create_stock_menu_item
  * creates a new stock menu item, append it to menu, add menu hint, optionally add accelerator and return the new menuitem
@@ -433,8 +434,10 @@ main_window.menu->tog_class =create_check_menu_item(main_window.menu->tog_class,
   main_window.menu->bugreport = create_mnemonic_menu_item(main_window.menu->bugreport,main_window.menu->menuhelp,_("_Report a bug in gPHPEdit"), _("Go to bug report page to report a bug"), 0, 0);
   g_signal_connect(G_OBJECT(main_window.menu->bugreport), "activate", G_CALLBACK(bugreport), NULL);
   #endif
+  #ifdef TRANSLATE_URL
   main_window.menu->translate = create_mnemonic_menu_item(main_window.menu->translate,main_window.menu->menuhelp,_("_Translate this application"), _("Start translating this application"), 0, 0);
   g_signal_connect(G_OBJECT(main_window.menu->translate), "activate", G_CALLBACK(translate), NULL);
+  #endif
   main_window.menu->abouthelp=create_stock_menu_item(main_window.menu->abouthelp,main_window.menu->menuhelp,GTK_STOCK_ABOUT, _("Shows info about gPHPEdit"), 0, 0);
   g_signal_connect(G_OBJECT(main_window.menu->abouthelp), "activate", G_CALLBACK(on_about1_activate), NULL);
   

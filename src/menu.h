@@ -69,7 +69,6 @@ typedef struct
   GtkWidget *sept;
   GtkWidget *upper;
   GtkWidget *lower;
-  
 
   GtkWidget *view;
   GtkWidget *viewmaintoolbar;
@@ -116,8 +115,12 @@ typedef struct
   GtkWidget *menuhelp;
   GtkWidget *help;
   GtkWidget *phphelp;
+  #ifdef PACKAGE_BUGREPORT
   GtkWidget *bugreport;
+  #endif
+  #ifdef TRANSLATE_URL
   GtkWidget *translate;
+  #endif
   GtkWidget *abouthelp;
 }
 Mainmenu;
