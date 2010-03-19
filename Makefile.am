@@ -17,6 +17,7 @@
 ##  along with this program; if not, write to the Free Software
 ##  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 ##
+
 ACLOCAL_AMFLAGS = -I m4
 
 SUBDIRS = \
@@ -33,8 +34,17 @@ applications_DATA = $(applications_in_files:.desktop.in=.desktop)
 spec_in_files = gphpedit.spec.in
 
 EXTRA_DIST = \
+	AUTHORS ChangeLog NEWS README 	\
+	intltool−extract.in 		\
+	intltool−merge.in   		\
+	intltool−update.in		\
 	gphpedit.spec			\
 	gphpedit.applications		\
 	$(applications_in_files)	\
 	$(spec_in_files)		\
 	src/gtkscintilla2
+
+CLEANFILES = 			\
+	intltool-extract 	\
+	intltool-merge 		\
+	intltool-update

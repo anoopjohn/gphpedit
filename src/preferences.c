@@ -21,6 +21,9 @@
  
    The GNU General Public License is contained in the file COPYING.
 */
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
 
 #include "preferences.h"
 #include "main_window.h"
@@ -28,8 +31,6 @@
 //debug macro
 //#define DEBUG
 
-#define DEFAULT_FONT_SIZE 12
-#define DEFAULT_FONT "!Sans"
 #define DEFAULT_PHP_EXTENSIONS "php,inc,phtml,php3,xml,htm,html"
 #define DEFAULT_BACK_COLOR 16777215
 Preferences preferences;
@@ -51,25 +52,21 @@ gint temp= gconf_client_get_int (client,key,NULL);
 return temp;
 }
 gint getcolor(GConfClient *client,gchar *key,gchar *subdir,gint default_color){
-        GFile *config;
-        GError *error;
-        error=NULL;
-        gchar *uri=g_strdup_printf("%s/%s/%s",g_get_home_dir(),".gconf/gPHPEdit",subdir);
+        gchar *uri= g_strdup_printf("%s/%s/%s",g_get_home_dir(),".gconf/gPHPEdit",subdir);
         #ifdef DEBUG
         g_print("uri:%s \n",uri);
         #endif
-        config=g_file_new_for_path (uri);
-        if(!g_file_query_exists (config,NULL)){
+       if (!g_file_test (uri,G_FILE_TEST_EXISTS)){
             #ifdef DEBUG
             g_print("key %s don't exist. load default value\n",key);
             #endif
-            g_object_unref(config);
             //load default value
+	    g_free(uri);
             return default_color;
         }else {
-            g_object_unref(config);
-            //load key value
-            GError *error=NULL;
+		    g_free(uri);
+          //load key value
+          GError *error=NULL;
             gint temp;
             temp = gconf_client_get_int (client,key,&error);
             if (error!=NULL){
@@ -106,7 +103,7 @@ void preferences_apply(void)
             preferences.height=400;
             error=NULL;
         }
-	preferences.maximized = gconf_client_get_int (config,"/gPHPEdit/main_window/maximized",&error);
+	preferences.maximized = gconf_client_get_bool (config,"/gPHPEdit/main_window/maximized",NULL);
         
 	gtk_window_move(GTK_WINDOW(main_window.window), preferences.left, preferences.top);
 	gtk_window_set_default_size(GTK_WINDOW(main_window.window), preferences.width, preferences.height);
@@ -119,11 +116,9 @@ void preferences_apply(void)
 
 void preferences_load(void)
 {
-        GConfClient *config;
-        config=gconf_client_get_default ();
+        GConfClient *config=gconf_client_get_default ();
         GError *error = NULL;
-        gconf_client_get_int (config,"/gPHPEdit/main_window/x",&error);
-        preferences.set_sel_back = getcolor(config,"/gPHPEdit/default_style/selection","default_style",13421772);
+        preferences.set_sel_back = getcolor(config,"/gPHPEdit/default_style/selection","default_style",11250603);
         preferences.marker_back = getcolor(config,"/gPHPEdit/default_style/bookmark","default_style",15908608);
         preferences.php_binary_location= get_string(config,"/gPHPEdit/locations/phpbinary","php");
         preferences.shared_source_location = get_string(config,"/gPHPEdit/locations/shared_source","");
@@ -148,11 +143,7 @@ void preferences_load(void)
             error=NULL;
         }
 	preferences.show_indentation_guides = gconf_client_get_int (config,"/gPHPEdit/defaults/showindentationguides",NULL);
-	preferences.show_folding = gconf_client_get_bool (config,"/gPHPEdit/defaults/showfolding",&error);
-	if (preferences.show_folding==0 && error!=NULL){
-	preferences.show_folding=TRUE;
-	error=NULL;
-	}
+	preferences.show_folding = true;//gconf_client_get_bool (config,"/gPHPEdit/defaults/showfolding",NULL);
 	preferences.edge_mode = gconf_client_get_int (config,"/gPHPEdit/defaults/edgemode",NULL);
 	preferences.edge_column = gconf_client_get_int (config,"/gPHPEdit/defaults/edgecolumn",&error);
         if (preferences.edge_column==0 && error!=NULL){
@@ -170,11 +161,7 @@ void preferences_load(void)
             error=NULL;
         }
 	//preferences.auto_indent_after_brace = gnome_config_get_int ("gPHPEdit/defaults/autoindentafterbrace=1");
-	preferences.save_session = gconf_client_get_int (config,"/gPHPEdit/defaults/save_session",&error);
-        if (preferences.save_session==0 && error!=NULL){
-            preferences.save_session=true;
-            error=NULL;
-        }
+	preferences.save_session = gconf_client_get_bool (config,"/gPHPEdit/defaults/save_session",NULL);
 	preferences.use_tabs_instead_spaces = gconf_client_get_bool(config,"/gPHPEdit/defaults/use_tabs_instead_spaces",&error);
         if (preferences.use_tabs_instead_spaces==0 && error!=NULL){
             preferences.use_tabs_instead_spaces=true;

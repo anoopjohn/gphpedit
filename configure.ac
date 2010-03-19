@@ -2,6 +2,7 @@ dnl
 dnl This file is part of gPHPEdit
 dnl
 dnl  Copyright (C) 2003, 2004, 2005 Andy Jeffries <andy@gphpedit.org>
+dnl  Copyright (C) 2010  Jose Rostagno <joserostagno@hotmail.com>
 dnl
 dnl gPHPEdit is free software; you can redistribute it and/or modify
 dnl it under the terms of the GNU General Public License as published by
@@ -17,12 +18,25 @@ dnl You should have received a copy of the GNU General Public License along
 dnl with this program; if not, write to the Free Software Foundation, Inc.,
 dnl 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
 dnl
-AC_PREREQ([2.64])
-AC_INIT(gPHPEdit, 0.9.97, https://savannah.nongnu.org/support/?group=gphpedit)
-AC_CONFIG_SRCDIR([config.h.in]) dnl maybe change to src/main.c
-AC_CONFIG_HEADERS([config.h])
+AC_PREREQ([2.59])
+AC_INIT([gPHPEdit],[0.9.97],[https://savannah.nongnu.org/support/?group=gphpedit],[gphpedit],[http://www.gphpedit.org])
+# give autoconf the name of a file whose existence is a hint that
+# autoconf has been started from the right directory.
+AC_CONFIG_SRCDIR([src/main.c])
+
+# tell autoconf where to put the temporary files it generates
+AC_CONFIG_AUX_DIR([build-aux])
+
+# Tell autoconf where to put the output file that contains all
+# definitions our C program will need
+AC_CONFIG_HEADERS([src/config.h])
+
 AC_CONFIG_MACRO_DIR([m4])
-AM_INIT_AUTOMAKE
+
+# Initialize automake, and tell it to tell the C compiler to output as
+# many warnings as it can
+AM_INIT_AUTOMAKE([-Wall foreign])
+
 AM_MAINTAINER_MODE([enable])
 
 # Checks for programs.
@@ -47,7 +61,7 @@ AC_HEADER_STDBOOL
 AC_C_INLINE
 AC_TYPE_PID_T
 AC_TYPE_SIZE_T
-
+AC_C_CONST
 # Checks for library functions.
 AC_CHECK_FUNCS([isascii mblen memmove memset mkfifo strchr strncasecmp strrchr strstr strtol])
 
@@ -55,16 +69,84 @@ dnl  --------------
 dnl | dependencies |-----------------------------------------------------------
 dnl  --------------
 
-PKG_CHECK_MODULES(GPHPEDIT,[
-	gtk+-2.0
-	webkit-1.0
-	gconf-2.0
-	])
+# Checks for libraries.
+dnl Checking for the required libraries.
+GTK_REQUIRED_VERSION=2.0.0
+dnl LIBGNOMEUI_REQUIRED_VERSION=2.0.0
+GCONF_REQUIRED_VERSION=2.0.0
 
-AC_SUBST(GPHPEDIT_CFLAGS)
-AC_SUBST(GPHPEDIT_LIBS)
+PKG_CHECK_MODULES(GTK, gtk+-2.0 >= $GTK_REQUIRED_VERSION)
+PKG_CHECK_MODULES(GCONF, gconf-2.0 >= $GCONF_REQUIRED_VERSION)
+PKG_CHECK_MODULES(WEBKIT,[webkit-1.0])
+
+AC_SUBST(GTK_CFLAGS)
+AC_SUBST(GTK_LIBS)
+AC_SUBST(GCONF_CFLAGS)
+AC_SUBST(GCONF_LIBS)
+AC_SUBST(WEBKIT_CFLAGS)
+AC_SUBST(WEBKIT_LIBS)
 
 dnl ---------------------------------------------------------------------------
+dnl PKG_CHECK_MODULES(
+dnl	[PHPDOC],
+dnl	[php-doc],
+dnl	[
+dnl	 have_php_doc=yes
+dnl	 AC_DEFINE([HAVE_PHPDOC], [1], [Define to 1 if you have the `php-doc'.])
+dnl	]
+dnl)
+dnl AM_CONDITIONAL([ENABLE_PHP_DOC], [test "x$have_php_doc" = "xyes"])
+dnl **********************
+dnl  function declaration
+dnl **********************
+
+dnl $1: var
+dnl $2: file
+dnl $3: path
+AC_DEFUN([AC_CHECK_DIR],
+[path="$$1 \
+       $3"
+$1=""
+for dir in $path ;
+do
+  if test -f $dir/$2; then
+    $1=$dir
+    break
+  fi
+done])
+
+dnl $1: var
+dnl $2: file
+AC_DEFUN([AC_ASK_DIR],
+[if test "$$1" == ""; then
+  dnl AC_MSG_RESULT([Checking for php-doc])
+  dnl echo -n "\$$1="
+  read $1
+  AC_MSG_CHECKING([for php-doc])
+  if test -f $$1/$2; then
+     AC_MSG_RESULT([$$1])
+  else
+    AC_MSG_RESULT([no])
+    dnl AC_MSG_ERROR([still can not find $2 in $$1])
+  fi
+fi ])
+
+dnl check for php-doc directory
+AC_CHECK_DIR([php_doc_dir],[index.html],
+        [/usr/doc/php-docs-200403/html \
+ 	/usr/share/doc/php-docs-20050822/html \
+	 /usr/share/doc/php-docs-20050822/html \
+	 /usr/doc/php-docs-4.2.3/html//usr/lib \
+	/usr/share/doc/php-manual/en/html \
+	/usr/share/doc/php-doc/html ])
+ AC_ASK_DIR([php_doc_dir],[index.html])
+if test "$php_doc_dir" != ""; then
+ AC_DEFINE_UNQUOTED(PHP_DOC_DIR, "$php_doc_dir",
+	[php-doc directory])
+fi
+dnl define default font and font size
+AC_DEFINE_UNQUOTED(DEFAULT_FONT, "!Sans",[default font])
+AC_DEFINE_UNQUOTED(DEFAULT_FONT_SIZE, 12,[default font size])
 
 dnl  ------------------
 dnl | language support |-------------------------------------------------------

@@ -25,8 +25,7 @@
 #include "classbrowser.h"
 #include "main_window.h"
 #include "main_window_callbacks.h"
-
-
+//#define DEBUGCLASSBROWSER 
 static GSList *filelist = NULL;
 static GSList *dirlist = NULL;
 static GSList *functionlist = NULL;
@@ -135,37 +134,6 @@ void classbrowser_filelist_add(gchar *filename)
 }
 
 
-/*void classbrowser_dirlist_add(gchar *dir)
-{
-	GDir *dir_iter;
-	GError *error = NULL;
-	gchar *file;
-	GString *fullfilename;
- 
-	g_print("dir_opened for %s\n", dir);
-	dir_iter= g_dir_open(dir, 0, &error);
-	g_print("dir_open succeeded for %s\n", dir);
-	if (dir_iter) {
-		while ((file = (gchar *)g_dir_read_name(dir_iter))) {
-			fullfilename = g_string_new(dir);
-			fullfilename = g_string_append(fullfilename, "/");
-			fullfilename = g_string_append(fullfilename, file);
-			if (g_file_test(fullfilename->str, G_FILE_TEST_IS_DIR)) {
-				classbrowser_dirlist_add(fullfilename->str);
-			}
-			else {
-				classbrowser_filelist_add(fullfilename->str);
-			}
-			g_string_free(fullfilename, TRUE);
-		}
-		g_dir_close(dir_iter);
-		g_print("dir_closed for %s\n", dir);
-	}
- 
-	dirlist = g_slist_append(dirlist, dir);
-}*/
-
-
 #include <dirent.h>
 void classbrowser_dirlist_add(gchar *dir)
 {
@@ -191,7 +159,9 @@ void classbrowser_dirlist_add(gchar *dir)
 				}
 				else if (is_php_file_from_filename(fullfilename->str)) {
 					classbrowser_filelist_add(fullfilename->str);
-					//debug("File added: %s", fullfilename->str);
+					#ifdef DEBUGCLASSBROWSER
+					debug("File added: %s", fullfilename->str);
+					#endif
 				}
 				g_string_free(fullfilename, TRUE);
 			}
@@ -200,7 +170,9 @@ void classbrowser_dirlist_add(gchar *dir)
 		closedir(dir_iter);
 	}
 	else {
-		//g_print("Err no: %d\n", errno);
+		#ifdef DEBUGCLASSBROWSER
+		g_print("Classbrowser error. Err no: %d\n", errno);
+		#endif
 	}
 
 	dirlist = g_slist_append(dirlist, g_strdup(dir));
@@ -268,8 +240,11 @@ ClassBrowserFile *classbrowser_filelist_getnext(void)
 		file = li->data;
 		if (file) {
 			if (file->accessible) {
-				if ( stat(file->filename, &buf) == 0) {
+ 				if ( stat(file->filename, &buf) == 0) {
 					if (buf.st_mtime != file->modified_time) {
+					#ifdef DEBUGCLASSBROWSER
+					g_print("DEBUG::ClassBrowser: file %s not modified\n",file->filename);
+					#endif
 						return file;
 					}
 				}
@@ -279,7 +254,6 @@ ClassBrowserFile *classbrowser_filelist_getnext(void)
 
 	return NULL;
 }
-
 
 void classbrowser_start_update(void)
 {
@@ -541,9 +515,9 @@ void classbrowser_functionlist_add(gchar *classname, gchar *funcname, gchar *fil
 	GtkTreeIter class_iter;
 	GString *function_decl;
 	guint type;
-	
-	//debug("Filename:%s", filename);
-
+	#ifdef DEBUGCLASSBROWSER	
+	debug("Filename:%s", filename);
+	#endif
 	if ((function = classbrowser_functionlist_find(funcname, param_list, filename, classname))) {
 		function->line_number = line_number;
 		function->remove = FALSE;
@@ -579,7 +553,9 @@ void classbrowser_functionlist_add(gchar *classname, gchar *funcname, gchar *fil
 			function_decl = g_string_append(function_decl, param_list);
 		}
 		function_decl = g_string_append(function_decl, ")");
-		//debug("Filename: %s", filename);
+		#ifdef DEBUGCLASSBROWSER
+		debug("Filename: %s", filename);
+		#endif
 		gtk_tree_store_set (main_window.classtreestore, &iter,
 		                    NAME_COLUMN, function_decl->str, LINE_NUMBER_COLUMN, line_number, FILENAME_COLUMN, filename, TYPE_COLUMN, type, ID_COLUMN, function->identifierid, -1);
 		g_string_free(function_decl, TRUE);
@@ -651,11 +627,10 @@ void classbrowser_update(void)
 	if (release_event) {
 		g_signal_handler_disconnect(main_window.classtreeview,release_event);
 	}
-	classbrowser_filelist_clear();
+        classbrowser_filelist_clear();
 	classbrowser_dirlist_clear();
 	classbrowser_dirlist_add_shared_source();
-
-	//if parse only current file is set then add only the file in the current tab
+        //if parse only current file is set then add only the file in the current tab
 	if(GTK_TOGGLE_BUTTON (main_window.chkOnlyCurFileFuncs)->active)
 	{
 		//add only if there is a current editor
@@ -678,18 +653,19 @@ void classbrowser_update(void)
 
 		//classbrowser_dirlist_add(preferences.shared_source_location);
 	}
-	classbrowser_filelist_update();
+        classbrowser_filelist_update();
 	classbrowser_start_update();
-
 	while ( (file = classbrowser_filelist_getnext() ) ) {
-		while (gtk_events_pending())
-			gtk_main_iteration();
-		stat(file->filename, &buf);
+        	while (gtk_events_pending()) {
+                gtk_main_iteration();
+                }
+           	stat(file->filename, &buf);
 		file->modified_time = buf.st_mtime;
 		classbrowser_parse_file(file->filename);
-		//debug("Parsing %s", file->filename);
+		#ifdef DEBUGCLASSBROWSER
+		debug("Parsing %s", file->filename);
+		#endif
 	}
-
 	classbrowser_remove_dead_wood();
 
 	press_event = g_signal_connect(GTK_OBJECT(main_window.classtreeview), "button_press_event",
@@ -803,7 +779,9 @@ void classbrowser_update_selected_label(gchar *filename, gint line)
 	else {
 		new_label = get_differing_part(filenames, filename);
 	}
-	//debug("%d :: %s", num_files, new_label);	
+	#ifdef DEBUGCLASSBROWSER
+	debug("%d :: %s", num_files, new_label);	
+	#endif
 	if (new_label) {
 		new_label = g_string_prepend(new_label, _("FILE: "));
 		g_string_append_printf(new_label, "(%d)", line);
@@ -832,17 +810,15 @@ gint classbrowser_compare_function_names(GtkTreeModel *model,
 										GtkTreeIter *b,
 										gpointer user_data)
 {
-	GValue aValue, bValue;
 	gchar *aName, *bName;
 	gint retVal;
-	//gtk_tree_model_get_value(model, a, 0, aValue);
-	//gtk_tree_model_get_value(model, b, 0, bValue);
 	gtk_tree_model_get(model, a, 0, &aName, -1);
 	gtk_tree_model_get(model, b, 0, &bName, -1);
-	//retVal = g_ascii_strcasecmp(g_value_get_string(aValue), g_value_get_string(bValue));
 	retVal = g_ascii_strcasecmp(aName, bName);
 	g_free(aName);
 	g_free(bName);
-	//g_message("* compare values %s and %s; return %d\n", g_value_get_string(&aValue), g_value_get_string(&bValue), retVal);
+	#ifdef DEBUGCLASSBROWSER
+	g_message("* compare values %s and %s; return %d\n", aName, bName, retVal);
+	#endif
 	return retVal;
 }

@@ -25,10 +25,10 @@
 
 bin_PROGRAMS = gphpedit
 
-INCLUDES = \
-	$(GPHPEDIT_CFLAGS)	\
+AM_CFLAGS = \
+	$(WEBKIT_CFLAGS) $(GTK_CFLAGS) $(GCONF_CFLAGS) \
 	-I$(top_srcdir)/src/gtkscintilla2 \
-	-g -Wall -DGTK -DSCI_LEXER \
+	-Wall -DGTK -DSCI_LEXER \
 	-DPIXMAP_DIR=\""$(datadir)/pixmaps"\"
 
 nodist_EXTRA_gphpedit_SOURCES = dummy.cxx
@@ -41,8 +41,6 @@ gphpedit_SOURCES = \
 	classbrowser_parse.h	\
 	folderbrowser.h		\
 	folderbrowser.c		\
-##	project.c		\
-##	project.h		\
 	edit_template.c		\
 	edit_template.h		\
 	find_replace.c		\
@@ -55,12 +53,14 @@ gphpedit_SOURCES = \
 	plugin.h		\
 	main.c			\
 	main.h			\
+	menu.c			\
+	menu.h			\
+	toolbar.c		\
+	toolbar.h		\
 	main_window.c		\
 	main_window.h		\
 	main_window_callbacks.c	\
 	main_window_callbacks.h	\
-	menu.h			\
-	menu.c			\
 	preferences.c		\
 	preferences.h		\
 	preferences_dialog.c	\
@@ -90,6 +90,6 @@ gtkscintilla2/libgtkscintilla2.a:
 	cd gtkscintilla2 && $(MAKE) libgtkscintilla2.a && cd ..
 
 gphpedit_LDADD = \
-	$(GPHPEDIT_LIBS)\
+	$(WEBKIT_LIBS) $(GTK_LIBS) $(GCONF_LIBS)\
 	gtkscintilla2/libgtkscintilla2.a\
 	gtkscintilla2/scintilla/bin/scintilla.a

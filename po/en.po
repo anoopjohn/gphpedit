@@ -1,0 +1,892 @@
+# English translations for gphpedit package.
+# Copyright (C) 2009 THE gphpedit'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the gphpedit package.
+# jose Rostagno <joserostagno@hotmail.com>, 2009.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: gphpedit 0.9.96\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2009-11-26 14:19-0300\n"
+"PO-Revision-Date: 2009-11-26 14:17-0300\n"
+"Last-Translator: pepe <joserostagno@hotmail.com>\n"
+"Language-Team: Spanish\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=ASCII\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#. Show message saying could not be found.
+#: ../src/find_replace.c:85 ../src/find_replace.c:380
+#, c-format
+msgid "The text \"%s\" was not found."
+msgstr ""
+
+#: ../src/find_replace.c:123
+msgid "Find"
+msgstr ""
+
+#. End get selected text
+#: ../src/find_replace.c:158 ../src/find_replace.c:548
+msgid "RegExp/String to search"
+msgstr ""
+
+#: ../src/find_replace.c:183 ../src/find_replace.c:591
+msgid "Whole document"
+msgstr "Documento Completo"
+
+#: ../src/find_replace.c:191 ../src/find_replace.c:598
+msgid "From cursor"
+msgstr ""
+
+#: ../src/find_replace.c:199 ../src/find_replace.c:606
+msgid "Search"
+msgstr ""
+
+#: ../src/find_replace.c:239 ../src/find_replace.c:646
+msgid "RegExp"
+msgstr ""
+
+#: ../src/find_replace.c:246 ../src/find_replace.c:653
+msgid "String"
+msgstr ""
+
+#: ../src/find_replace.c:254 ../src/find_replace.c:661
+msgid "Type"
+msgstr ""
+
+#: ../src/find_replace.c:263 ../src/find_replace.c:670
+msgid "Whole word"
+msgstr "Palabra completa"
+
+#: ../src/find_replace.c:267 ../src/find_replace.c:674
+msgid "Ignore case while searching"
+msgstr ""
+
+#: ../src/find_replace.c:272 ../src/find_replace.c:684
+msgid "Options"
+msgstr ""
+
+#. Prompt for replace?
+#: ../src/find_replace.c:393
+msgid "Do you want to replace this occurence?"
+msgstr ""
+
+#: ../src/find_replace.c:469
+#, c-format
+msgid "%s not found, no replacements made."
+msgstr ""
+
+#: ../src/find_replace.c:472
+#, c-format
+msgid "1 occurence of %s found, replaced."
+msgstr ""
+
+#: ../src/find_replace.c:475
+#, c-format
+msgid "%d occurences of %s found, all replaced."
+msgstr ""
+
+#: ../src/find_replace.c:514
+msgid "Find and Replace"
+msgstr ""
+
+#: ../src/find_replace.c:566
+msgid "String to Replace"
+msgstr ""
+
+#: ../src/find_replace.c:679
+msgid "Prompt before Replace"
+msgstr ""
+
+#: ../src/find_replace.c:705
+msgid "Replace _all"
+msgstr ""
+
+#: ../src/edit_template.c:34
+msgid "Add/Edit Template"
+msgstr ""
+
+#: ../src/edit_template.c:43
+msgid "Name/Shortcut:"
+msgstr ""
+
+#: ../src/edit_template.c:53
+msgid "Code:"
+msgstr ""
+
+#: ../src/main_window.c:142
+#, c-format
+msgid "Unable to create ~/.gphpedit/ (%d)"
+msgstr ""
+
+#: ../src/main_window.c:150
+#, c-format
+msgid "Unable to create ~/.gphpedit/plugins/ (%d)"
+msgstr ""
+
+#: ../src/main_window.c:171
+msgid "New File"
+msgstr ""
+
+#: ../src/main_window.c:177
+msgid "Open File"
+msgstr ""
+
+#: ../src/main_window.c:182
+msgid "Save File"
+msgstr ""
+
+#: ../src/main_window.c:187
+msgid "Save File As..."
+msgstr ""
+
+#: ../src/main_window.c:193
+msgid "Close File"
+msgstr ""
+
+#: ../src/main_window.c:208
+msgid "Undo last change"
+msgstr ""
+
+#: ../src/main_window.c:213
+msgid "Redo last change"
+msgstr ""
+
+#: ../src/main_window.c:226
+msgid "Cut current selection"
+msgstr ""
+
+#: ../src/main_window.c:232
+msgid "Copy current selection"
+msgstr ""
+
+#: ../src/main_window.c:238
+msgid "Paste current selection"
+msgstr ""
+
+#: ../src/main_window.c:249
+msgid "Find Text"
+msgstr ""
+
+#: ../src/main_window.c:255
+msgid "Find/Replace text"
+msgstr ""
+
+#: ../src/main_window.c:268
+msgid "Indent block"
+msgstr ""
+
+#: ../src/main_window.c:274 ../src/main_window.c:284 ../src/main_window.c:290
+msgid "Unindent block"
+msgstr ""
+
+#: ../src/main_window.c:306
+msgid "Search for: "
+msgstr ""
+
+#: ../src/main_window.c:319
+msgid "Incremental search"
+msgstr ""
+
+#. gtk_toolbar_append_space(GTK_TOOLBAR(main_window.toolbar_find));
+#: ../src/main_window.c:331
+msgid "Go to line: "
+msgstr ""
+
+#: ../src/main_window.c:346
+msgid "Go to line"
+msgstr ""
+
+#: ../src/main_window.c:444
+msgid "FILE: "
+msgstr ""
+
+#: ../src/main_window.c:463
+msgid "Name"
+msgstr ""
+
+#: ../src/main_window.c:496
+msgid "Syntax Check Output"
+msgstr ""
+
+#: ../src/main_window.c:647 ../src/main_window.c:652
+msgid " - gPHPEdit"
+msgstr ""
+
+#: ../src/main_window.c:661 ../src/main_window.c:666
+msgid "gPHPEdit"
+msgstr ""
+
+#: ../src/main_window.c:861
+#, c-format
+msgid "Plugin is null!\n"
+msgstr ""
+
+#: ../src/main_window.c:915
+#, c-format
+msgid "Spawning %s gave error %s\n"
+msgstr ""
+
+#: ../src/main_window_callbacks.c:62
+#, c-format
+msgid "ERROR: cannot save session to %s\n"
+msgstr ""
+
+#: ../src/main_window_callbacks.c:107
+#, c-format
+msgid "ERROR: cannot open session file (%s)\n"
+msgstr ""
+
+#: ../src/main_window_callbacks.c:501
+msgid "PHP files (*.php *.inc)"
+msgstr ""
+
+#: ../src/main_window_callbacks.c:512
+msgid "HTML files (*.html *.htm *.xhtml)"
+msgstr ""
+
+#: ../src/main_window_callbacks.c:519
+msgid "XML files (*.xml)"
+msgstr ""
+
+#: ../src/main_window_callbacks.c:524
+msgid "Stylesheet files (*.css)"
+msgstr ""
+
+#: ../src/main_window_callbacks.c:529
+msgid "SQL files (*.sql)"
+msgstr ""
+
+#: ../src/main_window_callbacks.c:534
+msgid "Javascript files (*.js)"
+msgstr ""
+
+#: ../src/main_window_callbacks.c:539
+msgid "C/C++ files (*.c *.h *.cpp *.hh *.cc)"
+msgstr ""
+
+#: ../src/main_window_callbacks.c:550
+msgid "Perl Files (*.pl *.ph *.pm)"
+msgstr ""
+
+#: ../src/main_window_callbacks.c:558
+msgid "Python Files (*.py *.pyd *.pyw)"
+msgstr ""
+
+#: ../src/main_window_callbacks.c:567
+msgid "All files"
+msgstr ""
+
+#: ../src/main_window_callbacks.c:645 ../src/main_window_callbacks.c:852
+msgid "This file already exists, are you sure you want to overwrite it?"
+msgstr ""
+
+#: ../src/main_window_callbacks.c:705 ../src/tab.c:1094 ../src/tab.c:1114
+msgid "Untitled"
+msgstr ""
+
+#: ../src/main_window_callbacks.c:711 ../src/syntax_check.c:115
+#: ../src/tab.c:276
+msgid "Cannot allocate write buffer"
+msgstr ""
+
+#: ../src/main_window_callbacks.c:716
+#, c-format
+msgid "Cannot open '%s' for writing"
+msgstr ""
+
+#. Create the selector widget
+#: ../src/main_window_callbacks.c:744
+msgid "Please type the filename to save as..."
+msgstr ""
+
+#: ../src/main_window_callbacks.c:791
+msgid "Are you sure you wish to reload the current file, losing your changes?"
+msgstr ""
+
+#. Create the selector widget
+#: ../src/main_window_callbacks.c:867
+msgid "Please type the filename to rename this file to..."
+msgstr ""
+
+#: ../src/main_window_callbacks.c:950
+#, c-format
+msgid ""
+"The file '%s' has not been saved since your last changes, are you sure you "
+"want to close it and lose these changes?"
+msgstr ""
+
+#: ../src/main_window_callbacks.c:952
+msgid "Close and _lose changes"
+msgstr ""
+
+#: ../src/main_window_callbacks.c:952
+msgid "_Save file"
+msgstr ""
+
+#: ../src/main_window_callbacks.c:952
+msgid "_Cancel closing"
+msgstr ""
+
+#: ../src/main_window_callbacks.c:953
+#, c-format
+msgid "Unsaved changes to '%s'"
+msgstr ""
+
+#: ../src/main_window_callbacks.c:1001
+msgid "FILE:"
+msgstr ""
+
+#: ../src/main_window_callbacks.c:1271
+#, c-format
+msgid ""
+"Unhandle keyboard macro function %d, please report to macro@gphpedit.org\n"
+msgstr ""
+
+#: ../src/main_window_callbacks.c:1339
+msgid "translator_credits"
+msgstr ""
+
+#: ../src/main_window_callbacks.c:1351
+msgid "Copyright  2003-2006 Andy Jeffries, 2009 Anoop John"
+msgstr ""
+
+#: ../src/main_window_callbacks.c:1352
+msgid ""
+"gPHPEdit is a GNOME2 editor specialised for editing PHP scripts and related "
+"files (HTML/CSS/JS)."
+msgstr ""
+
+#: ../src/main_window_callbacks.c:1394
+#, c-format
+msgid "Unable to get data for page %d\n"
+msgstr ""
+
+#: ../src/preferences.c:44
+msgid ""
+"Your old settings used non-Pango (modern) fonts.  gPHPEdit no longer "
+"supports old fonts, your preferences have been updated."
+msgstr ""
+
+#. Font drop down elements : General
+#: ../src/preferences_dialog.c:141 ../src/preferences_dialog.c:252
+#: ../src/preferences_dialog.c:253 ../src/preferences_dialog.c:712
+#: ../src/preferences_dialog.c:713
+msgid "Default"
+msgstr ""
+
+#: ../src/preferences_dialog.c:142 ../src/preferences_dialog.c:257
+#: ../src/preferences_dialog.c:258 ../src/preferences_dialog.c:717
+#: ../src/preferences_dialog.c:718
+msgid "Line Number (margin)"
+msgstr ""
+
+#. Font drop down elements : HTML
+#: ../src/preferences_dialog.c:145 ../src/preferences_dialog.c:262
+#: ../src/preferences_dialog.c:263 ../src/preferences_dialog.c:722
+#: ../src/preferences_dialog.c:723
+msgid "HTML Tag"
+msgstr ""
+
+#: ../src/preferences_dialog.c:146 ../src/preferences_dialog.c:267
+#: ../src/preferences_dialog.c:268 ../src/preferences_dialog.c:727
+#: ../src/preferences_dialog.c:728
+msgid "HTML Unknown Tag"
+msgstr ""
+
+#: ../src/preferences_dialog.c:147 ../src/preferences_dialog.c:272
+#: ../src/preferences_dialog.c:273 ../src/preferences_dialog.c:732
+#: ../src/preferences_dialog.c:733
+msgid "HTML Attribute"
+msgstr ""
+
+#: ../src/preferences_dialog.c:148 ../src/preferences_dialog.c:277
+#: ../src/preferences_dialog.c:278 ../src/preferences_dialog.c:737
+#: ../src/preferences_dialog.c:738
+msgid "HTML Unknown Attribute"
+msgstr ""
+
+#: ../src/preferences_dialog.c:149 ../src/preferences_dialog.c:282
+#: ../src/preferences_dialog.c:283 ../src/preferences_dialog.c:742
+#: ../src/preferences_dialog.c:743
+msgid "HTML Number"
+msgstr ""
+
+#: ../src/preferences_dialog.c:150 ../src/preferences_dialog.c:287
+#: ../src/preferences_dialog.c:288 ../src/preferences_dialog.c:747
+#: ../src/preferences_dialog.c:748
+msgid "HTML Single-quoted String"
+msgstr ""
+
+#: ../src/preferences_dialog.c:151 ../src/preferences_dialog.c:292
+#: ../src/preferences_dialog.c:293 ../src/preferences_dialog.c:752
+#: ../src/preferences_dialog.c:753
+msgid "HTML Double-quoted String"
+msgstr ""
+
+#: ../src/preferences_dialog.c:152 ../src/preferences_dialog.c:297
+#: ../src/preferences_dialog.c:298 ../src/preferences_dialog.c:757
+#: ../src/preferences_dialog.c:758
+msgid "HTML Comment"
+msgstr ""
+
+#: ../src/preferences_dialog.c:153 ../src/preferences_dialog.c:302
+#: ../src/preferences_dialog.c:303 ../src/preferences_dialog.c:762
+#: ../src/preferences_dialog.c:763
+msgid "HTML Entity"
+msgstr ""
+
+#: ../src/preferences_dialog.c:154 ../src/preferences_dialog.c:307
+#: ../src/preferences_dialog.c:308 ../src/preferences_dialog.c:767
+#: ../src/preferences_dialog.c:768
+msgid "HTML Script"
+msgstr ""
+
+#: ../src/preferences_dialog.c:155 ../src/preferences_dialog.c:312
+#: ../src/preferences_dialog.c:313 ../src/preferences_dialog.c:772
+#: ../src/preferences_dialog.c:773
+msgid "HTML Question"
+msgstr ""
+
+#: ../src/preferences_dialog.c:156 ../src/preferences_dialog.c:317
+#: ../src/preferences_dialog.c:318 ../src/preferences_dialog.c:777
+#: ../src/preferences_dialog.c:778
+msgid "HTML Value"
+msgstr ""
+
+#. Font drop down elements : JavaScript
+#: ../src/preferences_dialog.c:159 ../src/preferences_dialog.c:322
+#: ../src/preferences_dialog.c:323 ../src/preferences_dialog.c:782
+#: ../src/preferences_dialog.c:783
+msgid "JavaScript Multiple-line Comment"
+msgstr ""
+
+#: ../src/preferences_dialog.c:160 ../src/preferences_dialog.c:327
+#: ../src/preferences_dialog.c:328 ../src/preferences_dialog.c:787
+#: ../src/preferences_dialog.c:788
+msgid "JavaScript Single-line Comment"
+msgstr ""
+
+#: ../src/preferences_dialog.c:161 ../src/preferences_dialog.c:332
+#: ../src/preferences_dialog.c:333 ../src/preferences_dialog.c:792
+#: ../src/preferences_dialog.c:793
+msgid "JavaScript Document Comment"
+msgstr ""
+
+#: ../src/preferences_dialog.c:162 ../src/preferences_dialog.c:337
+#: ../src/preferences_dialog.c:338 ../src/preferences_dialog.c:797
+#: ../src/preferences_dialog.c:798
+msgid "JavaScript Word"
+msgstr ""
+
+#: ../src/preferences_dialog.c:163 ../src/preferences_dialog.c:342
+#: ../src/preferences_dialog.c:343 ../src/preferences_dialog.c:802
+#: ../src/preferences_dialog.c:803
+msgid "JavaScript Keyword"
+msgstr ""
+
+#: ../src/preferences_dialog.c:164 ../src/preferences_dialog.c:347
+#: ../src/preferences_dialog.c:348 ../src/preferences_dialog.c:807
+#: ../src/preferences_dialog.c:808
+msgid "JavaScript Single-quoted String"
+msgstr ""
+
+#: ../src/preferences_dialog.c:165 ../src/preferences_dialog.c:352
+#: ../src/preferences_dialog.c:353 ../src/preferences_dialog.c:812
+#: ../src/preferences_dialog.c:813
+msgid "JavaScript Double-quoted String"
+msgstr ""
+
+#: ../src/preferences_dialog.c:166 ../src/preferences_dialog.c:357
+#: ../src/preferences_dialog.c:358 ../src/preferences_dialog.c:817
+#: ../src/preferences_dialog.c:818
+msgid "JavaScript Symbol"
+msgstr ""
+
+#. Font drop down elements : PHP
+#: ../src/preferences_dialog.c:169 ../src/preferences_dialog.c:362
+#: ../src/preferences_dialog.c:363 ../src/preferences_dialog.c:822
+#: ../src/preferences_dialog.c:823
+msgid "PHP Default"
+msgstr ""
+
+#: ../src/preferences_dialog.c:170 ../src/preferences_dialog.c:367
+#: ../src/preferences_dialog.c:368 ../src/preferences_dialog.c:827
+#: ../src/preferences_dialog.c:828
+msgid "PHP 'HString'"
+msgstr ""
+
+#: ../src/preferences_dialog.c:171 ../src/preferences_dialog.c:372
+#: ../src/preferences_dialog.c:373 ../src/preferences_dialog.c:832
+#: ../src/preferences_dialog.c:833
+msgid "PHP Simple String"
+msgstr ""
+
+#: ../src/preferences_dialog.c:172 ../src/preferences_dialog.c:377
+#: ../src/preferences_dialog.c:378 ../src/preferences_dialog.c:837
+#: ../src/preferences_dialog.c:838
+msgid "PHP Word"
+msgstr ""
+
+#: ../src/preferences_dialog.c:173 ../src/preferences_dialog.c:382
+#: ../src/preferences_dialog.c:383 ../src/preferences_dialog.c:842
+#: ../src/preferences_dialog.c:843
+msgid "PHP Number"
+msgstr ""
+
+#: ../src/preferences_dialog.c:174 ../src/preferences_dialog.c:387
+#: ../src/preferences_dialog.c:388 ../src/preferences_dialog.c:847
+#: ../src/preferences_dialog.c:848
+msgid "PHP Variable"
+msgstr ""
+
+#: ../src/preferences_dialog.c:175 ../src/preferences_dialog.c:392
+#: ../src/preferences_dialog.c:393 ../src/preferences_dialog.c:852
+#: ../src/preferences_dialog.c:853
+msgid "PHP Single-line Comment"
+msgstr ""
+
+#: ../src/preferences_dialog.c:176 ../src/preferences_dialog.c:397
+#: ../src/preferences_dialog.c:398 ../src/preferences_dialog.c:857
+#: ../src/preferences_dialog.c:858
+msgid "PHP Multiple-line Comment"
+msgstr ""
+
+#. Font drop down elements : CSS
+#: ../src/preferences_dialog.c:179 ../src/preferences_dialog.c:402
+#: ../src/preferences_dialog.c:403 ../src/preferences_dialog.c:862
+#: ../src/preferences_dialog.c:863
+msgid "CSS Tag"
+msgstr ""
+
+#: ../src/preferences_dialog.c:180 ../src/preferences_dialog.c:407
+#: ../src/preferences_dialog.c:408 ../src/preferences_dialog.c:867
+#: ../src/preferences_dialog.c:868
+msgid "CSS Class"
+msgstr ""
+
+#: ../src/preferences_dialog.c:181 ../src/preferences_dialog.c:412
+#: ../src/preferences_dialog.c:413 ../src/preferences_dialog.c:872
+#: ../src/preferences_dialog.c:873
+msgid "CSS Psuedoclass"
+msgstr ""
+
+#: ../src/preferences_dialog.c:182 ../src/preferences_dialog.c:417
+#: ../src/preferences_dialog.c:418 ../src/preferences_dialog.c:877
+#: ../src/preferences_dialog.c:878
+msgid "CSS Unknown Pseudoclass"
+msgstr ""
+
+#: ../src/preferences_dialog.c:183 ../src/preferences_dialog.c:422
+#: ../src/preferences_dialog.c:423 ../src/preferences_dialog.c:882
+#: ../src/preferences_dialog.c:883
+msgid "CSS Operator"
+msgstr ""
+
+#: ../src/preferences_dialog.c:184 ../src/preferences_dialog.c:427
+#: ../src/preferences_dialog.c:428 ../src/preferences_dialog.c:887
+#: ../src/preferences_dialog.c:888
+msgid "CSS Identifier"
+msgstr ""
+
+#: ../src/preferences_dialog.c:185 ../src/preferences_dialog.c:432
+#: ../src/preferences_dialog.c:433 ../src/preferences_dialog.c:892
+#: ../src/preferences_dialog.c:893
+msgid "CSS Unknown Identifier"
+msgstr ""
+
+#: ../src/preferences_dialog.c:186 ../src/preferences_dialog.c:437
+#: ../src/preferences_dialog.c:438 ../src/preferences_dialog.c:897
+#: ../src/preferences_dialog.c:898
+msgid "CSS Value"
+msgstr ""
+
+#: ../src/preferences_dialog.c:187 ../src/preferences_dialog.c:442
+#: ../src/preferences_dialog.c:443 ../src/preferences_dialog.c:902
+#: ../src/preferences_dialog.c:903
+msgid "CSS Comment"
+msgstr ""
+
+#: ../src/preferences_dialog.c:188 ../src/preferences_dialog.c:447
+#: ../src/preferences_dialog.c:448 ../src/preferences_dialog.c:907
+#: ../src/preferences_dialog.c:908
+msgid "CSS ID"
+msgstr ""
+
+#: ../src/preferences_dialog.c:189 ../src/preferences_dialog.c:452
+#: ../src/preferences_dialog.c:453 ../src/preferences_dialog.c:912
+#: ../src/preferences_dialog.c:913
+msgid "CSS Important"
+msgstr ""
+
+#: ../src/preferences_dialog.c:190 ../src/preferences_dialog.c:457
+#: ../src/preferences_dialog.c:458 ../src/preferences_dialog.c:917
+#: ../src/preferences_dialog.c:918
+msgid "CSS Directive"
+msgstr ""
+
+#. Font drop down elements : SQL
+#: ../src/preferences_dialog.c:193 ../src/preferences_dialog.c:462
+#: ../src/preferences_dialog.c:463 ../src/preferences_dialog.c:922
+#: ../src/preferences_dialog.c:923
+msgid "SQL Word"
+msgstr ""
+
+#: ../src/preferences_dialog.c:194 ../src/preferences_dialog.c:467
+#: ../src/preferences_dialog.c:468 ../src/preferences_dialog.c:927
+#: ../src/preferences_dialog.c:928
+msgid "SQL Identifier"
+msgstr ""
+
+#: ../src/preferences_dialog.c:195 ../src/preferences_dialog.c:472
+#: ../src/preferences_dialog.c:473 ../src/preferences_dialog.c:932
+#: ../src/preferences_dialog.c:933
+msgid "SQL Number"
+msgstr ""
+
+#: ../src/preferences_dialog.c:196 ../src/preferences_dialog.c:477
+#: ../src/preferences_dialog.c:478 ../src/preferences_dialog.c:937
+#: ../src/preferences_dialog.c:938
+msgid "SQL String"
+msgstr ""
+
+#: ../src/preferences_dialog.c:197 ../src/preferences_dialog.c:482
+#: ../src/preferences_dialog.c:483 ../src/preferences_dialog.c:942
+#: ../src/preferences_dialog.c:943
+msgid "SQL Operator"
+msgstr ""
+
+#: ../src/preferences_dialog.c:198 ../src/preferences_dialog.c:487
+#: ../src/preferences_dialog.c:488 ../src/preferences_dialog.c:947
+#: ../src/preferences_dialog.c:948
+msgid "SQL Comment"
+msgstr ""
+
+#: ../src/preferences_dialog.c:671
+#, c-format
+msgid ""
+"You have just changed the font to %s\n"
+"\n"
+"Would you like to use this font as the default for every element?"
+msgstr ""
+
+#: ../src/preferences_dialog.c:687
+#, c-format
+msgid ""
+"You have just changed the font size to %dpt\n"
+"\n"
+"Would you like to use this font size as the default for every element?"
+msgstr ""
+
+#: ../src/preferences_dialog.c:1203
+#, c-format
+msgid "Are you sure you want to delete template %s?"
+msgstr ""
+
+#: ../src/preferences_dialog.c:1262
+msgid "Name/Shortcut"
+msgstr ""
+
+#: ../src/preferences_dialog.c:1280
+msgid "Preferences"
+msgstr ""
+
+#: ../src/preferences_dialog.c:1297
+msgid "Tab size:"
+msgstr ""
+
+#: ../src/preferences_dialog.c:1308
+msgid "Show indentation guides"
+msgstr ""
+
+#: ../src/preferences_dialog.c:1315
+msgid "Wrap long lines"
+msgstr ""
+
+#: ../src/preferences_dialog.c:1322
+msgid "Use tabs instead of spaces for indentation"
+msgstr ""
+
+#: ../src/preferences_dialog.c:1329
+msgid "Show right hand edge guide"
+msgstr ""
+
+#: ../src/preferences_dialog.c:1340
+msgid "Right hand edge colour:"
+msgstr ""
+
+#: ../src/preferences_dialog.c:1355
+msgid "Right hand edge column"
+msgstr ""
+
+#: ../src/preferences_dialog.c:1366
+msgid "Save session (including open files) on exit"
+msgstr ""
+
+#: ../src/preferences_dialog.c:1373
+msgid "Only ever run 1 copy of gPHPEdit at a time"
+msgstr ""
+
+#: ../src/preferences_dialog.c:1380
+msgid "Editor"
+msgstr ""
+
+#: ../src/preferences_dialog.c:1401
+msgid "Bold"
+msgstr ""
+
+#: ../src/preferences_dialog.c:1407
+msgid "Italic"
+msgstr ""
+
+#: ../src/preferences_dialog.c:1413
+msgid "Attributes"
+msgstr ""
+
+#: ../src/preferences_dialog.c:1430
+msgid "Foreground:"
+msgstr ""
+
+#: ../src/preferences_dialog.c:1444
+msgid "Background:"
+msgstr ""
+
+#: ../src/preferences_dialog.c:1454
+msgid "Colours"
+msgstr ""
+
+#: ../src/preferences_dialog.c:1523
+msgid "Font"
+msgstr ""
+
+#: ../src/preferences_dialog.c:1545
+msgid "Element"
+msgstr ""
+
+#: ../src/preferences_dialog.c:1549
+msgid "Colour"
+msgstr ""
+
+#: ../src/preferences_dialog.c:1562
+msgid "Syntax check program:"
+msgstr ""
+
+#: ../src/preferences_dialog.c:1593
+msgid "Recognised PHP file extensions:"
+msgstr ""
+
+#: ../src/preferences_dialog.c:1608
+msgid "Shared library path(s):"
+msgstr ""
+
+#: ../src/preferences_dialog.c:1623
+msgid "Delay (calltip/function list):"
+msgstr ""
+
+#: ../src/preferences_dialog.c:1637
+msgid "Templates:"
+msgstr ""
+
+#: ../src/preferences_dialog.c:1675
+msgid "Add..."
+msgstr ""
+
+#: ../src/preferences_dialog.c:1681
+msgid "Edit..."
+msgstr ""
+
+#: ../src/preferences_dialog.c:1687
+msgid "Delete"
+msgstr ""
+
+#: ../src/preferences_dialog.c:1701
+msgid "PHP Coding"
+msgstr ""
+
+#: ../src/preferences_dialog.c:1705
+msgid "Apply"
+msgstr ""
+
+#: ../src/syntax_check.c:182
+msgid ""
+"Error calling PHP CLI (is PHP command line binary installed? If so, check if "
+"it's in your path or set php_binary in ~/.gnome2/gPHPEdit)\n"
+msgstr ""
+
+#: ../src/syntax_check.c:195
+msgid "You don't have any files open to check\n"
+msgstr ""
+
+#: ../src/tab.c:207
+#, c-format
+msgid ""
+"File access error:\n"
+" %s: "
+msgstr ""
+
+#: ../src/tab.c:210
+#, c-format
+msgid "File access error: \n"
+msgstr ""
+
+#. Print error and return if no
+#: ../src/tab.c:232 ../src/tab.c:243 ../src/tab.c:266 ../src/tab.c:345
+#: ../src/tab.c:373 ../src/tab.c:397
+#, c-format
+msgid "VFS Error: %s\n"
+msgstr ""
+
+#: ../src/tab.c:286
+#, c-format
+msgid "UTF-8 Error: %s\n"
+msgstr ""
+
+#: ../src/tab.c:317
+#, c-format
+msgid "gPHPEdit UTF-8 Error: %s\n"
+msgstr ""
+
+#: ../src/tab.c:322
+#, c-format
+msgid "Converted to UTF-8 size: %d\n"
+msgstr ""
+
+#: ../src/tab.c:442
+#, c-format
+msgid "Could not stat the file %s"
+msgstr ""
+
+#. This is funny in unix, but never hurts
+#: ../src/tab.c:451
+msgid "This file is too big. Unable to allocate memory."
+msgstr ""
+
+#: ../src/tab.c:464
+msgid "File size and loaded size not matching"
+msgstr ""
+
+#: ../src/tab.c:596
+#, c-format
+msgid "Help for function not found: %s\n"
+msgstr ""
+
+#: ../src/tab.c:616 ../src/tab.c:639
+msgid "Help: "
+msgstr ""
+
+#: ../src/tab.c:644
+msgid "Could not find the required command in the online help"
+msgstr ""
+
+#: ../src/tab.c:1065
+#, c-format
+msgid ""
+"The file %s was not found.\n"
+"\n"
+"Would you like to create it as an empty document?"
+msgstr ""
+
+#: ../src/tab.c:1066
+msgid "File not found"
+msgstr ""

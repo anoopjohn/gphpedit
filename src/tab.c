@@ -21,7 +21,9 @@
  
    The GNU General Public License is contained in the file COPYING.
 */
-
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
 #define PLAT_GTK 1
 #include <gtkscintilla.h>
 #include "folderbrowser.h"
@@ -37,9 +39,8 @@
 #include "main_window_callbacks.h"
 #include "preferences.h"
 #include "grel2abs.h"
-
 #include <gconf/gconf-client.h>
-#define INFO_FLAGS "standard::display-name,standard::content-type,standard::edit-name,standard::size,access::can-write,access::can-delete"
+#define INFO_FLAGS "standard::display-name,standard::content-type,standard::edit-name,standard::size,access::can-write,access::can-delete,standard::icon"
 GSList *editors;
 guint completion_timer_id;
 gboolean completion_timer_set;
@@ -187,6 +188,11 @@ static void tab_set_folding(Editor *editor, gint folding)
 		
 		gtk_scintilla_set_margin_width_n (GTK_SCINTILLA(editor->scintilla), 2, 14);
 		
+/*		//makers margin settings
+		gtk_scintilla_set_margin_type_n(GTK_SCINTILLA(main_window.current_editor->scintilla), 1, SC_MARGIN_SYMBOL);
+		gtk_scintilla_set_margin_width_n (GTK_SCINTILLA(main_window.current_editor->scintilla), 1, 14);
+		gtk_scintilla_set_margin_sensitive_n(GTK_SCINTILLA(main_window.current_editor->scintilla), 1, 1);
+*/
 		//g_signal_connect (G_OBJECT (editor->scintilla), "fold_clicked", G_CALLBACK (fold_clicked), NULL);
 		g_signal_connect (G_OBJECT (editor->scintilla), "modified", G_CALLBACK (handle_modified), NULL);
 		//g_signal_connect (G_OBJECT (editor->scintilla), "margin_click", G_CALLBACK (margin_clicked), NULL);
@@ -202,39 +208,26 @@ static void tab_set_event_handlers(Editor *editor)
 void tab_file_write (GObject *source_object, GAsyncResult *res, gpointer user_data)
 {
         Editor *editor = (Editor *)user_data;
-        gssize bytes;
         GError *error=NULL;
-        bytes= g_output_stream_write_finish((GOutputStream *)source_object,res,&error);
-        if (bytes==-1){
+        if(!g_file_replace_contents_finish ((GFile *)source_object,res,NULL,&error)){
             g_print(_("GIO Error: %s\n"),error->message);
             return;
         }
-        g_output_stream_close ((GOutputStream *) source_object,NULL,&error);
 	gtk_scintilla_set_save_point (GTK_SCINTILLA(editor->scintilla));
 	register_file_opened(editor->filename->str);
 	classbrowser_update();
 	session_save();
 }
 
-void tab_file_save_opened(GObject *source_object, GAsyncResult *res, gpointer user_data)
+void tab_file_save_opened(Editor *editor,GFile *file)
 {
 	gchar *write_buffer = NULL;
 	gsize text_length;
 	GError *error = NULL;
 	gchar *converted_text = NULL;
 	gsize utf8_size; // was guint
-        GFileOutputStream *file;
-        file=g_file_replace_finish ((GFile *)source_object,res,&error);
-        if (!file){
-	    if (error->code==G_IO_ERROR_CANT_CREATE_BACKUP){
-	    g_file_replace_async ((GFile *)source_object,NULL,FALSE,0,G_PRIORITY_DEFAULT,NULL, tab_file_save_opened, main_window.current_editor);
-	    return;
-	    }else{
-            g_print(_("GIO Error: %s\n"),error->message);
-            return;
-	    }
-        }
-	text_length = gtk_scintilla_get_length(GTK_SCINTILLA(main_window.current_editor->scintilla));
+
+	text_length = gtk_scintilla_get_length(GTK_SCINTILLA(editor->scintilla));
 
 	write_buffer = g_malloc0(text_length+1); // Include terminating null
 
@@ -243,9 +236,9 @@ void tab_file_save_opened(GObject *source_object, GAsyncResult *res, gpointer us
 		return;
 	}
 
-	gtk_scintilla_get_text(GTK_SCINTILLA(main_window.current_editor->scintilla), text_length+1, write_buffer);
+	gtk_scintilla_get_text(GTK_SCINTILLA(editor->scintilla), text_length+1, write_buffer);
         // If we converted to UTF-8 when loading, convert back to the locale to save
-	if (main_window.current_editor->converted_to_utf8) {
+	if (editor->converted_to_utf8) {
 		converted_text = g_locale_from_utf8(write_buffer, text_length, NULL, &utf8_size, &error);
 		if (error != NULL) {
 			g_print(_("UTF-8 Error: %s\n"), error->message);
@@ -258,22 +251,20 @@ void tab_file_save_opened(GObject *source_object, GAsyncResult *res, gpointer us
 			text_length = utf8_size;
 		}
         }
-        g_output_stream_write_async ((GOutputStream *)file,write_buffer,text_length,G_PRIORITY_DEFAULT,NULL,tab_file_write, user_data);
+       g_file_replace_contents_async (file,write_buffer,text_length,NULL,FALSE,G_FILE_CREATE_NONE,NULL,tab_file_write,editor);
 }
 
 void tab_validate_buffer_and_insert(gpointer buffer, Editor *editor)
 {
-	gchar *converted_text;
-	gsize utf8_size;// was guint
-	GError *error = NULL;
-	
 	if (g_utf8_validate(buffer, editor->file_size, NULL)) {
 		//g_print("Valid UTF8 according to gnome\n");
 		gtk_scintilla_add_text(GTK_SCINTILLA (editor->scintilla), editor->file_size, buffer);
 		editor->converted_to_utf8 = FALSE;
 	}
 	else {
-		
+		gchar *converted_text;
+		gsize utf8_size;// was guint
+		GError *error = NULL;			
 		converted_text = g_locale_to_utf8(buffer, editor->file_size, NULL, &utf8_size, &error);
 		if (error != NULL) {
                         gssize nchars=strlen(buffer);
@@ -284,20 +275,14 @@ void tab_validate_buffer_and_insert(gpointer buffer, Editor *editor)
 			g_print(_("gPHPEdit UTF-8 Error: %s\n"), error->message);
 			g_error_free(error);
                         gtk_scintilla_add_text(GTK_SCINTILLA (editor->scintilla), editor->file_size, buffer);
-                        } else {
-                        g_print(_("Converted to UTF-8 size: %d\n"), utf8_size);
-			gtk_scintilla_add_text(GTK_SCINTILLA (editor->scintilla), utf8_size, converted_text);
-			g_free(converted_text);
-			editor->converted_to_utf8 = TRUE;
-                        }
+			return;
+               		}
 		}
-		else {
 			g_print(_("Converted to UTF-8 size: %d\n"), utf8_size);
 			gtk_scintilla_add_text(GTK_SCINTILLA (editor->scintilla), utf8_size, converted_text);
 			g_free(converted_text);
 			editor->converted_to_utf8 = TRUE;
 		}
-	}
 }
 
 void tab_reset_scintilla_after_open(Editor *editor)
@@ -310,48 +295,63 @@ void tab_reset_scintilla_after_open(Editor *editor)
 	gtk_scintilla_grab_focus(GTK_SCINTILLA(editor->scintilla));
 }
 
-void tab_file_read(GObject *source_object, GAsyncResult *res, gpointer user_data)
-{
-        Editor *editor = (Editor *)user_data;
-        gssize bytes_read;
-        GError *error=NULL;
-        bytes_read=g_input_stream_read_finish ((GInputStream *)source_object,res,&error);
+/*
+ * icon_name_from_icon
+ *
+ *   this function returns the icon name of a Gicon
+ *   for the current gtk default icon theme
+ */
 
-        if (!bytes_read){
-            g_print(_("GIO Error: %s\n"),error->message);
-            return;
-        }
-        if(editor->file_size!=bytes_read){
-            g_print(_("Error loading file:%s\nFile was loaded partially\nPress Shift + Ctrl + R to reload the file\n"),editor->filename->str);
-        }
+static gchar *icon_name_from_icon(GIcon *icon) {
+	gchar *icon_name=NULL;
+	if (icon && G_IS_THEMED_ICON(icon)) {
+		GStrv names;
+
+		g_object_get(icon, "names", &names, NULL);
+		if (names && names[0]) {
+			GtkIconTheme *icon_theme;
+			int i;
+			icon_theme = gtk_icon_theme_get_default();
+			for (i = 0; i < g_strv_length (names); i++) {
+				if (gtk_icon_theme_has_icon(icon_theme, names[i])) {
+					icon_name = g_strdup(names[i]);
+					break;
+				}
+			}
+			g_strfreev (names);
+		}
+	} else {
+		icon_name = g_strdup("application-text");
+	}
+        if (!icon_name){
+           icon_name=g_strdup("application-text");
+       }
+        return icon_name;
+}
+
+void tab_file_opened (GObject *source_object, GAsyncResult *res, gpointer user_data)
+{
+        GError *error=NULL;
+        Editor *editor = (Editor *)user_data;
+	editor->buffer = g_malloc(editor->file_size);
+ if (!g_file_load_contents_finish ((GFile *) source_object,res,&(editor->buffer),&(editor->file_size),NULL,&error)) {
+	g_print("Error reading file. Gio error:%s",error->message);
+	return;
+	}
+        //g_print("Loaded %d bytes\n",editor->file_size);
 	// Clear scintilla buffer
 	gtk_scintilla_clear_all(GTK_SCINTILLA (editor->scintilla));
-	
+
 	//g_print("BUFFER=\n%s\n-------------------------------------------\n", buffer);
-	
+
 	tab_validate_buffer_and_insert(editor->buffer, editor);
 	tab_reset_scintilla_after_open(editor);
         g_free(editor->buffer);
-        g_input_stream_close ((GInputStream *)source_object,NULL,&error);
 	if (gotoline_after_reload) {
 		goto_line_int(gotoline_after_reload);
 		gotoline_after_reload = 0;
 	}
 	tab_check_php_file(editor);
-}
-
-void tab_file_opened (GObject *source_object, GAsyncResult *res, gpointer user_data)
-{
-        Editor *editor = (Editor *)user_data;
-	GFileInputStream *input;
-        GError *error=NULL;
-        input=g_file_read_finish ((GFile *)source_object,res,&error);
-        if (!input){
-            g_print(_("GIO Error: %s\n"),error->message);
-            return;
-        }
-	editor->buffer = g_malloc(editor->file_size);
-       g_input_stream_read_async ((GInputStream *)input, editor->buffer,editor->file_size,G_PRIORITY_DEFAULT,NULL,tab_file_read, editor);
 }
 
  void tab_load_file(Editor *editor)
@@ -387,12 +387,19 @@ void tab_file_opened (GObject *source_object, GAsyncResult *res, gpointer user_d
         /*initial file size, needed for buffer size*/
         editor->file_size= g_file_info_get_size (info);
         editor->isreadonly= !g_file_info_get_attribute_boolean (info,"access::can-write");
-        g_object_unref(info);
+	editor->contenttype=g_strdup(contenttype);
+	GIcon *icon= g_file_info_get_icon (info); /* get Gicon for mimetype*/
+	editor->file_icon=gtk_icon_theme_load_icon (gtk_icon_theme_get_default (), icon_name_from_icon(icon), GTK_ICON_SIZE_MENU, 0, NULL); // get icon of size menu
+	g_object_unref(info);
         // Open file
-        g_file_read_async (file,G_PRIORITY_DEFAULT,NULL,tab_file_opened, editor);
+        /*it's all ok, read file*/
+        g_file_load_contents_async (file,NULL,tab_file_opened,editor);
 }
 
-
+/**
+* tab_new_editor
+* creates and allocate a new editor must be freed when no longer needed
+*/
 Editor *tab_new_editor(void)
 {
 	Editor *editor;
@@ -401,7 +408,10 @@ Editor *tab_new_editor(void)
 	return editor;
 }
 
-
+/**
+* str_replace
+* replaces tpRp with withc in the string
+*/
 void str_replace(char *Str, char ToRp, char WithC)
 {
 	int i = 0;
@@ -420,43 +430,36 @@ void tab_help_load_file(Editor *editor, GString *filename)
 {
         GFile *file;
         GFileInfo *info;
-        GError *error;
+        GError *error=NULL;
         gchar *buffer;
         goffset size;
-        guint nchars;
-        GFileInputStream *input;
-        error=NULL;
-        
+        gsize nchars;
+
         file=g_file_new_for_uri (convert_to_full(filename->str));
-	info=g_file_query_info (file,G_FILE_ATTRIBUTE_STANDARD_SIZE,0,NULL,&error);
+	info=g_file_query_info (file,"standard::size,standard::icon",0,NULL,&error);
         if (!info){
             g_warning (_("Could not get file info for file %s. GIO error: %s \n"), filename->str,error->message);
-		return;
+	    return;
         }
         size= g_file_info_get_size (info);
+	GIcon *icon= g_file_info_get_icon (info); /* get Gicon for mimetype*/
+	editor->file_icon=gtk_icon_theme_load_icon (gtk_icon_theme_get_default (), icon_name_from_icon(icon), GTK_ICON_SIZE_MENU, 0, NULL); // get icon of size menu
         g_object_unref(info);
-	buffer = (gchar *)g_malloc (size);
+	buffer = (gchar *)g_malloc (size+1); /*include termination null*/
 	if (buffer == NULL && size != 0)
 	{
-		// This is funny in unix, but never hurts 
 		g_warning (_("This file is too big. Unable to allocate memory."));
-		//die();
 		return;
 	}
-	input=g_file_read (file,NULL,&error);
-        if (input ==NULL){
-            g_print("Error reading file. GIO error:%s\n",error->message);
-            g_free (buffer);
+        if (!g_file_load_contents (file,NULL,&buffer, &nchars,NULL,&error)){
+        g_print("Error reading file. GIO error:%s\n",error->message);
+        g_free (buffer);
 	return;
-        }
-	nchars= g_input_stream_read ((GInputStream *)input,buffer,size,NULL,&error);
-        if (nchars ==-1){
-            g_print("Error reading file. GIO error:%s\n",error->message);
         }
 	if (size != nchars) g_warning (_("File size and loaded size not matching"));
 	webkit_web_view_load_string (WEBKIT_WEB_VIEW(editor->help_view),buffer,"text/html", "UTF-8", filename->str);
+
 	g_free (buffer);
-	g_object_unref(input);
         g_object_unref(file);
 }
 
@@ -467,7 +470,7 @@ GString *tab_help_try_filename(gchar *prefix, gchar *command, gchar *suffix)
 	GString *long_filename;
         
 	long_filename = g_string_new(command);
-	long_filename = g_string_prepend(long_filename, prefix);
+        long_filename = g_string_prepend(long_filename, prefix);
 	if (suffix) {
 		long_filename = g_string_append(long_filename, suffix);
 	}
@@ -488,7 +491,6 @@ GString *tab_help_try_filename(gchar *prefix, gchar *command, gchar *suffix)
         if (g_file_test(long_filename->str, G_FILE_TEST_EXISTS)){
 		return long_filename;
 	}
-
 	g_string_free(long_filename, TRUE);
 	return NULL;
 }
@@ -501,7 +503,7 @@ GString *tab_help_find_helpfile(gchar *command)
         if (strstr(command,"/usr/")!=NULL){
             return long_filename;
         }
-	// For Debian, Ubuntu and sensible distrubutions...
+/*	// For Debian, Ubuntu and sensible distrubutions...
 	long_filename = tab_help_try_filename("/usr/share/doc/php-doc/html/function.", command, ".html");
 	if (long_filename)
 		return long_filename;
@@ -562,10 +564,25 @@ GString *tab_help_find_helpfile(gchar *command)
 	long_filename = tab_help_try_filename("/usr/doc/php-docs-4.2.3/html/", command, NULL);
 	if (long_filename)
 		return long_filename;
-
+*/
+#ifndef PHP_DOC_DIR
+#define PHP_DOC_DIR ""
+#endif
+        gchar *temp= NULL;
+        temp=g_strdup_printf ("%s/%s",PHP_DOC_DIR,"function.");
+        long_filename = tab_help_try_filename(temp, command, ".html");
+	if (long_filename)
+		return long_filename; //FIXME: free temp???
+        temp=g_strdup_printf ("%s/%s",PHP_DOC_DIR,"ref.");
+	long_filename = tab_help_try_filename(PHP_DOC_DIR, command, ".html");
+	if (long_filename)
+		return long_filename;
+        temp=g_strdup_printf ("%s/",PHP_DOC_DIR); //FIXME: free temp???
+	long_filename = tab_help_try_filename(temp, command, NULL);
+	if (long_filename)
+		return long_filename;
         g_print(_("Help for function not found: %s\n"), command);
-        
-	return long_filename;
+        return long_filename;
 }
 //return a substring skip n char from str
 void substring(char *str, char *subst, int start, int lenght)
@@ -574,30 +591,40 @@ int i;
 
 for(i=0; i<lenght && start+i<strlen(str); i++)
 subst[i] = str[start+i];
-
 subst[i] = '\0';
 } 
 
-static void webkit_link_clicked (WebKitWebView *view, WebKitWebFrame *frame, WebKitNetworkRequest *request,Editor *editor)
+gboolean webkit_link_clicked (WebKitWebView *web_view, WebKitWebFrame *frame, WebKitNetworkRequest *request,
+                                                        WebKitWebNavigationAction *navigation_action,
+                                                        WebKitWebPolicyDecision   *policy_decision,
+                                                        Editor *editor)
 {
 gchar *uri= (gchar *)webkit_network_request_get_uri(request);
 if (uri){
 GString *filename;
 char *resp;
 int cant;
-if( strstr(uri, "#")!=NULL){
+if(strstr(uri, "#")!=NULL){
 // it's a direction like filename.html#refpoint
 resp = strchr(uri,'#');
 cant=resp-uri; //len filename without refpoint
 substring(uri, uri, 0, cant); //skips refpoint part
 }
-filename=tab_help_find_helpfile(uri);
+if (editor->type==TAB_HELP){ filename=tab_help_find_helpfile(uri);
+}
+else{
+	if (strstr(uri,".htm")==NULL){
+	     return TRUE;
+	     } else {
+	     filename=g_string_new(uri);
+	     }
+}
 if (filename) {
 		tab_help_load_file(editor, filename);
-		
 		g_string_free(editor->filename, TRUE);
-		
+
 		editor->filename = g_string_new(filename->str);
+		if (editor->type==TAB_HELP){
 		editor->filename = g_string_prepend(editor->filename, _("Help: "));
 		
 		//TODO: These strings are not being freed. The app crashes when the free
@@ -605,12 +632,32 @@ if (filename) {
 		//g_free(editor->short_filename);
 		//g_free(editor->help_function);
 		editor->short_filename = g_strconcat("Help: ", uri, NULL);
+		} else {
+		editor->filename = g_string_prepend(editor->filename, _("Preview: "));
+		editor->short_filename = g_strconcat("Preview: ", uri, NULL);
+		}
 		editor->help_function = g_strdup(uri);
-		gtk_label_set_text(GTK_LABEL(editor->label), editor->short_filename);
-		
-		update_app_title();
+		return true;
 	}
 }
+ return false;
+}
+
+static void
+notify_title_cb (WebKitWebView* web_view, GParamSpec* pspec, Editor *editor)
+{
+   char *main_title = g_strdup (webkit_web_view_get_title(web_view));
+   if (main_title){
+   if (editor->type==TAB_HELP){
+   editor->short_filename = g_strconcat("Help: ", main_title, NULL);
+   } else {
+   editor->short_filename = g_strconcat("Preview: ", main_title, NULL);
+   }
+   if (editor->help_function) g_free(editor->help_function);
+   editor->help_function = main_title;
+   gtk_label_set_text(GTK_LABEL(editor->label), editor->short_filename);
+   update_app_title();
+   }
 }
 
 
@@ -639,6 +686,7 @@ gboolean tab_create_help(Editor *editor, GString *filename)
 		editor->label = gtk_label_new (caption->str);
 		editor->is_untitled = FALSE;
 		editor->saved = TRUE;
+		editor->contenttype="text/plain";
 		gtk_widget_show (editor->label);
 		editor->help_view= WEBKIT_WEB_VIEW(webkit_web_view_new ());
 		editor->help_scrolled_window = gtk_scrolled_window_new(NULL, NULL);
@@ -648,15 +696,50 @@ gboolean tab_create_help(Editor *editor, GString *filename)
 		
 		//debug("%s - %s", long_filename, caption->str);
 
-		g_signal_connect(G_OBJECT(editor->help_view), "navigation-requested",
+		g_signal_connect(G_OBJECT(editor->help_view), "navigation-policy-decision-requested",
 			 G_CALLBACK(webkit_link_clicked),editor);
-
+		g_signal_connect (G_OBJECT(editor->help_view), "notify::title", G_CALLBACK (notify_title_cb), editor);
 		gtk_widget_show_all(editor->help_scrolled_window);
 		
 		editor_tab = get_close_tab_widget(editor);
 		gtk_notebook_append_page (GTK_NOTEBOOK (main_window.notebook_editor), editor->help_scrolled_window, editor_tab);
 		gtk_notebook_set_current_page (GTK_NOTEBOOK (main_window.notebook_editor), -1);
 	}
+	return TRUE;
+}
+
+gboolean tab_create_preview(Editor *editor, GString *filename)
+{
+	GString *caption;
+	GtkWidget *editor_tab;
+ 
+	caption = g_string_new(filename->str);
+	caption = g_string_prepend(caption, _("Preview: "));
+
+	editor->short_filename = caption->str;
+	editor->help_function = g_strdup(filename->str);
+	editor->filename = caption;
+	editor->label = gtk_label_new (caption->str);
+	editor->is_untitled = FALSE;
+	editor->saved = TRUE;
+	gtk_widget_show (editor->label);
+	editor->help_view= WEBKIT_WEB_VIEW(webkit_web_view_new ());
+	editor->help_scrolled_window = gtk_scrolled_window_new(NULL, NULL);
+	gtk_container_add(GTK_CONTAINER(editor->help_scrolled_window), GTK_WIDGET(editor->help_view));
+	
+        tab_help_load_file(editor, filename);
+
+	//debug("%s - %s", long_filename, caption->str);
+
+	g_signal_connect(G_OBJECT(editor->help_view), "navigation-policy-decision-requested",
+			 G_CALLBACK(webkit_link_clicked),editor);
+	g_signal_connect (G_OBJECT(editor->help_view), "notify::title", G_CALLBACK (notify_title_cb), editor);
+	gtk_widget_show_all(editor->help_scrolled_window);
+		
+	editor_tab = get_close_tab_widget(editor);
+	gtk_notebook_append_page (GTK_NOTEBOOK (main_window.notebook_editor), editor->help_scrolled_window, editor_tab);
+	gtk_notebook_set_current_page (GTK_NOTEBOOK (main_window.notebook_editor), -1);
+
 	return TRUE;
 }
 
@@ -979,22 +1062,6 @@ gboolean switch_to_file_or_open(gchar *filename, gint line_number)
 	return TRUE;
 }
 
-
-void close_saved_empty_Untitled()
-{
-	Editor *editor;
-	gint length;
-
-	if (editors) {
-		editor = editors->data;
-		if (editor->is_untitled && editor->saved) {
-			length = gtk_scintilla_get_length(GTK_SCINTILLA(editor->scintilla));
-			if (length == 0) {
-				try_close_page(editor);
-			}
-		}
-	}
-}
 gchar *recordar;
 void openfile_mount(GObject *source_object,GAsyncResult *res,gpointer user_data) {
 	GError *error=NULL;
@@ -1042,7 +1109,7 @@ gboolean tab_create_new(gint type, GString *filename)
                         error2=NULL;
                         return FALSE;
                         }
-                        g_print(_("Error opening file GIO error:%s\n"),error2->message);
+                        g_print(_("Error opening file GIO error:%s\nfile:%s"),error2->message,abs_path);
                         error2=NULL;
                         return FALSE;
                     }
@@ -1053,7 +1120,7 @@ gboolean tab_create_new(gint type, GString *filename)
 			result = yes_no_dialog(_("File not found"), dialog_message->str);
 			g_string_free(dialog_message, TRUE);
                         g_object_unref(file);
-			if (result != -8){//0) {
+			if (result != -8){
                             return FALSE;
 			}
 			file_created = TRUE;
@@ -1065,7 +1132,8 @@ gboolean tab_create_new(gint type, GString *filename)
         editor = tab_new_editor();
 	editor->type = type;
 	if (editor->type == TAB_HELP) {
-		if (!tab_create_help(editor, filename)) {
+
+                if (!tab_create_help(editor, filename)) {
 			// Couldn't find the help file, don't keep the editor
 			editors = g_slist_remove(editors, editor);
 		}
@@ -1073,8 +1141,15 @@ gboolean tab_create_new(gint type, GString *filename)
 			editor->saved = TRUE;
 		}
 
-	}
-	else {
+        } else if (editor->type== TAB_PREVIEW) {
+            if (!tab_create_preview(editor, filename)) {
+			// Couldn't find the help file, don't keep the editor
+			editors = g_slist_remove(editors, editor);
+		}
+		else {
+			editor->saved = TRUE;
+		}
+        } else {
 		editor->type = TAB_FILE;
                 editor->scintilla = gtk_scintilla_new();
                 tab_set_general_scintilla_properties(editor);
@@ -1103,6 +1178,8 @@ gboolean tab_create_new(gint type, GString *filename)
 				editor->opened_from = get_folder(main_window.current_editor->filename);
 			}
 			editor->is_untitled=TRUE;
+			/* set default text icon */
+			editor->file_icon= gtk_icon_theme_load_icon (gtk_icon_theme_get_default (), "text-plain", GTK_ICON_SIZE_MENU, 0, NULL); // get icon of size menu
 		}
                 
 		// Hmmm, I had the same error as the following comment.  A reshuffle here and upgrading GtkScintilla2 to 0.1.0 seems to have fixed it
@@ -1156,6 +1233,10 @@ GtkWidget *get_close_tab_widget(Editor *editor) {
         g_object_unref(rcstyle);
 	g_signal_connect(G_OBJECT(close_button), "clicked", G_CALLBACK(on_tab_close_activate), editor);
 	g_signal_connect(G_OBJECT(hbox), "style-set", G_CALLBACK(on_tab_close_set_style), close_button);
+	/* load file icon */
+	GtkWidget *icon= gtk_image_new_from_pixbuf (editor->file_icon);
+	gtk_widget_show (icon);
+	gtk_box_pack_start(GTK_BOX(hbox), icon, FALSE, FALSE, 0);
 	gtk_box_pack_start(GTK_BOX(hbox), editor->label, FALSE, FALSE, 0);
 	gtk_box_pack_end(GTK_BOX(hbox), close_button, FALSE, FALSE, 0);
 	gtk_widget_show(editor->label);

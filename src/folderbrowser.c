@@ -206,7 +206,7 @@ void add_file(GtkTreeStore *pTree, GFileInfo *info, GtkTreeIter *iter, GtkTreeIt
               g_print("DEBUG::ADD file to folderbrowser; Mime:%s\n",mime);
               #endif
             GIcon *icon= g_file_info_get_icon (info); // get iconname 
-            p_file_image =gtk_icon_theme_load_icon (gtk_icon_theme_get_default (), icon_name_from_icon(icon), 16, 0, NULL); // get icon of size 16px
+            p_file_image =gtk_icon_theme_load_icon (gtk_icon_theme_get_default (), icon_name_from_icon(icon), GTK_ICON_SIZE_MENU, 0, NULL); // get icon of size menu
             gtk_tree_store_insert_with_values(GTK_TREE_STORE(pTree), iter2, iter, 0, 0, p_file_image, 1, g_file_info_get_display_name (info),2,mime,-1);
             g_object_unref(info);
             }
@@ -266,7 +266,7 @@ info=g_file_enumerator_next_file (files,NULL,&error);
 while (info){
    if (g_file_info_get_file_type (info)==G_FILE_TYPE_DIRECTORY){
       add_folder(pTree, sChemin,info, iter, iter2);
-      if (error!=NULL){
+      if (!error){
        //error=NULL;
        //Start file monitor for folderbrowser autorefresh
        monitor= g_file_monitor_directory (file,G_FILE_MONITOR_NONE,NULL,&error);
@@ -838,7 +838,6 @@ gchar *trunc_on_char(gchar * string, gchar which_char)
   	Tcopyfile *cf;
   	GSList *tmplist;
   	cf = g_new0(Tcopyfile,1);
-  	//cf->bfwin = bfwin;
   	cf->destdir = destdir;
   	g_object_ref(cf->destdir);
   	cf->sourcelist = g_slist_copy(sources);
@@ -853,7 +852,6 @@ void copy_files_async(GFile *destdir, gchar *sources) {
   	Tcopyfile *cf;
   	gchar **splitted, **tmp;
   	cf = g_new0(Tcopyfile,1);
-  	//cf->bfwin = bfwin;
   	cf->destdir = destdir;
   	g_object_ref(cf->destdir);
   	/* create the source and destlist ! */
