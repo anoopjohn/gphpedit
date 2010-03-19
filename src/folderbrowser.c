@@ -38,7 +38,6 @@ Folderbrowser has the following features:
 //TODO:Async Update
 #include "folderbrowser.h"
 #include "tab.h"
-#include "time.h"
 //#define DEBUGFOLDERBROWSER
 
 typedef struct {
@@ -88,7 +87,8 @@ void fb_file_v_drag_data_received(GtkWidget * widget, GdkDragContext * context, 
 void copy_async_lcb(GObject *source_object,GAsyncResult *res,gpointer user_data);
 void copy_uris_async(GFile *destdir, GSList *sources);
 void copy_files_async(GFile *destdir, gchar *sources);
-
+static void go_home_cb(void);
+static void go_up_cb(void);
 static FOLDERFILE *new_folderfile(void)
 
 {
@@ -120,9 +120,9 @@ void finish_enumerate (GObject *source_object, GAsyncResult *res, gpointer user_
 GError *error=NULL;
 GList *filesinfo=NULL;
 filesinfo= g_file_enumerator_next_files_finish ((GFileEnumerator *)source_object, res,&error);
-//si es nulo entonces o termine o tengo error
+//two options: finish or error
 if (!filesinfo){
-//si la lista no esta vacia inicio la carga del arbol
+//if list isn't empty print files
 print_files();
 return;
 }
@@ -153,7 +153,7 @@ if (!g_file_info_get_is_hidden (info)  && !g_file_info_get_is_backup (info)){
                 }
 	} else {
 	if (IS_TEXT(mime) && !IS_APPLICATION(mime)){
-		//aca archivos
+		//files
 		FOLDERFILE *current;
 		current=new_folderfile();
 		current->mime=mime;
@@ -167,7 +167,7 @@ if (!g_file_info_get_is_hidden (info)  && !g_file_info_get_is_backup (info)){
    while (gtk_events_pending ())
 	  gtk_main_iteration ();
 }
-//siguientes archivos
+//next files
 g_file_enumerator_next_files_async  ((GFileEnumerator *)source_object,30,G_PRIORITY_DEFAULT,NULL, finish_enumerate,user_data);
 }
 
@@ -184,6 +184,12 @@ void update_folderbrowser (void){
             g_slist_free (filesinfolder);
             filesinfolder=NULL;
             init_folderbrowser(GTK_TREE_STORE(main_window.pTree),sChemin,iter,&iter2);
+	} else {
+            gtk_button_set_label(GTK_BUTTON(main_window.button_dialog), sChemin);
+            /* clear tree and cache data*/
+            gtk_tree_store_clear(main_window.pTree);
+            g_slist_free (filesinfolder);
+            filesinfolder=NULL;	
 	}
 }
 
@@ -604,7 +610,7 @@ void folderbrowser_create(MainWindow *main_window)
 
  	gtk_tree_view_append_column(GTK_TREE_VIEW(main_window->pListView), pColumn);
  	main_window->pScrollbar = gtk_scrolled_window_new(NULL, NULL);
-        gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(main_window->pScrollbar),GTK_POLICY_ALWAYS,GTK_POLICY_ALWAYS);
+        gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(main_window->pScrollbar),GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
         gtk_container_add(GTK_CONTAINER(main_window->pScrollbar), main_window->pListView);
 
  	//renderer for text
@@ -668,7 +674,30 @@ void folderbrowser_create(MainWindow *main_window)
 	gtk_widget_show(main_window->close_sidebar_button);
 	gtk_box_pack_end(GTK_BOX(hbox), main_window->close_sidebar_button, FALSE, FALSE, 0);
 	gtk_widget_show(hbox);
+	
+	/* home and up buttons*/
+	GtkWidget *hbox2;
+	hbox2 = gtk_hbox_new(FALSE, 0);
+	/* home button */
+	main_window->button_home= gtk_button_new();
+	main_window->image_home= gtk_image_new_from_stock (GTK_STOCK_HOME,GTK_ICON_SIZE_BUTTON);
+	gtk_widget_show(main_window->image_home);
+	gtk_button_set_image(GTK_BUTTON(main_window->button_home), main_window->image_home);
+	gtk_widget_show(main_window->button_home);
+	gtk_box_pack_start(GTK_BOX(hbox2), main_window->button_home, FALSE, FALSE, 0);
+	g_signal_connect(G_OBJECT(main_window->button_home), "clicked", G_CALLBACK (go_home_cb),NULL);
+
+	/* up button */
+	main_window->button_up= gtk_button_new();
+	main_window->image_up= gtk_image_new_from_stock (GTK_STOCK_GO_UP,GTK_ICON_SIZE_BUTTON );
+	gtk_widget_show(main_window->image_up);
+	gtk_button_set_image(GTK_BUTTON(main_window->button_up), main_window->image_up);
+	gtk_widget_show(main_window->button_up);
+	gtk_box_pack_start(GTK_BOX(hbox2), main_window->button_up, FALSE, FALSE, 0);
+	g_signal_connect(G_OBJECT(main_window->button_up), "clicked", G_CALLBACK (go_up_cb),NULL);
+	/*TODO: FILE SEARCH ENTRY */
         gtk_box_pack_start(GTK_BOX(main_window->folder), hbox, FALSE, TRUE, 2);
+        gtk_box_pack_start(GTK_BOX(main_window->folder), hbox2, FALSE, TRUE, 2);
  	gtk_box_pack_start(GTK_BOX(main_window->folder), main_window->button_dialog, FALSE, FALSE, 2);
  	gtk_box_pack_start(GTK_BOX(main_window->folder), main_window->pScrollbar, TRUE, TRUE, 2);
         gtk_widget_show(main_window->button_dialog);
@@ -952,4 +981,33 @@ static gchar *get_path_from_tree(GtkTreeView *tree_view, gchar *root_path){
      return g_strdup(file_name);
     }
     return NULL;
+}
+
+static void go_home_cb(void){
+if(main_window.current_editor){
+/*if there is a file open set file folder as home dir*/
+if (main_window.current_editor->is_untitled==FALSE){
+     sChemin= g_path_get_dirname (main_window.current_editor->filename->str);
+}else {
+	/* set default dir as home dir*/
+	sChemin= DEFAULT_DIR;
+}
+  #ifdef DEBUGFOLDERBROWSER
+  g_print("DEBUG:::home dir:%s",sChemin);
+  #endif
+update_folderbrowser ();
+}
+}
+
+/*
+* go up one level in directory tree
+*/
+static void go_up_cb(void){
+if (sChemin && !IS_DEFAULT_DIR(sChemin)){
+     sChemin= g_path_get_dirname (sChemin);
+  #ifdef DEBUGFOLDERBROWSER
+  g_print("DEBUG:::Up dir:%s",sChemin);
+  #endif
+update_folderbrowser ();
+}
 }
