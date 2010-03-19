@@ -88,6 +88,10 @@ typedef struct
  	GtkWidget *pListView;
  	GtkWidget *pScrollbar;
  	GtkWidget *button_dialog;
+ 	GtkWidget *button_home;
+	GtkWidget *image_home;
+ 	GtkWidget *button_up;
+	GtkWidget *image_up;
 }
 MainWindow;
 
