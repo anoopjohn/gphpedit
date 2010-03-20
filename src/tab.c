@@ -41,6 +41,7 @@
 #include "grel2abs.h"
 #include <gconf/gconf-client.h>
 #define INFO_FLAGS "standard::display-name,standard::content-type,standard::edit-name,standard::size,access::can-write,access::can-delete,standard::icon"
+
 GSList *editors;
 guint completion_timer_id;
 gboolean completion_timer_set;
@@ -119,7 +120,8 @@ void tab_set_configured_scintilla_properties(GtkScintilla *scintilla, Preference
 	gtk_scintilla_style_set_fore (scintilla, STYLE_LINENUMBER, prefs.line_number_fore);
 	gtk_scintilla_style_set_back (scintilla, STYLE_LINENUMBER, prefs.line_number_back);
 	gtk_scintilla_style_set_size (scintilla, STYLE_LINENUMBER, prefs.line_number_size);
-
+	/* set font quality */
+	gtk_scintilla_set_font_quality(scintilla, prefs.font_quality);
 	gtk_scintilla_set_indentation_guides (scintilla, prefs.show_indentation_guides);
 	gtk_scintilla_set_edge_mode (scintilla, prefs.edge_mode);
 	gtk_scintilla_set_edge_column (scintilla, prefs.edge_column);
