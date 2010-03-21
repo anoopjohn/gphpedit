@@ -1267,6 +1267,12 @@ void on_save_session_toggle(GtkToggleButton *togglebutton, gpointer user_data)
 	temp_preferences.save_session = gtk_toggle_button_get_active(togglebutton);
 }
 
+void on_save_folderbrowser_toggle(GtkToggleButton *togglebutton, gpointer user_data)
+{
+	temp_preferences.showfolderbrowser = gtk_toggle_button_get_active(togglebutton);
+}
+
+
 void on_single_instance_only_toggle(GtkToggleButton *togglebutton, gpointer user_data)
 {
 	temp_preferences.single_instance_only = gtk_toggle_button_get_active(togglebutton);
@@ -1601,6 +1607,13 @@ void preferences_dialog_create (void)
 	gtk_container_set_border_width (GTK_CONTAINER (preferences_dialog.single_instance_only), 8);
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(preferences_dialog.single_instance_only), temp_preferences.single_instance_only);
 	g_signal_connect(G_OBJECT(GTK_CHECK_BUTTON(preferences_dialog.single_instance_only)), "toggled", G_CALLBACK(on_single_instance_only_toggle), NULL);
+	
+	preferences_dialog.folderbrowser = gtk_check_button_new_with_mnemonic (_("Show folderbrowser (need restart)"));
+	gtk_widget_show (preferences_dialog.folderbrowser);
+	gtk_box_pack_start (GTK_BOX (preferences_dialog.vbox6), preferences_dialog.folderbrowser, FALSE, FALSE, 0);
+	gtk_container_set_border_width (GTK_CONTAINER (preferences_dialog.folderbrowser), 8);
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(preferences_dialog.folderbrowser), temp_preferences.showfolderbrowser);
+	g_signal_connect(G_OBJECT(GTK_CHECK_BUTTON(preferences_dialog.folderbrowser)), "toggled", G_CALLBACK(on_save_folderbrowser_toggle), NULL);
 
 	preferences_dialog.label29 = gtk_label_new (_("Editor"));
 	gtk_widget_show (preferences_dialog.label29);

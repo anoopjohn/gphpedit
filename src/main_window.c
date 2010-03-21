@@ -131,7 +131,7 @@ static void main_window_create_appbar(void)
     box = gtk_hbox_new(FALSE, 0);
     main_window.zoomlabel=gtk_label_new(_("Zoom:100%"));
     gtk_widget_show (main_window.zoomlabel);
-    gtk_box_pack_start(GTK_BOX(box), main_window.zoomlabel, FALSE, FALSE, 0);
+    gtk_box_pack_start(GTK_BOX(box), main_window.zoomlabel, FALSE, FALSE, 8);
     gtk_box_pack_end(GTK_BOX(main_window.appbar), box, FALSE, FALSE, 25);
     gtk_widget_show (box);
     gtk_widget_show (main_window.appbar);
@@ -890,7 +890,7 @@ void main_window_create(void)
 
 	update_app_title();
 	// folder browser init
-	folderbrowser_create(&main_window);
+	if (preferences.showfolderbrowser) folderbrowser_create(&main_window);
 }
 
 void update_controls(void){

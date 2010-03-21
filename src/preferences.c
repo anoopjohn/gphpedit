@@ -162,7 +162,7 @@ void preferences_load(void)
         }
 	/* font quality */
         preferences.font_quality = gconf_client_get_int (config,"/gPHPEdit/defaults/fontquality",NULL);
-
+	preferences.showfolderbrowser = gconf_client_get_bool (config,"/gPHPEdit/defaults/showfolderbrowser",NULL);	
 	//preferences.auto_indent_after_brace = gnome_config_get_int ("gPHPEdit/defaults/autoindentafterbrace=1");
 	preferences.save_session = gconf_client_get_bool (config,"/gPHPEdit/defaults/save_session",NULL);
 	preferences.use_tabs_instead_spaces = gconf_client_get_bool(config,"/gPHPEdit/defaults/use_tabs_instead_spaces",&error);
@@ -688,6 +688,7 @@ void preferences_save()
 	gconf_client_set_int (config,"/gPHPEdit/defaults/auto_complete_delay", preferences.auto_complete_delay,NULL);
 	gconf_client_set_int (config,"/gPHPEdit/defaults/calltip_delay", preferences.calltip_delay,NULL);
 	gconf_client_set_int (config,"/gPHPEdit/defaults/fontquality", preferences.font_quality,NULL);
+	gconf_client_set_bool (config,"/gPHPEdit/defaults/showfolderbrowser", preferences.showfolderbrowser,NULL);
 	//gconf_client_set_int (config,"/gPHPEdit//defaults/autoindentafterbrace"), preferences.auto_indent_after_brace,NULL);
 	gconf_client_set_string (config,"/gPHPEdit/defaults/php_file_extensions",preferences.php_file_extensions,NULL);
 	gconf_client_set_bool (config,"/gPHPEdit/defaults/save_session", preferences.save_session,NULL);

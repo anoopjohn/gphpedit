@@ -59,6 +59,7 @@ typedef struct
   GtkWidget *label34;
   GtkWidget *edge_column;
   GtkWidget *save_session;
+  GtkWidget *folderbrowser;
   GtkWidget *label29;
   GtkWidget *vbox10;
   GtkWidget *hbox22;
