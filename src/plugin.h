@@ -42,6 +42,8 @@ typedef struct
 	GtkWidget *menu_item;
 	GString *filename;
 	gchar *name;
+	gchar *description;
 } Plugin;
 
+gint parse_shortcut(gint accel_number);
 #endif

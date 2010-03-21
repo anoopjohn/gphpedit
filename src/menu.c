@@ -29,6 +29,7 @@
 #endif
 #include "main_window.h"
 #include "main_window_callbacks.h"
+#include "plugin.h"
 /*needed for menu hints*/
 guint context_id;
 guint message_id;
@@ -152,6 +153,7 @@ void install_menu_hint(GtkWidget *widget, gchar *message){
   g_signal_connect(G_OBJECT(widget), "enter-notify-event", G_CALLBACK(show_hint), message);
   g_signal_connect(G_OBJECT(widget), "leave-notify-event", G_CALLBACK(delete_hint), NULL);
 }
+#ifdef PACKAGE_BUGREPORT
 /*
  * bugreport
  * launch default system browser with bug report page
@@ -161,6 +163,7 @@ void bugreport(void){
     screen = gtk_widget_get_screen (GTK_WIDGET (main_window.window));
     gtk_show_uri (screen, PACKAGE_BUGREPORT, GDK_CURRENT_TIME, NULL);
 }
+#endif
 #ifdef TRANSLATE_URL
 /*
  * translate
@@ -423,6 +426,8 @@ main_window.menu->tog_class =create_check_menu_item(main_window.menu->tog_class,
   main_window.menu->plugins[i]= gtk_menu_item_new_with_mnemonic(_("_Plugin"));
   g_signal_connect(G_OBJECT(main_window.menu->plugins[i]), "activate", G_CALLBACK(run_plugin), (gpointer)i);
   gtk_menu_shell_append(GTK_MENU_SHELL(main_window.menu->menuplugin), main_window.menu->plugins[i]);
+  if (i<10)
+ gtk_widget_add_accelerator(main_window.menu->plugins[i], "activate", main_window.menu->accel_group, parse_shortcut(i), GDK_CONTROL_MASK, GTK_ACCEL_VISIBLE);
   }
   main_window.menu->help = gtk_menu_item_new_with_mnemonic(_("_Help"));
   gtk_menu_item_set_submenu(GTK_MENU_ITEM(main_window.menu->help), main_window.menu->menuhelp);

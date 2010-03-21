@@ -496,7 +496,6 @@ int plugin_discover_type(GString *filename)
 		
 		//g_print("Returning Discovered type of %d\n------------------------------------\n", type);
 		g_free(stdout);
-
 	}
 	else {
 		g_print("Spawning %s gave error %s\n", filename->str, error->message);
@@ -505,6 +504,72 @@ int plugin_discover_type(GString *filename)
 	g_string_free(command_line, TRUE);
 	
 	return type;
+}
+
+/****/
+
+gchar *plugin_discover_name(GString *filename,const gchar *file_name)
+{
+	GString *command_line;
+	gchar *stdout = NULL;
+	GError *error = NULL;
+	gint exit_status;
+	gchar *name=NULL;
+	gint stdout_len;
+	
+	command_line = g_string_new(filename->str);
+	command_line = g_string_prepend(command_line, "'");
+	command_line = g_string_append(command_line, "' -name");
+	
+	if (g_spawn_command_line_sync(command_line->str,&stdout,NULL, &exit_status,&error)) {
+		stdout_len = strlen(stdout);
+		//g_print("------------------------------------\nDISCOVERY\nCOMMAND: %s\nOUTPUT: %s (%d)\n", command_line->str, stdout, stdout_len);
+		
+		name=g_strdup(stdout);
+		g_free(stdout);
+		
+ 		//g_print("plugin name:%s\n",name);
+	}
+	else {
+		//g_print("Spawning %s gave error %s\n", filename->str, error->message);
+		name=g_strdup(file_name);
+	}	
+	
+	g_string_free(command_line, TRUE);
+	
+	return name;
+}
+
+gchar *plugin_discover_desc(GString *filename)
+{
+	GString *command_line;
+	gchar *stdout = NULL;
+	GError *error = NULL;
+	gint exit_status;
+	gchar *desc=NULL;
+	gint stdout_len;
+	
+	command_line = g_string_new(filename->str);
+	command_line = g_string_prepend(command_line, "'");
+	command_line = g_string_append(command_line, "' -desc");
+	
+	if (g_spawn_command_line_sync(command_line->str,&stdout,NULL, &exit_status,&error)) {
+		stdout_len = strlen(stdout);
+		//g_print("------------------------------------\nDISCOVERY\nCOMMAND: %s\nOUTPUT: %s (%d)\n", command_line->str, stdout, stdout_len);
+		
+		desc=g_strdup(stdout);
+		g_free(stdout);
+		
+ 		//g_print("plugin description:%s\n",desc);
+	}
+	else {
+		//g_print("Spawning %s gave error %s\n", filename->str, error->message);
+		desc="";
+	}	
+	
+	g_string_free(command_line, TRUE);
+	
+	return desc;
 }
 
 gint sort_plugin_func(gconstpointer a, gconstpointer b)
@@ -535,13 +600,15 @@ void plugin_discover_available(void)
 			for (plugin_name = g_dir_read_name(dir); plugin_name != NULL; plugin_name = g_dir_read_name(dir)) {
 				// Recommended by __tim in #gtk+ on irc.freenode.net 27/10/2004 11:30
 				plugin = g_new0 (Plugin, 1);
-				plugin->name = g_strdup(plugin_name);
+				//plugin->name = g_strdup(plugin_name);
 				// TODO: Could do with replacing ' in name with \' for spawn
-				filename = g_string_new(plugin->name);
+				filename = g_string_new(plugin_name);
 				filename = g_string_prepend(filename, user_plugin_dir->str);
 				plugin->filename = filename;
+				plugin->name = plugin_discover_name(filename,plugin_name);
 				//g_print ("PLUGIN FILENAME: %s\n", plugin->filename->str);
 				plugin->type = plugin_discover_type(plugin->filename);
+				plugin->description = plugin_discover_desc(plugin->filename);
 				Plugins = g_list_append(Plugins, plugin);
 				//g_print("%s\n", plugin_name);
 			}
@@ -556,12 +623,14 @@ void plugin_discover_available(void)
 			for (plugin_name = g_dir_read_name(dir); plugin_name != NULL; plugin_name = g_dir_read_name(dir)) {
 				// Recommended by __tim in #gtk+ on irc.freenode.net 27/10/2004 11:30
 				plugin = g_new0 (Plugin, 1);
-				plugin->name = g_strdup(plugin_name);
+				//plugin->name = g_strdup(plugin_name);
 				filename = g_string_new(plugin_name);
 				filename = g_string_prepend(filename, "/usr/share/gphpedit/plugins/");
 				plugin->filename = filename;
+				plugin->name = plugin_discover_name(filename,plugin_name);
 				//g_print ("PLUGIN FILENAME: %s\n", plugin->filename->str);
 				plugin->type = plugin_discover_type(plugin->filename);
+				plugin->description = plugin_discover_desc(plugin->filename);
 				Plugins = g_list_append(Plugins, plugin);
 				//g_print("%s\n", plugin_name);
 			}
@@ -599,14 +668,16 @@ void plugin_create_menu_items()
 			gtk_label_set_text(label, plugin->name);
 
                         gtk_widget_show(&main_window.menu->plugin[num_plugin]);
+			install_menu_hint(GTK_WIDGET(bin), plugin->description);
 		}
 		
 		num_plugin++;
 	}
-
 	//g_print("Blanking all non-found plugin entries\n");
         for (hide_plugin=num_plugin; hide_plugin <NUM_PLUGINS_MAX; hide_plugin++) {
-            gtk_widget_hide(main_window.menu->plugins[hide_plugin]);
+/*            gtk_widget_hide(main_window.menu->plugins[hide_plugin]);*/
+		/* don't hide destroy it */
+            gtk_widget_destroy (main_window.menu->plugins[hide_plugin]);
 	}
 }
 void plugin_exec(gint plugin_num)

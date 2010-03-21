@@ -126,4 +126,5 @@ typedef struct
 Mainmenu;
 
 void main_window_create_menu(void);
+void install_menu_hint(GtkWidget *widget, gchar *message);
 #endif /*MAIN_WINDOW_MENU_H*/

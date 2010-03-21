@@ -354,6 +354,46 @@ gint main_window_key_press_event(GtkWidget   *widget, GdkEventKey *event,gpointe
 			}
 			return TRUE;
 		}
+		else if ((event->state & GDK_CONTROL_MASK)==GDK_CONTROL_MASK && ((event->keyval == GDK_0)))	{
+			if (main_window.menu->plugins[0]) plugin_exec(0);
+			return TRUE;
+		}
+		else if ((event->state & GDK_CONTROL_MASK)==GDK_CONTROL_MASK && ((event->keyval == GDK_1)))	{
+			if (main_window.menu->plugins[1]) plugin_exec(1);
+			return TRUE;
+		}
+		else if ((event->state & GDK_CONTROL_MASK)==GDK_CONTROL_MASK && ((event->keyval == GDK_2)))	{
+			if (main_window.menu->plugins[2]) plugin_exec(2);
+			return TRUE;
+		}
+		else if ((event->state & GDK_CONTROL_MASK)==GDK_CONTROL_MASK && ((event->keyval == GDK_3)))	{
+			if (main_window.menu->plugins[3]) plugin_exec(3);
+			return TRUE;
+		}
+		else if ((event->state & GDK_CONTROL_MASK)==GDK_CONTROL_MASK && ((event->keyval == GDK_4)))	{
+			if (main_window.menu->plugins[4]) plugin_exec(4);
+			return TRUE;
+		}
+		else if ((event->state & GDK_CONTROL_MASK)==GDK_CONTROL_MASK && ((event->keyval == GDK_5)))	{
+			if (main_window.menu->plugins[5]) plugin_exec(5);
+			return TRUE;
+		}
+		else if ((event->state & GDK_CONTROL_MASK)==GDK_CONTROL_MASK && ((event->keyval == GDK_6)))	{
+			if (main_window.menu->plugins[6]) plugin_exec(6);
+			return TRUE;
+		}
+		else if ((event->state & GDK_CONTROL_MASK)==GDK_CONTROL_MASK && ((event->keyval == GDK_7)))	{
+			if (main_window.menu->plugins[7]) plugin_exec(7);
+			return TRUE;
+		}
+		else if ((event->state & GDK_CONTROL_MASK)==GDK_CONTROL_MASK && ((event->keyval == GDK_8)))	{
+			if (main_window.menu->plugins[8]) plugin_exec(8);
+			return TRUE;
+		}
+		else if ((event->state & GDK_CONTROL_MASK)==GDK_CONTROL_MASK && ((event->keyval == GDK_9)))	{
+			if (main_window.menu->plugins[9]) plugin_exec(9);
+			return TRUE;
+		}
 		else if ((event->keyval == GDK_F2))	{
 			///find next marker
 			//bugfix:segfault if type=TABHELP
