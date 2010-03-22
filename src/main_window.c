@@ -131,7 +131,7 @@ static void main_window_create_appbar(void)
     box = gtk_hbox_new(FALSE, 0);
     main_window.zoomlabel=gtk_label_new(_("Zoom:100%"));
     gtk_widget_show (main_window.zoomlabel);
-    gtk_box_pack_start(GTK_BOX(box), main_window.zoomlabel, FALSE, FALSE, 8);
+    gtk_box_pack_start(GTK_BOX(box), main_window.zoomlabel, FALSE, FALSE, 0);
     gtk_box_pack_end(GTK_BOX(main_window.appbar), box, FALSE, FALSE, 25);
     gtk_widget_show (box);
     gtk_widget_show (main_window.appbar);
@@ -870,6 +870,18 @@ void main_window_create(void)
         main_window_create_menu();
 	main_window_create_maintoolbar();
 	main_window_create_findtoolbar();
+
+	/* set up info bar */
+	main_window.infobar= gtk_info_bar_new_with_buttons (_("Reload"),1,_("Cancel"),2,NULL);
+	gtk_info_bar_set_message_type (GTK_INFO_BAR(main_window.infobar),GTK_MESSAGE_WARNING);
+	main_window.infolabel = gtk_label_new ("");
+	gtk_widget_show (main_window.infolabel);
+	GtkWidget *content_area = gtk_info_bar_get_content_area (GTK_INFO_BAR (main_window.infobar));
+	gtk_container_add (GTK_CONTAINER (content_area), main_window.infolabel);
+	g_signal_connect (main_window.infobar, "response", G_CALLBACK (process_external), main_window.current_editor);
+        gtk_box_pack_start (GTK_BOX (main_window.prinbox), main_window.infobar, FALSE, FALSE, 0);			
+	//gtk_widget_show (main_window.infobar);
+
         main_window_create_panes();
         main_window_fill_panes();
         main_window_create_appbar();
@@ -883,6 +895,9 @@ void main_window_create(void)
 	g_signal_connect (G_OBJECT (main_window.window), "key_press_event", G_CALLBACK (main_window_key_press_event), NULL);
 	g_signal_connect (G_OBJECT (main_window.window), "size_allocate", G_CALLBACK (main_window_resize), NULL);
 	g_signal_connect (G_OBJECT (main_window.window), "window-state-event", G_CALLBACK (main_window_state_changed), NULL);
+	g_signal_connect (G_OBJECT (main_window.window), "focus-in-event", G_CALLBACK (main_window_activate_focus), NULL);
+
+
 
 	main_window.clipboard = gtk_clipboard_get(GDK_SELECTION_CLIPBOARD);
 

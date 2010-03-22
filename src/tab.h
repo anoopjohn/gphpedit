@@ -50,7 +50,7 @@ typedef struct
 	GtkWidget *help_scrolled_window;
 	WebKitWebView *help_view;
 	gint scintilla_id;
-	gint file_mtime; // TODO: Change from a gint to something more meaningful
+	GTimeVal file_mtime;
 	GString *filename;
 	gchar *short_filename;
 	gboolean isreadonly;

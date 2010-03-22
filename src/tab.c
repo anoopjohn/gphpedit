@@ -40,7 +40,7 @@
 #include "preferences.h"
 #include "grel2abs.h"
 #include <gconf/gconf-client.h>
-#define INFO_FLAGS "standard::display-name,standard::content-type,standard::edit-name,standard::size,access::can-write,access::can-delete,standard::icon"
+#define INFO_FLAGS "standard::display-name,standard::content-type,standard::edit-name,standard::size,access::can-write,access::can-delete,standard::icon,time::modified,time::modified-usec"
 
 GSList *editors;
 guint completion_timer_id;
@@ -73,7 +73,7 @@ void debug_dump_editors(void)
 		g_print("Scintilla widget :%p\n", editor->scintilla);
 		g_print("Scintilla lexer  :%d\n", gtk_scintilla_get_lexer(GTK_SCINTILLA(editor->scintilla)));
 		g_print("Scintilla ID     :%d\n", editor->scintilla_id);
-		g_print("File mtime       :%d\n", editor->file_mtime);
+		g_print("File mtime       :%lo\n", editor->file_mtime.tv_sec);
 		g_print("File shortname   :%s\n", editor->short_filename);
 		g_print("File fullname    :%s\n", editor->filename->str);
 		if (editor->opened_from) {
@@ -216,6 +216,16 @@ void tab_file_write (GObject *source_object, GAsyncResult *res, gpointer user_da
             return;
         }
 	gtk_scintilla_set_save_point (GTK_SCINTILLA(editor->scintilla));
+        GFileInfo *info;
+        info= g_file_query_info ((GFile *)source_object,"time::modified,time::modified-usec",G_FILE_QUERY_INFO_NONE, NULL,&error);
+        if (!info){
+               	g_warning (_("Could not get the file modification time. GIO error: %s \n"), error->message);
+		g_get_current_time (&editor->file_mtime); /*set current time*/
+	} else {
+	/* update modification time */	
+	g_file_info_get_modification_time (info,&editor->file_mtime);
+	g_object_unref(info);	
+	}
 	register_file_opened(editor->filename->str);
 	classbrowser_update();
 	session_save();
@@ -392,6 +402,7 @@ void tab_file_opened (GObject *source_object, GAsyncResult *res, gpointer user_d
 	editor->contenttype=g_strdup(contenttype);
 	GIcon *icon= g_file_info_get_icon (info); /* get Gicon for mimetype*/
 	editor->file_icon=gtk_icon_theme_load_icon (gtk_icon_theme_get_default (), icon_name_from_icon(icon), GTK_ICON_SIZE_MENU, 0, NULL); // get icon of size menu
+	g_file_info_get_modification_time (info,&editor->file_mtime);
 	g_object_unref(info);
         // Open file
         /*it's all ok, read file*/
@@ -1295,6 +1306,7 @@ static void save_point_reached(GtkWidget *scintilla)
 		update_app_title();
 	}
 }
+
 static void save_point_left(GtkWidget *scintilla)
 {
 	GString *label_caption;
