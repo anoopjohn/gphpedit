@@ -1286,16 +1286,15 @@ static void save_point_reached(GtkWidget *scintilla)
 
 	editor = editor_find_from_scintilla(scintilla);
 	if (editor->short_filename != NULL) {
-		label_caption = g_string_new("<span color=\"black\">");
-		label_caption = g_string_append(label_caption, editor->short_filename);
-		label_caption = g_string_append(label_caption, "</span>");
+		label_caption = g_string_new(editor->short_filename);//g_string_new("<span color=\"black\">");
+//		label_caption = g_string_append(label_caption, editor->short_filename);
+//		label_caption = g_string_append(label_caption, "</span>");
 		gtk_label_set_markup(GTK_LABEL (editor->label), label_caption->str);
 		g_string_free(label_caption, TRUE);
 		editor->saved=TRUE;
 		update_app_title();
 	}
 }
-
 static void save_point_left(GtkWidget *scintilla)
 {
 	GString *label_caption;
