@@ -23,4 +23,32 @@
 */
    
 #include "plugin.h"
-//#include "main_window_menu.h"
+#include <gdk/gdkkeysyms.h>
+/*
+* transform a number into it's corresponding keysym
+*/
+gint parse_shortcut(gint accel_number){ 
+     switch (accel_number) {
+ 	case 0: return GDK_0;
+		break;
+	case 1: return GDK_1;
+		break;
+	case 2: return GDK_2;
+		break;
+	case 3: return GDK_3;
+		break;
+	case 4: return GDK_4;
+		break;
+	case 5: return GDK_5;
+		break;
+	case 6: return GDK_6;
+		break;
+	case 7: return GDK_7;
+		break;
+	case 8: return GDK_8;
+		break;
+	case 9: return GDK_9;
+		break;
+}
+ return GDK_0;
+}

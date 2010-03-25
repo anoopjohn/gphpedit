@@ -1,4 +1,13 @@
+Makefile.in
+aclocal.m4
+data/Makefile.in
+doc/Makefile.in
+m4/libtool.m4
+m4/ltversion.m4
+pixmaps/Makefile.in
+src/Makefile.in
 Makefile
+configure
 config.h
 config.log
 config.status

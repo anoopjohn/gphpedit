@@ -19,7 +19,7 @@ dnl with this program; if not, write to the Free Software Foundation, Inc.,
 dnl 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
 dnl
 AC_PREREQ([2.59])
-AC_INIT(gPHPEdit, 0.9.97, https://savannah.nongnu.org/support/?group=gphpedit)
+AC_INIT([gPHPEdit],[0.9.97],[https://savannah.nongnu.org/support/?group=gphpedit],[gphpedit],[http://www.gphpedit.org])
 # give autoconf the name of a file whose existence is a hint that
 # autoconf has been started from the right directory.
 AC_CONFIG_SRCDIR([src/main.c])
@@ -147,6 +147,8 @@ fi
 dnl define default font and font size
 AC_DEFINE_UNQUOTED(DEFAULT_FONT, "!Sans",[default font])
 AC_DEFINE_UNQUOTED(DEFAULT_FONT_SIZE, 12,[default font size])
+dnl define default translate url
+AC_DEFINE_UNQUOTED(TRANSLATE_URL, "https://www.transifex.net/projects/p/gphpedit/c/main/",[default tranlate url])
 
 dnl  ------------------
 dnl | language support |-------------------------------------------------------

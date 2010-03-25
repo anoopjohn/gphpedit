@@ -37,6 +37,8 @@ typedef struct
 {
 	GtkWidget *window;
         GtkWidget *prinbox;
+	GtkWidget *infobar;
+	GtkWidget *infolabel;
 	/* menu */
         Mainmenu *menu;
 	/* toolbars */
@@ -88,6 +90,10 @@ typedef struct
  	GtkWidget *pListView;
  	GtkWidget *pScrollbar;
  	GtkWidget *button_dialog;
+ 	GtkWidget *button_home;
+	GtkWidget *image_home;
+ 	GtkWidget *button_up;
+	GtkWidget *image_up;
 }
 MainWindow;
 

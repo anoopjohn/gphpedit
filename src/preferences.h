@@ -57,7 +57,8 @@ typedef struct
 	gboolean use_tabs_instead_spaces;
 	gboolean single_instance_only;
 	gboolean showfolderbrowser;
-
+	gint font_quality;	
+	
 	// Default formatting
 	gchar *default_font;
 	gint default_fore;

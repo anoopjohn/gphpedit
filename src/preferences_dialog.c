@@ -88,6 +88,23 @@ static GList *get_font_sizes()
 	return sizes;
 }
 
+static GList *get_font_qualities()
+{
+	GList *qualities = NULL;
+	
+/*
++#define SC_EFF_QUALITY_DEFAULT 0
++#define SC_EFF_QUALITY_NON_ANTIALIASED 1
++#define SC_EFF_QUALITY_ANTIALIASED 2
++#define SC_EFF_QUALITY_LCD_OPTIMIZED 3
+
+*/	
+	qualities = g_list_append(qualities, "Default");
+	qualities = g_list_append(qualities, "Non Antialiased");
+	qualities = g_list_append(qualities, "LCD Optimized");	
+	return qualities;
+}
+
 GString *create_sample_text()
 {
 	GString *ret;
@@ -1182,6 +1199,20 @@ void on_edge_colour_changed(GtkColorButton *widget, gpointer user_data)
 	temp_preferences.edge_colour = color.red | (color.green << 8) | (color.blue << 16);
 }
 
+void on_fontqualities_entry_changed(GtkEntry *Entry, gpointer data)
+{
+	const char *texttemp=gtk_combo_box_get_active_text(GTK_COMBO_BOX(preferences_dialog.fontstyle));
+
+	if(strcmp(texttemp,"Non Antialiased")==0){
+	temp_preferences.font_quality=SC_EFF_QUALITY_NON_ANTIALIASED;		
+	} else if(strcmp(texttemp,"LCD Optimized")==0){
+	temp_preferences.font_quality= SC_EFF_QUALITY_LCD_OPTIMIZED;
+	} else {
+	/* set default */
+	temp_preferences.font_quality=SC_EFF_QUALITY_DEFAULT;
+	}
+}
+
 /**
  * Callback registered for setting the selection background color from 
  * preferences dialog.
@@ -1235,6 +1266,12 @@ void on_save_session_toggle(GtkToggleButton *togglebutton, gpointer user_data)
 {
 	temp_preferences.save_session = gtk_toggle_button_get_active(togglebutton);
 }
+
+void on_save_folderbrowser_toggle(GtkToggleButton *togglebutton, gpointer user_data)
+{
+	temp_preferences.showfolderbrowser = gtk_toggle_button_get_active(togglebutton);
+}
+
 
 void on_single_instance_only_toggle(GtkToggleButton *togglebutton, gpointer user_data)
 {
@@ -1571,6 +1608,13 @@ void preferences_dialog_create (void)
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(preferences_dialog.single_instance_only), temp_preferences.single_instance_only);
 	g_signal_connect(G_OBJECT(GTK_CHECK_BUTTON(preferences_dialog.single_instance_only)), "toggled", G_CALLBACK(on_single_instance_only_toggle), NULL);
 	
+	preferences_dialog.folderbrowser = gtk_check_button_new_with_mnemonic (_("Show folderbrowser (need restart)"));
+	gtk_widget_show (preferences_dialog.folderbrowser);
+	gtk_box_pack_start (GTK_BOX (preferences_dialog.vbox6), preferences_dialog.folderbrowser, FALSE, FALSE, 0);
+	gtk_container_set_border_width (GTK_CONTAINER (preferences_dialog.folderbrowser), 8);
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(preferences_dialog.folderbrowser), temp_preferences.showfolderbrowser);
+	g_signal_connect(G_OBJECT(GTK_CHECK_BUTTON(preferences_dialog.folderbrowser)), "toggled", G_CALLBACK(on_save_folderbrowser_toggle), NULL);
+
 	preferences_dialog.label29 = gtk_label_new (_("Editor"));
 	gtk_widget_show (preferences_dialog.label29);
 	gtk_notebook_set_tab_label (GTK_NOTEBOOK (preferences_dialog.notebook1), gtk_notebook_get_nth_page (GTK_NOTEBOOK (preferences_dialog.notebook1), 0), preferences_dialog.label29);
@@ -1625,11 +1669,10 @@ void preferences_dialog_create (void)
 	gtk_widget_show (preferences_dialog.label42);
 	gtk_box_pack_start (GTK_BOX (preferences_dialog.hbox23), preferences_dialog.label42, FALSE, FALSE, 0);
 	
-	preferences_dialog.foreground_colour = gtk_color_button_new();//gnome_color_picker_new ();
+	preferences_dialog.foreground_colour = gtk_color_button_new();
 	gtk_widget_show (preferences_dialog.foreground_colour);
 	gtk_box_pack_start (GTK_BOX (preferences_dialog.hbox23), preferences_dialog.foreground_colour, FALSE, FALSE, 0);
 	gtk_container_set_border_width (GTK_CONTAINER (preferences_dialog.foreground_colour), 8);
-	//g_signal_connect(G_OBJECT(GNOME_COLOR_PICKER(preferences_dialog.foreground_colour)), "color-set", G_CALLBACK(on_fore_changed), NULL);
 	g_signal_connect(G_OBJECT(GTK_COLOR_BUTTON(preferences_dialog.foreground_colour)), "color-set", G_CALLBACK(on_fore_changed), NULL);
 	preferences_dialog.hbox24 = gtk_hbox_new (FALSE, 0);
 	gtk_widget_show (preferences_dialog.hbox24);
@@ -1639,7 +1682,7 @@ void preferences_dialog_create (void)
 	gtk_widget_show (preferences_dialog.label43);
 	gtk_box_pack_start (GTK_BOX (preferences_dialog.hbox24), preferences_dialog.label43, FALSE, FALSE, 0);
 	
-	preferences_dialog.background_colour = gtk_color_button_new();//gnome_color_picker_new ();
+	preferences_dialog.background_colour = gtk_color_button_new();
 	gtk_widget_show (preferences_dialog.background_colour);
 	gtk_box_pack_start (GTK_BOX (preferences_dialog.hbox24), preferences_dialog.background_colour, FALSE, FALSE, 0);
 	gtk_container_set_border_width (GTK_CONTAINER (preferences_dialog.background_colour), 8);
@@ -1710,6 +1753,37 @@ void preferences_dialog_create (void)
 	gtk_widget_show (preferences_dialog.label44);
 	gtk_frame_set_label_widget (GTK_FRAME (preferences_dialog.frame4), preferences_dialog.label44);
 	
+
+	/*  font quality */
+
+	preferences_dialog.hboxfs = gtk_frame_new (NULL);
+	gtk_widget_show (preferences_dialog.hboxfs);
+	gtk_box_pack_start (GTK_BOX (preferences_dialog.vbox10), preferences_dialog.hboxfs, FALSE, FALSE, 0);
+
+	preferences_dialog.fontlabel = gtk_label_new (_("Font Quality"));
+	gtk_widget_show (preferences_dialog.fontlabel);
+	gtk_frame_set_label_widget (GTK_FRAME (preferences_dialog.hboxfs), preferences_dialog.fontlabel);
+
+	preferences_dialog.fontstyle = gtk_combo_box_entry_new_text ();
+	gtk_widget_show (preferences_dialog.fontstyle);
+	gtk_container_add (GTK_CONTAINER (preferences_dialog.hboxfs), preferences_dialog.fontstyle);
+	gtk_container_set_border_width (GTK_CONTAINER (preferences_dialog.fontstyle), 8);
+	
+	comboitems = get_font_qualities();
+	for (items = g_list_first(comboitems); items != NULL; items = g_list_next(items)) {
+		// Suggested by__tim in #Gtk+/Freenode to be able to find the item again from set_control_to_highlight
+		g_object_set_qdata (G_OBJECT (preferences_dialog.fontstyle), g_quark_from_string (items->data), 
+			GINT_TO_POINTER (gtk_tree_model_iter_n_children (gtk_combo_box_get_model (GTK_COMBO_BOX(preferences_dialog.fontstyle)), NULL)));
+		gtk_combo_box_append_text (GTK_COMBO_BOX (preferences_dialog.fontstyle), items->data);
+	}
+	g_signal_connect (G_OBJECT (GTK_COMBO_BOX (preferences_dialog.fontstyle)), "changed",
+											G_CALLBACK (on_fontqualities_entry_changed),
+											NULL);
+
+	g_list_free (comboitems);
+	/* set actual quality */
+	gtk_combo_box_set_active (GTK_COMBO_BOX(preferences_dialog.fontstyle), (temp_preferences.font_quality!=0)?temp_preferences.font_quality -1 :0);
+
 	preferences_dialog.frame1 = gtk_frame_new (NULL);
 	gtk_widget_show (preferences_dialog.frame1);
 	gtk_box_pack_start (GTK_BOX (preferences_dialog.vbox10), preferences_dialog.frame1, TRUE, TRUE, 0);
