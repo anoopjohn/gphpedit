@@ -7,6 +7,7 @@ m4/ltversion.m4
 pixmaps/Makefile.in
 src/Makefile.in
 Makefile
+configure
 config.h
 config.log
 config.status
