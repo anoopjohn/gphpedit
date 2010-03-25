@@ -12,6 +12,7 @@ config.h
 config.log
 config.status
 config.status.lineno
+build-aux
 data/Makefile
 doc/Makefile
 gphpedit.desktop
@@ -28,6 +29,7 @@ src/Makefile
 stamp-h1
 *.[oa]
 src/gphpedit
+src/config.h.in
 autom4te.cache
 patches
 gphpedit.spec
