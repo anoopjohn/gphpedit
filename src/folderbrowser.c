@@ -35,7 +35,6 @@ Folderbrowser has the following features:
 -Only displays files which could be opened by the editor
 -Drag and drop: if you drop uri into the folderbrowser these files will be copied to current folderbrowser folder
 */
-//TODO:Async Update
 #include "folderbrowser.h"
 #include "tab.h"
 //#define DEBUGFOLDERBROWSER
@@ -51,7 +50,7 @@ enum {
 	TARGET_URI_LIST,
 	TARGET_STRING
 };
-
+GtkTreeModel *cache_model;
 GSList *filesinfolder;
 typedef struct {
   GFile *file;
@@ -89,6 +88,9 @@ void copy_uris_async(GFile *destdir, GSList *sources);
 void copy_files_async(GFile *destdir, gchar *sources);
 static void go_home_cb(void);
 static void go_up_cb(void);
+static void on_cleanicon_press (GtkEntry *entry, GtkEntryIconPosition icon_pos, GdkEvent *event, gpointer user_data);
+static void search_typed (GtkEntry *entry, const gchar *text, gint length, gint *position, gpointer data);
+static void search_activate(GtkEntry *entry,gpointer user_data);
 static FOLDERFILE *new_folderfile(void)
 
 {
@@ -109,6 +111,7 @@ if (!enumerator){
     g_print(_("Error getting folderbrowser files. GIO Error:%s\t"),error->message);
     DEBUG_GFILE((GFile *)source_object,TRUE);
     gtk_button_set_label(GTK_BUTTON(main_window.button_dialog), DEFAULT_DIR);
+    gtk_widget_set_sensitive (main_window.searchentry, FALSE);
     return;
 }
    while (gtk_events_pending ())
@@ -190,6 +193,7 @@ void update_folderbrowser (void){
             gtk_tree_store_clear(main_window.pTree);
             g_slist_free (filesinfolder);
             filesinfolder=NULL;	
+	    gtk_widget_set_sensitive (main_window.searchentry, FALSE);
 	}
 }
 
@@ -684,7 +688,7 @@ void folderbrowser_create(MainWindow *main_window)
 	gtk_widget_show(main_window->image_home);
 	gtk_button_set_image(GTK_BUTTON(main_window->button_home), main_window->image_home);
 	gtk_widget_show(main_window->button_home);
-	gtk_box_pack_start(GTK_BOX(hbox2), main_window->button_home, FALSE, FALSE, 0);
+	gtk_box_pack_start(GTK_BOX(hbox2), main_window->button_home, TRUE, TRUE, 0);
 	g_signal_connect(G_OBJECT(main_window->button_home), "clicked", G_CALLBACK (go_home_cb),NULL);
 
 	/* up button */
@@ -693,9 +697,25 @@ void folderbrowser_create(MainWindow *main_window)
 	gtk_widget_show(main_window->image_up);
 	gtk_button_set_image(GTK_BUTTON(main_window->button_up), main_window->image_up);
 	gtk_widget_show(main_window->button_up);
-	gtk_box_pack_start(GTK_BOX(hbox2), main_window->button_up, FALSE, FALSE, 0);
+	gtk_box_pack_start(GTK_BOX(hbox2), main_window->button_up, TRUE, TRUE, 0);
 	g_signal_connect(G_OBJECT(main_window->button_up), "clicked", G_CALLBACK (go_up_cb),NULL);
 	/*TODO: FILE SEARCH ENTRY */
+
+	main_window->searchentry = gtk_entry_new();
+	gtk_widget_show(main_window->searchentry);
+        gtk_widget_set_sensitive (main_window->searchentry, FALSE);
+//	gtk_container_add (GTK_CONTAINER (item), main_window.toolbar_find->search_entry);
+//	gtk_tool_item_set_tooltip_text(GTK_TOOL_ITEM (item), _("Incremental search"));
+//TODO tooltip??
+        gtk_entry_set_icon_from_stock (GTK_ENTRY(main_window->searchentry),GTK_ENTRY_ICON_SECONDARY,GTK_STOCK_CLEAR);
+        gtk_entry_set_icon_from_stock (GTK_ENTRY(main_window->searchentry),GTK_ENTRY_ICON_PRIMARY,GTK_STOCK_FIND);
+        g_signal_connect (G_OBJECT (main_window->searchentry), "icon-press", G_CALLBACK (on_cleanicon_press), NULL);
+	g_signal_connect_after(G_OBJECT(main_window->searchentry), "insert_text", G_CALLBACK(search_typed), NULL);
+	g_signal_connect_after(G_OBJECT(main_window->searchentry), "backspace", G_CALLBACK(search_activate), NULL);
+	g_signal_connect_after(G_OBJECT(main_window->searchentry), "activate", G_CALLBACK(search_activate), NULL);
+
+	gtk_box_pack_start(GTK_BOX(hbox2), main_window->searchentry, TRUE, TRUE, 0);
+
         gtk_box_pack_start(GTK_BOX(main_window->folder), hbox, FALSE, TRUE, 2);
         gtk_box_pack_start(GTK_BOX(main_window->folder), hbox2, FALSE, TRUE, 2);
  	gtk_box_pack_start(GTK_BOX(main_window->folder), main_window->button_dialog, FALSE, FALSE, 2);
@@ -724,6 +744,7 @@ void init_folderbrowser(GtkTreeStore *pTree, gchar *filename, GtkTreeIter *iter,
     //path don't exist?
     if (!g_file_query_exists (file,NULL)){
         gtk_button_set_label(GTK_BUTTON(main_window.button_dialog), DEFAULT_DIR);
+	gtk_widget_set_sensitive (main_window.searchentry, FALSE);
 	return;
     }
     GFileInfo *info =g_file_query_info (file,G_FILE_ATTRIBUTE_ACCESS_CAN_READ, G_FILE_QUERY_INFO_NOFOLLOW_SYMLINKS,NULL,&error);
@@ -733,6 +754,7 @@ void init_folderbrowser(GtkTreeStore *pTree, gchar *filename, GtkTreeIter *iter,
     g_print("DEBUG::folder %s\n",sChemin);
     #endif
     gtk_button_set_label(GTK_BUTTON(main_window.button_dialog), DEFAULT_DIR);
+    gtk_widget_set_sensitive (main_window.searchentry, FALSE);
     return;
     }
     if (!g_file_info_get_attribute_boolean (info, G_FILE_ATTRIBUTE_ACCESS_CAN_READ)){
@@ -741,6 +763,7 @@ void init_folderbrowser(GtkTreeStore *pTree, gchar *filename, GtkTreeIter *iter,
     g_print("DEBUG::folder %s\n",sChemin);
     #endif
     gtk_button_set_label(GTK_BUTTON(main_window.button_dialog), DEFAULT_DIR);
+    gtk_widget_set_sensitive (main_window.searchentry, FALSE);
     return;
     }
     g_object_unref(info);
@@ -945,6 +968,12 @@ gtk_tree_store_clear(main_window.pTree);
             #endif
 	g_signal_connect(monitor, "changed", (GCallback) update_folderbrowser_signal, NULL);
 	}
+	if (!IS_DEFAULT_DIR(sChemin)){
+	cache_model=gtk_tree_view_get_model (GTK_TREE_VIEW(main_window.pListView));
+        gtk_widget_set_sensitive (main_window.searchentry, TRUE);
+	} else {
+        gtk_widget_set_sensitive (main_window.searchentry, FALSE);
+	}
 }
 
 static gchar *get_mime_from_tree(GtkTreeView *tree_view){
@@ -991,6 +1020,7 @@ if (main_window.current_editor->is_untitled==FALSE){
 }else {
 	/* set default dir as home dir*/
 	sChemin= DEFAULT_DIR;
+        gtk_widget_set_sensitive (main_window.searchentry, FALSE);
 }
   #ifdef DEBUGFOLDERBROWSER
   g_print("DEBUG:::home dir:%s",sChemin);
@@ -1009,5 +1039,67 @@ if (sChemin && !IS_DEFAULT_DIR(sChemin)){
   g_print("DEBUG:::Up dir:%s",sChemin);
   #endif
 update_folderbrowser ();
+} else {
+	gtk_widget_set_sensitive (main_window.searchentry, FALSE);
+	}
 }
+
+static gboolean visible_func (GtkTreeModel *model,
+              GtkTreeIter  *iter,
+              gpointer      data)
+{
+  /* Visible if row is non-empty and name column contain filename as prefix */
+  gchar *str;
+  gboolean visible = FALSE;
+  const char *filename= (const char *) data;
+  gtk_tree_model_get (model, iter, 1, &str, -1);
+  if (str && strncasecmp(str,filename,MIN(strlen(str),strlen(filename)))==0)
+    visible = TRUE;
+  g_free (str);
+
+  return visible;
 }
+
+
+/**
+* on_search_press
+* process icon search press signals
+*/
+static void on_search_press (const gchar *filename){
+GtkTreeModel *new_model= gtk_tree_model_filter_new (cache_model,NULL);
+gtk_tree_model_filter_set_visible_func ((GtkTreeModelFilter *) new_model, visible_func, (gpointer) filename, NULL);
+gtk_tree_view_set_model (GTK_TREE_VIEW(main_window.pListView),new_model);
+}
+
+
+/**
+* on_cleanicon_press
+* process icon press signals 
+*/
+static void on_cleanicon_press (GtkEntry *entry, GtkEntryIconPosition icon_pos, GdkEvent *event, gpointer user_data){
+	if (icon_pos==GTK_ENTRY_ICON_SECONDARY){    
+	gtk_entry_set_text (entry,"");
+	} else {
+	const gchar *find_string=gtk_entry_get_text (entry);
+	#ifdef DEBUGFOLDERBROWSER
+	g_print("Search for:%s\n",find_string);
+	#endif
+	if (find_string && !IS_DEFAULT_DIR(sChemin))
+	on_search_press (gtk_entry_get_text (entry));
+	else
+	/* nothing to search sets default model */
+	gtk_tree_view_set_model (GTK_TREE_VIEW(main_window.pListView),cache_model);
+	}
+}
+
+static void search_typed (GtkEntry *entry, const gchar *text, gint length,
+					   gint *position, gpointer data)
+{
+on_cleanicon_press (entry, GTK_ENTRY_ICON_PRIMARY, NULL, NULL);
+}
+
+static void search_activate(GtkEntry *entry,gpointer user_data)
+{
+on_cleanicon_press (entry, GTK_ENTRY_ICON_PRIMARY, NULL, NULL);
+}
+

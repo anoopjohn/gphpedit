@@ -94,6 +94,7 @@ typedef struct
 	GtkWidget *image_home;
  	GtkWidget *button_up;
 	GtkWidget *image_up;
+ 	GtkWidget *searchentry;
 }
 MainWindow;
 
