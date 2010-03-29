@@ -91,7 +91,7 @@ void tab_set_general_scintilla_properties(Editor *editor)
 	gtk_scintilla_autoc_set_choose_single(GTK_SCINTILLA (editor->scintilla), FALSE);
 	gtk_scintilla_autoc_set_ignore_case(GTK_SCINTILLA (editor->scintilla), TRUE);
 	gtk_scintilla_autoc_set_drop_rest_of_word(GTK_SCINTILLA (editor->scintilla), FALSE);
-
+	gtk_scintilla_set_scroll_width_tracking(GTK_SCINTILLA (editor->scintilla), TRUE);
 	gtk_scintilla_set_code_page(GTK_SCINTILLA(editor->scintilla), 65001); // Unicode code page
 	
 	g_signal_connect (G_OBJECT (editor->scintilla), "save_point_reached", G_CALLBACK (save_point_reached), NULL);
@@ -1052,7 +1052,6 @@ gboolean switch_to_file_or_open(gchar *filename, gint line_number)
 	Editor *editor;
 	GSList *walk;
 	GString *tmp_filename;
-	
 	// need to check if filename is local before adding to the listen
 	filename = convert_to_full(filename);
 	for (walk = editors; walk!=NULL; walk = g_slist_next(walk)) {
@@ -1194,7 +1193,6 @@ gboolean tab_create_new(gint type, GString *filename)
 			/* set default text icon */
 			editor->file_icon= gtk_icon_theme_load_icon (gtk_icon_theme_get_default (), "text-plain", GTK_ICON_SIZE_MENU, 0, NULL); // get icon of size menu
 		}
-                
 		// Hmmm, I had the same error as the following comment.  A reshuffle here and upgrading GtkScintilla2 to 0.1.0 seems to have fixed it
 		if (!GTK_WIDGET_VISIBLE (editor->scintilla))
 			gtk_widget_show (editor->scintilla);
