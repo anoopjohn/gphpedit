@@ -168,4 +168,6 @@ void tab_css_set_lexer(Editor *editor)
 
 
 	gtk_scintilla_colourise(GTK_SCINTILLA (editor->scintilla), 0, -1);
+
+	gtk_scintilla_set_property(scintilla, "fold", "1");
 }
