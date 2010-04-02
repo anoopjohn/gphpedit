@@ -33,6 +33,8 @@ AC_CONFIG_HEADERS([src/config.h])
 
 AC_CONFIG_MACRO_DIR([m4])
 
+m4_ifdef([AM_SILENT_RULES],[AM_SILENT_RULES([yes])])
+
 # Initialize automake, and tell it to tell the C compiler to output as
 # many warnings as it can
 AM_INIT_AUTOMAKE([-Wall foreign])
