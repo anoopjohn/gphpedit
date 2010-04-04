@@ -224,3 +224,11 @@ src/Makefile
 ])
 AC_OUTPUT
 
+
+dnl *******************************
+dnl   Feedback
+dnl *******************************
+AC_MSG_NOTICE([
+-----------
+Now type Make to compile gPHPEdit
+-----------])
