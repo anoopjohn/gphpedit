@@ -67,12 +67,16 @@ void function_list_prepare(void)
 {
 	FILE *apifile;
 	char buffer[MAX_API_LINE_LENGTH];
+        gchar *api_dir = NULL;
+	//use autoconf macro to build api file path
+	api_dir = g_build_path (G_DIR_SEPARATOR_S, API_DIR, "php-gphpedit.api", NULL);
+//	g_print("API:'%s'\n",api_dir);
 
-	apifile = fopen("/usr/share/gphpedit/php-gphpedit.api", "r");
-	if (apifile == NULL) {
-		apifile = fopen("/usr/local/share/gphpedit/php-gphpedit.api", "r");
-	}
-	
+//	apifile = fopen("/usr/share/gphpedit/php-gphpedit.api", "r");
+//	if (apifile == NULL) {
+//		apifile = fopen("/usr/local/share/gphpedit/php-gphpedit.api", "r");
+//	}
+	apifile = fopen(api_dir, "r");
 	if( apifile != NULL ) {
 		while( fgets( buffer, MAX_API_LINE_LENGTH, apifile ) != NULL ) {
 			GString *line = g_string_new_len(buffer, strlen(buffer)-1);
