@@ -168,7 +168,6 @@ AM_GLIB_GNU_GETTEXT
 dnl Please keep this in alphabetical order
 ALL_LINGUAS="de es"
 
-dnl AM_GLIB_GNU_GETTEXT
 dnl AM_GNU_GETTEXT
 
 dnl AM_GLIB_GNU_GETTEXT sets $DATADIRNAME
@@ -181,6 +180,28 @@ dnl AM_GLIB_GNU_GETTEXT sets $DATADIRNAME
  AC_DEFINE_UNQUOTED(PACKAGE_LOCALE_DIR, "$PACKAGE_LOCALE_DIR",
 	[The directory in which gphpedit's locale data will be stored])
  AC_MSG_RESULT("$PACKAGE_LOCALE_DIR")
+
+dnl ************************
+dnl   Locations
+dnl ************************
+
+if test "$prefix" == "NONE"; then
+	AC_SUBST([prefix],[${ac_default_prefix}])
+fi
+
+if test "$exec_prefix" == "NONE"; then
+	AC_SUBST([exec_prefix],[${prefix}])
+fi
+
+if test -z "$localedir"; then
+	AC_SUBST([localedir],[${datadir}/locale])
+fi
+
+dnl define api data dir
+
+API_DIR=$prefix/share/gphpedit
+AC_DEFINE_UNQUOTED(API_DIR, "$API_DIR",
+	[The directory in which gphpedit's api data will be stored])
 
 dnl ---------------------------------------------------------------------------
 dnl check for deprecated flags
