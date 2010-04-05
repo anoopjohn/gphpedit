@@ -216,15 +216,19 @@ void tab_file_write (GObject *source_object, GAsyncResult *res, gpointer user_da
             return;
         }
 	gtk_scintilla_set_save_point (GTK_SCINTILLA(editor->scintilla));
-        GFileInfo *info;
-        info= g_file_query_info ((GFile *)source_object,"time::modified,time::modified-usec",G_FILE_QUERY_INFO_NONE, NULL,&error);
-        if (!info){
-               	g_warning (_("Could not get the file modification time. GIO error: %s \n"), error->message);
-		g_get_current_time (&editor->file_mtime); /*set current time*/
+	if (main_window.current_editor->type!=TAB_HELP || main_window.current_editor->type!=TAB_PREVIEW){
+		GFileInfo *info;
+		info= g_file_query_info ((GFile *)source_object,"time::modified,time::modified-usec",G_FILE_QUERY_INFO_NONE, NULL,&error);
+		if (!info){
+		       	g_warning (_("Could not get the file modification time for file: '%s'. GIO error: %s \n"), editor->short_filename,error->message);
+			g_get_current_time (&editor->file_mtime); /*set current time*/
+		} else {
+		/* update modification time */	
+		g_file_info_get_modification_time (info,&editor->file_mtime);
+		g_object_unref(info);	
+		}
 	} else {
-	/* update modification time */	
-	g_file_info_get_modification_time (info,&editor->file_mtime);
-	g_object_unref(info);	
+	g_get_current_time (&editor->file_mtime); /*set current time*/
 	}
 	register_file_opened(editor->filename->str);
 	classbrowser_update();
@@ -537,7 +541,6 @@ GString *tab_help_find_helpfile(gchar *command)
         return long_filename;
 #endif
 }
-
 //return a substring skip n char from str
 void substring(char *str, char *subst, int start, int lenght)
 {
