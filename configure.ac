@@ -88,16 +88,6 @@ AC_SUBST(GCONF_LIBS)
 AC_SUBST(WEBKIT_CFLAGS)
 AC_SUBST(WEBKIT_LIBS)
 
-dnl ---------------------------------------------------------------------------
-dnl PKG_CHECK_MODULES(
-dnl	[PHPDOC],
-dnl	[php-doc],
-dnl	[
-dnl	 have_php_doc=yes
-dnl	 AC_DEFINE([HAVE_PHPDOC], [1], [Define to 1 if you have the `php-doc'.])
-dnl	]
-dnl)
-dnl AM_CONDITIONAL([ENABLE_PHP_DOC], [test "x$have_php_doc" = "xyes"])
 dnl **********************
 dnl  function declaration
 dnl **********************
@@ -228,7 +218,15 @@ AC_OUTPUT
 dnl *******************************
 dnl   Feedback
 dnl *******************************
-AC_MSG_NOTICE([
------------
-Now type Make to compile gPHPEdit
------------])
+echo
+echo "-------------------------------------------------"
+echo "gPHPEDIT version: $PACKAGE_VERSION"
+echo "gPHPEDIT prefix: $prefix"
+if test "$php_doc_dir" != ""; then
+echo "PHP-DOC help support: yes"
+else
+echo "PHP-DOC help support: no"
+fi
+echo "-------------------------------------------------"
+echo "Now type Make to compile gPHPEdit"
+echo "-------------------------------------------------"
