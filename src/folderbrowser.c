@@ -644,7 +644,12 @@ void folderbrowser_create(MainWindow *main_window)
         gtk_tree_view_column_set_visible    (pColumn,FALSE);
         
  	gtk_widget_show(main_window->folder);
- 	GtkWidget *label= gtk_label_new(_("Folder browser"));
+
+
+ 	//GtkWidget *label= gtk_label_new(_("Folder browser"));
+	GtkWidget *label= gtk_image_new_from_file (PIXMAP_DIR "/folderbrowser.png");
+	/* set tooltip */
+	gtk_widget_set_tooltip_text (label,_("Folder Browser"));
         GConfClient *config;
         config=gconf_client_get_default ();
  	if(sChemin!=NULL)

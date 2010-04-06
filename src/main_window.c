@@ -175,7 +175,10 @@ static void main_window_fill_panes(void)
 //	gtk_paned_pack1 (GTK_PANED (main_window.main_horizontal_pane), box, FALSE, TRUE);
 	gtk_paned_pack1 (GTK_PANED (main_window.main_horizontal_pane), main_window.notebook_manager, FALSE, TRUE);
 
-	main_window.classlabel = gtk_label_new ("Class Browser");
+//	main_window.classlabel = gtk_label_new ("Class Browser");
+	main_window.classlabel = gtk_image_new_from_file (PIXMAP_DIR "/classbrowser.png");
+        /*set tooltip*/
+	gtk_widget_set_tooltip_text (main_window.classlabel,_("Class Browser"));
 	gtk_widget_show(main_window.classlabel);
 	pos=gtk_notebook_insert_page (GTK_NOTEBOOK(main_window.notebook_manager), box, main_window.classlabel, 0);
 
@@ -870,7 +873,7 @@ void main_window_create(void)
         main_window_create_menu();
 	main_window_create_maintoolbar();
 	main_window_create_findtoolbar();
-
+	//TODO:move to function
 	/* set up info bar */
 	main_window.infobar= gtk_info_bar_new_with_buttons (_("Reload"),1,_("Cancel"),2,NULL);
 	gtk_info_bar_set_message_type (GTK_INFO_BAR(main_window.infobar),GTK_MESSAGE_WARNING);
@@ -881,12 +884,11 @@ void main_window_create(void)
 	g_signal_connect (main_window.infobar, "response", G_CALLBACK (process_external), main_window.current_editor);
         gtk_box_pack_start (GTK_BOX (main_window.prinbox), main_window.infobar, FALSE, FALSE, 0);			
 	//gtk_widget_show (main_window.infobar);
-
         main_window_create_panes();
         main_window_fill_panes();
         main_window_create_appbar();
 	main_window_update_reopen_menu();
-
+	
 	plugin_setup_menu();
 	function_list_prepare();
 
