@@ -703,6 +703,8 @@ void plugin_exec(gint plugin_num)
 	plugin = (Plugin *)g_list_nth_data(Plugins, plugin_num);
 	if (!plugin) {
 		g_print(_("Plugin is null!\n"));
+		/* don't crash if plugin if null */
+		return;
 	}
 	//g_print("Plugin No: %d:%d (%s):%s\n", plugin_num, plugin->type, plugin->name, plugin->filename->str);
 	command_line = g_string_new(plugin->filename->str);
