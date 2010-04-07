@@ -693,6 +693,7 @@ void folderbrowser_create(MainWindow *main_window)
 	gtk_widget_show(main_window->image_home);
 	gtk_button_set_image(GTK_BUTTON(main_window->button_home), main_window->image_home);
 	gtk_widget_show(main_window->button_home);
+	gtk_widget_set_tooltip_text (main_window->button_home,_("Go Home Dir"));
 	gtk_box_pack_start(GTK_BOX(hbox2), main_window->button_home, TRUE, TRUE, 0);
 	g_signal_connect(G_OBJECT(main_window->button_home), "clicked", G_CALLBACK (go_home_cb),NULL);
 
@@ -702,16 +703,26 @@ void folderbrowser_create(MainWindow *main_window)
 	gtk_widget_show(main_window->image_up);
 	gtk_button_set_image(GTK_BUTTON(main_window->button_up), main_window->image_up);
 	gtk_widget_show(main_window->button_up);
+	gtk_widget_set_tooltip_text (main_window->button_up,_("Go Up one level"));
 	gtk_box_pack_start(GTK_BOX(hbox2), main_window->button_up, TRUE, TRUE, 0);
 	g_signal_connect(G_OBJECT(main_window->button_up), "clicked", G_CALLBACK (go_up_cb),NULL);
-	/*TODO: FILE SEARCH ENTRY */
+	/* refresh button */
+	main_window->button_refresh= gtk_button_new();
+	main_window->image_refresh= gtk_image_new_from_stock (GTK_STOCK_REFRESH,GTK_ICON_SIZE_BUTTON );
+	gtk_widget_show(main_window->image_refresh);
+	gtk_button_set_image(GTK_BUTTON(main_window->button_refresh), main_window->image_refresh);
+	gtk_widget_show(main_window->button_refresh);
+	gtk_widget_set_tooltip_text (main_window->button_refresh,_("Refresh folderbrowser"));
+	gtk_box_pack_start(GTK_BOX(hbox2), main_window->button_refresh, TRUE, TRUE, 0);
+	g_signal_connect(G_OBJECT(main_window->button_refresh), "clicked", G_CALLBACK (update_folderbrowser),NULL);	
 
 	main_window->searchentry = gtk_entry_new();
 	gtk_widget_show(main_window->searchentry);
+	gtk_widget_set_tooltip_text (main_window->searchentry,_("Search Files in Folder Browser"));
         gtk_widget_set_sensitive (main_window->searchentry, FALSE);
 //	gtk_container_add (GTK_CONTAINER (item), main_window.toolbar_find->search_entry);
 //	gtk_tool_item_set_tooltip_text(GTK_TOOL_ITEM (item), _("Incremental search"));
-//TODO tooltip??
+
         gtk_entry_set_icon_from_stock (GTK_ENTRY(main_window->searchentry),GTK_ENTRY_ICON_SECONDARY,GTK_STOCK_CLEAR);
         gtk_entry_set_icon_from_stock (GTK_ENTRY(main_window->searchentry),GTK_ENTRY_ICON_PRIMARY,GTK_STOCK_FIND);
         g_signal_connect (G_OBJECT (main_window->searchentry), "icon-press", G_CALLBACK (on_cleanicon_press), NULL);
