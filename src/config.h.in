@@ -1,4 +1,10 @@
-/* config.h.in.  Generated from configure.ac by autoheader.  */
+/* src/config.h.in.  Generated from configure.ac by autoheader.  */
+
+/* default font */
+#undef DEFAULT_FONT
+
+/* default font size */
+#undef DEFAULT_FONT_SIZE
 
 /* always defined to indicate that i18n is enabled */
 #undef ENABLE_NLS
@@ -121,11 +127,20 @@
 /* Define to the version of this package. */
 #undef PACKAGE_VERSION
 
+/* php-doc directory */
+#undef PHP_DOC_DIR
+
 /* Define to 1 if you have the ANSI C header files. */
 #undef STDC_HEADERS
 
+/* default tranlate url */
+#undef TRANSLATE_URL
+
 /* Version number of package */
 #undef VERSION
+
+/* Define to empty if `const' does not conform to ANSI C. */
+#undef const
 
 /* Define to `__inline__' or `__inline' if that's what the C compiler
    calls it, or to nothing if 'inline' is not supported under any name.  */

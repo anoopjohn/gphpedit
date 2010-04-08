@@ -18,6 +18,18 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
 #
+set -e
+
+# Refresh GNU autotools toolchain.
+echo Cleaning autotools files...
+find -type d -name autom4te.cache -print0 | xargs -0 rm -rf \;
+find -type f \( -name missing -o -name install-sh -o -name mkinstalldirs \
+	-o -name depcomp -o -name ltmain.sh -o -name configure \
+	-o -name config.sub -o -name config.guess \
+	-o -name Makefile.in \) -print0 | xargs -0 rm -f
+
+echo Running autoreconf...
 autoreconf -v -i -f
+
 echo Running configure with arguments "$@"
 ./configure $@

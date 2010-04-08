@@ -33,6 +33,8 @@ AC_CONFIG_HEADERS([src/config.h])
 
 AC_CONFIG_MACRO_DIR([m4])
 
+m4_ifdef([AM_SILENT_RULES],[AM_SILENT_RULES([yes])])
+
 # Initialize automake, and tell it to tell the C compiler to output as
 # many warnings as it can
 AM_INIT_AUTOMAKE([-Wall foreign])
@@ -86,16 +88,6 @@ AC_SUBST(GCONF_LIBS)
 AC_SUBST(WEBKIT_CFLAGS)
 AC_SUBST(WEBKIT_LIBS)
 
-dnl ---------------------------------------------------------------------------
-dnl PKG_CHECK_MODULES(
-dnl	[PHPDOC],
-dnl	[php-doc],
-dnl	[
-dnl	 have_php_doc=yes
-dnl	 AC_DEFINE([HAVE_PHPDOC], [1], [Define to 1 if you have the `php-doc'.])
-dnl	]
-dnl)
-dnl AM_CONDITIONAL([ENABLE_PHP_DOC], [test "x$have_php_doc" = "xyes"])
 dnl **********************
 dnl  function declaration
 dnl **********************
@@ -166,7 +158,6 @@ AM_GLIB_GNU_GETTEXT
 dnl Please keep this in alphabetical order
 ALL_LINGUAS="de es"
 
-dnl AM_GLIB_GNU_GETTEXT
 dnl AM_GNU_GETTEXT
 
 dnl AM_GLIB_GNU_GETTEXT sets $DATADIRNAME
@@ -179,6 +170,28 @@ dnl AM_GLIB_GNU_GETTEXT sets $DATADIRNAME
  AC_DEFINE_UNQUOTED(PACKAGE_LOCALE_DIR, "$PACKAGE_LOCALE_DIR",
 	[The directory in which gphpedit's locale data will be stored])
  AC_MSG_RESULT("$PACKAGE_LOCALE_DIR")
+
+dnl ************************
+dnl   Locations
+dnl ************************
+
+if test "$prefix" == "NONE"; then
+	AC_SUBST([prefix],[${ac_default_prefix}])
+fi
+
+if test "$exec_prefix" == "NONE"; then
+	AC_SUBST([exec_prefix],[${prefix}])
+fi
+
+if test -z "$localedir"; then
+	AC_SUBST([localedir],[${datadir}/locale])
+fi
+
+dnl define api data dir
+
+API_DIR=$prefix/share/gphpedit
+AC_DEFINE_UNQUOTED(API_DIR, "$API_DIR",
+	[The directory in which gphpedit's api data will be stored])
 
 dnl ---------------------------------------------------------------------------
 dnl check for deprecated flags
@@ -201,3 +214,19 @@ src/Makefile
 ])
 AC_OUTPUT
 
+
+dnl *******************************
+dnl   Feedback
+dnl *******************************
+echo
+echo "-------------------------------------------------"
+echo "gPHPEDIT version: $PACKAGE_VERSION"
+echo "gPHPEDIT prefix: $prefix"
+if test "$php_doc_dir" != ""; then
+echo "PHP-DOC help support: yes"
+else
+echo "PHP-DOC help support: no"
+fi
+echo "-------------------------------------------------"
+echo "Now type Make to compile gPHPEdit"
+echo "-------------------------------------------------"

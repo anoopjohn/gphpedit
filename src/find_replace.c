@@ -96,7 +96,8 @@ void find_clicked(GtkButton *button, gpointer data)
 
 		last_found = start_found;
 
-		gtk_scintilla_goto_pos(GTK_SCINTILLA(main_window.current_editor->scintilla), start_found);	
+		gtk_scintilla_goto_pos(GTK_SCINTILLA(main_window.current_editor->scintilla), start_found);
+		gtk_scintilla_scroll_caret(GTK_SCINTILLA(main_window.current_editor->scintilla));
 		gtk_scintilla_set_selection_start(GTK_SCINTILLA(main_window.current_editor->scintilla), start_found);
 		gtk_scintilla_set_selection_end(GTK_SCINTILLA(main_window.current_editor->scintilla), end_found);
 	}

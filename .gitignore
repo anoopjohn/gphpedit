@@ -12,10 +12,12 @@ config.h
 config.log
 config.status
 config.status.lineno
+build-aux
 data/Makefile
 doc/Makefile
 gphpedit.desktop
 intltool-extract
+configure
 intltool-merge
 intltool-update
 libtool
@@ -28,8 +30,11 @@ src/Makefile
 stamp-h1
 *.[oa]
 src/gphpedit
+src/config.h.in
 autom4te.cache
 patches
+gphpedit.spec
+po/stamp-it
 src/gtkscintilla2/libgtkscintilla2.so.*
 src/gtkscintilla2/scintilla/delbin.bat
 src/gtkscintilla2/scintilla/delcvs.bat
