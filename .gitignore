@@ -17,6 +17,7 @@ data/Makefile
 doc/Makefile
 gphpedit.desktop
 intltool-extract
+configure
 intltool-merge
 intltool-update
 libtool

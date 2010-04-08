@@ -177,6 +177,8 @@ void scintilla_cxx_set_lexer(GtkScintilla *scintilla, Preferences prefs)
 	gtk_scintilla_indic_set_fore(scintilla, 0, scintilla_color(255,0,0));
 
 	gtk_scintilla_set_property(scintilla, "fold.html", "1");
+	gtk_scintilla_set_property(scintilla, "fold.comment", "1");
+	gtk_scintilla_set_property(scintilla, "fold.preprocessor", "1");
 	gtk_scintilla_set_property(scintilla, "fold", "1");
 	gtk_scintilla_colourise(scintilla, 0, -1);
 }

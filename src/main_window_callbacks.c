@@ -1993,14 +1993,14 @@ void process_external (GtkInfoBar *info_bar, gint response_id, Editor *editor){
 }
 
 void check_externaly_modified(void){
-	if (!main_window.current_editor->is_untitled){
+	if (!main_window.current_editor->is_untitled && main_window.current_editor->type!=TAB_HELP && main_window.current_editor->type!=TAB_PREVIEW){
 	/*verify if file has been externaly modified */
         GError *error=NULL;
         GFile *file=g_file_new_for_uri (main_window.current_editor->filename->str);
         GFileInfo *info;
         info= g_file_query_info (file,"time::modified,time::modified-usec",G_FILE_QUERY_INFO_NONE, NULL,&error);
         if (!info){
-	g_warning (_("Could not get the file modification time. GIO error: %s \n"), error->message);
+        g_warning (_("Could not get the file modification time for file: '%s'. GIO error: %s \n"), main_window.current_editor->short_filename,error->message);
 	gtk_widget_hide (main_window.infobar);
        	return;
         }

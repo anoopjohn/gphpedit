@@ -47,4 +47,27 @@ EXTRA_DIST = \
 CLEANFILES = 			\
 	intltool-extract 	\
 	intltool-merge 		\
-	intltool-update
+	intltool-update		\
+        aclocal.m4 		\
+	build-aux/config.guess  \
+	build-aux/config.sub    \
+	build-aux/depcomp 	\
+	build-aux/install-sh 	\
+	build-aux/missing 	\
+	build-aux/ltmain.sh 	\
+	src/stamp-h1	 	\
+	src/config.h		\
+	src/Makefile.in	 	\
+	src/Makefile	 	\
+	gphpedit.desktop	\
+	gphpedit.spec		\
+	config.log		\
+	Makefile.in	 	\
+	Makefile	 	\
+	config.status		\
+	data/Makefile.in	\
+	data/Makefile	 	\
+	doc/Makefile.in		\
+	doc/Makefile	 	\
+	pixmaps/Makefile.in	\
+	pixmaps/Makefile

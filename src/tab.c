@@ -91,7 +91,7 @@ void tab_set_general_scintilla_properties(Editor *editor)
 	gtk_scintilla_autoc_set_choose_single(GTK_SCINTILLA (editor->scintilla), FALSE);
 	gtk_scintilla_autoc_set_ignore_case(GTK_SCINTILLA (editor->scintilla), TRUE);
 	gtk_scintilla_autoc_set_drop_rest_of_word(GTK_SCINTILLA (editor->scintilla), FALSE);
-
+	gtk_scintilla_set_scroll_width_tracking(GTK_SCINTILLA (editor->scintilla), TRUE);
 	gtk_scintilla_set_code_page(GTK_SCINTILLA(editor->scintilla), 65001); // Unicode code page
 	
 	g_signal_connect (G_OBJECT (editor->scintilla), "save_point_reached", G_CALLBACK (save_point_reached), NULL);
@@ -216,15 +216,19 @@ void tab_file_write (GObject *source_object, GAsyncResult *res, gpointer user_da
             return;
         }
 	gtk_scintilla_set_save_point (GTK_SCINTILLA(editor->scintilla));
-        GFileInfo *info;
-        info= g_file_query_info ((GFile *)source_object,"time::modified,time::modified-usec",G_FILE_QUERY_INFO_NONE, NULL,&error);
-        if (!info){
-               	g_warning (_("Could not get the file modification time. GIO error: %s \n"), error->message);
-		g_get_current_time (&editor->file_mtime); /*set current time*/
+	if (main_window.current_editor->type!=TAB_HELP || main_window.current_editor->type!=TAB_PREVIEW){
+		GFileInfo *info;
+		info= g_file_query_info ((GFile *)source_object,"time::modified,time::modified-usec",G_FILE_QUERY_INFO_NONE, NULL,&error);
+		if (!info){
+		       	g_warning (_("Could not get the file modification time for file: '%s'. GIO error: %s \n"), editor->short_filename,error->message);
+			g_get_current_time (&editor->file_mtime); /*set current time*/
+		} else {
+		/* update modification time */	
+		g_file_info_get_modification_time (info,&editor->file_mtime);
+		g_object_unref(info);	
+		}
 	} else {
-	/* update modification time */	
-	g_file_info_get_modification_time (info,&editor->file_mtime);
-	g_object_unref(info);	
+	g_get_current_time (&editor->file_mtime); /*set current time*/
 	}
 	register_file_opened(editor->filename->str);
 	classbrowser_update();
@@ -512,75 +516,11 @@ GString *tab_help_try_filename(gchar *prefix, gchar *command, gchar *suffix)
 GString *tab_help_find_helpfile(gchar *command)
 {
 	GString *long_filename = NULL;
+#ifdef PHP_DOC_DIR
         //FIX: avoid duplicated call
         if (strstr(command,"/usr/")!=NULL){
             return long_filename;
         }
-/*	// For Debian, Ubuntu and sensible distrubutions...
-	long_filename = tab_help_try_filename("/usr/share/doc/php-doc/html/function.", command, ".html");
-	if (long_filename)
-		return long_filename;
-	long_filename = tab_help_try_filename("/usr/share/doc/php-doc/html/ref.", command, ".html");
-	if (long_filename)
-		return long_filename;
-	long_filename = tab_help_try_filename("/usr/share/doc/php-doc/html/", command, NULL);
-	if (long_filename)
-		return long_filename;
-	long_filename = tab_help_try_filename("/usr/share/doc/phpdoc/html/function.", command, ".html");
-	if (long_filename)
-		return long_filename;
-	long_filename = tab_help_try_filename("/usr/share/doc/phpdoc/html/ref.", command, ".html");
-	if (long_filename)
-		return long_filename;
-	long_filename = tab_help_try_filename("/usr/share/doc/phpdoc/html/", command, NULL);
-	if (long_filename)
-		return long_filename;
-
-	// For Redhat/Fedora Core and other sensible distrubutions...
-	long_filename = tab_help_try_filename("/usr/share/doc/php-manual/en/html/function.", command, ".html");
-	if (long_filename)
-		return long_filename;
-	long_filename = tab_help_try_filename("/usr/share/doc/php-manual/en/html/ref.", command, ".html");
-	if (long_filename)
-		return long_filename;
-	long_filename = tab_help_try_filename("/usr/share/doc/php-manual/en/html/", command, NULL);
-	if (long_filename)
-		return long_filename;
-
-	// For Gentoo, as much as I love it - it's twatty to put docs in a version specific folder like this!
-	long_filename = tab_help_try_filename("/usr/doc/php-docs-200403/html/function.", command, ".html");
-	if (long_filename)
-		return long_filename;
-	long_filename = tab_help_try_filename("/usr/doc/php-docs-200403/html/ref.", command, ".html");
-	if (long_filename)
-		return long_filename;
-	long_filename = tab_help_try_filename("/usr/doc/php-docs-200403/html/", command, NULL);
-	if (long_filename)
-		return long_filename;
-
-	long_filename = tab_help_try_filename("/usr/share/doc/php-docs-20050822/html/function.", command, ".html");
-	if (long_filename)
-		return long_filename;
-	long_filename = tab_help_try_filename("/usr/share/doc/php-docs-20050822/html/ref.", command, ".html");
-	if (long_filename)
-		return long_filename;
-	long_filename = tab_help_try_filename("/usr/share/doc/php-docs-20050822/html/", command, NULL);
-	if (long_filename)
-		return long_filename;
-
-	long_filename = tab_help_try_filename("/usr/doc/php-docs-4.2.3/html/function.", command, ".html");
-	if (long_filename)
-		return long_filename;
-	long_filename = tab_help_try_filename("/usr/doc/php-docs-4.2.3/html/ref.", command, ".html");
-	if (long_filename)
-		return long_filename;
-	long_filename = tab_help_try_filename("/usr/doc/php-docs-4.2.3/html/", command, NULL);
-	if (long_filename)
-		return long_filename;
-*/
-#ifndef PHP_DOC_DIR
-#define PHP_DOC_DIR ""
-#endif
         gchar *temp= NULL;
         temp=g_strdup_printf ("%s/%s",PHP_DOC_DIR,"function.");
         long_filename = tab_help_try_filename(temp, command, ".html");
@@ -596,6 +536,10 @@ GString *tab_help_find_helpfile(gchar *command)
 		return long_filename;
         g_print(_("Help for function not found: %s\n"), command);
         return long_filename;
+#else
+        g_print(_("PHP-Help not compiled in. Help for function not found: %s\n"), command);
+        return long_filename;
+#endif
 }
 //return a substring skip n char from str
 void substring(char *str, char *subst, int start, int lenght)
@@ -1052,7 +996,6 @@ gboolean switch_to_file_or_open(gchar *filename, gint line_number)
 	Editor *editor;
 	GSList *walk;
 	GString *tmp_filename;
-	
 	// need to check if filename is local before adding to the listen
 	filename = convert_to_full(filename);
 	for (walk = editors; walk!=NULL; walk = g_slist_next(walk)) {
@@ -1194,7 +1137,6 @@ gboolean tab_create_new(gint type, GString *filename)
 			/* set default text icon */
 			editor->file_icon= gtk_icon_theme_load_icon (gtk_icon_theme_get_default (), "text-plain", GTK_ICON_SIZE_MENU, 0, NULL); // get icon of size menu
 		}
-                
 		// Hmmm, I had the same error as the following comment.  A reshuffle here and upgrading GtkScintilla2 to 0.1.0 seems to have fixed it
 		if (!GTK_WIDGET_VISIBLE (editor->scintilla))
 			gtk_widget_show (editor->scintilla);
