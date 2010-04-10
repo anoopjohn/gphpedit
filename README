@@ -1,31 +1,46 @@
-Introduction to gPHPedit
+A) Introduction to gPHPedit
 
 The gPHPedit package contains a lightweight UTF-8 text editor based in scintilla component for the GNOME desktop.
 gPHPEdit support PHP/HTML/CSS files and also support C/C++, Python and Perl Files.
 gPHPedit is currently maintained by Anoop John.
 
-Installation of gPHPEdit: (UBUNTU AND DEBIAN USERS)
+B) Installation of gPHPEdit: (UBUNTU AND DEBIAN USERS)
 
-Install gPHPEdit by running the following commands:
+	0) To install gPHPEdit from source:
 
-  ./autogen.sh --prefix=$(pkg-config --variable=prefix ORBit-2.0) && make
+	   You can download source packages from:
+	   http://www.gphpedit.org
 
-Now, as the root user:
+	TODO: installing from git?
 
- make install
+	1) Install gPHPEdit by running the following commands:
 
-Command Explanations:
+ 	   $ ./autogen.sh --prefix=$(pkg-config --variable=prefix ORBit-2.0) && make
+	
+	   Now, as the root user:
 
---prefix=$(pkg-config --variable=prefix ORBit-2.0): Setting the prefix using this parameter instead of with $GNOME_PREFIX will ensure that the prefix is consistent with the installation environment and the package will be installed in the correct location.
+	   # make install
 
-Dependencies
+    1.b) Command Explanations:
 
-Required:
+		--prefix=$(pkg-config --variable=prefix ORBit-2.0): Setting the prefix using this parameter instead of with $GNOME_PREFIX 
+		will ensure that the prefix is consistent with the installation environment and the package will be installed in the correct location.
 
-GConf-2.28.0, GTK+-2.18.7, and webkit-1.0
+	2) Dependencies
 
-Sugested:
-php5-cli, php-doc (for php help support and sintax cheking)
+       Compilation needs the following software packages - usually the headers and
+       libraries (search for packages with a -dev or -devel suffix and/or prefix
+       lib, e.g. libgtk2.0-dev)
 
-
+		 - Glib 2.0 (>= 2.18)
+	     - Gtk 2.0 (>= 2.18)
+	     - automake (>= 1.8)
+	     - autoconf (>= 2.59)
+	     - intltool
+	     - libtool
+	     - gettext
+	     - gvfs
+	     - webkit-1.0
+	     - php5-cli (optional for php sintax checking)
+	     - php-doc (for php help support)
 

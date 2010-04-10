@@ -1610,7 +1610,7 @@ void preferences_dialog_create (void)
 	
 	preferences_dialog.folderbrowser = gtk_check_button_new_with_mnemonic (_("Show folderbrowser (need restart)"));
 	/* set tooltip */
-        gtk_widget_set_tooltip_text (label,_("Show/Hide side-panel Folder Browser"));
+        gtk_widget_set_tooltip_text (preferences_dialog.folderbrowser,_("Show/Hide side-panel Folder Browser"));
 	gtk_widget_show (preferences_dialog.folderbrowser);
 	gtk_box_pack_start (GTK_BOX (preferences_dialog.vbox6), preferences_dialog.folderbrowser, FALSE, FALSE, 0);
 	gtk_container_set_border_width (GTK_CONTAINER (preferences_dialog.folderbrowser), 8);
