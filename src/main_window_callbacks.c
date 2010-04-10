@@ -1978,7 +1978,7 @@ gint on_tab_change_update_classbrowser(GtkWidget *widget)
 	//debug("Toggled");
 	//if parse only current file is set then add only the file in the current tab
 	//the filteration logic is set inside classbrowser_update
-	if(GTK_TOGGLE_BUTTON (main_window.chkOnlyCurFileFuncs)->active)
+	if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON (main_window.chkOnlyCurFileFuncs)))
 	{
 		//debug("Is set");
 		classbrowser_update();

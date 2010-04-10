@@ -36,7 +36,7 @@ void create_edit_template_dialog (void)
 		GTK_STOCK_OK, GTK_RESPONSE_ACCEPT, GTK_STOCK_CANCEL, GTK_RESPONSE_REJECT,NULL);
 
 	edit_template_dialog.hbox2 = gtk_hbox_new (FALSE, 0);
-	gtk_container_add (GTK_CONTAINER (GTK_DIALOG(edit_template_dialog.window1)->vbox),edit_template_dialog.hbox2);
+	gtk_container_add (GTK_CONTAINER (gtk_dialog_get_content_area(GTK_DIALOG(edit_template_dialog.window1))),edit_template_dialog.hbox2);
 
 	gtk_container_set_border_width (GTK_CONTAINER (edit_template_dialog.hbox2), 8);
 
@@ -47,7 +47,7 @@ void create_edit_template_dialog (void)
 	gtk_box_pack_start (GTK_BOX (edit_template_dialog.hbox2), edit_template_dialog.entry1, FALSE, FALSE, 8);
 
 	edit_template_dialog.hbox3 = gtk_hbox_new (FALSE, 0);
-	gtk_container_add (GTK_CONTAINER (GTK_DIALOG(edit_template_dialog.window1)->vbox),edit_template_dialog.hbox3);
+	gtk_container_add (GTK_CONTAINER (GTK_DIALOG(gtk_dialog_get_content_area(edit_template_dialog.window1))),edit_template_dialog.hbox3);
 	gtk_container_set_border_width (GTK_CONTAINER (edit_template_dialog.hbox3), 8);
 
 	edit_template_dialog.label3 = gtk_label_new (_("Code:"));

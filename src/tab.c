@@ -1138,7 +1138,7 @@ gboolean tab_create_new(gint type, GString *filename)
 			editor->file_icon= gtk_icon_theme_load_icon (gtk_icon_theme_get_default (), "text-plain", GTK_ICON_SIZE_MENU, 0, NULL); // get icon of size menu
 		}
 		// Hmmm, I had the same error as the following comment.  A reshuffle here and upgrading GtkScintilla2 to 0.1.0 seems to have fixed it
-		if (!GTK_WIDGET_VISIBLE (editor->scintilla))
+		if (!gtk_widget_get_visible(editor->scintilla))
 			gtk_widget_show (editor->scintilla);
 		
 		editor_tab = get_close_tab_widget(editor);

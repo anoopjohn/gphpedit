@@ -22,9 +22,6 @@
    The GNU General Public License is contained in the file COPYING.
 */
 
-//#ifdef HAVE_CONFIG_H
-//#include <config.h>
-//#endif
 #include <stdlib.h>
 #include <stdarg.h>
 #include "main.h"
@@ -34,6 +31,10 @@
 #include "gphpedit_ipc.h"
 #include "templates.h"
 #include <gconf/gconf-client.h>
+
+#ifdef ENABLE_NLS
+#include <locale.h>
+#endif							/* ENABLE_NLS */
 
 int main (int argc, char **argv)
 {

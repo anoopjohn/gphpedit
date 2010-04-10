@@ -285,7 +285,7 @@ static void main_window_fill_panes(void)
 	//GTK_WIDGET_UNSET_FLAGS (main_window.notebook_editor, GTK_CAN_FOCUS | GTK_RECEIVES_DEFAULT);
 	// Fix to scrollable list of tabs, however it then messes up grabbing of focus
 	// Hence the focus-tab event (which GTK doesn't seem to recognise
-	GTK_WIDGET_UNSET_FLAGS (main_window.notebook_editor, GTK_RECEIVES_DEFAULT);
+	gtk_widget_set_receives_default (main_window.notebook_editor,FALSE);
 	gtk_widget_show (main_window.notebook_editor);
 	gtk_paned_pack2 (GTK_PANED (main_window.main_horizontal_pane), main_window.notebook_editor, TRUE, TRUE);
         gtk_widget_set_size_request (main_window.notebook_editor, 400,400);

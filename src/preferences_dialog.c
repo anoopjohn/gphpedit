@@ -1227,19 +1227,19 @@ void on_sel_back_changed(GtkColorButton *widget, gpointer user_data)
 
 void on_tab_size_changed(GtkRange *range, gpointer user_data)
 {
-	temp_preferences.tab_size = (int)(gtk_range_get_adjustment(range)->value);	
+	temp_preferences.tab_size = (int)gtk_range_get_value(range);	
 	temp_preferences.indentation_size = temp_preferences.tab_size;	
 }
 
 void on_calltip_delay_changed(GtkRange *range, gpointer user_data)
 {
-	temp_preferences.calltip_delay = (int)(gtk_range_get_adjustment(range)->value);	
-	temp_preferences.auto_complete_delay = (int)(gtk_range_get_adjustment(range)->value);	
+	temp_preferences.calltip_delay = (int) gtk_range_get_value(range);
+	temp_preferences.auto_complete_delay = (int)gtk_range_get_value(range);	
 }
 
 void on_edge_column_changed(GtkRange *range, gpointer user_data)
 {
-	temp_preferences.edge_column = (int)(gtk_range_get_adjustment(range)->value);	
+	temp_preferences.edge_column = (int)gtk_range_get_value(range);	
 }
 
 void on_show_indentation_guides_toggle(GtkToggleButton *togglebutton, gpointer user_data)
@@ -1487,7 +1487,7 @@ void preferences_dialog_create (void)
 	
 	preferences_dialog.notebook1 = gtk_notebook_new ();
 	gtk_widget_show (preferences_dialog.notebook1);
-	gtk_container_add (GTK_CONTAINER (GTK_DIALOG(preferences_dialog.window)->vbox),preferences_dialog.notebook1);
+	gtk_container_add (GTK_CONTAINER (gtk_dialog_get_content_area(GTK_DIALOG(preferences_dialog.window))),preferences_dialog.notebook1);
 	
 	preferences_dialog.vbox6 = gtk_vbox_new (FALSE, 8);
 	gtk_widget_show (preferences_dialog.vbox6);
@@ -1610,7 +1610,7 @@ void preferences_dialog_create (void)
 	
 	preferences_dialog.folderbrowser = gtk_check_button_new_with_mnemonic (_("Show folderbrowser (need restart)"));
 	/* set tooltip */
-	gtk_widget_set_tooltip_text (label,_("Show/Hide side-panel Folder Browser"));
+        gtk_widget_set_tooltip_text (label,_("Show/Hide side-panel Folder Browser"));
 	gtk_widget_show (preferences_dialog.folderbrowser);
 	gtk_box_pack_start (GTK_BOX (preferences_dialog.vbox6), preferences_dialog.folderbrowser, FALSE, FALSE, 0);
 	gtk_container_set_border_width (GTK_CONTAINER (preferences_dialog.folderbrowser), 8);
@@ -1956,7 +1956,7 @@ void preferences_dialog_create (void)
 	preferences_dialog.apply_button = gtk_button_new_with_mnemonic (_("Apply"));
 	gtk_widget_show (preferences_dialog.apply_button);
 	//gtk_box_pack_end (GTK_BOX (GTK_DIALOG(preferences_dialog.window)->action_area), preferences_dialog.apply_button, FALSE, FALSE, 4);
-	gtk_container_add (GTK_CONTAINER (GTK_DIALOG(preferences_dialog.window)->action_area),preferences_dialog.apply_button);
+	gtk_container_add (GTK_CONTAINER (gtk_dialog_get_action_area(GTK_DIALOG(preferences_dialog.window))),preferences_dialog.apply_button);
 	g_signal_connect (G_OBJECT (preferences_dialog.apply_button),
 											"clicked", G_CALLBACK (apply_preferences), NULL);
 	

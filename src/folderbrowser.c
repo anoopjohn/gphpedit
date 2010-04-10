@@ -388,7 +388,7 @@ void popup_rename_file(gchar *file){
     window = gtk_dialog_new_with_buttons(_("Rename File"), GTK_WINDOW(main_window.window), GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT, GTK_STOCK_OK, GTK_RESPONSE_ACCEPT, GTK_STOCK_CANCEL, GTK_RESPONSE_REJECT, NULL);
     GtkWidget *vbox1 = gtk_vbox_new (FALSE, 8);
     gtk_widget_show (vbox1);
-    gtk_container_add (GTK_CONTAINER (GTK_DIALOG(window)->vbox),vbox1);
+    gtk_container_add (GTK_CONTAINER (gtk_dialog_get_content_area(GTK_DIALOG(window))),vbox1);
     GtkWidget *hbox1 = gtk_hbox_new (FALSE, 8);
     gtk_widget_show (hbox1);
     gtk_container_add (GTK_CONTAINER (vbox1),hbox1);
@@ -422,7 +422,7 @@ void popup_create_dir(void){
     window = gtk_dialog_new_with_buttons(_("New Dir"), GTK_WINDOW(main_window.window), GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT, GTK_STOCK_OK, GTK_RESPONSE_ACCEPT, GTK_STOCK_CANCEL, GTK_RESPONSE_REJECT, NULL);
     GtkWidget *vbox1 = gtk_vbox_new (FALSE, 8);
     gtk_widget_show (vbox1);
-    gtk_container_add (GTK_CONTAINER (GTK_DIALOG(window)->vbox),vbox1);
+    gtk_container_add (GTK_CONTAINER (gtk_dialog_get_content_area(GTK_DIALOG(window))),vbox1);
     GtkWidget *hbox1 = gtk_hbox_new (FALSE, 8);
     gtk_widget_show (hbox1);
     gtk_container_add (GTK_CONTAINER (vbox1),hbox1);
@@ -802,13 +802,13 @@ void fb_file_v_drag_data_received(GtkWidget * widget, GdkDragContext * context, 
 	g_object_ref(destdir);
 
 	g_signal_stop_emission_by_name(widget, "drag_data_received");
-	if ((data->length == 0) || (data->format != 8)
+	if ((gtk_selection_data_get_length(data) == 0) || (gtk_selection_data_get_format(data) != 8)
 		|| ((info != TARGET_STRING) && (info != TARGET_URI_LIST))) {
 		gtk_drag_finish(context, FALSE, TRUE, time);
 		return;
 	}
-	stringdata = g_strndup((gchar *) data->data, data->length);
-	g_print("fb2_file_v_drag_data_received, stringdata='%s', len=%d\n", stringdata, data->length);
+	stringdata = g_strndup((const gchar *) gtk_selection_data_get_data(data), gtk_selection_data_get_length(data));
+	g_print("fb2_file_v_drag_data_received, stringdata='%s', len=%d\n", stringdata, gtk_selection_data_get_length(data));
 	if (destdir) {
 		if (strchr(stringdata, '\n') == NULL) {	/* no newlines, probably a single file */
 			GSList *list = NULL;

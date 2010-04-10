@@ -144,7 +144,6 @@ void classbrowser_dirlist_add(gchar *dir)
 	if (strstr(dir, "file://")==dir) {
 		dir += 6;
 	}
-
 	dir_iter= opendir(dir);
 	if (dir_iter) {
 		errno=0;
@@ -174,7 +173,6 @@ void classbrowser_dirlist_add(gchar *dir)
 		g_print("Classbrowser error. Err no: %d\n", errno);
 		#endif
 	}
-
 	dirlist = g_slist_append(dirlist, g_strdup(dir));
 }
 
@@ -616,7 +614,6 @@ void classbrowser_update(void)
 
 	static guint press_event = 0;
 	static guint release_event = 0;
-
 	if (gtk_paned_get_position(GTK_PANED(main_window.main_horizontal_pane))==0) {
 		return;
 	}
@@ -631,7 +628,7 @@ void classbrowser_update(void)
 	classbrowser_dirlist_clear();
 	classbrowser_dirlist_add_shared_source();
         //if parse only current file is set then add only the file in the current tab
-	if(GTK_TOGGLE_BUTTON (main_window.chkOnlyCurFileFuncs)->active)
+	if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON (main_window.chkOnlyCurFileFuncs)))
 	{
 		//add only if there is a current editor
 		if (main_window.current_editor)
@@ -650,7 +647,6 @@ void classbrowser_update(void)
 				classbrowser_dirlist_add(g_path_get_dirname(editor->filename->str));
 			}
 		}
-
 		//classbrowser_dirlist_add(preferences.shared_source_location);
 	}
         classbrowser_filelist_update();
