@@ -164,15 +164,13 @@ static void main_window_fill_panes(void)
 	GtkTreeViewColumn *column;
 	gint pos;
 
-        GtkWidget *notebook_manager;
-	notebook_manager = gtk_notebook_new ();
 	main_window.notebook_manager= gtk_notebook_new ();
 	gtk_notebook_set_tab_pos (GTK_NOTEBOOK (main_window.notebook_manager), GTK_POS_BOTTOM);
 	gtk_widget_set_size_request (main_window.notebook_manager, 200,400);
 	gtk_widget_show (main_window.notebook_manager);
+
 	box = gtk_vbox_new(FALSE, 0);
 	gtk_widget_show(box);
-//	gtk_paned_pack1 (GTK_PANED (main_window.main_horizontal_pane), box, FALSE, TRUE);
 	gtk_paned_pack1 (GTK_PANED (main_window.main_horizontal_pane), main_window.notebook_manager, FALSE, TRUE);
 
 //	main_window.classlabel = gtk_label_new ("Class Browser");
@@ -240,29 +238,6 @@ static void main_window_fill_panes(void)
 					 renderer, "text", NAME_COLUMN, NULL);
 	gtk_tree_view_append_column (GTK_TREE_VIEW (main_window.classtreeview), column);
 
-	/*label1 = gtk_label_new ("Functions");
-	gtk_widget_show (label1);
-	gtk_notebook_set_tab_label (GTK_NOTEBOOK (notebook_manager), gtk_notebook_get_nth_page (GTK_NOTEBOOK (notebook_manager), 0), label1);
-	gtk_label_set_justify (GTK_LABEL (label1), GTK_JUSTIFY_LEFT);
-	 
-	notebook_manager_functions_page = gtk_vbox_new (FALSE, 0);
-	gtk_widget_show (notebook_manager_functions_page);
-	gtk_container_add (GTK_CONTAINER (notebook_manager), notebook_manager_functions_page);
-
-	label2 = gtk_label_new ("Files");
-	gtk_widget_show (label2);
-	gtk_notebook_set_tab_label (GTK_NOTEBOOK (notebook_manager), gtk_notebook_get_nth_page (GTK_NOTEBOOK (notebook_manager), 1), label2);
-	gtk_label_set_justify (GTK_LABEL (label2), GTK_JUSTIFY_LEFT);
-
-	notebook_manager_files_page = gtk_vbox_new (FALSE, 0);
-	gtk_widget_show (notebook_manager_files_page);
-	gtk_container_add (GTK_CONTAINER (notebook_manager), notebook_manager_files_page);
-
-	label3 = gtk_label_new ("Help");
-	gtk_widget_show (label3);
-	gtk_notebook_set_tab_label (GTK_NOTEBOOK (notebook_manager), gtk_notebook_get_nth_page (GTK_NOTEBOOK (notebook_manager), 2), label3);
-	gtk_label_set_justify (GTK_LABEL (label3), GTK_JUSTIFY_LEFT);
-	*/
         main_window.scrolledwindow1 = gtk_scrolled_window_new (NULL, NULL);
 	gtk_paned_pack2 (GTK_PANED (main_window.main_vertical_pane), main_window.scrolledwindow1, FALSE, TRUE);
         main_window.lint_view = gtk_tree_view_new ();
