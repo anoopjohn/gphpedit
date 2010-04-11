@@ -117,11 +117,10 @@ tab_create_new(TAB_PREVIEW, main_window.current_editor->filename);
 */
 void size_change(GtkWidget *widget, gpointer user_data)
 {
-gboolean p= gtk_check_menu_item_get_active ((GtkCheckMenuItem *)main_window.menu->sizebig);
-if (p){
-gtk_toolbar_set_icon_size (GTK_TOOLBAR (main_window.toolbar_main), GTK_ICON_SIZE_LARGE_TOOLBAR);
+if (gtk_check_menu_item_get_active ((GtkCheckMenuItem *)main_window.menu->sizebig)){
+gtk_toolbar_set_icon_size (GTK_TOOLBAR (main_window.toolbar_main->toolbar), GTK_ICON_SIZE_LARGE_TOOLBAR);
 } else {
-gtk_toolbar_set_icon_size (GTK_TOOLBAR (main_window.toolbar_main), GTK_ICON_SIZE_SMALL_TOOLBAR);
+gtk_toolbar_set_icon_size (GTK_TOOLBAR (main_window.toolbar_main->toolbar), GTK_ICON_SIZE_SMALL_TOOLBAR);
 }
 
 }
