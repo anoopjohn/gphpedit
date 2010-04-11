@@ -667,6 +667,7 @@ void folderbrowser_create(MainWindow *main_window)
         g_object_unref(config);
  	g_signal_connect(G_OBJECT(main_window->button_dialog), "pressed", G_CALLBACK(pressed_button_file_chooser), NULL);
         gtk_widget_set_size_request (main_window->pListView,80,450);
+/*
  	//Close button for the side bar
 	GtkWidget *hbox;
 	hbox = gtk_hbox_new(FALSE, 0);
@@ -683,7 +684,7 @@ void folderbrowser_create(MainWindow *main_window)
 	gtk_widget_show(main_window->close_sidebar_button);
 	gtk_box_pack_end(GTK_BOX(hbox), main_window->close_sidebar_button, FALSE, FALSE, 0);
 	gtk_widget_show(hbox);
-	
+*/	
 	/* home and up buttons*/
 	GtkWidget *hbox2;
 	hbox2 = gtk_hbox_new(FALSE, 0);
@@ -732,7 +733,7 @@ void folderbrowser_create(MainWindow *main_window)
 
 	gtk_box_pack_start(GTK_BOX(hbox2), main_window->searchentry, TRUE, TRUE, 0);
 
-        gtk_box_pack_start(GTK_BOX(main_window->folder), hbox, FALSE, TRUE, 2);
+//        gtk_box_pack_start(GTK_BOX(main_window->folder), hbox, FALSE, TRUE, 2);
         gtk_box_pack_start(GTK_BOX(main_window->folder), hbox2, FALSE, TRUE, 2);
  	gtk_box_pack_start(GTK_BOX(main_window->folder), main_window->button_dialog, FALSE, FALSE, 2);
  	gtk_box_pack_start(GTK_BOX(main_window->folder), main_window->pScrollbar, TRUE, TRUE, 2);
