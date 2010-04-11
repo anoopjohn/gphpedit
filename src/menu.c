@@ -50,14 +50,14 @@ int classbrowser_status(void){
  * tog_classbrowser
  * Show/hide side panel
 */
-void tog_classbrowser(GtkCheckMenuItem *checkmenuitem, gpointer user_data){
+static void tog_classbrowser(GtkCheckMenuItem *checkmenuitem, gpointer user_data){
     classbrowser_show_hide(NULL);
 }
 /*
  * tog_statusbar
  * Show/hide application statusbar
 */
-void tog_statusbar(GtkWidget *widget, gpointer user_data)
+static void tog_statusbar(GtkWidget *widget, gpointer user_data)
 {
   if (gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(widget))) {
     gtk_widget_show(main_window.appbar);
@@ -70,7 +70,7 @@ void tog_statusbar(GtkWidget *widget, gpointer user_data)
  * Show/hide application maintoolbar
 */
 
-void tog_maintoolbar(GtkWidget *widget, gpointer user_data)
+static void tog_maintoolbar(GtkWidget *widget, gpointer user_data)
 {
   if (gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(widget))) {
     gtk_widget_show(main_window.toolbar_main->toolbar);
@@ -83,7 +83,7 @@ void tog_maintoolbar(GtkWidget *widget, gpointer user_data)
  * tog_maintoolbar
  * Show/hide application findtoolbar
 */
-void tog_findtoolbar(GtkWidget *widget, gpointer user_data)
+static void tog_findtoolbar(GtkWidget *widget, gpointer user_data)
 {
   if (gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(widget))) {
     gtk_widget_show(main_window.toolbar_find->toolbar);
@@ -95,7 +95,7 @@ void tog_findtoolbar(GtkWidget *widget, gpointer user_data)
  * tog_fullscreen
  * Enable/disable fullscreen mode
 */
-void tog_fullscreen(GtkWidget *widget, gpointer user_data)
+static void tog_fullscreen(GtkWidget *widget, gpointer user_data)
 {
   if (gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(widget))) {
     gtk_window_fullscreen (GTK_WINDOW(main_window.window));
@@ -107,15 +107,15 @@ void tog_fullscreen(GtkWidget *widget, gpointer user_data)
  * ShowPreview
  * Preview Current Document
 */
-void showpreview (GtkWidget *widget, gpointer user_data)
+static void showpreview (GtkWidget *widget, gpointer user_data)
 {
-tab_create_new(TAB_PREVIEW, main_window.current_editor->filename);
+	tab_create_new(TAB_PREVIEW, main_window.current_editor->filename);
 }
 /*
  *size_change
  * Changes toolbar icon sizes
 */
-void size_change(GtkWidget *widget, gpointer user_data)
+static void size_change(GtkWidget *widget, gpointer user_data)
 {
 if (gtk_check_menu_item_get_active ((GtkCheckMenuItem *)main_window.menu->sizebig)){
 gtk_toolbar_set_icon_size (GTK_TOOLBAR (main_window.toolbar_main->toolbar), GTK_ICON_SIZE_LARGE_TOOLBAR);
@@ -157,7 +157,7 @@ void install_menu_hint(GtkWidget *widget, gchar *message){
  * bugreport
  * launch default system browser with bug report page
 */
-void bugreport(void){
+static void bugreport(void){
     GdkScreen *screen;
     screen = gtk_widget_get_screen (GTK_WIDGET (main_window.window));
     gtk_show_uri (screen, PACKAGE_BUGREPORT, GDK_CURRENT_TIME, NULL);
@@ -168,7 +168,7 @@ void bugreport(void){
  * translate
  * launch default system browser with tranlation page
 */
-void translate(void){
+static void translate(void){
     GdkScreen *screen;
     screen = gtk_widget_get_screen (GTK_WIDGET (main_window.window));
     gtk_show_uri (screen, TRANSLATE_URL, GDK_CURRENT_TIME, NULL);
@@ -178,7 +178,7 @@ void translate(void){
  * create_stock_menu_item
  * creates a new stock menu item, append it to menu, add menu hint, optionally add accelerator and return the new menuitem
 */
-GtkWidget *create_stock_menu_item(GtkWidget *menuitem,GtkWidget *menu,const gchar *stock_id, gchar *menu_hint, guint accel_key, GdkModifierType accel_mods){
+static GtkWidget *create_stock_menu_item(GtkWidget *menuitem,GtkWidget *menu,const gchar *stock_id, gchar *menu_hint, guint accel_key, GdkModifierType accel_mods){
   menuitem = gtk_image_menu_item_new_from_stock(stock_id, NULL);
   gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuitem);
   install_menu_hint(menuitem,menu_hint);
@@ -191,7 +191,7 @@ GtkWidget *create_stock_menu_item(GtkWidget *menuitem,GtkWidget *menu,const gcha
  * create_mnemonic_menu_item
  * creates a new mnemonic menu item, append it to menu, add menu hint, optionally add accelerator and return the new menuitem
 */
-GtkWidget *create_mnemonic_menu_item(GtkWidget *menuitem,GtkWidget *menu,gchar *mnemonic, gchar *menu_hint, guint accel_key, GdkModifierType accel_mods){
+static GtkWidget *create_mnemonic_menu_item(GtkWidget *menuitem,GtkWidget *menu,gchar *mnemonic, gchar *menu_hint, guint accel_key, GdkModifierType accel_mods){
 menuitem = gtk_menu_item_new_with_mnemonic(mnemonic);
 install_menu_hint(menuitem,menu_hint);
 if (!(accel_key==0 && accel_mods==0)){
@@ -204,7 +204,7 @@ return menuitem;
  * create_mnemonic_menu_item
  * creates a check menu item, append it to menu, add menu hint, optionally add accelerator, set default state and return the new menuitem
 */
-GtkWidget *create_check_menu_item(GtkWidget *menuitem,GtkWidget *menu,gchar *mnemonic, gchar *menu_hint, guint accel_key, GdkModifierType accel_mods,gboolean active){
+static GtkWidget *create_check_menu_item(GtkWidget *menuitem,GtkWidget *menu,gchar *mnemonic, gchar *menu_hint, guint accel_key, GdkModifierType accel_mods,gboolean active){
   menuitem = gtk_check_menu_item_new_with_label(mnemonic);
   gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(menuitem), active);
   install_menu_hint(menuitem, menu_hint);
@@ -218,7 +218,7 @@ GtkWidget *create_check_menu_item(GtkWidget *menuitem,GtkWidget *menu,gchar *mne
 * create_separator_item
 * creates a new separator item, add it to menu and return the separator item
 */
-GtkWidget *create_separator_item(GtkWidget *menu){
+static GtkWidget *create_separator_item(GtkWidget *menu){
 GtkWidget *separator;
 separator = gtk_separator_menu_item_new();
 gtk_menu_shell_append(GTK_MENU_SHELL(menu), separator);
