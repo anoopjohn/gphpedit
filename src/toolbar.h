@@ -59,6 +59,8 @@ typedef struct
 	GtkWidget *goto_label;
 	GtkWidget *goto_entry;
         GtkWidget *cleanimg;
+	GtkEntryCompletion *completion;
+	GtkTreeModel *completion_model;
 }
 Findtoolbar;
 

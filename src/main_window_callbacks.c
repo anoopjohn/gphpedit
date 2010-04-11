@@ -1571,6 +1571,23 @@ void inc_search_activate(GtkEntry *entry,gpointer user_data)
 				gtk_scintilla_set_sel(GTK_SCINTILLA(main_window.current_editor->scintilla), text_min, text_max);
 			}
 		}
+		/* add text to search history*/
+     	        GSList *walk;
+		gint i=0;
+		for (walk = preferences.search_history; walk!=NULL; walk = g_slist_next(walk)) {
+			i++;
+			if (strcmp((gchar *) walk->data,current_text)==0){
+				return;  /* already in the list */
+				}
+		   }
+		preferences.search_history = g_slist_prepend (preferences.search_history, g_strdup(current_text));
+		if (i==16){
+		/* delete last item */
+		GSList *temp= g_slist_nth (preferences.search_history,16);
+		preferences.search_history = g_slist_remove (preferences.search_history, temp->data);
+		}
+		g_print("added:%s\n",current_text);
+		gtk_entry_completion_insert_action_text (main_window.toolbar_find->completion,0,g_strdup(current_text));		
 	}
 }
 

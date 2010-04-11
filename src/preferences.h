@@ -24,7 +24,6 @@
 
 #ifndef PREFERENCES_H
 #define PREFERENCES_H
-
 #include "main.h"
 
 typedef struct
@@ -58,7 +57,7 @@ typedef struct
 	gboolean single_instance_only;
 	gboolean showfolderbrowser;
 	gint font_quality;	
-	
+	GSList *search_history;
 	// Default formatting
 	gchar *default_font;
 	gint default_fore;

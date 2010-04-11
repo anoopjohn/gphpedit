@@ -26,6 +26,27 @@
 #include "toolbar.h"
 #include "main_window.h"
 
+/* Creates a tree model containing the completions */
+GtkTreeModel *
+create_completion_model (void)
+	
+{
+  GtkListStore *store;
+  GtkTreeIter iter;
+  
+  store = gtk_list_store_new (1, G_TYPE_STRING);
+  GSList *walk;
+  for (walk = preferences.search_history; walk!=NULL; walk = g_slist_next(walk)) {
+	  /* Append one word */
+         gtk_list_store_append (store, &iter);
+         gtk_list_store_set (store, &iter, 0, (gchar *) walk->data, -1);
+	//g_print("completion added:%s\n",(gchar *) walk->data);
+   }
+ 
+  return GTK_TREE_MODEL (store);
+}
+
+
 /**
 * on_cleanicon_press
 * Clear entry text 
@@ -184,6 +205,25 @@ void main_window_create_findtoolbar(void){
 
 	main_window.toolbar_find->search_entry = create_entry(main_window.toolbar_find->search_entry, _("Incremental search"),20);//gtk_entry_new();
         g_signal_connect (G_OBJECT (main_window.toolbar_find->search_entry), "icon-press", G_CALLBACK (on_cleanicon_press), NULL);
+
+	/* search completion code */
+	main_window.toolbar_find->completion= gtk_entry_completion_new ();
+
+	/* Create a tree model and use it as the completion model */
+	main_window.toolbar_find->completion_model = create_completion_model ();
+	gtk_entry_completion_set_model (main_window.toolbar_find->completion, main_window.toolbar_find->completion_model);
+	g_object_unref (main_window.toolbar_find->completion_model);
+    
+ 	/* Use model column 0 as the text column */
+	gtk_entry_completion_set_text_column (main_window.toolbar_find->completion, 0);
+	/* set autocompletion settings: complete inline and show pop-up */
+	gtk_entry_completion_set_popup_completion (main_window.toolbar_find->completion,TRUE);
+	gtk_entry_completion_set_inline_completion (main_window.toolbar_find->completion,TRUE);
+	/* set min match as 2 */
+	gtk_entry_completion_set_minimum_key_length (main_window.toolbar_find->completion,2);
+	/* Assign the completion to the entry */
+    	gtk_entry_set_completion (GTK_ENTRY(main_window.toolbar_find->search_entry), main_window.toolbar_find->completion);
+    	g_object_unref (main_window.toolbar_find->completion);
  
 	/* connect entry signals */
 	g_signal_connect_after(G_OBJECT(main_window.toolbar_find->search_entry), "insert_text", G_CALLBACK(inc_search_typed), NULL);
