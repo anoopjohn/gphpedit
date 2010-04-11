@@ -855,7 +855,12 @@ void main_window_add_to_reopen_menu(gchar *full_filename)
 		
 	main_window_update_reopen_menu();
 }
+static void main_window_create_prinbox(void){
+  main_window.prinbox = gtk_vbox_new (FALSE, 0);
+  gtk_container_add (GTK_CONTAINER (main_window.window), main_window.prinbox);
+  gtk_widget_show (main_window.prinbox);
 
+}
 void main_window_create(void)
 {
         main_window.window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
@@ -872,6 +877,7 @@ void main_window_create(void)
 
 
 	preferences_apply();
+	main_window_create_prinbox();
         main_window_create_menu();
 	main_window_create_maintoolbar();
 	main_window_create_findtoolbar();

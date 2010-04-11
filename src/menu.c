@@ -230,10 +230,6 @@ return separator;
 */
 void main_window_create_menu(void){
   int i;
-  main_window.prinbox = gtk_vbox_new (FALSE, 0);
-  gtk_container_add (GTK_CONTAINER (main_window.window), main_window.prinbox);
-  gtk_widget_show (main_window.prinbox);
-
   main_window.menu=g_slice_new(Mainmenu);
   main_window.menu->accel_group=NULL;
   /*create menu bar*/
