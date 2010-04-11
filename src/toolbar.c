@@ -27,8 +27,7 @@
 #include "main_window.h"
 
 /* Creates a tree model containing the completions */
-GtkTreeModel *
-create_completion_model (void)
+static GtkTreeModel *create_completion_model (void)
 	
 {
   GtkListStore *store;
@@ -59,7 +58,7 @@ void on_cleanicon_press (GtkEntry *entry, GtkEntryIconPosition icon_pos, GdkEven
 * creates a new toolbar stock item
 */
 
-GtkWidget *create_toolbar_stock_item(GtkWidget *toolitem,GtkWidget *toolbar,const gchar *stock_id, gchar *tooltip_text){
+static GtkWidget *create_toolbar_stock_item(GtkWidget *toolitem,GtkWidget *toolbar,const gchar *stock_id, gchar *tooltip_text){
 	toolitem = GTK_WIDGET(gtk_tool_button_new_from_stock(stock_id));
 	gtk_tool_item_set_tooltip_text(GTK_TOOL_ITEM (toolitem), tooltip_text);
   	gtk_toolbar_insert(GTK_TOOLBAR(toolbar), GTK_TOOL_ITEM (toolitem), -1);
@@ -180,7 +179,7 @@ void main_window_create_maintoolbar(void)
 	gtk_widget_show (main_window.toolbar_main->toolbar);
 }
 
-GtkWidget *create_entry(GtkWidget *entry, const gchar *tooltip_text,gint max_lenght){
+static GtkWidget *create_entry(GtkWidget *entry, const gchar *tooltip_text,gint max_lenght){
 	entry = gtk_entry_new();
         gtk_entry_set_max_length (GTK_ENTRY(entry),max_lenght);
 	gtk_entry_set_width_chars(GTK_ENTRY(entry),max_lenght + 1);
