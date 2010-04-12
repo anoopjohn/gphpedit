@@ -25,7 +25,7 @@
 #include "syntax_check.h"
 #include "preferences.h"
 #include "main_window.h"
-#include "main_window_callbacks.h"
+
 
 gchar *run_php_lint(gchar *command_line)
 {
@@ -80,9 +80,6 @@ void syntax_add_lines(gchar *output)
 				line_start += (indent/preferences.indentation_size);
 	
 				line_end = gtk_scintilla_get_line_end_position(GTK_SCINTILLA(main_window.current_editor->scintilla), atoi(line_number)-1);
-							
-//				gtk_scintilla_start_styling(GTK_SCINTILLA(main_window.current_editor->scintilla), line_start, 128);
-//				gtk_scintilla_set_styling(GTK_SCINTILLA(main_window.current_editor->scintilla), line_end-line_start, INDIC2_MASK);
 				gtk_scintilla_indicator_fill_range(GTK_SCINTILLA(main_window.current_editor->scintilla), line_start, line_end-line_start);
 			}
 			else {
@@ -171,9 +168,6 @@ void syntax_check_run(void)
 		
 		main_window.lint_store = gtk_list_store_new (1, G_TYPE_STRING);
 
-//		gtk_scintilla_start_styling(GTK_SCINTILLA(main_window.current_editor->scintilla), 0, INDIC2_MASK);
-//		gtk_scintilla_set_styling(GTK_SCINTILLA(main_window.current_editor->scintilla),
-//		                          gtk_scintilla_get_length(GTK_SCINTILLA(main_window.current_editor->scintilla)), 0);
 	gtk_scintilla_indicator_clear_range(GTK_SCINTILLA(main_window.current_editor->scintilla), 0, gtk_scintilla_get_text_length(GTK_SCINTILLA(main_window.current_editor->scintilla)));
 
 		gtk_list_store_clear(main_window.lint_store);
@@ -183,7 +177,7 @@ void syntax_check_run(void)
 		}
 		else {
 			gtk_list_store_append (main_window.lint_store, &iter);
-			gtk_list_store_set (main_window.lint_store, &iter, 0, _("Error calling PHP CLI (is PHP command line binary installed? If so, check if it's in your path or set php_binary in ~/.gnome2/gPHPEdit)\n"), -1);
+			gtk_list_store_set (main_window.lint_store, &iter, 0, _("Error calling PHP CLI (is PHP command line binary installed? If so, check if it's in your path or set php_binary in Preferences)\n"), -1);
 		}
 		gtk_tree_view_set_model(GTK_TREE_VIEW(main_window.lint_view), GTK_TREE_MODEL(main_window.lint_store));
 		
