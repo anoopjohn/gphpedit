@@ -172,7 +172,7 @@ static void create_side_panel(void){
 	main_window.close_image = gtk_image_new_from_stock(GTK_STOCK_CLOSE, GTK_ICON_SIZE_MENU);
 	gtk_misc_set_padding(GTK_MISC(main_window.close_image), 0, 0);
 	main_window.close_sidebar_button = gtk_button_new();
-	gtk_widget_set_tooltip_text(main_window.close_sidebar_button, _("Close class Browser"));
+	gtk_widget_set_tooltip_text(main_window.close_sidebar_button, _("Close side panel"));
 	gtk_button_set_image(GTK_BUTTON(main_window.close_sidebar_button), main_window.close_image);
 	gtk_button_set_relief(GTK_BUTTON(main_window.close_sidebar_button), GTK_RELIEF_NONE);
 	gtk_button_set_focus_on_click(GTK_BUTTON(main_window.close_sidebar_button), FALSE);
@@ -391,9 +391,7 @@ void update_app_title(void)
 {
 	GString *title;
 	gchar *dir;
-	//debug("Function called");
 	if (main_window.current_editor != NULL) {
-		//debug("Not null");
 		if (main_window.current_editor->type != TAB_HELP
 		    && main_window.current_editor->filename) {
 			//debug("Full Name - %s, Short Name - %s", main_window.current_editor->filename->str, main_window.current_editor->short_filename);
@@ -768,7 +766,6 @@ void main_window_update_reopen_menu(void)
     
 	gchar *full_filename;
 	GString *key;
-	//gchar *short_filename;
 	guint entry;
 	GtkBin *bin = NULL;
         GConfClient *config;
@@ -849,27 +846,14 @@ static void main_window_create_prinbox(void){
   gtk_widget_show (main_window.prinbox);
 
 }
-void main_window_create(void)
-{
-        main_window.window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-        gtk_window_set_title(GTK_WINDOW(main_window.window), _("gPHPEdit"));
-        gtk_window_set_default_size(GTK_WINDOW(main_window.window), 230, 150);
-        gtk_window_set_position(GTK_WINDOW(main_window.window), GTK_WIN_POS_CENTER);
-        gtk_window_set_icon(GTK_WINDOW(main_window.window), get_window_icon());
-        
+static void set_colormap(GtkWidget *window){
 	/*Set RGBA colormap*/
-	GdkScreen *screen= gtk_widget_get_screen (main_window.window);
+	GdkScreen *screen= gtk_widget_get_screen (window);
 	GdkColormap *colormap= gdk_screen_get_rgba_colormap (screen);
 	if (colormap && gdk_screen_is_composited (screen)) gtk_widget_set_default_colormap (colormap);
 	/*End set RGBA colormap*/
-
-
-	preferences_apply();
-	main_window_create_prinbox();
-        main_window_create_menu();
-	main_window_create_maintoolbar();
-	main_window_create_findtoolbar();
-	//TODO:move to function
+}
+static void create_infobar(void){
 	/* set up info bar */
 	main_window.infobar= gtk_info_bar_new_with_buttons (_("Reload"),1,_("Cancel"),2,NULL);
 	gtk_info_bar_set_message_type (GTK_INFO_BAR(main_window.infobar),GTK_MESSAGE_WARNING);
@@ -879,7 +863,29 @@ void main_window_create(void)
 	gtk_container_add (GTK_CONTAINER (content_area), main_window.infolabel);
 	g_signal_connect (main_window.infobar, "response", G_CALLBACK (process_external), main_window.current_editor);
         gtk_box_pack_start (GTK_BOX (main_window.prinbox), main_window.infobar, FALSE, FALSE, 0);			
-	//gtk_widget_show (main_window.infobar);
+	/* gtk_widget_show (main_window.infobar); */
+}
+static void create_app_main_window(const gchar *title, gint height, gint width){
+        main_window.window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+        gtk_window_set_title(GTK_WINDOW(main_window.window), title);
+        gtk_window_set_default_size(GTK_WINDOW(main_window.window), height, width);
+        gtk_window_set_position(GTK_WINDOW(main_window.window), GTK_WIN_POS_CENTER);
+        gtk_window_set_icon(GTK_WINDOW(main_window.window), get_window_icon());
+	/* set RGBA colormap */        
+	set_colormap(main_window.window);
+}
+
+void main_window_create(void)
+{
+	create_app_main_window(_("gPHPEdit"), 230, 150);
+
+	preferences_apply();
+	main_window_create_prinbox();
+        main_window_create_menu();
+	main_window_create_maintoolbar();
+	main_window_create_findtoolbar();
+
+	create_infobar();
         main_window_create_panes();
         main_window_fill_panes();
         main_window_create_appbar();
