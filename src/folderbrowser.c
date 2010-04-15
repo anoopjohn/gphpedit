@@ -1016,7 +1016,12 @@ static void go_home_cb(void){
 if(main_window.current_editor){
 /*if there is a file open set file folder as home dir*/
 if (main_window.current_editor->is_untitled==FALSE){
-     sChemin= g_path_get_dirname (main_window.current_editor->filename->str);
+	if (editor_is_local(main_window.current_editor))
+        sChemin= g_path_get_dirname (main_window.current_editor->filename->str);
+	else
+	/* set default dir as home dir*/
+	sChemin= DEFAULT_DIR;
+        gtk_widget_set_sensitive (main_window.searchentry, FALSE);
 }else {
 	/* set default dir as home dir*/
 	sChemin= DEFAULT_DIR;
