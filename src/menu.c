@@ -193,9 +193,8 @@ static void create_stock_menu_item(GtkWidget **menuitem,GtkWidget *menu,const gc
 static void create_mnemonic_menu_item(GtkWidget **menuitem,GtkWidget *menu,gchar *mnemonic, gchar *menu_hint, guint accel_key, GdkModifierType accel_mods){
 *menuitem = gtk_menu_item_new_with_mnemonic(mnemonic);
 install_menu_hint(*menuitem,menu_hint);
-if (!(accel_key==0 && accel_mods==0)){
+if (!(accel_key==0 && accel_mods==0))
 	gtk_widget_add_accelerator(*menuitem, "activate", main_window.menu->accel_group, accel_key, accel_mods, GTK_ACCEL_VISIBLE);
-}
 gtk_menu_shell_append(GTK_MENU_SHELL(menu), *menuitem);
 }
 /*
@@ -206,9 +205,8 @@ static void create_check_menu_item(GtkWidget **menuitem,GtkWidget *menu,gchar *m
   *menuitem = gtk_check_menu_item_new_with_label(mnemonic);
   gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(*menuitem), active);
   install_menu_hint(*menuitem, menu_hint);
-  if (!(accel_key==0 && accel_mods==0)){
+  if (!(accel_key==0 && accel_mods==0))
  	 gtk_widget_add_accelerator(*menuitem, "activate", main_window.menu->accel_group, accel_key, accel_mods, GTK_ACCEL_VISIBLE);
-  }
   gtk_menu_shell_append(GTK_MENU_SHELL(menu),*menuitem);
 }
 /*
@@ -218,6 +216,16 @@ static void create_check_menu_item(GtkWidget **menuitem,GtkWidget *menu,gchar *m
 static void create_separator_item(GtkWidget **separator,GtkWidget *menu){
 *separator = gtk_separator_menu_item_new();
 gtk_menu_shell_append(GTK_MENU_SHELL(menu), *separator);
+}
+/*
+* create_menu
+* create a new menu and insert it in menubar
+*/
+static void create_menu(GtkWidget **menu, GtkWidget **menuitem, const gchar *caption, GtkWidget *menubar){
+  *menu = gtk_menu_new();
+  *menuitem = gtk_menu_item_new_with_mnemonic(caption);
+  gtk_menu_item_set_submenu(GTK_MENU_ITEM(*menuitem),   *menu);
+  gtk_menu_shell_append(GTK_MENU_SHELL(menubar), *menuitem);
 }
 /*
 * create_help_menu
@@ -239,7 +247,10 @@ static void fill_help_menu(void){
   g_signal_connect(G_OBJECT(main_window.menu->abouthelp), "activate", G_CALLBACK(on_about1_activate), NULL);
 }
 
-
+/*
+* create_edit_menu
+* create edit menu widgets and fill edit menu
+*/
 static void fill_menu_edit(void){
 
   create_stock_menu_item(&main_window.menu->undo,main_window.menu->menuedit,GTK_STOCK_UNDO, _("Undo last action"), GDK_z, GDK_CONTROL_MASK);
@@ -285,7 +296,10 @@ create_stock_menu_item(&main_window.menu->unindent,main_window.menu->menuedit,GT
 
 }
 
-
+/*
+* create_file_menu
+* create file menu widgets and fill file menu
+*/
 static void fill_menu_file(void){
   int i;
   create_stock_menu_item(&main_window.menu->newi,main_window.menu->menunew,GTK_STOCK_NEW, _("Creates a new file"), GDK_n, GDK_CONTROL_MASK);
@@ -327,14 +341,15 @@ static void fill_menu_file(void){
   create_stock_menu_item(&main_window.menu->quit,main_window.menu->menunew,GTK_STOCK_QUIT, _("Quit the application"), GDK_q, GDK_CONTROL_MASK);
   g_signal_connect(G_OBJECT(main_window.menu->quit), "activate", G_CALLBACK(on_quit1_activate), NULL);
 }
-
+/*
+* create_view_menu
+* create view menu widgets and fill view menu
+*/
 static void fill_menu_view(void){
   create_check_menu_item(&main_window.menu->viewstatusbar,main_window.menu->menuview,_("Statusbar"), _("Show/Hide Application Statusbar"), 0, 0,TRUE);
   g_signal_connect(G_OBJECT(main_window.menu->viewstatusbar), "activate", G_CALLBACK(tog_statusbar),NULL);
-
   create_check_menu_item(&main_window.menu->viewmaintoolbar,main_window.menu->menuview,_("Main Toolbar"), _("Show/Hide Application Main Toolbar"), 0, 0,TRUE);
   g_signal_connect(G_OBJECT(main_window.menu->viewmaintoolbar), "activate", G_CALLBACK(tog_maintoolbar),NULL);
-
   create_check_menu_item(&main_window.menu->viewfindtoolbar,main_window.menu->menuview,_("Find Toolbar"), _("Show/Hide Application Find Toolbar"), 0, 0,TRUE);
   g_signal_connect(G_OBJECT(main_window.menu->viewfindtoolbar), "activate", G_CALLBACK(tog_findtoolbar),NULL);
   /* separator */
@@ -353,11 +368,11 @@ static void fill_menu_view(void){
   /* separator */
   create_separator_item(&main_window.menu->sep7,main_window.menu->menuview);
 
-create_stock_menu_item(&main_window.menu->zoomin,main_window.menu->menuview,GTK_STOCK_ZOOM_IN, _("Increases zoom in 10%"), GDK_plus, GDK_CONTROL_MASK);
+  create_stock_menu_item(&main_window.menu->zoomin,main_window.menu->menuview,GTK_STOCK_ZOOM_IN, _("Increases zoom in 10%"), GDK_plus, GDK_CONTROL_MASK);
   g_signal_connect(G_OBJECT(main_window.menu->zoomin), "activate", G_CALLBACK(zoom_in),NULL);
-create_stock_menu_item(&main_window.menu->zoomout,main_window.menu->menuview,GTK_STOCK_ZOOM_OUT, _("Decreases zoom in 10%"), GDK_minus, GDK_CONTROL_MASK);
+  create_stock_menu_item(&main_window.menu->zoomout,main_window.menu->menuview,GTK_STOCK_ZOOM_OUT, _("Decreases zoom in 10%"), GDK_minus, GDK_CONTROL_MASK);
   g_signal_connect(G_OBJECT(main_window.menu->zoomout), "activate", G_CALLBACK(zoom_out),NULL);
-create_stock_menu_item(&main_window.menu->zoom100,main_window.menu->menuview,GTK_STOCK_ZOOM_100, _("Restores normal zoom level"), GDK_0, GDK_CONTROL_MASK);
+  create_stock_menu_item(&main_window.menu->zoom100,main_window.menu->menuview,GTK_STOCK_ZOOM_100, _("Restores normal zoom level"), GDK_0, GDK_CONTROL_MASK);
   g_signal_connect(G_OBJECT(main_window.menu->zoom100), "activate", G_CALLBACK(zoom_100),NULL);
   /* separator */
   create_separator_item(&main_window.menu->sep8,main_window.menu->menuview);
@@ -389,6 +404,11 @@ create_stock_menu_item(&main_window.menu->zoom100,main_window.menu->menuview,GTK
   create_stock_menu_item(&main_window.menu->preferences,main_window.menu->menuview,GTK_STOCK_PREFERENCES, _("Application Config"), GDK_F5, 0);
   g_signal_connect(G_OBJECT(main_window.menu->preferences), "activate", G_CALLBACK(on_preferences1_activate), NULL);
 }
+
+/*
+* create_code_menu
+* create code menu widgets and fill code menu
+*/
 static void fill_menu_code (void){
   create_mnemonic_menu_item(&main_window.menu->syntax,main_window.menu->menucode,_("_Syntax check"), _("Check the syntax using the PHP command line binary"), GDK_F9, 0);
   g_signal_connect(G_OBJECT(main_window.menu->syntax), "activate", G_CALLBACK(syntax_check), NULL);
@@ -425,48 +445,29 @@ static void fill_menu_code (void){
  * create application menu, menu should be free when no longer needed with g_slice_free
 */
 void main_window_create_menu(void){
-  int i;
   main_window.menu=g_slice_new(Mainmenu);
   main_window.menu->accel_group=NULL;
   /*create menu bar*/
   main_window.menu->menubar = gtk_menu_bar_new();
-  /*create menus*/
-   
+  /* create menui accel gruop */
   main_window.menu->accel_group = gtk_accel_group_new();
   gtk_window_add_accel_group(GTK_WINDOW(main_window.window), main_window.menu->accel_group);
+  /*create menus*/
   /*Menu file*/
-  main_window.menu->menunew = gtk_menu_new();
-  main_window.menu->file = gtk_menu_item_new_with_mnemonic(_("_File"));
-  gtk_menu_item_set_submenu(GTK_MENU_ITEM(  main_window.menu->file),   main_window.menu->menunew);
-  gtk_menu_shell_append(GTK_MENU_SHELL(main_window.men  /* help menu */u->menubar), main_window.menu->file);
-
+  create_menu(&main_window.menu->menunew, &main_window.menu->file, _("_File"),main_window.menu->menubar);
   fill_menu_file();
   /*Menu edit*/
-  main_window.menu->menuedit = gtk_menu_new();
-  main_window.menu->edit = gtk_menu_item_new_with_mnemonic(_("_Edit"));
-  gtk_menu_item_set_submenu(GTK_MENU_ITEM(main_window.menu->edit), main_window.menu->menuedit);
-  gtk_menu_shell_append(GTK_MENU_SHELL(main_window.menu->menubar), main_window.menu->edit);
-
+  create_menu(&main_window.menu->menuedit, &main_window.menu->edit, _("_Edit"), main_window.menu->menubar);
   fill_menu_edit();
   /* view menu */
-  main_window.menu->menuview = gtk_menu_new();
-  main_window.menu->view = gtk_menu_item_new_with_mnemonic(_("_View"));
-  gtk_menu_item_set_submenu(GTK_MENU_ITEM(main_window.menu->view), main_window.menu->menuview);
-  gtk_menu_shell_append(GTK_MENU_SHELL(main_window.menu->menubar), main_window.menu->view);
-
+  create_menu(&main_window.menu->menuview, &main_window.menu->view, _("_View"),main_window.menu->menubar);
   fill_menu_view();
   /*menu code*/
-  main_window.menu->menucode = gtk_menu_new();
-  main_window.menu->code = gtk_menu_item_new_with_mnemonic(_("_Code"));
-  gtk_menu_item_set_submenu(GTK_MENU_ITEM(main_window.menu->code), main_window.menu->menucode);
-  gtk_menu_shell_append(GTK_MENU_SHELL(main_window.menu->menubar), main_window.menu->code);
-
+  create_menu(&main_window.menu->menucode, &main_window.menu->code, _("_Code"),main_window.menu->menubar);
   fill_menu_code();
   /*plugin menu*/
-  main_window.menu->menuplugin = gtk_menu_new();
-  main_window.menu->plugin = gtk_menu_item_new_with_mnemonic(_("_Plugin"));
-  gtk_menu_item_set_submenu(GTK_MENU_ITEM(main_window.menu->plugin), main_window.menu->menuplugin);
-  gtk_menu_shell_append(GTK_MENU_SHELL(main_window.menu->menubar), main_window.menu->plugin);
+  create_menu(&main_window.menu->menuplugin, &main_window.menu->plugin, _("_Plugin"),main_window.menu->menubar);
+  int i;
   for (i=0;i<NUM_PLUGINS_MAX;i++){
   main_window.menu->plugins[i]= gtk_menu_item_new_with_mnemonic(_("_Plugin"));
   g_signal_connect(G_OBJECT(main_window.menu->plugins[i]), "activate", G_CALLBACK(run_plugin), (gpointer)i);
@@ -475,11 +476,7 @@ void main_window_create_menu(void){
  gtk_widget_add_accelerator(main_window.menu->plugins[i], "activate", main_window.menu->accel_group, parse_shortcut(i), GDK_CONTROL_MASK, GTK_ACCEL_VISIBLE);
   }
   /* help menu */
-  main_window.menu->menuhelp = gtk_menu_new();
-  main_window.menu->help = gtk_menu_item_new_with_mnemonic(_("_Help"));
-  gtk_menu_item_set_submenu(GTK_MENU_ITEM(main_window.menu->help), main_window.menu->menuhelp);
-  gtk_menu_shell_append(GTK_MENU_SHELL(main_window.menu->menubar), main_window.menu->help);
-
+  create_menu(&main_window.menu->menuhelp, &main_window.menu->help, _("_Help"),main_window.menu->menubar);
   fill_help_menu();
   /* add menu bar to main window */
   gtk_box_pack_start (GTK_BOX (main_window.prinbox), main_window.menu->menubar, FALSE, FALSE, 0);
