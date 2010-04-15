@@ -45,7 +45,7 @@ void find_clicked(GtkButton *button, gpointer data)
 {
 	gboolean whole_document;
 	gint search_flags = 0;
-	gchar *text;
+	const gchar *text;
 	glong length_of_document;
 	glong current_pos;
 	glong last_found = 0;
@@ -57,7 +57,7 @@ void find_clicked(GtkButton *button, gpointer data)
 	current_pos = gtk_scintilla_get_current_pos(GTK_SCINTILLA(main_window.current_editor->scintilla));
 
 	whole_document = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON(find_dialog.radiobutton1));
-	text = gtk_editable_get_chars (GTK_EDITABLE(find_dialog.entry1), 0, -1);
+	text =  gtk_entry_get_text (GTK_ENTRY(find_dialog.entry1));
 
 	if (whole_document) {
 		current_pos = 0;
@@ -78,7 +78,7 @@ void find_clicked(GtkButton *button, gpointer data)
 	}
 
 	result = gtk_scintilla_find_text (GTK_SCINTILLA(main_window.current_editor->scintilla),
-	                                  search_flags, text, current_pos, length_of_document, &start_found, &end_found);
+	                                  search_flags, (gchar *) text, current_pos, length_of_document, &start_found, &end_found);
 
 	if (result == -1) {
 		// Show message saying could not be found.
@@ -145,6 +145,7 @@ void find_create(void)
 	
 	find_dialog.entry1 = gtk_entry_new ();
 	gtk_widget_show (find_dialog.entry1);
+
 	gtk_container_add (GTK_CONTAINER (find_dialog.alignment1), find_dialog.entry1);
 	/* Get selected text (Wendell) */
 	gint wordStart;
@@ -207,33 +208,6 @@ void find_create(void)
 	gtk_widget_show (find_dialog.label3);
 	gtk_frame_set_label_widget (GTK_FRAME (find_dialog.frame3), find_dialog.label3);
 	gtk_label_set_justify (GTK_LABEL (find_dialog.label3), GTK_JUSTIFY_LEFT);
-
-	/*find_dialog.frame4 = gtk_frame_new (NULL);
-	gtk_widget_show (find_dialog.frame4);
-	gtk_box_pack_start (GTK_BOX (find_dialog.hbox1), find_dialog.frame4, FALSE, FALSE, 4);
-
-	find_dialog.vbox4 = gtk_vbox_new (FALSE, 0);
-	gtk_widget_show (find_dialog.vbox4);
-	gtk_container_add (GTK_CONTAINER (find_dialog.frame4), find_dialog.vbox4);
-
-	find_dialog.radiobutton2 = gtk_radio_button_new_with_mnemonic (NULL, _("Forwards"));
-	gtk_widget_show (find_dialog.radiobutton2);
-	gtk_box_pack_start (GTK_BOX (find_dialog.vbox4), find_dialog.radiobutton2, FALSE, FALSE, 0);
-	gtk_container_set_border_width (GTK_CONTAINER (find_dialog.radiobutton2), 2);
-	gtk_radio_button_set_group (GTK_RADIO_BUTTON (find_dialog.radiobutton2), find_dialog.radiobutton2_group);
-	find_dialog.radiobutton2_group = gtk_radio_button_get_group (GTK_RADIO_BUTTON (find_dialog.radiobutton2));
-
-	find_dialog.radiobutton3 = gtk_radio_button_new_with_mnemonic (NULL, _("Backwards"));
-	gtk_widget_show (find_dialog.radiobutton3);
-	gtk_box_pack_start (GTK_BOX (find_dialog.vbox4), find_dialog.radiobutton3, FALSE, FALSE, 0);
-	gtk_container_set_border_width (GTK_CONTAINER (find_dialog.radiobutton3), 2);
-	gtk_radio_button_set_group (GTK_RADIO_BUTTON (find_dialog.radiobutton3), find_dialog.radiobutton2_group);
-	find_dialog.radiobutton2_group = gtk_radio_button_get_group (GTK_RADIO_BUTTON (find_dialog.radiobutton3));
-
-	find_dialog.label4 = gtk_label_new (_("Direction"));
-	gtk_widget_show (find_dialog.label4);
-	gtk_frame_set_label_widget (GTK_FRAME (find_dialog.frame4), find_dialog.label4);
-	gtk_label_set_justify (GTK_LABEL (find_dialog.label4), GTK_JUSTIFY_LEFT);*/
 
 	find_dialog.frame5 = gtk_frame_new (NULL);
 	gtk_widget_show (find_dialog.frame5);
@@ -330,8 +304,8 @@ void replace_clicked(GtkButton *button, gpointer data)
 	static gint last_found = 0;
 	gboolean whole_document;
 	gint search_flags = 0;
-	gchar *text;
-	gchar *replace;
+	const gchar *text;
+	const gchar *replace;
 	glong length_of_document;
 	glong current_pos;
 	glong start_found;
@@ -342,8 +316,8 @@ void replace_clicked(GtkButton *button, gpointer data)
 	current_pos = gtk_scintilla_get_current_pos(GTK_SCINTILLA(main_window.current_editor->scintilla));
 
 	whole_document = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON(replace_dialog.radiobutton17));
-	text = gtk_editable_get_chars (GTK_EDITABLE(replace_dialog.entry1), 0, -1);
-	replace = gtk_editable_get_chars (GTK_EDITABLE(replace_dialog.entry2), 0, -1);
+	text = gtk_entry_get_text (GTK_ENTRY(replace_dialog.entry1));
+	replace = gtk_entry_get_text (GTK_ENTRY(replace_dialog.entry2));
 
 	if (whole_document) {
 		current_pos = 0;
@@ -364,7 +338,7 @@ void replace_clicked(GtkButton *button, gpointer data)
 	}
 
 	result = gtk_scintilla_find_text (GTK_SCINTILLA(main_window.current_editor->scintilla),
-	                                  search_flags, text, current_pos, length_of_document, &start_found, &end_found);
+	                                  search_flags, (gchar *)text, current_pos, length_of_document, &start_found, &end_found);
 
 	if (result == -1) {
 		// Show message saying could not be found.
@@ -392,9 +366,9 @@ void replace_clicked(GtkButton *button, gpointer data)
 	    gtk_window_set_icon(GTK_WINDOW(replace_prompt_dialog), get_window_icon());
             gint result = gtk_dialog_run (GTK_DIALOG (replace_prompt_dialog));
             gint selection_start;
-            gchar *replace;
+            const gchar *replace;
            if (result==GTK_RESPONSE_YES) {
-            	replace = gtk_editable_get_chars (GTK_EDITABLE(replace_dialog.entry2), 0, -1);
+            	replace =  gtk_entry_get_text (GTK_ENTRY(replace_dialog.entry2));
 		selection_start = gtk_scintilla_get_selection_start(GTK_SCINTILLA(main_window.current_editor->scintilla));
 		gtk_scintilla_replace_sel(GTK_SCINTILLA(main_window.current_editor->scintilla), replace);
 		gtk_scintilla_set_selection_start(GTK_SCINTILLA(main_window.current_editor->scintilla), selection_start);
@@ -416,8 +390,8 @@ void replace_all_clicked(GtkButton *button, gpointer data)
 {
 	static gint last_found = 0;
 	gint search_flags = 0;
-	gchar *text;
-	gchar *replace;
+	const gchar *text;
+	const gchar *replace;
 	glong length_of_document;
 	glong current_pos;
 	glong start_found;
@@ -432,8 +406,8 @@ void replace_all_clicked(GtkButton *button, gpointer data)
 
 	length_of_document = gtk_scintilla_get_length(GTK_SCINTILLA(main_window.current_editor->scintilla));
 
-	text = gtk_editable_get_chars (GTK_EDITABLE(replace_dialog.entry1), 0, -1);
-	replace = gtk_editable_get_chars (GTK_EDITABLE(replace_dialog.entry2), 0, -1);
+	text = gtk_entry_get_text (GTK_ENTRY(replace_dialog.entry1));
+	replace =gtk_entry_get_text (GTK_ENTRY(replace_dialog.entry2));
 
 	start_pos = gtk_scintilla_get_current_pos(GTK_SCINTILLA(main_window.current_editor->scintilla));
 
@@ -455,7 +429,7 @@ void replace_all_clicked(GtkButton *button, gpointer data)
 	numfound=0;
 
 	result = gtk_scintilla_find_text (GTK_SCINTILLA(main_window.current_editor->scintilla),
-	                                  search_flags, text, current_pos, length_of_document, &start_found, &end_found);
+	                                  search_flags, (gchar *)text, current_pos, length_of_document, &start_found, &end_found);
 
 	while (result != -1) {
 		if (start_found == last_found) {
@@ -470,7 +444,7 @@ void replace_all_clicked(GtkButton *button, gpointer data)
 		gtk_scintilla_set_selection_end(GTK_SCINTILLA(main_window.current_editor->scintilla), start_found + strlen(replace));
 		numfound++;
 		result = gtk_scintilla_find_text (GTK_SCINTILLA(main_window.current_editor->scintilla),
-		                                  search_flags, text, current_pos, length_of_document, &start_found, &end_found);
+		                                  search_flags, (gchar *)text, current_pos, length_of_document, &start_found, &end_found);
 	}
 
 	message = g_string_new("");
@@ -617,33 +591,6 @@ void replace_create(void)
 	gtk_widget_show (replace_dialog.label16);
 	gtk_frame_set_label_widget (GTK_FRAME (replace_dialog.frame16), replace_dialog.label16);
 	gtk_label_set_justify (GTK_LABEL (replace_dialog.label16), GTK_JUSTIFY_LEFT);
-
-	/*replace_dialog.frame17 = gtk_frame_new (NULL);
-	gtk_widget_show (replace_dialog.frame17);
-	gtk_box_pack_start (GTK_BOX (replace_dialog.hbox9), replace_dialog.frame17, FALSE, FALSE, 4);
-
-	replace_dialog.vbox16 = gtk_vbox_new (FALSE, 0);
-	gtk_widget_show (replace_dialog.vbox16);
-	gtk_container_add (GTK_CONTAINER (replace_dialog.frame17), replace_dialog.vbox16);
-
-	replace_dialog.radiobutton19 = gtk_radio_button_new_with_mnemonic (NULL, _("Forwards"));
-	gtk_widget_show (replace_dialog.radiobutton19);
-	gtk_box_pack_start (GTK_BOX (replace_dialog.vbox16), replace_dialog.radiobutton19, FALSE, FALSE, 0);
-	gtk_container_set_border_width (GTK_CONTAINER (replace_dialog.radiobutton19), 2);
-	gtk_radio_button_set_group (GTK_RADIO_BUTTON (replace_dialog.radiobutton19), replace_dialog.radiobutton19_group);
-	replace_dialog.radiobutton19_group = gtk_radio_button_get_group (GTK_RADIO_BUTTON (replace_dialog.radiobutton19));
-
-	replace_dialog.radiobutton20 = gtk_radio_button_new_with_mnemonic (NULL, _("Backwards"));
-	gtk_widget_show (replace_dialog.radiobutton20);
-	gtk_box_pack_start (GTK_BOX (replace_dialog.vbox16), replace_dialog.radiobutton20, FALSE, FALSE, 0);
-	gtk_container_set_border_width (GTK_CONTAINER (replace_dialog.radiobutton20), 2);
-	gtk_radio_button_set_group (GTK_RADIO_BUTTON (replace_dialog.radiobutton20), replace_dialog.radiobutton20_group);
-	replace_dialog.radiobutton20_group = gtk_radio_button_get_group (GTK_RADIO_BUTTON (replace_dialog.radiobutton20));
-
-	replace_dialog.label17 = gtk_label_new (_("Direction"));
-	gtk_widget_show (replace_dialog.label17);
-	gtk_frame_set_label_widget (GTK_FRAME (replace_dialog.frame17), replace_dialog.label17);
-	gtk_label_set_justify (GTK_LABEL (replace_dialog.label17), GTK_JUSTIFY_LEFT);*/
 
 	replace_dialog.frame18 = gtk_frame_new (NULL);
 	gtk_widget_show (replace_dialog.frame18);
