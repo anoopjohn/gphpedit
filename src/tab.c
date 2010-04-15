@@ -1829,14 +1829,14 @@ gboolean editor_is_local(Editor *editor)
 	gchar *filename;
 	
 	filename = (editor->filename)->str;
-	if (g_ascii_strncasecmp(filename, "file://", MIN(strlen(filename), 7))==0) {
+	if (g_str_has_prefix(filename, "file://")){
 		return TRUE;	
 	}
-	if (g_ascii_strncasecmp(filename, "/", MIN(strlen(filename), 1))==0) {
-		return TRUE;	
+	if (g_str_has_prefix(filename, "/")){
+		return TRUE;
 	}
 
-	g_print("FALSE - not local!!!");
+       /* g_print("FALSE - not local!!! filename:%s",filename); */
 	return FALSE;
 }
 gboolean uri_is_local_or_http(gchar *uri)
@@ -1844,20 +1844,20 @@ gboolean uri_is_local_or_http(gchar *uri)
 	gchar *filename;
 
 	filename = uri;
-	if (g_ascii_strncasecmp(filename, "file://", MIN(strlen(filename), 7))==0) {
+	if (g_str_has_prefix(filename, "file://")){
 		return TRUE;
 	}
-        if (g_ascii_strncasecmp(filename, "http://", MIN(strlen(filename), 7))==0) {
+	if (g_str_has_prefix(filename, "http://")){
 		return TRUE;
 	}
-        if (g_ascii_strncasecmp(filename, "https://", MIN(strlen(filename), 7))==0) {
+	if (g_str_has_prefix(filename, "https://")){
 		return TRUE;
 	}
-	if (g_ascii_strncasecmp(filename, "/", MIN(strlen(filename), 1))==0) {
+	if (g_str_has_prefix(filename, "/")){
 		return TRUE;
 	}
 
-	//g_print("FALSE - not local!!!");
+	/* g_print("FALSE - not local!!!"); */
 	return FALSE;
 }
 gchar * editor_convert_to_local(Editor *editor)
@@ -1868,7 +1868,7 @@ gchar * editor_convert_to_local(Editor *editor)
 		return NULL;
 	}
 	filename = editor->filename->str;
-	if (g_ascii_strncasecmp(filename, "file://", MIN(strlen(filename), 7))==0) {
+	if (g_str_has_prefix(filename, "file://")){
 		filename += 7;
 	}
 	
