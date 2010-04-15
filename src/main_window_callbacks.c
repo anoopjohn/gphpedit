@@ -130,7 +130,7 @@ void session_reopen(void)
 				focus_this_one = TRUE;
 			}
 			
-			if (strstr(filename, "phphelp:")) {
+			if (g_str_has_prefix(filename, "phphelp:")){
 				filename += 8;
 				target = g_string_new(filename);
 				tab_create_new(TAB_HELP, target);
@@ -141,7 +141,7 @@ void session_reopen(void)
 					//FIXME: seg fault if there's open a file and a TABHELP and the TABHELP GOT the focus
 					focus_tab = 0;
 				}
-			} else if (strstr(filename, "preview:")) {
+			}else if (g_str_has_prefix(filename, "preview:")){
 				filename += 8;
 				target = g_string_new(filename);
 				tab_create_new(TAB_PREVIEW, target);
@@ -1547,7 +1547,27 @@ gboolean inc_search_key_release_event(GtkWidget *widget,GdkEventKey *event,gpoin
 	}
 	return FALSE;
 }
-
+void add_to_search_history(const gchar *current_text){
+		/* add text to search history*/
+     	        GSList *walk;
+		gint i=0;
+		for (walk = preferences.search_history; walk!=NULL; walk = g_slist_next(walk)) {
+			i++;
+			if (strcmp((gchar *) walk->data,current_text)==0){
+				return;  /* already in the list */
+				}
+		   }
+		preferences.search_history = g_slist_prepend (preferences.search_history, g_strdup(current_text));
+		if (i==16){
+		/* delete last item */
+		GSList *temp= g_slist_nth (preferences.search_history,16);
+		preferences.search_history = g_slist_remove (preferences.search_history, temp->data);
+		}
+		#ifdef DEBUG
+		g_print("added:%s\n",current_text);
+		#endif
+		gtk_entry_completion_insert_action_text (main_window.toolbar_find->completion,0,g_strdup(current_text));		
+}
 
 void inc_search_activate(GtkEntry *entry,gpointer user_data)
 {
@@ -1571,23 +1591,7 @@ void inc_search_activate(GtkEntry *entry,gpointer user_data)
 				gtk_scintilla_set_sel(GTK_SCINTILLA(main_window.current_editor->scintilla), text_min, text_max);
 			}
 		}
-		/* add text to search history*/
-     	        GSList *walk;
-		gint i=0;
-		for (walk = preferences.search_history; walk!=NULL; walk = g_slist_next(walk)) {
-			i++;
-			if (strcmp((gchar *) walk->data,current_text)==0){
-				return;  /* already in the list */
-				}
-		   }
-		preferences.search_history = g_slist_prepend (preferences.search_history, g_strdup(current_text));
-		if (i==16){
-		/* delete last item */
-		GSList *temp= g_slist_nth (preferences.search_history,16);
-		preferences.search_history = g_slist_remove (preferences.search_history, temp->data);
-		}
-		g_print("added:%s\n",current_text);
-		gtk_entry_completion_insert_action_text (main_window.toolbar_find->completion,0,g_strdup(current_text));		
+		add_to_search_history(current_text);
 	}
 }
 
