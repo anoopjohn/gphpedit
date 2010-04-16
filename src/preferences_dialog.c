@@ -31,14 +31,13 @@
 #include "edit_template.h"
 #include <gtkscintilla.h>
 
-#define IS_FONT_NAME(name1, name2) strncmp(name1, name2, MIN(strlen(name1), strlen(name2))) == 0
-
+#define IS_FONT_NAME(name1, name2) g_str_has_prefix(name1, name2)
 PreferencesDialog preferences_dialog;
 Preferences temp_preferences;
 gchar *current_highlighting_element = NULL;
 gchar *current_key = NULL;
 
-static int cmp_families (const void *a, const void *b)
+static gint cmp_families (gconstpointer a, gconstpointer b, gpointer user_data)
 {
 	const char *a_name = pango_font_family_get_name (*(PangoFontFamily **)a);
 	const char *b_name = pango_font_family_get_name (*(PangoFontFamily **)b);
@@ -54,13 +53,15 @@ static GList * get_font_names()
 	
 	pango_context_list_families (gtk_widget_get_pango_context (GTK_WIDGET (main_window.window)),
 		&families, &n_families);
-	qsort (families, n_families, sizeof (PangoFontFamily *), cmp_families);
-
+        g_qsort_with_data (families, n_families, sizeof (PangoFontFamily *), cmp_families, NULL);
 	for (i=0; i<n_families; i++) {
 		const gchar *name = pango_font_family_get_name (families[i]);
-		fonts = g_list_append(fonts, (gchar *)name);
+		/* From glib docs. Prepend and reverse list it's more eficient */
+		//fonts = g_list_append(fonts, (gchar *)name);
+		fonts = g_list_prepend(fonts, (gchar *)name);
 	}
-	
+	fonts= g_list_reverse (fonts);
+
 	return fonts;
 }
 
@@ -70,21 +71,23 @@ static GList *get_font_sizes()
 	
 	// Again, there's gotta be a nicer way to do this!!!!	AJ 2004-02-09
 	
-	sizes = g_list_append(sizes, "6");
-	sizes = g_list_append(sizes, "8");
-	sizes = g_list_append(sizes, "10");
-	sizes = g_list_append(sizes, "12");
-	sizes = g_list_append(sizes, "14");
-	sizes = g_list_append(sizes, "16");
-	sizes = g_list_append(sizes, "18");
-	sizes = g_list_append(sizes, "20");
-	sizes = g_list_append(sizes, "22");
-	sizes = g_list_append(sizes, "24");
-	sizes = g_list_append(sizes, "26");
-	sizes = g_list_append(sizes, "32");
-	sizes = g_list_append(sizes, "48");
-	sizes = g_list_append(sizes, "72");
+	sizes = g_list_prepend(sizes, "6");
+	sizes = g_list_prepend(sizes, "8");
+	sizes = g_list_prepend(sizes, "10");
+	sizes = g_list_prepend(sizes, "12");
+	sizes = g_list_prepend(sizes, "14");
+	sizes = g_list_prepend(sizes, "16");
+	sizes = g_list_prepend(sizes, "18");
+	sizes = g_list_prepend(sizes, "20");
+	sizes = g_list_prepend(sizes, "22");
+	sizes = g_list_prepend(sizes, "24");
+	sizes = g_list_prepend(sizes, "26");
+	sizes = g_list_prepend(sizes, "32");
+	sizes = g_list_prepend(sizes, "48");
+	sizes = g_list_prepend(sizes, "72");
 	
+	sizes= g_list_reverse (sizes);	
+
 	return sizes;
 }
 
@@ -99,9 +102,9 @@ static GList *get_font_qualities()
 +#define SC_EFF_QUALITY_LCD_OPTIMIZED 3
 
 */	
-	qualities = g_list_append(qualities, "Default");
-	qualities = g_list_append(qualities, "Non Antialiased");
-	qualities = g_list_append(qualities, "LCD Optimized");	
+	qualities = g_list_prepend(qualities, "Non Antialiased");
+	qualities = g_list_prepend(qualities, "LCD Optimized");	
+	qualities = g_list_prepend(qualities, "Default");
 	return qualities;
 }
 
@@ -155,79 +158,81 @@ void get_current_preferences(void)
 	memcpy(&temp_preferences, &preferences, sizeof(preferences));
 
 	// Font drop down elements : General
-	highlighting_list = g_list_append(highlighting_list, _("Default"));
-	highlighting_list = g_list_append(highlighting_list, _("Line Number (margin)"));
+	highlighting_list = g_list_prepend(highlighting_list, _("Default"));
+	highlighting_list = g_list_prepend(highlighting_list, _("Line Number (margin)"));
 
 	// Font drop down elements : HTML
-	highlighting_list = g_list_append(highlighting_list, _("HTML Tag"));
-	highlighting_list = g_list_append(highlighting_list, _("HTML Unknown Tag"));
-	highlighting_list = g_list_append(highlighting_list, _("HTML Attribute"));
-	highlighting_list = g_list_append(highlighting_list, _("HTML Unknown Attribute"));
-	highlighting_list = g_list_append(highlighting_list, _("HTML Number"));
-	highlighting_list = g_list_append(highlighting_list, _("HTML Single-quoted String"));
-	highlighting_list = g_list_append(highlighting_list, _("HTML Double-quoted String"));
-	highlighting_list = g_list_append(highlighting_list, _("HTML Comment"));
-	highlighting_list = g_list_append(highlighting_list, _("HTML Entity"));
-	highlighting_list = g_list_append(highlighting_list, _("HTML Script"));
-	highlighting_list = g_list_append(highlighting_list, _("HTML Question"));
-	highlighting_list = g_list_append(highlighting_list, _("HTML Value"));
+	highlighting_list = g_list_prepend(highlighting_list, _("HTML Tag"));
+	highlighting_list = g_list_prepend(highlighting_list, _("HTML Unknown Tag"));
+	highlighting_list = g_list_prepend(highlighting_list, _("HTML Attribute"));
+	highlighting_list = g_list_prepend(highlighting_list, _("HTML Unknown Attribute"));
+	highlighting_list = g_list_prepend(highlighting_list, _("HTML Number"));
+	highlighting_list = g_list_prepend(highlighting_list, _("HTML Single-quoted String"));
+	highlighting_list = g_list_prepend(highlighting_list, _("HTML Double-quoted String"));
+	highlighting_list = g_list_prepend(highlighting_list, _("HTML Comment"));
+	highlighting_list = g_list_prepend(highlighting_list, _("HTML Entity"));
+	highlighting_list = g_list_prepend(highlighting_list, _("HTML Script"));
+	highlighting_list = g_list_prepend(highlighting_list, _("HTML Question"));
+	highlighting_list = g_list_prepend(highlighting_list, _("HTML Value"));
 
 	// Font drop down elements : JavaScript
-	highlighting_list = g_list_append(highlighting_list, _("JavaScript Multiple-line Comment"));
-	highlighting_list = g_list_append(highlighting_list, _("JavaScript Single-line Comment"));
-	highlighting_list = g_list_append(highlighting_list, _("JavaScript Document Comment"));
-	highlighting_list = g_list_append(highlighting_list, _("JavaScript Word"));
-	highlighting_list = g_list_append(highlighting_list, _("JavaScript Keyword"));
-	highlighting_list = g_list_append(highlighting_list, _("JavaScript Single-quoted String"));
-	highlighting_list = g_list_append(highlighting_list, _("JavaScript Double-quoted String"));
-	highlighting_list = g_list_append(highlighting_list, _("JavaScript Symbol"));
+	highlighting_list = g_list_prepend(highlighting_list, _("JavaScript Multiple-line Comment"));
+	highlighting_list = g_list_prepend(highlighting_list, _("JavaScript Single-line Comment"));
+	highlighting_list = g_list_prepend(highlighting_list, _("JavaScript Document Comment"));
+	highlighting_list = g_list_prepend(highlighting_list, _("JavaScript Word"));
+	highlighting_list = g_list_prepend(highlighting_list, _("JavaScript Keyword"));
+	highlighting_list = g_list_prepend(highlighting_list, _("JavaScript Single-quoted String"));
+	highlighting_list = g_list_prepend(highlighting_list, _("JavaScript Double-quoted String"));
+	highlighting_list = g_list_prepend(highlighting_list, _("JavaScript Symbol"));
 
 	// Font drop down elements : PHP
-	highlighting_list = g_list_append(highlighting_list, _("PHP Default"));
-	highlighting_list = g_list_append(highlighting_list, _("PHP 'HString'"));
-	highlighting_list = g_list_append(highlighting_list, _("PHP Simple String"));
-	highlighting_list = g_list_append(highlighting_list, _("PHP Word"));
-	highlighting_list = g_list_append(highlighting_list, _("PHP Number"));
-	highlighting_list = g_list_append(highlighting_list, _("PHP Variable"));
-	highlighting_list = g_list_append(highlighting_list, _("PHP Single-line Comment"));
-	highlighting_list = g_list_append(highlighting_list, _("PHP Multiple-line Comment"));
+	highlighting_list = g_list_prepend(highlighting_list, _("PHP Default"));
+	highlighting_list = g_list_prepend(highlighting_list, _("PHP 'HString'"));
+	highlighting_list = g_list_prepend(highlighting_list, _("PHP Simple String"));
+	highlighting_list = g_list_prepend(highlighting_list, _("PHP Word"));
+	highlighting_list = g_list_prepend(highlighting_list, _("PHP Number"));
+	highlighting_list = g_list_prepend(highlighting_list, _("PHP Variable"));
+	highlighting_list = g_list_prepend(highlighting_list, _("PHP Single-line Comment"));
+	highlighting_list = g_list_prepend(highlighting_list, _("PHP Multiple-line Comment"));
 
 	// Font drop down elements : CSS
-	highlighting_list = g_list_append(highlighting_list, _("CSS Tag"));
-	highlighting_list = g_list_append(highlighting_list, _("CSS Class"));
-	highlighting_list = g_list_append(highlighting_list, _("CSS Psuedoclass"));
-	highlighting_list = g_list_append(highlighting_list, _("CSS Unknown Pseudoclass"));
-	highlighting_list = g_list_append(highlighting_list, _("CSS Operator"));
-	highlighting_list = g_list_append(highlighting_list, _("CSS Identifier"));
-	highlighting_list = g_list_append(highlighting_list, _("CSS Unknown Identifier"));
-	highlighting_list = g_list_append(highlighting_list, _("CSS Value"));
-	highlighting_list = g_list_append(highlighting_list, _("CSS Comment"));
-	highlighting_list = g_list_append(highlighting_list, _("CSS ID"));
-	highlighting_list = g_list_append(highlighting_list, _("CSS Important"));
-	highlighting_list = g_list_append(highlighting_list, _("CSS Directive"));
+	highlighting_list = g_list_prepend(highlighting_list, _("CSS Tag"));
+	highlighting_list = g_list_prepend(highlighting_list, _("CSS Class"));
+	highlighting_list = g_list_prepend(highlighting_list, _("CSS Psuedoclass"));
+	highlighting_list = g_list_prepend(highlighting_list, _("CSS Unknown Pseudoclass"));
+	highlighting_list = g_list_prepend(highlighting_list, _("CSS Operator"));
+	highlighting_list = g_list_prepend(highlighting_list, _("CSS Identifier"));
+	highlighting_list = g_list_prepend(highlighting_list, _("CSS Unknown Identifier"));
+	highlighting_list = g_list_prepend(highlighting_list, _("CSS Value"));
+	highlighting_list = g_list_prepend(highlighting_list, _("CSS Comment"));
+	highlighting_list = g_list_prepend(highlighting_list, _("CSS ID"));
+	highlighting_list = g_list_prepend(highlighting_list, _("CSS Important"));
+	highlighting_list = g_list_prepend(highlighting_list, _("CSS Directive"));
 
 	// Font drop down elements : SQL
-	highlighting_list = g_list_append(highlighting_list, _("SQL Word"));
-	highlighting_list = g_list_append(highlighting_list, _("SQL Identifier"));
-	highlighting_list = g_list_append(highlighting_list, _("SQL Number"));
-	highlighting_list = g_list_append(highlighting_list, _("SQL String"));
-	highlighting_list = g_list_append(highlighting_list, _("SQL Operator"));
-	highlighting_list = g_list_append(highlighting_list, _("SQL Comment"));
+	highlighting_list = g_list_prepend(highlighting_list, _("SQL Word"));
+	highlighting_list = g_list_prepend(highlighting_list, _("SQL Identifier"));
+	highlighting_list = g_list_prepend(highlighting_list, _("SQL Number"));
+	highlighting_list = g_list_prepend(highlighting_list, _("SQL String"));
+	highlighting_list = g_list_prepend(highlighting_list, _("SQL Operator"));
+	highlighting_list = g_list_prepend(highlighting_list, _("SQL Comment"));
 
-	highlighting_list = g_list_append(highlighting_list, _("C Default"));
-	highlighting_list = g_list_append(highlighting_list, _("C String"));
-	highlighting_list = g_list_append(highlighting_list, _("C Character"));
-	highlighting_list = g_list_append(highlighting_list, _("C Word"));
-	highlighting_list = g_list_append(highlighting_list, _("C Number"));
-	highlighting_list = g_list_append(highlighting_list, _("C Identifier"));
-	highlighting_list = g_list_append(highlighting_list, _("C Comment"));
-	highlighting_list = g_list_append(highlighting_list, _("C Commentline"));
-	highlighting_list = g_list_append(highlighting_list, _("C Preprocessor"));
-	highlighting_list = g_list_append(highlighting_list, _("C Operator"));
-	highlighting_list = g_list_append(highlighting_list, _("C Regex"));
-	highlighting_list = g_list_append(highlighting_list, _("C UUID"));
-	highlighting_list = g_list_append(highlighting_list, _("C Verbatim"));
-	highlighting_list = g_list_append(highlighting_list, _("C Globalclass"));
+	highlighting_list = g_list_prepend(highlighting_list, _("C Default"));
+	highlighting_list = g_list_prepend(highlighting_list, _("C String"));
+	highlighting_list = g_list_prepend(highlighting_list, _("C Character"));
+	highlighting_list = g_list_prepend(highlighting_list, _("C Word"));
+	highlighting_list = g_list_prepend(highlighting_list, _("C Number"));
+	highlighting_list = g_list_prepend(highlighting_list, _("C Identifier"));
+	highlighting_list = g_list_prepend(highlighting_list, _("C Comment"));
+	highlighting_list = g_list_prepend(highlighting_list, _("C Commentline"));
+	highlighting_list = g_list_prepend(highlighting_list, _("C Preprocessor"));
+	highlighting_list = g_list_prepend(highlighting_list, _("C Operator"));
+	highlighting_list = g_list_prepend(highlighting_list, _("C Regex"));
+	highlighting_list = g_list_prepend(highlighting_list, _("C UUID"));
+	highlighting_list = g_list_prepend(highlighting_list, _("C Verbatim"));
+	highlighting_list = g_list_prepend(highlighting_list, _("C Globalclass"));
+
+	highlighting_list= g_list_reverse (highlighting_list);	
 
 	preferences_dialog.highlighting_elements = highlighting_list;
 }
@@ -797,7 +802,8 @@ void get_control_values_to_highlight(gchar *setting_name, gchar **fontname, gint
 	tempfontname = g_string_new(gtk_combo_box_get_active_text(GTK_COMBO_BOX(preferences_dialog.font_combo)));
 	tempfontname = g_string_prepend(tempfontname, "!");
 	
-	if (g_ascii_strncasecmp(*fontname, tempfontname->str, MIN(strlen(*fontname), strlen((tempfontname->str))))!=0) {
+	if (!g_str_has_prefix(*fontname, tempfontname->str)) {
+	
 		message = g_string_new(NULL);
 		g_string_printf(message, _("You have just changed the font to %s\n\nWould you like to use this font as the default for every element?"), gtk_combo_box_get_active_text(GTK_COMBO_BOX(preferences_dialog.font_combo)));
 		dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_MESSAGE_QUESTION,
