@@ -987,6 +987,7 @@ void set_active_tab(page_num)
 
         }
 void update_zoom_level(void){
+if (main_window.current_editor == NULL) return;
 gint p=0;
 if (GTK_IS_SCINTILLA(main_window.current_editor->scintilla)){
         p= gtk_scintilla_get_zoom(GTK_SCINTILLA(main_window.current_editor->scintilla));
