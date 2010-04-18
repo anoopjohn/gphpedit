@@ -834,10 +834,10 @@ void get_control_values_to_highlight(gchar *setting_name, gchar **fontname, gint
 	
 	GdkColor color;
 	gtk_color_button_get_color (GTK_COLOR_BUTTON(preferences_dialog.foreground_colour),&color);
-	*fore = (color.blue<<16) | (color.green<<8) | color.red;
+	*fore = color.red >> 8 | ((color.green >> 8) << 8) | ((color.blue >> 8) << 16);
 
 	gtk_color_button_get_color (GTK_COLOR_BUTTON(preferences_dialog.background_colour),&color);
-	*back = (color.blue<<16) | (color.green<<8) | color.red;
+	*back = color.red >> 8 | ((color.green >> 8) << 8) | ((color.blue >> 8) << 16);
 	// Debug print for preferences being set
 	//g_print("Setting %s: %s %d %d %d %d %d\n", setting_name, *fontname, *fontsize, *bold, *italic, *fore, *back);	
 }
@@ -1202,7 +1202,7 @@ void on_edge_colour_changed(GtkColorButton *widget, gpointer user_data)
 	GdkColor color;
 	gtk_color_button_get_color (widget,&color);
 
-	temp_preferences.edge_colour = color.red | (color.green << 8) | (color.blue << 16);
+	temp_preferences.edge_colour = color.red >> 8 | ((color.green >> 8) << 8) | ((color.blue >> 8) << 16);
 }
 
 void on_fontqualities_entry_changed(GtkEntry *Entry, gpointer data)
@@ -1228,7 +1228,7 @@ void on_sel_back_changed(GtkColorButton *widget, gpointer user_data)
 	GdkColor color;
 	gtk_color_button_get_color (widget, &color);
 
-	temp_preferences.set_sel_back = color.red | (color.green << 8) | (color.blue << 16);
+	temp_preferences.set_sel_back = color.red >> 8 | ((color.green >> 8) << 8) | ((color.blue >> 8) << 16);
 }
 
 void on_tab_size_changed(GtkRange *range, gpointer user_data)
