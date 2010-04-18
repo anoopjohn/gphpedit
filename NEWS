@@ -1,0 +1,21 @@
+============================
+gphpedit 0.9.98 (UNRELEASED)
+============================
+
+New Features and Fixes
+======================
+- Folderbrowser async load
+- New folderbrowser up and home buttons
+- Fix error loading / saving to remote filesystems
+- Fix error converting colors in preferences dialog
+- Added file icons in tab (like gedit) 
+- Fix tab caption in tab-help after one level navigation
+- Add Translation/Bug report buttons to help menu
+- Add HTML files webkit preview
+- Various improvements to build system
+- RGBA colormap support
+- Various plugin system upgrades
+- Add check for externally modified files
+- Remember incremental search strings
+- Misc bugfixes and code cleanups
+
