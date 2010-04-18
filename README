@@ -121,6 +121,70 @@ that of your teammates.
 
 gphpedit in Transifex: http://www.transifex.net/projects/p/gphpedit/c/main/
 
- 
+
+Shortcuts
+=========
+Shortcut keys enable you to perform tasks more quickly than if you use a mouse.
+The following list all gphpedit’s shortcut keys.
+
+ 1) File:
+
+    * New file (Ctrl + N)
+    * Open file (Ctrl + O)
+    * Open selected file (Ctrl + Intro)
+    * Reload Current file (SHIFT + Ctrl + O)
+    * Save (Ctrl + S)
+    * Save as (SHIFT + Ctrl + S)
+    * Save All (SHIFT + ALT + A)
+    * Rename file (SHIFT + ALT + R)
+    * Close File (Ctrl + W)
+    * Exit (Ctrl + Q)
+
+ 2) Edit:
+
+    * Copy (Ctrl + C)
+    * Paste (Ctrl + V)
+    * Cut (Ctrl + X)
+    * Select all (Ctrl + A)
+    * Undo (Ctrl + Z)
+    * Redo (SHIFT + Ctrl + Y)
+    * Line Delete (Ctrl + SHIFT + L)
+    * Duplicate line (Ctrl + D)
+    * Transpose line (Ctrl + T)
+    * Indent block (SHIFT + ALT + I)
+    * Unindent block (SHIFT + Ctrl + ALT + I)
+    * ToUpper (Ctrl + U)
+    * ToLower (Ctrl + L)
+    * Add/Remove bookmark (Ctrl + F2)
+    * Goto Next Bookmark (F2)
+
+ 3) Panes:
+
+    * Show/Hide Side Panel (F8)
+    * Hide Syntax Check Panel (SHIFT + F9)
+    * Show Preferences dialog (F5)
+    * Enter/Leave Fullscreen mode (F11)
+
+ 4) Tabs:
+
+    * Switches to the next tab to the left (Ctrl + PageDown)
+    * Switches to the next tab to the right (Ctrl + PageUp)
+    * Close Tab (Ctrl + W)
+    * Jump to nth tab1 (Alt + N) (**)
+		(**) replace n with tab number.
+
+ 5) Search:
+
+    * Find a string (Ctrl + F)
+    * Search and replace (Ctrl + H)
+    * Incremental search (Ctrl + I)
+
+ 4) Tools:
+
+    * Syntax check (Ctrl + F9)
+    * Hide Syntax Check Panel (SHIFT + F9)
+    * Record Keyboard macro start/stop (Alt + K)
+    * Playback Keyboard macro (Ctrl + K)
+
 	The gphpedit team.
 	
