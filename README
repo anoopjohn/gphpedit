@@ -1,36 +1,40 @@
-A) Introduction to gPHPedit
 
-The gPHPedit package contains a lightweight UTF-8 text editor based in scintilla component for the GNOME desktop.
-gPHPEdit support PHP/HTML/CSS files and also support C/C++, Python and Perl Files.
+Introduction to gPHPedit
+========================
+The gPHPedit package contains a lightweight UTF-8 text editor based in 
+scintilla component for the GNOME desktop.
+gPHPEdit support PHP/HTML/CSS files and also support C/C++, Python and 
+Perl Files.
 gPHPedit is currently maintained by Anoop John.
 
-B) Installation of gPHPEdit: (UBUNTU AND DEBIAN USERS)
+Installation of gPHPEdit: (UBUNTU AND DEBIAN USERS)
+===================================================
+0) To install gPHPEdit from source:
 
-	0) To install gPHPEdit from source:
-
-	   You can download source packages from:
-	   http://www.gphpedit.org
+    You can download source packages from: http://www.gphpedit.org
 
 	TODO: installing from git?
 
-	1) Install gPHPEdit by running the following commands:
+1) Install gPHPEdit by running the following commands:
 
- 	   $ ./autogen.sh --prefix=$(pkg-config --variable=prefix ORBit-2.0) && make
+	$ ./autogen.sh --prefix=$(pkg-config --variable=prefix ORBit-2.0) && make
 	
-	   Now, as the root user:
+	Now, as the root user:
 
-	   # make install
+	# make install
 
-    1.b) Command Explanations:
+	1.b) Command Explanations:
 
-		--prefix=$(pkg-config --variable=prefix ORBit-2.0): Setting the prefix using this parameter instead of with $GNOME_PREFIX 
-		will ensure that the prefix is consistent with the installation environment and the package will be installed in the correct location.
+	--prefix=$(pkg-config --variable=prefix ORBit-2.0): Setting the prefix 
+	using this parameter instead of with $GNOME_PREFIX will ensure that the
+	prefix is consistent with the installation environment and the package 
+	will be installed in the correct location.
 
-	2) Dependencies
+2) Dependencies
 
-       Compilation needs the following software packages - usually the headers and
-       libraries (search for packages with a -dev or -devel suffix and/or prefix
-       lib, e.g. libgtk2.0-dev)
+Compilation needs the following software packages - usually the headers 
+and libraries (search for packages with a -dev or -devel suffix and/or 
+prefix lib, e.g. libgtk2.0-dev)
 
 		 - Glib 2.0 (>= 2.18)
 	     - Gtk 2.0 (>= 2.18)
@@ -44,3 +48,79 @@ B) Installation of gPHPEdit: (UBUNTU AND DEBIAN USERS)
 	     - php5-cli (optional for php sintax checking)
 	     - php-doc (for php help support)
 
+How to report bugs
+==================
+
+Bugs should be reported to the Savannah bug tracking system.
+(https://savannah.nongnu.org/support/?group=gphpedit). You will need to create
+an account for yourself.
+
+In the bug report please include:
+
+* Information about your system. For instance:
+
+   - What operating system and version
+   - What version of the gtk+, glib and gnome libraries
+
+  And anything else you think is relevant.
+
+* How to reproduce the bug. 
+
+* If the bug was a crash, the exact text that was printed out when the
+  crash occurred.
+
+See 'https://savannah.nongnu.org/support/?group=gphpedit' 
+for the list of known bugs.
+
+
+Patches
+=======
+
+Patches should also be submitted to 
+https://savannah.nongnu.org/support/?group=gphpedit
+If the patch fixes an existing bug, add the patch as an attachment 
+to that bug report.
+
+Otherwise, enter a new bug report that describes the patch, and attach
+the patch to that bug report.
+
+Patches should be in unified diff form. (The -u option to GNU diff.)
+
+If you are interested in helping us to develop gphpedit, please see the 
+file 'AUTHORS' for contact information. 
+
+Translations
+============
+Transifex is a highly scalable localization platform with a focus on 
+integrating well with the existing workflow of both translators and developers.
+It aims in making it dead-simple for content providers to receive quality
+translations from big translation communities, no matter where the project 
+is hosted.
+
+In order to translate gphpedit on transifex or upload translations here you 
+need to:
+
+   1. create a (free) account in the Transifex server;
+   2. associate yourself with the gphpedit project and the specific language 
+you want to work on;
+   3. use the web interface to reserve a file for translation. 
+This file can then be downloaded and translated offline and then submitted back
+via the same interface. The translation is then validated and committed 
+upstream into the official repository. 
+
+If you are responsible for managing one of the language teams or just want to 
+make sure you know what is happening with the project as a whole, 
+you can choose to be notified every time someone reserves a file for 
+translation, writes down a comment, reviews someone’s work, 
+or a commit takes place. Since people will have to reserve a file for 
+translation, you can make sure that no two people work on the same file at 
+the same time, in the end saving time, headaches and redundancy. 
+Best of all, since your work can be committed automatically when you upload 
+your translation, you can see in real time your progress and 
+that of your teammates.
+
+gphpedit in Transifex: http://www.transifex.net/projects/p/gphpedit/c/main/
+
+ 
+	The gphpedit team.
+	
