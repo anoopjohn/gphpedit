@@ -865,12 +865,13 @@ static void create_infobar(void){
         gtk_box_pack_start (GTK_BOX (main_window.prinbox), main_window.infobar, FALSE, FALSE, 0);			
 	/* gtk_widget_show (main_window.infobar); */
 }
+
 static void create_app_main_window(const gchar *title, gint height, gint width){
         main_window.window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
         gtk_window_set_title(GTK_WINDOW(main_window.window), title);
         gtk_window_set_default_size(GTK_WINDOW(main_window.window), height, width);
         gtk_window_set_position(GTK_WINDOW(main_window.window), GTK_WIN_POS_CENTER);
-        gtk_window_set_icon(GTK_WINDOW(main_window.window), get_window_icon());
+	gtk_window_set_icon_from_file (GTK_WINDOW(main_window.window), GPHPEDIT_PIXMAP_FULL_PATH, NULL);
 	/* set RGBA colormap */        
 	set_colormap(main_window.window);
 }

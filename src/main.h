@@ -41,8 +41,6 @@
 #endif							/* ENABLE_NLS */
 
 #define GPHPEDIT_PIXMAP_ICON "gphpedit.png"
-
-gboolean add (gpointer bla);
+#define GPHPEDIT_PIXMAP_FULL_PATH (PIXMAP_DIR "/" GPHPEDIT_PIXMAP_ICON)
 gint debug(gchar *strMsg, ...);
-
 #endif
