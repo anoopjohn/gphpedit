@@ -189,6 +189,7 @@ void main_window_destroy_event(GtkWidget *widget, gpointer data)
         g_slice_free(Maintoolbar, main_window.toolbar_main); /* free toolbar struct*/
         g_slice_free(Findtoolbar, main_window.toolbar_find); /* free toolbar struct*/
 	// Old code had a main_window_delete_event call in here, not necessary, Gtk/GNOME does that anyway...
+	
         gtk_main_quit();
 }
 
@@ -1049,9 +1050,11 @@ void close_page(Editor *editor)
  * returns a pixbuf with gphpedit icon
  * @return GdkPixbuf
  */
+
 GdkPixbuf *get_window_icon (void){
 //GError *error = NULL;
-GdkPixbuf *pixbuf = gdk_pixbuf_new_from_file (PIXMAP_DIR "/" GPHPEDIT_PIXMAP_ICON, NULL);
+GdkPixbuf *pixbuf = gdk_pixbuf_new_from_file (GPHPEDIT_PIXMAP_FULL_PATH, NULL);
+
 return pixbuf;
 }
 
@@ -1456,7 +1459,8 @@ void on_about1_activate(GtkWidget *widget)
 							 };
   gchar *translator_credits = _("translator_credits");
   const gchar *documenters[] = {NULL};
-  GtkWidget *dialog = gtk_about_dialog_new();
+  GtkWidget *dialog = NULL;
+  dialog=gtk_about_dialog_new();
   gtk_about_dialog_set_program_name(GTK_ABOUT_DIALOG(dialog), PACKAGE_NAME);
   gtk_about_dialog_set_version(GTK_ABOUT_DIALOG(dialog), VERSION);
   gtk_about_dialog_set_copyright(GTK_ABOUT_DIALOG(dialog),
@@ -1467,11 +1471,21 @@ void on_about1_activate(GtkWidget *widget)
 #ifdef PACKAGE_URL
   gtk_about_dialog_set_website(GTK_ABOUT_DIALOG(dialog),PACKAGE_URL);
 #endif
-  gtk_about_dialog_set_logo(GTK_ABOUT_DIALOG(dialog),get_window_icon ());
+  GdkPixbuf *logo = NULL;
+  logo=get_window_icon ();
+  gtk_about_dialog_set_logo(GTK_ABOUT_DIALOG(dialog),logo);
+  if (logo != NULL) {
+	g_object_unref (logo);
+  }
   gtk_about_dialog_set_authors(GTK_ABOUT_DIALOG(dialog),(const gchar **) authors);
   gtk_about_dialog_set_translator_credits(GTK_ABOUT_DIALOG(dialog),translator_credits);
   gtk_about_dialog_set_documenters (GTK_ABOUT_DIALOG(dialog),(const gchar **) documenters);
-  gtk_window_set_icon(GTK_WINDOW(dialog), get_window_icon ());
+  /* 
+     http://library.gnome.org/devel/gtk/unstable/GtkWindow.html#gtk-window-set-transient-for
+     Dialog windows should be set transient for the main application window they were spawned from. 
+     This allows window managers  to e.g. keep the dialog on top of the main window, or center the dialog over the main window.
+  */
+  gtk_window_set_transient_for (GTK_WINDOW(dialog),GTK_WINDOW(main_window.window));
   gtk_dialog_run(GTK_DIALOG (dialog));
   gtk_widget_destroy(dialog);
 }
