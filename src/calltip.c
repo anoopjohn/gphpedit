@@ -72,10 +72,6 @@ void function_list_prepare(void)
 	api_dir = g_build_path (G_DIR_SEPARATOR_S, API_DIR, "php-gphpedit.api", NULL);
 //	g_print("API:'%s'\n",api_dir);
 
-//	apifile = fopen("/usr/share/gphpedit/php-gphpedit.api", "r");
-//	if (apifile == NULL) {
-//		apifile = fopen("/usr/local/share/gphpedit/php-gphpedit.api", "r");
-//	}
 	apifile = fopen(api_dir, "r");
 	if( apifile != NULL ) {
 		while( fgets( buffer, MAX_API_LINE_LENGTH, apifile ) != NULL ) {
@@ -87,6 +83,7 @@ void function_list_prepare(void)
 	else {
 		g_print(_("WARNING: Could not open php-gphpedit.api file\n"));
 	}
+	g_free(api_dir);
 }
 
 GString *get_api_line(GtkWidget *scintilla, gint wordStart, gint wordEnd)
