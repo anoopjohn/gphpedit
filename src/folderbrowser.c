@@ -357,14 +357,10 @@ void popup_delete_file(void){
         if (error->code == G_IO_ERROR_NOT_SUPPORTED){
                 if (!g_file_delete (fi,NULL,&error)){
                 g_print(_("GIO Error deleting file: %s\n"),error->message);
-                } else {
-          //      update_folderbrowser();
                 }
             } else {
             g_print(_("GIO Error deleting file: %s\n"),error->message);
             }
-        } else {
-        //update_folderbrowser();
         }
     }
 }
@@ -646,21 +642,20 @@ void folderbrowser_create(MainWindow *main_window)
 	GtkWidget *label= gtk_image_new_from_file (PIXMAP_DIR "/folderbrowser.png");
 	/* set tooltip */
 	gtk_widget_set_tooltip_text (label,_("Folder Browser"));
-        GConfClient *config;
-        config=gconf_client_get_default ();
- 	if(sChemin!=NULL)
+        if(sChemin)
    		main_window->button_dialog = gtk_button_new_with_label (sChemin);
    	else {
+	    GConfClient *config;
+            config=gconf_client_get_default ();
             /*load folder from config*/
-             GError *error = NULL;
-             sChemin= gconf_client_get_string(config,"/gPHPEdit/main_window/folderbrowser/folder",&error);
+             sChemin= gconf_client_get_string(config,"/gPHPEdit/main_window/folderbrowser/folder",NULL);
+             g_object_unref(config);
              if (!sChemin){
                  main_window->button_dialog = gtk_button_new_with_label (DEFAULT_DIR);
              } else {
              main_window->button_dialog = gtk_button_new_with_label (sChemin);
              }
         }
-        g_object_unref(config);
  	g_signal_connect(G_OBJECT(main_window->button_dialog), "pressed", G_CALLBACK(pressed_button_file_chooser), NULL);
         gtk_widget_set_size_request (main_window->pListView,80,450);
 
@@ -957,9 +952,11 @@ gtk_tree_store_clear(main_window.pTree);
             g_object_unref(p_file_image);
         }
         GError *error=NULL;
-        GFile *file=g_file_new_for_uri(convert_to_full(sChemin));
+	gchar *filepath =convert_to_full(sChemin);
+        GFile *file=g_file_new_for_uri(filepath);
+	g_free(filepath);
         //Start file monitor for folderbrowser autorefresh
-       monitor= g_file_monitor_directory (file,G_FILE_MONITOR_NONE,NULL,&error);
+        monitor= g_file_monitor_directory (file,G_FILE_MONITOR_NONE,NULL,&error);
 	if (!monitor){
 	g_print(_("Error initing folderbrowser autorefresh. GIO Error:%s\n"),error->message);
 	}else{
