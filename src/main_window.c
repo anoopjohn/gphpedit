@@ -763,19 +763,15 @@ void plugin_setup_menu(void)
 
 void main_window_update_reopen_menu(void)
 {
-    
-	gchar *full_filename;
-	GString *key;
 	guint entry;
 	GtkBin *bin = NULL;
         GConfClient *config;
         config=gconf_client_get_default ();
 	for (entry=0; entry<NUM_REOPEN_MAX; entry++) {
-		key = g_string_new("/gPHPEdit/recent/");
-		g_string_append_printf(key, "%d", entry);
-		full_filename = gconf_client_get_string(config,key->str,NULL);
-		g_string_free(key, TRUE);
-		
+         	gchar *full_filename=NULL;
+		gchar *key= g_strdup_printf("/gPHPEdit/recent/%d",entry);
+		full_filename = gconf_client_get_string(config,key,NULL);
+		g_free(key);
 		//g_print("Recent DEBUG: Entry %d: %s\n", entry, full_filename);
                 if (full_filename){
                     bin = GTK_BIN(main_window.menu->recent[entry]);
@@ -787,9 +783,9 @@ void main_window_update_reopen_menu(void)
 		else {
                     gtk_widget_hide(main_window.menu->recent[entry]);
 		}
+		g_free(full_filename);
 	}
-     
-                
+                     
 }
 
 void main_window_add_to_reopen_menu(gchar *full_filename)
