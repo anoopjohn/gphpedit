@@ -66,9 +66,9 @@ poke_existing_instance (int argc, char **argv)
     const char *entry, *username, *tmp_path;
     char *prefix;
     guint prefix_len;
-	char *cur_dir_tmp;
-	char *cur_dir;
-	char *to_open;
+    char *cur_dir_tmp;
+    char *cur_dir;
+    char *to_open;
 
     g_return_val_if_fail (input == NULL, FALSE);
 
@@ -80,9 +80,10 @@ poke_existing_instance (int argc, char **argv)
     prefix = g_strdup_printf (PIPE_PREFIX, username);
     prefix_len = strlen (prefix);
 
-	cur_dir_tmp = g_get_current_dir();
-	cur_dir = g_strdup_printf("%s/", cur_dir_tmp);
-	g_free(cur_dir_tmp);
+   cur_dir_tmp = g_get_current_dir();
+   cur_dir=NULL;
+   cur_dir = g_strdup_printf("%s/", cur_dir_tmp);
+   g_free(cur_dir_tmp);
 
     /* if another process creates a pipe while we are doing this,
        we may not get that pipe here. dunno if it's a problem */
@@ -154,6 +155,7 @@ poke_existing_instance (int argc, char **argv)
     g_dir_close (dir);
     start_ipc ();
     g_free (prefix);
+    g_free(cur_dir);
     return FALSE;
 }
 
