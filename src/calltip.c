@@ -327,3 +327,13 @@ void show_call_tip(GtkWidget *scintilla, gint pos)
 		//g_string_free(api_line, TRUE);
 	}
 }
+void clean_list_item (gpointer data, gpointer user_data){
+g_string_free ((GString *) data,TRUE);
+}
+
+void cleanup_calltip(void){
+	if (api_list) {
+	g_slist_foreach(api_list, (GFunc)clean_list_item, NULL);
+	g_slist_free(api_list);
+	}
+}

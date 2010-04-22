@@ -33,5 +33,5 @@ void function_list_prepare(void);
 GString *complete_function_list(gchar *original_list);
 void css_autocomplete_word(GtkWidget *scintilla, gint wordStart, gint wordEnd);
 void sql_autocomplete_word(GtkWidget *scintilla, gint wordStart, gint wordEnd);
-
+void cleanup_calltip(void);
 #endif
