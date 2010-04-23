@@ -451,48 +451,64 @@ gint maximum(gint val1, gint val2)
 
 GList *Plugins = NULL;
 
+static gchar *plugin_spawn(const gchar* command_line)
+{
+	gchar *stdout = NULL;
+	GError *error = NULL;
+	gint exit_status;
+	gchar *ret=NULL;
+        #ifdef DEBUG
+	gint stdout_len;
+	#endif
+	if (g_spawn_command_line_sync(command_line,&stdout,NULL, &exit_status,&error)) {
+		#ifdef DEBUG
+ 		stdout_len = strlen(stdout);
+		g_print("------------------------------------\nDISCOVERY\nCOMMAND: %s\nOUTPUT: %s (%d)\n", command_line->str, stdout, stdout_len);
+		#endif
+		ret=g_strdup(stdout);
+		g_free(stdout);
+	} else {
+		g_print("Spawning %s gave error %s\n", command_line, error->message);
+		g_error_free (error);
+	}	
+	
+	return ret;
+}
+
+
 /****/
 
 int plugin_discover_type(GString *filename)
 {
 	GString *command_line;
-	gchar *stdout = NULL;
-	GError *error = NULL;
-	gint exit_status;
 	gint type = GPHPEDIT_PLUGIN_TYPE_UNKNOWN;
-	gint stdout_len;
-	
+	gchar *result;	
 	command_line = g_string_new(filename->str);
 	command_line = g_string_prepend(command_line, "'");
 	command_line = g_string_append(command_line, "' -type");
-	
-	if (g_spawn_command_line_sync(command_line->str,&stdout,NULL, &exit_status,&error)) {
-		stdout_len = strlen(stdout);
-		//g_print("------------------------------------\nDISCOVERY\nCOMMAND: %s\nOUTPUT: %s (%d)\n", command_line->str, stdout, stdout_len);
-		
-		if (strncmp(stdout, "SELECTION", MIN(stdout_len, 9))==0) {
+	result= plugin_spawn(command_line->str);
+	if(result){
+		if (g_str_has_prefix(result, "SELECTION")){
 			type = GPHPEDIT_PLUGIN_TYPE_SELECTION;
 		}
-		else if (strncmp(stdout, "NO-INPUT", MIN(stdout_len, 8))==0) {
+		else if (g_str_has_prefix(result, "NO-INPUT")){
 			type = GPHPEDIT_PLUGIN_TYPE_NOINPUT;
 		}
-		else if (strncmp(stdout, "FNAME", MIN(stdout_len, 5))==0) {
+		else if (g_str_has_prefix(result, "FNAME")){
 			type = GPHPEDIT_PLUGIN_TYPE_FILENAME;
 		}
-		else if (strncmp(stdout, "DEBUG", MIN(stdout_len, 5))==0) {
+		else if (g_str_has_prefix(result, "DEBUG")){
 			type = GPHPEDIT_PLUGIN_TYPE_DEBUG;
 		}
-		
-		//g_print("Returning Discovered type of %d\n------------------------------------\n", type);
-		g_free(stdout);
+#ifdef DEBUG
+		g_print("Returning Discovered type of %d\n------------------------------------\n", type);
+#endif
+		g_free(result);
 	}
-	else {
-		g_print("Spawning %s gave error %s\n", filename->str, error->message);
-	}	
-	
 	g_string_free(command_line, TRUE);
 	
 	return type;
+	
 }
 
 /****/
@@ -500,30 +516,16 @@ int plugin_discover_type(GString *filename)
 gchar *plugin_discover_name(GString *filename,const gchar *file_name)
 {
 	GString *command_line;
-	gchar *stdout = NULL;
-	GError *error = NULL;
-	gint exit_status;
 	gchar *name=NULL;
-	gint stdout_len;
 	
 	command_line = g_string_new(filename->str);
 	command_line = g_string_prepend(command_line, "'");
 	command_line = g_string_append(command_line, "' -name");
-	
-	if (g_spawn_command_line_sync(command_line->str,&stdout,NULL, &exit_status,&error)) {
-		stdout_len = strlen(stdout);
-		//g_print("------------------------------------\nDISCOVERY\nCOMMAND: %s\nOUTPUT: %s (%d)\n", command_line->str, stdout, stdout_len);
-		
-		name=g_strdup(stdout);
-		g_free(stdout);
-		
- 		//g_print("plugin name:%s\n",name);
-	}
-	else {
-		//g_print("Spawning %s gave error %s\n", filename->str, error->message);
-		name=g_strdup(file_name);
-	}	
-	
+        name = plugin_spawn(command_line->str);
+        #ifdef DEBUG
+        g_print("plugin name:%s\n",name);
+        #endif
+
 	g_string_free(command_line, TRUE);
 	
 	return name;
@@ -532,30 +534,15 @@ gchar *plugin_discover_name(GString *filename,const gchar *file_name)
 gchar *plugin_discover_desc(GString *filename)
 {
 	GString *command_line;
-	gchar *stdout = NULL;
-	GError *error = NULL;
-	gint exit_status;
 	gchar *desc=NULL;
-	gint stdout_len;
 	
 	command_line = g_string_new(filename->str);
 	command_line = g_string_prepend(command_line, "'");
 	command_line = g_string_append(command_line, "' -desc");
-	
-	if (g_spawn_command_line_sync(command_line->str,&stdout,NULL, &exit_status,&error)) {
-		stdout_len = strlen(stdout);
-		//g_print("------------------------------------\nDISCOVERY\nCOMMAND: %s\nOUTPUT: %s (%d)\n", command_line->str, stdout, stdout_len);
-		
-		desc=g_strdup(stdout);
-		g_free(stdout);
-		
- 		//g_print("plugin description:%s\n",desc);
-	}
-	else {
-		//g_print("Spawning %s gave error %s\n", filename->str, error->message);
-		desc="";
-	}	
-	
+	desc = plugin_spawn(command_line->str);
+        #ifdef DEBUG
+	g_print("plugin description:%s\n",desc);
+	#endif
 	g_string_free(command_line, TRUE);
 	
 	return desc;
@@ -587,19 +574,22 @@ void plugin_discover_available(void)
 		dir = g_dir_open(user_plugin_dir->str, 0,NULL);
 		if (dir) {
 			for (plugin_name = g_dir_read_name(dir); plugin_name != NULL; plugin_name = g_dir_read_name(dir)) {
+				filename = g_string_new(plugin_name);
+				filename = g_string_prepend(filename, user_plugin_dir->str);
+				gchar *pluname= plugin_discover_name(filename,plugin_name);
+				if (pluname){
 				// Recommended by __tim in #gtk+ on irc.freenode.net 27/10/2004 11:30
 				plugin = g_new0 (Plugin, 1);
 				//plugin->name = g_strdup(plugin_name);
-				// TODO: Could do with replacing ' in name with \' for spawn
-				filename = g_string_new(plugin_name);
-				filename = g_string_prepend(filename, user_plugin_dir->str);
+				// TODO: Could do with replacing ' in name with \' for spawn				
 				plugin->filename = filename;
-				plugin->name = plugin_discover_name(filename,plugin_name);
+				plugin->name = pluname;//plugin_discover_name(filename,plugin_name);
 				//g_print ("PLUGIN FILENAME: %s\n", plugin->filename->str);
 				plugin->type = plugin_discover_type(plugin->filename);
 				plugin->description = plugin_discover_desc(plugin->filename);
 				Plugins = g_list_append(Plugins, plugin);
 				//g_print("%s\n", plugin_name);
+				}
 			}
 			g_dir_close(dir);			
 		}
@@ -610,18 +600,21 @@ void plugin_discover_available(void)
 		dir = g_dir_open("/usr/share/gphpedit/plugins/", 0,NULL);
 		if (dir) {
 			for (plugin_name = g_dir_read_name(dir); plugin_name != NULL; plugin_name = g_dir_read_name(dir)) {
+				filename = g_string_new(plugin_name);
+				filename = g_string_prepend(filename, "/usr/share/gphpedit/plugins/");
+				gchar *pluname= plugin_discover_name(filename,plugin_name);
+				if (pluname){
 				// Recommended by __tim in #gtk+ on irc.freenode.net 27/10/2004 11:30
 				plugin = g_new0 (Plugin, 1);
 				//plugin->name = g_strdup(plugin_name);
-				filename = g_string_new(plugin_name);
-				filename = g_string_prepend(filename, "/usr/share/gphpedit/plugins/");
 				plugin->filename = filename;
-				plugin->name = plugin_discover_name(filename,plugin_name);
+				plugin->name = pluname;
 				//g_print ("PLUGIN FILENAME: %s\n", plugin->filename->str);
 				plugin->type = plugin_discover_type(plugin->filename);
 				plugin->description = plugin_discover_desc(plugin->filename);
 				Plugins = g_list_append(Plugins, plugin);
 				//g_print("%s\n", plugin_name);
+				}
 			}
 			g_dir_close(dir);			
 		}
@@ -645,10 +638,10 @@ void plugin_create_menu_items()
 	num_plugin = 0;
 	for (iterator = Plugins; iterator != NULL && num_plugin<NUM_PLUGINS_MAX; iterator = g_list_next(iterator)) {
 		plugin = (Plugin *)(iterator->data);
-		//g_print ("Plugin %d:%s\n", num_plugin, plugin->filename);
-		
-		//g_print("Getting child widget\n");
-                
+                #ifdef DEBUG
+		g_print ("Plugin %d:%s\n", num_plugin, plugin->filename);
+		g_print("Getting child widget\n");
+                #endif
                 bin = GTK_BIN(main_window.menu->plugins[num_plugin]);
 		//g_print("Bin is %p\n", bin);
 		if (bin) {
@@ -662,9 +655,10 @@ void plugin_create_menu_items()
 		
 		num_plugin++;
 	}
-	//g_print("Blanking all non-found plugin entries\n");
+        #ifdef DEBUG
+	g_print("Blanking all non-found plugin entries\n");
+        #endif
         for (hide_plugin=num_plugin; hide_plugin <NUM_PLUGINS_MAX; hide_plugin++) {
-/*            gtk_widget_hide(main_window.menu->plugins[hide_plugin]);*/
 		/* don't hide destroy it */
             gtk_widget_destroy (main_window.menu->plugins[hide_plugin]);
 	}
@@ -688,16 +682,20 @@ void plugin_exec(gint plugin_num)
 	
 	plugin = (Plugin *)g_list_nth_data(Plugins, plugin_num);
 	if (!plugin) {
+                #ifdef DEBUG
 		g_print(_("Plugin is null!\n"));
+                #endif
 		/* don't crash if plugin if null */
 		return;
 	}
-	//g_print("Plugin No: %d:%d (%s):%s\n", plugin_num, plugin->type, plugin->name, plugin->filename->str);
+        #ifdef DEBUG
+	g_print("Plugin No: %d:%d (%s):%s\n", plugin_num, plugin->type, plugin->name, plugin->filename->str);
+        #endif
 	command_line = g_string_new(plugin->filename->str);
 	command_line = g_string_prepend(command_line, "'");
 	command_line = g_string_append(command_line, "' \"");
 	if (plugin->type == GPHPEDIT_PLUGIN_TYPE_SELECTION) {
-		wordStart = gtk_scintilla_get_selection_start(GTK_SCINTILLA(main_window.current_editor->scintilla));
+                wordStart = gtk_scintilla_get_selection_start(GTK_SCINTILLA(main_window.current_editor->scintilla));
 		wordEnd = gtk_scintilla_get_selection_end(GTK_SCINTILLA(main_window.current_editor->scintilla));
 		current_selection = gtk_scintilla_get_text_range (GTK_SCINTILLA(main_window.current_editor->scintilla), wordStart, wordEnd, &ac_length);
 		command_line = g_string_append(command_line, g_strescape(current_selection,""));
@@ -706,33 +704,34 @@ void plugin_exec(gint plugin_num)
 		command_line = g_string_append(command_line, editor_convert_to_local(main_window.current_editor));		
 	}
 	command_line = g_string_append(command_line, "\"");
-	//g_print("SPAWNING: %s\n", command_line->str);
-	
+        #ifdef DEBUG
+	g_print("SPAWNING: %s\n", command_line->str);
+	#endif
 	if (g_spawn_command_line_sync(command_line->str,&stdout,NULL, &exit_status,&error)) {
 		data = strstr(stdout, "\n");
 		data++;
-		
-		//g_print("COMMAND: %s\nSTDOUT:%s\nOUTPUT: %s\n", command_line->str, stdout, data);
-		
-		if (g_ascii_strncasecmp(stdout, "INSERT", MIN(strlen(stdout), 6))==0) {
+	#ifdef DEBUG
+		g_print("COMMAND: %s\nSTDOUT:%s\nOUTPUT: %s\n", command_line->str, stdout, data);
+	#endif
+		if (g_str_has_prefix(stdout, "INSERT")){
 			if (data) {
 				gtk_scintilla_insert_text(GTK_SCINTILLA(main_window.current_editor->scintilla), 
 					gtk_scintilla_get_current_pos(GTK_SCINTILLA(main_window.current_editor->scintilla)), data);
 			}
 		}
-		else if (g_ascii_strncasecmp(stdout, "REPLACE", MIN(strlen(stdout), 7))==0) {
+		else if (g_str_has_prefix(stdout, "REPLACE")){
 			if (data) {
 				gtk_scintilla_replace_sel(GTK_SCINTILLA(main_window.current_editor->scintilla), data);
 			}
 		}
-		else if (g_ascii_strncasecmp(stdout, "MESSAGE", MIN(strlen(stdout),7))==0) {
+		else if (g_str_has_prefix(stdout, "MESSAGE")){
 				info_dialog(plugin->name, data);
 		}
-		else if (g_ascii_strncasecmp(stdout, "OPEN", MIN(strlen(stdout), 4))==0) {
+		else if (g_str_has_prefix(stdout, "OPEN")){
 			if (DEBUG_MODE) { g_print("DEBUG: main_window.c:plugin_exec: Opening file :date: %s\n", data); }
 			switch_to_file_or_open(data, 0);
 		}
-		else if (g_ascii_strncasecmp(stdout, "DEBUG", MIN(strlen(stdout), 5))==0) {
+		else if (g_str_has_prefix(stdout, "DEBUG")){
 			debug_dump_editors();
 			DEBUG_MODE = TRUE;
 		}
@@ -742,7 +741,9 @@ void plugin_exec(gint plugin_num)
 	}
 	else {
 		g_print(_("Spawning %s gave error %s\n"), plugin->filename->str, error->message);
+		g_error_free (error);
 	}
+	g_string_free ((GString *) command_line,TRUE);
 }
 
 
@@ -866,6 +867,7 @@ static void create_app_main_window(const gchar *title, gint height, gint width){
         main_window.window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
         gtk_window_set_title(GTK_WINDOW(main_window.window), title);
         gtk_window_set_default_size(GTK_WINDOW(main_window.window), height, width);
+        /* center the window in the screen */
         gtk_window_set_position(GTK_WINDOW(main_window.window), GTK_WIN_POS_CENTER);
 	gtk_window_set_icon_from_file (GTK_WINDOW(main_window.window), GPHPEDIT_PIXMAP_FULL_PATH, NULL);
 	/* set RGBA colormap */        
