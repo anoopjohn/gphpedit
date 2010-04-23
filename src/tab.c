@@ -631,7 +631,7 @@ gboolean tab_create_help(Editor *editor, GString *filename)
 	if (!long_filename) {
 		dialog = gtk_message_dialog_new (NULL, GTK_DIALOG_MODAL, GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE,
 			_("Could not find the required command in the online help"));
-                gtk_window_set_icon(GTK_WINDOW(dialog), get_window_icon());
+		gtk_window_set_transient_for (GTK_WINDOW(dialog),GTK_WINDOW(main_window.window));
 		gtk_dialog_run (GTK_DIALOG (dialog));
 		gtk_widget_destroy (dialog);
 		return FALSE;
@@ -707,6 +707,7 @@ void info_dialog (gchar *title, gchar *message)
        	        dialog = gtk_message_dialog_new(GTK_WINDOW(main_window.window),GTK_DIALOG_DESTROY_WITH_PARENT,GTK_MESSAGE_INFO,GTK_BUTTONS_OK,"%s",
             message);
             gtk_window_set_title(GTK_WINDOW(dialog), title);
+	    gtk_window_set_transient_for (GTK_WINDOW(dialog),GTK_WINDOW(main_window.window));
             button = gtk_dialog_run (GTK_DIALOG (dialog));
             gtk_widget_destroy(dialog);
 	/*
@@ -723,6 +724,7 @@ gint yes_no_dialog (gchar *title, gchar *message)
        	dialog = gtk_message_dialog_new(GTK_WINDOW(main_window.window),GTK_DIALOG_DESTROY_WITH_PARENT,GTK_MESSAGE_INFO,GTK_BUTTONS_YES_NO,"%s",
             message);
             gtk_window_set_title(GTK_WINDOW(dialog), title);
+	    gtk_window_set_transient_for (GTK_WINDOW(dialog),GTK_WINDOW(main_window.window));
             button = gtk_dialog_run (GTK_DIALOG (dialog));
          gtk_widget_destroy(dialog);
 	/*
@@ -1836,7 +1838,7 @@ gboolean editor_is_local(Editor *editor)
 		return TRUE;
 	}
 
-       /* g_print("FALSE - not local!!! filename:%s",filename); */
+	//g_print("FALSE - not local!!! filename:%s",filename);
 	return FALSE;
 }
 gboolean uri_is_local_or_http(gchar *uri)
@@ -1857,7 +1859,7 @@ gboolean uri_is_local_or_http(gchar *uri)
 		return TRUE;
 	}
 
-	/* g_print("FALSE - not local!!!"); */
+	//g_print("FALSE - not local!!!");
 	return FALSE;
 }
 gchar * editor_convert_to_local(Editor *editor)

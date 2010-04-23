@@ -85,7 +85,7 @@ void find_clicked(GtkButton *button, gpointer data)
                   GtkWidget *dialog;
                    dialog = gtk_message_dialog_new(GTK_WINDOW(main_window.window),GTK_DIALOG_DESTROY_WITH_PARENT,GTK_MESSAGE_ERROR,GTK_BUTTONS_OK,_("The text \"%s\" was not found."), text);
                   gtk_window_set_title(GTK_WINDOW(dialog), "gphpedit");
-		  gtk_window_set_icon(GTK_WINDOW(dialog), get_window_icon());
+		  gtk_window_set_transient_for (GTK_WINDOW(dialog),GTK_WINDOW(main_window.window));
                     gtk_dialog_run(GTK_DIALOG(dialog));
                     gtk_widget_destroy(dialog);
 	}
@@ -128,7 +128,7 @@ void find_create(void)
 	gtk_container_set_border_width (GTK_CONTAINER (find_dialog.window1), 6);
 	gtk_window_set_title (GTK_WINDOW (find_dialog.window1), _("Find"));
 	gtk_window_set_resizable (GTK_WINDOW (find_dialog.window1), FALSE);
-	gtk_window_set_icon (GTK_WINDOW (find_dialog.window1),get_window_icon());
+	gtk_window_set_transient_for (GTK_WINDOW(find_dialog.window1),GTK_WINDOW(main_window.window));
 
 	find_dialog.vbox1 = gtk_vbox_new (FALSE, 0);
 	gtk_widget_show (find_dialog.vbox1);
@@ -345,7 +345,7 @@ void replace_clicked(GtkButton *button, gpointer data)
                  GtkWidget *dialog;
                  dialog = gtk_message_dialog_new(GTK_WINDOW(main_window.window),GTK_DIALOG_DESTROY_WITH_PARENT,GTK_MESSAGE_ERROR,GTK_BUTTONS_OK,_("The text \"%s\" was not found."), text);
                  gtk_window_set_title(GTK_WINDOW(dialog), "gphpedit");
-		 gtk_window_set_icon(GTK_WINDOW(dialog), get_window_icon());
+		 gtk_window_set_transient_for (GTK_WINDOW(dialog),GTK_WINDOW(main_window.window));
                  gtk_dialog_run(GTK_DIALOG(dialog));
                  gtk_widget_destroy(dialog);
 	}
@@ -363,7 +363,7 @@ void replace_clicked(GtkButton *button, gpointer data)
                  replace_prompt_dialog = gtk_message_dialog_new(GTK_WINDOW(main_window.window),GTK_DIALOG_DESTROY_WITH_PARENT,GTK_MESSAGE_QUESTION,GTK_BUTTONS_YES_NO,
             _("Do you want to replace this occurence?"));
             gtk_window_set_title(GTK_WINDOW(replace_prompt_dialog), "Question");
-	    gtk_window_set_icon(GTK_WINDOW(replace_prompt_dialog), get_window_icon());
+	    gtk_window_set_transient_for (GTK_WINDOW(replace_prompt_dialog),GTK_WINDOW(main_window.window));
             gint result = gtk_dialog_run (GTK_DIALOG (replace_prompt_dialog));
             gint selection_start;
             const gchar *replace;
@@ -460,7 +460,7 @@ void replace_all_clicked(GtkButton *button, gpointer data)
 
          replace_all_dialog = gtk_message_dialog_new(GTK_WINDOW(main_window.window),GTK_DIALOG_DESTROY_WITH_PARENT,GTK_MESSAGE_INFO,GTK_BUTTONS_OK,"%s",message->str);
          gtk_window_set_title(GTK_WINDOW(replace_all_dialog), "gphpedit");
-	 gtk_window_set_icon(GTK_WINDOW(replace_all_dialog), get_window_icon());
+         gtk_window_set_transient_for (GTK_WINDOW(replace_all_dialog),GTK_WINDOW(main_window.window));
          gtk_dialog_run(GTK_DIALOG(replace_all_dialog));
          gtk_widget_destroy(replace_all_dialog);
 
@@ -494,7 +494,7 @@ void replace_create(void)
 	gtk_window_set_position (GTK_WINDOW(replace_dialog.window2),GTK_WIN_POS_CENTER);
 	gtk_container_set_border_width (GTK_CONTAINER (replace_dialog.window2), 6);
 	gtk_window_set_title (GTK_WINDOW (replace_dialog.window2), _("Find and Replace"));
-	gtk_window_set_icon(GTK_WINDOW(replace_dialog.window2), get_window_icon());
+        gtk_window_set_transient_for (GTK_WINDOW(replace_dialog.window2),GTK_WINDOW(main_window.window));
         
 
 	replace_dialog.vbox10 = gtk_vbox_new (FALSE, 0);
