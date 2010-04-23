@@ -644,7 +644,9 @@ void classbrowser_update(void)
 			editor = li->data;
 			if (editor) {
 				classbrowser_filelist_add(editor->filename->str);
-				classbrowser_dirlist_add(g_path_get_dirname(editor->filename->str));
+				gchar *dir=g_path_get_dirname(editor->filename->str);
+				classbrowser_dirlist_add(dir);
+				g_free(dir);
 			}
 		}
 		//classbrowser_dirlist_add(preferences.shared_source_location);

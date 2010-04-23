@@ -70,7 +70,6 @@ typedef struct
 	guint current_line;
 	guint file_size;
         const char*contenttype;
-	gchar* buffer;
 } Editor;
 
 typedef struct

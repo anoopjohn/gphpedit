@@ -349,8 +349,8 @@ void tab_file_opened (GObject *source_object, GAsyncResult *res, gpointer user_d
 {
         GError *error=NULL;
         Editor *editor = (Editor *)user_data;
-	editor->buffer = g_malloc(editor->file_size);
- if (!g_file_load_contents_finish ((GFile *) source_object,res,&(editor->buffer),&(editor->file_size),NULL,&error)) {
+	gchar* buffer;
+ 	if (!g_file_load_contents_finish ((GFile *) source_object,res,&(buffer),&(editor->file_size),NULL,&error)) {
 	g_print("Error reading file. Gio error:%s",error->message);
 	return;
 	}
@@ -360,9 +360,9 @@ void tab_file_opened (GObject *source_object, GAsyncResult *res, gpointer user_d
 
 	//g_print("BUFFER=\n%s\n-------------------------------------------\n", buffer);
 
-	tab_validate_buffer_and_insert(editor->buffer, editor);
+	tab_validate_buffer_and_insert(buffer, editor);
 	tab_reset_scintilla_after_open(editor);
-        g_free(editor->buffer);
+        g_free(buffer);
 	if (gotoline_after_reload) {
 		goto_line_int(gotoline_after_reload);
 		gotoline_after_reload = 0;
@@ -381,7 +381,9 @@ void tab_file_opened (GObject *source_object, GAsyncResult *res, gpointer user_d
 	editor->current_line = gtk_scintilla_line_from_position(GTK_SCINTILLA(editor->scintilla), editor->current_pos);
 
         // Try getting file size
-        file=g_file_new_for_uri (convert_to_full(editor->filename->str));
+	gchar *filename=convert_to_full(editor->filename->str);
+        file=g_file_new_for_uri (filename);
+	g_free(filename);
         info= g_file_query_info (file,INFO_FLAGS,G_FILE_QUERY_INFO_NONE, NULL,&error);
         if (!info){
             g_warning (_("Could not get the file info. GIO error: %s \n"), error->message);
@@ -405,7 +407,9 @@ void tab_file_opened (GObject *source_object, GAsyncResult *res, gpointer user_d
         editor->isreadonly= !g_file_info_get_attribute_boolean (info,"access::can-write");
 	editor->contenttype=g_strdup(contenttype);
 	GIcon *icon= g_file_info_get_icon (info); /* get Gicon for mimetype*/
-	editor->file_icon=gtk_icon_theme_load_icon (gtk_icon_theme_get_default (), icon_name_from_icon(icon), GTK_ICON_SIZE_MENU, 0, NULL); // get icon of size menu
+	gchar *iconname=icon_name_from_icon(icon);
+	editor->file_icon=gtk_icon_theme_load_icon (gtk_icon_theme_get_default (), iconname, GTK_ICON_SIZE_MENU, 0, NULL); // get icon of size menu
+	g_free(iconname);
 	g_file_info_get_modification_time (info,&editor->file_mtime);
 	g_object_unref(info);
         // Open file
@@ -451,8 +455,9 @@ void tab_help_load_file(Editor *editor, GString *filename)
         gchar *buffer;
         goffset size;
         gsize nchars;
-
-        file=g_file_new_for_uri (convert_to_full(filename->str));
+	gchar *filenam=convert_to_full(filename->str);
+        file=g_file_new_for_uri (filenam);
+	g_free(filenam);
 	info=g_file_query_info (file,"standard::size,standard::icon",0,NULL,&error);
         if (!info){
             g_warning (_("Could not get file info for file %s. GIO error: %s \n"), filename->str,error->message);
@@ -460,14 +465,10 @@ void tab_help_load_file(Editor *editor, GString *filename)
         }
         size= g_file_info_get_size (info);
 	GIcon *icon= g_file_info_get_icon (info); /* get Gicon for mimetype*/
-	editor->file_icon=gtk_icon_theme_load_icon (gtk_icon_theme_get_default (), icon_name_from_icon(icon), GTK_ICON_SIZE_MENU, 0, NULL); // get icon of size menu
+	gchar *iconname=icon_name_from_icon(icon);
+	editor->file_icon=gtk_icon_theme_load_icon (gtk_icon_theme_get_default (), iconname, GTK_ICON_SIZE_MENU, 0, NULL); // get icon of size menu
+	g_free(iconname);
         g_object_unref(info);
-	buffer = (gchar *)g_malloc (size+1); /*include termination null*/
-	if (buffer == NULL && size != 0)
-	{
-		g_warning (_("This file is too big. Unable to allocate memory."));
-		return;
-	}
         if (!g_file_load_contents (file,NULL,&buffer, &nchars,NULL,&error)){
         g_print("Error reading file. GIO error:%s\n",error->message);
         g_free (buffer);
@@ -1017,6 +1018,7 @@ gboolean switch_to_file_or_open(gchar *filename, gint line_number)
         g_string_free(tmp_filename, TRUE);
 	register_file_opened(filename);
 	session_save();
+	g_free(filename);
 	return TRUE;
 }
 

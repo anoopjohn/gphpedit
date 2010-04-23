@@ -800,6 +800,7 @@ void main_window_add_to_reopen_menu(gchar *full_filename)
                 if (found){
 		if (strcmp(full_filename, found)==0) {
 			found_id = entry;
+			g_free(found);
 			break;
 		}
                }
