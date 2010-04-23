@@ -862,7 +862,9 @@ static void create_app_main_window(const gchar *title, gint height, gint width){
         gtk_window_set_default_size(GTK_WINDOW(main_window.window), height, width);
         /* center the window in the screen */
         gtk_window_set_position(GTK_WINDOW(main_window.window), GTK_WIN_POS_CENTER);
-	gtk_window_set_icon_from_file (GTK_WINDOW(main_window.window), GPHPEDIT_PIXMAP_FULL_PATH, NULL);
+	//gtk_window_set_icon_from_file (GTK_WINDOW(main_window.window), GPHPEDIT_PIXMAP_FULL_PATH, NULL);
+	g_set_application_name (title);
+	gtk_window_set_default_icon_name ("gphpedit");
 	/* set RGBA colormap */        
 	set_colormap(main_window.window);
 }
