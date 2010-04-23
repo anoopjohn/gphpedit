@@ -558,38 +558,42 @@ gint sort_plugin_func(gconstpointer a, gconstpointer b)
 	}
 	return 1;
 }
-
+static void new_plugin(GString *filename,const gchar *plugin_name){
+gchar *pluname= plugin_discover_name(filename,plugin_name);
+if (pluname){
+    Plugin *plugin;
+    plugin = g_slice_new(Plugin);
+    // TODO: Could do with replacing ' in name with \' for spawn
+    plugin->filename = filename;
+    plugin->name = pluname;
+    #ifdef DEBUG
+    g_print ("PLUGIN FILENAME: %s\n", plugin->filename->str);
+    #endif
+    plugin->type = plugin_discover_type(plugin->filename);
+    plugin->description = plugin_discover_desc(plugin->filename);
+    Plugins = g_list_append(Plugins, plugin);
+}
+}
 void plugin_discover_available(void)
 {
 	GDir *dir;
 	const gchar *plugin_name;
-	Plugin *plugin;
+	//Plugin *plugin;
 	GString *user_plugin_dir;
 	GString *filename;
 	
 	user_plugin_dir = g_string_new( g_get_home_dir());
 	user_plugin_dir = g_string_append(user_plugin_dir, "/.gphpedit/plugins/");
-	//g_print("User plugin dir: %s\n", user_plugin_dir->str);
+        #ifdef DEBUG
+	g_print("User plugin dir: %s\n", user_plugin_dir->str);
+        #endif
 	if (g_file_test(user_plugin_dir->str, G_FILE_TEST_IS_DIR)) {
 		dir = g_dir_open(user_plugin_dir->str, 0,NULL);
 		if (dir) {
 			for (plugin_name = g_dir_read_name(dir); plugin_name != NULL; plugin_name = g_dir_read_name(dir)) {
 				filename = g_string_new(plugin_name);
 				filename = g_string_prepend(filename, user_plugin_dir->str);
-				gchar *pluname= plugin_discover_name(filename,plugin_name);
-				if (pluname){
-				// Recommended by __tim in #gtk+ on irc.freenode.net 27/10/2004 11:30
-				plugin = g_new0 (Plugin, 1);
-				//plugin->name = g_strdup(plugin_name);
-				// TODO: Could do with replacing ' in name with \' for spawn				
-				plugin->filename = filename;
-				plugin->name = pluname;//plugin_discover_name(filename,plugin_name);
-				//g_print ("PLUGIN FILENAME: %s\n", plugin->filename->str);
-				plugin->type = plugin_discover_type(plugin->filename);
-				plugin->description = plugin_discover_desc(plugin->filename);
-				Plugins = g_list_append(Plugins, plugin);
-				//g_print("%s\n", plugin_name);
-				}
+                                new_plugin(filename,plugin_name);
 			}
 			g_dir_close(dir);			
 		}
@@ -602,27 +606,16 @@ void plugin_discover_available(void)
 			for (plugin_name = g_dir_read_name(dir); plugin_name != NULL; plugin_name = g_dir_read_name(dir)) {
 				filename = g_string_new(plugin_name);
 				filename = g_string_prepend(filename, "/usr/share/gphpedit/plugins/");
-				gchar *pluname= plugin_discover_name(filename,plugin_name);
-				if (pluname){
-				// Recommended by __tim in #gtk+ on irc.freenode.net 27/10/2004 11:30
-				plugin = g_new0 (Plugin, 1);
-				//plugin->name = g_strdup(plugin_name);
-				plugin->filename = filename;
-				plugin->name = pluname;
-				//g_print ("PLUGIN FILENAME: %s\n", plugin->filename->str);
-				plugin->type = plugin_discover_type(plugin->filename);
-				plugin->description = plugin_discover_desc(plugin->filename);
-				Plugins = g_list_append(Plugins, plugin);
-				//g_print("%s\n", plugin_name);
-				}
+                                new_plugin(filename,plugin_name);
 			}
 			g_dir_close(dir);			
 		}
 	}
 
 	Plugins = g_list_sort(Plugins, sort_plugin_func);
-
-	//g_print ("FOUND ALL PLUGINS\n");
+#ifdef DEBUG
+    g_print ("FOUND ALL PLUGINS\n");
+#endif
 }
 
 void plugin_create_menu_items()
