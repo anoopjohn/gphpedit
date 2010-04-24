@@ -110,6 +110,7 @@ GError *error=NULL;
 GFileEnumerator *enumerator= g_file_enumerate_children_finish    ( (GFile *)source_object,res,&error);
 if (!enumerator){
     g_print(_("Error getting folderbrowser files. GIO Error:%s\t"),error->message);
+    g_error_free (error);
     DEBUG_GFILE((GFile *)source_object,TRUE);
     gtk_button_set_label(GTK_BUTTON(main_window.button_dialog), DEFAULT_DIR);
     clear_folderbrowser();
@@ -125,6 +126,7 @@ void finish_enumerate (GObject *source_object, GAsyncResult *res, gpointer user_
 GError *error=NULL;
 GList *filesinfo=NULL;
 filesinfo= g_file_enumerator_next_files_finish ((GFileEnumerator *)source_object, res,&error);
+if (error) g_error_free (error);
 //two options: finish or error?
 if (!filesinfo){
 //if list isn't empty print files
@@ -321,6 +323,7 @@ static gchar *icon_name_from_icon(GIcon *icon) {
 
 void update_folderbrowser_signal (GFileMonitor *monitor,GFile *file,GFile *other_file, GFileMonitorEvent event_type, gpointer user_data){
     gtk_tree_store_clear(main_window.pTree);
+/* TODO free elements from list*/
     g_slist_free (filesinfolder);
     filesinfolder=NULL;
     update_folderbrowser ();
@@ -353,13 +356,16 @@ void popup_delete_file(void){
     gchar *filename;
     filename=convert_to_full((gchar *)pop.filename);
     fi=g_file_new_for_uri (filename);
+    g_free(filename);
     if (!g_file_trash (fi,NULL,&error)){
         if (error->code == G_IO_ERROR_NOT_SUPPORTED){
                 if (!g_file_delete (fi,NULL,&error)){
                 g_print(_("GIO Error deleting file: %s\n"),error->message);
+		g_error_free (error);
                 }
             } else {
             g_print(_("GIO Error deleting file: %s\n"),error->message);
+	    g_error_free (error);
             }
         }
     }
@@ -371,9 +377,11 @@ void popup_rename_file(gchar *file){
     gchar *filename;
     filename=convert_to_full(file);
     fi=g_file_new_for_uri (filename);
+    g_free(filename);
     GFileInfo *info= g_file_query_info (fi, "standard::display-name",G_FILE_QUERY_INFO_NOFOLLOW_SYMLINKS, NULL,&error);
     if (!info){
         g_print(_("Error renaming file. GIO Error:%s\n"),error->message);
+	g_error_free (error);
         return ;
     }
     GtkWidget *window;
@@ -407,9 +415,6 @@ void popup_rename_file(gchar *file){
 }
 
 void popup_create_dir(void){
-    gchar *filename;
-    filename=convert_to_full((gchar *)pop.filename);
-
     GtkWidget *window;
     window = gtk_dialog_new_with_buttons(_("New Dir"), GTK_WINDOW(main_window.window), GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT, GTK_STOCK_OK, GTK_RESPONSE_ACCEPT, GTK_STOCK_CANCEL, GTK_RESPONSE_REJECT, NULL);
     GtkWidget *vbox1 = gtk_vbox_new (FALSE, 8);
@@ -430,16 +435,20 @@ void popup_create_dir(void){
     const char *name=gtk_entry_get_text (GTK_ENTRY(text_filename));
     if ( res==GTK_RESPONSE_ACCEPT && name){
     GFile *config;
-    GError *error;
-    error=NULL;
-
+    GError *error=NULL;
+        gchar *filename;
     if (!MIME_ISDIR(pop.mime)){
-        config=g_file_new_for_uri (convert_to_full((gchar *)pop.filename));
+        filename=convert_to_full((gchar *)pop.filename);
+        config=g_file_new_for_uri (filename);
+	g_free(filename);
         gchar *parent=g_file_get_path (g_file_get_parent(config));
         filename= g_build_path (G_DIR_SEPARATOR_S, parent, name, NULL);
         config= g_file_new_for_path (filename);
     } else {
-        filename= g_build_path (G_DIR_SEPARATOR_S, convert_to_full((gchar *)pop.filename), name, NULL);
+        gchar *file;
+        file=convert_to_full((gchar *)pop.filename);
+        filename= g_build_path (G_DIR_SEPARATOR_S, file, name, NULL);
+	g_free(file);
         config=g_file_new_for_uri (filename);
     }
     #ifdef DEBUGFOLDERBROWSER
@@ -448,6 +457,7 @@ void popup_create_dir(void){
     
     if (!g_file_make_directory (config, NULL, &error)){
             g_print(_("Error creating folder. GIO error:%s\n"), error->message);
+	    g_error_free (error);
             gtk_widget_destroy(window);
             return ;
     }
@@ -600,10 +610,8 @@ void folderbrowser_create(MainWindow *main_window)
  	GtkCellRenderer  *pCellRenderer;
  	main_window->pTree = gtk_tree_store_new(3, GDK_TYPE_PIXBUF, G_TYPE_STRING,G_TYPE_STRING);
  	main_window->pListView = gtk_tree_view_new_with_model(GTK_TREE_MODEL(main_window->pTree));
-
         pCellRenderer = gtk_cell_renderer_pixbuf_new();
         pColumn = gtk_tree_view_column_new_with_attributes("",pCellRenderer,"pixbuf",0,NULL);
-
  	gtk_tree_view_append_column(GTK_TREE_VIEW(main_window->pListView), pColumn);
  	main_window->pScrollbar = gtk_scrolled_window_new(NULL, NULL);
         gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(main_window->pScrollbar),GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
@@ -634,7 +642,7 @@ void folderbrowser_create(MainWindow *main_window)
         pColumn = gtk_tree_view_column_new_with_attributes(_("Mime"), pCellRenderer,"text",2,NULL);
   	gtk_tree_view_append_column(GTK_TREE_VIEW(main_window->pListView), pColumn);
         gtk_tree_view_column_set_visible    (pColumn,FALSE);
-        
+
  	gtk_widget_show(main_window->folder);
 
 
@@ -864,6 +872,7 @@ static gchar *trunc_on_char(gchar * string, gchar which_char)
   			}
                 }else {
                     g_print("ERROR copying file::%s\n",error->message);
+		    g_error_free (error);
                 }
   	}
   	g_object_unref(cf->curfile);
@@ -945,7 +954,9 @@ gtk_tree_store_clear(main_window.pTree);
         #endif
             GdkPixbuf *p_file_image = NULL;
 	    /* get icon of size menu */
-            p_file_image =gtk_icon_theme_load_icon (gtk_icon_theme_get_default (), icon_name_from_icon(current->icon), GTK_ICON_SIZE_MENU, 0, NULL);
+	    gchar *icon_name=icon_name_from_icon(current->icon);
+            p_file_image =gtk_icon_theme_load_icon (gtk_icon_theme_get_default (), icon_name, GTK_ICON_SIZE_MENU, 0, NULL);
+	    g_free(icon_name);
             gtk_tree_store_insert_with_values(GTK_TREE_STORE(main_window.pTree), &iter2, iter, 0, 0, p_file_image, 1, current->display_name,2,current->mime,-1);
             while (gtk_events_pending ())
                 gtk_main_iteration ();
@@ -959,11 +970,12 @@ gtk_tree_store_clear(main_window.pTree);
         monitor= g_file_monitor_directory (file,G_FILE_MONITOR_NONE,NULL,&error);
 	if (!monitor){
 	g_print(_("Error initing folderbrowser autorefresh. GIO Error:%s\n"),error->message);
+	g_error_free (error);
 	}else{
             #ifdef DEBUGFOLDERBROWSER
             g_print("DEBUG:: initing folderbrowser update for:%s\n",sChemin);
             #endif
-	//g_signal_connect(monitor, "changed", (GCallback) update_folderbrowser_signal, NULL);
+	g_signal_connect(monitor, "changed", (GCallback) update_folderbrowser_signal, NULL);
 	}
 	if (!IS_DEFAULT_DIR(sChemin)){
 	cache_model=gtk_tree_view_get_model (GTK_TREE_VIEW(main_window.pListView));
@@ -1109,6 +1121,7 @@ on_cleanicon_press (entry, GTK_ENTRY_ICON_PRIMARY, NULL, NULL);
 static void clear_folderbrowser(void){
     /* clear tree and cache data*/
     gtk_tree_store_clear(main_window.pTree);
+/*TODO free list elements */
     if (filesinfolder) g_slist_free (filesinfolder);
     filesinfolder=NULL;
 }
