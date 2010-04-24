@@ -791,6 +791,7 @@ gboolean is_php_file(Editor *editor)
 			}
 		}
 		g_strfreev(lines);
+		g_free(buffer);
 	}
 	
 	return is_php;
