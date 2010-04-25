@@ -517,6 +517,11 @@ void gtk_scintilla_set_two_phase_draw(GtkScintilla *sci, gint two_phase);
 void gtk_scintilla_set_font_quality(GtkScintilla *sci, int font_quality);
 int gtk_scintilla_get_font_quality(GtkScintilla *sci);
 void gtk_scintilla_set_first_visible_line(GtkScintilla *sci, int line_display);
+#define SC_MULTIPASTE_ONCE 0
+#define SC_MULTIPASTE_EACH 1
+void gtk_scintilla_set_multi_paste(GtkScintilla *sci, int multi_paste);
+int gtk_scintilla_get_multi_paste(GtkScintilla *sci);
+int gtk_scintilla_get_tag(GtkScintilla *sci, int tag_number, gchar * tag_value);
 void gtk_scintilla_target_from_selection(GtkScintilla *sci);
 void gtk_scintilla_lines_join(GtkScintilla *sci);
 void gtk_scintilla_lines_split(GtkScintilla *sci, int pixel_width);

@@ -2,7 +2,7 @@
 
 NAME = GtkScintilla2
 LIB_NAME = gtkscintilla2
-VERSION = 0.2.0
+VERSION = 0.2.5
 PREFIX = $(shell pkg-config --variable=prefix gtk+-2.0)
 
 SCINTILLA_DIR = ./scintilla

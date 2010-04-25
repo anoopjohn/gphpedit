@@ -20,11 +20,10 @@
 #include "gtkscintilla.h"
 #include "marshal.h"
 
-#define PLAT_GTK 2
 #include "scintilla/include/Scintilla.h"
 #include "scintilla/include/ScintillaWidget.h"
 #define GPOINTER_TO_LONG(p)  ((glong) (p))
-/* Handled Signals*/
+/* Handled Signals */
 enum {
     STYLE_NEEDED,
     CHAR_ADDED,
@@ -361,9 +360,17 @@ gtk_scintilla_find_text (GtkScintilla *sci, gint flags, gchar *text,
     
     return find_pos;
 }
-
-gchar *
-gtk_scintilla_get_text_range (GtkScintilla *sci,
+/**
+ * gtk_scintilla_get_text_range:
+ * @sci: A #GtkScintilla
+ * @start: Start position
+ * @end: End position
+ * @length: text length
+ *
+ * return a text range from scintilla.
+ * the return value must be freed with g_free when no longer needed.
+ */
+gchar * gtk_scintilla_get_text_range (GtkScintilla *sci,
                               gint start, gint end, gint *length)
 {
     gchar *buffer = NULL;

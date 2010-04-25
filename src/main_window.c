@@ -691,7 +691,10 @@ void plugin_exec(gint plugin_num)
                 wordStart = gtk_scintilla_get_selection_start(GTK_SCINTILLA(main_window.current_editor->scintilla));
 		wordEnd = gtk_scintilla_get_selection_end(GTK_SCINTILLA(main_window.current_editor->scintilla));
 		current_selection = gtk_scintilla_get_text_range (GTK_SCINTILLA(main_window.current_editor->scintilla), wordStart, wordEnd, &ac_length);
-		command_line = g_string_append(command_line, g_strescape(current_selection,""));
+		gchar *escape=g_strescape(current_selection,"");
+		command_line = g_string_append(command_line, escape);
+		g_free(current_selection);
+		g_free(escape);
 	}
 	else if (plugin->type == GPHPEDIT_PLUGIN_TYPE_FILENAME) {
 		command_line = g_string_append(command_line, editor_convert_to_local(main_window.current_editor));		

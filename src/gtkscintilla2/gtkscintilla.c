@@ -20,7 +20,6 @@
 #include "gtkscintilla.h"
 #include "marshal.h"
 
-#define PLAT_GTK 2
 #include "scintilla/include/Scintilla.h"
 #include "scintilla/include/ScintillaWidget.h"
 #define GPOINTER_TO_LONG(p)  ((glong) (p))
@@ -361,9 +360,17 @@ gtk_scintilla_find_text (GtkScintilla *sci, gint flags, gchar *text,
     
     return find_pos;
 }
-
-gchar *
-gtk_scintilla_get_text_range (GtkScintilla *sci,
+/**
+ * gtk_scintilla_get_text_range:
+ * @sci: A #GtkScintilla
+ * @start: Start position
+ * @end: End position
+ * @length: text length
+ *
+ * return a text range from scintilla.
+ * the return value must be freed with g_free when no longer needed.
+ */
+gchar * gtk_scintilla_get_text_range (GtkScintilla *sci,
                               gint start, gint end, gint *length)
 {
     gchar *buffer = NULL;
@@ -2074,6 +2081,24 @@ void gtk_scintilla_set_first_visible_line(GtkScintilla *sci, int line_display)
 {
     scintilla_send_message(SCINTILLA(sci->scintilla),
         2613, (gulong) line_display, 0);
+}
+
+void gtk_scintilla_set_multi_paste(GtkScintilla *sci, int multi_paste)
+{
+    scintilla_send_message(SCINTILLA(sci->scintilla),
+        2614, (gulong) multi_paste, 0);
+}
+
+int gtk_scintilla_get_multi_paste(GtkScintilla *sci)
+{
+    return scintilla_send_message(SCINTILLA(sci->scintilla),
+        2615, 0, 0);
+}
+
+int gtk_scintilla_get_tag(GtkScintilla *sci, int tag_number, gchar * tag_value)
+{
+    return scintilla_send_message(SCINTILLA(sci->scintilla),
+        2616, (gulong) tag_number, (gulong) tag_value);
 }
 
 void gtk_scintilla_target_from_selection(GtkScintilla *sci)

@@ -471,6 +471,7 @@ void reopen_recent(GtkWidget *widget, gpointer data)
 	if (DEBUG_MODE) { g_print("DEBUG: main_window_callbacks.c:reopen_recent:filename: %s\n", filename); }
 	
 	switch_to_file_or_open(filename, 0);
+	g_free(filename);
 }
 
 void run_plugin(GtkWidget *widget, gpointer data)
