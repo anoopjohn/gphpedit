@@ -137,9 +137,9 @@ void session_reopen(void)
 				g_string_free(target, TRUE);
 				
 				if (focus_this_one && (main_window.current_editor)) {
-					//focus_tab = gtk_notebook_page_num(GTK_NOTEBOOK(main_window.notebook_editor),main_window.current_editor->help_scrolled_window);
+					focus_tab = gtk_notebook_page_num(GTK_NOTEBOOK(main_window.notebook_editor),main_window.current_editor->help_scrolled_window);
 					//FIXME: seg fault if there's open a file and a TABHELP and the TABHELP GOT the focus
-					focus_tab = 0;
+					//focus_tab = 0;
 				}
 			}else if (g_str_has_prefix(filename, "preview:")){
 				filename += 8;
@@ -147,9 +147,9 @@ void session_reopen(void)
 				tab_create_new(TAB_PREVIEW, target);
 				g_string_free(target, TRUE);
 				if (focus_this_one && (main_window.current_editor)) {
-					//focus_tab = gtk_notebook_page_num(GTK_NOTEBOOK(main_window.notebook_editor),main_window.current_editor->help_scrolled_window);
+					focus_tab = gtk_notebook_page_num(GTK_NOTEBOOK(main_window.notebook_editor),main_window.current_editor->help_scrolled_window);
 					//FIXME: seg fault if there's open a file and a TABHELP and the TABHELP GOT the focus
-					focus_tab = 0;
+					//focus_tab = 0;
 					}
 			} else {
                             	switch_to_file_or_open(filename,0);
@@ -189,7 +189,7 @@ void main_window_destroy_event(GtkWidget *widget, gpointer data)
         g_slice_free(Maintoolbar, main_window.toolbar_main); /* free toolbar struct*/
         g_slice_free(Findtoolbar, main_window.toolbar_find); /* free toolbar struct*/
 	// Old code had a main_window_delete_event call in here, not necessary, Gtk/GNOME does that anyway...
-	if (sChemin) g_free(sChemin);
+//	if (sChemin) g_free(sChemin);
 	cleanup_calltip();
         gtk_main_quit();
 }
@@ -857,7 +857,7 @@ void on_save_as1_activate(GtkWidget *widget)
 				}
 			}
 		}
-
+		g_free(last_opened_folder);
 		if (gtk_dialog_run (GTK_DIALOG(file_selection_box)) == GTK_RESPONSE_ACCEPT) {
 			save_file_as_ok(GTK_FILE_CHOOSER(file_selection_box));
 		}
@@ -1951,9 +1951,11 @@ gint treeview_click_release(GtkWidget *widget, GdkEventButton *event, gpointer f
 	}
 
 	if (main_window.current_editor) {
+		if(GTK_IS_SCINTILLA(main_window.current_editor->scintilla)){
 		gtk_scintilla_grab_focus(GTK_SCINTILLA(main_window.current_editor->scintilla));
 		gtk_scintilla_scroll_caret(GTK_SCINTILLA(main_window.current_editor->scintilla));
 		gtk_scintilla_grab_focus(GTK_SCINTILLA(main_window.current_editor->scintilla));
+		}
 	}
 	
 	return FALSE;
@@ -2030,6 +2032,7 @@ void process_external (GtkInfoBar *info_bar, gint response_id, Editor *editor){
 }
 
 void check_externaly_modified(void){
+	if (!main_window.current_editor) return;
 	if (!main_window.current_editor->is_untitled && main_window.current_editor->type!=TAB_HELP && main_window.current_editor->type!=TAB_PREVIEW){
 	/*verify if file has been externaly modified */
         GError *error=NULL;

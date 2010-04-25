@@ -174,6 +174,7 @@ if (!g_file_info_get_is_hidden (info)  && !g_file_info_get_is_backup (info)){
    while (gtk_events_pending ())
 	  gtk_main_iteration ();
 }
+g_list_free(filesinfo);
 /* next files */
 g_file_enumerator_next_files_async  ((GFileEnumerator *)source_object,30,G_PRIORITY_DEFAULT,NULL, finish_enumerate,user_data);
 }
@@ -989,7 +990,7 @@ gtk_tree_store_clear(main_window.pTree);
             #ifdef DEBUGFOLDERBROWSER
             g_print("DEBUG:: initing folderbrowser update for:%s\n",sChemin);
             #endif
-	g_signal_connect(monitor, "changed", (GCallback) update_folderbrowser_signal, NULL);
+//	g_signal_connect(monitor, "changed", (GCallback) update_folderbrowser_signal, NULL);
 	}
 	if (!IS_DEFAULT_DIR(sChemin)){
 	cache_model=gtk_tree_view_get_model (GTK_TREE_VIEW(main_window.pListView));

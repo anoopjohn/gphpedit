@@ -1243,10 +1243,9 @@ static void save_point_reached(GtkWidget *scintilla)
 	Editor *editor;
 
 	editor = editor_find_from_scintilla(scintilla);
+	if (!editor) return;
 	if (editor->short_filename != NULL) {
-		label_caption = g_string_new(editor->short_filename);//g_string_new("<span color=\"black\">");
-//		label_caption = g_string_append(label_caption, editor->short_filename);
-//		label_caption = g_string_append(label_caption, "</span>");
+		label_caption = g_string_new(editor->short_filename);
 		gtk_label_set_markup(GTK_LABEL (editor->label), label_caption->str);
 		g_string_free(label_caption, TRUE);
 		editor->saved=TRUE;
@@ -1804,8 +1803,10 @@ static void char_added(GtkWidget *scintilla, guint ch)
 				if (wordStart>1) {
 					ac_buffer = gtk_scintilla_get_text_range (GTK_SCINTILLA(scintilla), wordStart-2, wordEnd, &ac_length);
 					if (strcmp(ac_buffer,"<?php")==0 && type == TAB_PHP) {
+						g_free(ac_buffer);
 						return;
 					}
+					g_free(ac_buffer);
 				}
 	
 				if (gtk_scintilla_autoc_active(GTK_SCINTILLA(scintilla))==1) {
@@ -1825,6 +1826,7 @@ static void char_added(GtkWidget *scintilla, guint ch)
 				}
 			}
 			// Drop down for HTML here (line_state = 272)
+			g_free(member_function_buffer);
 		}
 	}
 }

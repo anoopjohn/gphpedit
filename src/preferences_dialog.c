@@ -61,7 +61,7 @@ static GList * get_font_names()
 		fonts = g_list_prepend(fonts, (gchar *)name);
 	}
 	fonts= g_list_reverse (fonts);
-
+	g_free(families);
 	return fonts;
 }
 
@@ -607,6 +607,7 @@ void on_element_entry_changed(GtkComboBox *widget, gpointer		 user_data)
 {
 	current_highlighting_element =	gtk_combo_box_get_active_text (widget);
 	get_current_highlighting_settings(current_highlighting_element);
+	g_free(current_highlighting_element);
 }
 
 void apply_preferences(GtkButton *button, gpointer data)
@@ -1207,7 +1208,7 @@ void on_edge_colour_changed(GtkColorButton *widget, gpointer user_data)
 
 void on_fontqualities_entry_changed(GtkEntry *Entry, gpointer data)
 {
-	const char *texttemp=gtk_combo_box_get_active_text(GTK_COMBO_BOX(preferences_dialog.fontstyle));
+	gchar *texttemp=gtk_combo_box_get_active_text(GTK_COMBO_BOX(preferences_dialog.fontstyle));
 
 	if(strcmp(texttemp,"Non Antialiased")==0){
 	temp_preferences.font_quality=SC_EFF_QUALITY_NON_ANTIALIASED;		
@@ -1217,6 +1218,7 @@ void on_fontqualities_entry_changed(GtkEntry *Entry, gpointer data)
 	/* set default */
 	temp_preferences.font_quality=SC_EFF_QUALITY_DEFAULT;
 	}
+	g_free(texttemp);
 }
 
 /**

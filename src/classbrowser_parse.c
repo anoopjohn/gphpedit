@@ -489,7 +489,7 @@ void classbrowser_parse_file(gchar *filename)
 					else if (is_closing_brace(*c)) {
 						brace_count--;
 #ifdef DEBUG_CLASSBROWSER
-						//g_print("Brace count %d:%c\n", brace_count, *c);
+						g_print("Brace count %d:%c\n", brace_count, *c);
 #endif
 						if (brace_count == 0) {
 							if (within_class) {
@@ -515,6 +515,8 @@ void classbrowser_parse_file(gchar *filename)
 		}
 		c++;
 	}
+	if (param_list) g_free(param_list);
+	if (within_function) g_free(within_function);
 	g_free(file_contents);
 }
 

@@ -159,7 +159,7 @@ void classbrowser_dirlist_add(gchar *dir)
 				else if (is_php_file_from_filename(fullfilename->str)) {
 					classbrowser_filelist_add(fullfilename->str);
 					#ifdef DEBUGCLASSBROWSER
-					debug("File added: %s", fullfilename->str);
+					g_print("DEBUG::File added: %s", fullfilename->str);
 					#endif
 				}
 				g_string_free(fullfilename, TRUE);
@@ -471,7 +471,7 @@ else {
 		class->identifierid = identifierid++;
 		classlist = g_slist_append(classlist, class);
 
-if (classbrowser_class_find_before_position(classname, &before)) {
+		if (classbrowser_class_find_before_position(classname, &before)) {
 			gtk_tree_store_insert_before(main_window.classtreestore,
 			                             &iter, NULL, &before);
 		}
@@ -513,9 +513,6 @@ void classbrowser_functionlist_add(gchar *classname, gchar *funcname, gchar *fil
 	GtkTreeIter class_iter;
 	GString *function_decl;
 	guint type;
-	#ifdef DEBUGCLASSBROWSER	
-	debug("Filename:%s", filename);
-	#endif
 	if ((function = classbrowser_functionlist_find(funcname, param_list, filename, classname))) {
 		function->line_number = line_number;
 		function->remove = FALSE;
@@ -552,7 +549,7 @@ void classbrowser_functionlist_add(gchar *classname, gchar *funcname, gchar *fil
 		}
 		function_decl = g_string_append(function_decl, ")");
 		#ifdef DEBUGCLASSBROWSER
-		debug("Filename: %s", filename);
+		g_print("Filename: %s\n", filename);
 		#endif
 		gtk_tree_store_set (main_window.classtreestore, &iter,
 		                    NAME_COLUMN, function_decl->str, LINE_NUMBER_COLUMN, line_number, FILENAME_COLUMN, filename, TYPE_COLUMN, type, ID_COLUMN, function->identifierid, -1);
@@ -661,7 +658,7 @@ void classbrowser_update(void)
 		file->modified_time = buf.st_mtime;
 		classbrowser_parse_file(file->filename);
 		#ifdef DEBUGCLASSBROWSER
-		debug("Parsing %s", file->filename);
+		g_print("Parsing %s\n", file->filename);
 		#endif
 	}
 	classbrowser_remove_dead_wood();
@@ -778,7 +775,7 @@ void classbrowser_update_selected_label(gchar *filename, gint line)
 		new_label = get_differing_part(filenames, filename);
 	}
 	#ifdef DEBUGCLASSBROWSER
-	debug("%d :: %s", num_files, new_label);	
+	g_print("%d :: %s\n", num_files, new_label->str);	
 	#endif
 	if (new_label) {
 		new_label = g_string_prepend(new_label, _("FILE: "));
@@ -813,10 +810,10 @@ gint classbrowser_compare_function_names(GtkTreeModel *model,
 	gtk_tree_model_get(model, a, 0, &aName, -1);
 	gtk_tree_model_get(model, b, 0, &bName, -1);
 	retVal = g_ascii_strcasecmp(aName, bName);
-	g_free(aName);
-	g_free(bName);
 	#ifdef DEBUGCLASSBROWSER
 	g_message("* compare values %s and %s; return %d\n", aName, bName, retVal);
 	#endif
+	g_free(aName);
+	g_free(bName);
 	return retVal;
 }
