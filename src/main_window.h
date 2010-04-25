@@ -52,6 +52,7 @@ typedef struct
         GtkWidget *zoomlabel;
 
 	GtkWidget *notebook_manager;
+	
 	GtkWidget *notebook_editor;
 
 	GtkWidget *scrolledwindow1;
@@ -125,7 +126,6 @@ void main_window_pass_command_line_files(char **argv);
 gboolean channel_pass_filename_callback(GIOChannel *source, GIOCondition condition, gpointer data );
 GString *get_differing_part(GSList *filenames, gchar *file_requested);
 void main_window_add_to_reopen_menu(gchar *full_filename);
-void plugin_exec(gint plugin_num);
 void create_untitled_if_empty(void);
 
 extern GIOChannel* inter_gphpedit_io;

@@ -27,9 +27,6 @@
 
 #include "main.h"
 
-void plugin_setup_menu(void);
-void plugin_exec(gint plugin_num);
-
 #define GPHPEDIT_PLUGIN_TYPE_UNKNOWN 0
 #define GPHPEDIT_PLUGIN_TYPE_NOINPUT 1
 #define GPHPEDIT_PLUGIN_TYPE_SELECTION 2
@@ -46,4 +43,6 @@ typedef struct
 } Plugin;
 
 gint parse_shortcut(gint accel_number);
+void plugin_setup_menu(void);
+void plugin_exec(gint plugin_num);
 #endif

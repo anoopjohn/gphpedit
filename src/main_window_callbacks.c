@@ -33,6 +33,7 @@
 #include "tab.h"
 #include "templates.h"
 #include "folderbrowser.h"
+#include "plugin.h"
 
 gboolean is_app_closing = FALSE;
 gint classbrowser_hidden_position;
