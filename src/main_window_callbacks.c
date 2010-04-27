@@ -139,8 +139,6 @@ void session_reopen(void)
 				
 				if (focus_this_one && (main_window.current_editor)) {
 					focus_tab = gtk_notebook_page_num(GTK_NOTEBOOK(main_window.notebook_editor),main_window.current_editor->help_scrolled_window);
-					//FIXME: seg fault if there's open a file and a TABHELP and the TABHELP GOT the focus
-					//focus_tab = 0;
 				}
 			}else if (g_str_has_prefix(filename, "preview:")){
 				filename += 8;
@@ -149,8 +147,6 @@ void session_reopen(void)
 				g_string_free(target, TRUE);
 				if (focus_this_one && (main_window.current_editor)) {
 					focus_tab = gtk_notebook_page_num(GTK_NOTEBOOK(main_window.notebook_editor),main_window.current_editor->help_scrolled_window);
-					//FIXME: seg fault if there's open a file and a TABHELP and the TABHELP GOT the focus
-					//focus_tab = 0;
 					}
 			} else {
                             	switch_to_file_or_open(filename,0);
@@ -190,7 +186,6 @@ void main_window_destroy_event(GtkWidget *widget, gpointer data)
         g_slice_free(Maintoolbar, main_window.toolbar_main); /* free toolbar struct*/
         g_slice_free(Findtoolbar, main_window.toolbar_find); /* free toolbar struct*/
 	// Old code had a main_window_delete_event call in here, not necessary, Gtk/GNOME does that anyway...
-//	if (sChemin) g_free(sChemin);
 	cleanup_calltip();
         gtk_main_quit();
 }
@@ -331,7 +326,6 @@ gint main_window_key_press_event(GtkWidget   *widget, GdkEventKey *event,gpointe
 					   gtk_entry_set_text(GTK_ENTRY(main_window.toolbar_find->search_entry), search_buffer);
 				}
 				gtk_widget_grab_focus(GTK_WIDGET(main_window.toolbar_find->search_entry));
-				//gtk_editable_select_region(GTK_EDITABLE(main_window.toolbar_find_search_entry),0, -1);
 			}
 			return TRUE;
 		}
@@ -430,6 +424,7 @@ gint main_window_key_press_event(GtkWidget   *widget, GdkEventKey *event,gpointe
 					sql_autocomplete_word(main_window.current_editor->scintilla, wordStart, wordEnd);
 				}
 			}
+			g_free(member_function_buffer);
 			return TRUE;
 		}
 	}
@@ -563,6 +558,7 @@ void on_openselected1_activate(GtkWidget *widget)
 		}
 	}
         }
+	g_free(ac_buffer);
 }
 void add_file_filters(GtkFileChooser *chooser){
 	//store file filter
@@ -690,7 +686,7 @@ void on_open1_activate(GtkWidget *widget)
 	if (gtk_dialog_run(GTK_DIALOG(file_selection_box)) == GTK_RESPONSE_ACCEPT) {
 		open_file_ok(GTK_FILE_CHOOSER(file_selection_box));
 	}
-	
+	g_free(last_opened_folder);
 	gtk_widget_destroy(file_selection_box);
 }
 
@@ -724,19 +720,7 @@ void save_file_as_confirm_overwrite(gint reply,gpointer data)
 void save_file_as_ok(GtkFileChooser *file_selection_box)
 {
 	GString *filename;
-	//GtkWidget *file_exists_dialog;
-	//struct stat st;
-        //GFile *fi;
-	// Extract filename from the file selection dialog
 	filename = g_string_new(gtk_file_chooser_get_uri(file_selection_box));
-        //fi=g_file_new_for_uri (filename->str);
-	//if(g_file_query_exists (fi,NULL)) {
-       //if (stat (filename->str, &st) == 0) {
-		//file_exists_dialog = gnome_question_dialog_modal(_("This file already exists, are you sure you want to overwrite it?"),
-		//	save_file_as_confirm_overwrite,filename);
-		//gnome_dialog_run_and_close(GNOME_DIALOG(file_exists_dialog));
-	//}
-	//else {
 		// Set the filename of the current editor to be that
 		if (main_window.current_editor->filename) {
 			g_string_free(main_window.current_editor->filename, TRUE);
@@ -755,8 +739,6 @@ void save_file_as_ok(GtkFileChooser *file_selection_box)
 			main_window.current_editor->opened_from = NULL;
 		}
 		g_string_free(filename, FALSE);
-	//}
-        //g_object_unref(fi);
 }
 
 
@@ -768,7 +750,7 @@ void on_save1_activate(GtkWidget *widget)
 		filename = main_window.current_editor->filename->str;
 
 		//if filename is Untitled
-		if (main_window.current_editor->is_untitled) {// && !main_window.current_editor->saved) {
+		if (main_window.current_editor->is_untitled) {
 			on_save_as1_activate(widget);
 		}
 		else {
@@ -932,12 +914,13 @@ void rename_file_ok(GtkFileChooser *file_selection)
 	GString *filename;
 	GtkWidget *file_exists_dialog;
 	// Extract filename from the file chooser dialog
-	filename = g_string_new(gtk_file_chooser_get_uri(file_selection));
-        GFile *file;
-        file=g_file_new_for_uri (filename->str);
+	gchar *fileuri=gtk_file_chooser_get_uri(file_selection);
+	filename = g_string_new(fileuri);
+	g_free(fileuri);
+        GFile *file = g_file_new_for_uri (filename->str);
         if (g_file_query_exists (file,NULL)) {
             file_exists_dialog = gtk_message_dialog_new(GTK_WINDOW(main_window.window),GTK_DIALOG_DESTROY_WITH_PARENT,GTK_MESSAGE_QUESTION,GTK_BUTTONS_YES_NO,
-            _("This file already exists, are you sure you want to overwrite it?"));
+ _("This file already exists, are you sure you want to overwrite it?"));
             gtk_window_set_title(GTK_WINDOW(file_exists_dialog), "Question");
             gint result = gtk_dialog_run (GTK_DIALOG (file_exists_dialog));
            if (result==GTK_RESPONSE_YES) {
@@ -948,6 +931,7 @@ void rename_file_ok(GtkFileChooser *file_selection)
             rename_file(filename);
         }
         g_object_unref(file);
+	g_string_free(filename, TRUE);
 }
 
 
@@ -1151,9 +1135,9 @@ void on_cut1_activate(GtkWidget *widget)
 	wordEnd = gtk_scintilla_get_selection_end(GTK_SCINTILLA(main_window.current_editor->scintilla));
 	if (wordStart != wordEnd) {
 		buffer = gtk_scintilla_get_text_range (GTK_SCINTILLA(main_window.current_editor->scintilla), wordStart, wordEnd, &length);
-
 		gtk_clipboard_set_text(main_window.clipboard,buffer,length);
 		gtk_scintilla_replace_sel(GTK_SCINTILLA(main_window.current_editor->scintilla), "");
+		g_free(buffer);
 	}
 	//gtk_scintilla_cut(GTK_SCINTILLA(main_window.current_editor->scintilla));
 }
@@ -1176,8 +1160,8 @@ void on_copy1_activate(GtkWidget *widget)
 		wordEnd = gtk_scintilla_get_selection_end(GTK_SCINTILLA(main_window.current_editor->scintilla));
 		if (wordStart != wordEnd) {
 			buffer = gtk_scintilla_get_text_range (GTK_SCINTILLA(main_window.current_editor->scintilla), wordStart, wordEnd, &length);
-	
 			gtk_clipboard_set_text(main_window.clipboard,buffer,length);
+			g_free(buffer);
 		}
 	}
 	macro_record (main_window.current_editor->scintilla, 2178, 0, 0); // As copy doesn't change the buffer it doesn't get recorded, so do it manually
@@ -1199,7 +1183,7 @@ void on_paste_got_from_cliboard(GtkClipboard *clipboard, const gchar *text, gpoi
 }
 
 void selectiontoupper(void){
-    gint wordStart;
+        gint wordStart;
 	gint wordEnd;
 	gint length;
 	gchar *buffer;
@@ -1212,10 +1196,12 @@ void selectiontoupper(void){
 		wordEnd = gtk_scintilla_get_selection_end(GTK_SCINTILLA(main_window.current_editor->scintilla));
 		if (wordStart != wordEnd) {
 			buffer = gtk_scintilla_get_text_range (GTK_SCINTILLA(main_window.current_editor->scintilla), wordStart, wordEnd, &length);
-                        //buffer to upper
-                        buffer=g_utf8_strup (buffer,strlen(buffer));
-                        //replace sel
-                        gtk_scintilla_replace_sel(GTK_SCINTILLA(main_window.current_editor->scintilla), buffer);
+                        /* buffer to upper */
+			gchar *tmpbuffer=g_utf8_strup (buffer,strlen(buffer));
+                        g_free(buffer);
+                        /* replace sel */
+                        gtk_scintilla_replace_sel(GTK_SCINTILLA(main_window.current_editor->scintilla), tmpbuffer);
+			g_free(tmpbuffer);
                 }
         }
 }
@@ -1233,10 +1219,12 @@ void selectiontolower(void){
 		wordEnd = gtk_scintilla_get_selection_end(GTK_SCINTILLA(main_window.current_editor->scintilla));
 		if (wordStart != wordEnd) {
 			buffer = gtk_scintilla_get_text_range (GTK_SCINTILLA(main_window.current_editor->scintilla), wordStart, wordEnd, &length);
-                        //buffer to upper
-                        buffer=g_utf8_strdown (buffer,strlen(buffer));
-                        //replace sel
-                        gtk_scintilla_replace_sel(GTK_SCINTILLA(main_window.current_editor->scintilla), buffer);
+			 /* buffer to lower */
+			gchar *tmpbuffer=g_utf8_strdown (buffer,strlen(buffer));
+                        g_free(buffer);
+                        /* replace sel */
+                        gtk_scintilla_replace_sel(GTK_SCINTILLA(main_window.current_editor->scintilla), tmpbuffer);
+			g_free(tmpbuffer);
                 }
         }
 }
@@ -1826,32 +1814,29 @@ void pressed_button_file_chooser(GtkButton *widget, gpointer data)
     gboolean res;
     res=gtk_file_chooser_set_current_folder (GTK_FILE_CHOOSER(pFileSelection), lbl);
     }
- 	  sChemin=NULL;
+ 	  gchar *sChemin=NULL;
  	  gchar*  sLabel;
- 	  gchar*  sLabelUtf8;
 
        switch(gtk_dialog_run(GTK_DIALOG(pFileSelection))) {
          case GTK_RESPONSE_OK:
-
              sChemin = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(pFileSelection));
-
              break;
          default:
              break;
      }
     	gtk_widget_destroy(pFileSelection);
-    	if(sChemin && !IS_DEFAULT_DIR(sChemin)){
- 	sLabel = g_strdup_printf("%s",sChemin);
-        sLabelUtf8 = g_locale_to_utf8(sLabel, -1, NULL, NULL, NULL);
-        gtk_button_set_label(GTK_BUTTON(widget), sLabelUtf8);
+	if(CURRENTFOLDER && !IS_DEFAULT_DIR(CURRENTFOLDER)){
+	sLabel = convert_to_full(sChemin); //g_strdup_printf("%s",CURRENTFOLDER);
+        gtk_button_set_label(GTK_BUTTON(widget), sLabel);
         /*store folder in config*/
         GConfClient *config;
         config=gconf_client_get_default ();
         gconf_client_set_string (config,"/gPHPEdit/main_window/folderbrowser/folder", sChemin,NULL);
+	g_free(sChemin);
         GtkTreeIter iter2;
  	GtkTreeIter* iter=NULL;
- 	sChemin=convert_to_full(sChemin);
-        init_folderbrowser(main_window.pTree,sChemin,iter,&iter2);
+        init_folderbrowser(main_window.pTree,sLabel,iter,&iter2);
+	g_free(sLabel);
     	}
    }
 void classbrowser_show(void)
@@ -1886,7 +1871,7 @@ void classbrowser_show_hide(GtkWidget *widget)
 	GConfClient *config;
         config=gconf_client_get_default ();
 	hidden = gconf_client_get_int (config,"/gPHPEdit/main_window/classbrowser_hidden",NULL);
-        g_object_set (main_window.menu->tog_class,"active",hidden,NULL);
+        gtk_check_menu_item_set_active ((GtkCheckMenuItem *) main_window.menu->tog_class,hidden);
 	if (hidden == 1)
 		classbrowser_show();
 	else
@@ -2036,13 +2021,14 @@ void process_external (GtkInfoBar *info_bar, gint response_id, Editor *editor){
 void check_externaly_modified(void){
 	if (!main_window.current_editor) return;
 	if (!main_window.current_editor->is_untitled && main_window.current_editor->type!=TAB_HELP && main_window.current_editor->type!=TAB_PREVIEW){
-	/*verify if file has been externaly modified */
+	/* verify if file has been externaly modified */
         GError *error=NULL;
         GFile *file=g_file_new_for_uri (main_window.current_editor->filename->str);
         GFileInfo *info;
         info= g_file_query_info (file,"time::modified,time::modified-usec",G_FILE_QUERY_INFO_NONE, NULL,&error);
         if (!info){
         g_warning (_("Could not get the file modification time for file: '%s'. GIO error: %s \n"), main_window.current_editor->short_filename,error->message);
+        g_error_free (error);
 	gtk_widget_hide (main_window.infobar);
        	return;
         }
@@ -2050,7 +2036,9 @@ void check_externaly_modified(void){
 	g_file_info_get_modification_time (info,&file_mtime);
 	g_object_unref(info);	
 	if ((file_mtime.tv_sec > main_window.current_editor->file_mtime.tv_sec) || (file_mtime.tv_sec == main_window.current_editor->file_mtime.tv_sec && file_mtime.tv_usec > main_window.current_editor->file_mtime.tv_usec)){
-gtk_label_set_text (GTK_LABEL (main_window.infolabel), g_strdup_printf(_("The file %s has been externaly modified. Do you want reload it?"),main_window.current_editor->filename->str));
+	gchar *message=g_strdup_printf(_("The file %s has been externaly modified. Do you want reload it?"),main_window.current_editor->filename->str);
+gtk_label_set_text (GTK_LABEL (main_window.infolabel), message);
+	g_free(message);
 	gtk_widget_show (main_window.infobar);
 	return;
 	}
