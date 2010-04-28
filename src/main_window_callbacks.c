@@ -1794,49 +1794,41 @@ void syntax_check_clear(GtkWidget *widget)
 	gtk_widget_hide(main_window.lint_view);
 }
 
-void pressed_button_file_chooser(GtkButton *widget, gpointer data)
- {
+void pressed_button_file_chooser(GtkButton *widget, gpointer data) {
 
- 	GtkWidget *pFileSelection;
+  GtkWidget *pFileSelection;
 
- 	pFileSelection = gtk_file_chooser_dialog_new("Open...",
- 	GTK_WINDOW(main_window.window),
- 	GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER,
- 	GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
- 	GTK_STOCK_OPEN, GTK_RESPONSE_OK,
- 	NULL);
-     gtk_window_set_modal(GTK_WINDOW(pFileSelection), TRUE);
-     gtk_file_chooser_set_local_only (GTK_FILE_CHOOSER(pFileSelection), FALSE);
-     // sets the label folder as start folder 
-     gchar *lbl;
-     lbl=(gchar*)gtk_button_get_label(GTK_BUTTON(main_window.button_dialog));
-     if (!IS_DEFAULT_DIR(lbl)){
-    gboolean res;
-    res=gtk_file_chooser_set_current_folder (GTK_FILE_CHOOSER(pFileSelection), lbl);
-    }
- 	  gchar *sChemin=NULL;
- 	  gchar*  sLabel;
+  pFileSelection = gtk_file_chooser_dialog_new("Open...", GTK_WINDOW(main_window.window), GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER,
+ 	GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL, GTK_STOCK_OPEN, GTK_RESPONSE_OK, NULL);
+  gtk_window_set_modal(GTK_WINDOW(pFileSelection), TRUE);
+  gtk_file_chooser_set_local_only (GTK_FILE_CHOOSER(pFileSelection), FALSE);
+  // sets the label folder as start folder 
+  gchar *lbl;
+  lbl=(gchar*)gtk_button_get_label(GTK_BUTTON(main_window.button_dialog));
+  if (!IS_DEFAULT_DIR(lbl)){
+     gboolean res;
+     res=gtk_file_chooser_set_current_folder (GTK_FILE_CHOOSER(pFileSelection), lbl);
+  }
+  gchar *sChemin=NULL;
 
-       switch(gtk_dialog_run(GTK_DIALOG(pFileSelection))) {
+  switch(gtk_dialog_run(GTK_DIALOG(pFileSelection))) {
          case GTK_RESPONSE_OK:
-             sChemin = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(pFileSelection));
+             sChemin = gtk_file_chooser_get_uri(GTK_FILE_CHOOSER(pFileSelection));
              break;
          default:
              break;
      }
-    	gtk_widget_destroy(pFileSelection);
-	if(CURRENTFOLDER && !IS_DEFAULT_DIR(CURRENTFOLDER)){
-	sLabel = convert_to_full(sChemin); //g_strdup_printf("%s",CURRENTFOLDER);
-        gtk_button_set_label(GTK_BUTTON(widget), sLabel);
+  gtk_widget_destroy(pFileSelection);
+	if(sChemin){
+        gtk_button_set_label(GTK_BUTTON(widget), sChemin);
         /*store folder in config*/
         GConfClient *config;
         config=gconf_client_get_default ();
         gconf_client_set_string (config,"/gPHPEdit/main_window/folderbrowser/folder", sChemin,NULL);
-	g_free(sChemin);
         GtkTreeIter iter2;
  	GtkTreeIter* iter=NULL;
-        init_folderbrowser(main_window.pTree,sLabel,iter,&iter2);
-	g_free(sLabel);
+        init_folderbrowser(main_window.pTree,sChemin,iter,&iter2);
+	g_free(sChemin);
     	}
    }
 void classbrowser_show(void)
