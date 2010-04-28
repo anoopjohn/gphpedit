@@ -250,12 +250,12 @@ gint filebrowser_sort_func(GtkTreeModel * model, GtkTreeIter * a, GtkTreeIter * 
 	gchar *namea, *nameb, *mimea, *mimeb;
 	gboolean isdira, isdirb;
 	gint retval = 0;
-	gtk_tree_model_get((GtkTreeModel *)model, a, 1, &namea,2, &mimea,-1);
-	gtk_tree_model_get((GtkTreeModel *)model, b, 1, &nameb,2, &mimeb,-1);
+	gtk_tree_model_get(GTK_TREE_MODEL (model), a, 1, &namea,2, &mimea,-1);
+	gtk_tree_model_get(GTK_TREE_MODEL (model), b, 1, &nameb,2, &mimeb,-1);
         isdira = (mimea && MIME_ISDIR(mimea));
 	isdirb = (mimeb && MIME_ISDIR(mimeb));
         #ifdef DEBUGFOLDERBROWSER
-        g_print("DEBUG::UPDATING FOLDERBROWSER\n");
+        g_print("DEBUG::SORTING FOLDERBROWSER\n");
         g_print("isdira=%d, mimea=%s, isdirb=%d, mimeb=%s\n",isdira,mimea,isdirb,mimeb);
         #endif
 	if (isdira == isdirb) {		/* both files, or both directories */
@@ -297,16 +297,14 @@ gint filebrowser_sort_func(GtkTreeModel * model, GtkTreeIter * a, GtkTreeIter * 
  *   for the current gtk default icon theme
  */
 
-static gchar *icon_name_from_icon(GIcon *icon) {
+static gchar *icon_name_from_icon(GIcon *icon, GtkIconTheme *icon_theme) {
 	gchar *icon_name=NULL;
 	if (icon && G_IS_THEMED_ICON(icon)) {
 		GStrv names;
 
 		g_object_get(icon, "names", &names, NULL);
 		if (names && names[0]) {
-			GtkIconTheme *icon_theme;
 			int i;
-			icon_theme = gtk_icon_theme_get_default();
 			for (i = 0; i < g_strv_length (names); i++) {
 				if (gtk_icon_theme_has_icon(icon_theme, names[i])) {
 					icon_name = g_strdup(names[i]);
@@ -776,7 +774,6 @@ void init_folderbrowser(GtkTreeStore *pTree, gchar *filename, GtkTreeIter *iter,
     #ifdef DEBUGFOLDERBROWSER
     g_print("DEBUG:: clear tree and cache data\n");
     #endif
-//    gtk_button_set_label(GTK_BUTTON(main_window.button_dialog), filename);
     create_tree_async(file);
     g_object_unref(file);
 }
@@ -948,6 +945,8 @@ GSList *l;
 GtkTreeIter iter2;
 GtkTreeIter* iter=NULL;
 gtk_tree_store_clear(main_window.pTree);
+/* get default icon theme */
+GtkIconTheme *theme= gtk_icon_theme_get_default();
 	for (l = filesinfolder; l != NULL; l = g_slist_next (l)) {
 	FOLDERFILE *current=(FOLDERFILE *) l->data;
         #ifdef DEBUGFOLDERBROWSER
@@ -955,8 +954,8 @@ gtk_tree_store_clear(main_window.pTree);
         #endif
             GdkPixbuf *p_file_image = NULL;
 	    /* get icon of size menu */
-	    gchar *icon_name=icon_name_from_icon(current->icon);
-            p_file_image =gtk_icon_theme_load_icon (gtk_icon_theme_get_default (), icon_name, GTK_ICON_SIZE_MENU, 0, NULL);
+	    gchar *icon_name=icon_name_from_icon(current->icon,theme);
+            p_file_image = gtk_icon_theme_load_icon (theme, icon_name, GTK_ICON_SIZE_MENU, 0, NULL);
 	    g_free(icon_name);
             gtk_tree_store_insert_with_values(GTK_TREE_STORE(main_window.pTree), &iter2, iter, 0, 0, p_file_image, 1, current->display_name,2,current->mime,-1);
 	    g_object_unref(p_file_image);
@@ -964,20 +963,20 @@ gtk_tree_store_clear(main_window.pTree);
                 gtk_main_iteration ();
         }
         GError *error=NULL;
-	gchar *filepath =convert_to_full(path);
-        GFile *file=g_file_new_for_uri(filepath);
-	g_free(filepath);
+//	gchar *filepath =convert_to_full(path);
+//        GFile *file=g_file_new_for_uri(filepath);
+//	g_free(filepath);
         //Start file monitor for folderbrowser autorefresh
-        monitor= g_file_monitor_directory (file,G_FILE_MONITOR_NONE,NULL,&error);
-	if (!monitor){
-	g_print(_("Error initing folderbrowser autorefresh. GIO Error:%s\n"),error->message);
-	g_error_free (error);
-	}else{
-            #ifdef DEBUGFOLDERBROWSER
-            g_print("DEBUG:: initing folderbrowser update for:%s\n",path);
-            #endif
+//        monitor= g_file_monitor_directory (file,G_FILE_MONITOR_NONE,NULL,&error);
+//	if (!monitor){
+//	g_print(_("Error initing folderbrowser autorefresh. GIO Error:%s\n"),error->message);
+//	g_error_free (error);
+//	}else{
+//            #ifdef DEBUGFOLDERBROWSER
+//            g_print("DEBUG:: initing folderbrowser update for:%s\n",path);
+//            #endif
 //	g_signal_connect(monitor, "changed", (GCallback) update_folderbrowser_signal, NULL);
-	}
+//	}
 	if (!IS_DEFAULT_DIR(path)){
 	cache_model=gtk_tree_view_get_model (GTK_TREE_VIEW(main_window.pListView));
         gtk_widget_set_sensitive (main_window.searchentry, TRUE);
@@ -1021,7 +1020,7 @@ static gchar *get_path_from_tree(GtkTreeView *tree_view, gchar *root_path){
      g_free(parentiter);
      gchar* file_name = g_build_path (G_DIR_SEPARATOR_S, root_path, nfile, NULL);
      g_free(nfile);
-     return file_name;//g_strdup(file_name);
+     return file_name;
     }
     return NULL;
 }
