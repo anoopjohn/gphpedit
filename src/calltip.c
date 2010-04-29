@@ -27,7 +27,7 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-
+//#define DEBUGCALLTIP
 GSList *api_list;
 GString *calltip=NULL;
 #define MAX_API_LINE_LENGTH 16384
@@ -68,16 +68,19 @@ void function_list_prepare(void)
 	FILE *apifile;
 	char buffer[MAX_API_LINE_LENGTH];
         gchar *api_dir = NULL;
-	//use autoconf macro to build api file path
+	/* use autoconf macro to build api file path */
 	api_dir = g_build_path (G_DIR_SEPARATOR_S, API_DIR, "php-gphpedit.api", NULL);
-//	g_print("API:'%s'\n",api_dir);
-
+	#ifdef DEBUGCALLTIP
+	g_print("DEBUG::API PATH:'%s'\n",api_dir);
+	#endif
 	apifile = fopen(api_dir, "r");
 	if( apifile != NULL ) {
 		while( fgets( buffer, MAX_API_LINE_LENGTH, apifile ) != NULL ) {
-			GString *line = g_string_new_len(buffer, strlen(buffer)-1);
-			api_list = g_slist_append(api_list, line);
+			gchar *line=g_strdup(buffer);
+			/* From glib docs. Prepend and reverse list it's more eficient */
+			api_list = g_slist_prepend(api_list, line);
 		}
+		api_list= g_slist_reverse (api_list);
 		fclose( apifile );
 	}
 	else {
@@ -89,7 +92,7 @@ void function_list_prepare(void)
 GString *get_api_line(GtkWidget *scintilla, gint wordStart, gint wordEnd)
 {
 	GSList *walk;
-	GString *line;
+	gchar *line;
 	gchar *buffer = NULL;
 	gchar *function_name;
 	gchar *return_value;
@@ -102,16 +105,16 @@ GString *get_api_line(GtkWidget *scintilla, gint wordStart, gint wordEnd)
 
 	for (walk = api_list; walk != NULL; walk = g_slist_next (walk)) {
 		line = walk->data;
-		token_line = g_malloc(line->len+1);
+		token_line = g_malloc(strlen(line)+1);
 		copy_line = token_line;
-		strcpy(token_line, line->str); // Line has trailing \n
+		strcpy(token_line, line); // Line has trailing \n
 		function_name = strtok(token_line, "|");
 		return_value = strtok(NULL, "|");
 		params = strtok(NULL, "|");
 		description = strtok(NULL, "|");
-		//A full comparison of the function name is required for the tool tip
-		//a partial match will result in an incorrect tooltip. So we 
-		//have to use strcmp and not strncasecmp
+		/* A full comparison of the function name is required for the tool tip
+		a partial match will result in an incorrect tooltip. So we 
+		have to use strcmp and not strncasecmp */
 		if (strcmp(function_name, buffer)==0) {
 			calltip = g_string_new(NULL);
 			g_string_printf(calltip, "%s %s %s\n%s", return_value, function_name, params, description);
@@ -129,7 +132,7 @@ GString *get_api_line(GtkWidget *scintilla, gint wordStart, gint wordEnd)
 GString *complete_function_list(gchar *original_list)
 {
 	GSList *walk;
-	GString *line;
+	gchar *line;
 	GString *result;
 	gchar *buffer = NULL;
 	gchar *function_name;
@@ -139,9 +142,9 @@ GString *complete_function_list(gchar *original_list)
 
 	for (walk = api_list; walk != NULL; walk = g_slist_next (walk)) {
 		line = walk->data;
-		token_line = g_malloc(line->len+1);
+		token_line = g_malloc(strlen(line)+1);
 		copy_line = token_line;
-		strcpy(token_line, line->str); // Line has trailing \n
+		strcpy(token_line, line); // Line has trailing \n
 		function_name = strtok(token_line, "|");
 		if (result == NULL) {
 			if (original_list==NULL) {
@@ -168,7 +171,7 @@ GString *get_completion_list(GtkWidget *scintilla, gint wordStart, gint wordEnd)
 {
 	GString *completion_list;
 	GSList *walk;
-	GString *line;
+	gchar *line;
 	gchar *buffer = NULL;
 	gchar *function_name;
 	gint length;
@@ -181,11 +184,11 @@ GString *get_completion_list(GtkWidget *scintilla, gint wordStart, gint wordEnd)
 	num_in_list = 0;
 	for (walk = api_list; (walk != NULL && num_in_list < 50); walk = g_slist_next (walk)) {
 		line = walk->data;
-		token_line = g_malloc(line->len+1);
+		token_line = g_malloc(strlen(line)+1);
 		copy_line = token_line;
-		strcpy(token_line, line->str); // Line has trailing \n
+		strcpy(token_line, line); // Line has trailing \n
 		function_name = strtok(token_line, "|");
-		if ((strncasecmp(function_name, buffer, strlen(buffer))==0) || (wordStart==wordEnd)) {
+		if ((g_str_has_prefix(function_name, buffer)) || (wordStart==wordEnd)) {
 			num_in_list++;
 			if (completion_list == NULL) {
 				completion_list = g_string_new(function_name);
@@ -230,7 +233,7 @@ GString *get_css_completion_list(GtkWidget *scintilla, gint wordStart, gint word
 	completion_list=NULL;
 
 	for (n = 0; css_keywords[n]!=NULL; n++) {
-		if (strncasecmp(css_keywords[n], buffer, strlen(buffer))==0) {
+		if (g_str_has_prefix(css_keywords[n], buffer)) {
 			if (completion_list == NULL) {
 				completion_list = g_string_new(css_keywords[n]);
 			}
@@ -261,7 +264,7 @@ GString *get_sql_completion_list(GtkWidget *scintilla, gint wordStart, gint word
 	completion_list=NULL;
 
 	for (n = 0; sql_keywords[n]!=NULL; n++) {
-		if (strncasecmp(sql_keywords[n], buffer, strlen(buffer))==0) {
+		if (g_str_has_prefix(sql_keywords[n], buffer)) {
 			if (completion_list == NULL) {
 				completion_list = g_string_new(sql_keywords[n]);
 			}
@@ -318,7 +321,7 @@ void show_call_tip(GtkWidget *scintilla, gint pos)
 	wordStart = gtk_scintilla_word_start_position(GTK_SCINTILLA(scintilla), pos-1, TRUE);
 	wordEnd = gtk_scintilla_word_end_position(GTK_SCINTILLA(scintilla), pos-1, TRUE);
 
-  //function returns the global variable calltip. So does not have to free
+        //function returns the global variable calltip. So does not have to free
 	api_line = get_api_line(scintilla, wordStart, wordEnd);
 
 	if (api_line != NULL) {
@@ -328,7 +331,7 @@ void show_call_tip(GtkWidget *scintilla, gint pos)
 	}
 }
 void clean_list_item (gpointer data, gpointer user_data){
-g_string_free ((GString *) data,TRUE);
+     g_free (data);
 }
 
 void cleanup_calltip(void){
