@@ -102,7 +102,7 @@ static FOLDERFILE *new_folderfile(void)
 }
 
 static void create_tree_async(GFile *file){
-    g_file_enumerate_children_async  (file,FOLDER_INFOFLAGS,G_FILE_QUERY_INFO_NOFOLLOW_SYMLINKS,G_PRIORITY_DEFAULT,NULL, enumerate_files_async,(gpointer)CURRENTFOLDER);
+    g_file_enumerate_children_async  (file,FOLDER_INFOFLAGS,G_FILE_QUERY_INFO_NOFOLLOW_SYMLINKS,G_PRIORITY_DEFAULT,NULL, enumerate_files_async,(gpointer)CURRENTFOLDER); 
 }
 
 void enumerate_files_async (GObject *source_object, GAsyncResult *res, gpointer user_data){
@@ -126,9 +126,15 @@ void finish_enumerate (GObject *source_object, GAsyncResult *res, gpointer user_
 GError *error=NULL;
 GList *filesinfo=NULL;
 filesinfo= g_file_enumerator_next_files_finish ((GFileEnumerator *)source_object, res,&error);
-if (error) g_error_free (error);
+if (error){
+ g_print("error:::%s",error->message);
+ g_error_free (error);
+}
 //two options: finish or error?
+
 if (!filesinfo){
+g_file_enumerator_close((GFileEnumerator *)source_object,NULL,NULL);
+g_object_unref((GFileEnumerator *)source_object);
 //if list isn't empty print files
 print_files(user_data);
 return;
@@ -941,6 +947,9 @@ void copy_files_async(GFile *destdir, gchar *sources) {
   }
 
 static void print_files(gchar *path){
+#ifdef DEBUGFOLDERBROWSER
+g_print("DEBUG::printing files\n");
+#endif
 GSList *l;
 GtkTreeIter iter2;
 GtkTreeIter* iter=NULL;
@@ -977,7 +986,7 @@ GtkIconTheme *theme= gtk_icon_theme_get_default();
 //            #endif
 //	g_signal_connect(monitor, "changed", (GCallback) update_folderbrowser_signal, NULL);
 //	}
-	if (!IS_DEFAULT_DIR(path)){
+	if (path && !IS_DEFAULT_DIR(path)){
 	cache_model=gtk_tree_view_get_model (GTK_TREE_VIEW(main_window.pListView));
         gtk_widget_set_sensitive (main_window.searchentry, TRUE);
 	} else {
