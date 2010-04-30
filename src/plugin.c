@@ -176,14 +176,13 @@ if (pluname){
     #endif
     plugin->type = plugin_discover_type(plugin->filename);
     plugin->description = plugin_discover_desc(plugin->filename);
-    Plugins = g_list_append(Plugins, plugin);
+    Plugins = g_list_prepend(Plugins, plugin);
 }
 }
 void plugin_discover_available(void)
 {
 	GDir *dir;
 	const gchar *plugin_name;
-	//Plugin *plugin;
 	GString *user_plugin_dir;
 	GString *filename;
 	
@@ -267,13 +266,12 @@ void plugin_setup_menu(void)
 {
     
 	plugin_discover_available();
-	if (g_list_length(Plugins)>0) {
+	if (Plugins) {
 		plugin_create_menu_items();
 	}
 	else {
               gtk_widget_hide(main_window.menu->plugin);
        }
-    
 }
 void plugin_exec(gint plugin_num)
 {
