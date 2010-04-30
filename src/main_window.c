@@ -39,7 +39,7 @@ gboolean DEBUG_MODE = FALSE;
 
 void create_untitled_if_empty(void)
 {
-	if (g_slist_length(editors) == 0) {
+	if (!editors) {
 		tab_create_new(TAB_FILE, NULL);
 	}
 }
