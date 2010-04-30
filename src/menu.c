@@ -148,7 +148,7 @@ gboolean delete_hint(GtkWidget *widget, GdkEventCrossing *event, gpointer user_d
  * install_menu_hint
  * connect menu hint signals
 */
-void install_menu_hint(GtkWidget *widget, gchar *message){
+void inline install_menu_hint(GtkWidget *widget, gchar *message){
   g_signal_connect(G_OBJECT(widget), "enter-notify-event", G_CALLBACK(show_hint), message);
   g_signal_connect(G_OBJECT(widget), "leave-notify-event", G_CALLBACK(delete_hint), NULL);
 }
@@ -178,7 +178,7 @@ static void translate(void){
  * create_stock_menu_item
  * creates a new stock menu item, append it to menu, add menu hint, optionally add accelerator and return the new menuitem
 */
-static void create_stock_menu_item(GtkWidget **menuitem,GtkWidget *menu,const gchar *stock_id, gchar *menu_hint, guint accel_key, GdkModifierType accel_mods){
+static inline void create_stock_menu_item(GtkWidget **menuitem,GtkWidget *menu,const gchar *stock_id, gchar *menu_hint, guint accel_key, GdkModifierType accel_mods){
   *menuitem = gtk_image_menu_item_new_from_stock(stock_id, NULL);
   gtk_menu_shell_append(GTK_MENU_SHELL(menu), *menuitem);
   install_menu_hint(*menuitem,menu_hint);
@@ -190,7 +190,7 @@ static void create_stock_menu_item(GtkWidget **menuitem,GtkWidget *menu,const gc
  * create_mnemonic_menu_item
  * creates a new mnemonic menu item, append it to menu, add menu hint, optionally add accelerator and return the new menuitem
 */
-static void create_mnemonic_menu_item(GtkWidget **menuitem,GtkWidget *menu,gchar *mnemonic, gchar *menu_hint, guint accel_key, GdkModifierType accel_mods){
+static inline void create_mnemonic_menu_item(GtkWidget **menuitem,GtkWidget *menu,gchar *mnemonic, gchar *menu_hint, guint accel_key, GdkModifierType accel_mods){
 *menuitem = gtk_menu_item_new_with_mnemonic(mnemonic);
 install_menu_hint(*menuitem,menu_hint);
 if (!(accel_key==0 && accel_mods==0))
@@ -201,7 +201,7 @@ gtk_menu_shell_append(GTK_MENU_SHELL(menu), *menuitem);
  * create_mnemonic_menu_item
  * creates a check menu item, append it to menu, add menu hint, optionally add accelerator, set default state and return the new menuitem
 */
-static void create_check_menu_item(GtkWidget **menuitem,GtkWidget *menu,gchar *mnemonic, gchar *menu_hint, guint accel_key, GdkModifierType accel_mods,gboolean active){
+static inline void create_check_menu_item(GtkWidget **menuitem,GtkWidget *menu,gchar *mnemonic, gchar *menu_hint, guint accel_key, GdkModifierType accel_mods,gboolean active){
   *menuitem = gtk_check_menu_item_new_with_label(mnemonic);
   gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(*menuitem), active);
   install_menu_hint(*menuitem, menu_hint);
@@ -213,7 +213,7 @@ static void create_check_menu_item(GtkWidget **menuitem,GtkWidget *menu,gchar *m
 * create_separator_item
 * creates a new separator item, add it to menu and return the separator item
 */
-static void create_separator_item(GtkWidget **separator,GtkWidget *menu){
+static inline void create_separator_item(GtkWidget **separator,GtkWidget *menu){
 *separator = gtk_separator_menu_item_new();
 gtk_menu_shell_append(GTK_MENU_SHELL(menu), *separator);
 }
@@ -221,7 +221,7 @@ gtk_menu_shell_append(GTK_MENU_SHELL(menu), *separator);
 * create_menu
 * create a new menu and insert it in menubar
 */
-static void create_menu(GtkWidget **menu, GtkWidget **menuitem, const gchar *caption, GtkWidget *menubar){
+static inline void create_menu(GtkWidget **menu, GtkWidget **menuitem, const gchar *caption, GtkWidget *menubar){
   *menu = gtk_menu_new();
   *menuitem = gtk_menu_item_new_with_mnemonic(caption);
   gtk_menu_item_set_submenu(GTK_MENU_ITEM(*menuitem),   *menu);
@@ -473,7 +473,7 @@ void main_window_create_menu(void){
   g_signal_connect(G_OBJECT(main_window.menu->plugins[i]), "activate", G_CALLBACK(run_plugin), (gpointer)i);
   gtk_menu_shell_append(GTK_MENU_SHELL(main_window.menu->menuplugin), main_window.menu->plugins[i]);
   if (i<10)
- gtk_widget_add_accelerator(main_window.menu->plugins[i], "activate", main_window.menu->accel_group, parse_shortcut(i), GDK_CONTROL_MASK, GTK_ACCEL_VISIBLE);
+  gtk_widget_add_accelerator(main_window.menu->plugins[i], "activate", main_window.menu->accel_group, parse_shortcut(i), GDK_CONTROL_MASK, GTK_ACCEL_VISIBLE);
   }
   /* help menu */
   create_menu(&main_window.menu->menuhelp, &main_window.menu->help, _("_Help"),main_window.menu->menubar);

@@ -58,7 +58,7 @@ void on_cleanicon_press (GtkEntry *entry, GtkEntryIconPosition icon_pos, GdkEven
 * creates a new toolbar stock item
 */
 
-static void create_toolbar_stock_item(GtkWidget **toolitem,GtkWidget *toolbar,const gchar *stock_id, gchar *tooltip_text){
+static inline void create_toolbar_stock_item(GtkWidget **toolitem,GtkWidget *toolbar,const gchar *stock_id, gchar *tooltip_text){
 	*toolitem = GTK_WIDGET(gtk_tool_button_new_from_stock(stock_id));
 	gtk_tool_item_set_tooltip_text(GTK_TOOL_ITEM (*toolitem), tooltip_text);
   	gtk_toolbar_insert(GTK_TOOLBAR(toolbar), GTK_TOOL_ITEM (*toolitem), -1);
@@ -67,7 +67,7 @@ static void create_toolbar_stock_item(GtkWidget **toolitem,GtkWidget *toolbar,co
 /**
 * create and insert a new toolbar item with a custom widget in it
 */
-static void create_custom_toolbar_item (GtkToolbar *toolbar, GtkWidget *control){
+static inline void create_custom_toolbar_item (GtkToolbar *toolbar, GtkWidget *control){
 	GtkToolItem *item;
 	item=gtk_tool_item_new();
 	gtk_tool_item_set_expand (item, FALSE);
@@ -88,7 +88,7 @@ static void sincronice_menu_items_size (GtkToolbar *toolbar){
        }
 }
 /* set custom toolbar style */        
-static void set_toolbar_style(GtkToolbar *toolbar){
+static inline void set_toolbar_style(GtkToolbar *toolbar){
 	gtk_container_set_border_width (GTK_CONTAINER (toolbar), 0);
 	gtk_toolbar_set_style (toolbar, GTK_TOOLBAR_ICONS);
 	gtk_toolbar_set_show_arrow (toolbar, TRUE);
@@ -187,7 +187,7 @@ void main_window_create_maintoolbar(void)
 	gtk_widget_show (main_window.toolbar_main->toolbar);
 }
 
-static void create_entry(GtkWidget **entry, const gchar *tooltip_text,gint max_lenght){
+static inline void create_entry(GtkWidget **entry, const gchar *tooltip_text,gint max_lenght){
 	*entry = gtk_entry_new();
         gtk_entry_set_max_length (GTK_ENTRY(*entry),max_lenght);
 	gtk_entry_set_width_chars(GTK_ENTRY(*entry),max_lenght + 1);
@@ -209,11 +209,11 @@ void main_window_create_findtoolbar(void){
 	gtk_widget_show(main_window.toolbar_find->search_label);
 	create_custom_toolbar_item (GTK_TOOLBAR(main_window.toolbar_find->toolbar), main_window.toolbar_find->search_label);
 
-	create_entry(&main_window.toolbar_find->search_entry, _("Incremental search"),20);//gtk_entry_new();
+	create_entry(&main_window.toolbar_find->search_entry, _("Incremental search"),20);
         g_signal_connect (G_OBJECT (main_window.toolbar_find->search_entry), "icon-press", G_CALLBACK (on_cleanicon_press), NULL);
 
 	/* search completion code */
-	main_window.toolbar_find->completion= gtk_entry_completion_new ();
+	main_window.toolbar_find->completion= gtk_entry_completion_new();
 
 	/* Create a tree model and use it as the completion model */
 	main_window.toolbar_find->completion_model = create_completion_model ();
