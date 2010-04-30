@@ -36,8 +36,7 @@
 typedef struct
 {
 	guint type;
-	GtkWidget *menu_item;
-	GString *filename;
+	gchar *filename;
 	gchar *name;
 	gchar *description;
 } Plugin;
@@ -45,4 +44,5 @@ typedef struct
 gint parse_shortcut(gint accel_number);
 void plugin_setup_menu(void);
 void plugin_exec(gint plugin_num);
+void cleanup_plugins(void);
 #endif

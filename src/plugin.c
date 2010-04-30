@@ -56,7 +56,7 @@ gint parse_shortcut(gint accel_number){
 }
 GList *Plugins = NULL;
 
-static gchar *plugin_spawn(const gchar* command_line)
+static inline gchar *plugin_spawn(const gchar* command_line)
 {
 	gchar *stdout = NULL;
 	GError *error = NULL;
@@ -83,12 +83,12 @@ static gchar *plugin_spawn(const gchar* command_line)
 
 /****/
 
-int plugin_discover_type(GString *filename)
+int plugin_discover_type(gchar *filename)
 {
 	GString *command_line;
 	gint type = GPHPEDIT_PLUGIN_TYPE_UNKNOWN;
 	gchar *result;	
-	command_line = g_string_new(filename->str);
+	command_line = g_string_new(filename);
 	command_line = g_string_prepend(command_line, "'");
 	command_line = g_string_append(command_line, "' -type");
 	result= plugin_spawn(command_line->str);
@@ -118,12 +118,12 @@ int plugin_discover_type(GString *filename)
 
 /****/
 
-gchar *plugin_discover_name(GString *filename,const gchar *file_name)
+gchar *plugin_discover_name(gchar *filename,const gchar *file_name)
 {
 	GString *command_line;
 	gchar *name=NULL;
 	
-	command_line = g_string_new(filename->str);
+	command_line = g_string_new(filename);
 	command_line = g_string_prepend(command_line, "'");
 	command_line = g_string_append(command_line, "' -name");
         name = plugin_spawn(command_line->str);
@@ -136,17 +136,17 @@ gchar *plugin_discover_name(GString *filename,const gchar *file_name)
 	return name;
 }
 
-gchar *plugin_discover_desc(GString *filename)
+gchar *plugin_discover_desc(gchar *filename)
 {
 	GString *command_line;
 	gchar *desc=NULL;
 	
-	command_line = g_string_new(filename->str);
+	command_line = g_string_new(filename);
 	command_line = g_string_prepend(command_line, "'");
 	command_line = g_string_append(command_line, "' -desc");
 	desc = plugin_spawn(command_line->str);
         #ifdef DEBUG
-	g_print("plugin description:%s\n",desc);
+	g_print("Plugin description:%s\n",desc);
 	#endif
 	g_string_free(command_line, TRUE);
 	
@@ -163,16 +163,16 @@ gint sort_plugin_func(gconstpointer a, gconstpointer b)
 	}
 	return 1;
 }
-static void new_plugin(GString *filename,const gchar *plugin_name){
+static void new_plugin(gchar *filename,const gchar *plugin_name){
 gchar *pluname= plugin_discover_name(filename,plugin_name);
 if (pluname){
     Plugin *plugin;
     plugin = g_slice_new(Plugin);
     // TODO: Could do with replacing ' in name with \' for spawn
-    plugin->filename = filename;
+    plugin->filename = g_strdup(filename);
     plugin->name = pluname;
     #ifdef DEBUG
-    g_print ("PLUGIN FILENAME: %s\n", plugin->filename->str);
+    g_print ("PLUGIN FILENAME: %s\n", plugin->filename);
     #endif
     plugin->type = plugin_discover_type(plugin->filename);
     plugin->description = plugin_discover_desc(plugin->filename);
@@ -197,7 +197,8 @@ void plugin_discover_available(void)
 			for (plugin_name = g_dir_read_name(dir); plugin_name != NULL; plugin_name = g_dir_read_name(dir)) {
 				filename = g_string_new(plugin_name);
 				filename = g_string_prepend(filename, user_plugin_dir->str);
-                                new_plugin(filename,plugin_name);
+                                new_plugin(filename->str,plugin_name);
+				g_string_free (filename,TRUE);
 			}
 			g_dir_close(dir);			
 		}
@@ -210,7 +211,8 @@ void plugin_discover_available(void)
 			for (plugin_name = g_dir_read_name(dir); plugin_name != NULL; plugin_name = g_dir_read_name(dir)) {
 				filename = g_string_new(plugin_name);
 				filename = g_string_prepend(filename, "/usr/share/gphpedit/plugins/");
-                                new_plugin(filename,plugin_name);
+                                new_plugin(filename->str,plugin_name);
+				g_string_free (filename,TRUE);
 			}
 			g_dir_close(dir);			
 		}
@@ -299,9 +301,9 @@ void plugin_exec(gint plugin_num)
 		return;
 	}
         #ifdef DEBUG
-	g_print("Plugin No: %d:%d (%s):%s\n", plugin_num, plugin->type, plugin->name, plugin->filename->str);
+	g_print("Plugin No: %d:%d (%s):%s\n", plugin_num, plugin->type, plugin->name, plugin->filename);
         #endif
-	command_line = g_string_new(plugin->filename->str);
+	command_line = g_string_new(plugin->filename);
 	command_line = g_string_prepend(command_line, "'");
 	command_line = g_string_append(command_line, "' \"");
 	if (plugin->type == GPHPEDIT_PLUGIN_TYPE_SELECTION) {
@@ -353,9 +355,23 @@ void plugin_exec(gint plugin_num)
 
 	}
 	else {
-		g_print(_("Spawning %s gave error %s\n"), plugin->filename->str, error->message);
+		g_print(_("Spawning %s gave error %s\n"), plugin->filename, error->message);
 		g_error_free (error);
 	}
 	g_string_free ((GString *) command_line,TRUE);
 }
 
+static void clean_list_item (gpointer data, gpointer user_data){
+     Plugin *plugin=(Plugin *)data;
+     g_free(plugin->filename);
+     g_free(plugin->name);
+     g_free(plugin->description);
+     g_slice_free(Plugin, plugin);
+}
+
+void cleanup_plugins(void){
+	if (Plugins) {
+	g_list_foreach(Plugins, (GFunc)clean_list_item, NULL);
+	g_list_free(Plugins);
+	}
+}
