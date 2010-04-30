@@ -105,6 +105,14 @@ static void create_tree_async(GFile *file){
     g_file_enumerate_children_async  (file,FOLDER_INFOFLAGS,G_FILE_QUERY_INFO_NOFOLLOW_SYMLINKS,G_PRIORITY_DEFAULT,NULL, enumerate_files_async,(gpointer)CURRENTFOLDER); 
 }
 
+static inline void store_last_folder(gchar *newpath){
+       /*store folder in config*/
+        GConfClient *config;
+        config=gconf_client_get_default ();
+        gconf_client_set_string (config,"/gPHPEdit/main_window/folderbrowser/folder", newpath,NULL);
+	g_object_unref(config);
+}
+
 void enumerate_files_async (GObject *source_object, GAsyncResult *res, gpointer user_data){
 GError *error=NULL;
 GFileEnumerator *enumerator= g_file_enumerate_children_finish    ( (GFile *)source_object,res,&error);
@@ -751,6 +759,7 @@ void init_folderbrowser(GtkTreeStore *pTree, gchar *filename, GtkTreeIter *iter,
         gtk_button_set_label(GTK_BUTTON(main_window.button_dialog), DEFAULT_DIR);
         clear_folderbrowser();
 	gtk_widget_set_sensitive (main_window.searchentry, FALSE);
+	store_last_folder(DEFAULT_DIR);
 	return;
     }
     GFileInfo *info =g_file_query_info (file,G_FILE_ATTRIBUTE_ACCESS_CAN_READ, G_FILE_QUERY_INFO_NOFOLLOW_SYMLINKS,NULL,&error);
@@ -762,6 +771,7 @@ void init_folderbrowser(GtkTreeStore *pTree, gchar *filename, GtkTreeIter *iter,
     gtk_button_set_label(GTK_BUTTON(main_window.button_dialog), DEFAULT_DIR);
     clear_folderbrowser();
     gtk_widget_set_sensitive (main_window.searchentry, FALSE);
+    store_last_folder(DEFAULT_DIR);
     return;
     }
     if (!g_file_info_get_attribute_boolean (info, G_FILE_ATTRIBUTE_ACCESS_CAN_READ)){
@@ -772,6 +782,7 @@ void init_folderbrowser(GtkTreeStore *pTree, gchar *filename, GtkTreeIter *iter,
     gtk_button_set_label(GTK_BUTTON(main_window.button_dialog), DEFAULT_DIR);
     clear_folderbrowser();
     gtk_widget_set_sensitive (main_window.searchentry, FALSE);
+    store_last_folder(DEFAULT_DIR);
     return;
     }
     g_object_unref(info);
@@ -780,6 +791,7 @@ void init_folderbrowser(GtkTreeStore *pTree, gchar *filename, GtkTreeIter *iter,
     #ifdef DEBUGFOLDERBROWSER
     g_print("DEBUG:: clear tree and cache data\n");
     #endif
+    store_last_folder(filename);
     create_tree_async(file);
     g_object_unref(file);
 }
@@ -971,7 +983,7 @@ GtkIconTheme *theme= gtk_icon_theme_get_default();
             while (gtk_events_pending ())
                 gtk_main_iteration ();
         }
-        GError *error=NULL;
+//        GError *error=NULL;
 //	gchar *filepath =convert_to_full(path);
 //        GFile *file=g_file_new_for_uri(filepath);
 //	g_free(filepath);
@@ -992,6 +1004,7 @@ GtkIconTheme *theme= gtk_icon_theme_get_default();
 	} else {
         gtk_widget_set_sensitive (main_window.searchentry, FALSE);
 	}
+	store_last_folder(path);
 }
 
 static gchar *get_mime_from_tree(GtkTreeView *tree_view){
@@ -1086,7 +1099,7 @@ static gboolean visible_func (GtkTreeModel *model,
   gboolean visible = FALSE;
   const char *filename= (const char *) data;
   gtk_tree_model_get (model, iter, 1, &str, -1);
-  if (str && strncasecmp(str,filename,MIN(strlen(str),strlen(filename)))==0)
+  if (str && g_str_has_prefix(str,filename))
     visible = TRUE;
   g_free (str);
 
