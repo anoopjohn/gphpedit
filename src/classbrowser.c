@@ -631,7 +631,7 @@ void classbrowser_update(void)
 		if (main_window.current_editor)
 		{
 			classbrowser_filelist_add(main_window.current_editor->filename->str);
-			g_slist_append(dirlist, g_path_get_dirname(main_window.current_editor->filename->str));
+			dirlist = g_slist_append(dirlist, g_path_get_dirname(main_window.current_editor->filename->str));
 		}
 	}
 	else

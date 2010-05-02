@@ -1075,7 +1075,13 @@ if(main_window.current_editor){
 static void go_up_cb(void){
 gchar *folderpath= (gchar*)CURRENTFOLDER;
 	if (folderpath && !IS_DEFAULT_DIR(folderpath)){
-		gchar *fullfolderpath= g_path_get_dirname (folderpath);
+		gchar *fullpath=convert_to_full(folderpath);
+		GFile *file= g_file_new_for_uri(fullpath);
+		g_free(fullpath);
+		GFile *parent= g_file_get_parent (file);
+		gchar *fullfolderpath= g_file_get_uri (parent);
+		g_object_unref(file);
+		g_object_unref(parent);
 		#ifdef DEBUGFOLDERBROWSER
 		g_print("DEBUG:::Up dir:%s\n",fullfolderpath);
 		#endif
@@ -1083,7 +1089,7 @@ gchar *folderpath= (gchar*)CURRENTFOLDER;
 			update_folderbrowser (fullfolderpath);
 			g_free(fullfolderpath);
 			} else {
-					update_folderbrowser (DEFAULT_DIR);
+			update_folderbrowser (DEFAULT_DIR);
 		}
 	} else {
 		gtk_widget_set_sensitive (main_window.searchentry, FALSE);
