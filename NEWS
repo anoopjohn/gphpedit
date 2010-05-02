@@ -19,4 +19,4 @@ New Features and Fixes
 - Remember incremental search strings
 - Misc bugfixes and code cleanups
 - Lots of memory leaks fixed
-
+- Added Cobol support.
