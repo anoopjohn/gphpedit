@@ -25,6 +25,7 @@
 #include "plugin.h"
 #include "main_window.h"
 #include <gdk/gdkkeysyms.h>
+#include <stdlib.h>
 //#define DEBUG
 /*
 * transform a number into it's corresponding keysym
@@ -54,19 +55,65 @@ gint parse_shortcut(gint accel_number){
 }
  return GDK_0;
 }
-
+/* 
+* syntax_window:
+* this función accept debug info, show it in syntax pane and apply style to text.
+* lines has form line number space message dot like next example:
+* 59 invalid operator.\n
+* lines end with \n 
+* if data hasn't got that format it'll be shown be error will not be styled.
+*/
+/*
+* TODO: double click in tree row should goto the corresponding line.
+*/
 static void syntax_window(gchar *plugin_name,gchar *data){
+g_print("dTA:%s",data);
+gchar *copy;
+gchar *token;
+gchar *line_number;
+gchar *first_error = NULL;
+gint line_start;
+gint line_end;
+gint indent;
+
+/* clear document before start any styling action */
+gtk_scintilla_indicator_clear_range(GTK_SCINTILLA(main_window.current_editor->scintilla), 0, gtk_scintilla_get_text_length(GTK_SCINTILLA(main_window.current_editor->scintilla)));
+
 gtk_widget_show(main_window.scrolledwindow1);
 gtk_widget_show(main_window.lint_view);
 GtkTreeIter iter;
 main_window.lint_store = gtk_list_store_new (1, G_TYPE_STRING);
 /*clear tree */
 gtk_list_store_clear(main_window.lint_store);
+copy = data;
+gtk_scintilla_set_indicator_current(GTK_SCINTILLA(main_window.current_editor->scintilla), 20);
+gtk_scintilla_indic_set_style(GTK_SCINTILLA(main_window.current_editor->scintilla), 20, INDIC_SQUIGGLE);
+gtk_scintilla_indic_set_fore(GTK_SCINTILLA(main_window.current_editor->scintilla), 20, 0x0000ff);
+/* lines has form line number space message dot like 
+* 59 invalid operator.\n
+* lines end with \n
+*/
+while ((token = strtok(copy, "\n"))) {
 gtk_list_store_append (main_window.lint_store, &iter);
-gtk_list_store_set (main_window.lint_store, &iter, 0, data, -1);
+gtk_list_store_set (main_window.lint_store, &iter, 0, token, -1);	
+	line_number = strchr(token, ' ');
+	line_number=strncpy(line_number,token,(int)(line_number-token));
+	if (atoi(line_number)>0) {
+	if (!first_error) {
+		first_error = line_number;
+	}
+	indent = gtk_scintilla_get_line_indentation(GTK_SCINTILLA(main_window.current_editor->scintilla), atoi(line_number)-1);
+	
+	line_start = gtk_scintilla_position_from_line(GTK_SCINTILLA(main_window.current_editor->scintilla), atoi(line_number)-1);
+	line_start += (indent/preferences.indentation_size);
+	
+	line_end = gtk_scintilla_get_line_end_position(GTK_SCINTILLA(main_window.current_editor->scintilla), atoi(line_number)-1);
+	gtk_scintilla_indicator_fill_range(GTK_SCINTILLA(main_window.current_editor->scintilla), line_start, line_end-line_start);
+	}
+copy = NULL;
+}
 gtk_tree_view_set_model(GTK_TREE_VIEW(main_window.lint_view), GTK_TREE_MODEL(main_window.lint_store));
 }
-
 
 GList *Plugins = NULL;
 
@@ -246,7 +293,6 @@ void plugin_create_menu_items()
 	guint hide_plugin;
 
 	GtkBin *bin = NULL;
-	GtkLabel *label;
 	
 	num_plugin = 0;
 	for (iterator = Plugins; iterator != NULL && num_plugin<NUM_PLUGINS_MAX; iterator = g_list_next(iterator)) {
@@ -258,11 +304,11 @@ void plugin_create_menu_items()
                 bin = GTK_BIN(main_window.menu->plugins[num_plugin]);
 		//g_print("Bin is %p\n", bin);
 		if (bin) {
+			GtkLabel *label;
 			label = GTK_LABEL(gtk_bin_get_child(bin));
 		
 			gtk_label_set_text(label, plugin->name);
-
-                        gtk_widget_show(&main_window.menu->plugin[num_plugin]);
+                        gtk_widget_show(main_window.menu->plugins[num_plugin]);
 			install_menu_hint(GTK_WIDGET(bin), plugin->description);
 		}
 		
