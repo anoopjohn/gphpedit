@@ -639,6 +639,14 @@ void add_file_filters(GtkFileChooser *chooser){
 
 	gtk_file_chooser_add_filter (GTK_FILE_CHOOSER (chooser),
 				     filter);
+
+	filter = gtk_file_filter_new ();
+	gtk_file_filter_set_name (filter, _("Cobol Files (*.cbl)"));
+        gtk_file_filter_add_pattern(filter, "*.cbl");
+
+	gtk_file_chooser_add_filter (GTK_FILE_CHOOSER (chooser),
+				     filter);
+
 	filter = gtk_file_filter_new ();
 	gtk_file_filter_set_name (filter, _("Python Files (*.py *.pyd *.pyw)"));
         gtk_file_filter_add_pattern(filter, "*.py");
@@ -1794,7 +1802,6 @@ void syntax_check_clear(GtkWidget *widget)
 	gtk_widget_hide(main_window.scrolledwindow1);
 	gtk_widget_hide(main_window.lint_view);
 }
-
 void pressed_button_file_chooser(GtkButton *widget, gpointer data) {
 
   GtkWidget *pFileSelection;
@@ -1832,6 +1839,7 @@ void pressed_button_file_chooser(GtkButton *widget, gpointer data) {
 	g_free(sChemin);
     	}
    }
+
 void classbrowser_show(void)
 {
 	gtk_paned_set_position(GTK_PANED(main_window.main_horizontal_pane),classbrowser_hidden_position);
@@ -1976,6 +1984,12 @@ void force_perl(GtkWidget *widget)
 	}
 }
 
+void force_cobol(GtkWidget *widget)
+{
+	if (main_window.current_editor) {
+		set_editor_to_cobol(main_window.current_editor);
+	}
+}
 void force_python(GtkWidget *widget)
 {
 	if (main_window.current_editor) {

@@ -437,6 +437,8 @@ static void fill_menu_code (void){
   g_signal_connect(G_OBJECT(main_window.menu->forcesql), "activate", G_CALLBACK(force_sql), NULL);
   create_mnemonic_menu_item(&main_window.menu->forceperl,main_window.menu->menuforce,_("_Perl"), _("Force syntax highlighting to Perl mode"), 0, 0);
   g_signal_connect(G_OBJECT(main_window.menu->forceperl), "activate", G_CALLBACK(force_perl), NULL);
+  create_mnemonic_menu_item(&main_window.menu->forcecobol,main_window.menu->menuforce,_("_Cobol"), _("Force syntax highlighting to Cobol mode"), 0, 0);
+  g_signal_connect(G_OBJECT(main_window.menu->forcecobol), "activate", G_CALLBACK(force_cobol), NULL);
   create_mnemonic_menu_item(&main_window.menu->forcepython,main_window.menu->menuforce,_("P_ython"), _("Force syntax highlighting to Python mode"), 0, 0);
   g_signal_connect(G_OBJECT(main_window.menu->forcepython), "activate", G_CALLBACK(force_python), NULL);
 }

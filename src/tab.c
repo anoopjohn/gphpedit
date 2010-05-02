@@ -33,6 +33,7 @@
 #include "tab_sql.h"
 #include "tab_cxx.h"
 #include "tab_perl.h"
+#include "tab_cobol.h"
 #include "tab_python.h"
 #include "calltip.h"
 #include "main_window.h"
@@ -852,6 +853,20 @@ gboolean is_perl_file(gchar *filename)
 	return FALSE;
 }
 
+gboolean is_cobol_file(gchar *filename)
+{
+	gchar *file_extension;
+
+	file_extension = strrchr(filename, '.');
+	if (file_extension) {
+		file_extension++;
+		if (strcmp(file_extension, "cbl") == 0 || strcmp(file_extension, "CBL") == 0) {
+			return TRUE;
+		}
+	}
+	return FALSE;
+}
+
 gboolean is_python_file(gchar *filename)
 {
 	gchar *file_extension;
@@ -928,6 +943,12 @@ void set_editor_to_perl(Editor *editor)
 	editor->type = TAB_PERL;
 }
 
+void set_editor_to_cobol(Editor *editor)
+{
+	tab_cobol_set_lexer(editor);
+	editor->type = TAB_COBOL;
+}
+
 void set_editor_to_python(Editor *editor)
 {
 	tab_python_set_lexer(editor);
@@ -956,6 +977,12 @@ void tab_check_perl_file(Editor *editor)
 	}
 }
 
+void tab_check_cobol_file(Editor *editor)
+{
+	if (is_cobol_file(editor->filename->str)) {
+		set_editor_to_cobol(editor);
+	}
+}
 void tab_check_python_file(Editor *editor)
 {
 	if (is_python_file(editor->filename->str)) {
@@ -1127,6 +1154,7 @@ gboolean tab_create_new(gint type, GString *filename)
 			tab_check_css_file(editor);
 			tab_check_cxx_file(editor);
 			tab_check_perl_file(editor);
+			tab_check_cobol_file(editor);
 			tab_check_python_file(editor);
 			tab_check_sql_file(editor);
                         classbrowser_update();

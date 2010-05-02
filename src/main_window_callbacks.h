@@ -72,6 +72,7 @@ void force_css(GtkWidget *widget);
 void force_sql(GtkWidget *widget);
 void force_cxx(GtkWidget *widget);
 void force_perl(GtkWidget *widget);
+void force_cobol(GtkWidget *widget);
 void force_python(GtkWidget *widget);
 void zoom_in(GtkWidget *widget);
 void zoom_out(GtkWidget *widget);
@@ -80,6 +81,7 @@ void update_zoom_level(void);
 void can_undo(GtkWidget *widget);
 void on_notebook_switch_page (GtkNotebook *notebook, GtkNotebookPage *page,
                               gint page_num, gpointer user_data);
+void add_to_searh_history(const gchar *current_text);
 void inc_search_typed (GtkEntry *entry, const gchar *text, gint length,
                        gint *position, gpointer data);
 gboolean inc_search_key_release_event(GtkWidget *widget,GdkEventKey *event,gpointer user_data);

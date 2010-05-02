@@ -72,6 +72,8 @@ gphpedit_SOURCES = \
 	tab_cxx.c		\
 	tab_cxx.h		\
 	tab_css.c		\
+	tab_cobol.c		\
+	tab_cobol.h		\
 	tab_css.h		\
 	tab_perl.c		\
 	tab_perl.h		\

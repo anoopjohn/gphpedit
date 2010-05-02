@@ -105,6 +105,7 @@ typedef struct
   GtkWidget *forcecxx;
   GtkWidget *forcesql;
   GtkWidget *forceperl;
+  GtkWidget *forcecobol;
   GtkWidget *forcepython;
   GtkWidget *menuplugin;
   GtkWidget *plugin;

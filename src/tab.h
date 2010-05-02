@@ -40,7 +40,8 @@
 #define TAB_CXX 6
 #define TAB_PERL 7
 #define TAB_PYTHON 8
-#define TAB_PREVIEW 9
+#define TAB_COBOL 9
+#define TAB_PREVIEW 10
 
 typedef struct
 {
@@ -69,7 +70,7 @@ typedef struct
 	guint current_pos;
 	guint current_line;
 	guint file_size;
-        const char*contenttype;
+        const char *contenttype;
 } Editor;
 
 typedef struct
@@ -90,6 +91,7 @@ void tab_check_php_file(Editor *editor);
 void tab_check_css_file(Editor *editor);
 void tab_check_cxx_file(Editor *editor);
 void tab_check_perl_file(Editor *editor);
+void tab_check_cobol_file(Editor *editor);
 void tab_check_python_file(Editor *editor);
 void tab_check_sql_file(Editor *editor);
 void tab_load_file(Editor *editor);
@@ -125,6 +127,7 @@ void set_editor_to_css(Editor *editor);
 void set_editor_to_sql(Editor *editor);
 void set_editor_to_cxx(Editor *editor);
 void set_editor_to_perl(Editor *editor);
+void set_editor_to_cobol(Editor *editor);
 void set_editor_to_python(Editor *editor);
 
 #endif
