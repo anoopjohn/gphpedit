@@ -54,6 +54,20 @@ gint parse_shortcut(gint accel_number){
 }
  return GDK_0;
 }
+
+static void syntax_window(gchar *plugin_name,gchar *data){
+gtk_widget_show(main_window.scrolledwindow1);
+gtk_widget_show(main_window.lint_view);
+GtkTreeIter iter;
+main_window.lint_store = gtk_list_store_new (1, G_TYPE_STRING);
+/*clear tree */
+gtk_list_store_clear(main_window.lint_store);
+gtk_list_store_append (main_window.lint_store, &iter);
+gtk_list_store_set (main_window.lint_store, &iter, 0, data, -1);
+gtk_tree_view_set_model(GTK_TREE_VIEW(main_window.lint_view), GTK_TREE_MODEL(main_window.lint_store));
+}
+
+
 GList *Plugins = NULL;
 
 static inline gchar *plugin_spawn(const gchar* command_line)
@@ -340,7 +354,15 @@ void plugin_exec(gint plugin_num)
 			}
 		}
 		else if (g_str_has_prefix(stdout, "MESSAGE")){
+				if (data){
 				info_dialog(plugin->name, data);
+				}
+		}
+		else if (g_str_has_prefix(stdout, "SYNTAX")){
+				/*TODO: save file before execute plugin?*/
+				if (data){
+				syntax_window(plugin->name, data);
+				}
 		}
 		else if (g_str_has_prefix(stdout, "OPEN")){
 			if (DEBUG_MODE) { g_print("DEBUG: main_window.c:plugin_exec: Opening file :date: %s\n", data); }
@@ -350,9 +372,7 @@ void plugin_exec(gint plugin_num)
 			debug_dump_editors();
 			DEBUG_MODE = TRUE;
 		}
-		
 		g_free(stdout);
-
 	}
 	else {
 		g_print(_("Spawning %s gave error %s\n"), plugin->filename, error->message);
