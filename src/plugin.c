@@ -292,8 +292,6 @@ void plugin_create_menu_items()
 	guint num_plugin;
 	guint hide_plugin;
 
-	GtkBin *bin = NULL;
-	
 	num_plugin = 0;
 	for (iterator = Plugins; iterator != NULL && num_plugin<NUM_PLUGINS_MAX; iterator = g_list_next(iterator)) {
 		plugin = (Plugin *)(iterator->data);
@@ -301,17 +299,10 @@ void plugin_create_menu_items()
 		g_print ("Plugin %d:%s\n", num_plugin, plugin->filename);
 		g_print("Getting child widget\n");
                 #endif
-                bin = GTK_BIN(main_window.menu->plugins[num_plugin]);
-		//g_print("Bin is %p\n", bin);
-		if (bin) {
-			GtkLabel *label;
-			label = GTK_LABEL(gtk_bin_get_child(bin));
-		
-			gtk_label_set_text(label, plugin->name);
-                        gtk_widget_show(main_window.menu->plugins[num_plugin]);
-			install_menu_hint(GTK_WIDGET(bin), plugin->description);
-		}
-		
+		gtk_menu_item_set_label ((GtkMenuItem *)main_window.menu->plugins[num_plugin],plugin->name);
+                gtk_widget_show(main_window.menu->plugins[num_plugin]);
+		install_menu_hint(GTK_WIDGET(main_window.menu->plugins[num_plugin]), plugin->description);
+
 		num_plugin++;
 	}
         #ifdef DEBUG
