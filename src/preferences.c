@@ -172,7 +172,8 @@ void preferences_load(void)
         }
         preferences.single_instance_only = gconf_client_get_bool(config,"/gPHPEdit/defaults/single_instance_only",NULL);
         preferences.php_file_extensions = get_string(config,"/gPHPEdit/defaults/php_file_extensions",DEFAULT_PHP_EXTENSIONS);
-        preferences.search_history=  gconf_client_get_list (config,"/gPHPEdit/search_history", GCONF_VALUE_STRING, NULL);
+        preferences.search_history= NULL;
+	preferences.search_history= gconf_client_get_list (config,"/gPHPEdit/search_history", GCONF_VALUE_STRING, NULL);
         preferences.default_font = get_string(config,"/gPHPEdit/default_style/font",DEFAULT_FONT);
 	preferences.default_fore = getcolor(config,"/gPHPEdit/default_style/fore","default_style",0);
 	preferences.default_back = getcolor(config,"/gPHPEdit/default_style/back","default_style",DEFAULT_BACK_COLOR);

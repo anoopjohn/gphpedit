@@ -66,4 +66,5 @@ Findtoolbar;
 
 void main_window_create_maintoolbar(void);
 void main_window_create_findtoolbar(void);
+GtkTreeModel *create_completion_model (void);
 #endif /*TOOLBAR_H*/

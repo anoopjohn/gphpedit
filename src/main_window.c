@@ -518,6 +518,7 @@ void main_window_add_to_reopen_menu(gchar *full_filename)
 		g_string_append_printf(key, "%d", entry);
 		if (found){
                 gconf_client_set_string (config,key->str, found,NULL);
+		g_free(found);
                 }
 		g_string_free(key, TRUE);
 	}

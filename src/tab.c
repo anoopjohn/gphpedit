@@ -41,6 +41,9 @@
 #include "preferences.h"
 #include "grel2abs.h"
 #include <gconf/gconf-client.h>
+
+#define DEBUGTAB
+
 #define INFO_FLAGS "standard::display-name,standard::content-type,standard::edit-name,standard::size,access::can-write,access::can-delete,standard::icon,time::modified,time::modified-usec"
 
 GSList *editors;
@@ -1618,6 +1621,22 @@ gboolean css_auto_complete_callback(gpointer data)
 	return FALSE;
 }
 
+gboolean cobol_auto_complete_callback(gpointer data)
+{
+	gint wordStart;
+	gint wordEnd;
+	gint current_pos;
+
+	current_pos = gtk_scintilla_get_current_pos(GTK_SCINTILLA(main_window.current_editor->scintilla));
+
+	if (current_pos == (gint)data) {
+		wordStart = gtk_scintilla_word_start_position(GTK_SCINTILLA(main_window.current_editor->scintilla), current_pos-1, TRUE);
+		wordEnd = gtk_scintilla_word_end_position(GTK_SCINTILLA(main_window.current_editor->scintilla), current_pos-1, TRUE);
+		cobol_autocomplete_word(main_window.current_editor->scintilla, wordStart, wordEnd);
+	}
+	completion_timer_set=FALSE;
+	return FALSE;
+}
 
 gboolean sql_auto_complete_callback(gpointer data)
 {
@@ -1759,104 +1778,136 @@ static void char_added(GtkWidget *scintilla, guint ch)
 	guint style;
 	gint type;
 
+	type = main_window.current_editor->type;
+	if (type == TAB_HELP || type == TAB_PREVIEW || type==TAB_FILE) return;
+
 	current_pos = gtk_scintilla_get_current_pos(GTK_SCINTILLA(scintilla));
 	current_line = gtk_scintilla_line_from_position(GTK_SCINTILLA(scintilla), current_pos);
 	wordStart = gtk_scintilla_word_start_position(GTK_SCINTILLA(scintilla), current_pos-1, TRUE);
 	wordEnd = gtk_scintilla_word_end_position(GTK_SCINTILLA(scintilla), current_pos-1, TRUE);
 	current_word_length = wordEnd - wordStart;
 	style = gtk_scintilla_get_style_at(GTK_SCINTILLA(scintilla), current_pos);
-	type = main_window.current_editor->type;
 
 	if (gtk_scintilla_autoc_active(GTK_SCINTILLA(scintilla))==1) {
 		style = 0; // Hack to get around the drop-down not showing in comments, but if it's been forced...	
 	}
 
-	if ( ( type != TAB_HELP && 
-		(style != SCE_HPHP_SIMPLESTRING) && (style != SCE_HPHP_HSTRING) && 
-		(style != SCE_HPHP_COMMENTLINE) && (style !=SCE_HPHP_COMMENT)) ) {
-
-		if (ch=='\r' || ch=='\n') {
-			//g_print("current_line: %d\n", current_line);
-			if (current_line>0) {
+	switch(type) {
+		case(TAB_PHP): 	
+			gtk_scintilla_autoc_set_fill_ups(GTK_SCINTILLA(scintilla), "( .");
+			if ((style != SCE_HPHP_SIMPLESTRING) && (style != SCE_HPHP_HSTRING) && (style != SCE_HPHP_COMMENTLINE) && (style !=SCE_HPHP_COMMENT)) {
+			switch(ch) {
+			    case ('\r'):
+			    case ('\n'):
+				if (current_line>0) {
 				previous_line = current_line-1;
 				previous_line_indentation = gtk_scintilla_get_line_indentation(GTK_SCINTILLA(scintilla), previous_line);
 
-				if (1==1) {//TODO: preferences.auto_indent_after_brace) {
-					previous_line_end = gtk_scintilla_get_line_end_position(GTK_SCINTILLA(scintilla), previous_line);
-					previous_char_buffer = gtk_scintilla_get_text_range (GTK_SCINTILLA(scintilla), previous_line_end-1, previous_line_end, &previous_char_buffer_length);
-					if (*previous_char_buffer=='{') {
+				previous_line_end = gtk_scintilla_get_line_end_position(GTK_SCINTILLA(scintilla), previous_line);
+				previous_char_buffer = gtk_scintilla_get_text_range (GTK_SCINTILLA(scintilla), previous_line_end-1, previous_line_end, &previous_char_buffer_length);
+				if (*previous_char_buffer=='{') {
 						previous_line_indentation+=preferences.indentation_size;
-					}
 				}
-
 				indent_line(scintilla, current_line, previous_line_indentation);
-
-				if (DEBUG_MODE) { g_print("DEBUG: tab.c:char_added:previous_line=%d, previous_indent=%d\n", previous_line, previous_line_indentation); }
-				//gtk_scintilla_goto_pos(GTK_SCINTILLA(scintilla), gtk_scintilla_get_line_end_position(GTK_SCINTILLA(scintilla), current_line));
+				#ifdef DEBUGTAB
+				g_print("DEBUG: tab.c:char_added:previous_line=%d, previous_indent=%d\n", previous_line, previous_line_indentation);
+				#endif
+				gint pos;
 				if (preferences.use_tabs_instead_spaces) {
-					gtk_scintilla_goto_pos(GTK_SCINTILLA(scintilla), gtk_scintilla_position_from_line(GTK_SCINTILLA(scintilla), current_line)+(previous_line_indentation/gtk_scintilla_get_tab_width(GTK_SCINTILLA(scintilla))));
+				pos= gtk_scintilla_position_from_line(GTK_SCINTILLA(scintilla), current_line)+(previous_line_indentation/gtk_scintilla_get_tab_width(GTK_SCINTILLA(scintilla)));
 				}
 				else {
-					gtk_scintilla_goto_pos(GTK_SCINTILLA(scintilla), gtk_scintilla_position_from_line(GTK_SCINTILLA(scintilla), current_line)+(previous_line_indentation));
+				pos=gtk_scintilla_position_from_line(GTK_SCINTILLA(scintilla), current_line)+(previous_line_indentation);
 				}
-			}
-		}
-		else {
-			member_function_buffer = gtk_scintilla_get_text_range (GTK_SCINTILLA(scintilla), wordStart-2, wordStart, &member_function_length);
-			if (gtk_scintilla_call_tip_active(GTK_SCINTILLA(scintilla)) && ch==')') {
+				gtk_scintilla_goto_pos(GTK_SCINTILLA(scintilla), pos);
+				} 
+			    case (')'):
+				if (gtk_scintilla_call_tip_active(GTK_SCINTILLA(scintilla))) {
 				gtk_scintilla_call_tip_cancel(GTK_SCINTILLA(scintilla));
-			}
-			else if (type == TAB_PHP && (ch == '(') && 
-				(gtk_scintilla_get_line_state(GTK_SCINTILLA(scintilla), current_line))==274 &&
+				}
+				break; /*salgo nada mas que hacer */
+			    case ('('):
+				if ((gtk_scintilla_get_line_state(GTK_SCINTILLA(scintilla), current_line))==274 &&
 				(calltip_timer_set==FALSE)) {
 					calltip_timer_id = g_timeout_add(preferences.calltip_delay, calltip_callback, (gpointer) current_pos);
 					calltip_timer_set=TRUE;
-			}
-			else if (type == TAB_PHP && strcmp(member_function_buffer, "->")==0 && 
-				(gtk_scintilla_get_line_state(GTK_SCINTILLA(scintilla), current_line)==274)) {
-				if (gtk_scintilla_autoc_active(GTK_SCINTILLA(scintilla))==1) {
+				}
+				break;
+			    default:			
+				member_function_buffer = gtk_scintilla_get_text_range (GTK_SCINTILLA(scintilla), wordStart-2, wordStart, &member_function_length);
+				if (strcmp(member_function_buffer, "->")==0 && (gtk_scintilla_get_line_state(GTK_SCINTILLA(scintilla), current_line)==274)) {
+					if (gtk_scintilla_autoc_active(GTK_SCINTILLA(scintilla))==1) {
 					autocomplete_member_function(scintilla, wordStart, wordEnd);
-				}
-				else {
-					if (completion_timer_set==FALSE) {
-						completion_timer_id = g_timeout_add(preferences.auto_complete_delay, auto_memberfunc_complete_callback, (gpointer) current_pos);
-						completion_timer_set=TRUE;
-					}
-				}
-			}
-			else if ((current_word_length>=3) && 
-				( (gtk_scintilla_get_line_state(GTK_SCINTILLA(scintilla), current_line)==274 && type == TAB_PHP) ||
-				  (type != TAB_HELP) )) {
+					} else {
+						if (completion_timer_set==FALSE) {
+							completion_timer_id = g_timeout_add(preferences.auto_complete_delay, auto_memberfunc_complete_callback, (gpointer) current_pos);
+							completion_timer_set=TRUE;
+						}
+					}	
+			        } else if ((current_word_length>=3) && ( (gtk_scintilla_get_line_state(GTK_SCINTILLA(scintilla), current_line)==274))) {
 				// check to see if they've typed <?php and if so do nothing
 				if (wordStart>1) {
 					ac_buffer = gtk_scintilla_get_text_range (GTK_SCINTILLA(scintilla), wordStart-2, wordEnd, &ac_length);
-					if (strcmp(ac_buffer,"<?php")==0 && type == TAB_PHP) {
+					if (strcmp(ac_buffer,"<?php")==0) {
 						g_free(ac_buffer);
-						return;
+						break;
 					}
 					g_free(ac_buffer);
 				}
-	
 				if (gtk_scintilla_autoc_active(GTK_SCINTILLA(scintilla))==1) {
-					switch(type) {
-						case(TAB_PHP): autocomplete_word(scintilla, wordStart, wordEnd); break;
-						case(TAB_CSS): css_autocomplete_word(scintilla, wordStart, wordEnd); break;
-						case(TAB_SQL): sql_autocomplete_word(scintilla, wordStart, wordEnd); break;
-					}
+					autocomplete_word(scintilla, wordStart, wordEnd);
+				} else {
+				      completion_timer_id = g_timeout_add(preferences.auto_complete_delay, auto_complete_callback, (gpointer) current_pos);
 				}
-				else {
-					switch(type) {
-						case(TAB_PHP): completion_timer_id = g_timeout_add(preferences.auto_complete_delay, auto_complete_callback, (gpointer) current_pos); break;
-						case(TAB_CSS): completion_timer_id = g_timeout_add(preferences.auto_complete_delay, css_auto_complete_callback, (gpointer) current_pos); break;
-						case(TAB_SQL): completion_timer_id = g_timeout_add(preferences.auto_complete_delay, sql_auto_complete_callback, (gpointer) current_pos); break;
-					}
 					
 				}
+				g_free(member_function_buffer);
+				}
+				break;
+			case(TAB_CSS):
+				gtk_scintilla_autoc_set_fill_ups(GTK_SCINTILLA(scintilla), ":");
+				member_function_buffer = gtk_scintilla_get_text_range (GTK_SCINTILLA(scintilla), wordStart-2, wordStart, &member_function_length);
+				if(current_word_length>=3){
+					css_autocomplete_word(scintilla, wordStart, wordEnd);
+				}
+				if (gtk_scintilla_autoc_active(GTK_SCINTILLA(scintilla))!=1) {
+						if (completion_timer_set==FALSE) {
+							completion_timer_id = g_timeout_add(preferences.auto_complete_delay, auto_memberfunc_complete_callback, (gpointer) current_pos);
+							completion_timer_set=TRUE;
+						}
+					}	
+				g_free(member_function_buffer);
+				break;
+			case(TAB_COBOL):
+				member_function_buffer = gtk_scintilla_get_text_range (GTK_SCINTILLA(scintilla), wordStart-2, wordStart, &member_function_length);
+				if(current_word_length>=3){
+					cobol_autocomplete_word(scintilla, wordStart, wordEnd);
+				}
+				if (gtk_scintilla_autoc_active(GTK_SCINTILLA(scintilla))!=1) {
+						if (completion_timer_set==FALSE) {
+							completion_timer_id = g_timeout_add(preferences.auto_complete_delay, auto_memberfunc_complete_callback, (gpointer) current_pos);
+							completion_timer_set=TRUE;
+						}
+					}	
+				g_free(member_function_buffer);
+				break;
+			case(TAB_SQL): 
+				member_function_buffer = gtk_scintilla_get_text_range (GTK_SCINTILLA(scintilla), wordStart-2, wordStart, &member_function_length);
+				if(current_word_length>=3){
+					sql_autocomplete_word(scintilla, wordStart, wordEnd);
+				}
+				if (gtk_scintilla_autoc_active(GTK_SCINTILLA(scintilla))!=1) {
+						if (completion_timer_set==FALSE) {
+							completion_timer_id = g_timeout_add(preferences.auto_complete_delay, auto_memberfunc_complete_callback, (gpointer) current_pos);
+							completion_timer_set=TRUE;
+						}
+					}	
+				g_free(member_function_buffer);
+				break;
 			}
 			// Drop down for HTML here (line_state = 272)
-			g_free(member_function_buffer);
+			
 		}
-	}
 }
 
 gboolean editor_is_local(Editor *editor)

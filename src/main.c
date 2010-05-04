@@ -44,6 +44,9 @@ int main (int argc, char **argv)
 	bind_textdomain_codeset (GETTEXT_PACKAGE, "UTF-8");
 	textdomain (GETTEXT_PACKAGE);
 #endif							/* ENABLE_NLS */
+       if (!g_thread_supported())
+		g_thread_init(NULL);
+
         gtk_init(&argc, &argv);
         gconf_init(argc, argv, NULL);
         
@@ -66,7 +69,7 @@ int main (int argc, char **argv)
 	gtk_main();
         
 	/* it makes sense to install sigterm handler that would call this too */
-    shutdown_ipc ();
+    	shutdown_ipc ();
 
 	return 0;
 }

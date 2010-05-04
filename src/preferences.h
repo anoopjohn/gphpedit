@@ -24,6 +24,7 @@
 
 #ifndef PREFERENCES_H
 #define PREFERENCES_H
+#define MAXHISTORY 10
 #include "main.h"
 
 typedef struct
