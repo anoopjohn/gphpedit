@@ -48,7 +48,7 @@ void find_clicked(GtkButton *button, gpointer data)
 	const gchar *text;
 	glong length_of_document;
 	glong current_pos;
-	glong last_found = 0;
+	glong last_found = -1;
 	glong start_found;
 	glong end_found;
 	glong result;
@@ -79,7 +79,6 @@ void find_clicked(GtkButton *button, gpointer data)
 
 	result = gtk_scintilla_find_text (GTK_SCINTILLA(main_window.current_editor->scintilla),
 	                                  search_flags, (gchar *) text, current_pos, length_of_document, &start_found, &end_found);
-
 	if (result == -1) {
 		// Show message saying could not be found.
                   GtkWidget *dialog;
@@ -404,6 +403,7 @@ void replace_all_clicked(GtkButton *button, gpointer data)
 	
 	gtk_widget_hide(replace_dialog.window2);
 
+
 	length_of_document = gtk_scintilla_get_length(GTK_SCINTILLA(main_window.current_editor->scintilla));
 
 	text = gtk_entry_get_text (GTK_ENTRY(replace_dialog.entry1));
@@ -427,7 +427,6 @@ void replace_all_clicked(GtkButton *button, gpointer data)
 	}
 
 	numfound=0;
-
 	result = gtk_scintilla_find_text (GTK_SCINTILLA(main_window.current_editor->scintilla),
 	                                  search_flags, (gchar *)text, current_pos, length_of_document, &start_found, &end_found);
 
