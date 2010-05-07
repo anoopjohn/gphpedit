@@ -1,0 +1,118 @@
+azimuth|(<angle> left-side far-left left center-left center center-right right far-right right-side behind leftwards rightwards inherit)|Sets where the sound should come from.
+background|(background-color background-image background-repeat background-attachment background-position inherit)|Sets all the background properties in one declaration.
+background-attachment|(scroll fixed inherit)|Sets whether a background image is fixed or scrolls with the rest of the page.
+background-color|(color transparent inherit)|Sets the background color of an element.
+background-image|(uri none inherit)|Sets the background image for an element.
+background-position|(<percentage> <length> top center bottom left center right inherit)|Sets the starting position of a background image.
+background-repeat|(repeat repeat-x repeat-y no-repeat inherit)|Sets how a background image will be repeated.
+border|(border-width border-style color inherit)|The CSS border properties allow you to specify the style and color of an element's border.
+border-collapse|(collapse separate inherit)|sets whether the table borders are collapsed into a single border or detached as in standard HTML.
+border-color|(<color> transparent inherit)|Sets the color of the four borders.
+border-spacing|(<length> <length>? inherit)|Sets the distance between the borders of adjacent cells.
+border-style|(<border-style> inherit)|Sets the style of the four borders.
+border-top|(border-top-width border-style <color> inherit)|Sets all the top border properties in one declaration.
+border-right|(border-top-width border-style <color> inherit)|Sets all the right border properties in one declaration.
+border-bottom|(border-top-width border-style <color> inherit)|Sets all the bottom border properties in one declaration.
+border-left|(border-top-width border-style <color> inherit)|Sets all the left border properties in one declaration.
+border-top-color|(<color> inherit)|Sets the color of the top border.
+border-right-color|(<color> inherit)|Sets the color of the right border.
+border-bottom-color|(<color> inherit)|Sets the color of the bottom border.
+border-left-color|(<color> inherit)|Sets the color of the left border.
+border-top-style|(<border-style> inherit)|Sets the style of the top border.
+border-right-style|(<border-style> inherit)|Sets the style of the right border.
+border-bottom-style|(<border-style> inherit)|Sets the style of the bottom border.
+border-left-style|(<border-style> inherit)|Sets the style of the left border.
+border-top-width|(<border-width> inherit)|Sets the width of the top border.
+border-right-width|(<border-width> inherit)|Sets the width of the right border.
+border-bottom-width|(<border-width> inherit)|Sets the width of the bottom border.
+border-left-width|(<border-width> inherit)|Sets the width of the left border.
+border-width|(<border-width> inherit)|Sets the width of the four borders.
+bottom|(<length> <percentage> auto inherit)|Sets the bottom margin edge for a positioned box.
+caption-side|(top bottom left right inherit)|Specifies the placement of a table caption.
+clear|(none left right both inherit)|Specifies which sides of an element where other floating elements are not allowed.
+clip|(<shape> auto inherit)|Clips an absolutely positioned element.
+color|(<color> inherit)|Sets the color of text.
+counter-increment|(<identifier> <integer> none inherit)|Increments one or more counters.
+counter-reset|(<identifier> <integer> none inherit)|Creates or resets one or more counters.
+cue|( cue-before cue-after inherit)|Sets the cue properties in one declaration.
+cue-after|(<uri> none inherit)|Specifies a sound to be played after speaking an element's content.
+cue-before|(<uri> none inherit)|Specifies a sound to be played before speaking an element's content.
+cursor|(<uri> auto crosshair default pointer move text wait help inherit)|Specifies the type of cursor to be displayed.
+direction|(ltr rtl inherit)|Specifies the text direction/writing direction.
+display|(inline block list-item run-in compact marker table inline-table table-row table-column table-cell table-caption none inherit)|Specifies the type of box an element should generate.
+elevation|(<angle> below level above higher lower inherit)|Sets where the sound should come from.
+empty-cells|(show hide inherit)|Specifies whether or not to display borders and background on empty cells in a table.
+float|(left right none inherit)|Specifies whether or not a box should float.
+font|(font-style font-variant font-weight font-size inherit)|Sets all the font properties in one declaration.
+font-family|(<family-name> <generic-family> inherit)|Specifies the font family for text.
+font-size|(<absolute-size> <relative-size> <length> <percentage> inherit)|Specifies the font size of text.
+font-style|(normal italic oblique inherit)|Specifies the font style for text.
+font-variant|(normal small-caps inherit)|Specifies whether or not a text should be displayed in a small-caps font.
+font-weight|(normal bold bolder lighter inherit)|Specifies the weight of a font.
+height|(<length> <percentage> auto inherit)|Sets the height of an element.
+left|(<length> <percentage> auto inherit)|Sets the left margin edge for a positioned box.
+letter-spacing|(normal <length> inherit)|Increase or decrease the space between characters in a text.
+line-height|(normal <number> <length> <percentage> inherit)|Sets the line height.
+list-style|(list-style-type list-style-position list-style-image inherit)|Sets all the properties for a list in one declaration.
+list-style-image|(<uri> none inherit)|Specifies an image as the list-item marker.
+list-style-position|(inside outside inherit)|Specifies if the list-item markers should appear inside or outside the content flow.
+list-style-type|(disc circle square decimal decimal-leading-zero lower-roman upper-roman lower-greek none inherit)|Specifies the type of list-item marker.
+margin|(<margin-width>{1,4} inherit)|Sets all the margin properties in one declaration.
+margin-top|(<margin-width> inherit)|Sets the top margin of an element.
+margin-right|(<margin-width> inherit)|Sets the right margin of an element.
+margin-bottom|(<margin-width> inherit)|Sets the bottom margin of an element.
+margin-left|(<margin-width> inherit)|Sets the left margin of an element.
+marker-offset|(<length> auto inherit)|Sets the distance between the nearest border edges of a marker box and its principal box.
+marks|(crop cross none inherit)|Sets whether cross marks or crop marks should be rendered just outside the page box edge.
+max-height|(<length> <percentage> none inherit)|Sets the maximum height of an element.
+max-width|(<length> <percentage> none inherit)|Sets the maximum width of an element.
+min-height|(<length> <percentage> inherit)|Sets the minimum height of an element.
+min-width|(<length> <percentage> inherit)|Sets the minimum width of an element.
+orphans|(<integer> inherit)|Sets the minimum number of lines that must be left at the bottom of a page when a page break occurs inside an element.
+outline|(outline-color outline-style outline-width inherit)|Sets all the outline properties in one declaration.
+outline-color|(<color> invert inherit)|Sets the color of an outline.
+outline-style|(<border-style> inherit)|Sets the style of an outline.
+outline-width|(<border-width> inherit)|Sets the width of an outline.
+overflow|(visible hidden scroll auto inherit)|Specifies what happens if content overflows an element's box.
+padding|(<padding-width>{1,4} inherit)|Sets all the padding properties in one declaration.
+padding-top|(<padding-width> inherit)|Sets the top padding of an element.
+padding-right|(<padding-width> inherit)|Sets the right padding of an element.
+padding-bottom|(<padding-width> inherit)|Sets the bottom padding of an element.
+padding-left|(<padding-width> inherit)|Sets the left padding of an element.
+page|(<identifier> auto)|Sets a page type to use when displaying an element.
+page-break-after|(auto always avoid left right inherit)|Sets the page-breaking behavior after an element.
+page-break-before|(auto always avoid left right inherit)|Sets the page-breaking behavior before an element.
+page-break-inside|(avoid auto inherit)|Sets the page-breaking behavior inside an element.
+pause|(<time> <percentage> inherit)|Sets the pause properties in one declaration.
+pause-after|(<time> <percentage> inherit)|Specifies a pause after speaking an element content.
+pause-before|(<time> <percentage> inherit)|Specifies a pause before speaking an element content.
+pitch|(<frequency> x-low low medium high x-high inherit)|Specifies the speaking voice.
+pitch-range|(<number> inherit)|Specifies the variation in the speaking voice.
+play-during|(<uri> mix? repeat? auto none inherit)|Specifies a sound to be played while speaking an element's content.
+position|(static relative absolute fixed inherit)|Specifies the type of positioning for an element.
+quotes|(<string> none inherit)|Sets the type of quotation marks for embedded quotations.
+richness|(<number> inherit)|Specifies the richness of the speaking voice.
+right|(<length> <percentage> auto inherit)|Sets the right margin edge for a positioned box.
+size|(<length>{1,2} auto portrait landscape inherit)|Sets the orientation and size of a page.
+speak|(normal none spell-out inherit)|Specifies whether content will render aurally.
+speak-header|(once always inherit)| Specifies how to handle table headers.
+speak-numeral|(digits continuous inherit)|Specifies how to speak numbers.
+speak-punctuation|(code none inherit)|Specifies how to speak punctuation characters.
+speech-rate|(<number> x-slow slow medium fast x-fast faster slower inherit)|Specifies the speed of the speaking.
+stress|(<number> inherit)|Specifies the "stress" in the speaking voice.
+table-layout|(auto fixed inherit)|Sets the algorithm used to display the table cells, rows, and columns.
+text-align|(left right center justify <string> inherit)|Aligns the text.
+text-decoration|(none underline overline line-through blink inherit)|Sets the decoration of a text.
+text-indent|(<length> <percentage> inherit)|Indents the first line of text.
+text-shadow|(none <color> <length> <length> <length> inherit)|Sets the shadow effect of a text.
+text-transform|(capitalize uppercase lowercase none inherit)|Sets capitalization effect on a text.
+top|(<length> <percentage> auto inherit)|Sets the top margin edge for a positioned box.
+vertical-align|(baseline sub super top text-top middle bottom text-bottom <percentage> <length> inherit)|Sets the vertical alignment of an element.
+visibility|(visible hidden collapse inherit)|Specifies whether or not an element is visible.
+voice-family|(<specific-voice> or <generic-voice>, <specific-voice> or <generic-voice> inherit)|Specifies the voice family of the speaking.
+volume|(<number> <percentage> silent x-soft soft medium loud x-loud inherit)|Specifies the volume of the speaking.
+white-space|(normal pre nowrap inherit)|Specifies how white-space inside an element is handled.
+windows|(<integer> inherit)|Sets the minimum number of lines that must be left at the top of a page when a page break occurs inside an element.
+width|(<length> <percentage> auto inherit)|Sets the width of an element.
+word-spacing|(normal <length> inherit)|Increases or decreases the space between words in a text.
+z-index|(auto <integer> inherit)|Sets the stack order of an element.

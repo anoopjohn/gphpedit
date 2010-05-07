@@ -499,6 +499,7 @@ void main_window_add_to_reopen_menu(gchar *full_filename)
 			g_free(found);
 			break;
 		}
+		g_free(found);
                }
 	}
 	
@@ -585,6 +586,7 @@ void main_window_create(void)
 	
 	plugin_setup_menu();
 	function_list_prepare();
+	css_function_list_prepare();
 
 	g_signal_connect (G_OBJECT (main_window.window), "delete_event", G_CALLBACK(main_window_delete_event), NULL);
 	g_signal_connect (G_OBJECT (main_window.window), "destroy", G_CALLBACK (main_window_destroy_event), NULL);

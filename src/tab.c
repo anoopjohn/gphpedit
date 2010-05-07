@@ -24,7 +24,6 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-#define PLAT_GTK 1
 #include <gtkscintilla.h>
 #include "folderbrowser.h"
 #include "tab.h"
@@ -42,7 +41,7 @@
 #include "grel2abs.h"
 #include <gconf/gconf-client.h>
 
-#define DEBUGTAB
+//#define DEBUGTAB
 
 #define INFO_FLAGS "standard::display-name,standard::content-type,standard::edit-name,standard::size,access::can-write,access::can-delete,standard::icon,time::modified,time::modified-usec"
 
@@ -265,7 +264,9 @@ void tab_file_save_opened(Editor *editor,GFile *file)
 			g_error_free(error);			
 		}
 		else {
-			//g_print("DEBUG: Converted size: %d\n", utf8_size);
+			#ifdef DEBUGTAB
+			g_print("DEBUG: Converted size: %d\n", utf8_size);
+			#endif
 			g_free(write_buffer);
 			write_buffer = converted_text;
 			text_length = utf8_size;
@@ -277,7 +278,9 @@ void tab_file_save_opened(Editor *editor,GFile *file)
 void tab_validate_buffer_and_insert(gpointer buffer, Editor *editor)
 {
 	if (g_utf8_validate(buffer, editor->file_size, NULL)) {
-		//g_print("Valid UTF8 according to gnome\n");
+		#ifdef DEBUGTAB
+		g_print("Valid UTF8 according to gnome\n");
+		#endif
 		gtk_scintilla_add_text(GTK_SCINTILLA (editor->scintilla), editor->file_size, buffer);
 		editor->converted_to_utf8 = FALSE;
 	}
@@ -358,12 +361,14 @@ void tab_file_opened (GObject *source_object, GAsyncResult *res, gpointer user_d
 	g_print("Error reading file. Gio error:%s",error->message);
 	return;
 	}
-        //g_print("Loaded %d bytes\n",editor->file_size);
+	#ifdef DEBUGTAB
+        g_print("DEBUG:: Loaded %d bytes\n",editor->file_size);
+	#endif
 	// Clear scintilla buffer
 	gtk_scintilla_clear_all(GTK_SCINTILLA (editor->scintilla));
-
-	//g_print("BUFFER=\n%s\n-------------------------------------------\n", buffer);
-
+	#ifdef DEBUGTAB
+	g_print("DEBUG:::BUFFER=\n%s\n-------------------------------------------\n", buffer);
+	#endif
 	tab_validate_buffer_and_insert(buffer, editor);
 	tab_reset_scintilla_after_open(editor);
         g_free(buffer);
@@ -496,7 +501,9 @@ GString *tab_help_try_filename(gchar *prefix, gchar *command, gchar *suffix)
 	if (suffix) {
 		long_filename = g_string_append(long_filename, suffix);
 	}
-	if (DEBUG_MODE) { g_print("DEBUG: tab.c:tab_help_try_filename:long_filename->str: %s\n", long_filename->str); }
+	#ifdef DEBUGTAB
+	g_print("DEBUG: tab.c:tab_help_try_filename:long_filename->str: %s\n", long_filename->str);
+	#endif
 	if (g_file_test(long_filename->str, G_FILE_TEST_EXISTS)){
 		return long_filename;
 	}
@@ -509,7 +516,9 @@ GString *tab_help_try_filename(gchar *prefix, gchar *command, gchar *suffix)
 	if (suffix) {
 		long_filename = g_string_append(long_filename, suffix);
 	}
-	if (DEBUG_MODE) { g_print("DEBUG: tab.c:tab_help_try_filename:long_filename->str: %s\n", long_filename->str); }
+	#ifdef DEBUGTAB
+	g_print("DEBUG: tab.c:tab_help_try_filename:long_filename->str: %s\n", long_filename->str);
+	#endif
         if (g_file_test(long_filename->str, G_FILE_TEST_EXISTS)){
 		return long_filename;
 	}
@@ -1076,7 +1085,9 @@ gboolean tab_create_new(gint type, GString *filename)
 	gboolean result;
 	gboolean file_created = FALSE;
         GFile *file;
-        if (DEBUG_MODE) { g_print("DEBUG: tab.c:tab_create_new:filename->str: %s\n", filename->str); }
+	#ifdef DEBUGTAB
+        g_print("DEBUG: tab.c:tab_create_new:filename->str: %s\n", filename->str);
+	#endif
 	if (filename != NULL) {
 		if (strstr(filename->str, ":")==NULL) {
 			cwd = g_get_current_dir();
@@ -1520,8 +1531,9 @@ void macro_record (GtkWidget *scintilla, gint message, gulong wparam, glong lpar
 		else {
 			event->lparam = lparam;
 		}
-		if (DEBUG_MODE) { g_print("DEBUG: tab.c:macro_record:Message: %d (%s)\n", event->message, macro_message_to_string(event->message)); }
-		
+		#ifdef DEBUGTAB
+		g_print("DEBUG: tab.c:macro_record:Message: %d (%s)\n", event->message, macro_message_to_string(event->message));
+		#endif
 		editor->keyboard_macro_list = g_slist_append(editor->keyboard_macro_list, event);
 	}
 }
@@ -1680,7 +1692,7 @@ gboolean calltip_callback(gpointer data)
 	current_pos = gtk_scintilla_get_current_pos(GTK_SCINTILLA(main_window.current_editor->scintilla));
 
 	if (current_pos == (gint)data) {
-		show_call_tip(main_window.current_editor->scintilla, current_pos);
+		show_call_tip(main_window.current_editor->scintilla, main_window.current_editor->type,current_pos);
 	}
 	calltip_timer_set=FALSE;
 	return FALSE;
@@ -1779,15 +1791,18 @@ static void char_added(GtkWidget *scintilla, guint ch)
 	gint type;
 
 	type = main_window.current_editor->type;
+	#ifdef DEBUGTAB
+	g_print("DEBUG:::char added:%d\n",ch);
+	#endif
 	if (type == TAB_HELP || type == TAB_PREVIEW || type==TAB_FILE) return;
-
+	if ((type != TAB_PHP) && (ch=='\r'|| ch=='\n' || ch=='\t'))return;
 	current_pos = gtk_scintilla_get_current_pos(GTK_SCINTILLA(scintilla));
 	current_line = gtk_scintilla_line_from_position(GTK_SCINTILLA(scintilla), current_pos);
 	wordStart = gtk_scintilla_word_start_position(GTK_SCINTILLA(scintilla), current_pos-1, TRUE);
 	wordEnd = gtk_scintilla_word_end_position(GTK_SCINTILLA(scintilla), current_pos-1, TRUE);
 	current_word_length = wordEnd - wordStart;
 	style = gtk_scintilla_get_style_at(GTK_SCINTILLA(scintilla), current_pos);
-
+	
 	if (gtk_scintilla_autoc_active(GTK_SCINTILLA(scintilla))==1) {
 		style = 0; // Hack to get around the drop-down not showing in comments, but if it's been forced...	
 	}
@@ -1866,6 +1881,19 @@ static void char_added(GtkWidget *scintilla, guint ch)
 				break;
 			case(TAB_CSS):
 				gtk_scintilla_autoc_set_fill_ups(GTK_SCINTILLA(scintilla), ":");
+			switch(ch) {
+			    case (';'):
+				if (gtk_scintilla_call_tip_active(GTK_SCINTILLA(scintilla))) {
+				gtk_scintilla_call_tip_cancel(GTK_SCINTILLA(scintilla));
+				}
+				break; /*salgo nada mas que hacer */
+			    case (':'):
+				if ((calltip_timer_set==FALSE)) {
+					calltip_timer_id = g_timeout_add(preferences.calltip_delay, calltip_callback, (gpointer) current_pos);
+					calltip_timer_set=TRUE;
+				}
+				break;
+			    default:	
 				member_function_buffer = gtk_scintilla_get_text_range (GTK_SCINTILLA(scintilla), wordStart-2, wordStart, &member_function_length);
 				if(current_word_length>=3){
 					css_autocomplete_word(scintilla, wordStart, wordEnd);
@@ -1877,6 +1905,7 @@ static void char_added(GtkWidget *scintilla, guint ch)
 						}
 					}	
 				g_free(member_function_buffer);
+				}
 				break;
 			case(TAB_COBOL):
 				member_function_buffer = gtk_scintilla_get_text_range (GTK_SCINTILLA(scintilla), wordStart-2, wordStart, &member_function_length);
@@ -1921,8 +1950,9 @@ gboolean editor_is_local(Editor *editor)
 	if (g_str_has_prefix(filename, "/")){
 		return TRUE;
 	}
-
-	//g_print("FALSE - not local!!! filename:%s",filename);
+	#ifdef DEBUGTAB
+	g_print("DEBUG::: FALSE - not local!!! filename:%s",filename);
+	#endif
 	return FALSE;
 }
 gboolean uri_is_local_or_http(gchar *uri)
@@ -1942,8 +1972,9 @@ gboolean uri_is_local_or_http(gchar *uri)
 	if (g_str_has_prefix(filename, "/")){
 		return TRUE;
 	}
-
-	//g_print("FALSE - not local!!!");
+	#ifdef DEBUGTAB
+	g_print("DEBUG:: %s - not local!!!",uri);
+	#endif
 	return FALSE;
 }
 gchar * editor_convert_to_local(Editor *editor)

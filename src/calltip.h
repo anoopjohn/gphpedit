@@ -26,11 +26,12 @@
 #define CALLTIP_H
 
 #include "main.h"
-
-void show_call_tip(GtkWidget *scintilla, gint position);
+void show_call_tip(GtkWidget *scintilla,gint type, gint pos);
 void autocomplete_word(GtkWidget *scintilla, gint wordStart, gint wordEnd);
 void function_list_prepare(void);
+void css_function_list_prepare(void);
 GString *complete_function_list(gchar *original_list);
+GString *complete_css_function_list(gchar *original_list);
 void css_autocomplete_word(GtkWidget *scintilla, gint wordStart, gint wordEnd);
 void cobol_autocomplete_word(GtkWidget *scintilla, gint wordStart, gint wordEnd);
 void sql_autocomplete_word(GtkWidget *scintilla, gint wordStart, gint wordEnd);
