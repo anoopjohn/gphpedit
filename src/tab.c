@@ -277,11 +277,11 @@ void tab_file_save_opened(Editor *editor,GFile *file)
 
 void tab_validate_buffer_and_insert(gpointer buffer, Editor *editor)
 {
-	if (g_utf8_validate(buffer, editor->file_size, NULL)) {
+	if (g_utf8_validate(buffer, strlen(buffer), NULL)) {
 		#ifdef DEBUGTAB
 		g_print("Valid UTF8 according to gnome\n");
 		#endif
-		gtk_scintilla_add_text(GTK_SCINTILLA (editor->scintilla), editor->file_size, buffer);
+		gtk_scintilla_add_text(GTK_SCINTILLA (editor->scintilla), strlen(buffer), buffer);//editor->file_size, buffer);
 		editor->converted_to_utf8 = FALSE;
 	}
 	else {
@@ -735,12 +735,12 @@ gint yes_no_dialog (gchar *title, gchar *message)
 {
 	GtkWidget *dialog;
 	gint button;
-       	dialog = gtk_message_dialog_new(GTK_WINDOW(main_window.window),GTK_DIALOG_DESTROY_WITH_PARENT,GTK_MESSAGE_INFO,GTK_BUTTONS_YES_NO,"%s",
-            message);
-            gtk_window_set_title(GTK_WINDOW(dialog), title);
-	    gtk_window_set_transient_for (GTK_WINDOW(dialog),GTK_WINDOW(main_window.window));
-            button = gtk_dialog_run (GTK_DIALOG (dialog));
-         gtk_widget_destroy(dialog);
+	dialog = gtk_message_dialog_new(GTK_WINDOW(main_window.window),GTK_DIALOG_DESTROY_WITH_PARENT,GTK_MESSAGE_INFO,GTK_BUTTONS_YES_NO,"%s",
+		message);
+	gtk_window_set_title(GTK_WINDOW(dialog), title);
+	gtk_window_set_transient_for (GTK_WINDOW(dialog),GTK_WINDOW(main_window.window));
+	button = gtk_dialog_run (GTK_DIALOG (dialog));
+	gtk_widget_destroy(dialog);
 	/*
 	 * Run the dialog and wait for the user to select yes or no.
 	 * If the user closes the window with the window manager, we
@@ -753,33 +753,16 @@ gint yes_no_dialog (gchar *title, gchar *message)
 gboolean is_php_file(Editor *editor)
 {
 	// New style function for configuration of what constitutes a PHP file
-	gchar *file_extension;
-	gchar **php_file_extensions;
 	gboolean is_php = FALSE;
 	gint i;
 	gchar *buffer = NULL;
 	gsize text_length;
 	gchar **lines;
 	gchar *filename;
-
-	filename = editor->filename->str;
-
-	file_extension = strrchr(filename, '.');
-	if (file_extension) {
-		file_extension++;
-		
-		php_file_extensions = g_strsplit(preferences.php_file_extensions,",",-1);
-		
-        for (i = 0; php_file_extensions[i] != NULL; i++) {
-			if (strcmp(file_extension, php_file_extensions[i]) == 0) {
-				is_php = TRUE;
-				break;
-			}
-		}
-				
-		g_strfreev(php_file_extensions);
-	}
 	
+	filename = editor->filename->str;
+	is_php=is_php_file_from_filename(filename);
+
 	if (!is_php && editor) { // If it's not recognised as a PHP file, examine the contents for <?php and #!.*php
 		
 		text_length = gtk_scintilla_get_length(GTK_SCINTILLA(editor->scintilla));
@@ -810,7 +793,7 @@ gboolean is_php_file(Editor *editor)
 	return is_php;
 }
 
-gboolean is_php_file_from_filename(gchar *filename)
+gboolean is_php_file_from_filename(const gchar *filename)
 {
 	// New style function for configuration of what constitutes a PHP file
 	gchar *file_extension;
@@ -822,10 +805,10 @@ gboolean is_php_file_from_filename(gchar *filename)
 	if (file_extension) {
 		file_extension++;
 		
-		php_file_extensions = g_strsplit(preferences.php_file_extensions,",",-1);
+	php_file_extensions = g_strsplit(preferences.php_file_extensions,",",-1);
 		
         for (i = 0; php_file_extensions[i] != NULL; i++) {
-			if (strcmp(file_extension, php_file_extensions[i]) == 0) {
+			if (g_str_has_suffix(filename,php_file_extensions[i])){
 				is_php = TRUE;
 				break;
 			}
@@ -837,89 +820,45 @@ gboolean is_php_file_from_filename(gchar *filename)
 	return is_php;
 }
 
-gboolean is_css_file(gchar *filename)
+gboolean is_css_file(const gchar *filename)
 {
-	gchar *file_extension;
-
-	file_extension = strrchr(filename, '.');
-	if (file_extension) {
-		file_extension++;
-		if (strcmp(file_extension, "css") == 0) {
+	if (g_str_has_suffix(filename,".css"))
 			return TRUE;
-		}
-	}
 	return FALSE;
 }
 
-gboolean is_perl_file(gchar *filename)
+gboolean is_perl_file(const gchar *filename)
 {
-	gchar *file_extension;
-
-	file_extension = strrchr(filename, '.');
-	if (file_extension) {
-		file_extension++;
-		if (strcmp(file_extension, "pl") == 0) {
+	if (g_str_has_suffix(filename,".pl"))
 			return TRUE;
-		}
-	}
 	return FALSE;
 }
 
-gboolean is_cobol_file(gchar *filename)
+gboolean is_cobol_file(const gchar *filename)
 {
-	gchar *file_extension;
-
-	file_extension = strrchr(filename, '.');
-	if (file_extension) {
-		file_extension++;
-		if (strcmp(file_extension, "cbl") == 0 || strcmp(file_extension, "CBL") == 0) {
+	if (g_str_has_suffix(filename,".cbl") || g_str_has_suffix(filename,".CBL"))
 			return TRUE;
-		}
-	}
 	return FALSE;
 }
 
-gboolean is_python_file(gchar *filename)
+gboolean is_python_file(const gchar *filename)
 {
-	gchar *file_extension;
-
-	file_extension = strrchr(filename, '.');
-	if (file_extension) {
-		file_extension++;
-		if (strcmp(file_extension, "py") == 0) {
+	if (g_str_has_suffix(filename,".py"))
 			return TRUE;
-		}
-	}
 	return FALSE;
 }
 
-gboolean is_cxx_file(gchar *filename)
+gboolean is_cxx_file(const gchar *filename)
 {
-	gchar *file_extension;
-
-	file_extension = strrchr(filename, '.');
-	if (file_extension) {
-		file_extension++;
-		if (strcmp(file_extension, "cxx") == 0 ||
-			strcmp(file_extension, "c") == 0 ||
-			strcmp(file_extension, "h") == 0) {
+	if (g_str_has_suffix(filename,".cxx") || g_str_has_suffix(filename,".c") || g_str_has_suffix(filename,".h"))
 			return TRUE;
-		}
-	}
 	return FALSE;
 }
 
-gboolean is_sql_file(gchar *filename)
+gboolean is_sql_file(const gchar *filename)
 {
-	gchar *file_extension;
-
-	file_extension = strrchr(filename, '.');
-	if (file_extension) {
-		file_extension++;
-		if (strcmp(file_extension, "sql") == 0) {
+if (g_str_has_suffix(filename,".sql"))
 			return TRUE;
-		}
-	}
 	return FALSE;
 }
 
@@ -933,7 +872,9 @@ void set_editor_to_php(Editor *editor)
 void set_editor_to_css(Editor *editor)
 {
 	tab_css_set_lexer(editor);
+	gtk_scintilla_set_word_chars((GtkScintilla *)editor->scintilla, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-");
 	editor->type = TAB_CSS;
+	tab_set_folding(editor, TRUE);
 }
 
 void set_editor_to_sql(Editor *editor)
@@ -1802,7 +1743,6 @@ static void char_added(GtkWidget *scintilla, guint ch)
 	wordEnd = gtk_scintilla_word_end_position(GTK_SCINTILLA(scintilla), current_pos-1, TRUE);
 	current_word_length = wordEnd - wordStart;
 	style = gtk_scintilla_get_style_at(GTK_SCINTILLA(scintilla), current_pos);
-	
 	if (gtk_scintilla_autoc_active(GTK_SCINTILLA(scintilla))==1) {
 		style = 0; // Hack to get around the drop-down not showing in comments, but if it's been forced...	
 	}
@@ -1998,7 +1938,7 @@ gchar *convert_to_full(gchar *filename)
 	gchar *cwd;
 	gchar abs_buffer[2048];
 	GString *gstr_filename;
-	
+
 	if (strstr(filename, "://") != NULL) {
 		return g_strdup(filename);	
 	}

@@ -96,7 +96,7 @@ void tab_check_python_file(Editor *editor);
 void tab_check_sql_file(Editor *editor);
 void tab_load_file(Editor *editor);
 gboolean is_php_file(Editor *editor);
-gboolean is_php_file_from_filename(gchar *filename);
+gboolean is_php_file_from_filename(const gchar *filename);
 gboolean switch_to_file_or_open(gchar *filename, gint line_number);
 void tab_set_configured_scintilla_properties(GtkScintilla *scintilla, Preferences prefs);
 GtkWidget *get_close_tab_widget(Editor *editor);
@@ -129,5 +129,4 @@ void set_editor_to_cxx(Editor *editor);
 void set_editor_to_perl(Editor *editor);
 void set_editor_to_cobol(Editor *editor);
 void set_editor_to_python(Editor *editor);
-
 #endif
