@@ -134,7 +134,7 @@ void tab_set_configured_scintilla_properties(GtkScintilla *scintilla, Preference
 	gtk_scintilla_set_caret_width (scintilla, 2);
 	gtk_scintilla_set_caret_period (scintilla, 250);
 
-	gtk_scintilla_autoc_set_choose_single (scintilla, TRUE);
+	gtk_scintilla_autoc_set_choose_single (scintilla, FALSE);
 	gtk_scintilla_set_use_tabs (scintilla, prefs.use_tabs_instead_spaces);
 	gtk_scintilla_set_tab_indents (scintilla, 1);
 	gtk_scintilla_set_backspace_unindents (scintilla, 1);
