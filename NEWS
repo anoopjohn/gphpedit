@@ -17,6 +17,6 @@ New Features and Fixes
 - Various plugin system upgrades
 - Add check for externally modified files
 - Remember incremental search strings
+- Added CSS calltips support.
+- Speed up Calltip/autocomplete lists.
 - Misc bugfixes and code cleanups
-- Lots of memory leaks fixed
-- Added Cobol support.
