@@ -714,6 +714,7 @@ GString *get_member_function_completion_list(GtkWidget *scintilla, gint wordStar
 	}
 
 	result = g_string_append(result, " ");
+	g_free(buffer);
 	return result;
 }
 
