@@ -119,7 +119,7 @@ poke_existing_instance (int argc, char **argv)
                 else
                 {
                     /* this is wrong too, but i am lazy to do error checking right now */
-                    write (fd, "", 1);
+                    int k=write (fd, "", 1);
                     for (i = 0; i < argc; ++i) {
 						if (g_path_is_absolute(argv[i])){
 							to_open = g_strdup ((gchar *) argv[i]);
@@ -132,7 +132,7 @@ poke_existing_instance (int argc, char **argv)
 }
 						if (to_open) {
 							//g_print("From %s to %s\n", argv[i], to_open);
-							write (fd, to_open, strlen (to_open) + 1);
+							k=write (fd, to_open, strlen (to_open) + 1);
 							g_free(to_open);
 						}
 					}
