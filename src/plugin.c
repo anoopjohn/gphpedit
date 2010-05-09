@@ -67,7 +67,7 @@ gint parse_shortcut(gint accel_number){
 * TODO: double click in tree row should goto the corresponding line.
 */
 static void syntax_window(gchar *plugin_name,gchar *data){
-g_print("dTA:%s",data);
+//g_print("***********************daTA:\n%s\n**********************\n",data);
 gchar *copy;
 gchar *token;
 gchar *line_number;
@@ -89,28 +89,42 @@ copy = data;
 gtk_scintilla_set_indicator_current(GTK_SCINTILLA(main_window.current_editor->scintilla), 20);
 gtk_scintilla_indic_set_style(GTK_SCINTILLA(main_window.current_editor->scintilla), 20, INDIC_SQUIGGLE);
 gtk_scintilla_indic_set_fore(GTK_SCINTILLA(main_window.current_editor->scintilla), 20, 0x0000ff);
+gtk_scintilla_annotation_clear_all(GTK_SCINTILLA(main_window.current_editor->scintilla));
+gtk_scintilla_annotation_set_visible(GTK_SCINTILLA(main_window.current_editor->scintilla), 2);
 /* lines has form line number space message dot like 
 * 59 invalid operator.\n
 * lines end with \n
 */
+
 while ((token = strtok(copy, "\n"))) {
 gtk_list_store_append (main_window.lint_store, &iter);
-gtk_list_store_set (main_window.lint_store, &iter, 0, token, -1);	
+gtk_list_store_set (main_window.lint_store, &iter, 0, token, -1);
+	gchar *anotationtext=g_strdup(token);
 	line_number = strchr(token, ' ');
 	line_number=strncpy(line_number,token,(int)(line_number-token));
 	if (atoi(line_number)>0) {
 	if (!first_error) {
 		first_error = line_number;
 	}
-	indent = gtk_scintilla_get_line_indentation(GTK_SCINTILLA(main_window.current_editor->scintilla), atoi(line_number)-1);
+	guint current_line_number=atoi(line_number)-1;
+	indent = gtk_scintilla_get_line_indentation(GTK_SCINTILLA(main_window.current_editor->scintilla), current_line_number);
 	
-	line_start = gtk_scintilla_position_from_line(GTK_SCINTILLA(main_window.current_editor->scintilla), atoi(line_number)-1);
+	line_start = gtk_scintilla_position_from_line(GTK_SCINTILLA(main_window.current_editor->scintilla), current_line_number);
 	line_start += (indent/preferences.indentation_size);
 	
-	line_end = gtk_scintilla_get_line_end_position(GTK_SCINTILLA(main_window.current_editor->scintilla), atoi(line_number)-1);
+	line_end = gtk_scintilla_get_line_end_position(GTK_SCINTILLA(main_window.current_editor->scintilla), current_line_number);
 	gtk_scintilla_indicator_fill_range(GTK_SCINTILLA(main_window.current_editor->scintilla), line_start, line_end-line_start);
+	token=anotationtext + (int)(line_number-token+1);
+	/* if first char is an E then set error style, else if first char is W set warning style */
+	if (strncmp(token,"E",1)==0)
+	gtk_scintilla_annotation_set_style(GTK_SCINTILLA(main_window.current_editor->scintilla), current_line_number, STYLE_ANNOTATION_ERROR);
+	else if (strncmp(token,"W",1)==0)
+	gtk_scintilla_annotation_set_style(GTK_SCINTILLA(main_window.current_editor->scintilla), current_line_number, STYLE_ANNOTATION_WARNING);
+	token+=1;
+	gtk_scintilla_annotation_set_text(GTK_SCINTILLA(main_window.current_editor->scintilla), current_line_number, token);
 	}
-copy = NULL;
+	g_free(anotationtext);
+	copy = NULL;
 }
 gtk_tree_view_set_model(GTK_TREE_VIEW(main_window.lint_view), GTK_TREE_MODEL(main_window.lint_store));
 }

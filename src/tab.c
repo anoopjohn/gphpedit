@@ -148,6 +148,21 @@ void tab_set_configured_scintilla_properties(GtkScintilla *scintilla, Preference
 	gtk_scintilla_style_set_fore (scintilla, STYLE_DEFAULT, prefs.default_fore);
 	gtk_scintilla_style_set_back (scintilla, STYLE_DEFAULT, prefs.default_back);
 
+	//annotation styles
+	gtk_scintilla_style_set_font (scintilla, STYLE_ANNOTATION_ERROR,  prefs.default_font);
+	gtk_scintilla_style_set_size (scintilla,  STYLE_ANNOTATION_ERROR, 8);
+	gtk_scintilla_style_set_italic (scintilla,  STYLE_ANNOTATION_ERROR, FALSE);
+	gtk_scintilla_style_set_bold (scintilla,  STYLE_ANNOTATION_ERROR, FALSE);
+	gtk_scintilla_style_set_fore (scintilla,  STYLE_ANNOTATION_ERROR, 3946645);
+	gtk_scintilla_style_set_back (scintilla,  STYLE_ANNOTATION_ERROR, 13355513);
+
+	gtk_scintilla_style_set_font (scintilla, STYLE_ANNOTATION_WARNING,  prefs.default_font);
+	gtk_scintilla_style_set_size (scintilla,  STYLE_ANNOTATION_WARNING, 8);
+	gtk_scintilla_style_set_italic (scintilla,  STYLE_ANNOTATION_WARNING, FALSE);
+	gtk_scintilla_style_set_bold (scintilla,  STYLE_ANNOTATION_WARNING, FALSE);
+	gtk_scintilla_style_set_fore (scintilla,  STYLE_ANNOTATION_WARNING, 2859424);
+	gtk_scintilla_style_set_back (scintilla,  STYLE_ANNOTATION_WARNING, 10813438);
+
 	//makers margin settings
 	gtk_scintilla_set_margin_type_n(GTK_SCINTILLA(scintilla), 1, SC_MARGIN_SYMBOL);
 	gtk_scintilla_set_margin_width_n (GTK_SCINTILLA(scintilla), 1, 14);

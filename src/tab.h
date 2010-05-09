@@ -43,6 +43,9 @@
 #define TAB_COBOL 9
 #define TAB_PREVIEW 10
 
+/* annotations styles */
+#define STYLE_ANNOTATION_ERROR 200
+#define STYLE_ANNOTATION_WARNING 201
 typedef struct
 {
 	gint type;
