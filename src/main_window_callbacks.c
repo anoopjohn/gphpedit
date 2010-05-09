@@ -763,53 +763,59 @@ void on_save1_activate(GtkWidget *widget)
 			on_save_as1_activate(widget);
 		}
 		else {
-                       GError *error;
-                       error=NULL;
                        file=g_file_new_for_uri (filename);
-           		tab_file_save_opened(main_window.current_editor,file);
+           	       tab_file_save_opened(main_window.current_editor,file);
 		}
 	}
 }
 
 void on_saveall1_activate(GtkWidget *widget)
 {
-	FILE *stream;
 	gchar *write_buffer = NULL;
 	gsize text_length;
-	gint status;
 	gchar *filename;
 	GSList *li;
 	Editor *editor;
+	gchar *converted_text = NULL;
+	gsize utf8_size; // was guint
+	GError *error = NULL;
 
 	for(li = editors; li!= NULL; li = g_slist_next(li)) {
 		editor = li->data;
-		if (editor) {
+		if (editor && editor->type!=TAB_HELP && editor->type!=TAB_PREVIEW && editor->is_untitled!=TRUE) {
 			filename = editor->filename->str;
-			if (strcmp(filename, _("Untitled"))!=0) {
+				GFile *file;
+	                	file=g_file_new_for_uri (filename);
 				text_length = gtk_scintilla_get_length(GTK_SCINTILLA(editor->scintilla));
-
 				write_buffer = g_malloc0(text_length+1); // Include terminating null
-
 				if (write_buffer == NULL) {
 					g_warning ("%s", _("Cannot allocate write buffer"));
-					return;
+					break;
 				}
-
-				if ((stream = fopen (filename, "w")) == NULL) {
-					g_message (_("Cannot open '%s' for writing"), editor->filename->str);
-					return;
-				}
-
 				gtk_scintilla_get_text(GTK_SCINTILLA(editor->scintilla), text_length+1, write_buffer);
-
-				status = fwrite (write_buffer, text_length, 1, stream);
-
-				fclose (stream);
-
+			        // If we converted to UTF-8 when loading, convert back to the locale to save
+				if (editor->converted_to_utf8) {
+				converted_text = g_locale_from_utf8(write_buffer, text_length, NULL, &utf8_size, &error);
+				if (error != NULL) {
+				g_print(_("UTF-8 Error: %s\n"), error->message);
+				g_error_free(error);			
+				} else {
+				#ifdef DEBUGTAB
+				g_print("DEBUG: Converted size: %d\n", utf8_size);
+				#endif
+				g_free(write_buffer);
+				write_buffer = converted_text;
+				text_length = utf8_size;
+				g_free(converted_text);
+					}
+			        }
+				if (!g_file_replace_contents (file,write_buffer,text_length,NULL,FALSE,G_FILE_CREATE_NONE,NULL,NULL,&error)){
+					g_print(_("GIO Error: %s saving file:%s\n"),error->message,editor->filename->str);
+					break;
+				}	
+				g_get_current_time (&editor->file_mtime); /*set current time*/
 				g_free (write_buffer);
-
 				gtk_scintilla_set_save_point (GTK_SCINTILLA(editor->scintilla));
-			}
 		}
 	}
 	classbrowser_update();
