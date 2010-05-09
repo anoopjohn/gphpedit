@@ -230,11 +230,11 @@ void tab_file_write (GObject *source_object, GAsyncResult *res, gpointer user_da
         Editor *editor = (Editor *)user_data;
         GError *error=NULL;
         if(!g_file_replace_contents_finish ((GFile *)source_object,res,NULL,&error)){
-            g_print(_("GIO Error: %s\n"),error->message);
+            g_print(_("GIO Error: %s saving file:%s\n"),error->message,editor->filename->str);
             return;
         }
 	gtk_scintilla_set_save_point (GTK_SCINTILLA(editor->scintilla));
-	if (main_window.current_editor->type!=TAB_HELP || main_window.current_editor->type!=TAB_PREVIEW){
+	if (editor->type!=TAB_HELP || editor->type!=TAB_PREVIEW){
 		GFileInfo *info;
 		info= g_file_query_info ((GFile *)source_object,"time::modified,time::modified-usec",G_FILE_QUERY_INFO_NONE, NULL,&error);
 		if (!info){
@@ -260,9 +260,7 @@ void tab_file_save_opened(Editor *editor,GFile *file)
 	GError *error = NULL;
 	gchar *converted_text = NULL;
 	gsize utf8_size; // was guint
-
 	text_length = gtk_scintilla_get_length(GTK_SCINTILLA(editor->scintilla));
-
 	write_buffer = g_malloc0(text_length+1); // Include terminating null
 
 	if (write_buffer == NULL) {
