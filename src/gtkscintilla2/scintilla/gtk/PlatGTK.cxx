@@ -122,7 +122,7 @@ public:
 	}
 	~FontHandle() {
 		if (pfont)
-			gdk_font_unref(pfont);
+			g_object_unref(pfont);
 		pfont = 0;
 		if (pfd)
 			pango_font_description_free(pfd);
@@ -802,11 +802,11 @@ void SurfaceImpl::Release() {
 	drawable = 0;
 	if (createdGC) {
 		createdGC = false;
-		gdk_gc_unref(gc);
+		g_object_unref(gc);
 	}
 	gc = 0;
 	if (ppixmap)
-		gdk_pixmap_unref(ppixmap);
+		g_object_unref(ppixmap);
 	ppixmap = 0;
 	if (layout)
 		g_object_unref(layout);
@@ -953,7 +953,7 @@ void SurfaceImpl::FillRectangle(PRectangle rc, Surface &surfacePattern) {
 			int widthx = (xTile + widthPat > rc.right) ? rc.right - xTile : widthPat;
 			for (int yTile = rc.top; yTile < rc.bottom; yTile += heightPat) {
 				int heighty = (yTile + heightPat > rc.bottom) ? rc.bottom - yTile : heightPat;
-				gdk_draw_pixmap(drawable,
+				gdk_draw_drawable(drawable,
 				                gc,
 				                static_cast<SurfaceImpl &>(surfacePattern).drawable,
 				                0, 0,
@@ -1079,7 +1079,7 @@ void SurfaceImpl::Ellipse(PRectangle rc, ColourAllocated fore, ColourAllocated b
 
 void SurfaceImpl::Copy(PRectangle rc, Point from, Surface &surfaceSource) {
 	if (static_cast<SurfaceImpl &>(surfaceSource).drawable) {
-		gdk_draw_pixmap(drawable,
+		gdk_draw_drawable(drawable,
 		                gc,
 		                static_cast<SurfaceImpl &>(surfaceSource).drawable,
 		                from.x, from.y,
@@ -1143,6 +1143,7 @@ static size_t MultiByteLenFromIconv(const Converter &conv, const char *s, size_t
 		char *pout = wcForm;
 		size_t outLeft = 2;
 		size_t conversions = conv.Convert(&pin, &inLeft, &pout, &outLeft);
+
 		if (conversions != ((size_t)(-1))) {
 			return lenMB;
 		}
@@ -1703,7 +1704,11 @@ void Window::Destroy() {
 }
 
 bool Window::HasFocus() {
+#if GTK_CHECK_VERSION(2,20,0)
+	return gtk_widget_has_focus (GTK_WIDGET(wid));
+#else
 	return GTK_WIDGET_HAS_FOCUS(wid);
+#endif
 }
 
 PRectangle Window::GetPosition() {
@@ -1753,8 +1758,11 @@ void Window::SetPositionRelative(PRectangle rc, Window relativeTo) {
 		oy = screenHeight - sizey;
 
 	gtk_window_move(GTK_WINDOW(PWidget(wid)), ox, oy);
-
+#if GTK_CHECK_VERSION(2,2,0)
+	gtk_widget_set_size_request(PWidget(wid), sizex, sizey);
+#else
 	gtk_widget_set_usize(PWidget(wid), sizex, sizey);
+#endif
 }
 
 PRectangle Window::GetClientPosition() {
@@ -1820,7 +1828,7 @@ void Window::SetCursor(Cursor curs) {
 
 	if (PWidget(wid)->window)
 		gdk_window_set_cursor(PWidget(wid)->window, gdkCurs);
-	gdk_cursor_destroy(gdkCurs);
+	gdk_cursor_unref(gdkCurs);
 }
 
 void Window::SetTitle(const char *s) {
@@ -1863,7 +1871,8 @@ struct ListImage {
 static void list_image_free(gpointer, gpointer value, gpointer) {
 	ListImage *list_image = (ListImage *) value;
 	if (list_image->pixbuf)
-		gdk_pixbuf_unref (list_image->pixbuf);
+//		gdk_pixbuf_unref (list_image->pixbuf);
+		g_object_unref (list_image->pixbuf);
 	g_free(list_image);
 }
 
@@ -2069,14 +2078,21 @@ PRectangle ListBoxX::GetDesiredRect() {
 		height = (rows * row_height
 		          + 2 * (ythickness
 		                 + GTK_CONTAINER(PWidget(list))->border_width + 1));
-		gtk_widget_set_usize(GTK_WIDGET(PWidget(list)), -1, height);
+		#if GTK_CHECK_VERSION(2,2,0)
+			gtk_widget_set_size_request(GTK_WIDGET(PWidget(list)), -1, height);
+		#else
+			gtk_widget_set_usize(GTK_WIDGET(PWidget(list)), -1, height);
+		#endif
 
 		// Get the size of the scroller because we set usize on the window
 		gtk_widget_size_request(GTK_WIDGET(scroller), &req);
 		rc.right = req.width;
 		rc.bottom = req.height;
-
-		gtk_widget_set_usize(GTK_WIDGET(list), -1, -1);
+		#if GTK_CHECK_VERSION(2,2,0)
+			gtk_widget_set_size_request(GTK_WIDGET(list), -1, -1);
+		#else
+			gtk_widget_set_usize(GTK_WIDGET(list), -1, -1);
+		#endif
 		int width = maxItemCharacters;
 		if (width < 12)
 			width = 12;
@@ -2116,7 +2132,8 @@ static void init_pixmap(ListImage *list_image) {
 
 	// Drop any existing pixmap/bitmap as data may have changed
 	if (list_image->pixbuf)
-		gdk_pixbuf_unref(list_image->pixbuf);
+//		gdk_pixbuf_unref(list_image->pixbuf);
+		g_object_unref(list_image->pixbuf);
 	list_image->pixbuf =
 		gdk_pixbuf_new_from_xpm_data((const gchar**)xpm_lineform);
 	delete []xpm_lineformfromtext;
@@ -2289,7 +2306,8 @@ void ListBoxX::RegisterImage(int type, const char *xpm_data) {
 	if (list_image) {
 		// Drop icon already registered
 		if (list_image->pixbuf)
-			gdk_pixbuf_unref(list_image->pixbuf);
+//			gdk_pixbuf_unref(list_image->pixbuf);
+			g_object_unref(list_image->pixbuf);
 		list_image->pixbuf = NULL;
 		list_image->xpm_data = xpm_data;
 	} else {
