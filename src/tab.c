@@ -134,7 +134,7 @@ void tab_set_configured_scintilla_properties(GtkScintilla *scintilla, Preference
 	gtk_scintilla_set_caret_width (scintilla, 2);
 	gtk_scintilla_set_caret_period (scintilla, 250);
 
-	gtk_scintilla_autoc_set_choose_single (scintilla, TRUE);
+	gtk_scintilla_autoc_set_choose_single (scintilla, FALSE);
 	gtk_scintilla_set_use_tabs (scintilla, prefs.use_tabs_instead_spaces);
 	gtk_scintilla_set_tab_indents (scintilla, 1);
 	gtk_scintilla_set_backspace_unindents (scintilla, 1);
@@ -147,6 +147,21 @@ void tab_set_configured_scintilla_properties(GtkScintilla *scintilla, Preference
 	gtk_scintilla_style_set_bold (scintilla, STYLE_DEFAULT, prefs.default_bold);
 	gtk_scintilla_style_set_fore (scintilla, STYLE_DEFAULT, prefs.default_fore);
 	gtk_scintilla_style_set_back (scintilla, STYLE_DEFAULT, prefs.default_back);
+
+	//annotation styles
+	gtk_scintilla_style_set_font (scintilla, STYLE_ANNOTATION_ERROR,  prefs.default_font);
+	gtk_scintilla_style_set_size (scintilla,  STYLE_ANNOTATION_ERROR, 8);
+	gtk_scintilla_style_set_italic (scintilla,  STYLE_ANNOTATION_ERROR, FALSE);
+	gtk_scintilla_style_set_bold (scintilla,  STYLE_ANNOTATION_ERROR, FALSE);
+	gtk_scintilla_style_set_fore (scintilla,  STYLE_ANNOTATION_ERROR, 3946645);
+	gtk_scintilla_style_set_back (scintilla,  STYLE_ANNOTATION_ERROR, 13355513);
+
+	gtk_scintilla_style_set_font (scintilla, STYLE_ANNOTATION_WARNING,  prefs.default_font);
+	gtk_scintilla_style_set_size (scintilla,  STYLE_ANNOTATION_WARNING, 8);
+	gtk_scintilla_style_set_italic (scintilla,  STYLE_ANNOTATION_WARNING, FALSE);
+	gtk_scintilla_style_set_bold (scintilla,  STYLE_ANNOTATION_WARNING, FALSE);
+	gtk_scintilla_style_set_fore (scintilla,  STYLE_ANNOTATION_WARNING, 2859424);
+	gtk_scintilla_style_set_back (scintilla,  STYLE_ANNOTATION_WARNING, 10813438);
 
 	//makers margin settings
 	gtk_scintilla_set_margin_type_n(GTK_SCINTILLA(scintilla), 1, SC_MARGIN_SYMBOL);
@@ -215,23 +230,19 @@ void tab_file_write (GObject *source_object, GAsyncResult *res, gpointer user_da
         Editor *editor = (Editor *)user_data;
         GError *error=NULL;
         if(!g_file_replace_contents_finish ((GFile *)source_object,res,NULL,&error)){
-            g_print(_("GIO Error: %s\n"),error->message);
+            g_print(_("GIO Error: %s saving file:%s\n"),error->message,editor->filename->str);
             return;
         }
 	gtk_scintilla_set_save_point (GTK_SCINTILLA(editor->scintilla));
-	if (main_window.current_editor->type!=TAB_HELP || main_window.current_editor->type!=TAB_PREVIEW){
-		GFileInfo *info;
-		info= g_file_query_info ((GFile *)source_object,"time::modified,time::modified-usec",G_FILE_QUERY_INFO_NONE, NULL,&error);
-		if (!info){
+	GFileInfo *info;
+	info= g_file_query_info ((GFile *)source_object,"time::modified,time::modified-usec",G_FILE_QUERY_INFO_NONE, NULL,&error);
+	if (!info){
 		       	g_warning (_("Could not get the file modification time for file: '%s'. GIO error: %s \n"), editor->short_filename,error->message);
 			g_get_current_time (&editor->file_mtime); /*set current time*/
-		} else {
-		/* update modification time */	
-		g_file_info_get_modification_time (info,&editor->file_mtime);
-		g_object_unref(info);	
-		}
 	} else {
-	g_get_current_time (&editor->file_mtime); /*set current time*/
+	/* update modification time */	
+	g_file_info_get_modification_time (info,&editor->file_mtime);
+	g_object_unref(info);	
 	}
 	register_file_opened(editor->filename->str);
 	classbrowser_update();
@@ -245,9 +256,7 @@ void tab_file_save_opened(Editor *editor,GFile *file)
 	GError *error = NULL;
 	gchar *converted_text = NULL;
 	gsize utf8_size; // was guint
-
 	text_length = gtk_scintilla_get_length(GTK_SCINTILLA(editor->scintilla));
-
 	write_buffer = g_malloc0(text_length+1); // Include terminating null
 
 	if (write_buffer == NULL) {
