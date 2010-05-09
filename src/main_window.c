@@ -260,11 +260,12 @@ static void main_window_fill_panes(void)
 	main_window.notebook_editor = gtk_notebook_new ();
 	gtk_notebook_set_scrollable(GTK_NOTEBOOK(main_window.notebook_editor), TRUE);
 	/*
-	GTK_WIDGET_UNSET_FLAGS (main_window.notebook_editor, GTK_CAN_FOCUS | GTK_RECEIVES_DEFAULT);
+ 	 GTK_WIDGET_UNSET_FLAGS (main_window.notebook_editor, GTK_CAN_FOCUS | GTK_RECEIVES_DEFAULT);
 	 Fix to scrollable list of tabs, however it then messes up grabbing of focus
 	 Hence the focus-tab event (which GTK doesn't seem to recognise
 	*/
 	gtk_widget_set_receives_default (main_window.notebook_editor,FALSE);
+	GTK_WIDGET_UNSET_FLAGS(main_window.notebook_editor, GTK_CAN_FOCUS);
 	gtk_widget_show (main_window.notebook_editor);
         gtk_box_pack_start(GTK_BOX(main_window.prin_hbox), main_window.notebook_editor, TRUE, TRUE, 2);
 
@@ -425,7 +426,7 @@ void update_app_title(void)
                         update_controls();
 		}
 		else if(main_window.current_editor->type == TAB_HELP) {
-			title = g_string_new("Help: ");
+			title = g_string_new(_("Help: "));
 			title = g_string_append(title, main_window.current_editor->help_function);
                         update_zoom_level();
                         update_controls();
