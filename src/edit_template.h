@@ -48,10 +48,6 @@ typedef struct
 } EditTemplateDialog;
 
 extern EditTemplateDialog edit_template_dialog; 
-  
-
-
 void create_edit_template_dialog (void);
-
 
 #endif

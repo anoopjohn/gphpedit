@@ -33,5 +33,4 @@
 
 void classbrowser_parse_file(gchar *filename);
 
-
 #endif
