@@ -65,31 +65,11 @@ static GList * get_font_names()
 	return fonts;
 }
 
-static GList *get_font_sizes()
-{
-	GList *sizes = NULL;
-	
-	// Again, there's gotta be a nicer way to do this!!!!	AJ 2004-02-09
-	
-	sizes = g_list_prepend(sizes, "6");
-	sizes = g_list_prepend(sizes, "8");
-	sizes = g_list_prepend(sizes, "10");
-	sizes = g_list_prepend(sizes, "12");
-	sizes = g_list_prepend(sizes, "14");
-	sizes = g_list_prepend(sizes, "16");
-	sizes = g_list_prepend(sizes, "18");
-	sizes = g_list_prepend(sizes, "20");
-	sizes = g_list_prepend(sizes, "22");
-	sizes = g_list_prepend(sizes, "24");
-	sizes = g_list_prepend(sizes, "26");
-	sizes = g_list_prepend(sizes, "32");
-	sizes = g_list_prepend(sizes, "48");
-	sizes = g_list_prepend(sizes, "72");
-	
-	sizes= g_list_reverse (sizes);	
-
-	return sizes;
-}
+#define CANT_SIZES 25
+/* These are what we use as the standard font sizes, for the size list. */
+static const gchar *font_sizes[CANT_SIZES] = {
+  "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "20", "22", "24", "26", "28",
+  "32", "36", "40", "48", "56", "64", "72"};
 
 static GList *get_font_qualities()
 {
@@ -1202,7 +1182,7 @@ void on_edge_colour_changed(GtkColorButton *widget, gpointer user_data)
 {
 	GdkColor color;
 	gtk_color_button_get_color (widget,&color);
-
+	g_print("color:%d",color.red >> 8 | ((color.green >> 8) << 8) | ((color.blue >> 8) << 16));
 	temp_preferences.edge_colour = color.red >> 8 | ((color.green >> 8) << 8) | ((color.blue >> 8) << 16);
 }
 
@@ -1746,19 +1726,17 @@ void preferences_dialog_create (void)
 	gtk_box_pack_start (GTK_BOX (preferences_dialog.hbox25), preferences_dialog.size_combo, FALSE, TRUE, 0);
 	gtk_container_set_border_width (GTK_CONTAINER (preferences_dialog.size_combo), 8);
 	
-	comboitems = get_font_sizes();
-	for (items = g_list_first(comboitems); items != NULL; items = g_list_next(items)) {
+	int i;
+	for (i=0; i<CANT_SIZES; i++) {
 		// Suggested by__tim in #Gtk+/Freenode to be able to find the item again from set_control_to_highlight
-		g_object_set_qdata (G_OBJECT (preferences_dialog.size_combo), g_quark_from_string (items->data), 
+		g_object_set_qdata (G_OBJECT (preferences_dialog.size_combo), g_quark_from_static_string (font_sizes[i]), 
 			GINT_TO_POINTER (gtk_tree_model_iter_n_children (gtk_combo_box_get_model (GTK_COMBO_BOX(preferences_dialog.size_combo)), NULL)));
-		gtk_combo_box_append_text (GTK_COMBO_BOX (preferences_dialog.size_combo), items->data);
-		//g_print("Appending Font Size: %s, %d\n", items->data, g_quark_from_string(items->data));
+		gtk_combo_box_append_text (GTK_COMBO_BOX (preferences_dialog.size_combo), font_sizes[i]);
+		//g_print("Appending Font Size: %s, %d\n", font_sizes[i], g_quark_from_static_string(font_sizes[i]));
 	}
 	g_signal_connect (G_OBJECT (GTK_COMBO_BOX (preferences_dialog.size_combo)), "changed",
 											G_CALLBACK (on_fontsize_entry_changed),
 											NULL);
-	g_list_free (comboitems);
-	
 	preferences_dialog.label44 = gtk_label_new (_("Font"));
 	gtk_widget_show (preferences_dialog.label44);
 	gtk_frame_set_label_widget (GTK_FRAME (preferences_dialog.frame4), preferences_dialog.label44);

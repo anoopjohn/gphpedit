@@ -138,13 +138,14 @@ static void main_window_create_appbar(void)
 
 static void main_window_create_panes(void)
 {
-	main_window.main_vertical_pane = gtk_vpaned_new ();
-	gtk_widget_show (main_window.main_vertical_pane);
-        gtk_box_pack_start(GTK_BOX(main_window.prinbox), main_window.main_vertical_pane, TRUE, TRUE, 0);
 	main_window.main_horizontal_pane = gtk_hpaned_new ();
 	gtk_widget_show (main_window.main_horizontal_pane);
-	gtk_paned_pack1 (GTK_PANED (main_window.main_vertical_pane), main_window.main_horizontal_pane, FALSE, TRUE);
+        gtk_box_pack_start(GTK_BOX(main_window.prinbox), main_window.main_horizontal_pane, TRUE, TRUE, 0);
 
+
+	main_window.main_vertical_pane = gtk_vpaned_new ();
+	gtk_widget_show (main_window.main_vertical_pane);
+	gtk_paned_pack1 (GTK_PANED (main_window.main_horizontal_pane), main_window.main_vertical_pane, FALSE, TRUE);
 	g_signal_connect (G_OBJECT (main_window.window), "size_allocate", G_CALLBACK (classbrowser_accept_size), NULL);
 	move_classbrowser_position();
         GConfClient *config;
@@ -153,6 +154,11 @@ static void main_window_create_panes(void)
 	if (gconf_client_get_int (config,"/gPHPEdit/main_window/classbrowser_hidden",NULL) == 1)
 		classbrowser_hide();
         g_object_unref(config);
+
+	main_window.prin_hbox = gtk_vbox_new(FALSE, 0);
+	gtk_widget_show(main_window.prin_hbox);
+	gtk_paned_pack2 (GTK_PANED (main_window.main_horizontal_pane), main_window.prin_hbox, TRUE, TRUE);	
+
 }
 
 static void create_side_panel(void){
@@ -163,7 +169,7 @@ static void create_side_panel(void){
 
 	prin_sidebox = gtk_vbox_new(FALSE, 0);
 	gtk_widget_show(prin_sidebox);
-	gtk_paned_pack1 (GTK_PANED (main_window.main_horizontal_pane), prin_sidebox, FALSE, TRUE);
+	gtk_paned_pack1 (GTK_PANED (main_window.main_vertical_pane), prin_sidebox, FALSE, TRUE);
 
 	/* Close button for the side bar */
 	GtkWidget *close_box;
@@ -250,8 +256,26 @@ static void main_window_fill_panes(void)
 {
 	/* create side panel */
 	create_side_panel();
+
+	main_window.notebook_editor = gtk_notebook_new ();
+	gtk_notebook_set_scrollable(GTK_NOTEBOOK(main_window.notebook_editor), TRUE);
+	/*
+ 	 GTK_WIDGET_UNSET_FLAGS (main_window.notebook_editor, GTK_CAN_FOCUS | GTK_RECEIVES_DEFAULT);
+	 Fix to scrollable list of tabs, however it then messes up grabbing of focus
+	 Hence the focus-tab event (which GTK doesn't seem to recognise
+	*/
+	gtk_widget_set_receives_default (main_window.notebook_editor,FALSE);
+	GTK_WIDGET_UNSET_FLAGS(main_window.notebook_editor, GTK_CAN_FOCUS);
+	gtk_widget_show (main_window.notebook_editor);
+        gtk_box_pack_start(GTK_BOX(main_window.prin_hbox), main_window.notebook_editor, TRUE, TRUE, 2);
+
+        gtk_widget_set_size_request (main_window.notebook_editor, 400,400);
+        g_signal_connect (G_OBJECT (main_window.notebook_editor), "switch_page", G_CALLBACK (on_notebook_switch_page), NULL);
+	g_signal_connect (G_OBJECT (main_window.notebook_editor), "focus-tab", G_CALLBACK (on_notebook_focus_tab), NULL);
+
+
         main_window.scrolledwindow1 = gtk_scrolled_window_new (NULL, NULL);
-	gtk_paned_pack2 (GTK_PANED (main_window.main_vertical_pane), main_window.scrolledwindow1, FALSE, TRUE);
+        gtk_box_pack_start(GTK_BOX(main_window.prin_hbox), main_window.scrolledwindow1, TRUE, TRUE, 2);
         main_window.lint_view = gtk_tree_view_new ();
 	gtk_container_add (GTK_CONTAINER (main_window.scrolledwindow1), main_window.lint_view);
 	main_window.lint_renderer = gtk_cell_renderer_text_new ();
@@ -266,19 +290,7 @@ static void main_window_fill_panes(void)
 	g_signal_connect (G_OBJECT (main_window.lint_select), "changed",
 						G_CALLBACK (lint_row_activated), NULL);
 
-	main_window.notebook_editor = gtk_notebook_new ();
-	gtk_notebook_set_scrollable(GTK_NOTEBOOK(main_window.notebook_editor), TRUE);
-	/*
-	GTK_WIDGET_UNSET_FLAGS (main_window.notebook_editor, GTK_CAN_FOCUS | GTK_RECEIVES_DEFAULT);
-	 Fix to scrollable list of tabs, however it then messes up grabbing of focus
-	 Hence the focus-tab event (which GTK doesn't seem to recognise
-	*/
-	gtk_widget_set_receives_default (main_window.notebook_editor,FALSE);
-	gtk_widget_show (main_window.notebook_editor);
-	gtk_paned_pack2 (GTK_PANED (main_window.main_horizontal_pane), main_window.notebook_editor, TRUE, TRUE);
-        gtk_widget_set_size_request (main_window.notebook_editor, 400,400);
-        g_signal_connect (G_OBJECT (main_window.notebook_editor), "switch_page", G_CALLBACK (on_notebook_switch_page), NULL);
-	g_signal_connect (G_OBJECT (main_window.notebook_editor), "focus-tab", G_CALLBACK (on_notebook_focus_tab), NULL);
+
 }
 
 /**
@@ -414,7 +426,7 @@ void update_app_title(void)
                         update_controls();
 		}
 		else if(main_window.current_editor->type == TAB_HELP) {
-			title = g_string_new("Help: ");
+			title = g_string_new(_("Help: "));
 			title = g_string_append(title, main_window.current_editor->help_function);
                         update_zoom_level();
                         update_controls();
@@ -551,8 +563,7 @@ static void create_infobar(void){
 	GtkWidget *content_area = gtk_info_bar_get_content_area (GTK_INFO_BAR (main_window.infobar));
 	gtk_container_add (GTK_CONTAINER (content_area), main_window.infolabel);
 	g_signal_connect (main_window.infobar, "response", G_CALLBACK (process_external), main_window.current_editor);
-        gtk_box_pack_start (GTK_BOX (main_window.prinbox), main_window.infobar, FALSE, FALSE, 0);			
-	/* gtk_widget_show (main_window.infobar); */
+        gtk_box_pack_start(GTK_BOX(main_window.prin_hbox), main_window.infobar, FALSE, FALSE, 0);
 }
 
 static void create_app_main_window(const gchar *title, gint height, gint width){
@@ -561,7 +572,6 @@ static void create_app_main_window(const gchar *title, gint height, gint width){
         gtk_window_set_default_size(GTK_WINDOW(main_window.window), height, width);
         /* center the window in the screen */
         gtk_window_set_position(GTK_WINDOW(main_window.window), GTK_WIN_POS_CENTER);
-	//gtk_window_set_icon_from_file (GTK_WINDOW(main_window.window), GPHPEDIT_PIXMAP_FULL_PATH, NULL);
 	g_set_application_name (title);
 	gtk_window_set_default_icon_name ("gphpedit");
 	/* set RGBA colormap */        
@@ -578,8 +588,8 @@ void main_window_create(void)
 	main_window_create_maintoolbar();
 	main_window_create_findtoolbar();
 
-	create_infobar();
         main_window_create_panes();
+	create_infobar();
         main_window_fill_panes();
         main_window_create_appbar();
 	main_window_update_reopen_menu();
