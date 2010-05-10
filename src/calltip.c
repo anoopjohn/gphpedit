@@ -37,308 +37,301 @@ GString *completion_list_tree;
 gchar *cobol_keywords[] = {"ACCEPT","ACCESS","ACQUIRE","ACTUAL","ADD","ADDRESS","ADVANCING","AFTER","ALL","ALLOWING","ALPHABET","ALPHABETIC","ALPHABETIC-LOWER","ALPHABETIC-UPPER","ALPHANUMERIC","ALPHANUMERIC-EDITED","ALSO","ALTER","ALTERNATE","AND","ANY","APPLY","ARE","AREA","AREAS","ASCENDING","ASSIGN","ATTRIBUTE","AUTHOR","AUTO","AUTO-HYPHEN-SKIP","AUTO-SKIP","AUTOMATIC","AUTOTERMINATE","BACKGROUND-COLOR","BACKGROUND-COLOUR","BACKWARD","BASIS","BEEP","BEFORE","BEGINNING","BELL","BINARY","BLANK","BLINK","BLINKING","BLOCK","BOLD","BOTTOM","BOX","BOXED","CALL","CANCEL","CBL","CENTERED","CHAIN","CHAINING","CHANGED","CHARACTER","CHARACTERS","CHART","CLASS","CLOCK-UNITS","CLOSE","COBOL","CODE","CODE-SET","COL","COLLATING","COLOR","COLOUR","COLUMN","COM-REG","COMMA","COMMAND-LINE","COMMIT","COMMITMENT","COMMON","COMMUNICATION","COMP","COMP-0","COMP-1","COMP-2","COMP-3","COMP-4","COMP-5","COMP-6","COMP-X","COMPRESSION","COMPUTATIONAL","COMPUTATIONAL","COMPUTATIONAL-1","COMPUTATIONAL-2","COMPUTATIONAL-3","COMPUTATIONAL-4","COMPUTATIONAL-5","COMPUTATIONAL-6","COMPUTATIONAL-X","COMPUTE","CONFIGURATION","CONSOLE","CONTAINS","CONTENT","CONTINUE","CONTROL","CONTROL-AREA","CONTROLS","CONVERSION","CONVERT","CONVERTING","COPY","CORE-INDEX","CORR","CORRESPONDING","COUNT","CRT","CRT-UNDER","CSP","CURRENCY","CURRENT-DATE","CURSOR","CYCLE","CYL-INDEX","CYL-OVERFLOW","DATA","DATE","DATE-COMPILED","DATE-WRITTEN","DAY","DAY-OF-WEEK","DBCS","DEBUG","DEBUG-CONTENTS","DEBUG-ITEM","DEBUG-LINE","DEBUG-NAME","DEBUG-SUB-1","DEBUG-SUB-2","DEBUG-SUB-3","DEBUGGING","DECIMAL-POINT","DECLARATIVES","DEFAULT","DELETE","DELIMITED","DELIMITER","DEPENDING","DESCENDING","DESTINATION","DETAIL","DISABLE","DISK","DISP","DISPLAY","DISPLAY-1","DISPLAY-ST","DIVIDE","DIVISION","DOWN","DRAW","DROP","DUPLICATES","DYNAMIC","ECHO","EGCS","EGI","EJECT","ELSE","EMI","EMPTY-CHECK","ENABLE","ENCRYPTION","END","END-ACCEPT","END-ADD","END-CALL","END-CHAIN","END-COMPUTE","END-DELETE","END-DISPLAY","END-DIVIDE","END-EVALUATE","END-IF","END-INVOKE","END-MULTIPLY","END-OF-PAGE","END-PERFORM","END-READ","END-RECEIVE","END-RETURN","END-REWRITE","END-SEARCH","END-START","END-STRING","END-SUBTRACT","END-UNSTRING","END-WRITE","ENDING","ENTER","ENTRY","ENVIRONMENT","ENVIRONMENT-DIVISION","EOL","EOP","EOS","EQUAL","EQUALS","ERASE","ERROR","ESCAPE","ESI","EVALUATE","EVERY","EXAMINE","EXCEEDS","EXCEPTION","EXCESS-3","EXCLUSIVE","EXEC","EXECUTE","EXHIBIT","EXIT","EXTEND","EXTENDED-SEARCH","EXTERNAL","EXTERNALLY-DESCRIBED-KEY","FACTORY","FALSE","FH--FCD","FH--KEYDEF","FILE","FILE-CONTROL","FILE-ID","FILE-LIMIT","FILE-LIMITS","FILE-PREFIX","FILLER","FINAL","FIRST","FIXED","FOOTING","FOOTING","FOR","FOREGROUND-COLOR","FOREGROUND-COLOUR","FORMAT","FROM","FULL","FUNCTION","GENERATE","GIVING","GLOBAL","GO","GOBACK","GREATER","GRID","GROUP","HEADING","HIGH","HIGH-VALUE","HIGH-VALUES","HIGHLIGHT","I-O-CONTROL","IDENTIFICATION","IGNORE","INDEX","INDEXED","INDIC","INDICATE","INDICATOR","INDICATORS","INHERITING","INITIAL","INITIALIZE","INITIATE","INPUT","INPUT-OUTPUT","INSERT","INSPECT","INSTALLATION","INTO","INVALID","INVOKE","INVOKED","JAPANESE","JUST","JUSTIFIED","KANJI","KEPT","KEY","KEYBOARD","LABEL","LAST","LEADING","LEAVE","LEFT","LEFT-JUSTIFY","LEFTLINE","LENGTH","LENGTH-CHECK","LESS","LIMIT","LIMITS","LIN","LINAGE","LINAGE-COUNTER","LINE","LINE-COUNTER","LINES","LINKAGE","LOCAL-STORAGE","LOCK","LOCK-HOLDING","LOCKING","LOW","LOW-VALUE","LOW-VALUES","LOWER","LOWLIGHT","MANUAL","MASS-UPDATE","MASTER-INDEX","MEMORY","MERGE","MESSAGE","METHOD","MODE","MODIFIED","MODULES","MORE-LABELS","MOVE","MULTIPLE","MULTIPLY","NAME","NAMED","NATIONAL","NATIONAL-EDITED","NATIVE","NCHAR","NEGATIVE","NEXT","NO-ECHO","NOMINAL","NOT","NOTE","NSTD-REELS","NULL","NULLS","NUMBER","NUMERIC","NUMERIC-EDITED","NUMERIC-FILL","O-FILL","OBJECT","OBJECT-COMPUTER","OBJECT-STORAGE","OCCURS","OFF","OMITTED","OOSTACKPTR","OPEN","OPTIONAL","ORDER","ORGANIZATION","OTHER","OTHERS","OTHERWISE","OUTPUT","OVERFLOW","OVERLINE","PACKED-DECIMAL","PACKED-DECIMAL","PADDING","PAGE","PAGE-COUNTER","PARAGRAPH","PASSWORD","PERFORM","PIC","PICTURE","PLUS","POINTER","POP-UP","POS","POSITION","POSITIONING","POSITIVE","PREVIOUS","PRINT","PRINT-CONTROL","PRINT-SWITCH","PRINTER","PRINTER-1","PRINTING","PRIOR","PRIVATE","PROCEDURE","PROCEDURE-POINTER","PROCEDURES","PROCEED","PROCESS","PROCESSING","PROGRAM","PROGRAM-ID","PROMPT","PROTECTED","PUBLIC","PURGE","QUEUE","QUOTE","QUOTES","RANDOM","RANGE","READ","READERS","READY","RECEIVE","RECEIVE-CONTROL","RECORD","RECORD-OVERFLOW","RECORDING","RECORDS","REDEFINES","REEL","REFERENCE","REFERENCES","RELATIVE","RELEASE","RELOAD","REMAINDER","REMARKS","REMOVAL","RENAMES","REORG-CRITERIA","REPEATED","REPLACE","REPLACING","REPORT","REPORTING","REPORTS","REQUIRED","REREAD","RERUN","RESERVE","RESET","RESIDENT","RETURN","RETURN-CODE","RETURNING","REVERSE","REVERSE-VIDEO","REVERSED","REWIND","REWRITE","RIGHT","RIGHT-JUSTIFY","ROLLBACK","ROLLING","ROUNDED","RUN","S01","S02","S03","S04","S05","SAME","SCREEN","SCROLL","SEARCH","SECTION","SECURE","SECURITY","SEEK","SEGMENT","SEGMENT-LIMIT","SELECT","SELECTIVE","SELF","SELFCLASS","SEND","SENTENCE","SEPARATE","SEQUENCE","SEQUENTIAL","SERVICE","SET","SETSHADOW","SHIFT-IN","SHIFT-OUT","SIGN","SIZE","SKIP1","SKIP2","SKIP3","SORT","SORT-CONTROL","SORT-CORE-SIZE","SORT-FILE-SIZE","SORT-MERGE","SORT-MESSAGE","SORT-MODE-SIZE","SORT-OPTION","SORT-RETURN","SOURCE","SOURCE-COMPUTER","SPACE","SPACE-FILL","SPACES","SPACES","SPECIAL-NAMES","STANDARD","STANDARD-1","STANDARD-2","START","STARTING","STATUS","STOP","STORE","STRING","SUB-QUEUE-1","SUB-QUEUE-2","SUB-QUEUE-3","SUBFILE","SUBTRACT","SUM","SUPER","SUPPRESS","SYMBOLIC","SYNC","SYNCHRONIZED","SYSIN","SYSIPT","SYSLST","SYSOUT","SYSPCH","SYSPUNCH","SYSTEM-INFO","TAB","TALLYING","TAPE","TERMINAL","TERMINAL-INFO","TERMINATE","TEST","TEXT","THAN","THEN","THROUGH","THRU","TIME","TIME-OF-DAY","TIME-OUT","TIMEOUT","TIMES","TITLE","TOP","TOTALED","TOTALING","TRACE","TRACK-AREA","TRACK-LIMIT","TRACKS","TRAILING","TRAILING-SIGN","TRANSACTION","TRANSFORM","TRUE","TYPE","TYPEDEF","UNDERLINE","UNDERLINED","UNEQUAL","UNIT","UNLOCK","UNSTRING","UNTIL","UPDATE","UPDATERS","UPON","UPPER","UPSI-0","UPSI-1","UPSI-2","UPSI-3","UPSI-4","UPSI-5","UPSI-6","UPSI-7","USAGE","USE","USER","USING","VALUE","VALUES","VARIABLE","VARYING","WAIT","WHEN","WHEN-COMPILED","WINDOW","WITH","WORDS","WORKING-STORAGE","WRAP","WRITE","WRITE-ONLY","WRITE-VERIFY","WRITERSZERO","ZERO","ZERO-FILL","ZEROES","ZEROS",NULL};
 
 gchar *sql_keywords[] = {"ADD", "ALL", "ALTER", "ANALYZE", "AND", "AS", "ASC", "ASENSITIVE", "AUTO_INCREMENT", 
-						 "BDB", "BEFORE", "BERKELEYDB", "BETWEEN", "BIGINT", "BINARY", "BLOB", "BOTH", "BTREE",
-						 "BY", "CALL", "CASCADE", "CASE", "CHANGE", "CHAR", "CHARACTER", "CHECK", "COLLATE", 
-						 "COLUMN", "COLUMNS", "CONNECTION", "CONSTRAINT", "CREATE", "CROSS", "CURRENT_DATE", 
-						 "CURRENT_TIME", "CURRENT_TIMESTAMP", "CURSOR", "DATABASE", "DATABASES", "DAY_HOUR", 
-						 "DAY_MINUTE", "DAY_SECOND", "DEC", "DECIMAL", "DECLARE", "DEFAULT", "DELAYED", 
-						 "DELETE", "DESC", "DESCRIBE", "DISTINCT", "DISTINCTROW", "DIV", "DOUBLE", "DROP", 
-						 "ELSE", "ELSEIF", "ENCLOSED", "ERRORS", "ESCAPED", "EXISTS", "EXPLAIN", "FALSE", 
-						 "FIELDS", "FLOAT", "FOR", "FORCE", "FOREIGN", "FROM", "FULLTEXT", "GRANT", "GROUP", 
-						 "HASH", "HAVING", "HIGH_PRIORITY", "HOUR_MINUTE", "HOUR_SECOND", "IF", "IGNORE", 
-						 "IN", "INDEX", "INFILE", "INNER", "INNODB", "INOUT", "INSENSITIVE", "INSERT", "INT", 
-						 "INTEGER", "INTERVAL", "INTO", "IS", "ITERATE", "JOIN", "KEY", "KEYS", "KILL", 
-						 "LEADING", "LEAVE", "LEFT", "LIKE", "LIMIT", "LINES", "LOAD", "LOCALTIME", 
-						 "LOCALTIMESTAMP", "LOCK", "LONG", "LONGBLOB", "LONGTEXT", "LOOP", "LOW_PRIORITY", 
-						 "MASTER_SERVER_ID", "MATCH", "MEDIUMBLOB", "MEDIUMINT", "MEDIUMTEXT", "MIDDLEINT", 
-						 "MINUTE_SECOND", "MOD", "MRG_MYISAM", "NATURAL", "NOT", "NULL", "NUMERIC", "ON",
-						 "OPTIMIZE", "OPTION", "OPTIONALLY", "OR", "ORDER", "OUT", "OUTER", "OUTFILE", 
-						 "PRECISION", "PRIMARY", "PRIVILEGES", "PROCEDURE", "PURGE", "READ", "REAL", 
-						 "REFERENCES", "REGEXP", "RENAME", "REPEAT", "REPLACE", "REQUIRE", "RESTRICT", 
-						 "RETURN", "RETURNS", "REVOKE", "RIGHT", "RLIKE", "RTREE", "SELECT", "SENSITIVE", 
-						 "SEPARATOR", "SET", "SHOW", "SMALLINT", "SOME", "SONAME", "SPATIAL", "SPECIFIC", 
-						 "SQL_BIG_RESULT", "SQL_CALC_FOUND_ROWS", "SQL_SMALL_RESULT", "SSL", "STARTING", 
-						 "STRAIGHT_JOIN STRIPED", "TABLE", "TABLES", "TERMINATED", "THEN", "TINYBLOB", 
-						 "TINYINT", "TINYTEXT", "TO", "TRAILING", "TRUE", "TYPES", "UNION", "UNIQUE", 
-						 "UNLOCK", "UNSIGNED", "UNTIL", "UPDATE", "USAGE", "USE", "USER_RESOURCES", 
-						 "USING", "VALUES", "VARBINARY", "VARCHAR", "VARCHARACTER", "VARYING", "WARNINGS", 
-						 "WHEN", "WHERE", "WHILE", "WITH", "WRITE", "XOR", "YEAR_MONTH", "ZEROFILL", NULL};
+  "BDB", "BEFORE", "BERKELEYDB", "BETWEEN", "BIGINT", "BINARY", "BLOB", "BOTH", "BTREE",
+  "BY", "CALL", "CASCADE", "CASE", "CHANGE", "CHAR", "CHARACTER", "CHECK", "COLLATE", 
+  "COLUMN", "COLUMNS", "CONNECTION", "CONSTRAINT", "CREATE", "CROSS", "CURRENT_DATE", 
+  "CURRENT_TIME", "CURRENT_TIMESTAMP", "CURSOR", "DATABASE", "DATABASES", "DAY_HOUR", 
+  "DAY_MINUTE", "DAY_SECOND", "DEC", "DECIMAL", "DECLARE", "DEFAULT", "DELAYED", 
+  "DELETE", "DESC", "DESCRIBE", "DISTINCT", "DISTINCTROW", "DIV", "DOUBLE", "DROP", 
+  "ELSE", "ELSEIF", "ENCLOSED", "ERRORS", "ESCAPED", "EXISTS", "EXPLAIN", "FALSE", 
+  "FIELDS", "FLOAT", "FOR", "FORCE", "FOREIGN", "FROM", "FULLTEXT", "GRANT", "GROUP", 
+  "HASH", "HAVING", "HIGH_PRIORITY", "HOUR_MINUTE", "HOUR_SECOND", "IF", "IGNORE", 
+  "IN", "INDEX", "INFILE", "INNER", "INNODB", "INOUT", "INSENSITIVE", "INSERT", "INT", 
+  "INTEGER", "INTERVAL", "INTO", "IS", "ITERATE", "JOIN", "KEY", "KEYS", "KILL", 
+  "LEADING", "LEAVE", "LEFT", "LIKE", "LIMIT", "LINES", "LOAD", "LOCALTIME", 
+  "LOCALTIMESTAMP", "LOCK", "LONG", "LONGBLOB", "LONGTEXT", "LOOP", "LOW_PRIORITY", 
+  "MASTER_SERVER_ID", "MATCH", "MEDIUMBLOB", "MEDIUMINT", "MEDIUMTEXT", "MIDDLEINT", 
+  "MINUTE_SECOND", "MOD", "MRG_MYISAM", "NATURAL", "NOT", "NULL", "NUMERIC", "ON",
+  "OPTIMIZE", "OPTION", "OPTIONALLY", "OR", "ORDER", "OUT", "OUTER", "OUTFILE", 
+  "PRECISION", "PRIMARY", "PRIVILEGES", "PROCEDURE", "PURGE", "READ", "REAL", 
+  "REFERENCES", "REGEXP", "RENAME", "REPEAT", "REPLACE", "REQUIRE", "RESTRICT", 
+  "RETURN", "RETURNS", "REVOKE", "RIGHT", "RLIKE", "RTREE", "SELECT", "SENSITIVE", 
+  "SEPARATOR", "SET", "SHOW", "SMALLINT", "SOME", "SONAME", "SPATIAL", "SPECIFIC", 
+  "SQL_BIG_RESULT", "SQL_CALC_FOUND_ROWS", "SQL_SMALL_RESULT", "SSL", "STARTING", 
+  "STRAIGHT_JOIN STRIPED", "TABLE", "TABLES", "TERMINATED", "THEN", "TINYBLOB", 
+  "TINYINT", "TINYTEXT", "TO", "TRAILING", "TRUE", "TYPES", "UNION", "UNIQUE", 
+  "UNLOCK", "UNSIGNED", "UNTIL", "UPDATE", "USAGE", "USE", "USER_RESOURCES", 
+  "USING", "VALUES", "VARBINARY", "VARCHAR", "VARCHARACTER", "VARYING", "WARNINGS", 
+  "WHEN", "WHERE", "WHILE", "WITH", "WRITE", "XOR", "YEAR_MONTH", "ZEROFILL", NULL};
 void function_list_prepare(void)
 {
-	FILE *apifile;
-	char buffer[MAX_API_LINE_LENGTH];
-        gchar *api_dir = NULL;
-	/* use autoconf macro to build api file path */
-	api_dir = g_build_path (G_DIR_SEPARATOR_S, API_DIR, "php-gphpedit.api", NULL);
-	#ifdef DEBUGCALLTIP
-	g_print("DEBUG::PHP API PATH:'%s'\n",api_dir);
-	#endif
-	apifile = fopen(api_dir, "r");
-	if( apifile != NULL ) {
-		php_api_tree=g_tree_new ((GCompareFunc)strcmp);
-		while( fgets( buffer, MAX_API_LINE_LENGTH, apifile ) != NULL ) {
-			gchar *line=g_strdup(buffer);
-			gchar *token_line = line;
-			gchar *function_name = strtok(token_line, "|");
-			#ifdef DEBUGCALLTIP
-			g_print("function name:%s,rest:%s\n",function_name, (line + strlen(function_name)+1));
-			#endif
- 			g_tree_insert (php_api_tree, function_name, (line + strlen(function_name)+1));
-//			g_free(token_line);
-		}
-		fclose( apifile );
-	}
-	else {
-		g_print(_("WARNING: Could not open php-gphpedit.api file\n"));
-	}
-	g_free(api_dir);
+  FILE *apifile;
+  char buffer[MAX_API_LINE_LENGTH];
+  gchar *api_dir = NULL;
+  /* use autoconf macro to build api file path */
+  api_dir = g_build_path (G_DIR_SEPARATOR_S, API_DIR, "php-gphpedit.api", NULL);
+  #ifdef DEBUGCALLTIP
+    g_print("DEBUG::PHP API PATH:'%s'\n",api_dir);
+  #endif
+  apifile = fopen(api_dir, "r");
+  if( apifile != NULL ) {
+    php_api_tree=g_tree_new ((GCompareFunc)strcmp);
+    while( fgets( buffer, MAX_API_LINE_LENGTH, apifile ) != NULL ) {
+      gchar *line=g_strdup(buffer);
+      gchar *token_line = line;
+      gchar *function_name = strtok(token_line, "|");
+      #ifdef DEBUGCALLTIP
+        g_print("function name:%s,rest:%s\n",function_name, (line + strlen(function_name)+1));
+      #endif
+      g_tree_insert (php_api_tree, function_name, (line + strlen(function_name)+1));
+      //g_free(token_line);
+    }
+    fclose( apifile );
+  } else {
+    g_print(_("WARNING: Could not open php-gphpedit.api file\n"));
+  }
+  g_free(api_dir);
 }
 
 void css_function_list_prepare(void)
 {
-	FILE *apifile;
-	char buffer[MAX_API_LINE_LENGTH];
-        gchar *api_dir = NULL;
-	/* use autoconf macro to build api file path */
-	api_dir = g_build_path (G_DIR_SEPARATOR_S, API_DIR, "css.api", NULL);
-	#ifdef DEBUGCALLTIP
-	g_print("DEBUG::CSS API PATH:'%s'\n",api_dir);
-	#endif
-	apifile = fopen(api_dir, "r");
-	if( apifile != NULL ) {
-		css_api_tree=g_tree_new ((GCompareFunc)strcmp);
-		while( fgets( buffer, MAX_API_LINE_LENGTH, apifile ) != NULL ) {
-			gchar *line=g_strdup(buffer);
-			gchar *token_line = line;
-			gchar *function_name = strtok(token_line, "|");
-			#ifdef DEBUGCALLTIP
-			g_print("function name:%s,rest:%s\n",function_name, (line + strlen(function_name)+1));
-			#endif
- 			g_tree_insert (css_api_tree, function_name, (line + strlen(function_name)+1));
-			//g_free(line);
-		}
-		fclose( apifile );
-	}
-	else {
-		g_print(_("WARNING: Could not open php-gphpedit.api file\n"));
-	}
-	g_free(api_dir);
+  FILE *apifile;
+  char buffer[MAX_API_LINE_LENGTH];
+  gchar *api_dir = NULL;
+  /* use autoconf macro to build api file path */
+  api_dir = g_build_path (G_DIR_SEPARATOR_S, API_DIR, "css.api", NULL);
+  #ifdef DEBUGCALLTIP
+    g_print("DEBUG::CSS API PATH:'%s'\n",api_dir);
+  #endif
+  apifile = fopen(api_dir, "r");
+  if( apifile != NULL ) {
+    css_api_tree=g_tree_new ((GCompareFunc)strcmp);
+    while( fgets( buffer, MAX_API_LINE_LENGTH, apifile ) != NULL ) {
+      gchar *line=g_strdup(buffer);
+      gchar *token_line = line;
+      gchar *function_name = strtok(token_line, "|");
+      #ifdef DEBUGCALLTIP
+        g_print("function name:%s,rest:%s\n",function_name, (line + strlen(function_name)+1));
+      #endif
+      g_tree_insert (css_api_tree, function_name, (line + strlen(function_name)+1));
+      //g_free(line);
+    }
+    fclose( apifile );
+  } else {
+    g_print(_("WARNING: Could not open php-gphpedit.api file\n"));
+  }
+  g_free(api_dir);
 }
 static void get_css_api_line(GtkWidget *scintilla, gint wordStart, gint wordEnd)
 {
-	gchar *buffer = NULL;
-	gint length;
+  gchar *buffer = NULL;
+  gint length;
 
-	buffer = gtk_scintilla_get_text_range (GTK_SCINTILLA(scintilla), wordStart, wordEnd, &length);
-	gchar *value=g_tree_lookup (css_api_tree, buffer);
-	if (value){
-	gchar *copy=g_strdup (value);
-	/* replace | with \n */
-	gchar *description = strstr(copy, "|");
-	strncpy(description,"\n",1);
-	/* make calltip */
-	gchar *callti=g_strdup_printf ("%s %s", buffer,copy);
-	#ifdef DEBUGCALLTIP
-	g_print("CSS::calltip:%s\n",callti);
-	#endif
+  buffer = gtk_scintilla_get_text_range (GTK_SCINTILLA(scintilla), wordStart, wordEnd, &length);
+  gchar *value=g_tree_lookup (css_api_tree, buffer);
+  if (value){
+  gchar *copy=g_strdup (value);
+  /* replace | with \n */
+  gchar *description = strstr(copy, "|");
+  strncpy(description,"\n",1);
+  /* make calltip */
+  gchar *callti=g_strdup_printf ("%s %s", buffer,copy);
+  #ifdef DEBUGCALLTIP
+    g_print("CSS::calltip:%s\n",callti);
+  #endif
 
-	/* show calltip */
-	gtk_scintilla_call_tip_show(GTK_SCINTILLA(scintilla), wordStart, callti);
-	g_free(callti);
-	g_free(copy);	
-	}
-	g_free (buffer);
+  /* show calltip */
+  gtk_scintilla_call_tip_show(GTK_SCINTILLA(scintilla), wordStart, callti);
+  g_free(callti);
+  g_free(copy);	
+  }
+  g_free (buffer);
 }
-
-
 
 gboolean make_completion_string (gpointer key, gpointer value, gpointer data){
- if(g_str_has_prefix(key, (gchar *)data)){
-	if (!completion_list_tree) {
-	completion_list_tree = g_string_new(key);
-	}else{
-	completion_list_tree = g_string_append(completion_list_tree, " ");
-	completion_list_tree = g_string_append(completion_list_tree, key);
-	}
- }
- if (strncmp(key, (gchar *)data,MIN(strlen(key),strlen(data)))>0){
-	return TRUE;
-	}
- return FALSE;
+  if(g_str_has_prefix(key, (gchar *)data)){
+	    if (!completion_list_tree) {
+	      completion_list_tree = g_string_new(key);
+	    }else{
+	      completion_list_tree = g_string_append(completion_list_tree, " ");
+        completion_list_tree = g_string_append(completion_list_tree, key);
+      }
+  }
+  if (strncmp(key, (gchar *)data,MIN(strlen(key),strlen(data)))>0){
+    return TRUE;
+  }
+  return FALSE;
 }
-
 
 GString *get_css_completion_list(GtkWidget *scintilla, gint wordStart, gint wordEnd)
 {
-	GString *completion_list;
-	gchar *buffer = NULL;
-	gint length;
+  GString *completion_list;
+  gchar *buffer = NULL;
+  gint length;
 
-	buffer = gtk_scintilla_get_text_range (GTK_SCINTILLA(scintilla), wordStart, wordEnd, &length);
-	g_tree_foreach (css_api_tree, make_completion_string, buffer);
-	if (completion_list_tree != NULL) {
-		completion_list = g_string_new(completion_list_tree->str);
-		g_string_free (completion_list_tree,TRUE);
-		completion_list_tree=NULL;
-		g_free (buffer);
-		return completion_list;
-}
-	g_free(buffer);
-	return NULL;
+  buffer = gtk_scintilla_get_text_range (GTK_SCINTILLA(scintilla), wordStart, wordEnd, &length);
+  g_tree_foreach (css_api_tree, make_completion_string, buffer);
+  if (completion_list_tree != NULL) {
+    completion_list = g_string_new(completion_list_tree->str);
+    g_string_free (completion_list_tree,TRUE);
+    completion_list_tree=NULL;
+    g_free (buffer);
+    return completion_list;
+  }
+  g_free(buffer);
+  return NULL;
 }
 
 static void get_api_line(GtkWidget *scintilla, gint wordStart, gint wordEnd)
 {
-	gchar *buffer = NULL;
-	gchar *return_value;
-	gchar *params;
-	gchar *description;
-	gint length;
-	gchar *token_line, *copy_line;
+  gchar *buffer = NULL;
+  gchar *return_value;
+  gchar *params;
+  gchar *description;
+  gint length;
+  gchar *token_line, *copy_line;
 
-	buffer = gtk_scintilla_get_text_range (GTK_SCINTILLA(scintilla), wordStart, wordEnd, &length);
-	gchar *value=g_tree_lookup (php_api_tree, buffer);
-	if (value){
-	token_line = g_strdup (value);
-	copy_line = token_line;
-	return_value = strtok(token_line, "|");
-	params = strtok(NULL, "|");
-	description = strtok(NULL, "|");
-	/* make calltip */
-	gchar *callti=g_strdup_printf ("%s %s %s\n%s",return_value,buffer,params,description);
-	#ifdef DEBUGCALLTIP
-	g_print("CSS::calltip:%s\n",callti);
-	#endif
+  buffer = gtk_scintilla_get_text_range (GTK_SCINTILLA(scintilla), wordStart, wordEnd, &length);
+  gchar *value=g_tree_lookup (php_api_tree, buffer);
+  if (value){
+    token_line = g_strdup (value);
+    copy_line = token_line;
+    return_value = strtok(token_line, "|");
+    params = strtok(NULL, "|");
+    description = strtok(NULL, "|");
+    /* make calltip */
+    gchar *callti=g_strdup_printf ("%s %s %s\n%s",return_value,buffer,params,description);
+    #ifdef DEBUGCALLTIP
+      g_print("CSS::calltip:%s\n",callti);
+    #endif
 
-	/* show calltip */
-	gtk_scintilla_call_tip_show(GTK_SCINTILLA(scintilla), wordStart, callti);
-	g_free(callti);
-	g_free(copy_line);	
-	}
-	g_free (buffer);
+    /* show calltip */
+    gtk_scintilla_call_tip_show(GTK_SCINTILLA(scintilla), wordStart, callti);
+    g_free(callti);
+    g_free(copy_line);	
+  }
+  g_free (buffer);
 }
 
 static void get_completion_list(GtkWidget *scintilla, gint wordStart, gint wordEnd)
 {
-	gchar *buffer = NULL;
-	gint length;
+  gchar *buffer = NULL;
+  gint length;
 
-	buffer = gtk_scintilla_get_text_range (GTK_SCINTILLA(scintilla), wordStart, wordEnd, &length);
-	g_tree_foreach (php_api_tree, make_completion_string, buffer);
-	if (completion_list_tree != NULL) {
-		gtk_scintilla_autoc_show(GTK_SCINTILLA(scintilla), wordEnd-wordStart, completion_list_tree->str);
-		g_string_free (completion_list_tree,TRUE);
-		completion_list_tree=NULL;
-	}
-	g_free(buffer);
+  buffer = gtk_scintilla_get_text_range (GTK_SCINTILLA(scintilla), wordStart, wordEnd, &length);
+  g_tree_foreach (php_api_tree, make_completion_string, buffer);
+  if (completion_list_tree != NULL) {
+    gtk_scintilla_autoc_show(GTK_SCINTILLA(scintilla), wordEnd-wordStart, completion_list_tree->str);
+    g_string_free (completion_list_tree,TRUE);
+    completion_list_tree=NULL;
+  }
+  g_free(buffer);
 }
 
 void autocomplete_word(GtkWidget *scintilla, gint wordStart, gint wordEnd)
 {
-	get_completion_list(scintilla, wordStart, wordEnd);
+  get_completion_list(scintilla, wordStart, wordEnd);
 }
 
 GString *get_cobol_completion_list(GtkWidget *scintilla, gint wordStart, gint wordEnd)
 {
-	GString *completion_list;
-	gchar *buffer = NULL;
-	gint length;
-	guint n;
+  GString *completion_list;
+  gchar *buffer = NULL;
+  gint length;
+  guint n;
 
-	buffer = gtk_scintilla_get_text_range (GTK_SCINTILLA(scintilla), wordStart, wordEnd, &length);
+  buffer = gtk_scintilla_get_text_range (GTK_SCINTILLA(scintilla), wordStart, wordEnd, &length);
 
-	completion_list=NULL;
+  completion_list=NULL;
 
-	for (n = 0; cobol_keywords[n]!=NULL; n++) {
-		if (g_str_has_prefix(cobol_keywords[n], buffer)) {
-			if (completion_list == NULL) {
-				completion_list = g_string_new(cobol_keywords[n]);
-			}
-			else {
-				completion_list = g_string_append(completion_list, " ");
-				completion_list = g_string_append(completion_list, cobol_keywords[n]);
-			}
-		}
-	}
+  for (n = 0; cobol_keywords[n]!=NULL; n++) {
+    if (g_str_has_prefix(cobol_keywords[n], buffer)) {
+      if (completion_list == NULL) {
+        completion_list = g_string_new(cobol_keywords[n]);
+      } else {
+        completion_list = g_string_append(completion_list, " ");
+        completion_list = g_string_append(completion_list, cobol_keywords[n]);
+      }
+    }
+  }
 
-	if (completion_list != NULL) {
-		completion_list = g_string_append(completion_list, " ");
-	}
-	g_free (buffer);
-	#ifdef DEBUGCALLTIP
-	g_print("Cobol completion list :%s\n",completion_list->str);
-	#endif
-	return completion_list;
+  if (completion_list != NULL) {
+    completion_list = g_string_append(completion_list, " ");
+  }
+  g_free (buffer);
+  #ifdef DEBUGCALLTIP
+    g_print("Cobol completion list :%s\n",completion_list->str);
+  #endif
+  return completion_list;
 }
 
 
 GString *get_sql_completion_list(GtkWidget *scintilla, gint wordStart, gint wordEnd)
 {
-	GString *completion_list;
-	gchar *buffer = NULL;
-	gint length;
-	guint n;
+  GString *completion_list;
+  gchar *buffer = NULL;
+  gint length;
+  guint n;
 
-	buffer = gtk_scintilla_get_text_range (GTK_SCINTILLA(scintilla), wordStart, wordEnd, &length);
+  buffer = gtk_scintilla_get_text_range (GTK_SCINTILLA(scintilla), wordStart, wordEnd, &length);
 
-	completion_list=NULL;
+  completion_list=NULL;
 
-	for (n = 0; sql_keywords[n]!=NULL; n++) {
-		if (g_str_has_prefix(sql_keywords[n], buffer)) {
-			if (completion_list == NULL) {
-				completion_list = g_string_new(sql_keywords[n]);
-			}
-			else {
-				completion_list = g_string_append(completion_list, " ");
-				completion_list = g_string_append(completion_list, sql_keywords[n]);
-			}
-		}
-	}
+  for (n = 0; sql_keywords[n]!=NULL; n++) {
+    if (g_str_has_prefix(sql_keywords[n], buffer)) {
+        if (completion_list == NULL) {
+          completion_list = g_string_new(sql_keywords[n]);
+        }	else {
+          completion_list = g_string_append(completion_list, " ");
+          completion_list = g_string_append(completion_list, sql_keywords[n]);
+        }
+    }
+  }
 
-	if (completion_list != NULL) {
-		completion_list = g_string_append(completion_list, " ");
-	}
-	g_free (buffer);
-	return completion_list;
+  if (completion_list != NULL) {
+    completion_list = g_string_append(completion_list, " ");
+  }
+  g_free (buffer);
+  return completion_list;
 }
 
 
 
 void css_autocomplete_word(GtkWidget *scintilla, gint wordStart, gint wordEnd)
 {
-	GString *list;
+  GString *list;
 
-	list = get_css_completion_list(scintilla, wordStart, wordEnd);
+  list = get_css_completion_list(scintilla, wordStart, wordEnd);
 	
-	if (list) {
-		gtk_scintilla_autoc_show(GTK_SCINTILLA(scintilla), wordEnd-wordStart, list->str);
-		g_string_free(list, TRUE);
-	}
+  if (list) {
+    gtk_scintilla_autoc_show(GTK_SCINTILLA(scintilla), wordEnd-wordStart, list->str);
+    g_string_free(list, TRUE);
+  }
 }
 
 void cobol_autocomplete_word(GtkWidget *scintilla, gint wordStart, gint wordEnd)
 {
-	GString *list;
+  GString *list;
 
-	list = get_cobol_completion_list(scintilla, wordStart, wordEnd);
+  list = get_cobol_completion_list(scintilla, wordStart, wordEnd);
 
-	if (list) {
-		gtk_scintilla_autoc_show(GTK_SCINTILLA(scintilla), wordEnd-wordStart, list->str);
-		g_string_free(list, TRUE);
-	}
+  if (list) {
+    gtk_scintilla_autoc_show(GTK_SCINTILLA(scintilla), wordEnd-wordStart, list->str);
+    g_string_free(list, TRUE);
+  }
 }
 
 
 void sql_autocomplete_word(GtkWidget *scintilla, gint wordStart, gint wordEnd)
 {
-	GString *list;
+  GString *list;
 
-	list = get_sql_completion_list(scintilla, wordStart, wordEnd);
+  list = get_sql_completion_list(scintilla, wordStart, wordEnd);
 
-	if (list) {
-		gtk_scintilla_autoc_show(GTK_SCINTILLA(scintilla), wordEnd-wordStart, list->str);
-		g_string_free(list, FALSE);
-	}
+  if (list) {
+    gtk_scintilla_autoc_show(GTK_SCINTILLA(scintilla), wordEnd-wordStart, list->str);
+    g_string_free(list, FALSE);
+  }
 }
 
 //function to show the tool tip with a short description about the
@@ -346,34 +339,34 @@ void sql_autocomplete_word(GtkWidget *scintilla, gint wordStart, gint wordEnd)
 //corresponding function from the php-gphpedit.api file
 void show_call_tip(GtkWidget *scintilla,gint type, gint pos)
 {
-	gint wordStart;
-	gint wordEnd;
+  gint wordStart;
+  gint wordEnd;
 
-	wordStart = gtk_scintilla_word_start_position(GTK_SCINTILLA(scintilla), pos-1, TRUE);
-	wordEnd = gtk_scintilla_word_end_position(GTK_SCINTILLA(scintilla), pos-1, TRUE);
+  wordStart = gtk_scintilla_word_start_position(GTK_SCINTILLA(scintilla), pos-1, TRUE);
+  wordEnd = gtk_scintilla_word_end_position(GTK_SCINTILLA(scintilla), pos-1, TRUE);
 
-	if (type==TAB_PHP){
-	get_api_line(scintilla, wordStart, wordEnd);
-	} else {
-	get_css_api_line(scintilla, wordStart, wordEnd);
-	}
+  if (type==TAB_PHP){
+    get_api_line(scintilla, wordStart, wordEnd);
+  } else {
+    get_css_api_line(scintilla, wordStart, wordEnd);
+  }
 }
 
 gboolean free_php_tree_item (gpointer key, gpointer value, gpointer data){
-     g_tree_remove(css_api_tree, key);
-     g_free (key);
-     return FALSE;	
+  g_tree_remove(css_api_tree, key);
+  g_free (key);
+  return FALSE;	
 }
 
 gboolean free_css_tree_item (gpointer key, gpointer value, gpointer data){
-     g_tree_remove(css_api_tree, key);
-     g_free (key);
-     return FALSE;	
+  g_tree_remove(css_api_tree, key);
+  g_free (key);
+  return FALSE;	
 }
 void cleanup_calltip(void){
-	g_tree_foreach (php_api_tree,free_php_tree_item,NULL);
-	if (completion_list_tree != NULL) {
-	g_string_free (completion_list_tree,TRUE);	
-	}
-	g_tree_foreach (css_api_tree,free_css_tree_item,NULL);
+  g_tree_foreach (php_api_tree,free_php_tree_item,NULL);
+  if (completion_list_tree != NULL) {
+    g_string_free (completion_list_tree,TRUE);	
+  }
+  g_tree_foreach (css_api_tree,free_css_tree_item,NULL);
 }

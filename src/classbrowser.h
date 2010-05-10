@@ -2,7 +2,7 @@
  
    Copyright (C) 2003, 2004, 2005 Andy Jeffries <andy at gphpedit.org>
    Copyright (C) 2009 Anoop John <anoop dot john at zyxware.com>
-	  
+    
    For more information or to find the latest release, visit our 
    website at http://www.gphpedit.org/
  
@@ -37,32 +37,32 @@ extern guint classbrowser_id;
 
 typedef struct
 {
-	gchar *filename;
-	gboolean accessible;
-	time_t modified_time;
+  gchar *filename;
+  gboolean accessible;
+  time_t modified_time;
 }
 ClassBrowserFile;
 
 typedef struct
 {
-	gchar *functionname;
-	gchar *paramlist;
-	gchar *filename;
-	guint line_number;
-	guint class_id;
-	gchar *classname;
-	gboolean remove;
-	guint identifierid;
+  gchar *functionname;
+  gchar *paramlist;
+  gchar *filename;
+  guint line_number;
+  guint class_id;
+  gchar *classname;
+  gboolean remove;
+  guint identifierid;
 }
 ClassBrowserFunction;
 
 typedef struct
 {
-	gchar *classname;
-	gchar *filename;
-	guint line_number;
-	gboolean remove;
-	guint identifierid;
+  gchar *classname;
+  gchar *filename;
+  guint line_number;
+  gboolean remove;
+  guint identifierid;
 }
 ClassBrowserClass;
 
