@@ -57,10 +57,6 @@ void scintilla_cobol_set_lexer(GtkScintilla *scintilla, Preferences prefs)
   //gtk_scintilla_set_sel_back (GTK_SCINTILLA(editor->scintilla), TRUE, prefs.set_sel_back);
   //gtk_scintilla_marker_set_back (GTK_SCINTILLA(editor->scintilla), TRUE, prefs.marker_back);
 
-  gtk_scintilla_set_caret_fore (scintilla, 0);
-  gtk_scintilla_set_caret_width (scintilla, 2);
-  gtk_scintilla_set_caret_period (scintilla, 250);
-
   gtk_scintilla_style_set_font (scintilla, STYLE_BRACELIGHT, prefs.php_default_font);
   gtk_scintilla_style_set_fore (scintilla, STYLE_BRACELIGHT, 16711680);// Matching bracket
   gtk_scintilla_style_set_back (scintilla, STYLE_BRACELIGHT, prefs.php_default_back);

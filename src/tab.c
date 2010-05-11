@@ -96,7 +96,11 @@ void tab_set_general_scintilla_properties(Editor *editor)
   gtk_scintilla_autoc_set_drop_rest_of_word(GTK_SCINTILLA (editor->scintilla), FALSE);
   gtk_scintilla_set_scroll_width_tracking(GTK_SCINTILLA (editor->scintilla), TRUE);
   gtk_scintilla_set_code_page(GTK_SCINTILLA(editor->scintilla), 65001); // Unicode code page
-  
+
+  gtk_scintilla_set_caret_fore (GTK_SCINTILLA(editor->scintilla), 0);
+  gtk_scintilla_set_caret_width (GTK_SCINTILLA(editor->scintilla), 2);
+  gtk_scintilla_set_caret_period (GTK_SCINTILLA(editor->scintilla), 250);
+
   g_signal_connect (G_OBJECT (editor->scintilla), "save_point_reached", G_CALLBACK (save_point_reached), NULL);
   g_signal_connect (G_OBJECT (editor->scintilla), "save_point_left", G_CALLBACK (save_point_left), NULL);
   g_signal_connect (G_OBJECT (editor->scintilla), "macro_record", G_CALLBACK (macro_record), NULL);
