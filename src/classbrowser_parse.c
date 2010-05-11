@@ -23,7 +23,7 @@
 */
 
 #include "classbrowser_parse.h"
-//#define DEBUG_CLASSBROWSER 1
+//#define DEBUG_CLASSBROWSER
 
 
 static gchar *read_text_file( gchar *filename )
@@ -67,13 +67,7 @@ static gboolean is_whitespace(gchar character)
 
 static gboolean is_identifier_char(gchar character)
 {
-  if ((character >= 'a') && (character <= 'z')) {
-    return TRUE;
-  }
-  if ((character >= 'A') && (character <= 'Z')) {
-    return TRUE;
-  }
-  if ((character >= '0') && (character <= '9')) {
+  if (g_ascii_isalnum (character)) {
     return TRUE;
   }
   if (character == '_') {
