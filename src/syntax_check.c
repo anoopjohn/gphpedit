@@ -130,6 +130,77 @@ GString *save_as_temp_file(void)
   return NULL;
 }
 
+// function from http://devpinoy.org/blogs/cvega/archive/2006/06/19/xtoi-hex-to-integer-c-function.aspx
+// Converts a hexadecimal string to integer
+int xtoi(const char* xs, unsigned int* result)
+{
+  size_t szlen = strlen(xs);
+  int i, xv, fact;
+
+ if (szlen > 0)
+ {
+
+  // Converting more than 32bit hexadecimal value?
+  if (szlen>8) return 2; // exit
+
+  // Begin conversion here
+  *result = 0;
+  fact = 1;
+
+  // Run until no more character to convert
+  for(i=szlen-1; i>=0 ;i--)
+  {
+   if (g_ascii_isxdigit(*(xs+i)))
+   {
+    if (*(xs+i)>=97)
+    {
+     xv = ( *(xs+i) - 97) + 10;
+    }
+    else if ( *(xs+i) >= 65)
+    {
+     xv = (*(xs+i) - 65) + 10;
+    }
+    else
+    {
+     xv = *(xs+i) - 48;
+    }
+    *result += (xv * fact);
+    fact *= 16;
+   }
+   else
+   {
+    // Conversion was abnormally terminated
+    // by non hexadecimal digit, hence
+    // returning only the converted with
+    // an error value 4 (illegal hex character)
+    return 4;
+   }
+  }
+ }
+
+ // Nothing to convert
+ return 1;
+}
+/**
+ * Replace any %xx escapes by their single-character equivalent.
+ */
+static void unquote(char *s) {
+	char *o = s;
+	while (*s) {
+		if ((*s == '%') && s[1] && s[2]) {
+      guint a;
+      const char *xl[]={*(s+1),*(s+2),0};
+      xtoi(&xl, &a);
+			*o = a;
+			s += 2;
+		} else {
+			*o = *s;
+		}
+		o++;
+		s++;
+	}
+	*o = '\0';
+}
 
 void syntax_check_run(void)
 {
@@ -155,11 +226,11 @@ void syntax_check_run(void)
       filename = save_as_temp_file();
       using_temp = TRUE;
     }
-
+    unquote(filename->str);
     command_line = g_string_new(preferences.php_binary_location);
-    command_line = g_string_append(command_line, " -q -l -d html_errors=Off -f ");
+    command_line = g_string_append(command_line, " -q -l -d html_errors=Off -f '");
     command_line = g_string_append(command_line, filename->str);
-
+    command_line = g_string_append(command_line, "'");
     g_print("eject:%s\n", command_line->str);
 
     output = run_php_lint(command_line->str);
