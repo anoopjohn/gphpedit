@@ -27,7 +27,6 @@
 
 #include "main.h"
 
-gchar *merge_font (gchar *modifier);
 gint scintilla_color(gint red, gint green, gint blue);
 
 #endif

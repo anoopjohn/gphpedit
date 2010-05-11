@@ -25,30 +25,6 @@
 #include "tab_util.h"
 #include "preferences.h"
 
-gchar *merge_font (gchar *modifier)
-{
-	gint i;
-	gchar **df, **sf;
-	gchar *merged;
-
-	df = g_strsplit (preferences.default_font, "-", -1);
-	sf = g_strsplit (modifier, "-", -1);
-
-	for (i = 1; (df[i] != NULL) && (sf[i] != NULL); i++) {
-		if (g_ascii_strcasecmp (sf[i], "*") != 0)
-			g_stpcpy (df[i], sf[i]);
-	}
-
-	merged = g_strjoinv ("-", df);
-
-	g_strfreev (df);
-	g_strfreev (sf);
-
-	return merged;
-}
-
-
-
 gint scintilla_color(gint red, gint green, gint blue)
 {
 	return red | (green << 8) | (blue << 16);

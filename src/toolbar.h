@@ -28,39 +28,39 @@
 
 typedef struct
 {
-        GtkWidget *toolbar;
-	GtkWidget *button_new;
-	GtkWidget *button_open;
-	GtkWidget *button_save;
-	GtkWidget *button_save_as;
-	GtkWidget *button_close;
-	GtkWidget *button_undo;
-	GtkWidget *button_redo;
-	GtkWidget *button_cut;
-	GtkWidget *button_copy;
-	GtkWidget *button_paste;
-	GtkWidget *button_find;
-	GtkWidget *button_replace;
-	GtkToolItem *toolbar_separator;
-	GtkWidget *button_indent;
-	GtkWidget *button_unindent;
-	GtkWidget *button_zoom_in;
-	GtkWidget *button_zoom_out;
-        GtkWidget *button_zoom_100;
+  GtkWidget *toolbar;
+  GtkWidget *button_new;
+  GtkWidget *button_open;
+  GtkWidget *button_save;
+  GtkWidget *button_save_as;
+  GtkWidget *button_close;
+  GtkWidget *button_undo;
+  GtkWidget *button_redo;
+  GtkWidget *button_cut;
+  GtkWidget *button_copy;
+  GtkWidget *button_paste;
+  GtkWidget *button_find;
+  GtkWidget *button_replace;
+  GtkToolItem *toolbar_separator;
+  GtkWidget *button_indent;
+  GtkWidget *button_unindent;
+  GtkWidget *button_zoom_in;
+  GtkWidget *button_zoom_out;
+  GtkWidget *button_zoom_100;
 }
 Maintoolbar;
 typedef struct
 {
-        GtkWidget *toolbar;
- 	GtkToolItem *toolbar_separator;
- 	GtkWidget *toolbar_find;
-	GtkWidget *search_label;
-	GtkWidget *search_entry;
-	GtkWidget *goto_label;
-	GtkWidget *goto_entry;
-        GtkWidget *cleanimg;
-	GtkEntryCompletion *completion;
-	GtkTreeModel *completion_model;
+  GtkWidget *toolbar;
+  GtkToolItem *toolbar_separator;
+  GtkWidget *toolbar_find;
+  GtkWidget *search_label;
+  GtkWidget *search_entry;
+  GtkWidget *goto_label;
+  GtkWidget *goto_entry;
+  GtkWidget *cleanimg;
+  GtkEntryCompletion *completion;
+  GtkTreeModel *completion_model;
 }
 Findtoolbar;
 
