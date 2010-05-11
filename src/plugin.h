@@ -35,10 +35,10 @@
 
 typedef struct
 {
-	guint type;
-	gchar *filename;
-	gchar *name;
-	gchar *description;
+  guint type;
+  gchar *filename;
+  gchar *name;
+  gchar *description;
 } Plugin;
 
 gint parse_shortcut(gint accel_number);

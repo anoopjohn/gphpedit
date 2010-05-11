@@ -1006,7 +1006,7 @@ void fb_file_v_drag_data_received(GtkWidget * widget, GdkDragContext * context, 
  *
  * Return value: the same gchar * as passed to the function
  **/
-static gchar *trunc_on_char(gchar * string, gchar which_char)
+gchar *trunc_on_char(gchar * string, gchar which_char)
 {
   gchar *tmpchar = string;
   while(*tmpchar) {
