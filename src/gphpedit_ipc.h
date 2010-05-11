@@ -30,10 +30,8 @@
 
 G_BEGIN_DECLS
 
-
 gboolean poke_existing_instance (int argc, char **argv);
 void     shutdown_ipc (void);
-
 
 G_END_DECLS
 

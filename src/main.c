@@ -34,87 +34,87 @@
 
 #ifdef ENABLE_NLS
 #include <locale.h>
-#endif							/* ENABLE_NLS */
+#endif              /* ENABLE_NLS */
 
 int main (int argc, char **argv)
 {
 #ifdef ENABLE_NLS
-	setlocale (LC_ALL, "");
-        bindtextdomain(GETTEXT_PACKAGE, PACKAGE_LOCALE_DIR);
-	bind_textdomain_codeset (GETTEXT_PACKAGE, "UTF-8");
-	textdomain (GETTEXT_PACKAGE);
-#endif							/* ENABLE_NLS */
-       if (!g_thread_supported())
-		g_thread_init(NULL);
+  setlocale (LC_ALL, "");
+  bindtextdomain(GETTEXT_PACKAGE, PACKAGE_LOCALE_DIR);
+  bind_textdomain_codeset (GETTEXT_PACKAGE, "UTF-8");
+  textdomain (GETTEXT_PACKAGE);
+#endif              /* ENABLE_NLS */
+  if (!g_thread_supported())
+    g_thread_init(NULL);
 
-        gtk_init(&argc, &argv);
-        gconf_init(argc, argv, NULL);
+  gtk_init(&argc, &argv);
+  gconf_init(argc, argv, NULL);
         
-	preferences_load();
+  preferences_load();
 
-    /* Start of IPC communication */
-    if (preferences.single_instance_only && poke_existing_instance (argc - 1, argv + 1))
-        return 0;
+  /* Start of IPC communication */
+  if (preferences.single_instance_only && poke_existing_instance (argc - 1, argv + 1))
+    return 0;
 
-	main_window_create();
+  main_window_create();
 
-	force_config_folder();
-        template_db_open();
-	main_window_open_command_line_files(argv, argc);
-	if (main_window.current_editor == NULL) {
-		session_reopen();
-	}
-	create_untitled_if_empty();
+  force_config_folder();
+  template_db_open();
+  main_window_open_command_line_files(argv, argc);
+  if (main_window.current_editor == NULL) {
+    session_reopen();
+  }
+  create_untitled_if_empty();
 
-	gtk_main();
+  gtk_main();
         
-	/* it makes sense to install sigterm handler that would call this too */
-    	shutdown_ipc ();
+  /* it makes sense to install sigterm handler that would call this too */
+  shutdown_ipc ();
 
-	return 0;
+  return 0;
 }
 
 gint debug(char *formatstring, ...)
 {
   GtkWidget *dlg;
-	char *buf, *temp;
-	temp = (char*) calloc(500, sizeof(char));
-	buf = (char*) calloc(500, sizeof(char));
-	va_list arguments;
-	va_start(arguments, formatstring);
-	int i  ;
-	for (i =0 ; formatstring[i] != '\0'; i++) {
-		if (formatstring[i] != '%' ) {
-			strncat(buf, formatstring + i, 1);
-		}
-		else {
-			switch (formatstring[++i]) {
-				case 's':
-					strcat(buf, va_arg(arguments, char*));
-					continue;
-				case 'd':
-					sprintf(temp, "%d", va_arg(arguments, int));
-					strcat(buf, temp);
-					continue;
-				case 'f':
-					sprintf(temp, "%f", va_arg(arguments, double));
-					strcat(buf, temp);
-					continue;
-				case 'l':
-					sprintf(temp, "%ld", va_arg(arguments, long));
-					strcat(buf,temp);
-					continue;
-				case 'c':
-					sprintf(temp, "%c", va_arg(arguments, int));
-					strcat(buf,temp);
-					continue;
-				case 'p':
-					sprintf(temp, "%p", va_arg(arguments, int*));
-					strcat(buf,temp);
-				continue;
-			}
-		}
-	}
+  char *buf, *temp;
+  temp = (char*) calloc(500, sizeof(char));
+  buf = (char*) calloc(500, sizeof(char));
+  va_list arguments;
+  va_start(arguments, formatstring);
+  int i  ;
+  for (i =0 ; formatstring[i] != '\0'; i++) {
+    if (formatstring[i] != '%' ) {
+      strncat(buf, formatstring + i, 1);
+    }
+    else {
+      switch (formatstring[++i]) {
+        case 's':
+          strcat(buf, va_arg(arguments, char*));
+          continue;
+        case 'd':
+          sprintf(temp, "%d", va_arg(arguments, int));
+          strcat(buf, temp);
+          continue;
+        case 'f':
+          sprintf(temp, "%f", va_arg(arguments, double));
+          strcat(buf, temp);
+          continue;
+        case 'l':
+          sprintf(temp, "%ld", va_arg(arguments, long));
+          strcat(buf,temp);
+          continue;
+        case 'c':
+          sprintf(temp, "%c", va_arg(arguments, int));
+          strcat(buf,temp);
+          continue;
+        case 'p':
+          sprintf(temp, "%p", va_arg(arguments, int*));
+          strcat(buf,temp);
+        continue;
+      }
+    }
+  }
   dlg = gtk_message_dialog_new (GTK_WINDOW(main_window.window),
                                 GTK_DIALOG_DESTROY_WITH_PARENT,
                                 GTK_MESSAGE_INFO,
@@ -123,6 +123,6 @@ gint debug(char *formatstring, ...)
                                 buf);
   gtk_dialog_run (GTK_DIALOG (dlg));
   gtk_widget_destroy (dlg);  
-	va_end(arguments);
-	return 0;
+  va_end(arguments);
+  return 0;
 }

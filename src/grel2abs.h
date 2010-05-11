@@ -16,5 +16,4 @@
  * along with this library; If not, see <http://www.gnu.org/licenses/>.
  */
 
-
 gchar * g_rel2abs (const gchar *path, const gchar *base, gchar *result, const size_t size);
