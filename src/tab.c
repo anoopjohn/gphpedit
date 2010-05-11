@@ -413,12 +413,9 @@ void tab_file_opened (GObject *source_object, GAsyncResult *res, gpointer user_d
  const char*contenttype= g_file_info_get_content_type (info);
   /*we could open text based types so if it not a text based content don't open and displays error*/
   if (!IS_TEXT(contenttype) || IS_APPLICATION(contenttype)){
-    g_print("Sorry, I can open this kind of file.\n");
+    info_dialog (_("gPHPEdit"), _("Sorry, I can open this kind of file.\n"));
     editor->filename = g_string_new(_("Untitled"));
     editor->short_filename = g_strdup(editor->filename->str);
-    if (main_window.current_editor) {
-      editor->opened_from = get_folder(main_window.current_editor->filename);
-    }
     editor->is_untitled=TRUE;
     return;
   }

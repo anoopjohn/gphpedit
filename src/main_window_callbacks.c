@@ -1987,7 +1987,7 @@ void check_externaly_modified(void){
     info= g_file_query_info (file,"time::modified,time::modified-usec",G_FILE_QUERY_INFO_NONE, NULL,&error);
     g_object_unref(file);
     if (!info){
-      if (error->code!=G_IO_ERROR_NOT_FOUND){
+      if (error->code!=G_IO_ERROR_NOT_FOUND && error->code!=G_IO_ERROR_NOT_SUPPORTED){
         g_warning (_("Could not get the file modification time for file: '%s'. GIO error: %s \n"), main_window.current_editor->short_filename,error->message);
        }
         g_error_free (error);
