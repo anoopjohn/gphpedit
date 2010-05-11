@@ -189,8 +189,9 @@ static void unquote(char *s) {
 	while (*s) {
 		if ((*s == '%') && s[1] && s[2]) {
       guint a;
-      const char *xl[]={*(s+1),*(s+2),0};
-      xtoi(&xl, &a);
+      char xl[3]={*(s+1),*(s+2),0};
+      const char *t=xl;
+      xtoi(t, &a);
 			*o = a;
 			s += 2;
 		} else {
