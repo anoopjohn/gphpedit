@@ -214,6 +214,9 @@ static void create_side_panel(void){
   GtkWidget *hbox;
   hbox = gtk_hbox_new(FALSE, 0);
   main_window.chkOnlyCurFileFuncs = gtk_check_button_new_with_label(_("Parse only current file"));
+  GConfClient *config;
+  config=gconf_client_get_default ();
+  gtk_toggle_button_set_active ((GtkToggleButton *)main_window.chkOnlyCurFileFuncs,gconf_client_get_int (config,"/gPHPEdit/classbrowser/onlycurrentfile",NULL));
   gtk_widget_show (main_window.chkOnlyCurFileFuncs);
   gtk_widget_show (hbox);
   gtk_box_pack_start(GTK_BOX(hbox), main_window.chkOnlyCurFileFuncs, TRUE, TRUE, 10);

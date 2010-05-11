@@ -1953,6 +1953,10 @@ void force_python(GtkWidget *widget)
 //or when the checkbox is clicked and the files tabbar is clicked
 gint on_parse_current_click (GtkWidget *widget)
 {
+  GConfClient *config;
+  config=gconf_client_get_default ();
+  gconf_client_set_int (config,"/gPHPEdit/classbrowser/onlycurrentfile", gtk_toggle_button_get_active((GtkToggleButton *)widget),NULL);
+  
   classbrowser_update();
   return 0;
 }
