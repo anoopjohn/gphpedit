@@ -33,16 +33,20 @@ gchar *run_php_lint(gchar *command_line)
   gchar *stdout;
   gint exit_status;
   GError *error;
-
+  gchar *stdouterr;
   error = NULL;
 
   result = g_spawn_command_line_sync (command_line,
-                                      &stdout, NULL, &exit_status, &error);
+                                      &stdout, &stdouterr, &exit_status, &error);
 
   if (!result) {
     return NULL;
   }
-  return stdout;
+  gchar *res =g_strdup_printf ("%s\n%s",stdouterr,stdout);
+
+  g_free(stdouterr);
+  g_free(stdout);
+  return res;
 }
 
 
@@ -56,7 +60,6 @@ void syntax_add_lines(gchar *output)
   gint line_start;
   gint line_end;
   gint indent;
-
   first_error = 0;
   copy = output;
   gtk_scintilla_set_indicator_current(GTK_SCINTILLA(main_window.current_editor->scintilla), 20);
@@ -64,12 +67,14 @@ void syntax_add_lines(gchar *output)
   gtk_scintilla_indic_set_fore(GTK_SCINTILLA(main_window.current_editor->scintilla), 20, 0x0000ff);
   while ((token = strtok(copy, "\n"))) {
     if ((strncmp(token, "PHP Warning:  ", MIN(strlen(token), 14))!=0) && (strncmp(token, "Content-type", MIN(strlen(token), 12))!=0)) { 
+      if (g_str_has_prefix(token,"PHP Parse error:  syntax error, ")){
+      token+=strlen("PHP Parse error:  syntax error, ");
+      }
       gtk_list_store_append (main_window.lint_store, &iter);
       gtk_list_store_set (main_window.lint_store, &iter, 0, token, -1);
   
       line_number = strrchr(token, ' ');
       line_number++;
-  
       if (atoi(line_number)>0) {
         if (!first_error) {
           first_error = line_number;
