@@ -35,6 +35,7 @@ autom4te.cache
 patches
 gphpedit.spec
 po/stamp-it
+po/*.gmo
 src/gtkscintilla2/libgtkscintilla2.so.*
 src/gtkscintilla2/scintilla/delbin.bat
 src/gtkscintilla2/scintilla/delcvs.bat
