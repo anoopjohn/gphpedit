@@ -17,6 +17,7 @@ New Features and Fixes
 - Various plugin system upgrades
 - Add check for externally modified files
 - Remember incremental search strings
-- Added CSS calltips support.
-- Speed up Calltip/autocomplete lists.
+- Added CSS calltips support
+- Speed up Calltip/autocomplete lists
+- Auto-Completion of Brackets and Quotes
 - Misc bugfixes and code cleanups

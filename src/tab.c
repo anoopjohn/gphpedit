@@ -469,17 +469,25 @@ void tab_help_load_file(Editor *editor, GString *filename)
   GFileInfo *info;
   GError *error=NULL;
   gchar *buffer;
+#ifdef PHP_DOC_DIR
   goffset size;
+#endif
   gsize nchars;
   gchar *filenam=convert_to_full(filename->str);
   file=g_file_new_for_uri (filenam);
   g_free(filenam);
+#ifdef PHP_DOC_DIR
   info=g_file_query_info (file,"standard::size,standard::icon",0,NULL,&error);
+#else
+  info=g_file_query_info (file,"standard::icon",0,NULL,&error);
+#endif
   if (!info){
     g_warning (_("Could not get file info for file %s. GIO error: %s \n"), filename->str,error->message);
     return;
   }
+#ifdef PHP_DOC_DIR
   size= g_file_info_get_size (info);
+#endif
   GIcon *icon= g_file_info_get_icon (info); /* get Gicon for mimetype*/
   gchar *iconname=icon_name_from_icon(icon);
   editor->file_icon=gtk_icon_theme_load_icon (gtk_icon_theme_get_default (), iconname, GTK_ICON_SIZE_MENU, 0, NULL); // get icon of size menu
@@ -491,7 +499,9 @@ void tab_help_load_file(Editor *editor, GString *filename)
     g_object_unref(file);
     return;
   }
+#ifdef PHP_DOC_DIR
   if (size != nchars) g_warning (_("File size and loaded size not matching"));
+#endif
   webkit_web_view_load_string (WEBKIT_WEB_VIEW(editor->help_view),buffer,"text/html", "UTF-8", filename->str);
 
   g_free (buffer);
@@ -559,20 +569,21 @@ GString *tab_help_find_helpfile(gchar *command)
  g_print(_("Help for function not found: %s\n"), command);
  return long_filename;
 #else
-  g_print(_("PHP-Help not compiled in. Help for function not found: %s\n"), command);
+  long_filename = g_string_new("http://www.php.net/manual/en/function.");
+  long_filename = g_string_append(long_filename, command);
+  long_filename = g_string_append(long_filename, ".php");
+  GFile *temp= g_file_new_for_uri (long_filename->str);
+  if(g_file_query_exists(temp,NULL)){
+  g_object_unref(temp);
   return long_filename;
+  }else{
+  g_object_unref(temp);
+  g_print(_("Help for function not found: %s\n"), command);
+  return NULL;
+  }
 #endif
 }
 /*
-//return a substring skip n char from str
-void substring(char *str, char *subst, int start, int lenght)
-{
-int i;
-
-for(i=0; i<lenght && start+i<strlen(str); i++)
-subst[i] = str[start+i];
-subst[i] = '\0';
-} 
 */
 gboolean webkit_link_clicked (WebKitWebView *web_view, WebKitWebFrame *frame, WebKitNetworkRequest *request,
                                                         WebKitWebNavigationAction *navigation_action,
@@ -582,16 +593,6 @@ gboolean webkit_link_clicked (WebKitWebView *web_view, WebKitWebFrame *frame, We
   gchar *uri= (gchar *)webkit_network_request_get_uri(request);
   if (uri){
     GString *filename;
-  /*
-    char *resp;
-    int cant;
-    if(strstr(uri, "#")!=NULL){
-    // it's a direction like filename.html#refpoint
-    resp = strchr(uri,'#');
-    cant=resp-uri; //len filename without refpoint
-    substring(uri, uri, 0, cant); //skips refpoint part
-    }
-  */
     //if it's a direction like filename.html#refpoint skips refpoint part
     uri=trunc_on_char(uri, '#');
     if (editor->type==TAB_HELP){ 
@@ -615,10 +616,10 @@ gboolean webkit_link_clicked (WebKitWebView *web_view, WebKitWebFrame *frame, We
         //is uncommented stating that there were duplicate free calls.
         //g_free(editor->short_filename);
         //g_free(editor->help_function);
-        editor->short_filename = g_strconcat("Help: ", uri, NULL);
+        editor->short_filename = g_strconcat(_("Help: "), uri, NULL);
       } else {
         editor->filename = g_string_prepend(editor->filename, _("Preview: "));
-        editor->short_filename = g_strconcat("Preview: ", uri, NULL);
+        editor->short_filename = g_strconcat(_("Preview: "), uri, NULL);
       }
       editor->help_function = g_strdup(uri);
       return true;
@@ -633,12 +634,14 @@ notify_title_cb (WebKitWebView* web_view, GParamSpec* pspec, Editor *editor)
    char *main_title = g_strdup (webkit_web_view_get_title(web_view));
    if (main_title){
    if (editor->type==TAB_HELP){
-     editor->short_filename = g_strconcat("Help: ", main_title, NULL);
+     editor->short_filename = g_strconcat(_("Help: "), main_title, NULL);
    } else {
-     editor->short_filename = g_strconcat("Preview: ", main_title, NULL);
+     editor->short_filename = g_strconcat(_("Preview: "), main_title, NULL);
    }
+#ifdef PHP_DOC_DIR
    if (editor->help_function) g_free(editor->help_function);
      editor->help_function = main_title;
+#endif
      gtk_label_set_text(GTK_LABEL(editor->label), editor->short_filename);
      update_app_title();
    }
@@ -666,7 +669,7 @@ gboolean tab_create_help(Editor *editor, GString *filename)
   else {
     editor->short_filename = caption->str;
     editor->help_function = g_strdup(filename->str);
-    editor->filename = caption;
+    editor->filename = long_filename;
     editor->label = gtk_label_new (caption->str);
     editor->is_untitled = FALSE;
     editor->saved = TRUE;
@@ -677,8 +680,9 @@ gboolean tab_create_help(Editor *editor, GString *filename)
     gtk_container_add(GTK_CONTAINER(editor->help_scrolled_window), GTK_WIDGET(editor->help_view));
   
     tab_help_load_file(editor, long_filename);
-    
-    //debug("%s - %s", long_filename, caption->str);
+    #ifdef DEBUGTAB
+    g_print("DEBUG::Help file->filename:%s - caption:->%s\n", long_filename, caption->str);
+    #endif
 
     g_signal_connect(G_OBJECT(editor->help_view), "navigation-policy-decision-requested",
        G_CALLBACK(webkit_link_clicked),editor);
@@ -713,7 +717,9 @@ gboolean tab_create_preview(Editor *editor, GString *filename)
   
   tab_help_load_file(editor, filename);
 
-  //debug("%s - %s", long_filename, caption->str);
+    #ifdef DEBUGTAB
+    g_print("DEBUG::Preview file->filename:%s - caption:->%s\n", long_filename, caption->str);
+    #endif
 
   g_signal_connect(G_OBJECT(editor->help_view), "navigation-policy-decision-requested",
        G_CALLBACK(webkit_link_clicked),editor);
