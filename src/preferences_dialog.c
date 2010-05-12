@@ -1254,6 +1254,10 @@ void on_save_folderbrowser_toggle(GtkToggleButton *togglebutton, gpointer user_d
 {
   temp_preferences.showfolderbrowser = gtk_toggle_button_get_active(togglebutton);
 }
+void on_save_autobrace_toggle(GtkToggleButton *togglebutton, gpointer user_data)
+{
+  temp_preferences.auto_complete_braces = gtk_toggle_button_get_active(togglebutton);
+}
 
 
 void on_single_instance_only_toggle(GtkToggleButton *togglebutton, gpointer user_data)
@@ -1595,6 +1599,15 @@ void preferences_dialog_create (void)
   gtk_container_set_border_width (GTK_CONTAINER (preferences_dialog.folderbrowser), 8);
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(preferences_dialog.folderbrowser), temp_preferences.showfolderbrowser);
   g_signal_connect(G_OBJECT(GTK_CHECK_BUTTON(preferences_dialog.folderbrowser)), "toggled", G_CALLBACK(on_save_folderbrowser_toggle), NULL);
+
+  preferences_dialog.autobrace = gtk_check_button_new_with_mnemonic (_("Auto-Completion of Brackets and Quotes"));
+  /* set tooltip */
+  gtk_widget_set_tooltip_text (preferences_dialog.autobrace,_("Auto-complete the closing brackets/quotes"));
+  gtk_widget_show (preferences_dialog.autobrace);
+  gtk_box_pack_start (GTK_BOX (preferences_dialog.vbox6), preferences_dialog.autobrace, FALSE, FALSE, 0);
+  gtk_container_set_border_width (GTK_CONTAINER (preferences_dialog.autobrace), 8);
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(preferences_dialog.autobrace), temp_preferences.auto_complete_braces);
+  g_signal_connect(G_OBJECT(GTK_CHECK_BUTTON(preferences_dialog.autobrace)), "toggled", G_CALLBACK(on_save_autobrace_toggle), NULL);
 
   preferences_dialog.label29 = gtk_label_new (_("Editor"));
   gtk_widget_show (preferences_dialog.label29);

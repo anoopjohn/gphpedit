@@ -1748,6 +1748,18 @@ static void char_added(GtkWidget *scintilla, guint ch)
   wordEnd = gtk_scintilla_word_end_position(GTK_SCINTILLA(scintilla), current_pos-1, TRUE);
   current_word_length = wordEnd - wordStart;
   style = gtk_scintilla_get_style_at(GTK_SCINTILLA(scintilla), current_pos);
+  if (preferences.auto_complete_braces){
+    if (ch=='{'){
+      gtk_scintilla_insert_text(GTK_SCINTILLA(scintilla), current_pos,"}");
+      gtk_scintilla_goto_pos(GTK_SCINTILLA(scintilla), current_pos);
+    } else if (ch=='('){
+      gtk_scintilla_insert_text(GTK_SCINTILLA(scintilla), current_pos,")");
+      gtk_scintilla_goto_pos(GTK_SCINTILLA(scintilla), current_pos);
+   } else if (ch=='['){
+     gtk_scintilla_insert_text(GTK_SCINTILLA(scintilla), current_pos,"]");
+     gtk_scintilla_goto_pos(GTK_SCINTILLA(scintilla), current_pos);
+    }
+  }
   if (gtk_scintilla_autoc_active(GTK_SCINTILLA(scintilla))==1) {
     style = 0; // Hack to get around the drop-down not showing in comments, but if it's been forced...  
   }
