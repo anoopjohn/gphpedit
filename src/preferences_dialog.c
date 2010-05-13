@@ -86,7 +86,8 @@ static GList *get_font_qualities()
   qualities = g_list_prepend(qualities, "Default");
   return qualities;
 }
-
+gchar sample_text[]= "<?php\n\n/* A class to implement a car\n   by Mr Somebody */\n\nclass Car extends Vehicle\n  implements EAccident\n{\n  private $PetrolTankFull = true;\n  protected $Name = \"betty\";\n  public $YearMade = 1999;\n\n  function __construct()\n  {\n    parent::__construct();\n    print \"Made $Name!\";\n  }\n  \n  private function go()\n  {\n    // Just go for it!\n    print 'Go!!!';\n  }\n}\n\n?>\n\n<html>\n <head>\n  <title>My test page</title>\n </head>\n\n <body>\n  <h1 class='winter'>Test</h1>\n </body>\n</html>  \n";
+#if 0
 GString *create_sample_text()
 {
   GString *ret;
@@ -128,7 +129,7 @@ GString *create_sample_text()
   ret = g_string_append(ret, "</html>  \n");
   return ret;
 }
-
+#endif
 void get_current_preferences(void)
 {
   GList *highlighting_list = NULL;
@@ -1259,7 +1260,6 @@ void on_save_autobrace_toggle(GtkToggleButton *togglebutton, gpointer user_data)
   temp_preferences.auto_complete_braces = gtk_toggle_button_get_active(togglebutton);
 }
 
-
 void on_single_instance_only_toggle(GtkToggleButton *togglebutton, gpointer user_data)
 {
   temp_preferences.single_instance_only = gtk_toggle_button_get_active(togglebutton);
@@ -1458,64 +1458,61 @@ static void templates_treeview_add_column(void)
 
 void preferences_dialog_create (void)
 {
+
   GList *comboitems = NULL;
   GList *items = NULL;
-  GString *sample_text;
+//  GString *sample_text;
   
   get_current_preferences();
 
-  preferences_dialog.window = gtk_dialog_new_with_buttons(_("Preferences"),
-    GTK_WINDOW(main_window.window), GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
-    GTK_STOCK_OK, GTK_RESPONSE_ACCEPT, GTK_STOCK_CANCEL, GTK_RESPONSE_REJECT, NULL);
+  preferences_dialog.window = gtk_dialog_new_with_buttons(_("Preferences"), GTK_WINDOW(main_window.window), GTK_DIALOG_MODAL |  GTK_DIALOG_DESTROY_WITH_PARENT,
+GTK_STOCK_OK, GTK_RESPONSE_ACCEPT, GTK_STOCK_CANCEL, GTK_RESPONSE_REJECT, NULL);
   
   preferences_dialog.notebook1 = gtk_notebook_new ();
   gtk_widget_show (preferences_dialog.notebook1);
   gtk_container_add (GTK_CONTAINER (gtk_dialog_get_content_area(GTK_DIALOG(preferences_dialog.window))),preferences_dialog.notebook1);
   
-  preferences_dialog.vbox6 = gtk_vbox_new (FALSE, 8);
-  gtk_widget_show (preferences_dialog.vbox6);
-  gtk_container_add (GTK_CONTAINER (preferences_dialog.notebook1), preferences_dialog.vbox6);
-  gtk_container_set_border_width (GTK_CONTAINER (preferences_dialog.vbox6), 8);
-  
-  preferences_dialog.hbox14 = gtk_hbox_new (FALSE, 0);
-  gtk_widget_show (preferences_dialog.hbox14);
-  gtk_box_pack_start (GTK_BOX (preferences_dialog.vbox6), preferences_dialog.hbox14, FALSE, TRUE, 0);
-  
-  preferences_dialog.label32 = gtk_label_new (_("Tab size:"));
-  gtk_widget_show (preferences_dialog.label32);
-  gtk_box_pack_start (GTK_BOX (preferences_dialog.hbox14), preferences_dialog.label32, FALSE, FALSE, 8);
-  
-  preferences_dialog.tab_size = gtk_hscale_new (GTK_ADJUSTMENT (gtk_adjustment_new (temp_preferences.tab_size, 0, 16, 1, 0, 0)));
-  gtk_widget_show (preferences_dialog.tab_size);
-  gtk_box_pack_start (GTK_BOX (preferences_dialog.hbox14), preferences_dialog.tab_size, TRUE, TRUE, 0);
-  gtk_scale_set_digits (GTK_SCALE (preferences_dialog.tab_size), 0);
-  g_signal_connect (G_OBJECT (GTK_HSCALE (preferences_dialog.tab_size)), "value_changed",
-                    G_CALLBACK (on_tab_size_changed), NULL);
-  
-  preferences_dialog.show_indentation_guides = gtk_check_button_new_with_mnemonic (_("Show indentation guides"));
-  gtk_widget_show (preferences_dialog.show_indentation_guides);
-  gtk_box_pack_start (GTK_BOX (preferences_dialog.vbox6), preferences_dialog.show_indentation_guides, FALSE, FALSE, 0);
-  gtk_container_set_border_width (GTK_CONTAINER (preferences_dialog.show_indentation_guides), 8);
-  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(preferences_dialog.show_indentation_guides), temp_preferences.show_indentation_guides);
-  g_signal_connect(G_OBJECT(GTK_CHECK_BUTTON(preferences_dialog.show_indentation_guides)), "toggled", G_CALLBACK(on_show_indentation_guides_toggle), NULL);
-  
-  preferences_dialog.line_wrapping = gtk_check_button_new_with_mnemonic (_("Wrap long lines"));
-  gtk_widget_show (preferences_dialog.line_wrapping);
-  gtk_box_pack_start (GTK_BOX (preferences_dialog.vbox6), preferences_dialog.line_wrapping, FALSE, FALSE, 0);
-  gtk_container_set_border_width (GTK_CONTAINER (preferences_dialog.line_wrapping), 8);
-  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(preferences_dialog.line_wrapping), temp_preferences.line_wrapping);
-  g_signal_connect(G_OBJECT(GTK_CHECK_BUTTON(preferences_dialog.line_wrapping)), "toggled", G_CALLBACK(on_line_wrapping_toggle), NULL);
-  
-  preferences_dialog.use_tabs_instead_spaces = gtk_check_button_new_with_mnemonic (_("Use tabs instead of spaces for indentation"));
-  gtk_widget_show (preferences_dialog.use_tabs_instead_spaces);
-  gtk_box_pack_start (GTK_BOX (preferences_dialog.vbox6), preferences_dialog.use_tabs_instead_spaces, FALSE, FALSE, 0);
-  gtk_container_set_border_width (GTK_CONTAINER (preferences_dialog.use_tabs_instead_spaces), 8);
-  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(preferences_dialog.use_tabs_instead_spaces), temp_preferences.use_tabs_instead_spaces);
-  g_signal_connect(G_OBJECT(GTK_CHECK_BUTTON(preferences_dialog.use_tabs_instead_spaces)), "toggled", G_CALLBACK(on_use_tabs_instead_spaces_toggle), NULL);
-  
+  preferences_dialog.prinbox = gtk_vbox_new (FALSE, 8);
+  gtk_widget_show (preferences_dialog.prinbox);
+  gtk_container_set_border_width (GTK_CONTAINER (preferences_dialog.prinbox), 8);
+
+  /* current session */  
+  preferences_dialog.lblseccion=gtk_frame_new (_("Session:"));
+  gtk_widget_show (preferences_dialog.lblseccion);
+  gtk_box_pack_start (GTK_BOX (preferences_dialog.prinbox), preferences_dialog.lblseccion, FALSE, FALSE, 0);
+
+  preferences_dialog.sessionbox = gtk_vbox_new (FALSE, 8);
+  gtk_widget_show (preferences_dialog.sessionbox);
+  gtk_container_add (GTK_CONTAINER (preferences_dialog.lblseccion),  preferences_dialog.sessionbox);
+
+  preferences_dialog.save_session = gtk_check_button_new_with_mnemonic (_("Save session (including open files) on exit"));
+  gtk_widget_show (preferences_dialog.save_session);
+  gtk_box_pack_start (GTK_BOX (preferences_dialog.sessionbox), preferences_dialog.save_session, FALSE, FALSE, 0);
+  gtk_container_set_border_width (GTK_CONTAINER (preferences_dialog.save_session), 8);
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(preferences_dialog.save_session), temp_preferences.save_session);
+  g_signal_connect(G_OBJECT(GTK_CHECK_BUTTON(preferences_dialog.save_session)), "toggled", G_CALLBACK(on_save_session_toggle), NULL);
+
+  preferences_dialog.single_instance_only = gtk_check_button_new_with_mnemonic (_("Only ever run 1 copy of gPHPEdit at a time"));
+  gtk_widget_show (preferences_dialog.single_instance_only);
+  gtk_box_pack_start (GTK_BOX (preferences_dialog.sessionbox), preferences_dialog.single_instance_only, FALSE, FALSE, 0);
+  gtk_container_set_border_width (GTK_CONTAINER (preferences_dialog.single_instance_only), 8);
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(preferences_dialog.single_instance_only), temp_preferences.single_instance_only);
+  g_signal_connect(G_OBJECT(GTK_CHECK_BUTTON(preferences_dialog.single_instance_only)), "toggled", G_CALLBACK(on_single_instance_only_toggle), NULL);
+  /*end session*/
+
+/*edge part*/
+
+  preferences_dialog.edge = gtk_frame_new (_("Hand edge guide:"));
+  gtk_widget_show (preferences_dialog.edge);
+  gtk_box_pack_start (GTK_BOX (preferences_dialog.prinbox), preferences_dialog.edge, FALSE, FALSE, 0);
+
+  preferences_dialog.edgebox = gtk_vbox_new (FALSE, 8);
+  gtk_widget_show (preferences_dialog.edgebox);
+  gtk_container_add (GTK_CONTAINER (preferences_dialog.edge), preferences_dialog.edgebox);
+
   preferences_dialog.edge_mode = gtk_check_button_new_with_mnemonic (_("Show right hand edge guide"));
   gtk_widget_show (preferences_dialog.edge_mode);
-  gtk_box_pack_start (GTK_BOX (preferences_dialog.vbox6), preferences_dialog.edge_mode, FALSE, FALSE, 0);
+  gtk_container_add (GTK_CONTAINER (preferences_dialog.edgebox), preferences_dialog.edge_mode);
   gtk_container_set_border_width (GTK_CONTAINER (preferences_dialog.edge_mode), 8);
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(preferences_dialog.edge_mode), temp_preferences.edge_mode);
   g_signal_connect(G_OBJECT(GTK_CHECK_BUTTON(preferences_dialog.edge_mode)), "toggled", G_CALLBACK(on_edge_mode_toggle), NULL);
@@ -1523,7 +1520,7 @@ void preferences_dialog_create (void)
   /*Begin: Right Hand Edge Color*/
   preferences_dialog.hbox15 = gtk_hbox_new (FALSE, 0);
   gtk_widget_show (preferences_dialog.hbox15);
-  gtk_box_pack_start (GTK_BOX (preferences_dialog.vbox6), preferences_dialog.hbox15, FALSE, TRUE, 0);
+  gtk_container_add (GTK_CONTAINER (preferences_dialog.edgebox), preferences_dialog.hbox15);
   
   preferences_dialog.label33 = gtk_label_new (_("Right hand edge colour:"));
   gtk_widget_show (preferences_dialog.label33);
@@ -1540,31 +1537,10 @@ void preferences_dialog_create (void)
   gtk_box_pack_start (GTK_BOX (preferences_dialog.hbox15), preferences_dialog.edge_colour, FALSE, FALSE, 0);
   g_signal_connect(G_OBJECT(GTK_COLOR_BUTTON(preferences_dialog.edge_colour)), "color-set", G_CALLBACK(on_edge_colour_changed), NULL);
   /*End: Right Hand Edge Color*/
-  
-  /*Begin: Selection Color*/
-  preferences_dialog.hbox27 = gtk_hbox_new (FALSE, 0);
-  gtk_widget_show (preferences_dialog.hbox27);
-  gtk_box_pack_start (GTK_BOX (preferences_dialog.vbox6), preferences_dialog.hbox27, FALSE, TRUE, 0);
-  
-  preferences_dialog.label46 = gtk_label_new (_("Selection colour:"));
-  gtk_widget_show (preferences_dialog.label46);
-  gtk_box_pack_start (GTK_BOX (preferences_dialog.hbox27), preferences_dialog.label46, FALSE, FALSE, 8);
-
-   GdkColor sel_back;
-  sel_back.red = (temp_preferences.set_sel_back & 0xff) << 8;
-  sel_back.green = ((temp_preferences.set_sel_back & 0xff00) >> 8) << 8;
-  sel_back.blue = ((temp_preferences.set_sel_back & 0xff0000) >> 16) << 8;  
-  preferences_dialog.sel_back = gtk_color_button_new_with_color (&sel_back);
-  gtk_color_button_set_color (GTK_COLOR_BUTTON(preferences_dialog.sel_back),&sel_back);
-
-  gtk_widget_show (preferences_dialog.sel_back);
-  gtk_box_pack_start (GTK_BOX (preferences_dialog.hbox27), preferences_dialog.sel_back, FALSE, FALSE, 0);
-  g_signal_connect(G_OBJECT(GTK_COLOR_BUTTON(preferences_dialog.sel_back)), "color-set", G_CALLBACK(on_sel_back_changed), NULL);
-  /*End: Selection Color*/
-  
+  /*TODO poner otro control el de la barra de escalas no es bueno */
   preferences_dialog.hbox16 = gtk_hbox_new (FALSE, 0);
   gtk_widget_show (preferences_dialog.hbox16);
-  gtk_box_pack_start (GTK_BOX (preferences_dialog.vbox6), preferences_dialog.hbox16, FALSE, TRUE, 0);
+  gtk_container_add (GTK_CONTAINER (preferences_dialog.edgebox), preferences_dialog.hbox16);
   
   preferences_dialog.label34 = gtk_label_new (_("Right hand edge column"));
   gtk_widget_show (preferences_dialog.label34);
@@ -1576,48 +1552,176 @@ void preferences_dialog_create (void)
   gtk_scale_set_digits (GTK_SCALE (preferences_dialog.edge_column), 0);
   g_signal_connect (G_OBJECT (GTK_HSCALE (preferences_dialog.edge_column)), "value_changed",
                     G_CALLBACK (on_edge_column_changed), NULL);
-  
-  preferences_dialog.save_session = gtk_check_button_new_with_mnemonic (_("Save session (including open files) on exit"));
-  gtk_widget_show (preferences_dialog.save_session);
-  gtk_box_pack_start (GTK_BOX (preferences_dialog.vbox6), preferences_dialog.save_session, FALSE, FALSE, 0);
-  gtk_container_set_border_width (GTK_CONTAINER (preferences_dialog.save_session), 8);
-  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(preferences_dialog.save_session), temp_preferences.save_session);
-  g_signal_connect(G_OBJECT(GTK_CHECK_BUTTON(preferences_dialog.save_session)), "toggled", G_CALLBACK(on_save_session_toggle), NULL);
 
-  preferences_dialog.single_instance_only = gtk_check_button_new_with_mnemonic (_("Only ever run 1 copy of gPHPEdit at a time"));
-  gtk_widget_show (preferences_dialog.single_instance_only);
-  gtk_box_pack_start (GTK_BOX (preferences_dialog.vbox6), preferences_dialog.single_instance_only, FALSE, FALSE, 0);
-  gtk_container_set_border_width (GTK_CONTAINER (preferences_dialog.single_instance_only), 8);
-  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(preferences_dialog.single_instance_only), temp_preferences.single_instance_only);
-  g_signal_connect(G_OBJECT(GTK_CHECK_BUTTON(preferences_dialog.single_instance_only)), "toggled", G_CALLBACK(on_single_instance_only_toggle), NULL);
-  
+/*end edge part*/
+
+  preferences_dialog.sidepanel = gtk_frame_new (_("Side Panel:"));
+  gtk_widget_show (preferences_dialog.sidepanel);
+  gtk_box_pack_start (GTK_BOX (preferences_dialog.prinbox), preferences_dialog.sidepanel, FALSE, FALSE, 0);
+
   preferences_dialog.folderbrowser = gtk_check_button_new_with_mnemonic (_("Show folderbrowser (need restart)"));
   /* set tooltip */
   gtk_widget_set_tooltip_text (preferences_dialog.folderbrowser,_("Show/Hide side-panel Folder Browser"));
   gtk_widget_show (preferences_dialog.folderbrowser);
-  gtk_box_pack_start (GTK_BOX (preferences_dialog.vbox6), preferences_dialog.folderbrowser, FALSE, FALSE, 0);
+  gtk_container_add (GTK_CONTAINER (preferences_dialog.sidepanel), preferences_dialog.folderbrowser);
   gtk_container_set_border_width (GTK_CONTAINER (preferences_dialog.folderbrowser), 8);
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(preferences_dialog.folderbrowser), temp_preferences.showfolderbrowser);
   g_signal_connect(G_OBJECT(GTK_CHECK_BUTTON(preferences_dialog.folderbrowser)), "toggled", G_CALLBACK(on_save_folderbrowser_toggle), NULL);
+  /*end side panel part*/
+
+/* autocompletion part */
+  preferences_dialog.autocomp = gtk_frame_new (_("Auto-completion:"));
+  gtk_widget_show (preferences_dialog.autocomp);
+  gtk_box_pack_start (GTK_BOX (preferences_dialog.prinbox), preferences_dialog.autocomp, FALSE, FALSE, 0);
 
   preferences_dialog.autobrace = gtk_check_button_new_with_mnemonic (_("Auto-Completion of Brackets and Quotes"));
   /* set tooltip */
   gtk_widget_set_tooltip_text (preferences_dialog.autobrace,_("Auto-complete the closing brackets/quotes"));
   gtk_widget_show (preferences_dialog.autobrace);
-  gtk_box_pack_start (GTK_BOX (preferences_dialog.vbox6), preferences_dialog.autobrace, FALSE, FALSE, 0);
+  gtk_container_add (GTK_CONTAINER (preferences_dialog.autocomp), preferences_dialog.autobrace);
   gtk_container_set_border_width (GTK_CONTAINER (preferences_dialog.autobrace), 8);
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(preferences_dialog.autobrace), temp_preferences.auto_complete_braces);
   g_signal_connect(G_OBJECT(GTK_CHECK_BUTTON(preferences_dialog.autobrace)), "toggled", G_CALLBACK(on_save_autobrace_toggle), NULL);
 
-  preferences_dialog.label29 = gtk_label_new (_("Editor"));
-  gtk_widget_show (preferences_dialog.label29);
-  gtk_notebook_set_tab_label (GTK_NOTEBOOK (preferences_dialog.notebook1), gtk_notebook_get_nth_page (GTK_NOTEBOOK (preferences_dialog.notebook1), 0), preferences_dialog.label29);
+/*end autocompletion part*/
+
+  preferences_dialog.lblgen = gtk_label_new (_("General"));
+  gtk_widget_show (preferences_dialog.lblgen);
+  gtk_notebook_prepend_page (GTK_NOTEBOOK (preferences_dialog.notebook1),preferences_dialog.prinbox, preferences_dialog.lblgen);
+
+/*editor tab */
+
+  preferences_dialog.prinboxed = gtk_vbox_new (FALSE, 8);
+  gtk_widget_show (preferences_dialog.prinboxed);
+  gtk_container_set_border_width (GTK_CONTAINER (preferences_dialog.prinboxed), 8);
+
+/* tabs part */  
+  preferences_dialog.lbltabs=gtk_frame_new (_("Tabs:"));
+  gtk_widget_show (preferences_dialog.lbltabs);
+  gtk_box_pack_start (GTK_BOX (preferences_dialog.prinboxed), preferences_dialog.lbltabs, FALSE, FALSE, 0);
+
+  preferences_dialog.tabsbox = gtk_vbox_new (FALSE, 8);
+  gtk_widget_show (preferences_dialog.tabsbox);
+  gtk_container_add (GTK_CONTAINER (preferences_dialog.lbltabs),  preferences_dialog.tabsbox);
+
+  preferences_dialog.hbox14 = gtk_hbox_new (FALSE, 0);
+  gtk_widget_show (preferences_dialog.hbox14);
+  gtk_box_pack_start (GTK_BOX (preferences_dialog.tabsbox), preferences_dialog.hbox14, TRUE, FALSE, 0);
+
+  preferences_dialog.label32 = gtk_label_new (_("Tab size:"));
+  gtk_widget_show (preferences_dialog.label32);
+  gtk_box_pack_start (GTK_BOX (preferences_dialog.hbox14), preferences_dialog.label32, FALSE, FALSE, 8);
+
+  preferences_dialog.tab_size = gtk_hscale_new (GTK_ADJUSTMENT (gtk_adjustment_new (temp_preferences.tab_size, 0, 16, 1, 0, 0)));
+  gtk_widget_show (preferences_dialog.tab_size);
+  gtk_box_pack_start (GTK_BOX (preferences_dialog.hbox14), preferences_dialog.tab_size, TRUE, TRUE, 0);
+  gtk_scale_set_digits (GTK_SCALE (preferences_dialog.tab_size), 0);
+  g_signal_connect (G_OBJECT (GTK_HSCALE (preferences_dialog.tab_size)), "value_changed",
+                    G_CALLBACK (on_tab_size_changed), NULL);
+
+  preferences_dialog.use_tabs_instead_spaces = gtk_check_button_new_with_mnemonic (_("Use tabs instead of spaces for indentation"));
+  gtk_widget_show (preferences_dialog.use_tabs_instead_spaces);
+  gtk_box_pack_start (GTK_BOX (preferences_dialog.tabsbox), preferences_dialog.use_tabs_instead_spaces, FALSE, FALSE, 0);
+  gtk_container_set_border_width (GTK_CONTAINER (preferences_dialog.use_tabs_instead_spaces), 8);
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(preferences_dialog.use_tabs_instead_spaces), temp_preferences.use_tabs_instead_spaces);
+  g_signal_connect(G_OBJECT(GTK_CHECK_BUTTON(preferences_dialog.use_tabs_instead_spaces)), "toggled", G_CALLBACK(on_use_tabs_instead_spaces_toggle), NULL);
+
+  preferences_dialog.show_indentation_guides = gtk_check_button_new_with_mnemonic (_("Show indentation guides"));
+  gtk_widget_show (preferences_dialog.show_indentation_guides);
+  gtk_box_pack_start (GTK_BOX (preferences_dialog.tabsbox), preferences_dialog.show_indentation_guides, FALSE, FALSE, 0);
+  gtk_container_set_border_width (GTK_CONTAINER (preferences_dialog.show_indentation_guides), 8);
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(preferences_dialog.show_indentation_guides), temp_preferences.show_indentation_guides);
+  g_signal_connect(G_OBJECT(GTK_CHECK_BUTTON(preferences_dialog.show_indentation_guides)), "toggled", G_CALLBACK(on_show_indentation_guides_toggle), NULL);
+
+  preferences_dialog.lblwrap=gtk_frame_new (_("Text wrap:"));
+  gtk_widget_show (preferences_dialog.lblwrap);
+  gtk_box_pack_start (GTK_BOX (preferences_dialog.prinboxed), preferences_dialog.lblwrap, FALSE, FALSE, 0);
+
+  preferences_dialog.line_wrapping = gtk_check_button_new_with_mnemonic (_("Wrap long lines"));
+  gtk_widget_show (preferences_dialog.line_wrapping);
+  gtk_container_add (GTK_CONTAINER (preferences_dialog.lblwrap), preferences_dialog.line_wrapping);
+  gtk_container_set_border_width (GTK_CONTAINER (preferences_dialog.line_wrapping), 8);
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(preferences_dialog.line_wrapping), temp_preferences.line_wrapping);
+  g_signal_connect(G_OBJECT(GTK_CHECK_BUTTON(preferences_dialog.line_wrapping)), "toggled", G_CALLBACK(on_line_wrapping_toggle), NULL);
+
+
+  preferences_dialog.lblsel=gtk_frame_new (_("Selection:"));
+  gtk_widget_show (preferences_dialog.lblsel);
+  gtk_box_pack_start (GTK_BOX (preferences_dialog.prinboxed), preferences_dialog.lblsel, FALSE, FALSE, 0);
+
+  /*Begin: Selection Color*/  preferences_dialog.vbox10 = gtk_vbox_new (FALSE, 0);
+  gtk_widget_show (preferences_dialog.vbox10);
+  gtk_container_set_border_width (GTK_CONTAINER (preferences_dialog.vbox10), 8);
+
+  preferences_dialog.hbox27 = gtk_hbox_new (FALSE, 0);
+  gtk_widget_show (preferences_dialog.hbox27);
+  gtk_container_add (GTK_CONTAINER (preferences_dialog.lblsel), preferences_dialog.hbox27);
   
+  preferences_dialog.label46 = gtk_label_new (_("Selection colour:"));
+  gtk_widget_show (preferences_dialog.label46);
+  gtk_box_pack_start (GTK_BOX (preferences_dialog.hbox27), preferences_dialog.label46, FALSE, FALSE, 8);
+
+  GdkColor sel_back;
+  sel_back.red = (temp_preferences.set_sel_back & 0xff) << 8;
+  sel_back.green = ((temp_preferences.set_sel_back & 0xff00) >> 8) << 8;
+  sel_back.blue = ((temp_preferences.set_sel_back & 0xff0000) >> 16) << 8;  
+  preferences_dialog.sel_back = gtk_color_button_new_with_color (&sel_back);
+  gtk_color_button_set_color (GTK_COLOR_BUTTON(preferences_dialog.sel_back),&sel_back);
+
+  gtk_widget_show (preferences_dialog.sel_back);
+  gtk_box_pack_start (GTK_BOX (preferences_dialog.hbox27), preferences_dialog.sel_back, FALSE, FALSE, 0);
+  g_signal_connect(G_OBJECT(GTK_COLOR_BUTTON(preferences_dialog.sel_back)), "color-set", G_CALLBACK(on_sel_back_changed), NULL);
+  /*End: Selection Color*/
+
+  preferences_dialog.lblcurl=gtk_frame_new (_("Current line:"));
+  gtk_widget_show (preferences_dialog.lblcurl);
+  gtk_box_pack_start (GTK_BOX (preferences_dialog.prinboxed), preferences_dialog.lblcurl, FALSE, FALSE, 0);
+  
+  preferences_dialog.curlbox = gtk_hbox_new (FALSE, 0);
+  gtk_widget_show (preferences_dialog.curlbox);
+  gtk_container_add (GTK_CONTAINER (preferences_dialog.lblcurl), preferences_dialog.curlbox);
+
+  /*  font quality */
+
+  preferences_dialog.hboxfs = gtk_frame_new (NULL);
+  gtk_widget_show (preferences_dialog.hboxfs);
+  gtk_box_pack_start (GTK_BOX (preferences_dialog.prinboxed), preferences_dialog.hboxfs, FALSE, FALSE, 0);
+
+  preferences_dialog.fontlabel = gtk_label_new (_("Font Quality"));
+  gtk_widget_show (preferences_dialog.fontlabel);
+  gtk_frame_set_label_widget (GTK_FRAME (preferences_dialog.hboxfs), preferences_dialog.fontlabel);
+
+  preferences_dialog.fontstyle = gtk_combo_box_entry_new_text ();
+  gtk_widget_show (preferences_dialog.fontstyle);
+  gtk_container_add (GTK_CONTAINER (preferences_dialog.hboxfs), preferences_dialog.fontstyle);
+  gtk_container_set_border_width (GTK_CONTAINER (preferences_dialog.fontstyle), 8);
+  
+  comboitems = get_font_qualities();
+  for (items = g_list_first(comboitems); items != NULL; items = g_list_next(items)) {
+    // Suggested by__tim in #Gtk+/Freenode to be able to find the item again from set_control_to_highlight
+    g_object_set_qdata (G_OBJECT (preferences_dialog.fontstyle), g_quark_from_string (items->data), 
+      GINT_TO_POINTER (gtk_tree_model_iter_n_children (gtk_combo_box_get_model (GTK_COMBO_BOX(preferences_dialog.fontstyle)), NULL)));
+    gtk_combo_box_append_text (GTK_COMBO_BOX (preferences_dialog.fontstyle), items->data);
+  }
+  g_signal_connect (G_OBJECT (GTK_COMBO_BOX (preferences_dialog.fontstyle)), "changed",
+                      G_CALLBACK (on_fontqualities_entry_changed),
+                      NULL);
+
+  g_list_free (comboitems);
+  /* set actual quality */
+  gtk_combo_box_set_active (GTK_COMBO_BOX(preferences_dialog.fontstyle), (temp_preferences.font_quality!=0)?temp_preferences.font_quality -1 :0);
+
+/*end editor page */
+  preferences_dialog.lbled = gtk_label_new (_("Editor"));
+  gtk_widget_show (preferences_dialog.lbled);
+  gtk_notebook_append_page (GTK_NOTEBOOK (preferences_dialog.notebook1),preferences_dialog.prinboxed, preferences_dialog.lbled);
+
+/*color page */
+
   preferences_dialog.vbox10 = gtk_vbox_new (FALSE, 0);
   gtk_widget_show (preferences_dialog.vbox10);
-  gtk_container_add (GTK_CONTAINER (preferences_dialog.notebook1), preferences_dialog.vbox10);
   gtk_container_set_border_width (GTK_CONTAINER (preferences_dialog.vbox10), 8);
-  
+
   preferences_dialog.hbox22 = gtk_hbox_new (FALSE, 0);
   gtk_widget_show (preferences_dialog.hbox22);
   gtk_box_pack_end (GTK_BOX (preferences_dialog.vbox10), preferences_dialog.hbox22, FALSE, TRUE, 8);
@@ -1688,8 +1792,7 @@ void preferences_dialog_create (void)
   
   preferences_dialog.highlighting_editor = g_new0(Editor,1);
   preferences_dialog.highlighting_editor->scintilla = gtk_scintilla_new();
-  sample_text = create_sample_text();
-  gtk_scintilla_add_text(GTK_SCINTILLA (preferences_dialog.highlighting_editor->scintilla), sample_text->len, sample_text->str);
+  gtk_scintilla_add_text(GTK_SCINTILLA (preferences_dialog.highlighting_editor->scintilla), strlen(sample_text),sample_text);
   gtk_scintilla_goto_pos(GTK_SCINTILLA(preferences_dialog.highlighting_editor->scintilla), 0);
   gtk_scintilla_set_read_only(GTK_SCINTILLA(preferences_dialog.highlighting_editor->scintilla), 1);
   tab_php_set_lexer(preferences_dialog.highlighting_editor);
@@ -1745,37 +1848,6 @@ void preferences_dialog_create (void)
   gtk_widget_show (preferences_dialog.label44);
   gtk_frame_set_label_widget (GTK_FRAME (preferences_dialog.frame4), preferences_dialog.label44);
   
-
-  /*  font quality */
-
-  preferences_dialog.hboxfs = gtk_frame_new (NULL);
-  gtk_widget_show (preferences_dialog.hboxfs);
-  gtk_box_pack_start (GTK_BOX (preferences_dialog.vbox10), preferences_dialog.hboxfs, FALSE, FALSE, 0);
-
-  preferences_dialog.fontlabel = gtk_label_new (_("Font Quality"));
-  gtk_widget_show (preferences_dialog.fontlabel);
-  gtk_frame_set_label_widget (GTK_FRAME (preferences_dialog.hboxfs), preferences_dialog.fontlabel);
-
-  preferences_dialog.fontstyle = gtk_combo_box_entry_new_text ();
-  gtk_widget_show (preferences_dialog.fontstyle);
-  gtk_container_add (GTK_CONTAINER (preferences_dialog.hboxfs), preferences_dialog.fontstyle);
-  gtk_container_set_border_width (GTK_CONTAINER (preferences_dialog.fontstyle), 8);
-  
-  comboitems = get_font_qualities();
-  for (items = g_list_first(comboitems); items != NULL; items = g_list_next(items)) {
-    // Suggested by__tim in #Gtk+/Freenode to be able to find the item again from set_control_to_highlight
-    g_object_set_qdata (G_OBJECT (preferences_dialog.fontstyle), g_quark_from_string (items->data), 
-      GINT_TO_POINTER (gtk_tree_model_iter_n_children (gtk_combo_box_get_model (GTK_COMBO_BOX(preferences_dialog.fontstyle)), NULL)));
-    gtk_combo_box_append_text (GTK_COMBO_BOX (preferences_dialog.fontstyle), items->data);
-  }
-  g_signal_connect (G_OBJECT (GTK_COMBO_BOX (preferences_dialog.fontstyle)), "changed",
-                      G_CALLBACK (on_fontqualities_entry_changed),
-                      NULL);
-
-  g_list_free (comboitems);
-  /* set actual quality */
-  gtk_combo_box_set_active (GTK_COMBO_BOX(preferences_dialog.fontstyle), (temp_preferences.font_quality!=0)?temp_preferences.font_quality -1 :0);
-
   preferences_dialog.frame1 = gtk_frame_new (NULL);
   gtk_widget_show (preferences_dialog.frame1);
   gtk_box_pack_start (GTK_BOX (preferences_dialog.vbox10), preferences_dialog.frame1, TRUE, TRUE, 0);
@@ -1790,11 +1862,10 @@ void preferences_dialog_create (void)
     GINT_TO_POINTER (gtk_tree_model_iter_n_children (gtk_combo_box_get_model (GTK_COMBO_BOX(preferences_dialog.element_combo)), NULL)));
     gtk_combo_box_append_text (GTK_COMBO_BOX(preferences_dialog.element_combo),walk->data);
   }
-  gtk_combo_box_set_active (GTK_COMBO_BOX(preferences_dialog.element_combo),0);
-  current_highlighting_element = g_list_first(preferences_dialog.highlighting_elements)->data;
   g_signal_connect (G_OBJECT (GTK_COMBO_BOX (preferences_dialog.element_combo)), "changed",
                       G_CALLBACK (on_element_entry_changed),
                       NULL);
+  gtk_combo_box_set_active (GTK_COMBO_BOX(preferences_dialog.element_combo),0);
   g_list_free (preferences_dialog.highlighting_elements);
   
   preferences_dialog.label39 = gtk_label_new (_("Element"));
@@ -1803,12 +1874,12 @@ void preferences_dialog_create (void)
   
   preferences_dialog.label30 = gtk_label_new (_("Colour"));
   gtk_widget_show (preferences_dialog.label30);
-  gtk_notebook_set_tab_label (GTK_NOTEBOOK (preferences_dialog.notebook1), gtk_notebook_get_nth_page (GTK_NOTEBOOK (preferences_dialog.notebook1), 1), preferences_dialog.label30);
-  
+  gtk_notebook_append_page (GTK_NOTEBOOK (preferences_dialog.notebook1),preferences_dialog.vbox10, preferences_dialog.label30);
+
+/**/
   preferences_dialog.vbox7 = gtk_vbox_new (FALSE, 0);
   gtk_widget_show (preferences_dialog.vbox7);
-  gtk_container_add (GTK_CONTAINER (preferences_dialog.notebook1), preferences_dialog.vbox7);
-  gtk_container_set_border_width (GTK_CONTAINER (preferences_dialog.vbox7), 8);
+  gtk_container_set_border_width (GTK_CONTAINER (preferences_dialog.vbox7), 0);
   
   preferences_dialog.hbox17 = gtk_hbox_new (FALSE, 0);
   gtk_widget_show (preferences_dialog.hbox17);
@@ -1933,19 +2004,20 @@ void preferences_dialog_create (void)
   
   preferences_dialog.template_sample_scrolled = gtk_scrolled_window_new (NULL, NULL);
   gtk_widget_show (preferences_dialog.template_sample_scrolled);
-  gtk_box_pack_start (GTK_BOX (preferences_dialog.vbox8), preferences_dialog.template_sample_scrolled, TRUE, TRUE, 0);
+  gtk_box_pack_start (GTK_BOX (preferences_dialog.vbox8), preferences_dialog.template_sample_scrolled, FALSE, TRUE, 0);
   
   preferences_dialog.template_sample = gtk_text_view_new ();
   gtk_widget_show (preferences_dialog.template_sample);
   gtk_container_add (GTK_CONTAINER (preferences_dialog.template_sample_scrolled), preferences_dialog.template_sample);
   gtk_text_view_set_editable (GTK_TEXT_VIEW(preferences_dialog.template_sample), FALSE);
+ 
   preferences_dialog.label31 = gtk_label_new (_("PHP Coding"));
   gtk_widget_show (preferences_dialog.label31);
-  gtk_notebook_set_tab_label (GTK_NOTEBOOK (preferences_dialog.notebook1), gtk_notebook_get_nth_page (GTK_NOTEBOOK (preferences_dialog.notebook1), 2), preferences_dialog.label31);
-  
+
+  gtk_notebook_append_page (GTK_NOTEBOOK (preferences_dialog.notebook1),preferences_dialog.vbox7, preferences_dialog.label31);
+ 
   preferences_dialog.apply_button = gtk_button_new_with_mnemonic (_("Apply"));
   gtk_widget_show (preferences_dialog.apply_button);
-  //gtk_box_pack_end (GTK_BOX (GTK_DIALOG(preferences_dialog.window)->action_area), preferences_dialog.apply_button, FALSE, FALSE, 4);
   gtk_container_add (GTK_CONTAINER (gtk_dialog_get_action_area(GTK_DIALOG(preferences_dialog.window))),preferences_dialog.apply_button);
   g_signal_connect (G_OBJECT (preferences_dialog.apply_button),
                       "clicked", G_CALLBACK (apply_preferences), NULL);
