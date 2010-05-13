@@ -841,6 +841,7 @@ extern void folderbrowser_create(MainWindow *main_window)
     main_window->button_dialog = gtk_button_new_with_label (DEFAULT_DIR);
   } else {
     main_window->button_dialog = gtk_button_new_with_label (folderpath);
+    g_free(folderpath);
   }
   g_signal_connect(G_OBJECT(main_window->button_dialog), "pressed", G_CALLBACK(pressed_button_file_chooser), NULL);
   gtk_widget_set_size_request (main_window->pListView,80,450);
@@ -895,10 +896,10 @@ extern void folderbrowser_create(MainWindow *main_window)
   gtk_widget_show(main_window->button_dialog);
   gtk_widget_show_all(main_window->folder);
   gtk_notebook_insert_page (GTK_NOTEBOOK(main_window->notebook_manager), main_window->folder, label, 1);
-  if(folderpath && !IS_DEFAULT_DIR(folderpath)){
+    gchar *path=(gchar *)gtk_button_get_label(GTK_BUTTON(main_window->button_dialog));
+    if(!IS_DEFAULT_DIR(path)){
     gchar *fullfolderpath;
-    fullfolderpath=convert_to_full(folderpath); /*necesary for gfile*/
-    g_free(folderpath);
+    fullfolderpath=convert_to_full(path); /*necesary for gfile*/
     GtkTreeIter iter2;
     GtkTreeIter* iter=NULL;
     gtk_tree_sortable_set_sort_func(GTK_TREE_SORTABLE(main_window->pTree), 1,
