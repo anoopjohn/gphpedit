@@ -129,6 +129,10 @@ void tab_set_configured_scintilla_properties(GtkScintilla *scintilla, Preference
   gtk_scintilla_style_set_size (scintilla, STYLE_LINENUMBER, prefs.line_number_size);
   /* set font quality */
   gtk_scintilla_set_font_quality(scintilla, prefs.font_quality);
+
+  gtk_scintilla_set_caret_line_visible(scintilla, preferences.higthlightcaretline);
+  gtk_scintilla_set_caret_line_back(scintilla, preferences.higthlightcaretline_color);
+
   gtk_scintilla_set_indentation_guides (scintilla, prefs.show_indentation_guides);
   gtk_scintilla_set_edge_mode (scintilla, prefs.edge_mode);
   gtk_scintilla_set_edge_column (scintilla, prefs.edge_column);

@@ -49,6 +49,8 @@ typedef struct
 	gchar *php_binary_location;
 	gchar *shared_source_location;
 	gint auto_complete_braces;
+	gint higthlightcaretline;
+	gint higthlightcaretline_color;
 	//gint auto_indent_after_brace;
 	gint auto_complete_delay;
 	gint calltip_delay;

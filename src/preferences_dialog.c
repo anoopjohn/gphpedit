@@ -1209,6 +1209,14 @@ void on_sel_back_changed(GtkColorButton *widget, gpointer user_data)
   temp_preferences.set_sel_back = color.red >> 8 | ((color.green >> 8) << 8) | ((color.blue >> 8) << 16);
 }
 
+void on_caretline_back_changed(GtkColorButton *widget, gpointer user_data)
+{
+  GdkColor color;
+  gtk_color_button_get_color (widget, &color);
+
+  temp_preferences.higthlightcaretline_color = color.red >> 8 | ((color.green >> 8) << 8) | ((color.blue >> 8) << 16);
+}
+
 void on_tab_size_changed(GtkRange *range, gpointer user_data)
 {
   temp_preferences.tab_size = (int)gtk_range_get_value(range);  
@@ -1258,6 +1266,10 @@ void on_save_folderbrowser_toggle(GtkToggleButton *togglebutton, gpointer user_d
 void on_save_autobrace_toggle(GtkToggleButton *togglebutton, gpointer user_data)
 {
   temp_preferences.auto_complete_braces = gtk_toggle_button_get_active(togglebutton);
+}
+void on_save_higthlightcaretline_toggle(GtkToggleButton *togglebutton, gpointer user_data)
+{
+  temp_preferences.higthlightcaretline = gtk_toggle_button_get_active(togglebutton);
 }
 
 void on_single_instance_only_toggle(GtkToggleButton *togglebutton, gpointer user_data)
@@ -1649,7 +1661,8 @@ GTK_STOCK_OK, GTK_RESPONSE_ACCEPT, GTK_STOCK_CANCEL, GTK_RESPONSE_REJECT, NULL);
   gtk_widget_show (preferences_dialog.lblsel);
   gtk_box_pack_start (GTK_BOX (preferences_dialog.prinboxed), preferences_dialog.lblsel, FALSE, FALSE, 0);
 
-  /*Begin: Selection Color*/  preferences_dialog.vbox10 = gtk_vbox_new (FALSE, 0);
+  /*Begin: Selection Color*/  
+  preferences_dialog.vbox10 = gtk_vbox_new (FALSE, 0);
   gtk_widget_show (preferences_dialog.vbox10);
   gtk_container_set_border_width (GTK_CONTAINER (preferences_dialog.vbox10), 8);
 
@@ -1672,6 +1685,41 @@ GTK_STOCK_OK, GTK_RESPONSE_ACCEPT, GTK_STOCK_CANCEL, GTK_RESPONSE_REJECT, NULL);
   gtk_box_pack_start (GTK_BOX (preferences_dialog.hbox27), preferences_dialog.sel_back, FALSE, FALSE, 0);
   g_signal_connect(G_OBJECT(GTK_COLOR_BUTTON(preferences_dialog.sel_back)), "color-set", G_CALLBACK(on_sel_back_changed), NULL);
   /*End: Selection Color*/
+
+  preferences_dialog.lblcurl=gtk_frame_new (_("Current line:"));
+  gtk_widget_show (preferences_dialog.lblcurl);
+  gtk_box_pack_start (GTK_BOX (preferences_dialog.prinboxed), preferences_dialog.lblcurl, FALSE, FALSE, 0);
+  
+  preferences_dialog.curlbox = gtk_vbox_new (FALSE, 0);
+  gtk_widget_show (preferences_dialog.curlbox);
+  gtk_container_add (GTK_CONTAINER (preferences_dialog.lblcurl), preferences_dialog.curlbox);
+
+  preferences_dialog.higthlightcaretline = gtk_check_button_new_with_mnemonic (_("Highlight Caret Line"));
+  /* set tooltip */
+  gtk_widget_show (preferences_dialog.higthlightcaretline);
+  gtk_box_pack_start (GTK_BOX (preferences_dialog.curlbox), preferences_dialog.higthlightcaretline, FALSE, FALSE, 0);
+  gtk_container_set_border_width (GTK_CONTAINER (preferences_dialog.higthlightcaretline), 8);
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(preferences_dialog.higthlightcaretline), temp_preferences.higthlightcaretline);
+  g_signal_connect(G_OBJECT(GTK_CHECK_BUTTON(preferences_dialog.higthlightcaretline)), "toggled", G_CALLBACK(on_save_higthlightcaretline_toggle), NULL);
+
+  preferences_dialog.colcaret = gtk_hbox_new (FALSE, 0);
+  gtk_widget_show (preferences_dialog.colcaret);
+  gtk_container_add (GTK_CONTAINER (preferences_dialog.curlbox), preferences_dialog.colcaret);
+  
+  preferences_dialog.lblcol = gtk_label_new (_("Highlight Caret Line colour:"));
+  gtk_widget_show (preferences_dialog.lblcol);
+  gtk_box_pack_start (GTK_BOX (preferences_dialog.colcaret), preferences_dialog.lblcol, FALSE, FALSE, 8);
+
+  GdkColor caret_back;
+  caret_back.red = (temp_preferences.higthlightcaretline_color & 0xff) << 8;
+  caret_back.green = ((temp_preferences.higthlightcaretline_color & 0xff00) >> 8) << 8;
+  caret_back.blue = ((temp_preferences.higthlightcaretline_color & 0xff0000) >> 16) << 8;  
+  preferences_dialog.caretline_color = gtk_color_button_new_with_color (&caret_back);
+  gtk_color_button_set_color (GTK_COLOR_BUTTON(preferences_dialog.caretline_color),&caret_back);
+
+  gtk_widget_show (preferences_dialog.caretline_color);
+  gtk_box_pack_start (GTK_BOX (preferences_dialog.colcaret), preferences_dialog.caretline_color, FALSE, FALSE, 0);
+  g_signal_connect(G_OBJECT(GTK_COLOR_BUTTON(preferences_dialog.caretline_color)), "color-set", G_CALLBACK(on_caretline_back_changed), NULL);
 
   /*  font quality */
 

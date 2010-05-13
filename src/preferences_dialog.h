@@ -51,6 +51,9 @@ typedef struct
   GtkWidget *lblsel;
   GtkWidget *lblcurl;
   GtkWidget *curlbox;
+  GtkWidget *colcaret;
+  GtkWidget *caretline_color;
+  GtkWidget *lblcol;
   GtkWidget *vbox6;
   GtkWidget *hbox14;
   GtkWidget *hbox26;
@@ -76,6 +79,7 @@ typedef struct
   GtkWidget *edge_column;
   GtkWidget *save_session;
   GtkWidget *folderbrowser;
+  GtkWidget *higthlightcaretline;
   GtkWidget *autobrace;
   GtkWidget *label29;
   GtkWidget *vbox10;

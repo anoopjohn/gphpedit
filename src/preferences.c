@@ -164,6 +164,8 @@ void preferences_load(void)
 	preferences.font_quality = gconf_client_get_int (config,"/gPHPEdit/defaults/fontquality",NULL);
 	preferences.showfolderbrowser = gconf_client_get_bool (config,"/gPHPEdit/defaults/showfolderbrowser",NULL);	
 	preferences.auto_complete_braces= gconf_client_get_bool (config,"/gPHPEdit/defaults/autocompletebraces",NULL);
+	preferences.higthlightcaretline= gconf_client_get_bool (config,"/gPHPEdit/defaults/higthlightcaretline",NULL);
+	preferences.higthlightcaretline_color= getcolor(config,"/gPHPEdit/defaults/higthlightcaretline_color","higthlightcaretline_color",13684944);
 	//preferences.auto_indent_after_brace = gnome_config_get_int ("gPHPEdit/defaults/autoindentafterbrace=1");
 	preferences.save_session = gconf_client_get_bool (config,"/gPHPEdit/defaults/save_session",NULL);
 	preferences.use_tabs_instead_spaces = gconf_client_get_bool(config,"/gPHPEdit/defaults/use_tabs_instead_spaces",&error);
@@ -689,6 +691,8 @@ void preferences_save()
 	gconf_client_set_int (config,"/gPHPEdit/defaults/fontquality", preferences.font_quality,NULL);
 	gconf_client_set_bool (config,"/gPHPEdit/defaults/showfolderbrowser", preferences.showfolderbrowser,NULL);
 	gconf_client_set_bool (config,"/gPHPEdit/defaults/autocompletebraces", preferences.auto_complete_braces,NULL);
+	gconf_client_set_bool (config,"/gPHPEdit/defaults/higthlightcaretline", preferences.higthlightcaretline,NULL);
+	gconf_client_set_int (config,"/gPHPEdit/defaults/higthlightcaretline_color", preferences.higthlightcaretline_color,NULL);
 	//gconf_client_set_int (config,"/gPHPEdit//defaults/autoindentafterbrace"), preferences.auto_indent_after_brace,NULL);
 	gconf_client_set_string (config,"/gPHPEdit/defaults/php_file_extensions",preferences.php_file_extensions,NULL);
 	gconf_client_set_bool (config,"/gPHPEdit/defaults/save_session", preferences.save_session,NULL);

@@ -56,13 +56,20 @@ void tab_sql_set_lexer(Editor *editor)
 
   gtk_scintilla_style_set_font (GTK_SCINTILLA(editor->scintilla), STYLE_BRACELIGHT, preferences.php_default_font);
   gtk_scintilla_style_set_fore (GTK_SCINTILLA(editor->scintilla), STYLE_BRACELIGHT, 16711680);// Matching bracket
-  gtk_scintilla_style_set_back (GTK_SCINTILLA(editor->scintilla), STYLE_BRACELIGHT, preferences.php_default_back);
+  if(preferences.higthlightcaretline)
+    gtk_scintilla_style_set_back (GTK_SCINTILLA(editor->scintilla), STYLE_BRACELIGHT, preferences.higthlightcaretline_color);
+  else
+    gtk_scintilla_style_set_back (GTK_SCINTILLA(editor->scintilla), STYLE_BRACELIGHT, preferences.php_default_back);
+
   gtk_scintilla_style_set_size (GTK_SCINTILLA(editor->scintilla), STYLE_BRACELIGHT, preferences.php_default_size);
   gtk_scintilla_style_set_italic (GTK_SCINTILLA(editor->scintilla), STYLE_BRACELIGHT, preferences.php_default_italic);
   gtk_scintilla_style_set_bold (GTK_SCINTILLA(editor->scintilla), STYLE_BRACELIGHT, TRUE);
   gtk_scintilla_style_set_font (GTK_SCINTILLA(editor->scintilla), STYLE_BRACEBAD, preferences.php_default_font);
   gtk_scintilla_style_set_fore (GTK_SCINTILLA(editor->scintilla), STYLE_BRACEBAD, 255);
-  gtk_scintilla_style_set_back (GTK_SCINTILLA(editor->scintilla), STYLE_BRACEBAD, preferences.php_default_back);
+  if(preferences.higthlightcaretline)
+    gtk_scintilla_style_set_back (GTK_SCINTILLA(editor->scintilla), STYLE_BRACEBAD, preferences.higthlightcaretline_color);
+  else
+    gtk_scintilla_style_set_back (GTK_SCINTILLA(editor->scintilla), STYLE_BRACEBAD, preferences.php_default_back);
   gtk_scintilla_style_set_size (GTK_SCINTILLA(editor->scintilla), STYLE_BRACEBAD, preferences.php_default_size);
   gtk_scintilla_style_set_italic (GTK_SCINTILLA(editor->scintilla), STYLE_BRACEBAD, preferences.php_default_italic);
   gtk_scintilla_style_set_bold (GTK_SCINTILLA(editor->scintilla), STYLE_BRACEBAD, TRUE);

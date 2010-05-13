@@ -60,13 +60,19 @@ void scintilla_python_set_lexer(GtkScintilla *scintilla, Preferences prefs)
 
   gtk_scintilla_style_set_font (scintilla, STYLE_BRACELIGHT, prefs.php_default_font);
   gtk_scintilla_style_set_fore (scintilla, STYLE_BRACELIGHT, 16711680);// Matching bracket
-  gtk_scintilla_style_set_back (scintilla, STYLE_BRACELIGHT, prefs.php_default_back);
+  if(prefs.higthlightcaretline)
+    gtk_scintilla_style_set_back (scintilla, STYLE_BRACELIGHT, prefs.higthlightcaretline_color);
+  else
+    gtk_scintilla_style_set_back (scintilla, STYLE_BRACELIGHT, prefs.php_default_back);
   gtk_scintilla_style_set_size (scintilla, STYLE_BRACELIGHT, prefs.php_default_size);
   gtk_scintilla_style_set_italic (scintilla, STYLE_BRACELIGHT, prefs.php_default_italic);
   gtk_scintilla_style_set_bold (scintilla, STYLE_BRACELIGHT, TRUE);
   gtk_scintilla_style_set_font (scintilla, STYLE_BRACEBAD, prefs.php_default_font);
   gtk_scintilla_style_set_fore (scintilla, STYLE_BRACEBAD, 255);
-  gtk_scintilla_style_set_back (scintilla, STYLE_BRACEBAD, prefs.php_default_back);
+  if(prefs.higthlightcaretline)
+    gtk_scintilla_style_set_back (scintilla, STYLE_BRACEBAD, prefs.higthlightcaretline_color);
+  else
+    gtk_scintilla_style_set_back (scintilla, STYLE_BRACEBAD, prefs.php_default_back);
   gtk_scintilla_style_set_size (scintilla, STYLE_BRACEBAD, prefs.php_default_size);
   gtk_scintilla_style_set_italic (scintilla, STYLE_BRACEBAD, prefs.php_default_italic);
   gtk_scintilla_style_set_bold (scintilla, STYLE_BRACEBAD, TRUE);
