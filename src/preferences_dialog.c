@@ -1673,14 +1673,6 @@ GTK_STOCK_OK, GTK_RESPONSE_ACCEPT, GTK_STOCK_CANCEL, GTK_RESPONSE_REJECT, NULL);
   g_signal_connect(G_OBJECT(GTK_COLOR_BUTTON(preferences_dialog.sel_back)), "color-set", G_CALLBACK(on_sel_back_changed), NULL);
   /*End: Selection Color*/
 
-  preferences_dialog.lblcurl=gtk_frame_new (_("Current line:"));
-  gtk_widget_show (preferences_dialog.lblcurl);
-  gtk_box_pack_start (GTK_BOX (preferences_dialog.prinboxed), preferences_dialog.lblcurl, FALSE, FALSE, 0);
-  
-  preferences_dialog.curlbox = gtk_hbox_new (FALSE, 0);
-  gtk_widget_show (preferences_dialog.curlbox);
-  gtk_container_add (GTK_CONTAINER (preferences_dialog.lblcurl), preferences_dialog.curlbox);
-
   /*  font quality */
 
   preferences_dialog.hboxfs = gtk_frame_new (NULL);
