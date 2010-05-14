@@ -1816,7 +1816,7 @@ static void char_added(GtkWidget *scintilla, guint ch)
         }
         break;
           default:      
-        member_function_buffer = gtk_scintilla_get_text_range (GTK_SCINTILLA(scintilla), wordStart-2, wordStart, &member_function_length);
+        member_function_buffer = gtk_scintilla_get_text_range (GTK_SCINTILLA(scintilla), wordEnd-1, wordEnd +1, &member_function_length);
         if (strcmp(member_function_buffer, "->")==0 && (gtk_scintilla_get_line_state(GTK_SCINTILLA(scintilla), current_line)==274)) {
           if (gtk_scintilla_autoc_active(GTK_SCINTILLA(scintilla))==1) {
           autocomplete_member_function(scintilla, wordStart, wordEnd);
@@ -1826,7 +1826,7 @@ static void char_added(GtkWidget *scintilla, guint ch)
               completion_timer_set=TRUE;
             }
           }  
-              } else if ((current_word_length>=3) && ( (gtk_scintilla_get_line_state(GTK_SCINTILLA(scintilla), current_line)==274))) {
+        } else if ((current_word_length>=3) && ( (gtk_scintilla_get_line_state(GTK_SCINTILLA(scintilla), current_line)==274))) {
         // check to see if they've typed <?php and if so do nothing
         if (wordStart>1) {
           ac_buffer = gtk_scintilla_get_text_range (GTK_SCINTILLA(scintilla), wordStart-2, wordEnd, &ac_length);
