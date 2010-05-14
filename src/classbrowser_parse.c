@@ -28,26 +28,21 @@
 
 static gchar *read_text_file( gchar *filename )
 {
-  FILE *fp;
-  gchar *buffer = NULL;
-  struct stat buf;
-  size_t size_read;
+  GFile *file;
+  GError *error=NULL;
+  gchar *buffer=NULL;
+  gsize nchars;
 
-  stat(filename, &buf);
+  /*buscar entre los editores abiertos el que tenga esta filename y sacar el texto del scintilla asi esta actualizado siempre */
+  gchar *filenam=convert_to_full(filename);
+  file=g_file_new_for_uri (filenam);
+  g_free(filenam);
 
-  buffer = g_malloc(buf.st_size+1);
-
-  fp = fopen( filename, "r" );
-
-  if (fp) {
-    size_read = fread(buffer, 1, buf.st_size, fp);
-    if (size_read != buf.st_size) {
-      g_print("ERROR: classbrowser reading %s, read in %d bytes, expecting %d bytes\n", filename, size_read, (guint)(buf.st_size));
-    }
-    buffer[buf.st_size] = '\0';
-    fclose(fp);
+  if (!g_file_load_contents (file,NULL,&buffer, &nchars,NULL,&error)){
+    g_print("Error classbrowser reading file '%s'. GIO error:%s\n",filename,error->message);
   }
-
+  g_object_unref(file);
+//  g_print("buffer:<---\n%s\n--->",buffer);
   return buffer;
 }
 
@@ -231,7 +226,7 @@ void classbrowser_parse_file(gchar *filename)
   gboolean function_awaiting_brace_or_parenthesis;
 
   file_contents = read_text_file(filename);
-
+  if (!file_contents) return;
   o = file_contents;
   c = o;
 

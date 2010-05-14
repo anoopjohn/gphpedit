@@ -39,7 +39,8 @@ typedef struct
 {
   gchar *filename;
   gboolean accessible;
-  time_t modified_time;
+  //time_t modified_time;
+   GTimeVal modified_time;
 }
 ClassBrowserFile;
 

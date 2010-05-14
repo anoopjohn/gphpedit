@@ -27,7 +27,6 @@
 #include "main_window_callbacks.h"
 //#define DEBUGCLASSBROWSER 
 static GSList *filelist = NULL;
-static GSList *dirlist = NULL;
 static GSList *functionlist = NULL;
 static GSList *classlist = NULL;
 
@@ -50,36 +49,6 @@ gboolean classbrowser_filelist_find(gchar *filename)
 }
 
 
-gchar *strip_double_slashes(gchar *filename)
-{
-  gchar *result;
-  gchar *result_running;
-  gchar previous_char;
-
-  result = g_malloc(strlen(filename)+1);
-  result_running = result;
-
-  previous_char = *filename;
-  *result_running = *filename;
-  filename++;
-  result_running++;
-
-  while (*filename) {
-    if (previous_char=='/' && *filename == '/') {
-      // Do nothing, but makes logic clearer
-    } else {
-      *result_running = *filename;
-      result_running++;
-    }
-    previous_char = *filename;
-    filename++;
-  }
-  *result_running = '\0';
-
-  return result;
-}
-
-
 void classbrowser_filelist_clear(void)
 {
   GSList *li;
@@ -87,117 +56,62 @@ void classbrowser_filelist_clear(void)
 
   for(li = filelist; li!= NULL; li = g_slist_next(li)) {
     file = li->data;
-    if (file) {
-      g_free(file->filename);
-    }
+      if (file->filename) g_free(file->filename);
   }
   g_slist_free(filelist);
   filelist = NULL;
 }
 
-
-void classbrowser_dirlist_clear(void)
-{
-  GSList *li;
-  gchar *dir;
-
-  for(li = dirlist; li!= NULL; li = g_slist_next(li)) {
-    dir = li->data;
-    if (dir) {
-      g_free(dir);
-    }
-  }
-  g_slist_free(dirlist);
-  dirlist = NULL;
-}
-
-
 void classbrowser_filelist_add(gchar *filename)
 {
   ClassBrowserFile *file;
 
-  if (strstr(filename, "file://")==filename) {
-    filename += 6;
-  }
-
-  if (!classbrowser_filelist_find(filename) && is_php_file_from_filename(filename)) {
+  if (!classbrowser_filelist_find(filename) && is_php_file_from_filename(filename)){
+#ifdef DEBUGCLASSBROWSER
+    g_print("Added filename to classbrowser:%s\n",filename);
+#endif
     file = g_malloc(sizeof(ClassBrowserFile));
-    file->filename = strip_double_slashes(filename);
+    file->filename = convert_to_full(filename);
     file->accessible = TRUE;
-    file->modified_time = 0;
-    filelist = g_slist_append(filelist, file);
+    file->modified_time.tv_sec = 0;
+    file->modified_time.tv_usec = 0;
+    filelist = g_slist_prepend(filelist, file);
   }
 }
-
-
-#include <dirent.h>
-void classbrowser_dirlist_add(gchar *dir)
-{
-  DIR *dir_iter;
-  struct dirent *dir_data;
-  GString *fullfilename;
-
-  if (strstr(dir, "file://")==dir) {
-    dir += 6;
-  }
-  dir_iter= opendir(dir);
-  if (dir_iter) {
-    errno=0;
-    while ((dir_data = readdir(dir_iter))) {
-      if (strcmp(dir_data->d_name, ".")!=0 &&
-        strcmp(dir_data->d_name, "..")!=0) {
-        fullfilename = g_string_new(dir);
-        fullfilename = g_string_append(fullfilename, "/");
-        fullfilename = g_string_append(fullfilename, dir_data->d_name);
-        if (g_file_test(fullfilename->str, G_FILE_TEST_IS_DIR)) {
-          //classbrowser_dirlist_add(fullfilename->str);
-        }
-        else if (is_php_file_from_filename(fullfilename->str)) {
-          classbrowser_filelist_add(fullfilename->str);
-          #ifdef DEBUGCLASSBROWSER
-            g_print("DEBUG::File added: %s", fullfilename->str);
-          #endif
-        }
-        g_string_free(fullfilename, TRUE);
-      }
-    }
-    errno=0;
-    closedir(dir_iter);
-  }
-  else {
-    #ifdef DEBUGCLASSBROWSER
-      g_print("Classbrowser error. Err no: %d\n", errno);
-    #endif
-  }
-  dirlist = g_slist_append(dirlist, g_strdup(dir));
-}
-
-void classbrowser_dirlist_add_shared_source()
-{
-  gchar **shared_source_locations;
-  gint i;
-
-  shared_source_locations = g_strsplit(preferences.shared_source_location,",",-1);
-
-  for (i = 0; shared_source_locations[i] != NULL; i++) {
-    classbrowser_dirlist_add(shared_source_locations[i]);
-  }
-      
-  g_strfreev(shared_source_locations);
-}
-
 gboolean classbrowser_file_accessible(gchar *filename)
 {
-  FILE *file;
-
-  file = fopen(filename, "r");
-  if (file) {
-    fclose(file);
-    return TRUE;
+  GFileInfo *info;
+  GError *error=NULL;
+  GFile *file;
+  if (!filename) return FALSE;
+#ifdef DEBUGCLASSBROWSER
+  g_print("can read filename:'%s'?\n",filename);
+#endif
+  file= g_file_new_for_uri (filename);
+  
+  info=g_file_query_info (file,G_FILE_ATTRIBUTE_ACCESS_CAN_READ,0,NULL,&error);
+  if (error){
+  g_object_unref(file);
+  return FALSE;  
   }
-  return FALSE;
+  gboolean hr= g_file_info_get_attribute_boolean (info, G_FILE_ATTRIBUTE_ACCESS_CAN_READ);
+  g_object_unref(info);  
+  g_object_unref(file);
+  
+  return hr;
 }
 
+gboolean classbrowser_file_exist(gchar *filename)
+{
+  if (!filename) return FALSE;
+#ifdef DEBUGCLASSBROWSER
+  g_print("exist filename?:%s\n",filename);
+#endif
+  GFile *file= g_file_new_for_uri (filename);
+  gboolean hr= g_file_query_exists (file,NULL);
+  g_object_unref(file);
+  return hr;
+}
 
 void classbrowser_filelist_update(void)
 {
@@ -207,13 +121,11 @@ void classbrowser_filelist_update(void)
   for(li = filelist; li!= NULL; li = g_slist_next(li)) {
     file = li->data;
     if (file) {
-      if (!g_file_test(file->filename, G_FILE_TEST_EXISTS)){
+      if (!classbrowser_file_exist(file->filename)){
         classbrowser_filelist_remove(file);
         li = g_slist_remove(filelist, file);
       }
       else if (!classbrowser_file_accessible(file->filename)) {
-        //classbrowser_functionlist_start_file(file->filename);
-        //classbrowser_functionlist_remove_dead_wood();
         file->accessible = FALSE;
       }
       else {
@@ -222,25 +134,46 @@ void classbrowser_filelist_update(void)
     }
   }
 }
-
+gboolean classbrowser_file_modified(gchar *filename,GTimeVal *act){
+  GFileInfo *info;
+  GError *error=NULL;
+  GFile *file;
+  if (!filename) return FALSE;
+  file= g_file_new_for_uri (filename);
+  
+  info=g_file_query_info (file,"time::modified,time::modified-usec",0,NULL,&error);
+  if (error){
+  g_object_unref(file);
+  return FALSE;  
+  }
+  GTimeVal result;
+  g_file_info_get_modification_time (info,&result);
+  gboolean hr=FALSE;
+  if ((result.tv_sec > act->tv_sec) || (result.tv_sec == act->tv_sec && result.tv_usec > act->tv_usec)) hr=TRUE;
+  /*make current mark as file mark*/
+  act=memcpy (act,&result, sizeof(GTimeVal));
+  g_object_unref(info);  
+  g_object_unref(file);
+#ifdef DEBUGCLASSBROWSER
+    g_print("filename:'%s' returned %d modified status\n",filename,hr);
+#endif
+  return hr;
+}
 
 ClassBrowserFile *classbrowser_filelist_getnext(void)
 {
   GSList *li;
   ClassBrowserFile *file;
-  struct stat buf;
 
   for(li = filelist; li!= NULL; li = g_slist_next(li)) {
     file = li->data;
     if (file) {
       if (file->accessible) {
-         if ( stat(file->filename, &buf) == 0) {
-          if (buf.st_mtime != file->modified_time) {
+          if (classbrowser_file_modified(file->filename,&file->modified_time)){
             #ifdef DEBUGCLASSBROWSER
-              g_print("DEBUG::ClassBrowser: file %s not modified\n",file->filename);
+              g_print("DEBUG::ClassBrowser: file %s modified\n",file->filename);
             #endif
             return file;
-          }
         }
       }
     }
@@ -281,7 +214,6 @@ gboolean classbrowser_safe_equality(gchar *a, gchar *b)
   }
 
   // (a && b)
-
   return (strcmp(a, b)==0);
 }
 
@@ -576,31 +508,33 @@ void classbrowser_filelist_remove(ClassBrowserFile *file)
   g_free(file);
 }
 
+void list_php_files_open(void){
+  GSList *li;
+  Editor *editor;
+  for(li = editors; li!= NULL; li = g_slist_next(li)) {
+    editor = li->data;
+    if (editor) {
+#ifdef CLASSBROWSER
+      g_print("classbrowser found:%s\n",editor->filename->str);
+#endif
+      classbrowser_filelist_add(editor->filename->str);
+    }
+  }
+}
+
 //Note: this function can be optimized by not requesting to reparse files on tab change
 //when the parse only selected tab is set - Anoop
 
 void classbrowser_update(void)
 {
-  GSList *li;
-  Editor *editor;
   ClassBrowserFile *file;
-  struct stat buf;
-
   static guint press_event = 0;
   static guint release_event = 0;
   if (gtk_paned_get_position(GTK_PANED(main_window.main_horizontal_pane))==0) {
     return;
   }
-  
-  if (press_event) {
-    g_signal_handler_disconnect(main_window.classtreeview, press_event);
-  }
-  if (release_event) {
-    g_signal_handler_disconnect(main_window.classtreeview,release_event);
-  }
-        classbrowser_filelist_clear();
-  classbrowser_dirlist_clear();
-  classbrowser_dirlist_add_shared_source();
+
+  classbrowser_filelist_clear();
   //if parse only current file is set then add only the file in the current tab
   if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON (main_window.chkOnlyCurFileFuncs)))
   {
@@ -608,36 +542,28 @@ void classbrowser_update(void)
     if (main_window.current_editor)
     {
       classbrowser_filelist_add(main_window.current_editor->filename->str);
-      dirlist = g_slist_append(dirlist, g_path_get_dirname(main_window.current_editor->filename->str));
     }
   } else { 
-    // iterate open files
-    for(li = editors; li!= NULL; li = g_slist_next(li)) {
-      editor = li->data;
-      if (editor) {
-        classbrowser_filelist_add(editor->filename->str);
-        gchar *dir=g_path_get_dirname(editor->filename->str);
-        classbrowser_dirlist_add(dir);
-        g_free(dir);
-      }
-    }
-    //classbrowser_dirlist_add(preferences.shared_source_location);
+    list_php_files_open();
+  }
+  if (press_event) {
+    g_signal_handler_disconnect(main_window.classtreeview, press_event);
+  }
+  if (release_event) {
+    g_signal_handler_disconnect(main_window.classtreeview,release_event);
   }
   classbrowser_filelist_update();
   classbrowser_start_update();
+
   while ( (file = classbrowser_filelist_getnext() ) ) {
-          while (gtk_events_pending()) {
-                gtk_main_iteration();
-                }
-    stat(file->filename, &buf);
-    file->modified_time = buf.st_mtime;
+    while (gtk_events_pending()) gtk_main_iteration(); /* update ui */
     classbrowser_parse_file(file->filename);
     #ifdef DEBUGCLASSBROWSER
       g_print("Parsing %s\n", file->filename);
     #endif
   }
-  classbrowser_remove_dead_wood();
 
+  classbrowser_remove_dead_wood();
   press_event = g_signal_connect(GTK_OBJECT(main_window.classtreeview), "button_press_event",
                                    G_CALLBACK(treeview_double_click), NULL);
   release_event = g_signal_connect(GTK_OBJECT(main_window.classtreeview), "button_release_event",
