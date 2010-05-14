@@ -220,6 +220,8 @@ static void get_completion_list(GtkWidget *scintilla, gint wordStart, gint wordE
 
   buffer = gtk_scintilla_get_text_range (GTK_SCINTILLA(scintilla), wordStart, wordEnd, &length);
   g_tree_foreach (php_api_tree, make_completion_string, buffer);
+  /* add custom php functions */
+  classbrowser_add_custom_autocompletion(completion_list_tree,buffer);
   if (completion_list_tree != NULL) {
     gtk_scintilla_autoc_show(GTK_SCINTILLA(scintilla), wordEnd-wordStart, completion_list_tree->str);
     g_string_free (completion_list_tree,TRUE);
@@ -281,7 +283,7 @@ GString *get_sql_completion_list(GtkWidget *scintilla, gint wordStart, gint word
     if (g_str_has_prefix(sql_keywords[n], buffer)) {
         if (completion_list == NULL) {
           completion_list = g_string_new(sql_keywords[n]);
-        }	else {
+        } else {
           completion_list = g_string_append(completion_list, " ");
           completion_list = g_string_append(completion_list, sql_keywords[n]);
         }

@@ -69,6 +69,7 @@ ClassBrowserClass;
 
 void classbrowser_set_sortable(GtkTreeStore *classtreestore);
 void classbrowser_update(void);
+void classbrowser_add_custom_autocompletion(GString *result, gchar *prefix);
 void classbrowser_filelist_remove(ClassBrowserFile *file);
 void classbrowser_functionlist_start_file(gchar *filename);
 void classbrowser_functionlist_remove_dead_wood(void);

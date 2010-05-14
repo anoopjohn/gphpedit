@@ -590,7 +590,7 @@ GString *get_member_function_completion_list(GtkWidget *scintilla, gint wordStar
   gchar *function_name;
 
   buffer = gtk_scintilla_get_text_range (GTK_SCINTILLA(scintilla), wordStart, wordEnd, &length);
-
+  g_print("buffer:%s\n",buffer);
   for(li = functionlist; li!= NULL; li = g_slist_next(li)) {
     function = li->data;
     if (function) {
@@ -632,6 +632,40 @@ void autocomplete_member_function(GtkWidget *scintilla, gint wordStart, gint wor
   }
 }
 
+void classbrowser_add_custom_autocompletion(GString *result, gchar *prefix){
+  GSList *li;
+  GList *li2;
+  ClassBrowserFunction *function;
+  GList* member_functions = NULL;
+  GList* sorted_member_functions = NULL;
+  gchar *function_name;
+
+  for(li = functionlist; li!= NULL; li = g_slist_next(li)) {
+    function = li->data;
+    if (function) {
+      if ((g_str_has_prefix(function->functionname, prefix))) {
+        member_functions = g_list_append(member_functions, function->functionname);
+      }
+    }
+  }
+
+  sorted_member_functions = g_list_sort(member_functions, member_function_list_sort);
+  member_functions = sorted_member_functions;
+
+  for(li2 = member_functions; li2!= NULL; li2 = g_list_next(li2)) {
+    function_name = li2->data;
+    if (!result) {
+      result = g_string_new(function_name);
+    }
+    else {
+      result = g_string_append(result, " ");
+      result = g_string_append(result, function_name);
+    }
+  }
+
+  result = g_string_append(result, " ");
+//  return result;
+}
 
 gboolean classbrowser_file_in_list_find(GSList *list, gchar *file)
 {
