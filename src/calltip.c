@@ -221,7 +221,15 @@ static void get_completion_list(GtkWidget *scintilla, gint wordStart, gint wordE
   buffer = gtk_scintilla_get_text_range (GTK_SCINTILLA(scintilla), wordStart, wordEnd, &length);
   g_tree_foreach (php_api_tree, make_completion_string, buffer);
   /* add custom php functions */
-  classbrowser_add_custom_autocompletion(completion_list_tree,buffer);
+  gchar *custom= classbrowser_add_custom_autocompletion(buffer);
+  if (custom){
+    if(completion_list_tree != NULL){
+      completion_list_tree = g_string_append(completion_list_tree, " ");
+      completion_list_tree = g_string_append(completion_list_tree, custom);
+    } else {
+      completion_list_tree = g_string_new(custom);
+    }
+  }
   if (completion_list_tree != NULL) {
     gtk_scintilla_autoc_show(GTK_SCINTILLA(scintilla), wordEnd-wordStart, completion_list_tree->str);
     g_string_free (completion_list_tree,TRUE);

@@ -632,14 +632,15 @@ void autocomplete_member_function(GtkWidget *scintilla, gint wordStart, gint wor
   }
 }
 
-void classbrowser_add_custom_autocompletion(GString *result, gchar *prefix){
+gchar *classbrowser_add_custom_autocompletion(gchar *prefix){
   GSList *li;
   GList *li2;
   ClassBrowserFunction *function;
+  GString *result=NULL;
   GList* member_functions = NULL;
   GList* sorted_member_functions = NULL;
   gchar *function_name;
-
+  g_print("busco por %s\n",prefix);
   for(li = functionlist; li!= NULL; li = g_slist_next(li)) {
     function = li->data;
     if (function) {
@@ -664,7 +665,8 @@ void classbrowser_add_custom_autocompletion(GString *result, gchar *prefix){
   }
 
   result = g_string_append(result, " ");
-//  return result;
+
+  return result->str;
 }
 
 gboolean classbrowser_file_in_list_find(GSList *list, gchar *file)
