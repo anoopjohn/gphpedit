@@ -630,7 +630,6 @@ void move_classbrowser_position(void)
 
 void save_classbrowser_position(void)
 {
-    
   if (gtk_paned_get_position(GTK_PANED(main_window.main_horizontal_pane)) != 0) {
     GConfClient *config;
     config=gconf_client_get_default ();
@@ -640,19 +639,10 @@ void save_classbrowser_position(void)
 
 void main_window_size_save_details()
 {
-  GConfClient *config;
-  config=gconf_client_get_default ();
-  preferences.maximized = gconf_client_get_bool(config,"/gPHPEdit/main_window/maximized",NULL);
-	
-	if (!preferences.maximized) {
-		gtk_window_get_position(GTK_WINDOW(main_window.window), &preferences.left, &preferences.top);
-		gtk_window_get_size(GTK_WINDOW(main_window.window), &preferences.width, &preferences.height);
-
-    gconf_client_set_int (config,"/gPHPEdit/main_window/x", preferences.left,NULL);
-    gconf_client_set_int (config,"/gPHPEdit/main_window/y", preferences.top,NULL);
-    gconf_client_set_int (config,"/gPHPEdit/main_window/width", preferences.width,NULL);
-		gconf_client_set_int (config,"/gPHPEdit/main_window/height", preferences.height,NULL);
-	}
+  if (!preferences.maximized) {
+    gtk_window_get_position(GTK_WINDOW(main_window.window), &preferences.left, &preferences.top);
+    gtk_window_get_size(GTK_WINDOW(main_window.window), &preferences.width, &preferences.height);
+  }
 }
 
 void preferences_save()
@@ -1113,6 +1103,17 @@ void preferences_save()
 	gconf_client_set_int (config,"/gPHPEdit/c_globalclass/size", preferences.c_globalclass_size,NULL);
 	gconf_client_set_bool (config,"/gPHPEdit/c_globalclass/italic", preferences.c_globalclass_italic,NULL);
 	gconf_client_set_bool (config,"/gPHPEdit/c_globalclass/bold", preferences.c_globalclass_bold,NULL);
+
+  /* Main window settings */
+  /* save maximized status */
+  gconf_client_set_bool (config,"/gPHPEdit/main_window/maximized", preferences.maximized,NULL);
+	/* window position */
+  if (!preferences.maximized) {
+    gconf_client_set_int (config,"/gPHPEdit/main_window/x", preferences.left,NULL);
+    gconf_client_set_int (config,"/gPHPEdit/main_window/y", preferences.top,NULL);
+    gconf_client_set_int (config,"/gPHPEdit/main_window/width", preferences.width,NULL);
+    gconf_client_set_int (config,"/gPHPEdit/main_window/height", preferences.height,NULL);
+  }
 
   gconf_client_suggest_sync (config,NULL);
   gconf_client_clear_cache(config);

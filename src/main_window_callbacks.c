@@ -260,10 +260,7 @@ void main_window_resize(GtkWidget *widget, GtkAllocation *allocation, gpointer u
 
 void main_window_state_changed(GtkWidget *widget, GdkEventWindowState *event, gpointer user_data)
 {
-  gboolean maximized = GDK_WINDOW_STATE_MAXIMIZED && event->new_window_state;
-  GConfClient *config;
-  config=gconf_client_get_default ();
-  gconf_client_set_bool (config,"/gPHPEdit/main_window/maximized", maximized,NULL);
+  preferences.maximized = GDK_WINDOW_STATE_MAXIMIZED && event->new_window_state;
 }
 
 gboolean classbrowser_accept_size(GtkPaned *paned, gpointer user_data)
@@ -1850,7 +1847,7 @@ void lint_row_activated (GtkTreeSelection *selection, gpointer data)
     space = strrchr(line, ' ');
     space++;
     // Go to that line
-    goto_line(space);
+      goto_line(space);
 
     g_free (line);
   }
