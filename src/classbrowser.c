@@ -657,10 +657,12 @@ gchar *classbrowser_add_custom_autocompletion(gchar *prefix){
     function_name = li2->data;
     if (!result) {
       result = g_string_new(function_name);
+      result = g_string_append(result, "?1");
     }
     else {
       result = g_string_append(result, " ");
       result = g_string_append(result, function_name);
+      result = g_string_append(result, "?1");
     }
   }
 

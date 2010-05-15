@@ -35,6 +35,7 @@ nodist_EXTRA_gphpedit_SOURCES = dummy.cxx
 gphpedit_SOURCES = \
 	calltip.c		\
 	calltip.h		\
+	images.h		\
 	classbrowser.c		\
 	classbrowser.h		\
 	classbrowser_parse.c	\

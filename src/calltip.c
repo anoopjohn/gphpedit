@@ -25,6 +25,7 @@
 #include <stdio.h>
 #include "calltip.h"
 #include "tab.h"
+#include "images.h"
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
@@ -63,6 +64,12 @@ gchar *sql_keywords[] = {"ADD", "ALL", "ALTER", "ANALYZE", "AND", "AS", "ASC", "
   "UNLOCK", "UNSIGNED", "UNTIL", "UPDATE", "USAGE", "USE", "USER_RESOURCES", 
   "USING", "VALUES", "VARBINARY", "VARCHAR", "VARCHARACTER", "VARYING", "WARNINGS", 
   "WHEN", "WHERE", "WHILE", "WITH", "WRITE", "XOR", "YEAR_MONTH", "ZEROFILL", NULL};
+
+void register_autoc_images(GtkScintilla *sci){
+  gtk_scintilla_register_image(sci, 1, (long int) function_xpm);
+  gtk_scintilla_register_image(sci, 2, (long int) bullet_blue_xpm);
+}
+
 void function_list_prepare(void)
 {
   FILE *apifile;
@@ -152,9 +159,11 @@ gboolean make_completion_string (gpointer key, gpointer value, gpointer data){
   if(g_str_has_prefix(key, (gchar *)data)){
 	    if (!completion_list_tree) {
 	      completion_list_tree = g_string_new(key);
+        completion_list_tree = g_string_append(completion_list_tree, "?2");
 	    }else{
 	      completion_list_tree = g_string_append(completion_list_tree, " ");
         completion_list_tree = g_string_append(completion_list_tree, key);
+        completion_list_tree = g_string_append(completion_list_tree, "?2");
       }
   }
   if (strncmp(key, (gchar *)data,MIN(strlen(key),strlen(data)))>0){
@@ -229,6 +238,7 @@ static void get_completion_list(GtkWidget *scintilla, gint wordStart, gint wordE
     } else {
       completion_list_tree = g_string_new(custom);
     }
+    g_free(custom);
   }
   if (completion_list_tree != NULL) {
     gtk_scintilla_autoc_show(GTK_SCINTILLA(scintilla), wordEnd-wordStart, completion_list_tree->str);
