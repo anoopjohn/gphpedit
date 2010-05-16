@@ -267,6 +267,7 @@ void set_controls_to_highlight(gchar *setting_name, gchar *fontname, gint fontsi
 
 void get_current_highlighting_settings(gchar *name)
 {
+  if (!name) return;
   if (strlen(name)==0) return;
 
   if (IS_FONT_NAME(current_highlighting_element, _("Default"))) {
@@ -1902,10 +1903,11 @@ GTK_STOCK_OK, GTK_RESPONSE_ACCEPT, GTK_STOCK_CANCEL, GTK_RESPONSE_REJECT, NULL);
     GINT_TO_POINTER (gtk_tree_model_iter_n_children (gtk_combo_box_get_model (GTK_COMBO_BOX(preferences_dialog.element_combo)), NULL)));
     gtk_combo_box_append_text (GTK_COMBO_BOX(preferences_dialog.element_combo),walk->data);
   }
+  current_highlighting_element = g_list_first(preferences_dialog.highlighting_elements)->data;
+  gtk_combo_box_set_active (GTK_COMBO_BOX(preferences_dialog.element_combo),0);
   g_signal_connect (G_OBJECT (GTK_COMBO_BOX (preferences_dialog.element_combo)), "changed",
                       G_CALLBACK (on_element_entry_changed),
                       NULL);
-  gtk_combo_box_set_active (GTK_COMBO_BOX(preferences_dialog.element_combo),0);
   g_list_free (preferences_dialog.highlighting_elements);
   
   preferences_dialog.label39 = gtk_label_new (_("Element"));
