@@ -218,6 +218,13 @@ static void get_api_line(GtkWidget *scintilla, gint wordStart, gint wordEnd)
     gtk_scintilla_call_tip_show(GTK_SCINTILLA(scintilla), wordStart, callti);
     g_free(callti);
     g_free(copy_line);	
+  } else {
+  /*maybe a custom function*/
+    gchar *result=classbrowser_custom_function_calltip(buffer);
+    if (result){
+      gtk_scintilla_call_tip_show(GTK_SCINTILLA(scintilla), wordStart, result);
+      g_free(result);
+    }
   }
   g_free (buffer);
 }

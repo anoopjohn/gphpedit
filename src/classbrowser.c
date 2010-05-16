@@ -590,7 +590,6 @@ GString *get_member_function_completion_list(GtkWidget *scintilla, gint wordStar
   gchar *function_name;
 
   buffer = gtk_scintilla_get_text_range (GTK_SCINTILLA(scintilla), wordStart, wordEnd, &length);
-  g_print("buffer:%s\n",buffer);
   for(li = functionlist; li!= NULL; li = g_slist_next(li)) {
     function = li->data;
     if (function) {
@@ -607,10 +606,12 @@ GString *get_member_function_completion_list(GtkWidget *scintilla, gint wordStar
     function_name = li2->data;
     if (!result) {
       result = g_string_new(function_name);
+      result = g_string_append(result, "?1");
     }
     else {
       result = g_string_append(result, " ");
       result = g_string_append(result, function_name);
+      result = g_string_append(result, "?1");
     }
   }
 
@@ -631,6 +632,23 @@ void autocomplete_member_function(GtkWidget *scintilla, gint wordStart, gint wor
     g_string_free(list, FALSE);
   }
 }
+gchar *classbrowser_custom_function_calltip(gchar *function_name){
+/*FIXME::two functions diferent classes same name =bad calltip */
+  GSList *li;
+  ClassBrowserFunction *function;
+  GList* member_functions = NULL;
+  gchar *calltip=NULL;
+  for(li = functionlist; li!= NULL; li = g_slist_next(li)) {
+    function = li->data;
+    if (function) {
+      if ((g_str_has_prefix(function->functionname, function_name))) {
+          calltip=g_strdup_printf("%s (%s)",function->functionname,function->paramlist);
+          break;
+      }
+    }
+  }
+  return calltip;
+}
 
 gchar *classbrowser_add_custom_autocompletion(gchar *prefix,GSList *list){
   GSList *li;
@@ -640,7 +658,6 @@ gchar *classbrowser_add_custom_autocompletion(gchar *prefix,GSList *list){
   GList* member_functions = NULL;
   GList* sorted_member_functions = NULL;
   gchar *function_name;
-  g_print("busco por %s\n",prefix);
   for(li = functionlist; li!= NULL; li = g_slist_next(li)) {
     function = li->data;
     if (function) {

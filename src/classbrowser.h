@@ -39,8 +39,7 @@ typedef struct
 {
   gchar *filename;
   gboolean accessible;
-  //time_t modified_time;
-   GTimeVal modified_time;
+  GTimeVal modified_time;
 }
 ClassBrowserFile;
 
@@ -70,6 +69,7 @@ ClassBrowserClass;
 void classbrowser_set_sortable(GtkTreeStore *classtreestore);
 void classbrowser_update(void);
 gchar *classbrowser_add_custom_autocompletion(gchar *prefix,GSList *list);
+gchar *classbrowser_custom_function_calltip(gchar *function_name);
 void classbrowser_filelist_remove(ClassBrowserFile *file);
 void classbrowser_functionlist_start_file(gchar *filename);
 void classbrowser_functionlist_remove_dead_wood(void);
