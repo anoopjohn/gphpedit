@@ -222,29 +222,37 @@ static void get_api_line(GtkWidget *scintilla, gint wordStart, gint wordEnd)
   g_free (buffer);
 }
 
+GSList *list = NULL;
+gboolean make_completion_list (gpointer key, gpointer value, gpointer data){
+  if(g_str_has_prefix(key, (gchar *)data)){
+      gchar *string=g_strdup_printf("%s?2",(gchar *)key); /*must free when no longer needed*/
+	    list=g_slist_prepend(list,string);
+      }
+  if (strncmp(key, (gchar *)data,MIN(strlen(key),strlen(data)))>0){
+    return TRUE;
+  }
+  return FALSE;
+}
+static inline void clear_list(void){
+g_slist_foreach (list,(GFunc) g_free,NULL);
+g_slist_free(list);
+list=NULL;
+}
+
 static void get_completion_list(GtkWidget *scintilla, gint wordStart, gint wordEnd)
 {
   gchar *buffer = NULL;
   gint length;
 
   buffer = gtk_scintilla_get_text_range (GTK_SCINTILLA(scintilla), wordStart, wordEnd, &length);
-  g_tree_foreach (php_api_tree, make_completion_string, buffer);
+  g_tree_foreach (php_api_tree, make_completion_list, buffer);
   /* add custom php functions */
-  gchar *custom= classbrowser_add_custom_autocompletion(buffer);
+  gchar *custom= classbrowser_add_custom_autocompletion(buffer,list);
   if (custom){
-    if(completion_list_tree != NULL){
-      completion_list_tree = g_string_append(completion_list_tree, " ");
-      completion_list_tree = g_string_append(completion_list_tree, custom);
-    } else {
-      completion_list_tree = g_string_new(custom);
-    }
+    gtk_scintilla_autoc_show(GTK_SCINTILLA(scintilla), wordEnd-wordStart, custom);
     g_free(custom);
   }
-  if (completion_list_tree != NULL) {
-    gtk_scintilla_autoc_show(GTK_SCINTILLA(scintilla), wordEnd-wordStart, completion_list_tree->str);
-    g_string_free (completion_list_tree,TRUE);
-    completion_list_tree=NULL;
-  }
+  clear_list();
   g_free(buffer);
 }
 

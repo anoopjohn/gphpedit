@@ -632,7 +632,7 @@ void autocomplete_member_function(GtkWidget *scintilla, gint wordStart, gint wor
   }
 }
 
-gchar *classbrowser_add_custom_autocompletion(gchar *prefix){
+gchar *classbrowser_add_custom_autocompletion(gchar *prefix,GSList *list){
   GSList *li;
   GList *li2;
   ClassBrowserFunction *function;
@@ -645,11 +645,17 @@ gchar *classbrowser_add_custom_autocompletion(gchar *prefix){
     function = li->data;
     if (function) {
       if ((g_str_has_prefix(function->functionname, prefix))) {
-        member_functions = g_list_append(member_functions, function->functionname);
+        member_functions = g_list_prepend(member_functions, function->functionname);
       }
     }
   }
-
+  /* add functions */
+  for(li = list; li!= NULL; li = g_slist_next(li)) {
+    function = li->data;
+    if (function) {
+        member_functions = g_list_prepend(member_functions, function);
+    }
+  }
   sorted_member_functions = g_list_sort(member_functions, member_function_list_sort);
   member_functions = sorted_member_functions;
 
@@ -657,18 +663,22 @@ gchar *classbrowser_add_custom_autocompletion(gchar *prefix){
     function_name = li2->data;
     if (!result) {
       result = g_string_new(function_name);
-      result = g_string_append(result, "?1");
+      if (!g_str_has_suffix(function_name,"?2"))
+          result = g_string_append(result, "?1");
     }
     else {
       result = g_string_append(result, " ");
       result = g_string_append(result, function_name);
-      result = g_string_append(result, "?1");
+      if (!g_str_has_suffix(function_name,"?2"))
+          result = g_string_append(result, "?1");
     }
   }
-
-  result = g_string_append(result, " ");
-
-  return result->str;
+  if (result){
+    result = g_string_append(result, " ");
+    return result->str;
+  } else {
+    return NULL;
+  }
 }
 
 gboolean classbrowser_file_in_list_find(GSList *list, gchar *file)
