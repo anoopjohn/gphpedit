@@ -93,6 +93,7 @@ void tab_set_general_scintilla_properties(Editor *editor)
   gtk_scintilla_set_backspace_unindents(GTK_SCINTILLA(editor->scintilla), 1);
   gtk_scintilla_autoc_set_choose_single(GTK_SCINTILLA (editor->scintilla), FALSE);
   gtk_scintilla_autoc_set_ignore_case(GTK_SCINTILLA (editor->scintilla), TRUE);
+  register_autoc_images(GTK_SCINTILLA (editor->scintilla));
   gtk_scintilla_autoc_set_drop_rest_of_word(GTK_SCINTILLA (editor->scintilla), FALSE);
   gtk_scintilla_set_scroll_width_tracking(GTK_SCINTILLA (editor->scintilla), TRUE);
   gtk_scintilla_set_code_page(GTK_SCINTILLA(editor->scintilla), 65001); // Unicode code page
@@ -433,7 +434,7 @@ void tab_file_opened (GObject *source_object, GAsyncResult *res, gpointer user_d
   g_free(iconname);
   g_file_info_get_modification_time (info,&editor->file_mtime);
   g_object_unref(info);
-  // Open file
+  /* Open file*/
   /*it's all ok, read file*/
   g_file_load_contents_async (file,NULL,tab_file_opened,editor);
 }
@@ -1790,6 +1791,7 @@ static void char_added(GtkWidget *scintilla, guint ch)
         if (*previous_char_buffer=='{') {
             previous_line_indentation+=preferences.indentation_size;
         }
+        g_free(previous_char_buffer);
         indent_line(scintilla, current_line, previous_line_indentation);
         #ifdef DEBUGTAB
         g_print("DEBUG: tab.c:char_added:previous_line=%d, previous_indent=%d\n", previous_line, previous_line_indentation);
@@ -1802,7 +1804,7 @@ static void char_added(GtkWidget *scintilla, guint ch)
         pos=gtk_scintilla_position_from_line(GTK_SCINTILLA(scintilla), current_line)+(previous_line_indentation);
         }
         gtk_scintilla_goto_pos(GTK_SCINTILLA(scintilla), pos);
-        } 
+        }
           case (')'):
         if (gtk_scintilla_call_tip_active(GTK_SCINTILLA(scintilla))) {
         gtk_scintilla_call_tip_cancel(GTK_SCINTILLA(scintilla));
@@ -1817,15 +1819,29 @@ static void char_added(GtkWidget *scintilla, guint ch)
         break;
           default:      
         member_function_buffer = gtk_scintilla_get_text_range (GTK_SCINTILLA(scintilla), wordEnd-1, wordEnd +1, &member_function_length);
-        if (strcmp(member_function_buffer, "->")==0 && (gtk_scintilla_get_line_state(GTK_SCINTILLA(scintilla), current_line)==274)) {
-          if (gtk_scintilla_autoc_active(GTK_SCINTILLA(scintilla))==1) {
-          autocomplete_member_function(scintilla, wordStart, wordEnd);
-          } else {
+        if (strcmp(member_function_buffer, "->")==0) {
+          /*search back for a '$' in that line */
+          gint initial_pos=gtk_scintilla_position_from_line(GTK_SCINTILLA(scintilla), current_line);
+          gint line_size;
+          gchar *line_text= gtk_scintilla_get_text_range (GTK_SCINTILLA(scintilla), initial_pos, wordStart-1, &line_size);
+          if (!strchr(line_text,'$')) return;
+          /*search for a '$' or ';' or ' ' */
+          int i;
+          gboolean r=FALSE;
+          for (i=strlen(line_text)-1;i>=0;i--){
+            if (*(line_text+i)==';') break;
+            if (*(line_text+i)==' ') break;
+            /*something like this "p$sk->"*/
+            if (*(line_text+i)=='$' && (*(line_text+i-1)==' ' || *(line_text+i-1)=='(' || *(line_text+i-1)=='[')){  
+              r=TRUE; 
+              break;
+            }
+          }
+          if (!r) return;
             if (completion_timer_set==FALSE) {
               completion_timer_id = g_timeout_add(preferences.auto_complete_delay, auto_memberfunc_complete_callback, (gpointer) current_pos);
               completion_timer_set=TRUE;
             }
-          }  
         } else if ((current_word_length>=3) && ( (gtk_scintilla_get_line_state(GTK_SCINTILLA(scintilla), current_line)==274))) {
         // check to see if they've typed <?php and if so do nothing
         if (wordStart>1) {
@@ -1839,7 +1855,7 @@ static void char_added(GtkWidget *scintilla, guint ch)
         if (gtk_scintilla_autoc_active(GTK_SCINTILLA(scintilla))==1) {
           autocomplete_word(scintilla, wordStart, wordEnd);
         } else {
-              completion_timer_id = g_timeout_add(preferences.auto_complete_delay, auto_complete_callback, (gpointer) current_pos);
+          completion_timer_id = g_timeout_add(preferences.auto_complete_delay, auto_complete_callback, (gpointer) current_pos);
         }
         }
         g_free(member_function_buffer);
