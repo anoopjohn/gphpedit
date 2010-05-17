@@ -641,7 +641,7 @@ gchar *classbrowser_custom_function_calltip(gchar *function_name){
   for(li = functionlist; li!= NULL; li = g_slist_next(li)) {
     function = li->data;
     if (function) {
-      if ((g_str_has_prefix(function->functionname, function_name))) {
+      if (strcmp(function->functionname, function_name)==0) {
           calltip=g_strdup_printf("%s (%s)",function->functionname,function->paramlist);
           break;
       }
