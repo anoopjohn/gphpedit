@@ -43,7 +43,6 @@ gchar *run_php_lint(gchar *command_line)
     return NULL;
   }
   gchar *res =g_strdup_printf ("%s\n%s",stdouterr,stdout);
-
   g_free(stdouterr);
   g_free(stdout);
   return res;
@@ -65,35 +64,83 @@ void syntax_add_lines(gchar *output)
   gtk_scintilla_set_indicator_current(GTK_SCINTILLA(main_window.current_editor->scintilla), 20);
   gtk_scintilla_indic_set_style(GTK_SCINTILLA(main_window.current_editor->scintilla), 20, INDIC_SQUIGGLE);
   gtk_scintilla_indic_set_fore(GTK_SCINTILLA(main_window.current_editor->scintilla), 20, 0x0000ff);
-  while ((token = strtok(copy, "\n"))) {
-    if ((strncmp(token, "PHP Warning:  ", MIN(strlen(token), 14))!=0) && (strncmp(token, "Content-type", MIN(strlen(token), 12))!=0)) { 
-      if (g_str_has_prefix(token,"PHP Parse error:  syntax error, ")){
-      token+=strlen("PHP Parse error:  syntax error, ");
-      }
-      gtk_list_store_append (main_window.lint_store, &iter);
-      gtk_list_store_set (main_window.lint_store, &iter, 0, token, -1);
-  
-      line_number = strrchr(token, ' ');
-      line_number++;
-      if (atoi(line_number)>0) {
-        if (!first_error) {
-          first_error = line_number;
+  if (main_window.current_editor->type==TAB_PHP){
+    while ((token = strtok(copy, "\n"))) {
+      if ((strncmp(token, "PHP Warning:  ", MIN(strlen(token), 14))!=0) && (strncmp(token, "Content-type", MIN(strlen(token), 12))!=0)) { 
+        if (g_str_has_prefix(token,"PHP Parse error:  syntax error, ")){
+        token+=strlen("PHP Parse error:  syntax error, ");
         }
-        indent = gtk_scintilla_get_line_indentation(GTK_SCINTILLA(main_window.current_editor->scintilla), atoi(line_number)-1);
-  
-        line_start = gtk_scintilla_position_from_line(GTK_SCINTILLA(main_window.current_editor->scintilla), atoi(line_number)-1);
-        line_start += (indent/preferences.indentation_size);
-  
-        line_end = gtk_scintilla_get_line_end_position(GTK_SCINTILLA(main_window.current_editor->scintilla), atoi(line_number)-1);
-        gtk_scintilla_indicator_fill_range(GTK_SCINTILLA(main_window.current_editor->scintilla), line_start, line_end-line_start);
+        gtk_list_store_append (main_window.lint_store, &iter);
+        gtk_list_store_set (main_window.lint_store, &iter, 0, token, -1);
+    
+        line_number = strrchr(token, ' ');
+        line_number++;
+        if (atoi(line_number)>0) {
+          if (!first_error) {
+            first_error = line_number;
+          }
+          indent = gtk_scintilla_get_line_indentation(GTK_SCINTILLA(main_window.current_editor->scintilla), atoi(line_number)-1);
+    
+          line_start = gtk_scintilla_position_from_line(GTK_SCINTILLA(main_window.current_editor->scintilla), atoi(line_number)-1);
+          line_start += (indent/preferences.indentation_size);
+    
+          line_end = gtk_scintilla_get_line_end_position(GTK_SCINTILLA(main_window.current_editor->scintilla), atoi(line_number)-1);
+          gtk_scintilla_indicator_fill_range(GTK_SCINTILLA(main_window.current_editor->scintilla), line_start, line_end-line_start);
+        }
+        else {
+          g_print("Line number is 0\n");
+        }
       }
-      else {
-        g_print("Line number is 0\n");
-      }
+      copy = NULL;
     }
-    copy = NULL;
-  }
+  } else if (main_window.current_editor->type==TAB_PERL){
+      gint quote=0;
+      gint a=0;
+      gchar *cop=copy;
+      while (*cop!='\0'){
+      if(*cop=='"' && quote==0) quote++;
+      else if(*cop=='"' && quote!=0) quote--;
+      if (*cop=='\n' && quote==1) *(copy +a)=' ';
+      cop++;
+      a++;
+//      g_print("char:%c, quote:%d,pos:%d\n",*cop,quote,a);
+      }      
+      while ((token = strtok(copy, "\n"))) {
+        gtk_list_store_append (main_window.lint_store, &iter);
+        gtk_list_store_set (main_window.lint_store, &iter, 0, token, -1);
+        gchar number[15];  
+        int i=15;
+        line_number = strstr(token, "line ");
+        if (line_number){
+        line_number+=5;
+        while (*line_number!=',' && *line_number!='.' && i!=0){
+        number[15-i]=*line_number;
+        line_number++;
+        i--;
+        }
+        number[i]='\0';
+        }
+        gint num=atoi(number);
+        if (num>0) {
+          if (!first_error) {
+            first_error = number;
+          }
+          indent = gtk_scintilla_get_line_indentation(GTK_SCINTILLA(main_window.current_editor->scintilla), num-1);
+    
+          line_start = gtk_scintilla_position_from_line(GTK_SCINTILLA(main_window.current_editor->scintilla), num-1);
+          line_start += (indent/preferences.indentation_size);
+    
+          line_end = gtk_scintilla_get_line_end_position(GTK_SCINTILLA(main_window.current_editor->scintilla), num-1);
+          gtk_scintilla_indicator_fill_range(GTK_SCINTILLA(main_window.current_editor->scintilla), line_start, line_end-line_start);
+        }
+        else {
+          g_print("Line number is 0\n");
+        }
+      number[0]='a'; /*force new number */
+      copy = NULL;
+    }
 
+  }
   if (first_error) {
     goto_line(first_error);
   }
@@ -233,12 +280,19 @@ void syntax_check_run(void)
       using_temp = TRUE;
     }
     unquote(filename->str);
+    if(main_window.current_editor->type==TAB_PHP){
     command_line = g_string_new(preferences.php_binary_location);
     command_line = g_string_append(command_line, " -q -l -d html_errors=Off -f '");
     command_line = g_string_append(command_line, filename->str);
     command_line = g_string_append(command_line, "'");
     g_print("eject:%s\n", command_line->str);
-
+    } else {
+    command_line = g_string_new("perl -c ");
+    command_line = g_string_append(command_line, "'");
+    command_line = g_string_append(command_line, filename->str);
+    command_line = g_string_append(command_line, "'");
+    g_print("eject:%s\n", command_line->str);
+    }
     output = run_php_lint(command_line->str);
     g_string_free(command_line, TRUE);
 
