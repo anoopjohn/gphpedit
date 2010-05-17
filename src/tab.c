@@ -1751,7 +1751,8 @@ static void char_added(GtkWidget *scintilla, guint ch)
   #ifdef DEBUGTAB
   g_print("DEBUG:::char added:%d\n",ch);
   #endif
-  if (type == TAB_HELP || type == TAB_PREVIEW || type==TAB_FILE) return;
+//  if (type == TAB_HELP || type == TAB_PREVIEW || type==TAB_FILE) return;
+  if (type == TAB_HELP || type == TAB_PREVIEW) return;
   if ((type != TAB_PHP) && (ch=='\r'|| ch=='\n' || ch=='\t'))return;
   current_pos = gtk_scintilla_get_current_pos(GTK_SCINTILLA(scintilla));
   current_line = gtk_scintilla_line_from_position(GTK_SCINTILLA(scintilla), current_pos);
@@ -1917,7 +1918,13 @@ static void char_added(GtkWidget *scintilla, guint ch)
         break;
       }
       // Drop down for HTML here (line_state = 272)
-      
+     default:
+            member_function_buffer = gtk_scintilla_get_text_range (GTK_SCINTILLA(scintilla), wordStart-2, wordEnd, &member_function_length);
+            /* if we type <?php then we are in a php file so force php syntax mode */
+            if (strcmp(member_function_buffer,"<?php")==0) set_editor_to_php(main_window.current_editor);
+//          g_print("buffer:%s",member_function_buffer);
+            g_free(member_function_buffer);
+            break;
     }
 }
 
