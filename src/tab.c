@@ -887,6 +887,7 @@ if (g_str_has_suffix(filename,".sql"))
 void set_editor_to_php(Editor *editor)
 {
   tab_php_set_lexer(editor);
+  gtk_scintilla_set_word_chars((GtkScintilla *)editor->scintilla, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_$");
   editor->type = TAB_PHP;
   tab_set_folding(editor, TRUE);
 }
@@ -1820,29 +1821,21 @@ static void char_added(GtkWidget *scintilla, guint ch)
         break;
           default:      
         member_function_buffer = gtk_scintilla_get_text_range (GTK_SCINTILLA(scintilla), wordEnd-1, wordEnd +1, &member_function_length);
-        if (strcmp(member_function_buffer, "->")==0) {
+        if (strcmp(member_function_buffer, "->")==0 || strcmp(member_function_buffer, "::")==0) {
           /*search back for a '$' in that line */
           gint initial_pos=gtk_scintilla_position_from_line(GTK_SCINTILLA(scintilla), current_line);
           gint line_size;
           gchar *line_text= gtk_scintilla_get_text_range (GTK_SCINTILLA(scintilla), initial_pos, wordStart-1, &line_size);
-          if (!strchr(line_text,'$')) return;
-          /*search for a '$' or ';' or ' ' */
-          int i;
-          gboolean r=FALSE;
-          for (i=strlen(line_text)-1;i>=0;i--){
-            if (*(line_text+i)==';') break;
-            if (*(line_text+i)==' ') break;
-            /*something like this "p$sk->"*/
-            if (*(line_text+i)=='$' && (*(line_text+i-1)==' ' || *(line_text+i-1)=='(' || *(line_text+i-1)=='[')){  
-              r=TRUE; 
-              break;
-            }
-          }
-          if (!r) return;
+            if (!check_php_variable_before(line_text))return;
             if (completion_timer_set==FALSE) {
               completion_timer_id = g_timeout_add(preferences.auto_complete_delay, auto_memberfunc_complete_callback, (gpointer) current_pos);
               completion_timer_set=TRUE;
             }
+        }
+        g_free(member_function_buffer);
+        member_function_buffer = gtk_scintilla_get_text_range (GTK_SCINTILLA(scintilla), wordStart, wordEnd, &member_function_length);
+        if (g_str_has_prefix(member_function_buffer,"$")) {
+            autocomplete_php_variables(scintilla, wordStart, wordEnd);
         } else if ((current_word_length>=3) && ( (gtk_scintilla_get_line_state(GTK_SCINTILLA(scintilla), current_line)==274))) {
         // check to see if they've typed <?php and if so do nothing
         if (wordStart>1) {

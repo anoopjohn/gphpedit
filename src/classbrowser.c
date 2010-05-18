@@ -636,7 +636,6 @@ gchar *classbrowser_custom_function_calltip(gchar *function_name){
 /*FIXME::two functions diferent classes same name =bad calltip */
   GSList *li;
   ClassBrowserFunction *function;
-  GList* member_functions = NULL;
   gchar *calltip=NULL;
   for(li = functionlist; li!= NULL; li = g_slist_next(li)) {
     function = li->data;
@@ -649,7 +648,6 @@ gchar *classbrowser_custom_function_calltip(gchar *function_name){
   }
   return calltip;
 }
-
 gchar *classbrowser_add_custom_autocompletion(gchar *prefix,GSList *list){
   GSList *li;
   GList *li2;
@@ -686,7 +684,7 @@ gchar *classbrowser_add_custom_autocompletion(gchar *prefix,GSList *list){
     else {
       result = g_string_append(result, " ");
       result = g_string_append(result, function_name);
-      if (!g_str_has_suffix(function_name,"?2"))
+      if (!g_str_has_suffix(function_name,"?2") && !g_str_has_suffix(function_name,"?3"))
           result = g_string_append(result, "?1");
     }
   }

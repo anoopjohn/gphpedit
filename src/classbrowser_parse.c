@@ -25,7 +25,6 @@
 #include "classbrowser_parse.h"
 //#define DEBUG_CLASSBROWSER
 
-
 static gchar *read_text_file( gchar *filename )
 {
   GFile *file;
@@ -33,14 +32,12 @@ static gchar *read_text_file( gchar *filename )
   gchar *buffer=NULL;
   gsize nchars;
 
-  /*buscar entre los editores abiertos el que tenga esta filename y sacar el texto del scintilla asi esta actualizado siempre */
   gchar *filenam=convert_to_full(filename);
   file=g_file_new_for_uri (filenam);
   g_free(filenam);
-
-  if (!g_file_load_contents (file,NULL,&buffer, &nchars,NULL,&error)){
-    g_print("Error classbrowser reading file '%s'. GIO error:%s\n",filename,error->message);
-  }
+    if (!g_file_load_contents (file,NULL,&buffer, &nchars,NULL,&error)){
+      g_print("Error classbrowser reading file '%s'. GIO error:%s\n",filename,error->message);
+    }
   g_object_unref(file);
 //  g_print("buffer:<---\n%s\n--->",buffer);
   return buffer;
@@ -506,4 +503,25 @@ void classbrowser_parse_file(gchar *filename)
   if (within_function) g_free(within_function);
   g_free(file_contents);
 }
-
+/*
+ * gboolean check_variable_before(const gchar *line_text)
+ * check if there is a valid php variable has suffix in the gchar input
+ * something like this "p$sk->" return FALSE
+ * $this-> return TRUE
+ * $var($this-> return TRUE
+ * $var[$this-> return TRUE
+ */
+gboolean check_php_variable_before(const gchar *line_text){
+  gboolean r=FALSE;
+  int i;
+  if (!strchr(line_text,'$')) return r;
+  for (i=strlen(line_text)-1;i>=0;i--){
+    if (*(line_text+i)==';') break;
+    if (*(line_text+i)==' ') break;
+    if (*(line_text+i)=='$' && (*(line_text+i-1)==' ' || *(line_text+i-1)=='(' || *(line_text+i-1)=='[' || i==0)){  
+    r=TRUE; 
+    break;
+    }
+  }
+  return r;
+}

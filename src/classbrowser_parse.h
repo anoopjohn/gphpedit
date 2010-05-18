@@ -32,5 +32,5 @@
 #include "classbrowser.h"
 
 void classbrowser_parse_file(gchar *filename);
-
+gboolean check_php_variable_before(const gchar *line_text);
 #endif
