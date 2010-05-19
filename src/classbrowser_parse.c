@@ -222,6 +222,11 @@ void classbrowser_parse_file(gchar *filename)
   guint param_list_length;
   gboolean function_awaiting_brace_or_parenthesis;
 
+  gboolean posiblevar=FALSE;
+  gchar *startvarname=NULL;
+  gchar *posvarname=NULL;
+  gchar *varname=NULL;
+  gchar *beforevarname=NULL;
   file_contents = read_text_file(filename);
   if (!file_contents) return;
   o = file_contents;
@@ -463,6 +468,40 @@ void classbrowser_parse_file(gchar *filename)
               #endif
             }
             within_function_param_list = FALSE;
+          }
+          if (posiblevar){
+            if (is_identifier_char(*c)){
+              posvarname=c;
+            } else {
+              //g_print("char:%c ret:false\n",*c);
+              posiblevar=FALSE;
+            int len=posvarname - startvarname +1; /*include initial $*/
+              if (len>1){ /*only if we have $ and something more */
+                varname = g_malloc(len +1);
+                strncpy(varname,startvarname,len);
+                varname[len]='\0';
+                if (!beforevarname){ beforevarname=g_strdup(varname); /*store lasat variable name found*/
+                } else {
+                  if (strcmp(beforevarname,varname)==0){
+#ifdef DEBUGCLASSBROWSER
+                    g_print("Duplicate variable: %s\n",varname);
+#endif
+                  } else {
+#ifdef DEBUGCLASSBROWSER
+                    g_print("Classbrowser var added:%s\n",varname);
+#endif
+                    classbrowser_varlist_add(varname, within_function, filename);
+                    g_free(beforevarname);
+                    beforevarname=g_strdup(varname);
+                  }
+                }
+                g_free(varname);
+              }
+            }
+          }
+          if (*c=='$' && !within_function_param_list && !within_multi_line_comment && !within_single_line_comment){ /* skip params vars */
+            posiblevar=TRUE;
+            startvarname=c;
           }
           if (is_opening_brace(*c)) {
             brace_count++;

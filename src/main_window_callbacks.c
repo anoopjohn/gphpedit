@@ -182,6 +182,7 @@ void main_window_destroy_event(GtkWidget *widget, gpointer data)
   g_slice_free(Mainmenu, main_window.menu); /* free menu struct*/
   g_slice_free(Maintoolbar, main_window.toolbar_main); /* free toolbar struct*/
   g_slice_free(Findtoolbar, main_window.toolbar_find); /* free toolbar struct*/
+  cleanup_classbrowser();
   // Old code had a main_window_delete_event call in here, not necessary, Gtk/GNOME does that anyway...
   cleanup_calltip();
   cleanup_plugins();

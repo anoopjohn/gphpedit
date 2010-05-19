@@ -28,6 +28,7 @@
 //#define DEBUGCLASSBROWSER 
 static GSList *filelist = NULL;
 static GSList *functionlist = NULL;
+static GTree *php_variables_tree;
 static GSList *classlist = NULL;
 
 guint identifierid = 0;
@@ -360,12 +361,15 @@ gboolean classbrowser_class_find_before_position(gchar *classname, GtkTreeIter *
       gtk_tree_model_get(GTK_TREE_MODEL(main_window.classtreestore),iter,
                          NAME_COLUMN, &classnamefound, TYPE_COLUMN, &type, -1);
       if ((type==CB_ITEM_TYPE_CLASS) && g_ascii_strcasecmp(classname, classnamefound)<0) {
+        g_free(classnamefound);
         return TRUE;
       }
       if (type==CB_ITEM_TYPE_FUNCTION) {
+        g_free(classnamefound);
         return TRUE;
       }
       found = gtk_tree_model_iter_next(GTK_TREE_MODEL(main_window.classtreestore), iter);
+      g_free(classnamefound);
     }
   }
   return FALSE;
@@ -420,6 +424,63 @@ gboolean classbrowser_classid_to_iter(guint classid, GtkTreeIter *iter)
   }
   return FALSE;
 }
+
+void classbrowser_varlist_add(gchar *varname, gchar *funcname, gchar *filename)
+{
+  ClassBrowserVar *var;
+  var=g_tree_lookup (php_variables_tree, varname);
+  if (var){
+    var->remove = FALSE;
+  } else {
+    var = g_slice_new(ClassBrowserVar);
+    var->varname = g_strdup(varname);
+    if (funcname) {
+      var->functionname = g_strdup(funcname);
+    }
+    var->filename = g_strdup(filename);
+    var->remove = FALSE;
+    var->identifierid = identifierid++;
+
+    g_tree_insert (php_variables_tree, g_strdup(varname), var); /* key =variables name value var struct */
+
+    #ifdef DEBUGCLASSBROWSER
+      g_print("Filename: %s\n", filename);
+    #endif
+  }
+}
+
+GString *completion_result=NULL;
+static gboolean make_completion_string (gpointer key, gpointer value, gpointer data){
+  gchar *prefix=(gchar *) data;
+  ClassBrowserVar *var;
+  var=(ClassBrowserVar *)value;
+  if (g_str_has_prefix(key,prefix)){
+        if (!completion_result) {
+        completion_result = g_string_new(key);
+        completion_result = g_string_append(completion_result, "?3");
+        } else {
+        completion_result = g_string_append(completion_result, " ");
+        completion_result = g_string_append(completion_result, key);
+        completion_result = g_string_append(completion_result, "?3"); /* add corresponding image*/
+        }
+  }
+  if (strncmp(key,prefix,MIN(strlen(key),strlen(prefix)))>0) return TRUE; /*no more words with this prefix, skips others items*/
+  return FALSE;
+}
+void autocomplete_php_variables(GtkWidget *scintilla, gint wordStart, gint wordEnd){
+  gchar *buffer = NULL;
+  gint length;
+  buffer = gtk_scintilla_get_text_range (GTK_SCINTILLA(scintilla), wordStart, wordEnd, &length);
+
+  g_tree_foreach (php_variables_tree, make_completion_string,buffer);
+  g_free(buffer);
+  if (completion_result){
+    gtk_scintilla_autoc_show(GTK_SCINTILLA(scintilla), wordEnd-wordStart, completion_result->str);
+    g_string_free(completion_result,TRUE); /*release resources*/
+    completion_result=NULL;
+  }  
+}
+
 
 void classbrowser_functionlist_add(gchar *classname, gchar *funcname, gchar *filename, guint line_number, gchar *param_list)
 {
@@ -521,7 +582,19 @@ void list_php_files_open(void){
     }
   }
 }
+void add_global_var(const gchar *var_name){
+  ClassBrowserVar *var;
+    var = g_slice_new(ClassBrowserVar);
+    var->varname = g_strdup(var_name);
+    var->functionname = NULL; /* NULL for global variables*/
+    var->filename = NULL; /*NULL FOR PHP GLOBAL VARIABLES*/
+    var->remove = FALSE;
+    var->identifierid = identifierid++;
 
+    g_tree_insert (php_variables_tree, g_strdup(var_name), var); /* key =variables name value var struct */ 
+/*must free this in some place*/
+
+}
 //Note: this function can be optimized by not requesting to reparse files on tab change
 //when the parse only selected tab is set - Anoop
 
@@ -530,6 +603,25 @@ void classbrowser_update(void)
   ClassBrowserFile *file;
   static guint press_event = 0;
   static guint release_event = 0;
+
+  if (!php_variables_tree){
+     /* create new tree */
+     php_variables_tree=g_tree_new ((GCompareFunc)strcmp);
+
+     /*add php global vars*/
+     add_global_var("$GLOBALS");
+     add_global_var("$HTTP_POST_VARS");
+     add_global_var("$THIS");
+     add_global_var("$_COOKIE");
+     add_global_var("$_POST");
+     add_global_var("$_REQUEST");
+     add_global_var("$_SERVER");
+     add_global_var("$_SESSION");
+     add_global_var("$_GET");
+     add_global_var("$_FILES");
+     add_global_var("$_ENV");
+  }
+  
   if (gtk_paned_get_position(GTK_PANED(main_window.main_horizontal_pane))==0) {
     return;
   }
@@ -781,4 +873,19 @@ gint classbrowser_compare_function_names(GtkTreeModel *model,
   g_free(aName);
   g_free(bName);
   return retVal;
+}
+/* release resources used by classbrowser */
+gboolean free_php_variables_tree_item (gpointer key, gpointer value, gpointer data){
+  ClassBrowserVar *var=(ClassBrowserVar *)value;
+  g_free(var->varname);
+  if (var->functionname) g_free(var->functionname);
+  if (var->filename) g_free(var->filename);
+  g_slice_free(ClassBrowserVar, var);
+  g_tree_remove(php_variables_tree, key);
+  g_free (key);
+  return FALSE;	
+}
+
+void cleanup_classbrowser(void){
+  g_tree_foreach (php_variables_tree,free_php_variables_tree_item,NULL);
 }

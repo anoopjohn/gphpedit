@@ -45,6 +45,16 @@ ClassBrowserFile;
 
 typedef struct
 {
+  gchar *varname;
+  gchar *functionname;
+  gchar *filename;
+  gboolean remove;
+  guint identifierid;
+}
+ClassBrowserVar;
+
+typedef struct
+{
   gchar *functionname;
   gchar *paramlist;
   gchar *filename;
@@ -65,11 +75,14 @@ typedef struct
   guint identifierid;
 }
 ClassBrowserClass;
+void autocomplete_php_variables(GtkWidget *scintilla, gint wordStart, gint wordEnd);
+void cleanup_classbrowser(void);
 
 void classbrowser_set_sortable(GtkTreeStore *classtreestore);
 void classbrowser_update(void);
 gchar *classbrowser_add_custom_autocompletion(gchar *prefix,GSList *list);
 gchar *classbrowser_custom_function_calltip(gchar *function_name);
+void classbrowser_varlist_add(gchar *varname, gchar *funcname, gchar *filename);
 void classbrowser_filelist_remove(ClassBrowserFile *file);
 void classbrowser_functionlist_start_file(gchar *filename);
 void classbrowser_functionlist_remove_dead_wood(void);
