@@ -29,10 +29,8 @@ static GSList *functionlist = NULL;
 static GTree *php_variables_tree;
 static GTree *php_files_tree;
 static GTree *php_class_tree;
-
 guint identifierid = 0;
 
-/* release resources used by classbrowser */
 gboolean free_php_files_tree_item (gpointer key, gpointer value, gpointer data){
   ClassBrowserFile *file=(ClassBrowserFile *)value;
   if (file->filename) g_free(file->filename);
@@ -420,7 +418,9 @@ void autocomplete_php_variables(GtkWidget *scintilla, gint wordStart, gint wordE
   gchar *buffer = NULL;
   gint length;
   buffer = gtk_scintilla_get_text_range (GTK_SCINTILLA(scintilla), wordStart, wordEnd, &length);
-
+#ifdef DEBUGCLASSBROWSER
+  g_print("var autoc:%s\n",buffer);
+#endif
   g_tree_foreach (php_variables_tree, make_completion_string,buffer);
   g_free(buffer);
   if (completion_result){
@@ -579,6 +579,12 @@ void classbrowser_update(void)
      add_global_var("$_GET");
      add_global_var("$_FILES");
      add_global_var("$_ENV");
+     add_global_var("__CLASS__");
+     add_global_var("__DIR__");
+     add_global_var("__FILE__");
+     add_global_var("__FUNCTION__");
+     add_global_var("__METHOD__");
+     add_global_var("__NAMESPACE__");
   }
   
   if (gtk_paned_get_position(GTK_PANED(main_window.main_horizontal_pane))==0) {

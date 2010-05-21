@@ -1838,7 +1838,7 @@ static void char_added(GtkWidget *scintilla, guint ch)
         }
         g_free(member_function_buffer);
         member_function_buffer = gtk_scintilla_get_text_range (GTK_SCINTILLA(scintilla), wordStart, wordEnd, &member_function_length);
-        if (g_str_has_prefix(member_function_buffer,"$")) {
+        if (g_str_has_prefix(member_function_buffer,"$") || g_str_has_prefix(member_function_buffer,"__")) {
             autocomplete_php_variables(scintilla, wordStart, wordEnd);
         } else if ((current_word_length>=3) && ( (gtk_scintilla_get_line_state(GTK_SCINTILLA(scintilla), current_line)==274))) {
         // check to see if they've typed <?php and if so do nothing
