@@ -71,7 +71,7 @@ void classbrowser_filelist_add(gchar *filename)
 #ifdef DEBUGCLASSBROWSER
     g_print("Added filename to classbrowser:%s\n",filename);
 #endif
-    file = g_malloc(sizeof(ClassBrowserFile));
+    file = g_slice_new(ClassBrowserFile);
     file->filename = convert_to_full(filename);
     file->accessible = TRUE;
     file->modified_time.tv_sec = 0;
@@ -141,7 +141,6 @@ gboolean classbrowser_file_modified(gchar *filename,GTimeVal *act){
   GFile *file;
   if (!filename) return FALSE;
   file= g_file_new_for_uri (filename);
-  
   info=g_file_query_info (file,"time::modified,time::modified-usec",0,NULL,&error);
   if (error){
   g_object_unref(file);
@@ -274,7 +273,7 @@ void classbrowser_functionlist_free(ClassBrowserFunction *function, GtkTreeIter 
     g_free(function->classname);
   }
   functionlist = g_slist_remove(functionlist, function);
-  g_free(function);
+  g_slice_free(ClassBrowserFunction,function);
 }
 
 
@@ -345,7 +344,7 @@ void classbrowser_classlist_remove(ClassBrowserClass *class)
   g_free(class->filename);
   g_free(class->classname);
   classlist = g_slist_remove(classlist, class);
-  g_free(class);
+  g_slice_free(ClassBrowserClass, class);
 }
 
 
@@ -386,7 +385,7 @@ void classbrowser_classlist_add(gchar *classname, gchar *filename, gint line_num
     class->line_number = line_number;
     class->remove= FALSE;
   } else {
-    class = g_malloc0(sizeof(ClassBrowserClass));
+    class = g_slice_new(ClassBrowserClass);
     class->classname = g_strdup(classname);
     class->filename = g_strdup(filename);
     class->line_number = line_number;
@@ -494,7 +493,7 @@ void classbrowser_functionlist_add(gchar *classname, gchar *funcname, gchar *fil
     function->line_number = line_number;
     function->remove = FALSE;
   } else {
-    function = g_malloc0(sizeof(ClassBrowserFunction));
+    function = g_slice_new(ClassBrowserFunction);
     function->functionname = g_strdup(funcname);
     if (param_list) {
       function->paramlist = g_strdup(param_list);
@@ -566,7 +565,7 @@ void classbrowser_filelist_remove(ClassBrowserFile *file)
 {
   filelist = g_slist_remove(filelist, file);
   g_free(file->filename);
-  g_free(file);
+  g_slice_free(ClassBrowserFile,file);
 }
 
 void list_php_files_open(void){
@@ -874,6 +873,7 @@ gint classbrowser_compare_function_names(GtkTreeModel *model,
   g_free(bName);
   return retVal;
 }
+
 /* release resources used by classbrowser */
 gboolean free_php_variables_tree_item (gpointer key, gpointer value, gpointer data){
   ClassBrowserVar *var=(ClassBrowserVar *)value;
