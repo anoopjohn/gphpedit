@@ -1400,8 +1400,9 @@ void context_help(GtkWidget *widget)
 void on_about1_activate(GtkWidget *widget)
 {
   const gchar *authors[] = {
-                "Current Maintainer",
+                "Current Maintainers",
                 "Anoop John <anoop.john@zyxware.com>",
+                "Jose Rostagno <rostagnojose@yahoo.com>",
                 "",
                 "Original Developer",
                 "Andy Jeffries <andy@gphpedit.org>",
@@ -1410,7 +1411,6 @@ void on_about1_activate(GtkWidget *widget)
                 "Jonh Wendell <wendell@bani.com.br>",
                 "Tim Jackson <tim@timj.co.uk>",
                 "Sven Herzberg <herzi@gnome-de.org>",
-                "Jose Rostagno <rostagnojose@yahoo.com>",
                 NULL
                };
   gchar *translator_credits = _("translator_credits");
