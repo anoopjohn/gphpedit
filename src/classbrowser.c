@@ -28,7 +28,7 @@
 static GSList *functionlist = NULL;
 static GTree *php_variables_tree;
 static GTree *php_files_tree;
-static GSList *classlist = NULL;
+static GTree *php_class_tree;
 
 guint identifierid = 0;
 
@@ -144,11 +144,19 @@ gboolean classbrowser_file_modified(gchar *filename,GTimeVal *act){
   return hr;
 }
 
+/* release resources used by classbrowser */
+gboolean classbrowser_php_class_set_remove_item (gpointer key, gpointer value, gpointer data){
+  ClassBrowserClass *class=(ClassBrowserClass *)value;
+  if (class) {
+    class->remove = TRUE;
+  }
+  return FALSE;	
+}
+
 void classbrowser_start_update(void)
 {
   GSList *li;
   ClassBrowserFunction *function;
-  ClassBrowserClass *class;
 
   for(li = functionlist; li!= NULL; li = g_slist_next(li)) {
     function = li->data;
@@ -156,11 +164,11 @@ void classbrowser_start_update(void)
       function->remove = TRUE;
     }
   }
-  for(li = classlist; li!= NULL; li = g_slist_next(li)) {
-    class = li->data;
-    if (class) {
-      class->remove = TRUE;
-    }
+  if (!php_class_tree){
+     /* create new tree */
+     php_class_tree=g_tree_new ((GCompareFunc)strcmp);
+  } else {
+  g_tree_foreach (php_class_tree,classbrowser_php_class_set_remove_item,NULL);
   }
 }
 
@@ -178,27 +186,6 @@ gboolean classbrowser_safe_equality(gchar *a, gchar *b)
   // (a && b)
   return (strcmp(a, b)==0);
 }
-
-
-ClassBrowserClass *classbrowser_classlist_find(gchar *classname, gchar *filename)
-{
-  GSList *li;
-  ClassBrowserClass *class;
-
-  for(li = classlist; li!= NULL; li = g_slist_next(li)) {
-    class = li->data;
-    if (class) {
-      if (classbrowser_safe_equality(class->filename, filename) &&
-              classbrowser_safe_equality(class->classname, classname))
-      {
-        return class;
-      }
-    }
-  }
-
-  return NULL;
-}
-
 
 ClassBrowserFunction *classbrowser_functionlist_find(gchar *funcname, gchar *param_list, gchar *filename, gchar *classname)
 {
@@ -290,10 +277,6 @@ void classbrowser_classlist_remove(ClassBrowserClass *class)
     found = TRUE;
     while (found) {
       gtk_tree_model_get(GTK_TREE_MODEL(main_window.classtreestore),&iter, ID_COLUMN, &id,-1);
-      // AAARGGHHH!!! TODO!!!
-      // According to the docs gtk_tree_store_remove removes it and moves on
-      // according to the header file, it removes it and returns void
-      // I'll assume for now that I have to move on!
       if (id == class->identifierid) {
         gtk_tree_store_remove(GTK_TREE_STORE(main_window.classtreestore),&iter);
         break;
@@ -303,10 +286,12 @@ void classbrowser_classlist_remove(ClassBrowserClass *class)
       }
     }
   }
+  gchar *keyname=g_strdup_printf("%s%s",class->classname,class->filename);
   g_free(class->filename);
   g_free(class->classname);
-  classlist = g_slist_remove(classlist, class);
+  g_tree_remove (php_class_tree,keyname);
   g_slice_free(ClassBrowserClass, class);
+  g_free(keyname);
 }
 
 
@@ -342,10 +327,12 @@ void classbrowser_classlist_add(gchar *classname, gchar *filename, gint line_num
   ClassBrowserClass *class;
   GtkTreeIter iter;
   GtkTreeIter before;
-
-  if ((class = classbrowser_classlist_find(classname, filename))) {
+  gchar *keyname=g_strdup_printf("%s%s",classname,filename);
+  class=g_tree_lookup (php_class_tree, keyname);
+  if ((class)){
     class->line_number = line_number;
     class->remove= FALSE;
+    g_free(keyname);
   } else {
     class = g_slice_new(ClassBrowserClass);
     class->classname = g_strdup(classname);
@@ -353,7 +340,7 @@ void classbrowser_classlist_add(gchar *classname, gchar *filename, gint line_num
     class->line_number = line_number;
     class->remove = FALSE;
     class->identifierid = identifierid++;
-    classlist = g_slist_append(classlist, class);
+    g_tree_insert (php_class_tree,keyname,class);
 
     if (classbrowser_class_find_before_position(classname, &before)) {
       gtk_tree_store_insert_before(main_window.classtreestore, &iter, NULL, &before);
@@ -365,6 +352,7 @@ void classbrowser_classlist_add(gchar *classname, gchar *filename, gint line_num
                         NAME_COLUMN, (class->classname), FILENAME_COLUMN, (class->filename),
                         LINE_NUMBER_COLUMN, line_number, TYPE_COLUMN, CB_ITEM_TYPE_CLASS, ID_COLUMN, (class->identifierid), -1);
   }
+
 }
 
 
@@ -464,7 +452,8 @@ void classbrowser_functionlist_add(gchar *classname, gchar *funcname, gchar *fil
     function->line_number = line_number;
     function->remove = FALSE;
     function->identifierid = identifierid++;
-    if (classname && (class = classbrowser_classlist_find(classname, filename))) {
+    gchar *keyname=g_strdup_printf("%s%s",classname,filename);
+    if (classname && (class = g_tree_lookup (php_class_tree,keyname))){
       function->class_id = class->identifierid;
       function->classname = g_strdup(classname);
       classbrowser_classid_to_iter(function->class_id, &class_iter);
@@ -474,7 +463,7 @@ void classbrowser_functionlist_add(gchar *classname, gchar *funcname, gchar *fil
       type = CB_ITEM_TYPE_FUNCTION;
       gtk_tree_store_append (main_window.classtreestore, &iter, NULL);
     }
-
+    g_free(keyname);
     functionlist = g_slist_append(functionlist, function);
 
     function_decl = g_string_new(funcname);
@@ -491,14 +480,21 @@ void classbrowser_functionlist_add(gchar *classname, gchar *funcname, gchar *fil
     g_string_free(function_decl, TRUE);
   }
 }
-
+gboolean classbrowser_remove_class(gpointer key, gpointer value, gpointer data){
+  ClassBrowserClass *class= (ClassBrowserClass *)value;
+      if (class) {
+      if (class->remove) {
+        classbrowser_classlist_remove(class);
+      }
+    }
+  return FALSE;
+}
 
 void classbrowser_remove_dead_wood(void)
 {
   GSList *orig;
   GSList *li;
   ClassBrowserFunction *function;
-  ClassBrowserClass *class;
 
   orig = g_slist_copy(functionlist);
   for(li = orig; li!= NULL; li = g_slist_next(li)) {
@@ -510,17 +506,7 @@ void classbrowser_remove_dead_wood(void)
     }
   }
   g_slist_free(orig);
-
-  orig = g_slist_copy(classlist);
-  for(li = orig; li!= NULL; li = g_slist_next(li)) {
-    class = li->data;
-    if (class) {
-      if (class->remove) {
-        classbrowser_classlist_remove(class);
-      }
-    }
-  }
-  g_slist_free(orig);
+  g_tree_foreach (php_class_tree, classbrowser_remove_class, NULL);
 }
 
 void classbrowser_filelist_remove(ClassBrowserFile *file)
