@@ -21,7 +21,6 @@
  
    The GNU General Public License is contained in the file COPYING.
 */
-#include <errno.h>
 #include "classbrowser.h"
 #include "main_window.h"
 #include "main_window_callbacks.h"
