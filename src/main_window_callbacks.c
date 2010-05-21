@@ -857,6 +857,7 @@ void on_reload1_activate(GtkWidget *widget)
 void on_tab_close_activate(GtkWidget *widget, Editor *editor)
 {
   try_close_page(editor);
+  classbrowser_update();
 }
 
 void on_tab_close_set_style(GtkWidget *hbox, GtkWidget *button)
