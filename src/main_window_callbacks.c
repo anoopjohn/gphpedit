@@ -28,16 +28,13 @@
 #include "stdlib.h"
 #include "main_window_callbacks.h"
 #include "find_replace.h"
-#include "main_window.h"
 #include "preferences_dialog.h"
 #include "tab.h"
 #include "templates.h"
 #include "folderbrowser.h"
 #include "plugin.h"
 #include "gvfs_utils.h"
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <unistd.h>
+#include <gdk/gdkkeysyms.h>
 
 gboolean is_app_closing = FALSE;
 gint classbrowser_hidden_position;
@@ -51,58 +48,52 @@ void session_save(void)
   Editor *editor;
   Editor *current_focus_editor;
   GString *session_file;
-  FILE *fp;
+  GString *session_file_contents;
 
   session_file = g_string_new( g_get_home_dir());
   session_file = g_string_append(session_file, "/.gphpedit/session");
   
-  unlink(session_file->str);
-  
+  GFile *file=get_gfile_from_filename(session_file->str);
+  GError *error=NULL;
+
+
   if (preferences.save_session && (g_slist_length(editors) > 0)) {
     current_focus_editor = main_window.current_editor;
-  
-    fp = fopen(session_file->str, "w");
-      if (!fp) {  
-      g_print(_("ERROR: cannot save session to %s\n"), session_file->str);
-      return;
-      }
+    session_file_contents=g_string_new(NULL);
     for(walk = editors; walk!= NULL; walk = g_slist_next(walk)) {
       editor = walk->data;
       if (editor) {
         if (!editor->is_untitled) {
           if (editor == current_focus_editor) {
-            fputs("*", fp);
+            session_file_contents = g_string_append(session_file_contents,"*");
           }
           if (GTK_IS_SCINTILLA(editor->scintilla)) {
-            fputs(editor->filename->str, fp);
-            fputs("\n", fp);
+            g_string_append_printf (session_file_contents,"%s\n",editor->filename->str);
           } else {
             if (editor->type==TAB_HELP){
-              // it's a help page
-              fputs("phphelp:", fp);
-              fputs(editor->help_function, fp);
-              fputs("\n", fp);
+              /* it's a help page */
+            g_string_append_printf (session_file_contents,"phphelp:%s\n",editor->help_function);
             } else {
-              // it's a preview page
-              fputs("preview:", fp);
+              /* it's a preview page */
               gchar *temp=editor->filename->str;
               temp+=9;
-              fputs(temp, fp);
-              fputs("\n", fp);
+              g_string_append_printf (session_file_contents,"preview:%s\n",temp);
             }
           }
         }
       }
-    }  
-    fclose(fp);
+    }
+    if(!g_file_replace_contents (file,session_file_contents->str,session_file_contents->len,NULL,FALSE,G_FILE_CREATE_NONE,NULL,NULL,&error)){
+      g_print(_("Error Saving session file: %s\n"),error->message);
+      g_error_free (error);
+    }
   }
+   g_object_unref(file);
 }
 
 void session_reopen(void)
 {
   GString *session_file;
-  FILE *fp;
-  char buf[16384];
   char *filename;
   int focus_tab=-1;
   gboolean focus_this_one = FALSE;
@@ -110,24 +101,27 @@ void session_reopen(void)
 
   session_file = g_string_new( g_get_home_dir());
   session_file = g_string_append(session_file, "/.gphpedit/session");
-  
-  if (g_file_test(session_file->str,G_FILE_TEST_EXISTS)){
-    fp = fopen(session_file->str, "r");
-      if (!fp) {  
-      g_print(_("ERROR: cannot open session file (%s)\n"), session_file->str);
-      return;
-      }
-    while (fgets(buf, sizeof(buf), fp)) {
-      /* buf contains possibly:
+
+  if (filename_file_exist(session_file->str)){
+    gchar *content=read_text_file_sync(session_file->str);
+    gchar **strings;
+    strings = g_strsplit (content,"\n",0);
+    int i=0;
+    while (strings[i]){
+      /* strings[i] contains possibly:
         file:///blah\n
         *file:///blah\n
         phphelp:function\n
         *phphelp:function\n
+        preview:function\n
+        *preview:function\n
+
       */
-      
-      filename = buf;
+
+      if (strings[i][0]==0) break;
+      filename = strings[i];
       str_replace(filename, 10, 0);
-      if (buf[0]=='*') {
+      if (strings[i][0]=='*') {
         filename++;
         focus_this_one = TRUE;
       }
@@ -157,11 +151,11 @@ void session_reopen(void)
       }
         
       focus_this_one=FALSE;
+      i++;    
     }
-    
-  fclose(fp);
-  gtk_notebook_set_current_page( GTK_NOTEBOOK(main_window.notebook_editor), focus_tab);
-  unlink(session_file->str);
+    g_strfreev (strings);
+    g_free(content);
+    gtk_notebook_set_current_page( GTK_NOTEBOOK(main_window.notebook_editor), focus_tab);
   }
 }
 

@@ -38,6 +38,7 @@ Folderbrowser has the following features:
 #include "folderbrowser.h"
 #include "tab.h"
 #include "gvfs_utils.h"
+#include <gdk/gdkkeysyms.h>
 //#define DEBUGFOLDERBROWSER
 
 typedef struct {
