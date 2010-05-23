@@ -1153,7 +1153,7 @@ gboolean tab_create_new(gint type, GString *filename)
       assertion `GTK_WIDGET_ANCHORED (widget) || GTK_IS_INVISIBLE (widget)' failed */
     gtk_notebook_set_current_page (GTK_NOTEBOOK (main_window.notebook_editor), -1);
     gtk_scintilla_goto_pos(GTK_SCINTILLA(editor->scintilla), 0);
-    //gtk_scintilla_grab_focus(GTK_SCINTILLA(editor->scintilla));
+//    gtk_scintilla_grab_focus(GTK_SCINTILLA(editor->scintilla));
     gtk_scintilla_set_focus(GTK_SCINTILLA(editor->scintilla), TRUE);
     main_window.current_editor = editor;
 

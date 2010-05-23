@@ -1,5 +1,5 @@
 ============================
-gphpedit 0.9.98 (UNRELEASED)
+gphpedit 0.9.98~RC1
 ============================
 
 New Features and Fixes
@@ -20,4 +20,5 @@ New Features and Fixes
 - Added CSS calltips support
 - Speed up Calltip/autocomplete lists
 - Auto-Completion of Brackets and Quotes
+- Hightlight current caret line
 - Misc bugfixes and code cleanups

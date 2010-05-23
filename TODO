@@ -5,9 +5,6 @@ BUGS TO FIX
 from position to find nearest PHP function. Should popup hint for function.
 Should also work for cases like: outer( inner(
 
-* Class browser: handle the choice of parsing only current file
-in the configuration
-
 NEW FUNCTIONALITY/FEATURES
 ==========================
 
@@ -20,11 +17,6 @@ NEW FUNCTIONALITY/FEATURES
 * Debugger Support
 
 * Project/Live site editing
-
-* Bookmarks: Ctrl+F2 makes a bookmark at a line, and with F2 you cycle
-through all bookmarks in line number order.
-If you insert a line before a bookbmark, the bookmark line is shifted 1
-up, so that the bookmark stays on the code line you've originally selected
 
 * Tabs: with context menu
 

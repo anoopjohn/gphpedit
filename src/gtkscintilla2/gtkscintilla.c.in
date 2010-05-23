@@ -308,7 +308,7 @@ static void gtk_scintilla_dispose (GObject *gobject)
 
   GtkScintilla *self = GTK_SCINTILLA (gobject);
 
-  g_object_unref(self->sci);
+//  g_object_unref(self->sci);
 
   /* Chain up to the parent class */
   G_OBJECT_CLASS (parent_class)->dispose (gobject);
