@@ -364,9 +364,11 @@ gboolean free_css_tree_item (gpointer key, gpointer value, gpointer data){
   return FALSE;	
 }
 void cleanup_calltip(void){
-  g_tree_foreach (php_api_tree,free_php_tree_item,NULL);
+  if (php_api_tree) 
+    g_tree_foreach (php_api_tree,free_php_tree_item,NULL);
   if (completion_list_tree != NULL) {
     g_string_free (completion_list_tree,TRUE);	
   }
-  g_tree_foreach (css_api_tree,free_css_tree_item,NULL);
+  if (css_api_tree)
+    g_tree_foreach (css_api_tree,free_css_tree_item,NULL);
 }
