@@ -388,11 +388,18 @@ static void go_home_cb(void){
   /*if there is a file open set file folder as home dir*/
     gchar *folderpath;
     if (main_window.current_editor->is_untitled==FALSE){
-      if (editor_is_local(main_window.current_editor))
-        folderpath= g_path_get_dirname (main_window.current_editor->filename->str);
-      else
+      if (editor_is_local(main_window.current_editor)){
+        gchar *fullpath=convert_to_full(main_window.current_editor->filename->str);
+        GFile *file= g_file_new_for_uri(fullpath);
+        g_free(fullpath);
+        GFile *parent= g_file_get_parent (file);
+        folderpath= g_file_get_uri (parent);
+        g_object_unref(file);
+        g_object_unref(parent);
+      }else{
         /* set default dir as home dir*/
         folderpath= DEFAULT_DIR;
+      }
     } else {
       /* set default dir as home dir*/
       folderpath= DEFAULT_DIR;
