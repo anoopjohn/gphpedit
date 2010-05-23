@@ -25,6 +25,9 @@
 #include "syntax_check.h"
 #include "preferences.h"
 #include "main_window.h"
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
 
 
 gchar *run_php_lint(gchar *command_line)

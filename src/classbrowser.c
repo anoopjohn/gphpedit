@@ -22,14 +22,16 @@
    The GNU General Public License is contained in the file COPYING.
 */
 #include "classbrowser.h"
-#include "main_window.h"
 #include "main_window_callbacks.h"
+#include "gvfs_utils.h"
 //#define DEBUGCLASSBROWSER 
 static GSList *functionlist = NULL;
 static GTree *php_variables_tree;
 static GTree *php_files_tree;
 static GTree *php_class_tree;
 guint identifierid = 0;
+GString *completion_result=NULL;
+
 
 gboolean free_php_files_tree_item (gpointer key, gpointer value, gpointer data){
   ClassBrowserFile *file=(ClassBrowserFile *)value;
@@ -54,7 +56,7 @@ void classbrowser_filelist_add(gchar *filename)
     g_print("Added filename to classbrowser:%s\n",filename);
 #endif
     file = g_slice_new(ClassBrowserFile);
-    file->filename = convert_to_full(filename);
+    file->filename = g_strdup(filename);
     file->accessible = TRUE;
     file->modified_time.tv_sec = 0;
     file->modified_time.tv_usec = 0;
@@ -70,7 +72,7 @@ gboolean classbrowser_file_accessible(gchar *filename)
 #ifdef DEBUGCLASSBROWSER
   g_print("can read filename:'%s'?\n",filename);
 #endif
-  file= g_file_new_for_uri (filename);
+  file= get_gfile_from_filename(filename);
   
   info=g_file_query_info (file,G_FILE_ATTRIBUTE_ACCESS_CAN_READ,0,NULL,&error);
   if (error){
@@ -86,14 +88,10 @@ gboolean classbrowser_file_accessible(gchar *filename)
 
 gboolean classbrowser_file_exist(gchar *filename)
 {
-  if (!filename) return FALSE;
 #ifdef DEBUGCLASSBROWSER
   g_print("exist filename?:%s\n",filename);
 #endif
-  GFile *file= g_file_new_for_uri (filename);
-  gboolean hr= g_file_query_exists (file,NULL);
-  g_object_unref(file);
-  return hr;
+  return filename_file_exist(filename);
 }
 
 gboolean classbrowser_file_set_remove (gpointer key, gpointer value, gpointer data){
@@ -395,8 +393,29 @@ void classbrowser_varlist_add(gchar *varname, gchar *funcname, gchar *filename)
     #endif
   }
 }
+static gboolean make_class_completion_string (gpointer key, gpointer value, gpointer data){
+  ClassBrowserClass *class;
+  class=(ClassBrowserClass *)value;
+        if (!completion_result) {
+        completion_result = g_string_new(g_strchug(class->classname));
+        completion_result = g_string_append(completion_result, "?4"); /* add corresponding image*/
+        } else {
+        completion_result = g_string_append(completion_result, " ");
+        completion_result = g_string_append(completion_result, g_strchug(class->classname));
+        completion_result = g_string_append(completion_result, "?4"); /* add corresponding image*/
+        }
+  return FALSE;
+}
+void autocomplete_php_classes(GtkWidget *scintilla, gint wordStart, gint wordEnd){
+  g_tree_foreach (php_class_tree, make_class_completion_string,NULL);
+  if (completion_result){
+//    gtk_scintilla_autoc_cancel(GTK_SCINTILLA(scintilla));
+    gtk_scintilla_autoc_show(GTK_SCINTILLA(scintilla), 0, completion_result->str);
+    g_string_free(completion_result,TRUE); /*release resources*/
+    completion_result=NULL;
+  }  
+}
 
-GString *completion_result=NULL;
 static gboolean make_completion_string (gpointer key, gpointer value, gpointer data){
   gchar *prefix=(gchar *) data;
   ClassBrowserVar *var;
@@ -429,7 +448,6 @@ void autocomplete_php_variables(GtkWidget *scintilla, gint wordStart, gint wordE
     completion_result=NULL;
   }  
 }
-
 
 void classbrowser_functionlist_add(gchar *classname, gchar *funcname, gchar *filename, guint line_number, gchar *param_list)
 {
@@ -570,6 +588,8 @@ void classbrowser_update(void)
      /*add php global vars*/
      add_global_var("$GLOBALS");
      add_global_var("$HTTP_POST_VARS");
+     add_global_var("$HTTP_RAW_POST_DATA");
+     add_global_var("$http_response_header");
      add_global_var("$THIS");
      add_global_var("$_COOKIE");
      add_global_var("$_POST");

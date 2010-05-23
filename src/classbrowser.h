@@ -25,9 +25,6 @@
 #ifndef CLASS_BROWSER_H
 #define CLASS_BROWSER_H
 
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <unistd.h>
 #include "preferences.h"
 #include "tab.h"
 #include "classbrowser_parse.h"
@@ -76,6 +73,7 @@ typedef struct
 }
 ClassBrowserClass;
 void autocomplete_php_variables(GtkWidget *scintilla, gint wordStart, gint wordEnd);
+void autocomplete_php_classes(GtkWidget *scintilla, gint wordStart, gint wordEnd);
 void cleanup_classbrowser(void);
 
 void classbrowser_set_sortable(GtkTreeStore *classtreestore);

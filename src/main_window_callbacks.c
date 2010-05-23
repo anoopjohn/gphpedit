@@ -34,6 +34,10 @@
 #include "templates.h"
 #include "folderbrowser.h"
 #include "plugin.h"
+#include "gvfs_utils.h"
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
 
 gboolean is_app_closing = FALSE;
 gint classbrowser_hidden_position;
@@ -176,14 +180,11 @@ void quit_application()
 
 void main_window_destroy_event(GtkWidget *widget, gpointer data)
 {
-  //g_io_channel_unref(inter_gphpedit_io);
-  //unlink("/tmp/gphpedit.sock");
   quit_application();
   g_slice_free(Mainmenu, main_window.menu); /* free menu struct*/
   g_slice_free(Maintoolbar, main_window.toolbar_main); /* free toolbar struct*/
   g_slice_free(Findtoolbar, main_window.toolbar_find); /* free toolbar struct*/
   cleanup_classbrowser();
-  // Old code had a main_window_delete_event call in here, not necessary, Gtk/GNOME does that anyway...
   cleanup_calltip();
   cleanup_plugins();
   gtk_main_quit();
@@ -533,8 +534,7 @@ void on_openselected1_activate(GtkWidget *widget)
         else if (strstr(ac_buffer, "://")) {
           file = g_string_new(ac_buffer);
         }
-        GFile *fi;
-        fi=g_file_new_for_uri (file->str);
+        GFile *fi=get_gfile_from_filename(file->str);
         if(g_file_query_exists (fi,NULL)) switch_to_file_or_open(file->str,0);
         g_object_unref(fi);
         if (file) {
@@ -733,7 +733,7 @@ void on_save1_activate(GtkWidget *widget)
     if (main_window.current_editor->is_untitled) {
       on_save_as1_activate(widget);
     } else {
-      file=g_file_new_for_uri (filename);
+      file=get_gfile_from_filename(filename);
       tab_file_save_opened(main_window.current_editor,file);
     }
   }
@@ -755,7 +755,7 @@ void on_saveall1_activate(GtkWidget *widget)
     if (editor && editor->type!=TAB_HELP && editor->type!=TAB_PREVIEW && editor->is_untitled!=TRUE) {
       filename = editor->filename->str;
         GFile *file;
-        file=g_file_new_for_uri (filename);
+        file=get_gfile_from_filename(filename);
         text_length = gtk_scintilla_get_length(GTK_SCINTILLA(editor->scintilla));
         write_buffer = g_malloc0(text_length+1); // Include terminating null
         if (write_buffer == NULL) {
@@ -876,7 +876,7 @@ void rename_file(GString *newfilename)
 {
   GFile *file;
   GError *error;
-  file=g_file_new_for_uri ((const gchar *)main_window.current_editor->filename->str);
+  file=get_gfile_from_filename(main_window.current_editor->filename->str);
   char *basename=g_path_get_basename(newfilename->str);
   file=g_file_set_display_name (file,basename,NULL,&error);
   g_free(basename);
@@ -900,7 +900,7 @@ void rename_file_ok(GtkFileChooser *file_selection)
   gchar *fileuri=gtk_file_chooser_get_uri(file_selection);
   filename = g_string_new(fileuri);
   g_free(fileuri);
-  GFile *file = g_file_new_for_uri (filename->str);
+  GFile *file = get_gfile_from_filename(filename->str);
   if (g_file_query_exists (file,NULL)) {
     file_exists_dialog = gtk_message_dialog_new(GTK_WINDOW(main_window.window),GTK_DIALOG_DESTROY_WITH_PARENT,GTK_MESSAGE_QUESTION,GTK_BUTTONS_YES_NO,
        _("This file already exists, are you sure you want to overwrite it?"));
@@ -1985,7 +1985,7 @@ void check_externaly_modified(void){
   if (!main_window.current_editor->is_untitled && GTK_IS_SCINTILLA(main_window.current_editor->scintilla)){
     /* verify if file has been externaly modified */
     GError *error=NULL;
-    GFile *file=g_file_new_for_uri (main_window.current_editor->filename->str);
+    GFile *file=get_gfile_from_filename(main_window.current_editor->filename->str);
     GFileInfo *info;
     info= g_file_query_info (file,"time::modified,time::modified-usec",G_FILE_QUERY_INFO_NONE, NULL,&error);
     g_object_unref(file);

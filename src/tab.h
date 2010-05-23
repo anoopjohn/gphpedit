@@ -25,9 +25,6 @@
 #ifndef TAB_H
 #define TAB_H
 
-#include <sys/types.h>
-#include <fcntl.h>
-#include <gio/gio.h>
 #include "main.h"
 #include "classbrowser.h"
 #include <webkit/webkit.h> 
@@ -120,7 +117,7 @@ void register_file_opened(gchar *filename);
 gchar * editor_convert_to_local(Editor *editor);
 gboolean editor_is_local(Editor *editor);
 gboolean uri_is_local_or_http(gchar *uri);
-gchar *convert_to_full(gchar *filename);
+//gchar *convert_to_full(gchar *filename);
 void str_replace(char *Str, char ToRp, char WithC);
 void tab_file_save_opened(Editor *editor,GFile *file);
 char *macro_message_to_string(gint message);

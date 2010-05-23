@@ -23,26 +23,8 @@
 */
 
 #include "classbrowser_parse.h"
+#include "gvfs_utils.h"
 //#define DEBUG_CLASSBROWSER
-
-static gchar *read_text_file( gchar *filename )
-{
-  GFile *file;
-  GError *error=NULL;
-  gchar *buffer=NULL;
-  gsize nchars;
-
-  gchar *filenam=convert_to_full(filename);
-  file=g_file_new_for_uri (filenam);
-  g_free(filenam);
-    if (!g_file_load_contents (file,NULL,&buffer, &nchars,NULL,&error)){
-      g_print("Error classbrowser reading file '%s'. GIO error:%s\n",filename,error->message);
-    }
-  g_object_unref(file);
-//  g_print("buffer:<---\n%s\n--->",buffer);
-  return buffer;
-}
-
 
 static gboolean is_whitespace(gchar character)
 {
@@ -227,7 +209,7 @@ void classbrowser_parse_file(gchar *filename)
   gchar *posvarname=NULL;
   gchar *varname=NULL;
   gchar *beforevarname=NULL;
-  file_contents = read_text_file(filename);
+  file_contents = read_text_file_sync(filename);
   if (!file_contents) return;
   o = file_contents;
   c = o;
@@ -540,6 +522,7 @@ void classbrowser_parse_file(gchar *filename)
   }
   if (param_list) g_free(param_list);
   if (within_function) g_free(within_function);
+  if (beforevarname) g_free(beforevarname);
   g_free(file_contents);
 }
 /*

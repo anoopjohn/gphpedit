@@ -69,6 +69,7 @@ void register_autoc_images(GtkScintilla *sci){
   gtk_scintilla_register_image(sci, 1, (const gchar *) function_xpm);
   gtk_scintilla_register_image(sci, 2, (const gchar *) bullet_blue_xpm);
   gtk_scintilla_register_image(sci, 3, (const gchar *) variable_xpm);
+  gtk_scintilla_register_image(sci, 4, (const gchar *) class_xpm);
 }
 
 void function_list_prepare(void)

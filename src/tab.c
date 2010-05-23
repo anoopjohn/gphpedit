@@ -24,8 +24,6 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-#include <gtkscintilla.h>
-#include "folderbrowser.h"
 #include "tab.h"
 #include "tab_php.h"
 #include "tab_css.h"
@@ -34,13 +32,10 @@
 #include "tab_perl.h"
 #include "tab_cobol.h"
 #include "tab_python.h"
-#include "calltip.h"
-#include "main_window.h"
 #include "main_window_callbacks.h"
-#include "preferences.h"
 #include "grel2abs.h"
 #include <gconf/gconf-client.h>
-
+#include "gvfs_utils.h"
 //#define DEBUGTAB
 
 #define INFO_FLAGS "standard::display-name,standard::content-type,standard::edit-name,standard::size,access::can-write,access::can-delete,standard::icon,time::modified,time::modified-usec"
@@ -56,7 +51,6 @@ guint gotoline_after_create_tab = 0;
 static void save_point_reached(GtkWidget *w);
 static void save_point_left(GtkWidget *w);
 static void char_added(GtkWidget *scintilla, guint ch);
-
 
 void debug_dump_editors(void)
 {
@@ -411,9 +405,7 @@ void tab_file_opened (GObject *source_object, GAsyncResult *res, gpointer user_d
   editor->current_line = gtk_scintilla_line_from_position(GTK_SCINTILLA(editor->scintilla), editor->current_pos);
 
   // Try getting file size
-  gchar *filename=convert_to_full(editor->filename->str);
-  file=g_file_new_for_uri (filename);
-  g_free(filename);
+  file=get_gfile_from_filename(editor->filename->str);
   info= g_file_query_info (file,INFO_FLAGS,G_FILE_QUERY_INFO_NONE, NULL,&error);
   if (!info){
     g_warning (_("Could not get the file info. GIO error: %s \n"), error->message);
@@ -482,9 +474,7 @@ void tab_help_load_file(Editor *editor, GString *filename)
   goffset size;
 #endif
   gsize nchars;
-  gchar *filenam=convert_to_full(filename->str);
-  file=g_file_new_for_uri (filenam);
-  g_free(filenam);
+  file=get_gfile_from_filename(filename->str);
 #ifdef PHP_DOC_DIR
   info=g_file_query_info (file,"standard::size,standard::icon",0,NULL,&error);
 #else
@@ -503,7 +493,7 @@ void tab_help_load_file(Editor *editor, GString *filename)
   g_free(iconname);
   g_object_unref(info);
   if (!g_file_load_contents (file,NULL,&buffer, &nchars,NULL,&error)){
-    g_print("Error reading file. GIO error:%s\n",error->message);
+    g_print(_("Error reading file. GIO error:%s\n"),error->message);
     g_free (buffer);
     g_object_unref(file);
     return;
@@ -531,7 +521,7 @@ GString *tab_help_try_filename(gchar *prefix, gchar *command, gchar *suffix)
   #ifdef DEBUGTAB
   g_print("DEBUG: tab.c:tab_help_try_filename:long_filename->str: %s\n", long_filename->str);
   #endif
-  if (g_file_test(long_filename->str, G_FILE_TEST_EXISTS)){
+  if (filename_file_exist(long_filename->str)){
     return long_filename;
   }
   else {
@@ -546,7 +536,7 @@ GString *tab_help_try_filename(gchar *prefix, gchar *command, gchar *suffix)
   #ifdef DEBUGTAB
   g_print("DEBUG: tab.c:tab_help_try_filename:long_filename->str: %s\n", long_filename->str);
   #endif
-  if (g_file_test(long_filename->str, G_FILE_TEST_EXISTS)){
+  if (filename_file_exist(long_filename->str)){
     return long_filename;
   }
   g_string_free(long_filename, TRUE);
@@ -565,14 +555,17 @@ GString *tab_help_find_helpfile(gchar *command)
  gchar *temp= NULL;
  temp=g_strdup_printf ("%s/%s",PHP_DOC_DIR,"function.");
  long_filename = tab_help_try_filename(temp, command, ".html");
- if (long_filename)
-  return long_filename; //FIXME: free temp???
- temp=g_strdup_printf ("%s/%s",PHP_DOC_DIR,"ref.");
- long_filename = tab_help_try_filename(PHP_DOC_DIR, command, ".html");
+ g_free(temp);
  if (long_filename)
   return long_filename;
- temp=g_strdup_printf ("%s/",PHP_DOC_DIR); //FIXME: free temp???
+ temp=g_strdup_printf ("%s/%s",PHP_DOC_DIR,"ref.");
+ long_filename = tab_help_try_filename(temp, command, ".html");
+ g_free(temp);
+ if (long_filename)
+  return long_filename;
+ temp=g_strdup_printf ("%s/",PHP_DOC_DIR);
  long_filename = tab_help_try_filename(temp, command, NULL);
+ g_free(temp);
  if (long_filename)
   return long_filename;
  g_print(_("Help for function not found: %s\n"), command);
@@ -581,7 +574,7 @@ GString *tab_help_find_helpfile(gchar *command)
   long_filename = g_string_new("http://www.php.net/manual/en/function.");
   long_filename = g_string_append(long_filename, command);
   long_filename = g_string_append(long_filename, ".php");
-  GFile *temp= g_file_new_for_uri (long_filename->str);
+  GFile *temp= get_gfile_from_filename(long_filename->str);
   if(g_file_query_exists(temp,NULL)){
   g_object_unref(temp);
   return long_filename;
@@ -1008,7 +1001,7 @@ gboolean switch_to_file_or_open(gchar *filename, gint line_number)
   GSList *walk;
   GString *tmp_filename;
   // need to check if filename is local before adding to the listen
-  filename = convert_to_full(filename);
+  filename = g_strdup(filename);
   for (walk = editors; walk!=NULL; walk = g_slist_next(walk)) {
     editor = walk->data;
     if (strcmp(editor->filename->str, filename)==0) {
@@ -1065,7 +1058,7 @@ gboolean tab_create_new(gint type, GString *filename)
     else {
       abs_path = g_strdup(filename->str);
     }
-    file=g_file_new_for_uri (abs_path);
+    file=get_gfile_from_filename(abs_path);//g_file_new_for_uri (abs_path);
     if (!uri_is_local_or_http(abs_path)){
       GError *error2=NULL;
       GMount *ex= g_file_find_enclosing_mount (file,NULL,&error2);
@@ -1840,6 +1833,10 @@ static void char_added(GtkWidget *scintilla, guint ch)
         member_function_buffer = gtk_scintilla_get_text_range (GTK_SCINTILLA(scintilla), wordStart, wordEnd, &member_function_length);
         if (g_str_has_prefix(member_function_buffer,"$") || g_str_has_prefix(member_function_buffer,"__")) {
             autocomplete_php_variables(scintilla, wordStart, wordEnd);
+        } else if (strcmp(member_function_buffer,"instanceof")==0 || strcmp(member_function_buffer,"is_subclass_of")==0) {
+        gtk_scintilla_insert_text(GTK_SCINTILLA(scintilla), current_pos," ");
+        gtk_scintilla_goto_pos(GTK_SCINTILLA(scintilla), current_pos +1);
+        autocomplete_php_classes(scintilla, wordStart, wordEnd);
         } else if ((current_word_length>=3) && ( (gtk_scintilla_get_line_state(GTK_SCINTILLA(scintilla), current_line)==274))) {
         // check to see if they've typed <?php and if so do nothing
         if (wordStart>1) {
@@ -1963,6 +1960,7 @@ gboolean uri_is_local_or_http(gchar *uri)
   #endif
   return FALSE;
 }
+
 gchar * editor_convert_to_local(Editor *editor)
 {
   gchar *filename;
@@ -1981,6 +1979,7 @@ gchar * editor_convert_to_local(Editor *editor)
 /*
 * return a newly allocated string that may be freed with g_free()
 */
+/*
 gchar *convert_to_full(gchar *filename)
 {
   gchar *new_filename;
@@ -2005,4 +2004,4 @@ gchar *convert_to_full(gchar *filename)
   g_string_free(gstr_filename, FALSE);
   return new_filename;
 }
-
+*/

@@ -24,9 +24,7 @@
 
 #ifndef MAIN_WINDOW_CALLBACKS_H
 #define MAIN_WINDOW_CALLBACKS_H
-#include <webkit/webkit.h> 
 #include "main.h"
-#include "tab.h"
 #include "main_window.h"
 #include "preferences.h"
 #include "syntax_check.h"

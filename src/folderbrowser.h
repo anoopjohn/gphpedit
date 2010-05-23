@@ -25,9 +25,8 @@
 #ifndef FOLDER_BROWSER_H
 #define FOLDER_BROWSER_H
 
-#include "main_window.h"
 #include "main_window_callbacks.h"
-#include <gio/gio.h>
+
 #define MIME_ISDIR(string) (strcmp(string, "inode/directory")==0)
 #define IS_MIME(stringa,stringb) (g_content_type_equals (stringa, stringb))
 #define IS_TEXT(stringa) (g_content_type_is_a (stringa, "text/*"))
@@ -36,11 +35,8 @@
 #define IS_DEFAULT_DIR(a) (strcmp(a,DEFAULT_DIR)==0)
 #define CURRENTFOLDER gtk_button_get_label(GTK_BUTTON(main_window.button_dialog))
 #define FOLDER_INFOFLAGS "standard::type,standard::is-backup,standard::display-name,standard::icon,standard::content-type"
-//gchar *sChemin;
+
 void init_folderbrowser(GtkTreeStore *pTree, gchar *filename, GtkTreeIter *iter, GtkTreeIter *iter2);
-//void folderbrowser_create(MainWindow *main_window);
-//void update_folderbrowser (void);
-//void update_folderbrowser (gchar *newpath);
 void update_folderbrowser_signal (GFileMonitor *monitor,GFile *file,GFile *other_file, GFileMonitorEvent event_type, gpointer user_data);
 void tree_double_clicked(GtkTreeView *tree_view,GtkTreePath *path,GtkTreeViewColumn *column,gpointer user_data);
 gint filebrowser_sort_func(GtkTreeModel * model, GtkTreeIter * a, GtkTreeIter * b, gpointer user_data);
