@@ -23,7 +23,7 @@
 #include "scintilla/include/Scintilla.h"
 #include "scintilla/include/ScintillaWidget.h"
 #define GPOINTER_TO_LONG(p)  ((glong) (p))
-/* Handled Signals*/
+/* Handled Signals */
 enum {
     STYLE_NEEDED,
     CHAR_ADDED,
@@ -291,7 +291,7 @@ gtk_scintilla_init (GtkScintilla *sci)
     
     gtk_container_add (GTK_CONTAINER (sci), sci->scintilla);
     
-    gtk_widget_set (GTK_WIDGET (sci->scintilla),
+    g_object_set(G_OBJECT (sci->scintilla),
                     "visible", TRUE, NULL);
     
     gtk_widget_show (GTK_WIDGET (sci->scintilla));
@@ -305,7 +305,10 @@ static void gtk_scintilla_dispose (GObject *gobject)
 {
   g_return_if_fail (gobject != NULL);
   g_return_if_fail (GTK_IS_SCINTILLA (gobject));
-  //GtkScintilla *self = GTK_SCINTILLA (gobject);
+
+  GtkScintilla *self = GTK_SCINTILLA (gobject);
+
+//  g_object_unref(self->sci);
 
   /* Chain up to the parent class */
   G_OBJECT_CLASS (parent_class)->dispose (gobject);
