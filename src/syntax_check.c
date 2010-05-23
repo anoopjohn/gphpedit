@@ -25,8 +25,8 @@
 #include "syntax_check.h"
 #include "preferences.h"
 #include "main_window.h"
-#include <sys/types.h>
-#include <sys/stat.h>
+#include <glib/gstdio.h>
+
 #include <unistd.h>
 
 
@@ -154,13 +154,13 @@ GString *save_as_temp_file(void)
 {
   gchar *write_buffer = NULL;
   gsize text_length;
-  gint status;
   gchar *rawfilename;
   GString *filename;
   int file_handle;
 
   file_handle = g_file_open_tmp("gphpeditXXXXXX",&rawfilename,NULL);
   if (file_handle != -1) {
+    close(file_handle);
     filename = g_string_new(rawfilename);
     
     text_length = gtk_scintilla_get_length(GTK_SCINTILLA(main_window.current_editor->scintilla));
@@ -172,12 +172,15 @@ GString *save_as_temp_file(void)
     }
     
     gtk_scintilla_get_text(GTK_SCINTILLA(main_window.current_editor->scintilla), text_length+1, write_buffer);
-  
-    status = write (file_handle, write_buffer, text_length+1);
+    GError *error=NULL;
+    
+    if (!g_file_set_contents (rawfilename, write_buffer,text_length+1,&error)){
+      g_print(_("Error saving temp file: '%s'. GIO Error:%s"),rawfilename,error->message);
+      g_error_free(error);
+    }
     
     g_free (write_buffer);
     g_free(rawfilename);
-    close(file_handle);
 
     return filename;
   }
@@ -316,7 +319,7 @@ void syntax_check_run(void)
     gtk_tree_view_set_model(GTK_TREE_VIEW(main_window.lint_view), GTK_TREE_MODEL(main_window.lint_store));
     
     if (using_temp) {
-      unlink(filename->str);
+      g_unlink(filename->str);
     }
     g_string_free(filename, TRUE);
   }
