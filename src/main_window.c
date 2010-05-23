@@ -550,13 +550,16 @@ static void set_colormap(GtkWidget *window){
 }
 static void create_infobar(void){
   /* set up info bar */
-  main_window.infobar= gtk_info_bar_new_with_buttons (_("Reload"),1,_("Cancel"),2,NULL);
-  gtk_info_bar_set_message_type (GTK_INFO_BAR(main_window.infobar),GTK_MESSAGE_WARNING);
-  main_window.infolabel = gtk_label_new ("");
-  gtk_widget_show (main_window.infolabel);
-  GtkWidget *content_area = gtk_info_bar_get_content_area (GTK_INFO_BAR (main_window.infobar));
-  gtk_container_add (GTK_CONTAINER (content_area), main_window.infolabel);
-  g_signal_connect (main_window.infobar, "response", G_CALLBACK (process_external), main_window.current_editor);
+  main_window.infobar= gtk_info_bar_new_with_buttons(_("Reload"), 1, _("Cancel"), 2, NULL);
+  gtk_info_bar_set_message_type (GTK_INFO_BAR(main_window.infobar), GTK_MESSAGE_WARNING);
+  main_window.infolabel = gtk_label_new("");
+  gtk_label_set_line_wrap(GTK_LABEL (main_window.infolabel), TRUE);
+  gtk_label_set_justify(GTK_LABEL (main_window.infolabel), GTK_JUSTIFY_FILL);
+  GtkWidget *content_area = gtk_info_bar_get_content_area(GTK_INFO_BAR (main_window.infobar));
+  gtk_box_set_spacing(GTK_BOX (content_area), 0);
+  gtk_box_pack_start(GTK_BOX (content_area), main_window.infolabel, FALSE, FALSE, 0);
+  gtk_widget_show(main_window.infolabel);
+  g_signal_connect(main_window.infobar, "response", G_CALLBACK (process_external), main_window.current_editor);
   gtk_box_pack_start(GTK_BOX(main_window.prin_hbox), main_window.infobar, FALSE, FALSE, 0);
 }
 

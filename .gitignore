@@ -53,3 +53,4 @@ src/gtkscintilla2/scintilla/include/CVS/
 src/gtkscintilla2/scintilla/src/CVS/
 src/gtkscintilla2/scintilla/include/Face.pyc
 *.cvsignore
+src/config.h.in~

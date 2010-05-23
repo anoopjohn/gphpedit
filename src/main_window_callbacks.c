@@ -281,7 +281,7 @@ gint main_window_key_press_event(GtkWidget   *widget, GdkEventKey *event,gpointe
   gint wordEnd;
   
   if (main_window.notebook_editor != NULL) {
-    if (main_window.current_editor && main_window.current_editor->scintilla) check_externaly_modified();
+    if (main_window.current_editor && main_window.current_editor->scintilla) check_externally_modified();
     if (((event->state & (GDK_CONTROL_MASK | GDK_SHIFT_MASK))==(GDK_CONTROL_MASK | GDK_SHIFT_MASK)) && (event->keyval == GDK_ISO_Left_Tab)) {
       // Hack, for some reason when shift is held down keyval comes through as GDK_ISO_Left_Tab not GDK_Tab
       if (gtk_notebook_get_current_page(GTK_NOTEBOOK(main_window.notebook_editor)) == 0) {
@@ -1400,8 +1400,9 @@ void context_help(GtkWidget *widget)
 void on_about1_activate(GtkWidget *widget)
 {
   const gchar *authors[] = {
-                "Current Maintainer",
+                "Current Maintainers",
                 "Anoop John <anoop.john@zyxware.com>",
+                "Jose Rostagno <rostagnojose@yahoo.com>",
                 "",
                 "Original Developer",
                 "Andy Jeffries <andy@gphpedit.org>",
@@ -1410,7 +1411,6 @@ void on_about1_activate(GtkWidget *widget)
                 "Jonh Wendell <wendell@bani.com.br>",
                 "Tim Jackson <tim@timj.co.uk>",
                 "Sven Herzberg <herzi@gnome-de.org>",
-                "Jose Rostagno <rostagnojose@yahoo.com>",
                 NULL
                };
   gchar *translator_credits = _("translator_credits");
@@ -1478,7 +1478,7 @@ void on_notebook_switch_page (GtkNotebook *notebook, GtkNotebookPage *page,
     update_app_title();
   }
   on_tab_change_update_classbrowser(main_window.notebook_editor);
-  check_externaly_modified();
+  check_externally_modified();
 }
 
 gboolean on_notebook_focus_tab(GtkNotebook *notebook,
@@ -1978,10 +1978,10 @@ void process_external (GtkInfoBar *info_bar, gint response_id, Editor *editor){
   gtk_widget_hide (GTK_WIDGET(info_bar));  
 }
 
-void check_externaly_modified(void){
+void check_externally_modified(void){
   if (!main_window.current_editor) return;
   if (!main_window.current_editor->is_untitled && GTK_IS_SCINTILLA(main_window.current_editor->scintilla)){
-    /* verify if file has been externaly modified */
+    /* verify if file has been externally modified */
     GError *error=NULL;
     GFile *file=g_file_new_for_uri (main_window.current_editor->filename->str);
     GFileInfo *info;
@@ -1999,7 +1999,7 @@ void check_externaly_modified(void){
     g_file_info_get_modification_time (info,&file_mtime);
     g_object_unref(info);  
     if ((file_mtime.tv_sec > main_window.current_editor->file_mtime.tv_sec) || (file_mtime.tv_sec == main_window.current_editor->file_mtime.tv_sec && file_mtime.tv_usec > main_window.current_editor->file_mtime.tv_usec)){
-      gchar *message=g_strdup_printf(_("The file %s has been externaly modified. Do you want reload it?"),main_window.current_editor->filename->str);
+      gchar *message=g_strdup_printf(_("The file %s has been externally modified. Do you want reload it?"), main_window.current_editor->filename->str);
       gtk_label_set_text (GTK_LABEL (main_window.infolabel), message);
       g_free(message);
       gtk_widget_show (main_window.infobar);
@@ -2010,5 +2010,5 @@ void check_externaly_modified(void){
 }
 
 void main_window_activate_focus (GtkWidget *widget,GdkEventFocus *event,gpointer user_data){
-  check_externaly_modified();
+  check_externally_modified();
 }
