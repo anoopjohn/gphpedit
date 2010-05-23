@@ -1458,7 +1458,7 @@ void on_notebook_switch_page (GtkNotebook *notebook, GtkNotebookPage *page,
     if (GTK_IS_SCINTILLA(data->scintilla)) {
       // Grab the focus in to the editor
       gtk_scintilla_grab_focus(GTK_SCINTILLA(data->scintilla));
-      gtk_scintilla_set_focus(GTK_SCINTILLA(data->scintilla), TRUE);
+//      gtk_scintilla_set_focus(GTK_SCINTILLA(data->scintilla), TRUE);
       // Store it in the global main_window.current_editor value
       main_window.current_editor = data;
     }
