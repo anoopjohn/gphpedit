@@ -564,14 +564,17 @@ GString *tab_help_find_helpfile(gchar *command)
  gchar *temp= NULL;
  temp=g_strdup_printf ("%s/%s",PHP_DOC_DIR,"function.");
  long_filename = tab_help_try_filename(temp, command, ".html");
- if (long_filename)
-  return long_filename; //FIXME: free temp???
- temp=g_strdup_printf ("%s/%s",PHP_DOC_DIR,"ref.");
- long_filename = tab_help_try_filename(PHP_DOC_DIR, command, ".html");
+ g_free(temp);
  if (long_filename)
   return long_filename;
- temp=g_strdup_printf ("%s/",PHP_DOC_DIR); //FIXME: free temp???
+ temp=g_strdup_printf ("%s/%s",PHP_DOC_DIR,"ref.");
+ long_filename = tab_help_try_filename(temp, command, ".html");
+ g_free(temp);
+ if (long_filename)
+  return long_filename;
+ temp=g_strdup_printf ("%s/",PHP_DOC_DIR);
  long_filename = tab_help_try_filename(temp, command, NULL);
+ g_free(temp);
  if (long_filename)
   return long_filename;
  g_print(_("Help for function not found: %s\n"), command);
