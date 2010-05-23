@@ -157,6 +157,15 @@ void session_reopen(void)
     g_free(content);
     gtk_notebook_set_current_page( GTK_NOTEBOOK(main_window.notebook_editor), focus_tab);
   }
+  GFile *file=get_gfile_from_filename(session_file->str);
+  GError *error=NULL;
+  if (!g_file_delete (file,NULL,&error)){
+      if (error->code!=G_FILE_ERROR_NOENT && error->code!=1){
+        g_print(_("GIO Error deleting file: %s, code %d\n"),error->message,error->code);
+      }
+      g_error_free (error);
+  }
+  g_object_unref (file);
 }
 
 
@@ -1454,7 +1463,7 @@ void on_notebook_switch_page (GtkNotebook *notebook, GtkNotebookPage *page,
     if (GTK_IS_SCINTILLA(data->scintilla)) {
       // Grab the focus in to the editor
       gtk_scintilla_grab_focus(GTK_SCINTILLA(data->scintilla));
-      gtk_scintilla_set_focus(GTK_SCINTILLA(data->scintilla), TRUE);
+//    gtk_scintilla_set_focus(GTK_SCINTILLA(data->scintilla), TRUE);
       // Store it in the global main_window.current_editor value
       main_window.current_editor = data;
     }
