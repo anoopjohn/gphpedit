@@ -865,5 +865,6 @@ gboolean free_php_variables_tree_item (gpointer key, gpointer value, gpointer da
 }
 
 void cleanup_classbrowser(void){
-  g_tree_foreach (php_variables_tree,free_php_variables_tree_item,NULL);
+  if (php_variables_tree)
+    g_tree_foreach (php_variables_tree,free_php_variables_tree_item,NULL);
 }
