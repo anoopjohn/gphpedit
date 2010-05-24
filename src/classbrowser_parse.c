@@ -26,6 +26,36 @@
 #include "gvfs_utils.h"
 //#define DEBUG_CLASSBROWSER
 
+static gchar *read_text_file(gchar *filename){
+
+  gchar *buffer=NULL;
+  gsize nchars=0;
+
+  GSList *walk;
+  Editor *editor;
+
+  for (walk = editors; walk != NULL; walk = g_slist_next (walk)) {
+    editor = walk->data;
+    if (strcmp(editor->filename->str,filename)==0) {
+        /* found read text from scintilla */ 
+          nchars = gtk_scintilla_get_length(GTK_SCINTILLA(editor->scintilla));
+          buffer = g_malloc0(nchars+1); // Include terminating null
+          if (buffer == NULL) {
+            g_warning ("%s", _("Classbrowser::Cannot allocate buffer"));
+            return NULL;
+          }
+          gtk_scintilla_get_text(GTK_SCINTILLA(editor->scintilla), nchars+1, buffer);
+//          g_print("Classbrowser::Using scintilla text\n");
+          break;
+    }
+  }
+  if (!buffer || nchars==0){
+    buffer=read_text_file_sync(filename);
+  }
+//  g_print("buffer:<---\n%s\n--->",buffer);
+  return buffer;
+}
+
 static gboolean is_whitespace(gchar character)
 {
   if ( (character == ' ') ||
@@ -209,7 +239,7 @@ void classbrowser_parse_file(gchar *filename)
   gchar *posvarname=NULL;
   gchar *varname=NULL;
   gchar *beforevarname=NULL;
-  file_contents = read_text_file_sync(filename);
+  file_contents = read_text_file(filename);
   if (!file_contents) return;
   o = file_contents;
   c = o;
