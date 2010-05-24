@@ -2009,6 +2009,7 @@ void check_externally_modified(void){
   gtk_widget_hide (main_window.infobar);
 }
 
-void main_window_activate_focus (GtkWidget *widget,GdkEventFocus *event,gpointer user_data){
+gboolean main_window_activate_focus (GtkWidget *widget,GdkEventFocus *event,gpointer user_data){
   check_externally_modified();
+  return FALSE;
 }

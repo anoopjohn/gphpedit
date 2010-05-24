@@ -122,5 +122,5 @@ void on_tab_close_activate(GtkWidget *widget, Editor *editor);
 void on_tab_close_set_style(GtkWidget *hbox, GtkWidget *button);
 void process_external (GtkInfoBar *info_bar, gint response_id, Editor *editor);
 void check_externally_modified(void);
-void main_window_activate_focus (GtkWidget *widget,GdkEventFocus *event,gpointer       user_data);
+gboolean main_window_activate_focus (GtkWidget *widget,GdkEventFocus *event,gpointer       user_data);
 #endif
