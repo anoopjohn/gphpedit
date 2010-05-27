@@ -460,52 +460,19 @@ void run_plugin(GtkWidget *widget, gpointer data) {
   plugin_exec((gulong) data);// was (gint)
 }
 
-gchar *get_gnome_vfs_dirname(gchar *filename) {
-  gchar *end = NULL;
-  gchar *dirname = NULL;
-  gint length=0;
-  
-  end = strrchr(filename, '/');
-  if (end) {
-    length = (end-filename);
-    dirname = g_malloc0(length+1);
-    strncpy(dirname, filename, length);
-  }
-  return dirname;
-}
-
-GString *get_folder(GString *filename) {
-  gchar *dir;
-  GString *folder;
-
-  if (strstr(filename->str, "/")) {
-    dir = get_gnome_vfs_dirname(filename->str);
-  }
-  else {
-    dir = g_get_current_dir();
-  }
-  folder = g_string_new(dir);
-  folder = g_string_append(folder, "/");
-  g_free(dir);
-
-  return folder;
-}
-
 void on_openselected1_activate(GtkWidget *widget)
 {
   GSList *li;
   Editor *editor;
 
-  gint current_pos;
   gint wordStart;
   gint wordEnd;
   gchar *ac_buffer;
   gint ac_length;
-  GString *file;
+  gchar *file;
 
   if (main_window.current_editor == NULL || main_window.current_editor->type == TAB_HELP || main_window.current_editor->type == TAB_PREVIEW) return;
   
-  current_pos = gtk_scintilla_get_current_pos(GTK_SCINTILLA(main_window.current_editor->scintilla));
   wordStart = gtk_scintilla_get_selection_start(GTK_SCINTILLA(main_window.current_editor->scintilla));
   wordEnd = gtk_scintilla_get_selection_end(GTK_SCINTILLA(main_window.current_editor->scintilla));
   ac_buffer = gtk_scintilla_get_text_range (GTK_SCINTILLA(main_window.current_editor->scintilla), wordStart, wordEnd, &ac_length);
@@ -514,25 +481,27 @@ void on_openselected1_activate(GtkWidget *widget)
       editor = li->data;
       if (editor) {
         if (editor->opened_from) {
-          file = get_folder(editor->opened_from);
-          if (DEBUG_MODE) { g_print("DEBUG: main_window_callbacks.c:on_selected1_activate (opened_from) :file->str: %s\n", file->str); }
+          file = filename_parent_uri(editor->opened_from->str);
+          if (DEBUG_MODE) { g_print("DEBUG: main_window_callbacks.c:on_selected1_activate (opened_from) :file: %s\n", file); }
         }
         else {
-          file = get_folder(editor->filename);
-          if (DEBUG_MODE) { g_print("DEBUG: main_window_callbacks.c:on_selected1_activate:file->str: %s\n", file->str); }
+          file = filename_parent_uri(editor->filename->str);
+          if (DEBUG_MODE) { g_print("DEBUG: main_window_callbacks.c:on_selected1_activate:file: %s\n", file); }
         }
 
-        if (!strstr(ac_buffer, "://") && file->str) {
-          file = g_string_append(file, ac_buffer);
+        if (!strstr(ac_buffer, "://") && file) {
+          gchar *filetemp= g_strdup_printf("%s/%s",file, ac_buffer);
+          g_free(file);
+          file=g_strdup(filetemp);
+          g_free(filetemp);
         }
         else if (strstr(ac_buffer, "://")) {
-          file = g_string_new(ac_buffer);
+            if (file) g_free(file);
+            file = g_strdup(ac_buffer);
         }
-        GFile *fi=get_gfile_from_filename(file->str);
-        if(g_file_query_exists (fi,NULL)) switch_to_file_or_open(file->str,0);
-        g_object_unref(fi);
+        if(filename_file_exist(file)) switch_to_file_or_open(file,0);
         if (file) {
-          g_string_free(file, TRUE);
+          g_free(file);
         }
       }
     }
@@ -631,7 +600,7 @@ void add_file_filters(GtkFileChooser *chooser){
 void on_open1_activate(GtkWidget *widget)
 {
   GtkWidget *file_selection_box;
-  GString *folder;
+  gchar *folder;
   gchar *last_opened_folder;
   // Create the selector widget
   file_selection_box = gtk_file_chooser_dialog_new("Please select files for editing", GTK_WINDOW(main_window.window),
@@ -649,12 +618,12 @@ void on_open1_activate(GtkWidget *widget)
   /* opening of multiple files at once */
   gtk_file_chooser_set_select_multiple(GTK_FILE_CHOOSER(file_selection_box), TRUE);
   if (main_window.current_editor && !main_window.current_editor->is_untitled) {
-    folder = get_folder(main_window.current_editor->filename);
-    if (DEBUG_MODE) { g_print("DEBUG: main_window_callbacks.c:on_open1_activate:folder: %s\n", folder->str); }
-    gtk_file_chooser_set_current_folder_uri(GTK_FILE_CHOOSER(file_selection_box),  folder->str);
-    g_string_free(folder, TRUE);
+    folder = filename_parent_uri(main_window.current_editor->filename->str);
+    if (DEBUG_MODE) { g_print("DEBUG: main_window_callbacks.c:on_open1_activate:folder: %s\n", folder); }
+    gtk_file_chooser_set_current_folder_uri(GTK_FILE_CHOOSER(file_selection_box),  folder);
+    g_free(folder);
   }
-  else if (!last_opened_folder){
+  else if (last_opened_folder){
     gtk_file_chooser_set_current_folder_uri(GTK_FILE_CHOOSER(file_selection_box),  last_opened_folder);
   }
   
@@ -1454,7 +1423,6 @@ void on_notebook_switch_page (GtkNotebook *notebook, GtkNotebookPage *page,
     if (GTK_IS_SCINTILLA(data->scintilla)) {
       // Grab the focus in to the editor
       gtk_scintilla_grab_focus(GTK_SCINTILLA(data->scintilla));
-//    gtk_scintilla_set_focus(GTK_SCINTILLA(data->scintilla), TRUE);
       // Store it in the global main_window.current_editor value
       main_window.current_editor = data;
     }
@@ -2005,6 +1973,7 @@ void check_externally_modified(void){
   gtk_widget_hide (main_window.infobar);
 }
 
-void main_window_activate_focus (GtkWidget *widget,GdkEventFocus *event,gpointer user_data){
+gboolean main_window_activate_focus (GtkWidget *widget,GdkEventFocus *event,gpointer user_data){
   check_externally_modified();
+  return FALSE;
 }

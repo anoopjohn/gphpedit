@@ -21,6 +21,18 @@ gboolean filename_file_exist(gchar *filename)
   return hr;
 }
 /*
+* filename_parent_uri
+* return a gchar with the parent uri of the Gfile
+*/
+gchar *filename_parent_uri(gchar *filename){
+    GFile *file= get_gfile_from_filename(filename);
+    GFile *parent= g_file_get_parent (file);
+    gchar *parent_path= g_file_get_uri (parent);
+    g_object_unref(file);
+    g_object_unref(parent);
+    return parent_path;
+}
+/*
 * read_text_file_sync
 * return a gchar with file contents or NULL in case of error. Must free with g_free when no longer needed
 */

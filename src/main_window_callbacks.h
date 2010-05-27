@@ -30,7 +30,6 @@
 #include "syntax_check.h"
 #include "classbrowser.h"
 
-GString *get_folder(GString *filename);
 void main_window_destroy_event(GtkWidget *widget, gpointer data);
 gboolean main_window_delete_event(GtkWidget *widget, GdkEvent *event, gpointer user_data);
 gint main_window_key_press_event(GtkWidget   *widget, GdkEventKey *event,gpointer user_data);
@@ -120,5 +119,5 @@ void on_tab_close_activate(GtkWidget *widget, Editor *editor);
 void on_tab_close_set_style(GtkWidget *hbox, GtkWidget *button);
 void process_external (GtkInfoBar *info_bar, gint response_id, Editor *editor);
 void check_externally_modified(void);
-void main_window_activate_focus (GtkWidget *widget,GdkEventFocus *event,gpointer       user_data);
+gboolean main_window_activate_focus (GtkWidget *widget,GdkEventFocus *event,gpointer       user_data);
 #endif

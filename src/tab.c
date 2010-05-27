@@ -980,18 +980,14 @@ void tab_check_sql_file(Editor *editor)
 
 void register_file_opened(gchar *filename)
 {
-  GString *tmp_filename;
-  GString *folder;
-  main_window_add_to_reopen_menu(filename);
-
-  tmp_filename = g_string_new(filename);
-
-  folder = get_folder(tmp_filename);
+  gchar *full_filename=convert_to_full(filename);
+  main_window_add_to_reopen_menu(full_filename);
+  g_free(full_filename);
+  gchar *folder = filename_parent_uri(filename);
   GConfClient *config;
   config=gconf_client_get_default ();
-  gconf_client_set_string (config,"/gPHPEdit/general/last_opened_folder",folder->str,NULL);
-  g_string_free(folder, TRUE);
-  g_string_free(tmp_filename, TRUE);
+  if (folder)
+    gconf_client_set_string (config,"/gPHPEdit/general/last_opened_folder",folder,NULL);
 }
 
 gboolean switch_to_file_or_open(gchar *filename, gint line_number)
@@ -1134,7 +1130,9 @@ gboolean tab_create_new(gint type, GString *filename)
       editor->filename = g_string_new(_("Untitled"));
       editor->short_filename = g_strdup(editor->filename->str);
       if (main_window.current_editor) {
-        editor->opened_from = get_folder(main_window.current_editor->filename);
+        gchar *tfilename=filename_parent_uri(main_window.current_editor->filename->str);
+        editor->opened_from = g_string_new(tfilename);
+        g_free(tfilename);
       }
       editor->is_untitled=TRUE;
       /* set default text icon */
