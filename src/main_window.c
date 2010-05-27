@@ -160,6 +160,7 @@ static void main_window_create_panes(void)
   gtk_paned_pack2 (GTK_PANED (main_window.main_horizontal_pane), main_window.prin_hbox, TRUE, TRUE);  
 }
 
+
 static void create_side_panel(void){
   GtkWidget *prin_sidebox;
   GtkWidget *box2;
@@ -508,7 +509,6 @@ void main_window_add_to_reopen_menu(gchar *full_filename)
   gtk_recent_manager_add_item (manager, full_filename);
   main_window_update_reopen_menu();
 }
-
 static void main_window_create_prinbox(void){
   main_window.prinbox = gtk_vbox_new (FALSE, 0);
   gtk_container_add (GTK_CONTAINER (main_window.window), main_window.prinbox);
@@ -552,7 +552,6 @@ void main_window_create(void){
   create_app_main_window(_("gPHPEdit"), 230, 150);
   preferences_apply();
   main_window_create_prinbox();
-  
   main_window_create_menu();
   main_window_create_maintoolbar();
   main_window_create_findtoolbar();

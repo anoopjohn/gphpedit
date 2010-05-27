@@ -633,6 +633,7 @@ void classbrowser_update(void)
   classbrowser_start_update();
   g_tree_foreach (php_files_tree,classbrowser_files_parse,NULL);
   classbrowser_remove_dead_wood();
+
   press_event = g_signal_connect(GTK_OBJECT(main_window.classtreeview), "button_press_event",
                                    G_CALLBACK(treeview_double_click), NULL);
   release_event = g_signal_connect(GTK_OBJECT(main_window.classtreeview), "button_release_event",
@@ -701,6 +702,7 @@ void autocomplete_member_function(GtkWidget *scintilla, gint wordStart, gint wor
     g_string_free(list, FALSE);
   }
 }
+
 gchar *classbrowser_custom_function_calltip(gchar *function_name){
 /*FIXME::two functions diferent classes same name =bad calltip */
   GSList *li;

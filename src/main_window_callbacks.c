@@ -634,44 +634,19 @@ void on_open1_activate(GtkWidget *widget)
   gtk_widget_destroy(file_selection_box);
 }
 
-void save_file_as_confirm_overwrite(gint reply,gpointer data)
-{
-  GString *filename;
-
-  if (reply==0) {
-    filename = data; //g_string_new(gtk_file_selection_get_filename(GTK_FILE_SELECTION(data)));
-
-    // Set the filename of the current editor to be that
-    if (main_window.current_editor->filename) {
-      g_string_free(main_window.current_editor->filename, TRUE);
-    }
-    main_window.current_editor->filename=g_string_new(filename->str);
-    main_window.current_editor->short_filename = g_path_get_basename(filename->str);
-
-    tab_check_php_file(main_window.current_editor);
-
-    if (main_window.current_editor->opened_from) {
-      g_string_free(main_window.current_editor->opened_from, TRUE);
-      main_window.current_editor->opened_from = NULL;
-    }
-
-    // Call Save method to actually save it now it has a filename
-    on_save1_activate(NULL);
-  }
-}
-
-
 void save_file_as_ok(GtkFileChooser *file_selection_box)
 {
   GString *filename;
-  filename = g_string_new(gtk_file_chooser_get_uri(file_selection_box));
+  gchar *uri=gtk_file_chooser_get_uri(file_selection_box);
+  filename = g_string_new(uri);
+  g_free(uri);
   // Set the filename of the current editor to be that
   if (main_window.current_editor->filename) {
     g_string_free(main_window.current_editor->filename, TRUE);
   }
   main_window.current_editor->filename=g_string_new(filename->str);
   main_window.current_editor->is_untitled=FALSE;
-  main_window.current_editor->short_filename = g_path_get_basename(filename->str);
+  main_window.current_editor->short_filename = filename_get_basename(filename->str);
   tab_check_php_file(main_window.current_editor);
   tab_check_css_file(main_window.current_editor);
 
@@ -773,25 +748,26 @@ void on_save_as1_activate(GtkWidget *widget)
     gtk_file_chooser_set_do_overwrite_confirmation (GTK_FILE_CHOOSER(file_selection_box), TRUE);
     gtk_dialog_set_default_response (GTK_DIALOG(file_selection_box), GTK_RESPONSE_ACCEPT);
     
-    GConfClient *config;
-    GError *error = NULL;
-    config=gconf_client_get_default ();
-    last_opened_folder = gconf_client_get_string(config,"/gPHPEdit/general/last_opened_folder",&error);
-    if (DEBUG_MODE) { g_print("DEBUG: main_window_callbacks.c:on_save_as1_activate:last_opened_folder: %s\n", last_opened_folder); }
-  
     if (main_window.current_editor) {
       filename = main_window.current_editor->filename->str;
       if (main_window.current_editor->is_untitled == FALSE) {
-        gtk_file_chooser_set_uri(GTK_FILE_CHOOSER(file_selection_box), filename);
+          gchar *uri=filename_get_uri(filename);
+          gtk_file_chooser_set_uri(GTK_FILE_CHOOSER(file_selection_box), uri);
+          g_free(uri);
       }
       else {
-        if (!last_opened_folder){
+        GConfClient *config;
+        GError *error = NULL;
+        config=gconf_client_get_default ();
+        last_opened_folder = gconf_client_get_string(config,"/gPHPEdit/general/last_opened_folder",&error);
+        if (DEBUG_MODE) { g_print("DEBUG: main_window_callbacks.c:on_save_as1_activate:last_opened_folder: %s\n", last_opened_folder); }
+        if (last_opened_folder){
           if (DEBUG_MODE) { g_print("DEBUG: main_window_callbacks.c:on_save_as1_activate:Setting current_folder_uri to %s\n", last_opened_folder); }
           gtk_file_chooser_set_current_folder_uri(GTK_FILE_CHOOSER(file_selection_box),  last_opened_folder);
+              g_free(last_opened_folder);
         }
       }
     }
-    g_free(last_opened_folder);
     if (gtk_dialog_run (GTK_DIALOG(file_selection_box)) == GTK_RESPONSE_ACCEPT) {
       save_file_as_ok(GTK_FILE_CHOOSER(file_selection_box));
     }
@@ -840,7 +816,7 @@ void rename_file(GString *newfilename)
   GFile *file;
   GError *error;
   file=get_gfile_from_filename(main_window.current_editor->filename->str);
-  char *basename=g_path_get_basename(newfilename->str);
+  gchar *basename=filename_get_basename(newfilename->str);
   file=g_file_set_display_name (file,basename,NULL,&error);
   g_free(basename);
   if (!file){
@@ -849,7 +825,7 @@ void rename_file(GString *newfilename)
         
   // set current_editor->filename
   main_window.current_editor->filename=newfilename;
-  main_window.current_editor->short_filename = g_path_get_basename(newfilename->str);
+  main_window.current_editor->short_filename = filename_get_basename(newfilename->str);
 
   // save as new filename
   on_save1_activate(NULL);

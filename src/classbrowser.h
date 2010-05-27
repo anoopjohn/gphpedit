@@ -89,5 +89,4 @@ void classbrowser_functionlist_add(gchar *classname, gchar *funcname, gchar *fil
 void autocomplete_member_function(GtkWidget *scintilla, gint wordStart, gint wordEnd);
 void classbrowser_update_selected_label(gchar *filename, gint line);
 gint classbrowser_compare_function_names(GtkTreeModel *model, GtkTreeIter *a, GtkTreeIter *b, gpointer user_data);
-
 #endif
