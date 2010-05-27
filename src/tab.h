@@ -46,11 +46,9 @@
 typedef struct
 {
 	gint type;
-	GSList components;
 	GtkWidget *scintilla;
 	GtkWidget *help_scrolled_window;
 	WebKitWebView *help_view;
-	gint scintilla_id;
 	GTimeVal file_mtime;
 	GString *filename;
 	gchar *short_filename;
@@ -58,8 +56,6 @@ typedef struct
 	GdkPixbuf *file_icon;
 	gchar *help_function;
 	GString *opened_from;
-	gint last_parsed_time; // TODO: Change to something more meaningful
-	GSList functions_and_classes;
 	gboolean saved;
 	GtkWidget *label;
 	GSList *keyboard_macro_list;
@@ -69,8 +65,7 @@ typedef struct
 	gboolean is_untitled;
 	guint current_pos;
 	guint current_line;
-	guint file_size;
-        const char *contenttype;
+  const char *contenttype;
 } Editor;
 
 typedef struct
@@ -80,7 +75,6 @@ typedef struct
 	glong lparam;
 } MacroEvent;
 
-extern GtkWidget *label;
 extern GSList *editors;
 
 Editor *editor_find_from_scintilla(GtkWidget *scintilla);

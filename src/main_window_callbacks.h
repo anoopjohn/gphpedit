@@ -38,7 +38,6 @@ void open_file_ok(GtkFileChooser *file_selection);
 void reopen_recent(GtkWidget *widget, gpointer data);
 void on_open1_activate(GtkWidget *widget);
 void on_openselected1_activate(GtkWidget *widget);
-void save_file_as_confirm_overwrite(gint reply,gpointer filename);
 void save_file_as_ok(GtkFileChooser *file_selection_box);
 void on_save1_activate(GtkWidget *widget);
 void on_save_as1_activate(GtkWidget *widget);

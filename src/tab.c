@@ -69,7 +69,6 @@ void debug_dump_editors(void)
     g_print("Editor number    :%d\n", editor_number);
     g_print("Scintilla widget :%p\n", editor->scintilla);
     g_print("Scintilla lexer  :%d\n", gtk_scintilla_get_lexer(GTK_SCINTILLA(editor->scintilla)));
-    g_print("Scintilla ID     :%d\n", editor->scintilla_id);
     g_print("File mtime       :%lo\n", editor->file_mtime.tv_sec);
     g_print("File shortname   :%s\n", editor->short_filename);
     g_print("File fullname    :%s\n", editor->filename->str);
@@ -297,14 +296,14 @@ void tab_validate_buffer_and_insert(gpointer buffer, Editor *editor)
     #ifdef DEBUGTAB
     g_print("Valid UTF8 according to gnome\n");
     #endif
-    gtk_scintilla_add_text(GTK_SCINTILLA (editor->scintilla), strlen(buffer), buffer);//editor->file_size, buffer);
+    gtk_scintilla_add_text(GTK_SCINTILLA (editor->scintilla), strlen(buffer), buffer);
     editor->converted_to_utf8 = FALSE;
   }
   else {
     gchar *converted_text;
     gsize utf8_size;// was guint
     GError *error = NULL;      
-    converted_text = g_locale_to_utf8(buffer, editor->file_size, NULL, &utf8_size, &error);
+    converted_text = g_locale_to_utf8(buffer, strlen(buffer), NULL, &utf8_size, &error);
     if (error != NULL) {
       gssize nchars=strlen(buffer);
       // if locale isn't set
@@ -313,7 +312,7 @@ void tab_validate_buffer_and_insert(gpointer buffer, Editor *editor)
       if (error!=NULL){
         g_print(_("gPHPEdit UTF-8 Error: %s\n"), error->message);
         g_error_free(error);
-        gtk_scintilla_add_text(GTK_SCINTILLA (editor->scintilla), editor->file_size, buffer);
+        gtk_scintilla_add_text(GTK_SCINTILLA (editor->scintilla), strlen(buffer), buffer);
       return;
       }
     }
@@ -372,8 +371,10 @@ void tab_file_opened (GObject *source_object, GAsyncResult *res, gpointer user_d
   GError *error=NULL;
   Editor *editor = (Editor *)user_data;
   gchar* buffer;
-  if (!g_file_load_contents_finish ((GFile *) source_object,res,&(buffer),&(editor->file_size),NULL,&error)) {
+  guint size; 
+  if (!g_file_load_contents_finish ((GFile *) source_object,res,&(buffer),&size,NULL,&error)) {
     g_print("Error reading file. Gio error:%s",error->message);
+    g_error_free(error);
     return;
   }
   #ifdef DEBUGTAB
@@ -420,8 +421,6 @@ void tab_file_opened (GObject *source_object, GAsyncResult *res, gpointer user_d
     editor->is_untitled=TRUE;
     return;
   }
-  /*initial file size, needed for buffer size*/
-  editor->file_size= g_file_info_get_size (info);
   editor->isreadonly= !g_file_info_get_attribute_boolean (info,"access::can-write");
   editor->contenttype=g_strdup(contenttype);
   GIcon *icon= g_file_info_get_icon (info); /* get Gicon for mimetype*/
@@ -1234,15 +1233,12 @@ Editor *editor_find_from_help(void *help)
 
 static void save_point_reached(GtkWidget *scintilla)
 {
-  GString *label_caption;
   Editor *editor;
 
   editor = editor_find_from_scintilla(scintilla);
   if (!editor) return;
   if (editor->short_filename != NULL) {
-    label_caption = g_string_new(editor->short_filename);
-    gtk_label_set_markup(GTK_LABEL (editor->label), label_caption->str);
-    g_string_free(label_caption, TRUE);
+    gtk_label_set_text(GTK_LABEL (editor->label), editor->short_filename);
     editor->saved=TRUE;
     update_app_title();
   }
@@ -1250,16 +1246,13 @@ static void save_point_reached(GtkWidget *scintilla)
 
 static void save_point_left(GtkWidget *scintilla)
 {
-  GString *label_caption;
   Editor *editor;
-
+  gchar *caption;
   editor = editor_find_from_scintilla(scintilla);
+  if (!editor) return;
   if (editor->short_filename != NULL) {
-    label_caption = g_string_new("<span color=\"red\">");
-    label_caption = g_string_append(label_caption, editor->short_filename);
-    label_caption = g_string_append(label_caption, "</span>");
-    gtk_label_set_markup(GTK_LABEL (editor->label), label_caption->str);
-    g_string_free(label_caption, TRUE);
+    caption= g_strdup_printf("*%s",editor->short_filename);
+    gtk_label_set_text(GTK_LABEL (editor->label), caption);
     editor->saved=FALSE;
     update_app_title();
   }
