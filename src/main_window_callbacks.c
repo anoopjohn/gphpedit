@@ -1418,25 +1418,21 @@ void on_notebook_switch_page (GtkNotebook *notebook, GtkNotebookPage *page,
   GtkWidget *child;
 
   child = gtk_notebook_get_nth_page(GTK_NOTEBOOK(main_window.notebook_editor), page_num);
-  data = editor_find_from_scintilla(child);
-  if (data) {
+  if (GTK_IS_SCINTILLA(child)){
+    data = editor_find_from_scintilla(child);
     if (GTK_IS_SCINTILLA(data->scintilla)) {
       // Grab the focus in to the editor
       gtk_scintilla_grab_focus(GTK_SCINTILLA(data->scintilla));
-      // Store it in the global main_window.current_editor value
-      main_window.current_editor = data;
     }
-  }
-  else {
+  } else {
     data = editor_find_from_help((void *)child);
-    if (data) {
-      main_window.current_editor = data;
-    }
-    else {
-       g_print(_("Unable to get data for page %d\n"), page_num);
-    }
   }
-  
+  if (data){
+    // Store it in the global main_window.current_editor value
+    main_window.current_editor = data;
+  } else {
+    g_print(_("Unable to get data for page %d\n"), page_num);
+  }
   if (!is_app_closing) {
     // Change the title of the main application window to the full filename
     update_app_title();
