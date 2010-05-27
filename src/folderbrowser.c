@@ -396,11 +396,7 @@ static void go_home_cb(void){
     gchar *folderpath;
     if (main_window.current_editor->is_untitled==FALSE){
       if (editor_is_local(main_window.current_editor)){
-      GFile *file= get_gfile_from_filename(main_window.current_editor->filename->str);
-      GFile *parent= g_file_get_parent (file);
-      folderpath=g_file_get_uri (parent);
-      g_object_unref(file);
-      g_object_unref(parent);
+        folderpath=filename_parent_uri(main_window.current_editor->filename->str);
       }else{
         /* set default dir as home dir*/
         folderpath= DEFAULT_DIR;
@@ -424,11 +420,7 @@ static void go_home_cb(void){
 static void go_up_cb(void){
   gchar *folderpath= (gchar*)CURRENTFOLDER;
   if (folderpath && !IS_DEFAULT_DIR(folderpath)){
-    GFile *file= get_gfile_from_filename(folderpath);
-    GFile *parent= g_file_get_parent (file);
-    gchar *fullfolderpath= g_file_get_uri (parent);
-    g_object_unref(file);
-    g_object_unref(parent);
+    gchar *fullfolderpath=filename_parent_uri(folderpath);
     #ifdef DEBUGFOLDERBROWSER
     g_print("DEBUG:::Up dir:%s\n",fullfolderpath);
     #endif
