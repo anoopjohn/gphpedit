@@ -1053,7 +1053,7 @@ gboolean tab_create_new(gint type, GString *filename)
     else {
       abs_path = g_strdup(filename->str);
     }
-    file=get_gfile_from_filename(abs_path);//g_file_new_for_uri (abs_path);
+    file=get_gfile_from_filename(abs_path);
     if (!uri_is_local_or_http(abs_path)){
       GError *error2=NULL;
       GMount *ex= g_file_find_enclosing_mount (file,NULL,&error2);
@@ -1064,7 +1064,8 @@ gboolean tab_create_new(gint type, GString *filename)
           gmo= gtk_mount_operation_new(GTK_WINDOW(main_window.window));
           recordar=g_strdup(filename->str);
           g_file_mount_enclosing_volume (file, G_MOUNT_MOUNT_NONE,gmo,NULL, openfile_mount, recordar);
-          error2=NULL;
+          g_error_free(error2);
+          error2=NULL;        
           return FALSE;
         }
         g_print(_("Error opening file GIO error:%s\nfile:%s"),error2->message,abs_path);
@@ -1115,7 +1116,7 @@ gboolean tab_create_new(gint type, GString *filename)
                 
     if (abs_path != NULL) {
       editor->filename = g_string_new(abs_path);
-      editor->short_filename = g_path_get_basename(editor->filename->str);
+      editor->short_filename = filename_get_basename (editor->filename->str);
       if (!file_created) tab_load_file(editor);
       //tab_check_php_file(editor);
       tab_check_css_file(editor);
@@ -1921,20 +1922,21 @@ static void char_added(GtkWidget *scintilla, guint ch)
 
 gboolean editor_is_local(Editor *editor)
 {
+  gboolean result=FALSE;
   gchar *filename;
   
-  filename = (editor->filename)->str;
-  if (g_str_has_prefix(filename, "file://")){
-    return TRUE;  
-  }
-  if (g_str_has_prefix(filename, "/")){
-    return TRUE;
+  filename = filename_get_path(editor->filename->str);
+  if (filename){
+  g_free(filename);
+  result=TRUE;
   }
   #ifdef DEBUGTAB
-  g_print("DEBUG::: FALSE - not local!!! filename:%s",filename);
+  g_print("DEBUG::: %s filename:%s",(result)?"TRUE - local!!!":"FALSE - not local!!!",editor->filename->str);
   #endif
-  return FALSE;
+
+  return result;
 }
+
 gboolean uri_is_local_or_http(gchar *uri)
 {
   gchar *filename;
@@ -1956,19 +1958,4 @@ gboolean uri_is_local_or_http(gchar *uri)
   g_print("DEBUG:: %s - not local!!!",uri);
   #endif
   return FALSE;
-}
-
-gchar * editor_convert_to_local(Editor *editor)
-{
-  gchar *filename;
-  
-  if (!editor_is_local(editor)) {
-    return NULL;
-  }
-  filename = editor->filename->str;
-  if (g_str_has_prefix(filename, "file://")){
-    filename += 7;
-  }
-  
-  return filename;
 }

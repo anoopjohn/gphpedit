@@ -114,7 +114,6 @@ gboolean auto_memberfunc_complete_callback(gpointer data);
 void info_dialog (gchar *title, gchar *message);
 void debug_dump_editors(void);
 void register_file_opened(gchar *filename);
-gchar * editor_convert_to_local(Editor *editor);
 gboolean editor_is_local(Editor *editor);
 gboolean uri_is_local_or_http(gchar *uri);
 void str_replace(char *Str, char ToRp, char WithC);

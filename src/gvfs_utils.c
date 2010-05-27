@@ -33,6 +33,18 @@ gchar *filename_parent_uri(gchar *filename){
     return parent_path;
 }
 /*
+* filename_get_basename
+* return a gchar with the basename of the Gfile
+*/
+gchar *filename_get_basename (gchar *filename){
+    GFile *file= get_gfile_from_filename(filename);
+    gchar *basename= g_file_get_basename (file);
+    g_object_unref(file);
+    return basename;
+}
+
+
+/*
 * filename_get_uri
 * return a gchar with the uri of the Gfile
 */
@@ -41,6 +53,16 @@ gchar *filename_get_uri(gchar *filename){
     gchar *file_uri= g_file_get_uri (file);
     g_object_unref(file);
     return file_uri;
+}
+/*
+* filename_get_path
+* return a gchar with the local pathname for filename, if one exists
+*/
+gchar *filename_get_path(gchar *filename){
+    GFile *file= get_gfile_from_filename(filename);
+    gchar *file_path= g_file_get_path (file);
+    g_object_unref(file);
+    return file_path;
 }
 /*
 * read_text_file_sync

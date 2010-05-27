@@ -26,7 +26,7 @@
 #include "preferences.h"
 #include "main_window.h"
 #include <glib/gstdio.h>
-
+#include "gvfs_utils.h"
 #include <unistd.h>
 
 
@@ -269,16 +269,11 @@ void syntax_check_run(void)
   gboolean using_temp;
   GString *filename;
   
-  /* Tim: this doesn't work if php_binary_location is not an absolute path 
-
-  struct stat *buf = NULL;
-  if (stat(preferences.php_binary_location, buf)==-1) {
-    g_print("PHP command line binary not found.\n");
-  }
-  else */
   if (main_window.current_editor) {
     if (main_window.current_editor->saved==TRUE) {
-      filename = g_string_new(editor_convert_to_local(main_window.current_editor));
+      gchar *local_path=filename_get_path(main_window.current_editor->filename->str);
+      filename = g_string_new(local_path);
+      g_free(local_path);
       using_temp = FALSE;
     }
     else {
