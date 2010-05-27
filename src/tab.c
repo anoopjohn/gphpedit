@@ -980,7 +980,7 @@ void tab_check_sql_file(Editor *editor)
 
 void register_file_opened(gchar *filename)
 {
-  gchar *full_filename=convert_to_full(filename);
+  gchar *full_filename=filename_get_uri(filename);
   main_window_add_to_reopen_menu(full_filename);
   g_free(full_filename);
   gchar *folder = filename_parent_uri(filename);
@@ -1971,33 +1971,4 @@ gchar * editor_convert_to_local(Editor *editor)
   }
   
   return filename;
-}
-
-/*
-* return a newly allocated string that may be freed with g_free()
-*/
-
-gchar *convert_to_full(gchar *filename)
-{
-  gchar *new_filename;
-  gchar *cwd;
-  gchar abs_buffer[2048];
-  GString *gstr_filename;
-
-  if (strstr(filename, "://") != NULL) {
-    return g_strdup(filename);  
-  }
-
-  cwd = g_get_current_dir();
-  // g_rel2abs returns a pointer in to abs_buffer!
-  new_filename = g_strdup(g_rel2abs (filename, cwd, abs_buffer, 2048));
-  g_free(cwd);
-  
-  gstr_filename = g_string_new("file://");
-  gstr_filename = g_string_append(gstr_filename, new_filename);
-  g_free(new_filename);
-    
-  new_filename = gstr_filename->str;
-  g_string_free(gstr_filename, FALSE);
-  return new_filename;
 }

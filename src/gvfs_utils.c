@@ -33,6 +33,16 @@ gchar *filename_parent_uri(gchar *filename){
     return parent_path;
 }
 /*
+* filename_get_uri
+* return a gchar with the uri of the Gfile
+*/
+gchar *filename_get_uri(gchar *filename){
+    GFile *file= get_gfile_from_filename(filename);
+    gchar *file_uri= g_file_get_uri (file);
+    g_object_unref(file);
+    return file_uri;
+}
+/*
 * read_text_file_sync
 * return a gchar with file contents or NULL in case of error. Must free with g_free when no longer needed
 */
