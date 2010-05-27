@@ -291,10 +291,6 @@ gtk_scintilla_init (GtkScintilla *sci)
     
     gtk_container_add (GTK_CONTAINER (sci), sci->scintilla);
     
-    g_object_set(G_OBJECT (sci->scintilla),
-                    "visible", TRUE, NULL);
-    
-    gtk_widget_show (GTK_WIDGET (sci->scintilla));
     gtk_widget_show_all (GTK_WIDGET(sci));
 }
 /*
@@ -306,9 +302,7 @@ static void gtk_scintilla_dispose (GObject *gobject)
   g_return_if_fail (gobject != NULL);
   g_return_if_fail (GTK_IS_SCINTILLA (gobject));
 
-  GtkScintilla *self = GTK_SCINTILLA (gobject);
-
-//  g_object_unref(self->sci);
+  //GtkScintilla *self = GTK_SCINTILLA (gobject);
 
   /* Chain up to the parent class */
   G_OBJECT_CLASS (parent_class)->dispose (gobject);
@@ -332,11 +326,7 @@ static void gtk_scintilla_finalize (GObject *gobject)
 */
 GtkWidget *gtk_scintilla_new (void)
 {
-    GObject *scintilla;
-
-    scintilla = g_object_new (gtk_scintilla_get_type (), NULL);
-
-    return GTK_WIDGET (scintilla);
+    return gtk_widget_new (gtk_scintilla_get_type (), NULL);
 }
 
 glong
