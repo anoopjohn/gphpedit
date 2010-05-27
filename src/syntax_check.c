@@ -242,7 +242,7 @@ int xtoi(const char* xs, unsigned int* result)
 /**
  * Replace any %xx escapes by their single-character equivalent.
  */
-static void unquote(char *s) {
+void unquote(char *s) {
 	char *o = s;
 	while (*s) {
 		if ((*s == '%') && s[1] && s[2]) {

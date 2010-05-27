@@ -29,7 +29,6 @@
 
 
 void syntax_check_run(void);
-
-
+void unquote(char *s);
 
 #endif
