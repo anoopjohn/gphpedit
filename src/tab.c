@@ -982,7 +982,6 @@ void register_file_opened(gchar *filename)
 {
   GString *tmp_filename;
   GString *folder;
-  
   main_window_add_to_reopen_menu(filename);
 
   tmp_filename = g_string_new(filename);
@@ -1153,8 +1152,7 @@ gboolean tab_create_new(gint type, GString *filename)
       assertion `GTK_WIDGET_ANCHORED (widget) || GTK_IS_INVISIBLE (widget)' failed */
     gtk_notebook_set_current_page (GTK_NOTEBOOK (main_window.notebook_editor), -1);
     gtk_scintilla_goto_pos(GTK_SCINTILLA(editor->scintilla), 0);
-//    gtk_scintilla_grab_focus(GTK_SCINTILLA(editor->scintilla));
-    gtk_scintilla_set_focus(GTK_SCINTILLA(editor->scintilla), TRUE);
+    gtk_scintilla_grab_focus(GTK_SCINTILLA(editor->scintilla));
     main_window.current_editor = editor;
 
     if (gotoline_after_create_tab) {
@@ -1980,7 +1978,7 @@ gchar * editor_convert_to_local(Editor *editor)
 /*
 * return a newly allocated string that may be freed with g_free()
 */
-/*
+
 gchar *convert_to_full(gchar *filename)
 {
   gchar *new_filename;
@@ -2005,4 +2003,3 @@ gchar *convert_to_full(gchar *filename)
   g_string_free(gstr_filename, FALSE);
   return new_filename;
 }
-*/

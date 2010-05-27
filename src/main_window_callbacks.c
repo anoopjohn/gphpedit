@@ -449,20 +449,11 @@ void open_file_ok(GtkFileChooser *file_selection)
 }
 
 void reopen_recent(GtkWidget *widget, gpointer data) {
-  gchar *filename;
-  GString *key;
-  GConfClient *config;
-  config=gconf_client_get_default ();
-
-  key = g_string_new("/gPHPEdit/recent/");
-  g_string_append_printf(key, "%d", (gint)data); // Back to being gint from gulong due to compiler warning
-  filename = gconf_client_get_string(config,key->str,NULL);
-  g_string_free(key, TRUE);
-
+  const gchar *filename;
+  filename=gtk_menu_item_get_label ((GtkMenuItem *)widget);
   if (DEBUG_MODE) { g_print("DEBUG: main_window_callbacks.c:reopen_recent:filename: %s\n", filename); }
   
-  switch_to_file_or_open(filename, 0);
-  g_free(filename);
+  switch_to_file_or_open((gchar *)filename, 0);
 }
 
 void run_plugin(GtkWidget *widget, gpointer data) {

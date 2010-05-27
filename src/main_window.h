@@ -99,6 +99,7 @@ typedef struct
   GtkWidget *searchentry;
   GtkWidget *button_refresh;
   GtkWidget *image_refresh;
+
 }
 MainWindow;
 
