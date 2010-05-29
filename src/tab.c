@@ -420,7 +420,7 @@ void tab_file_opened (GObject *source_object, GAsyncResult *res, gpointer user_d
   }
  const char*contenttype= g_file_info_get_content_type (info);
   /*we could open text based types so if it not a text based content don't open and displays error*/
-  if (!IS_TEXT(contenttype) || IS_APPLICATION(contenttype)){
+  if (!IS_TEXT(contenttype) && IS_APPLICATION(contenttype)){
     info_dialog (_("gPHPEdit"), _("Sorry, I can open this kind of file.\n"));
     editor->filename = g_string_new(_("Untitled"));
     editor->short_filename = g_strdup(editor->filename->str);
@@ -1161,8 +1161,7 @@ gboolean tab_create_new(gint type, GString *filename)
       assertion `GTK_WIDGET_ANCHORED (widget) || GTK_IS_INVISIBLE (widget)' failed */
     gtk_notebook_set_current_page (GTK_NOTEBOOK (main_window.notebook_editor), -1);
     gtk_scintilla_goto_pos(GTK_SCINTILLA(editor->scintilla), 0);
-//    gtk_scintilla_grab_focus(GTK_SCINTILLA(editor->scintilla));
-    gtk_scintilla_set_focus(GTK_SCINTILLA(editor->scintilla), TRUE);
+    gtk_scintilla_grab_focus(GTK_SCINTILLA(editor->scintilla));
     main_window.current_editor = editor;
 
     if (gotoline_after_create_tab) {
