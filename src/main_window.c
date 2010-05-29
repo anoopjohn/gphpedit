@@ -484,6 +484,7 @@ void main_window_update_reopen_menu(void)
     if (gtk_recent_info_has_application (recent_info,"gPHPEdit")){ /* only show our files */
       const gchar *full_filename= gtk_recent_info_get_uri (recent_info);
       if (full_filename){
+        unquote((gchar *)full_filename);
         gtk_menu_item_set_label ((GtkMenuItem *)main_window.menu->recent[entry],full_filename);
         gtk_widget_show(main_window.menu->recent[entry]);
       }
