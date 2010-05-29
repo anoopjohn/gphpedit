@@ -23,9 +23,8 @@
 
 #include <gtk/gtk.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+G_BEGIN_DECLS /* adds extern "C" around the header */
+
 
 #define GTK_TYPE_SCINTILLA            (gtk_scintilla_get_type ())
 #define GTK_SCINTILLA(obj)            (G_TYPE_CHECK_INSTANCE_CAST ((obj), GTK_TYPE_SCINTILLA, GtkScintilla))
@@ -99,13 +98,13 @@ glong gtk_scintilla_get_current_pos(GtkScintilla *sci);
 glong gtk_scintilla_get_anchor(GtkScintilla *sci);
 int gtk_scintilla_get_style_at(GtkScintilla *sci, glong pos);
 void gtk_scintilla_redo(GtkScintilla *sci);
-void gtk_scintilla_set_undo_collection(GtkScintilla *sci, gint collect_undo);
+void gtk_scintilla_set_undo_collection(GtkScintilla *sci, gboolean collect_undo);
 void gtk_scintilla_select_all(GtkScintilla *sci);
 void gtk_scintilla_set_save_point(GtkScintilla *sci);
-gint gtk_scintilla_can_redo(GtkScintilla *sci);
+gboolean gtk_scintilla_can_redo(GtkScintilla *sci);
 int gtk_scintilla_marker_line_from_handle(GtkScintilla *sci, int handle);
 void gtk_scintilla_marker_delete_handle(GtkScintilla *sci, int handle);
-gint gtk_scintilla_get_undo_collection(GtkScintilla *sci);
+gboolean gtk_scintilla_get_undo_collection(GtkScintilla *sci);
 #define SCWS_INVISIBLE 0
 #define SCWS_VISIBLEALWAYS 1
 #define SCWS_VISIBLEAFTERINDENT 2
@@ -126,14 +125,14 @@ int gtk_scintilla_get_eol_mode(GtkScintilla *sci);
 void gtk_scintilla_set_eol_mode(GtkScintilla *sci, int eol_mode);
 void gtk_scintilla_start_styling(GtkScintilla *sci, glong pos, int mask);
 void gtk_scintilla_set_styling(GtkScintilla *sci, int length, int style);
-gint gtk_scintilla_get_buffered_draw(GtkScintilla *sci);
-void gtk_scintilla_set_buffered_draw(GtkScintilla *sci, gint buffered);
+gboolean gtk_scintilla_get_buffered_draw(GtkScintilla *sci);
+void gtk_scintilla_set_buffered_draw(GtkScintilla *sci, gboolean buffered);
 void gtk_scintilla_set_tab_width(GtkScintilla *sci, int tab_width);
 int gtk_scintilla_get_tab_width(GtkScintilla *sci);
 #define SC_CP_UTF8 65001
 #define SC_CP_DBCS 1
 void gtk_scintilla_set_code_page(GtkScintilla *sci, int code_page);
-void gtk_scintilla_set_use_palette(GtkScintilla *sci, gint use_palette);
+void gtk_scintilla_set_use_palette(GtkScintilla *sci, gboolean use_palette);
 #define MARKER_MAX 31
 #define SC_MARK_CIRCLE 0
 #define SC_MARK_ROUNDRECT 1
@@ -198,8 +197,8 @@ void gtk_scintilla_set_margin_width_n(GtkScintilla *sci, int margin, int pixel_w
 int gtk_scintilla_get_margin_width_n(GtkScintilla *sci, int margin);
 void gtk_scintilla_set_margin_mask_n(GtkScintilla *sci, int margin, int mask);
 int gtk_scintilla_get_margin_mask_n(GtkScintilla *sci, int margin);
-void gtk_scintilla_set_margin_sensitive_n(GtkScintilla *sci, int margin, gint sensitive);
-gint gtk_scintilla_get_margin_sensitive_n(GtkScintilla *sci, int margin);
+void gtk_scintilla_set_margin_sensitive_n(GtkScintilla *sci, int margin, gboolean sensitive);
+gboolean gtk_scintilla_get_margin_sensitive_n(GtkScintilla *sci, int margin);
 #define STYLE_DEFAULT 32
 #define STYLE_LINENUMBER 33
 #define STYLE_BRACELIGHT 34
@@ -233,42 +232,42 @@ gint gtk_scintilla_get_margin_sensitive_n(GtkScintilla *sci, int margin);
 void gtk_scintilla_style_clear_all(GtkScintilla *sci);
 void gtk_scintilla_style_set_fore(GtkScintilla *sci, int style, glong fore);
 void gtk_scintilla_style_set_back(GtkScintilla *sci, int style, glong back);
-void gtk_scintilla_style_set_bold(GtkScintilla *sci, int style, gint bold);
-void gtk_scintilla_style_set_italic(GtkScintilla *sci, int style, gint italic);
+void gtk_scintilla_style_set_bold(GtkScintilla *sci, int style, gboolean bold);
+void gtk_scintilla_style_set_italic(GtkScintilla *sci, int style, gboolean italic);
 void gtk_scintilla_style_set_size(GtkScintilla *sci, int style, int size_points);
 void gtk_scintilla_style_set_font(GtkScintilla *sci, int style, const gchar * font_name);
-void gtk_scintilla_style_set_eol_filled(GtkScintilla *sci, int style, gint filled);
+void gtk_scintilla_style_set_eol_filled(GtkScintilla *sci, int style, gboolean filled);
 void gtk_scintilla_style_reset_default(GtkScintilla *sci);
-void gtk_scintilla_style_set_underline(GtkScintilla *sci, int style, gint underline);
+void gtk_scintilla_style_set_underline(GtkScintilla *sci, int style, gboolean underline);
 #define SC_CASE_MIXED 0
 #define SC_CASE_UPPER 1
 #define SC_CASE_LOWER 2
 glong gtk_scintilla_style_get_fore(GtkScintilla *sci, int style);
 glong gtk_scintilla_style_get_back(GtkScintilla *sci, int style);
-gint gtk_scintilla_style_get_bold(GtkScintilla *sci, int style);
-gint gtk_scintilla_style_get_italic(GtkScintilla *sci, int style);
+gboolean gtk_scintilla_style_get_bold(GtkScintilla *sci, int style);
+gboolean gtk_scintilla_style_get_italic(GtkScintilla *sci, int style);
 int gtk_scintilla_style_get_size(GtkScintilla *sci, int style);
 int gtk_scintilla_style_get_font(GtkScintilla *sci, int style, gchar * font_name);
-gint gtk_scintilla_style_get_eol_filled(GtkScintilla *sci, int style);
-gint gtk_scintilla_style_get_underline(GtkScintilla *sci, int style);
+gboolean gtk_scintilla_style_get_eol_filled(GtkScintilla *sci, int style);
+gboolean gtk_scintilla_style_get_underline(GtkScintilla *sci, int style);
 int gtk_scintilla_style_get_case(GtkScintilla *sci, int style);
 int gtk_scintilla_style_get_character_set(GtkScintilla *sci, int style);
-gint gtk_scintilla_style_get_visible(GtkScintilla *sci, int style);
-gint gtk_scintilla_style_get_changeable(GtkScintilla *sci, int style);
-gint gtk_scintilla_style_get_hot_spot(GtkScintilla *sci, int style);
+gboolean gtk_scintilla_style_get_visible(GtkScintilla *sci, int style);
+gboolean gtk_scintilla_style_get_changeable(GtkScintilla *sci, int style);
+gboolean gtk_scintilla_style_get_hot_spot(GtkScintilla *sci, int style);
 void gtk_scintilla_style_set_case(GtkScintilla *sci, int style, int case_force);
 void gtk_scintilla_style_set_character_set(GtkScintilla *sci, int style, int character_set);
-void gtk_scintilla_style_set_hot_spot(GtkScintilla *sci, int style, gint hotspot);
-void gtk_scintilla_set_sel_fore(GtkScintilla *sci, gint use_setting, glong fore);
-void gtk_scintilla_set_sel_back(GtkScintilla *sci, gint use_setting, glong back);
+void gtk_scintilla_style_set_hot_spot(GtkScintilla *sci, int style, gboolean hotspot);
+void gtk_scintilla_set_sel_fore(GtkScintilla *sci, gboolean use_setting, glong fore);
+void gtk_scintilla_set_sel_back(GtkScintilla *sci, gboolean use_setting, glong back);
 int gtk_scintilla_get_sel_alpha(GtkScintilla *sci);
 void gtk_scintilla_set_sel_alpha(GtkScintilla *sci, int alpha);
-gint gtk_scintilla_get_sel_eol_filled(GtkScintilla *sci);
-void gtk_scintilla_set_sel_eol_filled(GtkScintilla *sci, gint filled);
+gboolean gtk_scintilla_get_sel_eol_filled(GtkScintilla *sci);
+void gtk_scintilla_set_sel_eol_filled(GtkScintilla *sci, gboolean filled);
 void gtk_scintilla_set_caret_fore(GtkScintilla *sci, glong fore);
 void gtk_scintilla_clear_all_cmd_keys(GtkScintilla *sci);
 void gtk_scintilla_set_styling_ex(GtkScintilla *sci, int length, const gchar * styles);
-void gtk_scintilla_style_set_visible(GtkScintilla *sci, int style, gint visible);
+void gtk_scintilla_style_set_visible(GtkScintilla *sci, int style, gboolean visible);
 int gtk_scintilla_get_caret_period(GtkScintilla *sci);
 void gtk_scintilla_set_caret_period(GtkScintilla *sci, int period_milliseconds);
 void gtk_scintilla_set_word_chars(GtkScintilla *sci, const gchar * characters);
@@ -292,10 +291,10 @@ void gtk_scintilla_indic_set_style(GtkScintilla *sci, int indic, int style);
 int gtk_scintilla_indic_get_style(GtkScintilla *sci, int indic);
 void gtk_scintilla_indic_set_fore(GtkScintilla *sci, int indic, glong fore);
 glong gtk_scintilla_indic_get_fore(GtkScintilla *sci, int indic);
-void gtk_scintilla_indic_set_under(GtkScintilla *sci, int indic, gint under);
-gint gtk_scintilla_indic_get_under(GtkScintilla *sci, int indic);
-void gtk_scintilla_set_whitespace_fore(GtkScintilla *sci, gint use_setting, glong fore);
-void gtk_scintilla_set_whitespace_back(GtkScintilla *sci, gint use_setting, glong back);
+void gtk_scintilla_indic_set_under(GtkScintilla *sci, int indic, gboolean under);
+gboolean gtk_scintilla_indic_get_under(GtkScintilla *sci, int indic);
+void gtk_scintilla_set_whitespace_fore(GtkScintilla *sci, gboolean use_setting, glong fore);
+void gtk_scintilla_set_whitespace_back(GtkScintilla *sci, gboolean use_setting, glong back);
 void gtk_scintilla_set_whitespace_size(GtkScintilla *sci, int size);
 int gtk_scintilla_get_whitespace_size(GtkScintilla *sci);
 void gtk_scintilla_set_style_bits(GtkScintilla *sci, int bits);
@@ -303,32 +302,32 @@ int gtk_scintilla_get_style_bits(GtkScintilla *sci);
 void gtk_scintilla_set_line_state(GtkScintilla *sci, int line, int state);
 int gtk_scintilla_get_line_state(GtkScintilla *sci, int line);
 int gtk_scintilla_get_max_line_state(GtkScintilla *sci);
-gint gtk_scintilla_get_caret_line_visible(GtkScintilla *sci);
-void gtk_scintilla_set_caret_line_visible(GtkScintilla *sci, gint show);
+gboolean gtk_scintilla_get_caret_line_visible(GtkScintilla *sci);
+void gtk_scintilla_set_caret_line_visible(GtkScintilla *sci, gboolean show);
 glong gtk_scintilla_get_caret_line_back(GtkScintilla *sci);
 void gtk_scintilla_set_caret_line_back(GtkScintilla *sci, glong back);
-void gtk_scintilla_style_set_changeable(GtkScintilla *sci, int style, gint changeable);
+void gtk_scintilla_style_set_changeable(GtkScintilla *sci, int style, gboolean changeable);
 void gtk_scintilla_autoc_show(GtkScintilla *sci, int len_entered, const gchar * item_list);
 void gtk_scintilla_autoc_cancel(GtkScintilla *sci);
-gint gtk_scintilla_autoc_active(GtkScintilla *sci);
+gboolean gtk_scintilla_autoc_active(GtkScintilla *sci);
 glong gtk_scintilla_autoc_pos_start(GtkScintilla *sci);
 void gtk_scintilla_autoc_complete(GtkScintilla *sci);
 void gtk_scintilla_autoc_stops(GtkScintilla *sci, const gchar * character_set);
 void gtk_scintilla_autoc_set_separator(GtkScintilla *sci, int separator_character);
 int gtk_scintilla_autoc_get_separator(GtkScintilla *sci);
 void gtk_scintilla_autoc_select(GtkScintilla *sci, const gchar * text);
-void gtk_scintilla_autoc_set_cancel_at_start(GtkScintilla *sci, gint cancel);
-gint gtk_scintilla_autoc_get_cancel_at_start(GtkScintilla *sci);
+void gtk_scintilla_autoc_set_cancel_at_start(GtkScintilla *sci, gboolean cancel);
+gboolean gtk_scintilla_autoc_get_cancel_at_start(GtkScintilla *sci);
 void gtk_scintilla_autoc_set_fill_ups(GtkScintilla *sci, const gchar * character_set);
-void gtk_scintilla_autoc_set_choose_single(GtkScintilla *sci, gint choose_single);
-gint gtk_scintilla_autoc_get_choose_single(GtkScintilla *sci);
-void gtk_scintilla_autoc_set_ignore_case(GtkScintilla *sci, gint ignore_case);
-gint gtk_scintilla_autoc_get_ignore_case(GtkScintilla *sci);
+void gtk_scintilla_autoc_set_choose_single(GtkScintilla *sci, gboolean choose_single);
+gboolean gtk_scintilla_autoc_get_choose_single(GtkScintilla *sci);
+void gtk_scintilla_autoc_set_ignore_case(GtkScintilla *sci, gboolean ignore_case);
+gboolean gtk_scintilla_autoc_get_ignore_case(GtkScintilla *sci);
 void gtk_scintilla_user_list_show(GtkScintilla *sci, int list_type, const gchar * item_list);
-void gtk_scintilla_autoc_set_auto_hide(GtkScintilla *sci, gint auto_hide);
-gint gtk_scintilla_autoc_get_auto_hide(GtkScintilla *sci);
-void gtk_scintilla_autoc_set_drop_rest_of_word(GtkScintilla *sci, gint drop_rest_of_word);
-gint gtk_scintilla_autoc_get_drop_rest_of_word(GtkScintilla *sci);
+void gtk_scintilla_autoc_set_auto_hide(GtkScintilla *sci, gboolean auto_hide);
+gboolean gtk_scintilla_autoc_get_auto_hide(GtkScintilla *sci);
+void gtk_scintilla_autoc_set_drop_rest_of_word(GtkScintilla *sci, gboolean drop_rest_of_word);
+gboolean gtk_scintilla_autoc_get_drop_rest_of_word(GtkScintilla *sci);
 void gtk_scintilla_register_image(GtkScintilla *sci, int type, const gchar * xpm_data);
 void gtk_scintilla_clear_registered_images(GtkScintilla *sci);
 int gtk_scintilla_autoc_get_type_separator(GtkScintilla *sci);
@@ -339,14 +338,14 @@ void gtk_scintilla_autoc_set_max_height(GtkScintilla *sci, int row_count);
 int gtk_scintilla_autoc_get_max_height(GtkScintilla *sci);
 void gtk_scintilla_set_indent(GtkScintilla *sci, int indent_size);
 int gtk_scintilla_get_indent(GtkScintilla *sci);
-void gtk_scintilla_set_use_tabs(GtkScintilla *sci, gint use_tabs);
-gint gtk_scintilla_get_use_tabs(GtkScintilla *sci);
+void gtk_scintilla_set_use_tabs(GtkScintilla *sci, gboolean use_tabs);
+gboolean gtk_scintilla_get_use_tabs(GtkScintilla *sci);
 void gtk_scintilla_set_line_indentation(GtkScintilla *sci, int line, int indent_size);
 int gtk_scintilla_get_line_indentation(GtkScintilla *sci, int line);
 glong gtk_scintilla_get_line_indent_position(GtkScintilla *sci, int line);
 int gtk_scintilla_get_column(GtkScintilla *sci, glong pos);
-void gtk_scintilla_set_h_scroll_bar(GtkScintilla *sci, gint show);
-gint gtk_scintilla_get_h_scroll_bar(GtkScintilla *sci);
+void gtk_scintilla_set_h_scroll_bar(GtkScintilla *sci, gboolean show);
+gboolean gtk_scintilla_get_h_scroll_bar(GtkScintilla *sci);
 #define SC_IV_NONE 0
 #define SC_IV_REAL 1
 #define SC_IV_LOOKFORWARD 2
@@ -358,8 +357,8 @@ int gtk_scintilla_get_highlight_guide(GtkScintilla *sci);
 int gtk_scintilla_get_line_end_position(GtkScintilla *sci, int line);
 int gtk_scintilla_get_code_page(GtkScintilla *sci);
 glong gtk_scintilla_get_caret_fore(GtkScintilla *sci);
-gint gtk_scintilla_get_use_palette(GtkScintilla *sci);
-gint gtk_scintilla_get_read_only(GtkScintilla *sci);
+gboolean gtk_scintilla_get_use_palette(GtkScintilla *sci);
+gboolean gtk_scintilla_get_read_only(GtkScintilla *sci);
 void gtk_scintilla_set_current_pos(GtkScintilla *sci, glong pos);
 void gtk_scintilla_set_selection_start(GtkScintilla *sci, glong pos);
 glong gtk_scintilla_get_selection_start(GtkScintilla *sci);
@@ -386,10 +385,10 @@ void gtk_scintilla_set_margin_left(GtkScintilla *sci, int pixel_width);
 int gtk_scintilla_get_margin_left(GtkScintilla *sci);
 void gtk_scintilla_set_margin_right(GtkScintilla *sci, int pixel_width);
 int gtk_scintilla_get_margin_right(GtkScintilla *sci);
-gint gtk_scintilla_get_modify(GtkScintilla *sci);
+gboolean gtk_scintilla_get_modify(GtkScintilla *sci);
 void gtk_scintilla_set_sel(GtkScintilla *sci, glong start, glong end);
 int gtk_scintilla_get_sel_text(GtkScintilla *sci, gchar * text);
-void gtk_scintilla_hide_selection(GtkScintilla *sci, gint normal);
+void gtk_scintilla_hide_selection(GtkScintilla *sci, gboolean normal);
 int gtk_scintilla_point_x_from_position(GtkScintilla *sci, glong pos);
 int gtk_scintilla_point_y_from_position(GtkScintilla *sci, glong pos);
 int gtk_scintilla_line_from_position(GtkScintilla *sci, glong pos);
@@ -397,10 +396,10 @@ glong gtk_scintilla_position_from_line(GtkScintilla *sci, int line);
 void gtk_scintilla_line_scroll(GtkScintilla *sci, int columns, int lines);
 void gtk_scintilla_scroll_caret(GtkScintilla *sci);
 void gtk_scintilla_replace_sel(GtkScintilla *sci, const gchar * text);
-void gtk_scintilla_set_read_only(GtkScintilla *sci, gint read_only);
+void gtk_scintilla_set_read_only(GtkScintilla *sci, gboolean read_only);
 void gtk_scintilla_null(GtkScintilla *sci);
-gint gtk_scintilla_can_paste(GtkScintilla *sci);
-gint gtk_scintilla_can_undo(GtkScintilla *sci);
+gboolean gtk_scintilla_can_paste(GtkScintilla *sci);
+gboolean gtk_scintilla_can_undo(GtkScintilla *sci);
 void gtk_scintilla_empty_undo_buffer(GtkScintilla *sci);
 void gtk_scintilla_undo(GtkScintilla *sci);
 void gtk_scintilla_cut(GtkScintilla *sci);
@@ -412,8 +411,8 @@ int gtk_scintilla_get_text(GtkScintilla *sci, int length, gchar * text);
 int gtk_scintilla_get_text_length(GtkScintilla *sci);
 int gtk_scintilla_get_direct_function(GtkScintilla *sci);
 int gtk_scintilla_get_direct_pointer(GtkScintilla *sci);
-void gtk_scintilla_set_overtype(GtkScintilla *sci, gint overtype);
-gint gtk_scintilla_get_overtype(GtkScintilla *sci);
+void gtk_scintilla_set_overtype(GtkScintilla *sci, gboolean overtype);
+gboolean gtk_scintilla_get_overtype(GtkScintilla *sci);
 void gtk_scintilla_set_caret_width(GtkScintilla *sci, int pixel_width);
 int gtk_scintilla_get_caret_width(GtkScintilla *sci);
 void gtk_scintilla_set_target_start(GtkScintilla *sci, glong pos);
@@ -427,7 +426,7 @@ void gtk_scintilla_set_search_flags(GtkScintilla *sci, int flags);
 int gtk_scintilla_get_search_flags(GtkScintilla *sci);
 void gtk_scintilla_call_tip_show(GtkScintilla *sci, glong pos, const gchar * definition);
 void gtk_scintilla_call_tip_cancel(GtkScintilla *sci);
-gint gtk_scintilla_call_tip_active(GtkScintilla *sci);
+gboolean gtk_scintilla_call_tip_active(GtkScintilla *sci);
 glong gtk_scintilla_call_tip_pos_start(GtkScintilla *sci);
 void gtk_scintilla_call_tip_set_hlt(GtkScintilla *sci, int start, int end);
 void gtk_scintilla_call_tip_set_back(GtkScintilla *sci, glong back);
@@ -447,9 +446,9 @@ int gtk_scintilla_get_last_child(GtkScintilla *sci, int line, int level);
 int gtk_scintilla_get_fold_parent(GtkScintilla *sci, int line);
 void gtk_scintilla_show_lines(GtkScintilla *sci, int line_start, int line_end);
 void gtk_scintilla_hide_lines(GtkScintilla *sci, int line_start, int line_end);
-gint gtk_scintilla_get_line_visible(GtkScintilla *sci, int line);
-void gtk_scintilla_set_fold_expanded(GtkScintilla *sci, int line, gint expanded);
-gint gtk_scintilla_get_fold_expanded(GtkScintilla *sci, int line);
+gboolean gtk_scintilla_get_line_visible(GtkScintilla *sci, int line);
+void gtk_scintilla_set_fold_expanded(GtkScintilla *sci, int line, gboolean expanded);
+gboolean gtk_scintilla_get_fold_expanded(GtkScintilla *sci, int line);
 void gtk_scintilla_toggle_fold(GtkScintilla *sci, int line);
 void gtk_scintilla_ensure_visible(GtkScintilla *sci, int line);
 #define SC_FOLDFLAG_LINEBEFORE_EXPANDED 0x0002
@@ -459,15 +458,15 @@ void gtk_scintilla_ensure_visible(GtkScintilla *sci, int line);
 #define SC_FOLDFLAG_LEVELNUMBERS 0x0040
 void gtk_scintilla_set_fold_flags(GtkScintilla *sci, int flags);
 void gtk_scintilla_ensure_visible_enforce_policy(GtkScintilla *sci, int line);
-void gtk_scintilla_set_tab_indents(GtkScintilla *sci, gint tab_indents);
-gint gtk_scintilla_get_tab_indents(GtkScintilla *sci);
-void gtk_scintilla_set_backspace_unindents(GtkScintilla *sci, gint bs_unindents);
-gint gtk_scintilla_get_backspace_unindents(GtkScintilla *sci);
+void gtk_scintilla_set_tab_indents(GtkScintilla *sci, gboolean tab_indents);
+gboolean gtk_scintilla_get_tab_indents(GtkScintilla *sci);
+void gtk_scintilla_set_backspace_unindents(GtkScintilla *sci, gboolean bs_unindents);
+gboolean gtk_scintilla_get_backspace_unindents(GtkScintilla *sci);
 #define SC_TIME_FOREVER 10000000
 void gtk_scintilla_set_mouse_dwell_time(GtkScintilla *sci, int period_milliseconds);
 int gtk_scintilla_get_mouse_dwell_time(GtkScintilla *sci);
-int gtk_scintilla_word_start_position(GtkScintilla *sci, glong pos, gint only_word_characters);
-int gtk_scintilla_word_end_position(GtkScintilla *sci, glong pos, gint only_word_characters);
+int gtk_scintilla_word_start_position(GtkScintilla *sci, glong pos, gboolean only_word_characters);
+int gtk_scintilla_word_end_position(GtkScintilla *sci, glong pos, gboolean only_word_characters);
 #define SC_WRAP_NONE 0
 #define SC_WRAP_WORD 1
 #define SC_WRAP_CHAR 2
@@ -498,17 +497,17 @@ void gtk_scintilla_set_layout_cache(GtkScintilla *sci, int mode);
 int gtk_scintilla_get_layout_cache(GtkScintilla *sci);
 void gtk_scintilla_set_scroll_width(GtkScintilla *sci, int pixel_width);
 int gtk_scintilla_get_scroll_width(GtkScintilla *sci);
-void gtk_scintilla_set_scroll_width_tracking(GtkScintilla *sci, gint tracking);
-gint gtk_scintilla_get_scroll_width_tracking(GtkScintilla *sci);
+void gtk_scintilla_set_scroll_width_tracking(GtkScintilla *sci, gboolean tracking);
+gboolean gtk_scintilla_get_scroll_width_tracking(GtkScintilla *sci);
 int gtk_scintilla_text_width(GtkScintilla *sci, int style, const gchar * text);
-void gtk_scintilla_set_end_at_last_line(GtkScintilla *sci, gint end_at_last_line);
-gint gtk_scintilla_get_end_at_last_line(GtkScintilla *sci);
+void gtk_scintilla_set_end_at_last_line(GtkScintilla *sci, gboolean end_at_last_line);
+gboolean gtk_scintilla_get_end_at_last_line(GtkScintilla *sci);
 int gtk_scintilla_text_height(GtkScintilla *sci, int line);
-void gtk_scintilla_set_v_scroll_bar(GtkScintilla *sci, gint show);
-gint gtk_scintilla_get_v_scroll_bar(GtkScintilla *sci);
+void gtk_scintilla_set_v_scroll_bar(GtkScintilla *sci, gboolean show);
+gboolean gtk_scintilla_get_v_scroll_bar(GtkScintilla *sci);
 void gtk_scintilla_append_text(GtkScintilla *sci, int length, const gchar * text);
-gint gtk_scintilla_get_two_phase_draw(GtkScintilla *sci);
-void gtk_scintilla_set_two_phase_draw(GtkScintilla *sci, gint two_phase);
+gboolean gtk_scintilla_get_two_phase_draw(GtkScintilla *sci);
+void gtk_scintilla_set_two_phase_draw(GtkScintilla *sci, gboolean two_phase);
 #define SC_EFF_QUALITY_MASK 0xF
 #define SC_EFF_QUALITY_DEFAULT 0
 #define SC_EFF_QUALITY_NON_ANTIALIASED 1
@@ -525,8 +524,8 @@ int gtk_scintilla_get_tag(GtkScintilla *sci, int tag_number, gchar * tag_value);
 void gtk_scintilla_target_from_selection(GtkScintilla *sci);
 void gtk_scintilla_lines_join(GtkScintilla *sci);
 void gtk_scintilla_lines_split(GtkScintilla *sci, int pixel_width);
-void gtk_scintilla_set_fold_margin_colour(GtkScintilla *sci, gint use_setting, glong back);
-void gtk_scintilla_set_fold_margin_hi_colour(GtkScintilla *sci, gint use_setting, glong fore);
+void gtk_scintilla_set_fold_margin_colour(GtkScintilla *sci, gboolean use_setting, glong back);
+void gtk_scintilla_set_fold_margin_hi_colour(GtkScintilla *sci, gboolean use_setting, glong fore);
 void gtk_scintilla_line_down(GtkScintilla *sci);
 void gtk_scintilla_line_down_extend(GtkScintilla *sci);
 void gtk_scintilla_line_up(GtkScintilla *sci);
@@ -590,8 +589,8 @@ int gtk_scintilla_line_length(GtkScintilla *sci, int line);
 void gtk_scintilla_brace_highlight(GtkScintilla *sci, glong pos1, glong pos2);
 void gtk_scintilla_brace_bad_light(GtkScintilla *sci, glong pos);
 glong gtk_scintilla_brace_match(GtkScintilla *sci, glong pos);
-gint gtk_scintilla_get_view_eol(GtkScintilla *sci);
-void gtk_scintilla_set_view_eol(GtkScintilla *sci, gint visible);
+gboolean gtk_scintilla_get_view_eol(GtkScintilla *sci);
+void gtk_scintilla_set_view_eol(GtkScintilla *sci, gboolean visible);
 int gtk_scintilla_get_doc_pointer(GtkScintilla *sci);
 void gtk_scintilla_set_doc_pointer(GtkScintilla *sci, int pointer);
 void gtk_scintilla_set_mod_event_mask(GtkScintilla *sci, int mask);
@@ -608,23 +607,23 @@ void gtk_scintilla_search_anchor(GtkScintilla *sci);
 int gtk_scintilla_search_next(GtkScintilla *sci, int flags, const gchar * text);
 int gtk_scintilla_search_prev(GtkScintilla *sci, int flags, const gchar * text);
 int gtk_scintilla_lines_on_screen(GtkScintilla *sci);
-void gtk_scintilla_use_pop_up(GtkScintilla *sci, gint allow_pop_up);
-gint gtk_scintilla_selection_is_rectangle(GtkScintilla *sci);
+void gtk_scintilla_use_pop_up(GtkScintilla *sci, gboolean allow_pop_up);
+gboolean gtk_scintilla_selection_is_rectangle(GtkScintilla *sci);
 void gtk_scintilla_set_zoom(GtkScintilla *sci, int zoom);
 int gtk_scintilla_get_zoom(GtkScintilla *sci);
 int gtk_scintilla_create_document(GtkScintilla *sci);
 void gtk_scintilla_add_ref_document(GtkScintilla *sci, int doc);
 void gtk_scintilla_release_document(GtkScintilla *sci, int doc);
 int gtk_scintilla_get_mod_event_mask(GtkScintilla *sci);
-void gtk_scintilla_set_focus(GtkScintilla *sci, gint focus);
-gint gtk_scintilla_get_focus(GtkScintilla *sci);
+void gtk_scintilla_set_focus(GtkScintilla *sci, gboolean focus);
+gboolean gtk_scintilla_get_focus(GtkScintilla *sci);
 #define SC_STATUS_OK 0
 #define SC_STATUS_FAILURE 1
 #define SC_STATUS_BADALLOC 2
 void gtk_scintilla_set_status(GtkScintilla *sci, int status_code);
 int gtk_scintilla_get_status(GtkScintilla *sci);
-void gtk_scintilla_set_mouse_down_captures(GtkScintilla *sci, gint captures);
-gint gtk_scintilla_get_mouse_down_captures(GtkScintilla *sci);
+void gtk_scintilla_set_mouse_down_captures(GtkScintilla *sci, gboolean captures);
+gboolean gtk_scintilla_get_mouse_down_captures(GtkScintilla *sci);
 #define SC_CURSORNORMAL -1
 #define SC_CURSORWAIT 4
 void gtk_scintilla_set_cursor(GtkScintilla *sci, int cursor_type);
@@ -652,14 +651,14 @@ void gtk_scintilla_set_x_caret_policy(GtkScintilla *sci, int caret_policy, int c
 void gtk_scintilla_set_y_caret_policy(GtkScintilla *sci, int caret_policy, int caret_slop);
 void gtk_scintilla_set_print_wrap_mode(GtkScintilla *sci, int mode);
 int gtk_scintilla_get_print_wrap_mode(GtkScintilla *sci);
-void gtk_scintilla_set_hotspot_active_fore(GtkScintilla *sci, gint use_setting, glong fore);
+void gtk_scintilla_set_hotspot_active_fore(GtkScintilla *sci, gboolean use_setting, glong fore);
 glong gtk_scintilla_get_hotspot_active_fore(GtkScintilla *sci);
-void gtk_scintilla_set_hotspot_active_back(GtkScintilla *sci, gint use_setting, glong back);
+void gtk_scintilla_set_hotspot_active_back(GtkScintilla *sci, gboolean use_setting, glong back);
 glong gtk_scintilla_get_hotspot_active_back(GtkScintilla *sci);
-void gtk_scintilla_set_hotspot_active_underline(GtkScintilla *sci, gint underline);
-gint gtk_scintilla_get_hotspot_active_underline(GtkScintilla *sci);
-void gtk_scintilla_set_hotspot_single_line(GtkScintilla *sci, gint single_line);
-gint gtk_scintilla_get_hotspot_single_line(GtkScintilla *sci);
+void gtk_scintilla_set_hotspot_active_underline(GtkScintilla *sci, gboolean underline);
+gboolean gtk_scintilla_get_hotspot_active_underline(GtkScintilla *sci);
+void gtk_scintilla_set_hotspot_single_line(GtkScintilla *sci, gboolean single_line);
+gboolean gtk_scintilla_get_hotspot_single_line(GtkScintilla *sci);
 void gtk_scintilla_para_down(GtkScintilla *sci);
 void gtk_scintilla_para_down_extend(GtkScintilla *sci);
 void gtk_scintilla_para_up(GtkScintilla *sci);
@@ -702,11 +701,11 @@ int gtk_scintilla_target_as_u_t_f8(GtkScintilla *sci, gchar * s);
 void gtk_scintilla_set_length_for_encode(GtkScintilla *sci, int bytes);
 int gtk_scintilla_encoded_from_u_t_f8(GtkScintilla *sci, const gchar * utf8, gchar * encoded);
 int gtk_scintilla_find_column(GtkScintilla *sci, int line, int column);
-gint gtk_scintilla_get_caret_sticky(GtkScintilla *sci);
-void gtk_scintilla_set_caret_sticky(GtkScintilla *sci, gint use_caret_sticky_behaviour);
+gboolean gtk_scintilla_get_caret_sticky(GtkScintilla *sci);
+void gtk_scintilla_set_caret_sticky(GtkScintilla *sci, gboolean use_caret_sticky_behaviour);
 void gtk_scintilla_toggle_caret_sticky(GtkScintilla *sci);
-void gtk_scintilla_set_paste_convert_endings(GtkScintilla *sci, gint convert);
-gint gtk_scintilla_get_paste_convert_endings(GtkScintilla *sci);
+void gtk_scintilla_set_paste_convert_endings(GtkScintilla *sci, gboolean convert);
+gboolean gtk_scintilla_get_paste_convert_endings(GtkScintilla *sci);
 void gtk_scintilla_selection_duplicate(GtkScintilla *sci);
 #define SC_ALPHA_TRANSPARENT 0
 #define SC_ALPHA_OPAQUE 255
@@ -732,8 +731,8 @@ void gtk_scintilla_set_position_cache(GtkScintilla *sci, int size);
 int gtk_scintilla_get_position_cache(GtkScintilla *sci);
 void gtk_scintilla_copy_allow_line(GtkScintilla *sci);
 int gtk_scintilla_get_character_pointer(GtkScintilla *sci);
-void gtk_scintilla_set_keys_unicode(GtkScintilla *sci, gint keys_unicode);
-gint gtk_scintilla_get_keys_unicode(GtkScintilla *sci);
+void gtk_scintilla_set_keys_unicode(GtkScintilla *sci, gboolean keys_unicode);
+gboolean gtk_scintilla_get_keys_unicode(GtkScintilla *sci);
 void gtk_scintilla_indic_set_alpha(GtkScintilla *sci, int indicator, int alpha);
 int gtk_scintilla_indic_get_alpha(GtkScintilla *sci, int indicator);
 void gtk_scintilla_set_extra_ascent(GtkScintilla *sci, int extra_ascent);
@@ -769,14 +768,14 @@ int gtk_scintilla_annotation_get_style_offset(GtkScintilla *sci);
 void gtk_scintilla_add_undo_action(GtkScintilla *sci, int token, int flags);
 glong gtk_scintilla_char_position_from_point(GtkScintilla *sci, int x, int y);
 glong gtk_scintilla_char_position_from_point_close(GtkScintilla *sci, int x, int y);
-void gtk_scintilla_set_multiple_selection(GtkScintilla *sci, gint multiple_selection);
-gint gtk_scintilla_get_multiple_selection(GtkScintilla *sci);
-void gtk_scintilla_set_additional_selection_typing(GtkScintilla *sci, gint additional_selection_typing);
-gint gtk_scintilla_get_additional_selection_typing(GtkScintilla *sci);
-void gtk_scintilla_set_additional_carets_blink(GtkScintilla *sci, gint additional_carets_blink);
-gint gtk_scintilla_get_additional_carets_blink(GtkScintilla *sci);
-void gtk_scintilla_set_additional_carets_visible(GtkScintilla *sci, gint additional_carets_blink);
-gint gtk_scintilla_get_additional_carets_visible(GtkScintilla *sci);
+void gtk_scintilla_set_multiple_selection(GtkScintilla *sci, gboolean multiple_selection);
+gboolean gtk_scintilla_get_multiple_selection(GtkScintilla *sci);
+void gtk_scintilla_set_additional_selection_typing(GtkScintilla *sci, gboolean additional_selection_typing);
+gboolean gtk_scintilla_get_additional_selection_typing(GtkScintilla *sci);
+void gtk_scintilla_set_additional_carets_blink(GtkScintilla *sci, gboolean additional_carets_blink);
+gboolean gtk_scintilla_get_additional_carets_blink(GtkScintilla *sci);
+void gtk_scintilla_set_additional_carets_visible(GtkScintilla *sci, gboolean additional_carets_blink);
+gboolean gtk_scintilla_get_additional_carets_visible(GtkScintilla *sci);
 int gtk_scintilla_get_selections(GtkScintilla *sci);
 void gtk_scintilla_clear_selections(GtkScintilla *sci);
 int gtk_scintilla_set_selection(GtkScintilla *sci, int caret, int anchor);
@@ -2245,8 +2244,6 @@ int gtk_scintilla_get_lexer_language(GtkScintilla *sci, gchar * text);
 
 /* --- End of autogenerated code --- */
 
-#ifdef __cplusplus
-}
-#endif
+G_END_DECLS 
 
 #endif /* __GTK_SCINTILLA_H__ */
