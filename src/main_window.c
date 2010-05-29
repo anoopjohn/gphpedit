@@ -32,6 +32,8 @@
 #include "classbrowser.h"
 #include "plugin.h"
 #include "templates.h"
+#include "syntax_check.h"
+
 MainWindow main_window;
 GIOChannel* inter_gphpedit_io;
 guint inter_gphpedit_event_id;
@@ -407,6 +409,7 @@ void update_app_title(void)
       char *str = NULL;
       title = g_string_new(str);
       dir = g_path_get_dirname(main_window.current_editor->filename->str);
+      if (dir) unquote(dir);
       g_string_printf (title,"%s (%s)",main_window.current_editor->short_filename,dir);
       g_free(dir);
       //debug("Title - %s, Short name - %s", title->str, main_window.current_editor->short_filename);
