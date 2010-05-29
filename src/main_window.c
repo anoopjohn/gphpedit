@@ -467,73 +467,43 @@ gint maximum(gint val1, gint val2)
 
 void main_window_update_reopen_menu(void)
 {
-  guint entry;
-  GConfClient *config;
-  config=gconf_client_get_default ();
-  for (entry=0; entry<NUM_REOPEN_MAX; entry++) {
-    gchar *full_filename=NULL;
-    gchar *key= g_strdup_printf("/gPHPEdit/recent/%d",entry);
-    full_filename = gconf_client_get_string(config,key,NULL);
-    g_free(key);
-    //g_print("Recent DEBUG: Entry %d: %s\n", entry, full_filename);
-    if (full_filename){
+  guint entry=0;
+  GtkRecentManager *manager;
+  manager = gtk_recent_manager_get_default ();
+  GList *recent_items= gtk_recent_manager_get_items (manager);
+
+  gtk_widget_show(main_window.menu->reciente);
+
+  GList *walk = NULL;//recent_items;
+  for (walk = recent_items;walk!=NULL;walk = g_list_next (walk)){
+    if (entry==NUM_REOPEN_MAX) break;
+    GtkRecentInfo *recent_info=(GtkRecentInfo *)walk->data;
+    if (gtk_recent_info_has_application (recent_info,"gPHPEdit")){ /* only show our files */
+      const gchar *full_filename= gtk_recent_info_get_uri (recent_info);
+      if (full_filename){
         gtk_menu_item_set_label ((GtkMenuItem *)main_window.menu->recent[entry],full_filename);
         gtk_widget_show(main_window.menu->recent[entry]);
-    } else {
-      gtk_widget_hide(main_window.menu->recent[entry]);
+      }
+      entry++;
     }
-    g_free(full_filename);
+    gtk_recent_info_unref(recent_info);
+  }
+  g_list_free(recent_items);
+  /* hide other items */
+  guint hideitem;
+  for (hideitem=entry;hideitem<NUM_REOPEN_MAX;hideitem++){
+      gtk_widget_hide(main_window.menu->recent[hideitem]);
+  }
+  if (!gtk_widget_get_visible (main_window.menu->recent[0])){
+    gtk_widget_hide(main_window.menu->reciente);
   }
 }
 
 void main_window_add_to_reopen_menu(gchar *full_filename)
 {
-  guint entry;
-  gchar *found;
-  GString *key;
-  guint found_id;
-  GConfClient *config;
-  config=gconf_client_get_default ();
-  // Find current filename in list
-  found_id = -1;
-  for (entry=0; entry<NUM_REOPEN_MAX; entry++) {
-    key = g_string_new("/gPHPEdit/recent/");
-    g_string_append_printf(key, "%d", entry);
-    found = gconf_client_get_string(config,key->str,NULL);
-    g_string_free(key, TRUE);
-    if (found){
-      if (strcmp(full_filename, found)==0) {
-        found_id = entry;
-        g_free(found);
-        break;
-      }
-    g_free(found);
-    }
-  }
-  
-  // if not found, drop the last one off the end (i.e. pretend it was found in the last position)
-  if (found_id == -1) {
-    found_id = NUM_REOPEN_MAX-1;
-  }
-
-  // replace from found_id to 1 with entry above
-  for (entry=found_id; entry > 0; entry--) {
-    key = g_string_new("/gPHPEdit/recent/");
-    g_string_append_printf(key, "%d", entry-1);
-    found = gconf_client_get_string(config,key->str,NULL);
-    g_string_free(key, TRUE);
-
-    key = g_string_new("/gPHPEdit/recent/");
-    g_string_append_printf(key, "%d", entry);
-    if (found){
-      gconf_client_set_string (config,key->str, found,NULL);
-      g_free(found);
-    }
-    g_string_free(key, TRUE);
-  }
-
-  // set entry 0 to be new entry
-  gconf_client_set_string (config,"/gPHPEdit/recent/0", full_filename,NULL);
+  GtkRecentManager *manager;
+  manager = gtk_recent_manager_get_default ();
+  gtk_recent_manager_add_item (manager, full_filename);
   main_window_update_reopen_menu();
 }
 static void main_window_create_prinbox(void){

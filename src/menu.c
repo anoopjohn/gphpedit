@@ -317,7 +317,7 @@ static void fill_menu_file(void){
   /* create empty widgets */
   for (i=0;i<NUM_REOPEN_MAX;i++){
   main_window.menu->recent[i]= gtk_menu_item_new_with_mnemonic(_("_Recent"));
-  g_signal_connect(G_OBJECT(main_window.menu->recent[i]), "activate", G_CALLBACK(reopen_recent), (gpointer)i);
+  g_signal_connect(G_OBJECT(main_window.menu->recent[i]), "activate", G_CALLBACK(reopen_recent), NULL);
   gtk_menu_shell_append(GTK_MENU_SHELL(main_window.menu->menureciente), main_window.menu->recent[i]);
   }
 
