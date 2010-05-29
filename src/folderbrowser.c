@@ -640,12 +640,8 @@ void popup_create_dir(void){
     GError *error=NULL;
     gchar *filename;
     if (!MIME_ISDIR(pop.mime)){
-      config=get_gfile_from_filename((gchar *)pop.filename);
-      GFile *pa=g_file_get_parent(config);
-      gchar *parent=g_file_get_path (pa);
-      g_object_unref(pa);
-      g_object_unref(config);
-      filename= g_build_path (G_DIR_SEPARATOR_S, parent, name, NULL);
+      gchar *parent=filename_parent_uri((gchar *)pop.filename);
+      filename= g_strdup_printf("%s/%s",parent,name);
       g_free(parent);
       config= get_gfile_from_filename(filename);
       g_free(filename);
