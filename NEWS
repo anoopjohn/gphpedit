@@ -1,4 +1,17 @@
 ============================
+gphpedit 0.9.98~RC2 (not released)
+============================
+
+New Features and Fixes
+======================
+-Use GtkRecentManager for recent files
+-Fix Missing cursor in search and goto boxes
+-Fix Hidden caret when editor is opened without files in session
+-Fix Crash when press toolbar close button
+-Fix External modification notification grows window beyond screen
+
+
+============================
 gphpedit 0.9.98~RC1
 ============================
 

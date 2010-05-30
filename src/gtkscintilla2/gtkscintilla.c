@@ -291,10 +291,6 @@ gtk_scintilla_init (GtkScintilla *sci)
     
     gtk_container_add (GTK_CONTAINER (sci), sci->scintilla);
     
-    g_object_set(G_OBJECT (sci->scintilla),
-                    "visible", TRUE, NULL);
-    
-    gtk_widget_show (GTK_WIDGET (sci->scintilla));
     gtk_widget_show_all (GTK_WIDGET(sci));
 }
 /*
@@ -307,8 +303,6 @@ static void gtk_scintilla_dispose (GObject *gobject)
   g_return_if_fail (GTK_IS_SCINTILLA (gobject));
 
   GtkScintilla *self = GTK_SCINTILLA (gobject);
-
-//  g_object_unref(self->sci);
 
   /* Chain up to the parent class */
   G_OBJECT_CLASS (parent_class)->dispose (gobject);
@@ -332,11 +326,7 @@ static void gtk_scintilla_finalize (GObject *gobject)
 */
 GtkWidget *gtk_scintilla_new (void)
 {
-    GObject *scintilla;
-
-    scintilla = g_object_new (gtk_scintilla_get_type (), NULL);
-
-    return GTK_WIDGET (scintilla);
+    return gtk_widget_new (gtk_scintilla_get_type (), NULL);
 }
 
 glong
@@ -454,7 +444,7 @@ void gtk_scintilla_redo(GtkScintilla *sci)
         2011, 0, 0);
 }
 
-void gtk_scintilla_set_undo_collection(GtkScintilla *sci, gint collect_undo)
+void gtk_scintilla_set_undo_collection(GtkScintilla *sci, gboolean collect_undo)
 {
     scintilla_send_message(SCINTILLA(sci->scintilla),
         2012, (gulong) collect_undo, 0);
@@ -472,7 +462,7 @@ void gtk_scintilla_set_save_point(GtkScintilla *sci)
         2014, 0, 0);
 }
 
-gint gtk_scintilla_can_redo(GtkScintilla *sci)
+gboolean gtk_scintilla_can_redo(GtkScintilla *sci)
 {
     return scintilla_send_message(SCINTILLA(sci->scintilla),
         2016, 0, 0);
@@ -490,7 +480,7 @@ void gtk_scintilla_marker_delete_handle(GtkScintilla *sci, int handle)
         2018, (gulong) handle, 0);
 }
 
-gint gtk_scintilla_get_undo_collection(GtkScintilla *sci)
+gboolean gtk_scintilla_get_undo_collection(GtkScintilla *sci)
 {
     return scintilla_send_message(SCINTILLA(sci->scintilla),
         2019, 0, 0);
@@ -580,13 +570,13 @@ void gtk_scintilla_set_styling(GtkScintilla *sci, int length, int style)
         2033, (gulong) length, (gulong) style);
 }
 
-gint gtk_scintilla_get_buffered_draw(GtkScintilla *sci)
+gboolean gtk_scintilla_get_buffered_draw(GtkScintilla *sci)
 {
     return scintilla_send_message(SCINTILLA(sci->scintilla),
         2034, 0, 0);
 }
 
-void gtk_scintilla_set_buffered_draw(GtkScintilla *sci, gint buffered)
+void gtk_scintilla_set_buffered_draw(GtkScintilla *sci, gboolean buffered)
 {
     scintilla_send_message(SCINTILLA(sci->scintilla),
         2035, (gulong) buffered, 0);
@@ -610,7 +600,7 @@ void gtk_scintilla_set_code_page(GtkScintilla *sci, int code_page)
         2037, (gulong) code_page, 0);
 }
 
-void gtk_scintilla_set_use_palette(GtkScintilla *sci, gint use_palette)
+void gtk_scintilla_set_use_palette(GtkScintilla *sci, gboolean use_palette)
 {
     scintilla_send_message(SCINTILLA(sci->scintilla),
         2039, (gulong) use_palette, 0);
@@ -724,13 +714,13 @@ int gtk_scintilla_get_margin_mask_n(GtkScintilla *sci, int margin)
         2245, (gulong) margin, 0);
 }
 
-void gtk_scintilla_set_margin_sensitive_n(GtkScintilla *sci, int margin, gint sensitive)
+void gtk_scintilla_set_margin_sensitive_n(GtkScintilla *sci, int margin, gboolean sensitive)
 {
     scintilla_send_message(SCINTILLA(sci->scintilla),
         2246, (gulong) margin, (gulong) sensitive);
 }
 
-gint gtk_scintilla_get_margin_sensitive_n(GtkScintilla *sci, int margin)
+gboolean gtk_scintilla_get_margin_sensitive_n(GtkScintilla *sci, int margin)
 {
     return scintilla_send_message(SCINTILLA(sci->scintilla),
         2247, (gulong) margin, 0);
@@ -754,13 +744,13 @@ void gtk_scintilla_style_set_back(GtkScintilla *sci, int style, glong back)
         2052, (gulong) style, (gulong) back);
 }
 
-void gtk_scintilla_style_set_bold(GtkScintilla *sci, int style, gint bold)
+void gtk_scintilla_style_set_bold(GtkScintilla *sci, int style, gboolean bold)
 {
     scintilla_send_message(SCINTILLA(sci->scintilla),
         2053, (gulong) style, (gulong) bold);
 }
 
-void gtk_scintilla_style_set_italic(GtkScintilla *sci, int style, gint italic)
+void gtk_scintilla_style_set_italic(GtkScintilla *sci, int style, gboolean italic)
 {
     scintilla_send_message(SCINTILLA(sci->scintilla),
         2054, (gulong) style, (gulong) italic);
@@ -778,7 +768,7 @@ void gtk_scintilla_style_set_font(GtkScintilla *sci, int style, const gchar * fo
         2056, (gulong) style, (gulong) font_name);
 }
 
-void gtk_scintilla_style_set_eol_filled(GtkScintilla *sci, int style, gint filled)
+void gtk_scintilla_style_set_eol_filled(GtkScintilla *sci, int style, gboolean filled)
 {
     scintilla_send_message(SCINTILLA(sci->scintilla),
         2057, (gulong) style, (gulong) filled);
@@ -790,7 +780,7 @@ void gtk_scintilla_style_reset_default(GtkScintilla *sci)
         2058, 0, 0);
 }
 
-void gtk_scintilla_style_set_underline(GtkScintilla *sci, int style, gint underline)
+void gtk_scintilla_style_set_underline(GtkScintilla *sci, int style, gboolean underline)
 {
     scintilla_send_message(SCINTILLA(sci->scintilla),
         2059, (gulong) style, (gulong) underline);
@@ -808,13 +798,13 @@ glong gtk_scintilla_style_get_back(GtkScintilla *sci, int style)
         2482, (gulong) style, 0);
 }
 
-gint gtk_scintilla_style_get_bold(GtkScintilla *sci, int style)
+gboolean gtk_scintilla_style_get_bold(GtkScintilla *sci, int style)
 {
     return scintilla_send_message(SCINTILLA(sci->scintilla),
         2483, (gulong) style, 0);
 }
 
-gint gtk_scintilla_style_get_italic(GtkScintilla *sci, int style)
+gboolean gtk_scintilla_style_get_italic(GtkScintilla *sci, int style)
 {
     return scintilla_send_message(SCINTILLA(sci->scintilla),
         2484, (gulong) style, 0);
@@ -832,13 +822,13 @@ int gtk_scintilla_style_get_font(GtkScintilla *sci, int style, gchar * font_name
         2486, (gulong) style, (gulong) font_name);
 }
 
-gint gtk_scintilla_style_get_eol_filled(GtkScintilla *sci, int style)
+gboolean gtk_scintilla_style_get_eol_filled(GtkScintilla *sci, int style)
 {
     return scintilla_send_message(SCINTILLA(sci->scintilla),
         2487, (gulong) style, 0);
 }
 
-gint gtk_scintilla_style_get_underline(GtkScintilla *sci, int style)
+gboolean gtk_scintilla_style_get_underline(GtkScintilla *sci, int style)
 {
     return scintilla_send_message(SCINTILLA(sci->scintilla),
         2488, (gulong) style, 0);
@@ -856,19 +846,19 @@ int gtk_scintilla_style_get_character_set(GtkScintilla *sci, int style)
         2490, (gulong) style, 0);
 }
 
-gint gtk_scintilla_style_get_visible(GtkScintilla *sci, int style)
+gboolean gtk_scintilla_style_get_visible(GtkScintilla *sci, int style)
 {
     return scintilla_send_message(SCINTILLA(sci->scintilla),
         2491, (gulong) style, 0);
 }
 
-gint gtk_scintilla_style_get_changeable(GtkScintilla *sci, int style)
+gboolean gtk_scintilla_style_get_changeable(GtkScintilla *sci, int style)
 {
     return scintilla_send_message(SCINTILLA(sci->scintilla),
         2492, (gulong) style, 0);
 }
 
-gint gtk_scintilla_style_get_hot_spot(GtkScintilla *sci, int style)
+gboolean gtk_scintilla_style_get_hot_spot(GtkScintilla *sci, int style)
 {
     return scintilla_send_message(SCINTILLA(sci->scintilla),
         2493, (gulong) style, 0);
@@ -886,19 +876,19 @@ void gtk_scintilla_style_set_character_set(GtkScintilla *sci, int style, int cha
         2066, (gulong) style, (gulong) character_set);
 }
 
-void gtk_scintilla_style_set_hot_spot(GtkScintilla *sci, int style, gint hotspot)
+void gtk_scintilla_style_set_hot_spot(GtkScintilla *sci, int style, gboolean hotspot)
 {
     scintilla_send_message(SCINTILLA(sci->scintilla),
         2409, (gulong) style, (gulong) hotspot);
 }
 
-void gtk_scintilla_set_sel_fore(GtkScintilla *sci, gint use_setting, glong fore)
+void gtk_scintilla_set_sel_fore(GtkScintilla *sci, gboolean use_setting, glong fore)
 {
     scintilla_send_message(SCINTILLA(sci->scintilla),
         2067, (gulong) use_setting, (gulong) fore);
 }
 
-void gtk_scintilla_set_sel_back(GtkScintilla *sci, gint use_setting, glong back)
+void gtk_scintilla_set_sel_back(GtkScintilla *sci, gboolean use_setting, glong back)
 {
     scintilla_send_message(SCINTILLA(sci->scintilla),
         2068, (gulong) use_setting, (gulong) back);
@@ -916,13 +906,13 @@ void gtk_scintilla_set_sel_alpha(GtkScintilla *sci, int alpha)
         2478, (gulong) alpha, 0);
 }
 
-gint gtk_scintilla_get_sel_eol_filled(GtkScintilla *sci)
+gboolean gtk_scintilla_get_sel_eol_filled(GtkScintilla *sci)
 {
     return scintilla_send_message(SCINTILLA(sci->scintilla),
         2479, 0, 0);
 }
 
-void gtk_scintilla_set_sel_eol_filled(GtkScintilla *sci, gint filled)
+void gtk_scintilla_set_sel_eol_filled(GtkScintilla *sci, gboolean filled)
 {
     scintilla_send_message(SCINTILLA(sci->scintilla),
         2480, (gulong) filled, 0);
@@ -946,7 +936,7 @@ void gtk_scintilla_set_styling_ex(GtkScintilla *sci, int length, const gchar * s
         2073, (gulong) length, (gulong) styles);
 }
 
-void gtk_scintilla_style_set_visible(GtkScintilla *sci, int style, gint visible)
+void gtk_scintilla_style_set_visible(GtkScintilla *sci, int style, gboolean visible)
 {
     scintilla_send_message(SCINTILLA(sci->scintilla),
         2074, (gulong) style, (gulong) visible);
@@ -1006,25 +996,25 @@ glong gtk_scintilla_indic_get_fore(GtkScintilla *sci, int indic)
         2083, (gulong) indic, 0);
 }
 
-void gtk_scintilla_indic_set_under(GtkScintilla *sci, int indic, gint under)
+void gtk_scintilla_indic_set_under(GtkScintilla *sci, int indic, gboolean under)
 {
     scintilla_send_message(SCINTILLA(sci->scintilla),
         2510, (gulong) indic, (gulong) under);
 }
 
-gint gtk_scintilla_indic_get_under(GtkScintilla *sci, int indic)
+gboolean gtk_scintilla_indic_get_under(GtkScintilla *sci, int indic)
 {
     return scintilla_send_message(SCINTILLA(sci->scintilla),
         2511, (gulong) indic, 0);
 }
 
-void gtk_scintilla_set_whitespace_fore(GtkScintilla *sci, gint use_setting, glong fore)
+void gtk_scintilla_set_whitespace_fore(GtkScintilla *sci, gboolean use_setting, glong fore)
 {
     scintilla_send_message(SCINTILLA(sci->scintilla),
         2084, (gulong) use_setting, (gulong) fore);
 }
 
-void gtk_scintilla_set_whitespace_back(GtkScintilla *sci, gint use_setting, glong back)
+void gtk_scintilla_set_whitespace_back(GtkScintilla *sci, gboolean use_setting, glong back)
 {
     scintilla_send_message(SCINTILLA(sci->scintilla),
         2085, (gulong) use_setting, (gulong) back);
@@ -1072,13 +1062,13 @@ int gtk_scintilla_get_max_line_state(GtkScintilla *sci)
         2094, 0, 0);
 }
 
-gint gtk_scintilla_get_caret_line_visible(GtkScintilla *sci)
+gboolean gtk_scintilla_get_caret_line_visible(GtkScintilla *sci)
 {
     return scintilla_send_message(SCINTILLA(sci->scintilla),
         2095, 0, 0);
 }
 
-void gtk_scintilla_set_caret_line_visible(GtkScintilla *sci, gint show)
+void gtk_scintilla_set_caret_line_visible(GtkScintilla *sci, gboolean show)
 {
     scintilla_send_message(SCINTILLA(sci->scintilla),
         2096, (gulong) show, 0);
@@ -1096,7 +1086,7 @@ void gtk_scintilla_set_caret_line_back(GtkScintilla *sci, glong back)
         2098, (gulong) back, 0);
 }
 
-void gtk_scintilla_style_set_changeable(GtkScintilla *sci, int style, gint changeable)
+void gtk_scintilla_style_set_changeable(GtkScintilla *sci, int style, gboolean changeable)
 {
     scintilla_send_message(SCINTILLA(sci->scintilla),
         2099, (gulong) style, (gulong) changeable);
@@ -1114,7 +1104,7 @@ void gtk_scintilla_autoc_cancel(GtkScintilla *sci)
         2101, 0, 0);
 }
 
-gint gtk_scintilla_autoc_active(GtkScintilla *sci)
+gboolean gtk_scintilla_autoc_active(GtkScintilla *sci)
 {
     return scintilla_send_message(SCINTILLA(sci->scintilla),
         2102, 0, 0);
@@ -1156,13 +1146,13 @@ void gtk_scintilla_autoc_select(GtkScintilla *sci, const gchar * text)
         2108, 0, (gulong) text);
 }
 
-void gtk_scintilla_autoc_set_cancel_at_start(GtkScintilla *sci, gint cancel)
+void gtk_scintilla_autoc_set_cancel_at_start(GtkScintilla *sci, gboolean cancel)
 {
     scintilla_send_message(SCINTILLA(sci->scintilla),
         2110, (gulong) cancel, 0);
 }
 
-gint gtk_scintilla_autoc_get_cancel_at_start(GtkScintilla *sci)
+gboolean gtk_scintilla_autoc_get_cancel_at_start(GtkScintilla *sci)
 {
     return scintilla_send_message(SCINTILLA(sci->scintilla),
         2111, 0, 0);
@@ -1174,25 +1164,25 @@ void gtk_scintilla_autoc_set_fill_ups(GtkScintilla *sci, const gchar * character
         2112, 0, (gulong) character_set);
 }
 
-void gtk_scintilla_autoc_set_choose_single(GtkScintilla *sci, gint choose_single)
+void gtk_scintilla_autoc_set_choose_single(GtkScintilla *sci, gboolean choose_single)
 {
     scintilla_send_message(SCINTILLA(sci->scintilla),
         2113, (gulong) choose_single, 0);
 }
 
-gint gtk_scintilla_autoc_get_choose_single(GtkScintilla *sci)
+gboolean gtk_scintilla_autoc_get_choose_single(GtkScintilla *sci)
 {
     return scintilla_send_message(SCINTILLA(sci->scintilla),
         2114, 0, 0);
 }
 
-void gtk_scintilla_autoc_set_ignore_case(GtkScintilla *sci, gint ignore_case)
+void gtk_scintilla_autoc_set_ignore_case(GtkScintilla *sci, gboolean ignore_case)
 {
     scintilla_send_message(SCINTILLA(sci->scintilla),
         2115, (gulong) ignore_case, 0);
 }
 
-gint gtk_scintilla_autoc_get_ignore_case(GtkScintilla *sci)
+gboolean gtk_scintilla_autoc_get_ignore_case(GtkScintilla *sci)
 {
     return scintilla_send_message(SCINTILLA(sci->scintilla),
         2116, 0, 0);
@@ -1204,25 +1194,25 @@ void gtk_scintilla_user_list_show(GtkScintilla *sci, int list_type, const gchar 
         2117, (gulong) list_type, (gulong) item_list);
 }
 
-void gtk_scintilla_autoc_set_auto_hide(GtkScintilla *sci, gint auto_hide)
+void gtk_scintilla_autoc_set_auto_hide(GtkScintilla *sci, gboolean auto_hide)
 {
     scintilla_send_message(SCINTILLA(sci->scintilla),
         2118, (gulong) auto_hide, 0);
 }
 
-gint gtk_scintilla_autoc_get_auto_hide(GtkScintilla *sci)
+gboolean gtk_scintilla_autoc_get_auto_hide(GtkScintilla *sci)
 {
     return scintilla_send_message(SCINTILLA(sci->scintilla),
         2119, 0, 0);
 }
 
-void gtk_scintilla_autoc_set_drop_rest_of_word(GtkScintilla *sci, gint drop_rest_of_word)
+void gtk_scintilla_autoc_set_drop_rest_of_word(GtkScintilla *sci, gboolean drop_rest_of_word)
 {
     scintilla_send_message(SCINTILLA(sci->scintilla),
         2270, (gulong) drop_rest_of_word, 0);
 }
 
-gint gtk_scintilla_autoc_get_drop_rest_of_word(GtkScintilla *sci)
+gboolean gtk_scintilla_autoc_get_drop_rest_of_word(GtkScintilla *sci)
 {
     return scintilla_send_message(SCINTILLA(sci->scintilla),
         2271, 0, 0);
@@ -1288,13 +1278,13 @@ int gtk_scintilla_get_indent(GtkScintilla *sci)
         2123, 0, 0);
 }
 
-void gtk_scintilla_set_use_tabs(GtkScintilla *sci, gint use_tabs)
+void gtk_scintilla_set_use_tabs(GtkScintilla *sci, gboolean use_tabs)
 {
     scintilla_send_message(SCINTILLA(sci->scintilla),
         2124, (gulong) use_tabs, 0);
 }
 
-gint gtk_scintilla_get_use_tabs(GtkScintilla *sci)
+gboolean gtk_scintilla_get_use_tabs(GtkScintilla *sci)
 {
     return scintilla_send_message(SCINTILLA(sci->scintilla),
         2125, 0, 0);
@@ -1324,13 +1314,13 @@ int gtk_scintilla_get_column(GtkScintilla *sci, glong pos)
         2129, (gulong) pos, 0);
 }
 
-void gtk_scintilla_set_h_scroll_bar(GtkScintilla *sci, gint show)
+void gtk_scintilla_set_h_scroll_bar(GtkScintilla *sci, gboolean show)
 {
     scintilla_send_message(SCINTILLA(sci->scintilla),
         2130, (gulong) show, 0);
 }
 
-gint gtk_scintilla_get_h_scroll_bar(GtkScintilla *sci)
+gboolean gtk_scintilla_get_h_scroll_bar(GtkScintilla *sci)
 {
     return scintilla_send_message(SCINTILLA(sci->scintilla),
         2131, 0, 0);
@@ -1378,13 +1368,13 @@ glong gtk_scintilla_get_caret_fore(GtkScintilla *sci)
         2138, 0, 0);
 }
 
-gint gtk_scintilla_get_use_palette(GtkScintilla *sci)
+gboolean gtk_scintilla_get_use_palette(GtkScintilla *sci)
 {
     return scintilla_send_message(SCINTILLA(sci->scintilla),
         2139, 0, 0);
 }
 
-gint gtk_scintilla_get_read_only(GtkScintilla *sci)
+gboolean gtk_scintilla_get_read_only(GtkScintilla *sci)
 {
     return scintilla_send_message(SCINTILLA(sci->scintilla),
         2140, 0, 0);
@@ -1486,7 +1476,7 @@ int gtk_scintilla_get_margin_right(GtkScintilla *sci)
         2158, 0, 0);
 }
 
-gint gtk_scintilla_get_modify(GtkScintilla *sci)
+gboolean gtk_scintilla_get_modify(GtkScintilla *sci)
 {
     return scintilla_send_message(SCINTILLA(sci->scintilla),
         2159, 0, 0);
@@ -1504,7 +1494,7 @@ int gtk_scintilla_get_sel_text(GtkScintilla *sci, gchar * text)
         2161, 0, (gulong) text);
 }
 
-void gtk_scintilla_hide_selection(GtkScintilla *sci, gint normal)
+void gtk_scintilla_hide_selection(GtkScintilla *sci, gboolean normal)
 {
     scintilla_send_message(SCINTILLA(sci->scintilla),
         2163, (gulong) normal, 0);
@@ -1552,7 +1542,7 @@ void gtk_scintilla_replace_sel(GtkScintilla *sci, const gchar * text)
         2170, 0, (gulong) text);
 }
 
-void gtk_scintilla_set_read_only(GtkScintilla *sci, gint read_only)
+void gtk_scintilla_set_read_only(GtkScintilla *sci, gboolean read_only)
 {
     scintilla_send_message(SCINTILLA(sci->scintilla),
         2171, (gulong) read_only, 0);
@@ -1564,13 +1554,13 @@ void gtk_scintilla_null(GtkScintilla *sci)
         2172, 0, 0);
 }
 
-gint gtk_scintilla_can_paste(GtkScintilla *sci)
+gboolean gtk_scintilla_can_paste(GtkScintilla *sci)
 {
     return scintilla_send_message(SCINTILLA(sci->scintilla),
         2173, 0, 0);
 }
 
-gint gtk_scintilla_can_undo(GtkScintilla *sci)
+gboolean gtk_scintilla_can_undo(GtkScintilla *sci)
 {
     return scintilla_send_message(SCINTILLA(sci->scintilla),
         2174, 0, 0);
@@ -1642,13 +1632,13 @@ int gtk_scintilla_get_direct_pointer(GtkScintilla *sci)
         2185, 0, 0);
 }
 
-void gtk_scintilla_set_overtype(GtkScintilla *sci, gint overtype)
+void gtk_scintilla_set_overtype(GtkScintilla *sci, gboolean overtype)
 {
     scintilla_send_message(SCINTILLA(sci->scintilla),
         2186, (gulong) overtype, 0);
 }
 
-gint gtk_scintilla_get_overtype(GtkScintilla *sci)
+gboolean gtk_scintilla_get_overtype(GtkScintilla *sci)
 {
     return scintilla_send_message(SCINTILLA(sci->scintilla),
         2187, 0, 0);
@@ -1732,7 +1722,7 @@ void gtk_scintilla_call_tip_cancel(GtkScintilla *sci)
         2201, 0, 0);
 }
 
-gint gtk_scintilla_call_tip_active(GtkScintilla *sci)
+gboolean gtk_scintilla_call_tip_active(GtkScintilla *sci)
 {
     return scintilla_send_message(SCINTILLA(sci->scintilla),
         2202, 0, 0);
@@ -1828,19 +1818,19 @@ void gtk_scintilla_hide_lines(GtkScintilla *sci, int line_start, int line_end)
         2227, (gulong) line_start, (gulong) line_end);
 }
 
-gint gtk_scintilla_get_line_visible(GtkScintilla *sci, int line)
+gboolean gtk_scintilla_get_line_visible(GtkScintilla *sci, int line)
 {
     return scintilla_send_message(SCINTILLA(sci->scintilla),
         2228, (gulong) line, 0);
 }
 
-void gtk_scintilla_set_fold_expanded(GtkScintilla *sci, int line, gint expanded)
+void gtk_scintilla_set_fold_expanded(GtkScintilla *sci, int line, gboolean expanded)
 {
     scintilla_send_message(SCINTILLA(sci->scintilla),
         2229, (gulong) line, (gulong) expanded);
 }
 
-gint gtk_scintilla_get_fold_expanded(GtkScintilla *sci, int line)
+gboolean gtk_scintilla_get_fold_expanded(GtkScintilla *sci, int line)
 {
     return scintilla_send_message(SCINTILLA(sci->scintilla),
         2230, (gulong) line, 0);
@@ -1870,25 +1860,25 @@ void gtk_scintilla_ensure_visible_enforce_policy(GtkScintilla *sci, int line)
         2234, (gulong) line, 0);
 }
 
-void gtk_scintilla_set_tab_indents(GtkScintilla *sci, gint tab_indents)
+void gtk_scintilla_set_tab_indents(GtkScintilla *sci, gboolean tab_indents)
 {
     scintilla_send_message(SCINTILLA(sci->scintilla),
         2260, (gulong) tab_indents, 0);
 }
 
-gint gtk_scintilla_get_tab_indents(GtkScintilla *sci)
+gboolean gtk_scintilla_get_tab_indents(GtkScintilla *sci)
 {
     return scintilla_send_message(SCINTILLA(sci->scintilla),
         2261, 0, 0);
 }
 
-void gtk_scintilla_set_backspace_unindents(GtkScintilla *sci, gint bs_unindents)
+void gtk_scintilla_set_backspace_unindents(GtkScintilla *sci, gboolean bs_unindents)
 {
     scintilla_send_message(SCINTILLA(sci->scintilla),
         2262, (gulong) bs_unindents, 0);
 }
 
-gint gtk_scintilla_get_backspace_unindents(GtkScintilla *sci)
+gboolean gtk_scintilla_get_backspace_unindents(GtkScintilla *sci)
 {
     return scintilla_send_message(SCINTILLA(sci->scintilla),
         2263, 0, 0);
@@ -1906,13 +1896,13 @@ int gtk_scintilla_get_mouse_dwell_time(GtkScintilla *sci)
         2265, 0, 0);
 }
 
-int gtk_scintilla_word_start_position(GtkScintilla *sci, glong pos, gint only_word_characters)
+int gtk_scintilla_word_start_position(GtkScintilla *sci, glong pos, gboolean only_word_characters)
 {
     return scintilla_send_message(SCINTILLA(sci->scintilla),
         2266, (gulong) pos, (gulong) only_word_characters);
 }
 
-int gtk_scintilla_word_end_position(GtkScintilla *sci, glong pos, gint only_word_characters)
+int gtk_scintilla_word_end_position(GtkScintilla *sci, glong pos, gboolean only_word_characters)
 {
     return scintilla_send_message(SCINTILLA(sci->scintilla),
         2267, (gulong) pos, (gulong) only_word_characters);
@@ -2002,13 +1992,13 @@ int gtk_scintilla_get_scroll_width(GtkScintilla *sci)
         2275, 0, 0);
 }
 
-void gtk_scintilla_set_scroll_width_tracking(GtkScintilla *sci, gint tracking)
+void gtk_scintilla_set_scroll_width_tracking(GtkScintilla *sci, gboolean tracking)
 {
     scintilla_send_message(SCINTILLA(sci->scintilla),
         2516, (gulong) tracking, 0);
 }
 
-gint gtk_scintilla_get_scroll_width_tracking(GtkScintilla *sci)
+gboolean gtk_scintilla_get_scroll_width_tracking(GtkScintilla *sci)
 {
     return scintilla_send_message(SCINTILLA(sci->scintilla),
         2517, 0, 0);
@@ -2020,13 +2010,13 @@ int gtk_scintilla_text_width(GtkScintilla *sci, int style, const gchar * text)
         2276, (gulong) style, (gulong) text);
 }
 
-void gtk_scintilla_set_end_at_last_line(GtkScintilla *sci, gint end_at_last_line)
+void gtk_scintilla_set_end_at_last_line(GtkScintilla *sci, gboolean end_at_last_line)
 {
     scintilla_send_message(SCINTILLA(sci->scintilla),
         2277, (gulong) end_at_last_line, 0);
 }
 
-gint gtk_scintilla_get_end_at_last_line(GtkScintilla *sci)
+gboolean gtk_scintilla_get_end_at_last_line(GtkScintilla *sci)
 {
     return scintilla_send_message(SCINTILLA(sci->scintilla),
         2278, 0, 0);
@@ -2038,13 +2028,13 @@ int gtk_scintilla_text_height(GtkScintilla *sci, int line)
         2279, (gulong) line, 0);
 }
 
-void gtk_scintilla_set_v_scroll_bar(GtkScintilla *sci, gint show)
+void gtk_scintilla_set_v_scroll_bar(GtkScintilla *sci, gboolean show)
 {
     scintilla_send_message(SCINTILLA(sci->scintilla),
         2280, (gulong) show, 0);
 }
 
-gint gtk_scintilla_get_v_scroll_bar(GtkScintilla *sci)
+gboolean gtk_scintilla_get_v_scroll_bar(GtkScintilla *sci)
 {
     return scintilla_send_message(SCINTILLA(sci->scintilla),
         2281, 0, 0);
@@ -2056,13 +2046,13 @@ void gtk_scintilla_append_text(GtkScintilla *sci, int length, const gchar * text
         2282, (gulong) length, (gulong) text);
 }
 
-gint gtk_scintilla_get_two_phase_draw(GtkScintilla *sci)
+gboolean gtk_scintilla_get_two_phase_draw(GtkScintilla *sci)
 {
     return scintilla_send_message(SCINTILLA(sci->scintilla),
         2283, 0, 0);
 }
 
-void gtk_scintilla_set_two_phase_draw(GtkScintilla *sci, gint two_phase)
+void gtk_scintilla_set_two_phase_draw(GtkScintilla *sci, gboolean two_phase)
 {
     scintilla_send_message(SCINTILLA(sci->scintilla),
         2284, (gulong) two_phase, 0);
@@ -2122,13 +2112,13 @@ void gtk_scintilla_lines_split(GtkScintilla *sci, int pixel_width)
         2289, (gulong) pixel_width, 0);
 }
 
-void gtk_scintilla_set_fold_margin_colour(GtkScintilla *sci, gint use_setting, glong back)
+void gtk_scintilla_set_fold_margin_colour(GtkScintilla *sci, gboolean use_setting, glong back)
 {
     scintilla_send_message(SCINTILLA(sci->scintilla),
         2290, (gulong) use_setting, (gulong) back);
 }
 
-void gtk_scintilla_set_fold_margin_hi_colour(GtkScintilla *sci, gint use_setting, glong fore)
+void gtk_scintilla_set_fold_margin_hi_colour(GtkScintilla *sci, gboolean use_setting, glong fore)
 {
     scintilla_send_message(SCINTILLA(sci->scintilla),
         2291, (gulong) use_setting, (gulong) fore);
@@ -2512,13 +2502,13 @@ glong gtk_scintilla_brace_match(GtkScintilla *sci, glong pos)
         2353, (gulong) pos, 0);
 }
 
-gint gtk_scintilla_get_view_eol(GtkScintilla *sci)
+gboolean gtk_scintilla_get_view_eol(GtkScintilla *sci)
 {
     return scintilla_send_message(SCINTILLA(sci->scintilla),
         2355, 0, 0);
 }
 
-void gtk_scintilla_set_view_eol(GtkScintilla *sci, gint visible)
+void gtk_scintilla_set_view_eol(GtkScintilla *sci, gboolean visible)
 {
     scintilla_send_message(SCINTILLA(sci->scintilla),
         2356, (gulong) visible, 0);
@@ -2602,13 +2592,13 @@ int gtk_scintilla_lines_on_screen(GtkScintilla *sci)
         2370, 0, 0);
 }
 
-void gtk_scintilla_use_pop_up(GtkScintilla *sci, gint allow_pop_up)
+void gtk_scintilla_use_pop_up(GtkScintilla *sci, gboolean allow_pop_up)
 {
     scintilla_send_message(SCINTILLA(sci->scintilla),
         2371, (gulong) allow_pop_up, 0);
 }
 
-gint gtk_scintilla_selection_is_rectangle(GtkScintilla *sci)
+gboolean gtk_scintilla_selection_is_rectangle(GtkScintilla *sci)
 {
     return scintilla_send_message(SCINTILLA(sci->scintilla),
         2372, 0, 0);
@@ -2650,13 +2640,13 @@ int gtk_scintilla_get_mod_event_mask(GtkScintilla *sci)
         2378, 0, 0);
 }
 
-void gtk_scintilla_set_focus(GtkScintilla *sci, gint focus)
+void gtk_scintilla_set_focus(GtkScintilla *sci, gboolean focus)
 {
     scintilla_send_message(SCINTILLA(sci->scintilla),
         2380, (gulong) focus, 0);
 }
 
-gint gtk_scintilla_get_focus(GtkScintilla *sci)
+gboolean gtk_scintilla_get_focus(GtkScintilla *sci)
 {
     return scintilla_send_message(SCINTILLA(sci->scintilla),
         2381, 0, 0);
@@ -2674,13 +2664,13 @@ int gtk_scintilla_get_status(GtkScintilla *sci)
         2383, 0, 0);
 }
 
-void gtk_scintilla_set_mouse_down_captures(GtkScintilla *sci, gint captures)
+void gtk_scintilla_set_mouse_down_captures(GtkScintilla *sci, gboolean captures)
 {
     scintilla_send_message(SCINTILLA(sci->scintilla),
         2384, (gulong) captures, 0);
 }
 
-gint gtk_scintilla_get_mouse_down_captures(GtkScintilla *sci)
+gboolean gtk_scintilla_get_mouse_down_captures(GtkScintilla *sci)
 {
     return scintilla_send_message(SCINTILLA(sci->scintilla),
         2385, 0, 0);
@@ -2800,7 +2790,7 @@ int gtk_scintilla_get_print_wrap_mode(GtkScintilla *sci)
         2407, 0, 0);
 }
 
-void gtk_scintilla_set_hotspot_active_fore(GtkScintilla *sci, gint use_setting, glong fore)
+void gtk_scintilla_set_hotspot_active_fore(GtkScintilla *sci, gboolean use_setting, glong fore)
 {
     scintilla_send_message(SCINTILLA(sci->scintilla),
         2410, (gulong) use_setting, (gulong) fore);
@@ -2812,7 +2802,7 @@ glong gtk_scintilla_get_hotspot_active_fore(GtkScintilla *sci)
         2494, 0, 0);
 }
 
-void gtk_scintilla_set_hotspot_active_back(GtkScintilla *sci, gint use_setting, glong back)
+void gtk_scintilla_set_hotspot_active_back(GtkScintilla *sci, gboolean use_setting, glong back)
 {
     scintilla_send_message(SCINTILLA(sci->scintilla),
         2411, (gulong) use_setting, (gulong) back);
@@ -2824,25 +2814,25 @@ glong gtk_scintilla_get_hotspot_active_back(GtkScintilla *sci)
         2495, 0, 0);
 }
 
-void gtk_scintilla_set_hotspot_active_underline(GtkScintilla *sci, gint underline)
+void gtk_scintilla_set_hotspot_active_underline(GtkScintilla *sci, gboolean underline)
 {
     scintilla_send_message(SCINTILLA(sci->scintilla),
         2412, (gulong) underline, 0);
 }
 
-gint gtk_scintilla_get_hotspot_active_underline(GtkScintilla *sci)
+gboolean gtk_scintilla_get_hotspot_active_underline(GtkScintilla *sci)
 {
     return scintilla_send_message(SCINTILLA(sci->scintilla),
         2496, 0, 0);
 }
 
-void gtk_scintilla_set_hotspot_single_line(GtkScintilla *sci, gint single_line)
+void gtk_scintilla_set_hotspot_single_line(GtkScintilla *sci, gboolean single_line)
 {
     scintilla_send_message(SCINTILLA(sci->scintilla),
         2421, (gulong) single_line, 0);
 }
 
-gint gtk_scintilla_get_hotspot_single_line(GtkScintilla *sci)
+gboolean gtk_scintilla_get_hotspot_single_line(GtkScintilla *sci)
 {
     return scintilla_send_message(SCINTILLA(sci->scintilla),
         2497, 0, 0);
@@ -3076,13 +3066,13 @@ int gtk_scintilla_find_column(GtkScintilla *sci, int line, int column)
         2456, (gulong) line, (gulong) column);
 }
 
-gint gtk_scintilla_get_caret_sticky(GtkScintilla *sci)
+gboolean gtk_scintilla_get_caret_sticky(GtkScintilla *sci)
 {
     return scintilla_send_message(SCINTILLA(sci->scintilla),
         2457, 0, 0);
 }
 
-void gtk_scintilla_set_caret_sticky(GtkScintilla *sci, gint use_caret_sticky_behaviour)
+void gtk_scintilla_set_caret_sticky(GtkScintilla *sci, gboolean use_caret_sticky_behaviour)
 {
     scintilla_send_message(SCINTILLA(sci->scintilla),
         2458, (gulong) use_caret_sticky_behaviour, 0);
@@ -3094,13 +3084,13 @@ void gtk_scintilla_toggle_caret_sticky(GtkScintilla *sci)
         2459, 0, 0);
 }
 
-void gtk_scintilla_set_paste_convert_endings(GtkScintilla *sci, gint convert)
+void gtk_scintilla_set_paste_convert_endings(GtkScintilla *sci, gboolean convert)
 {
     scintilla_send_message(SCINTILLA(sci->scintilla),
         2467, (gulong) convert, 0);
 }
 
-gint gtk_scintilla_get_paste_convert_endings(GtkScintilla *sci)
+gboolean gtk_scintilla_get_paste_convert_endings(GtkScintilla *sci)
 {
     return scintilla_send_message(SCINTILLA(sci->scintilla),
         2468, 0, 0);
@@ -3220,13 +3210,13 @@ int gtk_scintilla_get_character_pointer(GtkScintilla *sci)
         2520, 0, 0);
 }
 
-void gtk_scintilla_set_keys_unicode(GtkScintilla *sci, gint keys_unicode)
+void gtk_scintilla_set_keys_unicode(GtkScintilla *sci, gboolean keys_unicode)
 {
     scintilla_send_message(SCINTILLA(sci->scintilla),
         2521, (gulong) keys_unicode, 0);
 }
 
-gint gtk_scintilla_get_keys_unicode(GtkScintilla *sci)
+gboolean gtk_scintilla_get_keys_unicode(GtkScintilla *sci)
 {
     return scintilla_send_message(SCINTILLA(sci->scintilla),
         2522, 0, 0);
@@ -3418,49 +3408,49 @@ glong gtk_scintilla_char_position_from_point_close(GtkScintilla *sci, int x, int
         2562, (gulong) x, (gulong) y);
 }
 
-void gtk_scintilla_set_multiple_selection(GtkScintilla *sci, gint multiple_selection)
+void gtk_scintilla_set_multiple_selection(GtkScintilla *sci, gboolean multiple_selection)
 {
     scintilla_send_message(SCINTILLA(sci->scintilla),
         2563, (gulong) multiple_selection, 0);
 }
 
-gint gtk_scintilla_get_multiple_selection(GtkScintilla *sci)
+gboolean gtk_scintilla_get_multiple_selection(GtkScintilla *sci)
 {
     return scintilla_send_message(SCINTILLA(sci->scintilla),
         2564, 0, 0);
 }
 
-void gtk_scintilla_set_additional_selection_typing(GtkScintilla *sci, gint additional_selection_typing)
+void gtk_scintilla_set_additional_selection_typing(GtkScintilla *sci, gboolean additional_selection_typing)
 {
     scintilla_send_message(SCINTILLA(sci->scintilla),
         2565, (gulong) additional_selection_typing, 0);
 }
 
-gint gtk_scintilla_get_additional_selection_typing(GtkScintilla *sci)
+gboolean gtk_scintilla_get_additional_selection_typing(GtkScintilla *sci)
 {
     return scintilla_send_message(SCINTILLA(sci->scintilla),
         2566, 0, 0);
 }
 
-void gtk_scintilla_set_additional_carets_blink(GtkScintilla *sci, gint additional_carets_blink)
+void gtk_scintilla_set_additional_carets_blink(GtkScintilla *sci, gboolean additional_carets_blink)
 {
     scintilla_send_message(SCINTILLA(sci->scintilla),
         2567, (gulong) additional_carets_blink, 0);
 }
 
-gint gtk_scintilla_get_additional_carets_blink(GtkScintilla *sci)
+gboolean gtk_scintilla_get_additional_carets_blink(GtkScintilla *sci)
 {
     return scintilla_send_message(SCINTILLA(sci->scintilla),
         2568, 0, 0);
 }
 
-void gtk_scintilla_set_additional_carets_visible(GtkScintilla *sci, gint additional_carets_blink)
+void gtk_scintilla_set_additional_carets_visible(GtkScintilla *sci, gboolean additional_carets_blink)
 {
     scintilla_send_message(SCINTILLA(sci->scintilla),
         2608, (gulong) additional_carets_blink, 0);
 }
 
-gint gtk_scintilla_get_additional_carets_visible(GtkScintilla *sci)
+gboolean gtk_scintilla_get_additional_carets_visible(GtkScintilla *sci)
 {
     return scintilla_send_message(SCINTILLA(sci->scintilla),
         2609, 0, 0);

@@ -77,7 +77,7 @@ def write_fun(dict):
             elif dict[key] == 'int':
                 pass
             elif dict[key] == 'bool':
-                dict[key] = 'gint'
+                dict[key] = 'gboolean'
             elif dict[key] == 'position':
                 dict[key] = 'glong'
             elif dict[key] == 'colour':

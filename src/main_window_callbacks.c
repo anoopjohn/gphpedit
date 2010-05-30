@@ -444,20 +444,11 @@ void open_file_ok(GtkFileChooser *file_selection)
 }
 
 void reopen_recent(GtkWidget *widget, gpointer data) {
-  gchar *filename;
-  GString *key;
-  GConfClient *config;
-  config=gconf_client_get_default ();
-
-  key = g_string_new("/gPHPEdit/recent/");
-  g_string_append_printf(key, "%d", (gint)data); // Back to being gint from gulong due to compiler warning
-  filename = gconf_client_get_string(config,key->str,NULL);
-  g_string_free(key, TRUE);
-
+  const gchar *filename;
+  filename=gtk_menu_item_get_label ((GtkMenuItem *)widget);
   if (DEBUG_MODE) { g_print("DEBUG: main_window_callbacks.c:reopen_recent:filename: %s\n", filename); }
   
-  switch_to_file_or_open(filename, 0);
-  g_free(filename);
+  switch_to_file_or_open((gchar *)filename, 0);
 }
 
 void run_plugin(GtkWidget *widget, gpointer data) {
@@ -1453,26 +1444,21 @@ void on_notebook_switch_page (GtkNotebook *notebook, GtkNotebookPage *page,
   GtkWidget *child;
 
   child = gtk_notebook_get_nth_page(GTK_NOTEBOOK(main_window.notebook_editor), page_num);
-  data = editor_find_from_scintilla(child);
-  if (data) {
+  if (GTK_IS_SCINTILLA(child)){
+    data = editor_find_from_scintilla(child);
     if (GTK_IS_SCINTILLA(data->scintilla)) {
       // Grab the focus in to the editor
       gtk_scintilla_grab_focus(GTK_SCINTILLA(data->scintilla));
-//      gtk_scintilla_set_focus(GTK_SCINTILLA(data->scintilla), TRUE);
-      // Store it in the global main_window.current_editor value
-      main_window.current_editor = data;
     }
-  }
-  else {
+  } else {
     data = editor_find_from_help((void *)child);
-    if (data) {
-      main_window.current_editor = data;
-    }
-    else {
-       g_print(_("Unable to get data for page %d\n"), page_num);
-    }
   }
-  
+  if (data){
+    // Store it in the global main_window.current_editor value
+    main_window.current_editor = data;
+  } else {
+    g_print(_("Unable to get data for page %d\n"), page_num);
+  }
   if (!is_app_closing) {
     // Change the title of the main application window to the full filename
     update_app_title();
