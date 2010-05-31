@@ -26,6 +26,7 @@ gboolean filename_file_exist(gchar *filename)
 */
 gchar *filename_parent_uri(gchar *filename){
     GFile *file= get_gfile_from_filename(filename);
+    if (!g_file_query_exists (file,NULL)) return NULL;
     GFile *parent= g_file_get_parent (file);
     gchar *parent_path= g_file_get_uri (parent);
     g_object_unref(file);
