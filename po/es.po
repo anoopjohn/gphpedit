@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 0.9.96\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2010-06-01 10:16-0300\n"
+"POT-Creation-Date: 2010-06-01 13:46+0000\n"
 "PO-Revision-Date: 2010-01-25 22:45-0300\n"
 "Last-Translator: jose rostagno <joserostagno@hotmail.com>\n"
 "Language-Team: español <none@none.com>\n"
@@ -138,9 +138,8 @@ msgid "Unable to create ~/.gphpedit/ (%d) %s"
 msgstr "Imposible crear ~/.gphpedit/ (%d) %s"
 
 #: ../src/main_window.c:132
-#, fuzzy
 msgid "Zoom: 100%"
-msgstr "Zoom:100%"
+msgstr "Zoom: 100%"
 
 #: ../src/main_window.c:180
 msgid "Close side panel"
@@ -271,9 +270,7 @@ msgstr "Por favor, escriba el nombre de archivo para guardar como ..."
 
 #: ../src/main_window_callbacks.c:834
 msgid "Are you sure you wish to reload the current file, losing your changes?"
-msgstr ""
-"¿Estás seguro de que desea volver a cargar el archivo actual, perdiendo los "
-"cambios?"
+msgstr "¿Estás seguro de que desea volver a cargar el archivo actual, perdiendo los cambios?"
 
 #: ../src/main_window_callbacks.c:895
 msgid "This file already exists, are you sure you want to overwrite it?"
@@ -290,12 +287,8 @@ msgstr "Zoom:"
 
 #: ../src/main_window_callbacks.c:1025 ../src/main_window_callbacks.c:1026
 #, c-format
-msgid ""
-"The file '%s' has not been saved since your last changes, are you sure you "
-"want to close it and lose these changes?"
-msgstr ""
-"El archivo '%s' no ha sido guardado desde el ultimo cambio, ¿esta seguro que "
-"desea cerrarlo y perder los cambios?"
+msgid "The file '%s' has not been saved since your last changes, are you sure you want to close it and lose these changes?"
+msgstr "El archivo '%s' no ha sido guardado desde el ultimo cambio, ¿esta seguro que desea cerrarlo y perder los cambios?"
 
 #: ../src/main_window_callbacks.c:1027
 #, c-format
@@ -328,33 +321,25 @@ msgid "translator_credits"
 msgstr "Jose Rostagno <joserostagno@hotmail.com>"
 
 #: ../src/main_window_callbacks.c:1414
-#, fuzzy
 msgid "Copyright  2003-2006 Andy Jeffries, 2009-2010 Anoop John"
-msgstr "Copyright  2003-2006 Andy Jeffries, 2009 Anoop John"
+msgstr "Copyright  2003-2006 Andy Jeffries, 2009-2010 Anoop John"
 
 #: ../src/main_window_callbacks.c:1416
-msgid ""
-"gPHPEdit is a GNOME2 editor specialised for editing PHP scripts and related "
-"files (HTML/CSS/JS)."
-msgstr ""
-"gPHPEdit es un editor de GNOME2 especializado en editar specialised for "
-"editing PHP scripts and related files (HTML/CSS/JS)."
+msgid "gPHPEdit is a GNOME2 editor specialised for editing PHP scripts and related files (HTML/CSS/JS)."
+msgstr "gPHPEdit es un editor de GNOME2 especializado en editar specialised for editing PHP scripts and related files (HTML/CSS/JS)."
 
 #: ../src/main_window_callbacks.c:1460
 #, c-format
 msgid "Unable to get data for page %d\n"
-msgstr ""
+msgstr "No se pudo obtener información para la pagina %d\n"
 
 #: ../src/main_window_callbacks.c:1978 ../src/tab.c:253
 #, c-format
-msgid ""
-"Could not get the file modification time for file: '%s'. GIO error: %s \n"
-msgstr ""
-"No se pudo obtener la fecha de modificación del archivo: '%s'. Error GIO: %"
-"s \n"
+msgid "Could not get the file modification time for file: '%s'. GIO error: %s \n"
+msgstr "No se pudo obtener la fecha de modificación del archivo: '%s'. Error GIO: %s \n"
 
 #: ../src/main_window_callbacks.c:1988
-#, fuzzy, c-format
+#, c-format
 msgid "The file %s has been externally modified. Do you want reload it?"
 msgstr "El Archivo %s fue modificado externamente. Desea re-cargarlo?"
 
@@ -436,7 +421,7 @@ msgstr "Script HTML"
 #: ../src/preferences_dialog.c:334 ../src/preferences_dialog.c:886
 #: ../src/preferences_dialog.c:887
 msgid "HTML Question"
-msgstr ""
+msgstr "HTML Pregunta"
 
 #: ../src/preferences_dialog.c:156 ../src/preferences_dialog.c:338
 #: ../src/preferences_dialog.c:339 ../src/preferences_dialog.c:891
@@ -449,13 +434,13 @@ msgstr "Valor HTML"
 #: ../src/preferences_dialog.c:344 ../src/preferences_dialog.c:896
 #: ../src/preferences_dialog.c:897
 msgid "JavaScript Multiple-line Comment"
-msgstr ""
+msgstr "JavaScript Comentario Multilinea"
 
 #: ../src/preferences_dialog.c:160 ../src/preferences_dialog.c:348
 #: ../src/preferences_dialog.c:349 ../src/preferences_dialog.c:901
 #: ../src/preferences_dialog.c:902
 msgid "JavaScript Single-line Comment"
-msgstr ""
+msgstr "PHP Comentario Monolinea"
 
 #: ../src/preferences_dialog.c:161 ../src/preferences_dialog.c:353
 #: ../src/preferences_dialog.c:354 ../src/preferences_dialog.c:906
@@ -498,7 +483,7 @@ msgstr "Símbolo Javascript"
 #: ../src/preferences_dialog.c:384 ../src/preferences_dialog.c:936
 #: ../src/preferences_dialog.c:937
 msgid "PHP Default"
-msgstr ""
+msgstr "PHP Por Defecto"
 
 #: ../src/preferences_dialog.c:170 ../src/preferences_dialog.c:388
 #: ../src/preferences_dialog.c:389 ../src/preferences_dialog.c:941
@@ -534,7 +519,7 @@ msgstr "Variable PHP"
 #: ../src/preferences_dialog.c:414 ../src/preferences_dialog.c:966
 #: ../src/preferences_dialog.c:967
 msgid "PHP Single-line Comment"
-msgstr ""
+msgstr "PHP Comentario Monolinea"
 
 #: ../src/preferences_dialog.c:176 ../src/preferences_dialog.c:418
 #: ../src/preferences_dialog.c:419 ../src/preferences_dialog.c:971
@@ -607,7 +592,7 @@ msgstr "ID CSS"
 #: ../src/preferences_dialog.c:474 ../src/preferences_dialog.c:1026
 #: ../src/preferences_dialog.c:1027
 msgid "CSS Important"
-msgstr ""
+msgstr "CSS Important"
 
 #: ../src/preferences_dialog.c:190 ../src/preferences_dialog.c:478
 #: ../src/preferences_dialog.c:479 ../src/preferences_dialog.c:1031
@@ -661,9 +646,8 @@ msgstr "General"
 #: ../src/preferences_dialog.c:201 ../src/preferences_dialog.c:518
 #: ../src/preferences_dialog.c:519 ../src/preferences_dialog.c:1071
 #: ../src/preferences_dialog.c:1072
-#, fuzzy
 msgid "C String"
-msgstr "Cadena"
+msgstr "C Cadena"
 
 #: ../src/preferences_dialog.c:202 ../src/preferences_dialog.c:523
 #: ../src/preferences_dialog.c:524 ../src/preferences_dialog.c:1076
@@ -674,9 +658,8 @@ msgstr "Carácter C"
 #: ../src/preferences_dialog.c:203 ../src/preferences_dialog.c:528
 #: ../src/preferences_dialog.c:529 ../src/preferences_dialog.c:1081
 #: ../src/preferences_dialog.c:1082
-#, fuzzy
 msgid "C Word"
-msgstr "Palabra SQL"
+msgstr ""
 
 #: ../src/preferences_dialog.c:204 ../src/preferences_dialog.c:533
 #: ../src/preferences_dialog.c:534 ../src/preferences_dialog.c:1086
@@ -699,9 +682,8 @@ msgstr "Comentario C"
 #: ../src/preferences_dialog.c:207 ../src/preferences_dialog.c:548
 #: ../src/preferences_dialog.c:549 ../src/preferences_dialog.c:1101
 #: ../src/preferences_dialog.c:1102
-#, fuzzy
 msgid "C Commentline"
-msgstr "Comentario SQL"
+msgstr "C Comentario"
 
 #: ../src/preferences_dialog.c:208
 msgid "C Preprocessor"
@@ -722,7 +704,6 @@ msgstr "Expresión regular C"
 #: ../src/preferences_dialog.c:211 ../src/preferences_dialog.c:568
 #: ../src/preferences_dialog.c:569 ../src/preferences_dialog.c:1121
 #: ../src/preferences_dialog.c:1122
-#, fuzzy
 msgid "C UUID"
 msgstr "C UUID"
 
@@ -736,7 +717,7 @@ msgstr ""
 #: ../src/preferences_dialog.c:579 ../src/preferences_dialog.c:1131
 #: ../src/preferences_dialog.c:1132
 msgid "C Globalclass"
-msgstr ""
+msgstr "C Clase Global"
 
 #: ../src/preferences_dialog.c:553 ../src/preferences_dialog.c:554
 #: ../src/preferences_dialog.c:1106 ../src/preferences_dialog.c:1107
@@ -772,7 +753,7 @@ msgstr "¿Está seguro de que desea eliminar la plantilla% s?"
 
 #: ../src/preferences_dialog.c:1467
 msgid "Name/Shortcut"
-msgstr ""
+msgstr "Nombre"
 
 #: ../src/preferences_dialog.c:1481
 msgid "Preferences"
@@ -781,7 +762,7 @@ msgstr "Preferencias"
 #. current session
 #: ../src/preferences_dialog.c:1493
 msgid "Session:"
-msgstr ""
+msgstr "Sesión:"
 
 #: ../src/preferences_dialog.c:1501
 msgid "Save session (including open files) on exit"
@@ -794,9 +775,8 @@ msgstr "Ejecutar solo 1 copia de gPHPEdit a la vez"
 #. end session
 #. edge part
 #: ../src/preferences_dialog.c:1518
-#, fuzzy
 msgid "Hand edge guide:"
-msgstr "Mostrar la guía del borde derecho"
+msgstr "Guía del borde derecho:"
 
 #: ../src/preferences_dialog.c:1526
 msgid "Show right hand edge guide"
@@ -812,9 +792,8 @@ msgstr "Columna de la guía del borde derecho"
 
 #. end edge part
 #: ../src/preferences_dialog.c:1571
-#, fuzzy
 msgid "Side Panel:"
-msgstr "Mostrar panel lateral"
+msgstr "Panel lateral"
 
 #: ../src/preferences_dialog.c:1575
 msgid "Show folderbrowser (need restart)"
@@ -829,27 +808,26 @@ msgstr ""
 #. autocompletion part
 #: ../src/preferences_dialog.c:1586
 msgid "Auto-completion:"
-msgstr ""
+msgstr "Auto-completado:"
 
 #: ../src/preferences_dialog.c:1590
 msgid "Auto-Completion of Brackets and Quotes"
-msgstr ""
+msgstr "Auto-completado de Paréntesis y Corchetes "
 
 #. set tooltip
 #: ../src/preferences_dialog.c:1592
 msgid "Auto-complete the closing brackets/quotes"
-msgstr ""
+msgstr "Auto-completa el paréntesis/corchete de cierre"
 
 #. end autocompletion part
 #: ../src/preferences_dialog.c:1601
 msgid "General"
-msgstr ""
+msgstr "General"
 
 #. tabs part
 #: ../src/preferences_dialog.c:1612
-#, fuzzy
 msgid "Tabs:"
-msgstr "Tamaño Tabulación:"
+msgstr "Tabuladores:"
 
 #: ../src/preferences_dialog.c:1624
 msgid "Tab size:"
@@ -865,7 +843,7 @@ msgstr "Mostrar guías de sangrado"
 
 #: ../src/preferences_dialog.c:1649
 msgid "Text wrap:"
-msgstr ""
+msgstr "Ajuste de Texto:"
 
 #: ../src/preferences_dialog.c:1653
 msgid "Wrap long lines"
@@ -873,26 +851,24 @@ msgstr "Ajustar lineas largas"
 
 #: ../src/preferences_dialog.c:1661
 msgid "Selection:"
-msgstr ""
+msgstr "Selección:"
 
 #: ../src/preferences_dialog.c:1674
 msgid "Selection colour:"
-msgstr ""
+msgstr "Color de la selección:"
 
 #. End: Selection Color
 #: ../src/preferences_dialog.c:1690
-#, fuzzy
 msgid "Current line:"
-msgstr "Cortar selección actual"
+msgstr "Linea Actual:"
 
 #: ../src/preferences_dialog.c:1698
 msgid "Highlight Caret Line"
-msgstr ""
+msgstr "Resaltar la linea actual"
 
 #: ../src/preferences_dialog.c:1710
-#, fuzzy
 msgid "Highlight Caret Line colour:"
-msgstr "Color de la guía del borde derecho"
+msgstr "Color del resaltado de la linea actual:"
 
 #: ../src/preferences_dialog.c:1731
 msgid "Font Quality"
@@ -973,16 +949,14 @@ msgstr "Borrar"
 
 #: ../src/preferences_dialog.c:2056
 msgid "PHP Coding"
-msgstr ""
+msgstr "Codificación PHP"
 
 #: ../src/preferences_dialog.c:2061
 msgid "Apply"
 msgstr "Aplicar"
 
 #: ../src/syntax_check.c:257
-msgid ""
-"Error calling PHP CLI (is PHP command line binary installed? If so, check if "
-"it's in your path or set php_binary in Preferences)\n"
+msgid "Error calling PHP CLI (is PHP command line binary installed? If so, check if it's in your path or set php_binary in Preferences)\n"
 msgstr ""
 
 #: ../src/syntax_check.c:270
@@ -1006,16 +980,16 @@ msgstr "No se pudo obtener la información del archivo. Error GIO: %s.\n"
 
 #: ../src/tab.c:424
 msgid "Sorry, I can open this kind of file.\n"
-msgstr ""
+msgstr "Lo siento, no puedo abrir esa clase de archivo.\n"
 
 #: ../src/tab.c:425 ../src/tab.c:1126 ../src/tab.c:1143
 msgid "Untitled"
 msgstr "Sin titulo"
 
 #: ../src/tab.c:493
-#, fuzzy, c-format
+#, c-format
 msgid "Could not get file info for file %s. GIO error: %s \n"
-msgstr "No se pudo obtener la información del archivo. Error GIO: %s.\n"
+msgstr "No se pudo obtener la información del archivo %s. Error GIO: %s.\n"
 
 #: ../src/tab.c:511
 msgid "File size and loaded size not matching"
@@ -1045,11 +1019,13 @@ msgstr ""
 "Montando sistema de archivos, esto tardara unos segundos...\n"
 
 #: ../src/tab.c:1083
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "Error opening file GIO error:%s\n"
 "file:%s"
-msgstr "Error abriendo archivo. Error GIO:%s\n"
+msgstr ""
+"Error abriendo archivo. Error GIO:%s\n"
+"Archivo:%s"
 
 #: ../src/tab.c:1090
 #, c-format
@@ -1134,11 +1110,11 @@ msgstr "Buscar y reemplazar en el archivo actual"
 
 #: ../src/menu.c:284
 msgid "Indent the currently selected block"
-msgstr ""
+msgstr "Indentar el bloque actualmente seleccionado"
 
 #: ../src/menu.c:286
 msgid "Unindent the currently selected block"
-msgstr ""
+msgstr "Desindentar el bloque actualmente seleccionado"
 
 #: ../src/menu.c:292
 msgid "_ToUpper"
@@ -1299,7 +1275,7 @@ msgstr "Comprobar sintaxis"
 
 #: ../src/menu.c:415
 msgid "Check the syntax using the PHP command line binary"
-msgstr ""
+msgstr "Comprobar la sintaxis usando el binario de PHP"
 
 #: ../src/menu.c:417
 msgid "_Clear Syntax check"
@@ -1311,19 +1287,19 @@ msgstr "Oculta la ventana de comprobación de sintaxis"
 
 #: ../src/menu.c:422
 msgid "_Record keyboard macro start/stop"
-msgstr ""
+msgstr "_Grabar macro de teclado iniciar/detener"
 
 #: ../src/menu.c:422
 msgid "Record keyboard actions"
-msgstr ""
+msgstr "Grabar acciones del teclado"
 
 #: ../src/menu.c:424
 msgid "_Playback keyboard macro"
-msgstr ""
+msgstr "_Reproducir macro del teclado"
 
 #: ../src/menu.c:424
 msgid "Playback the stored keyboard macro"
-msgstr ""
+msgstr "Reproducir macro de teclado guardada"
 
 #: ../src/menu.c:427
 msgid "_Force"
@@ -1370,7 +1346,6 @@ msgid "Force syntax highlighting to Perl mode"
 msgstr "Fuerza el resaltado de sintaxis a modo Perl"
 
 #: ../src/menu.c:442
-#, fuzzy
 msgid "_Cobol"
 msgstr "_Cobol"
 
@@ -1418,52 +1393,48 @@ msgid "_Help"
 msgstr "Ayuda"
 
 #: ../src/folderbrowser.c:293
-#, fuzzy, c-format
+#, c-format
 msgid "Error getting folderbrowser files. GIO Error:%s\t"
-msgstr "Error montando volumen. Error GIO:%s\n"
+msgstr ""
 
 #: ../src/folderbrowser.c:311
-#, fuzzy, c-format
+#, c-format
 msgid "Error::%s"
-msgstr "UTF-8 Error: %s\n"
+msgstr "Error::%s"
 
 #: ../src/folderbrowser.c:564
-#, fuzzy
 msgid "Are you sure you wish to delete this file?"
-msgstr "¿Está seguro de que desea eliminar la plantilla% s?"
+msgstr "¿Está seguro de que desea eliminar este archivo?"
 
 #: ../src/folderbrowser.c:565
 msgid "Question"
-msgstr ""
+msgstr "Pregunta"
 
 #: ../src/folderbrowser.c:578 ../src/folderbrowser.c:582
-#, fuzzy, c-format
+#, c-format
 msgid "GIO Error deleting file: %s\n"
-msgstr "Error GIO: %s guardando archivo:%s\n"
+msgstr "Error GIO borrando archivo: %s\n"
 
 #: ../src/folderbrowser.c:599
-#, fuzzy, c-format
+#, c-format
 msgid "Error renaming file. GIO Error:%s\n"
-msgstr "Error abriendo archivo. Error GIO:%s\n"
+msgstr "Error re-nombrando archivo. Error GIO:%s\n"
 
 #: ../src/folderbrowser.c:604
-#, fuzzy
 msgid "Rename File"
-msgstr "Abrir archivo"
+msgstr "Renombrar archivo"
 
 #: ../src/folderbrowser.c:611
-#, fuzzy
 msgid "New Filename"
-msgstr "Nuevo archivo"
+msgstr "Nuevo nombre archivo"
 
 #: ../src/folderbrowser.c:633
-#, fuzzy
 msgid "New Dir"
-msgstr "Nuevo archivo"
+msgstr "Nuevo Directorio"
 
 #: ../src/folderbrowser.c:640
 msgid "Directory Name"
-msgstr ""
+msgstr "Nombre directorio"
 
 #: ../src/folderbrowser.c:676
 #, fuzzy, c-format
@@ -1471,29 +1442,24 @@ msgid "Error creating folder. GIO error:%s\n"
 msgstr "Error montando volumen. Error GIO:%s\n"
 
 #: ../src/folderbrowser.c:699
-#, fuzzy
 msgid "Open file"
 msgstr "Abrir archivo"
 
 #: ../src/folderbrowser.c:707
-#, fuzzy
 msgid "Rename file"
-msgstr "Abrir archivo"
+msgstr "Renombrar archivo"
 
 #: ../src/folderbrowser.c:711
-#, fuzzy
 msgid "Delete file"
-msgstr "Borrar"
+msgstr "Borrar Archivo"
 
 #: ../src/folderbrowser.c:718
-#, fuzzy
 msgid "Create New Directory"
-msgstr "Crea un nuevo archivo"
+msgstr "Crea un nuevo directorio"
 
 #: ../src/folderbrowser.c:832
-#, fuzzy
 msgid "File"
-msgstr "_Archivo"
+msgstr "Archivo"
 
 #: ../src/folderbrowser.c:838
 msgid "Mime"
@@ -1511,7 +1477,7 @@ msgstr ""
 
 #: ../src/folderbrowser.c:881
 msgid "Go Up one level"
-msgstr ""
+msgstr "Subir un nivel"
 
 #: ../src/folderbrowser.c:890
 msgid "Refresh folderbrowser"
@@ -1524,11 +1490,11 @@ msgstr ""
 #: ../src/folderbrowser.c:1053
 #, c-format
 msgid "%s cannot be copied, it already exists, overwrite?"
-msgstr ""
+msgstr "%s no se puede copiar, ya existe, sobreescribirlo?"
 
 #: ../src/folderbrowser.c:1054
 msgid "Overwrite file?"
-msgstr ""
+msgstr "Sobrescribir archivo?"
 
 #. Add the File operations to the Main Toolbar
 #: ../src/toolbar.c:108
@@ -1633,7 +1599,6 @@ msgstr "Ir a linea"
 #~ msgid "C character"
 #~ msgstr "Carácter C"
 
-#, fuzzy
 #~ msgid "C word"
 #~ msgstr "Palabra completa"
 
@@ -1643,15 +1608,12 @@ msgstr "Ir a linea"
 #~ msgid "C identifier"
 #~ msgstr "Identificador C"
 
-#, fuzzy
 #~ msgid "C comment"
 #~ msgstr "Comentario SQL"
 
-#, fuzzy
 #~ msgid "C operator"
 #~ msgstr "Operador CSS"
 
-#, fuzzy
 #~ msgid "PHP-Help not compiled in. Help for function not found: %s\n"
 #~ msgstr "Ayuda para la función no encontrada: %s\n"
 
