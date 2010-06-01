@@ -216,7 +216,7 @@ static void print_files(gchar *path){
       gchar *icon_name=icon_name_from_icon(current->icon,theme);
       p_file_image = gtk_icon_theme_load_icon (theme, icon_name, GTK_ICON_SIZE_MENU, 0, NULL);
       g_free(icon_name);
-      gtk_tree_store_insert_with_values(GTK_TREE_STORE(main_window.pTree), &iter2, iter, 0, 0, p_file_image, 1, current->display_name,2,current->mime,-1);
+      gtk_tree_store_insert_with_values(GTK_TREE_STORE(main_window.pTree), &iter2, iter, 0, ICON_COLUMN, p_file_image, FILE_COLUMN, current->display_name,MIME_COLUMN,current->mime,-1);
       g_object_unref(p_file_image);
         while (gtk_events_pending ())
           gtk_main_iteration ();
@@ -256,7 +256,7 @@ static gchar *get_mime_from_tree(GtkTreeView *tree_view){
   gchar *tmime;
   select = gtk_tree_view_get_selection(tree_view);
   if(gtk_tree_selection_get_selected (select, &model, &iter)) {
-    gtk_tree_model_get (model, &iter,2,&tmime, -1);
+    gtk_tree_model_get (model, &iter,MIME_COLUMN,&tmime, -1);
   return tmime;
   }
   return NULL;
@@ -269,11 +269,11 @@ static gchar *get_path_from_tree(GtkTreeView *tree_view, gchar *root_path){
   select = gtk_tree_view_get_selection(tree_view);
   if(gtk_tree_selection_get_selected (select, &model, &iter)) {
     gchar *nfile;
-    gtk_tree_model_get (model, &iter,1, &nfile, -1);
+    gtk_tree_model_get (model, &iter,FILE_COLUMN, &nfile, -1);
     GtkTreeIter* parentiter=(GtkTreeIter*)g_malloc(sizeof(GtkTreeIter));
     while(gtk_tree_model_iter_parent(model,parentiter,&iter)){
       gchar *rom;
-      gtk_tree_model_get (model, parentiter, 1, &rom, -1);
+      gtk_tree_model_get (model, parentiter, FILE_COLUMN, &rom, -1);
       nfile = g_build_path (G_DIR_SEPARATOR_S, rom, nfile, NULL);
       iter=*parentiter;
       g_free(parentiter);
@@ -485,8 +485,8 @@ gint filebrowser_sort_func(GtkTreeModel * model, GtkTreeIter * a, GtkTreeIter * 
   gchar *namea, *nameb, *mimea, *mimeb;
   gboolean isdira, isdirb;
   gint retval = 0;
-  gtk_tree_model_get(GTK_TREE_MODEL (model), a, 1, &namea,2, &mimea,-1);
-  gtk_tree_model_get(GTK_TREE_MODEL (model), b, 1, &nameb,2, &mimeb,-1);
+  gtk_tree_model_get(GTK_TREE_MODEL (model), a, FILE_COLUMN, &namea,MIME_COLUMN, &mimea,-1);
+  gtk_tree_model_get(GTK_TREE_MODEL (model), b, FILE_COLUMN, &nameb,MIME_COLUMN, &mimeb,-1);
   isdira = (mimea && MIME_ISDIR(mimea));
   isdirb = (mimeb && MIME_ISDIR(mimeb));
   #ifdef DEBUGFOLDERBROWSER
@@ -685,7 +685,7 @@ void view_popup_menu (GtkWidget *treeview, GdkEventButton *event, gpointer userd
   }
   gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuopen);
 
-  menurename = gtk_menu_item_new_with_label(_("Rename file"));
+  menurename = gtk_menu_item_new_with_label(_("Rename File"));
   g_signal_connect(menurename, "activate", (GCallback) popup_rename_file, (gpointer) pop.filename);
   gtk_menu_shell_append(GTK_MENU_SHELL(menu), menurename);
 
@@ -785,10 +785,10 @@ extern void folderbrowser_create(MainWindow *main_window)
 
   GtkTreeViewColumn *pColumn;
   GtkCellRenderer  *pCellRenderer;
-  main_window->pTree = gtk_tree_store_new(3, GDK_TYPE_PIXBUF, G_TYPE_STRING,G_TYPE_STRING);
+  main_window->pTree = gtk_tree_store_new(N_COL, GDK_TYPE_PIXBUF, G_TYPE_STRING,G_TYPE_STRING);
   main_window->pListView = gtk_tree_view_new_with_model(GTK_TREE_MODEL(main_window->pTree));
   pCellRenderer = gtk_cell_renderer_pixbuf_new();
-  pColumn = gtk_tree_view_column_new_with_attributes("",pCellRenderer,"pixbuf",0,NULL);
+  pColumn = gtk_tree_view_column_new_with_attributes("",pCellRenderer,"pixbuf",ICON_COLUMN,NULL);
   gtk_tree_view_append_column(GTK_TREE_VIEW(main_window->pListView), pColumn);
   main_window->pScrollbar = gtk_scrolled_window_new(NULL, NULL);
   gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(main_window->pScrollbar),GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
@@ -810,13 +810,13 @@ extern void folderbrowser_create(MainWindow *main_window)
   pColumn=NULL;
   pCellRenderer=NULL;
   pCellRenderer = gtk_cell_renderer_text_new();
-  pColumn = gtk_tree_view_column_new_with_attributes(_("File"), pCellRenderer, "text",1,NULL);
+  pColumn = gtk_tree_view_column_new_with_attributes(_("File"), pCellRenderer, "text",FILE_COLUMN,NULL);
   gtk_tree_view_append_column(GTK_TREE_VIEW(main_window->pListView), pColumn);
 
   pColumn=NULL;
   pCellRenderer=NULL;
   pCellRenderer = gtk_cell_renderer_text_new();
-  pColumn = gtk_tree_view_column_new_with_attributes(_("Mime"), pCellRenderer,"text",2,NULL);
+  pColumn = gtk_tree_view_column_new_with_attributes(_("Mime"), pCellRenderer,"text",MIME_COLUMN,NULL);
   gtk_tree_view_append_column(GTK_TREE_VIEW(main_window->pListView), pColumn);
   gtk_tree_view_column_set_visible    (pColumn,FALSE);
   gtk_widget_show(main_window->folder);
@@ -954,7 +954,7 @@ void init_folderbrowser(GtkTreeStore *pTree, gchar *filename, GtkTreeIter *iter,
 void fb_file_v_drag_data_received(GtkWidget * widget, GdkDragContext * context, gint x,  gint y, GtkSelectionData * data, guint info, guint time,gpointer user_data)
 {
   gchar *stringdata;
-  GFile *destdir = g_file_new_for_path ((gchar*)CURRENTFOLDER);
+  GFile *destdir = get_gfile_from_filename ((gchar*)CURRENTFOLDER);
   g_object_ref(destdir);
 
   g_signal_stop_emission_by_name(widget, "drag_data_received");
@@ -964,7 +964,9 @@ void fb_file_v_drag_data_received(GtkWidget * widget, GdkDragContext * context, 
     return;
   }
   stringdata = g_strndup((const gchar *) gtk_selection_data_get_data(data), gtk_selection_data_get_length(data));
+  #ifdef DEBUGFOLDERBROWSER
   g_print("fb2_file_v_drag_data_received, stringdata='%s', len=%d\n", stringdata, gtk_selection_data_get_length(data));
+  #endif
   if (destdir) {
     if (strchr(stringdata, '\n') == NULL) {  /* no newlines, probably a single file */
       GSList *list = NULL;
@@ -1049,7 +1051,7 @@ gchar *trunc_on_char(gchar * string, gchar which_char)
   if (!copy_uris_process_queue(cf)) {
     update_folderbrowser((gchar*)CURRENTFOLDER);
     g_object_unref(cf->destdir);
-    g_free(cf);
+    g_slice_free(Tcopyfile,cf);
   }
 }
 
@@ -1078,7 +1080,7 @@ static gboolean copy_uris_process_queue(Tcopyfile *cf) {
 void copy_uris_async(GFile *destdir, GSList *sources) {
     Tcopyfile *cf;
     GSList *tmplist;
-    cf = g_new0(Tcopyfile,1);
+    cf = g_slice_new0(Tcopyfile);
     cf->destdir = destdir;
     g_object_ref(cf->destdir);
     cf->sourcelist = g_slist_copy(sources);
@@ -1092,7 +1094,7 @@ void copy_uris_async(GFile *destdir, GSList *sources) {
 void copy_files_async(GFile *destdir, gchar *sources) {
   Tcopyfile *cf;
   gchar **splitted, **tmp;
-  cf = g_new0(Tcopyfile,1);
+  cf = g_slice_new0(Tcopyfile);
   cf->destdir = destdir;
   g_object_ref(cf->destdir);
   /* create the source and destlist ! */

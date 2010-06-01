@@ -36,6 +36,13 @@
 #define CURRENTFOLDER gtk_button_get_label(GTK_BUTTON(main_window.button_dialog))
 #define FOLDER_INFOFLAGS "standard::type,standard::is-backup,standard::display-name,standard::icon,standard::content-type"
 
+enum {
+  ICON_COLUMN,
+  FILE_COLUMN,
+  MIME_COLUMN,
+  N_COL
+};
+
 void init_folderbrowser(GtkTreeStore *pTree, gchar *filename, GtkTreeIter *iter, GtkTreeIter *iter2);
 void update_folderbrowser_signal (GFileMonitor *monitor,GFile *file,GFile *other_file, GFileMonitorEvent event_type, gpointer user_data);
 void tree_double_clicked(GtkTreeView *tree_view,GtkTreePath *path,GtkTreeViewColumn *column,gpointer user_data);
