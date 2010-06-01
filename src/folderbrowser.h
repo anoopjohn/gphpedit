@@ -34,7 +34,7 @@
 #define DEFAULT_DIR (N_("Workspace's directory"))
 #define IS_DEFAULT_DIR(a) (strcmp(a,DEFAULT_DIR)==0)
 #define CURRENTFOLDER gtk_button_get_label(GTK_BUTTON(main_window.button_dialog))
-#define FOLDER_INFOFLAGS "standard::type,standard::is-backup,standard::display-name,standard::icon,standard::content-type"
+#define FOLDER_INFOFLAGS "standard::is-backup,standard::display-name,standard::icon,standard::content-type"
 
 enum {
   ICON_COLUMN,

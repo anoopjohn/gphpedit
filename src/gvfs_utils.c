@@ -51,6 +51,7 @@ gchar *filename_get_basename (gchar *filename){
 */
 gchar *filename_get_uri(gchar *filename){
     GFile *file= get_gfile_from_filename(filename);
+    if (!g_file_query_exists (file,NULL)) return NULL;
     gchar *file_uri= g_file_get_uri (file);
     g_object_unref(file);
     return file_uri;
