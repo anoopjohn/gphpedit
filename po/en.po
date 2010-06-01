@@ -57,7 +57,7 @@ msgstr ""
 
 #: ../src/find_replace.c:263 ../src/find_replace.c:670
 msgid "Whole word"
-msgstr "Palabra completa"
+msgstr ""
 
 #: ../src/find_replace.c:267 ../src/find_replace.c:674
 msgid "Ignore case while searching"

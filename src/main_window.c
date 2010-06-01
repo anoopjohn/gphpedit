@@ -129,7 +129,7 @@ static void main_window_create_appbar(void)
   gtk_statusbar_set_has_resize_grip (GTK_STATUSBAR (main_window.appbar), FALSE);
   GtkWidget *box;
   box = gtk_hbox_new(FALSE, 0);
-  main_window.zoomlabel=gtk_label_new(_("Zoom:100%"));
+  main_window.zoomlabel=gtk_label_new(_("Zoom: 100%"));
   gtk_widget_show (main_window.zoomlabel);
   gtk_box_pack_start(GTK_BOX(box), main_window.zoomlabel, FALSE, FALSE, 0);
   gtk_box_pack_end(GTK_BOX(main_window.appbar), box, FALSE, FALSE, 25);

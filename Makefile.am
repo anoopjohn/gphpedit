@@ -48,13 +48,8 @@ CLEANFILES = 			\
 	intltool-extract 	\
 	intltool-merge 		\
 	intltool-update		\
-        aclocal.m4 		\
-	build-aux/config.guess  \
-	build-aux/config.sub    \
-	build-aux/depcomp 	\
-	build-aux/install-sh 	\
-	build-aux/missing 	\
-	build-aux/ltmain.sh 	\
+  aclocal.m4 		\
+	build-aux/* 	\
 	src/stamp-h1	 	\
 	src/config.h		\
 	src/Makefile.in	 	\
@@ -70,4 +65,8 @@ CLEANFILES = 			\
 	doc/Makefile.in		\
 	doc/Makefile	 	\
 	pixmaps/Makefile.in	\
-	pixmaps/Makefile
+	pixmaps/Makefile \
+	po/*.gmo \
+  po/POTFILES \
+	po/Makefile.in	\
+	po/Makefile

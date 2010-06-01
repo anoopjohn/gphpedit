@@ -1068,68 +1068,68 @@ void set_current_highlighting_font()
       &temp_preferences.c_default_bold, &temp_preferences.c_default_italic,
       &temp_preferences.c_default_fore, &temp_preferences.c_default_back);
   }
-  if (IS_FONT_NAME(current_highlighting_element, _("C string"))) {
-    get_control_values_to_highlight(_("C string"), &temp_preferences.c_string_font, &temp_preferences.c_string_size,
+  if (IS_FONT_NAME(current_highlighting_element, _("C String"))) {
+    get_control_values_to_highlight(_("C String"), &temp_preferences.c_string_font, &temp_preferences.c_string_size,
       &temp_preferences.c_string_bold, &temp_preferences.c_string_italic,
       &temp_preferences.c_string_fore, &temp_preferences.c_string_back);
   }
-  if (IS_FONT_NAME(current_highlighting_element, _("C character"))) {
-    get_control_values_to_highlight(_("C character"), &temp_preferences.c_character_font, &temp_preferences.c_character_size,
+  if (IS_FONT_NAME(current_highlighting_element, _("C Character"))) {
+    get_control_values_to_highlight(_("C Character"), &temp_preferences.c_character_font, &temp_preferences.c_character_size,
       &temp_preferences.c_character_bold, &temp_preferences.c_character_italic,
       &temp_preferences.c_character_fore, &temp_preferences.c_character_back);
   }
-  if (IS_FONT_NAME(current_highlighting_element, _("C word"))) {
-    get_control_values_to_highlight(_("C word"), &temp_preferences.c_word_font, &temp_preferences.c_word_size,
+  if (IS_FONT_NAME(current_highlighting_element, _("C Word"))) {
+    get_control_values_to_highlight(_("C Word"), &temp_preferences.c_word_font, &temp_preferences.c_word_size,
       &temp_preferences.c_word_bold, &temp_preferences.c_word_italic,
       &temp_preferences.c_word_fore, &temp_preferences.c_word_back);
   }
-  if (IS_FONT_NAME(current_highlighting_element, _("C number"))) {
-    get_control_values_to_highlight(_("C number"), &temp_preferences.c_number_font, &temp_preferences.c_number_size,
+  if (IS_FONT_NAME(current_highlighting_element, _("C Number"))) {
+    get_control_values_to_highlight(_("C Number"), &temp_preferences.c_number_font, &temp_preferences.c_number_size,
       &temp_preferences.c_number_bold, &temp_preferences.c_number_italic,
       &temp_preferences.c_number_fore, &temp_preferences.c_number_back);
   }
-  if (IS_FONT_NAME(current_highlighting_element, _("C identifier"))) {
-    get_control_values_to_highlight(_("C identifier"), &temp_preferences.c_identifier_font, &temp_preferences.c_identifier_size,
+  if (IS_FONT_NAME(current_highlighting_element, _("C Identifier"))) {
+    get_control_values_to_highlight(_("C Identifier"), &temp_preferences.c_identifier_font, &temp_preferences.c_identifier_size,
       &temp_preferences.c_identifier_bold, &temp_preferences.c_identifier_italic,
       &temp_preferences.c_identifier_fore, &temp_preferences.c_identifier_back);
   }
-  if (IS_FONT_NAME(current_highlighting_element, _("C comment"))) {
-    get_control_values_to_highlight(_("C comment"), &temp_preferences.c_comment_font, &temp_preferences.c_comment_size,
+  if (IS_FONT_NAME(current_highlighting_element, _("C Comment"))) {
+    get_control_values_to_highlight(_("C Comment"), &temp_preferences.c_comment_font, &temp_preferences.c_comment_size,
       &temp_preferences.c_comment_bold, &temp_preferences.c_comment_italic,
       &temp_preferences.c_comment_fore, &temp_preferences.c_comment_back);
   }
-  if (IS_FONT_NAME(current_highlighting_element, _("C commentline"))) {
-    get_control_values_to_highlight(_("C commentline"), &temp_preferences.c_commentline_font, &temp_preferences.c_commentline_size,
+  if (IS_FONT_NAME(current_highlighting_element, _("C Commentline"))) {
+    get_control_values_to_highlight(_("C Commentline"), &temp_preferences.c_commentline_font, &temp_preferences.c_commentline_size,
       &temp_preferences.c_commentline_bold, &temp_preferences.c_commentline_italic,
       &temp_preferences.c_commentline_fore, &temp_preferences.c_commentline_back);
   }
-  if (IS_FONT_NAME(current_highlighting_element, _("C preprocesor"))) {
-    get_control_values_to_highlight(_("C preprocesor"), &temp_preferences.c_preprocesor_font, &temp_preferences.c_preprocesor_size,
+  if (IS_FONT_NAME(current_highlighting_element, _("C Preprocesor"))) {
+    get_control_values_to_highlight(_("C Preprocesor"), &temp_preferences.c_preprocesor_font, &temp_preferences.c_preprocesor_size,
       &temp_preferences.c_preprocesor_bold, &temp_preferences.c_preprocesor_italic,
       &temp_preferences.c_preprocesor_fore, &temp_preferences.c_preprocesor_back);
   }
-  if (IS_FONT_NAME(current_highlighting_element, _("C operator"))) {
-    get_control_values_to_highlight(_("C operator"), &temp_preferences.c_operator_font, &temp_preferences.c_operator_size,
+  if (IS_FONT_NAME(current_highlighting_element, _("C Operator"))) {
+    get_control_values_to_highlight(_("C Operator"), &temp_preferences.c_operator_font, &temp_preferences.c_operator_size,
       &temp_preferences.c_operator_bold, &temp_preferences.c_operator_italic,
       &temp_preferences.c_operator_fore, &temp_preferences.c_operator_back);
   }
-  if (IS_FONT_NAME(current_highlighting_element, _("C regex"))) {
-    get_control_values_to_highlight(_("C regex"), &temp_preferences.c_regex_font, &temp_preferences.c_regex_size,
+  if (IS_FONT_NAME(current_highlighting_element, _("C Regex"))) {
+    get_control_values_to_highlight(_("C Regex"), &temp_preferences.c_regex_font, &temp_preferences.c_regex_size,
       &temp_preferences.c_regex_bold, &temp_preferences.c_regex_italic,
       &temp_preferences.c_regex_fore, &temp_preferences.c_regex_back);
   }
-  if (IS_FONT_NAME(current_highlighting_element, _("C uuid"))) {
-    get_control_values_to_highlight(_("C uuid"), &temp_preferences.c_uuid_font, &temp_preferences.c_uuid_size,
+  if (IS_FONT_NAME(current_highlighting_element, _("C UUID"))) {
+    get_control_values_to_highlight(_("C UUID"), &temp_preferences.c_uuid_font, &temp_preferences.c_uuid_size,
       &temp_preferences.c_uuid_bold, &temp_preferences.c_uuid_italic,
       &temp_preferences.c_uuid_fore, &temp_preferences.c_uuid_back);
   }
-  if (IS_FONT_NAME(current_highlighting_element, _("C verbatim"))) {
-    get_control_values_to_highlight(_("C verbatim"), &temp_preferences.c_verbatim_font, &temp_preferences.c_verbatim_size,
+  if (IS_FONT_NAME(current_highlighting_element, _("C Verbatim"))) {
+    get_control_values_to_highlight(_("C Verbatim"), &temp_preferences.c_verbatim_font, &temp_preferences.c_verbatim_size,
       &temp_preferences.c_verbatim_bold, &temp_preferences.c_verbatim_italic,
       &temp_preferences.c_verbatim_fore, &temp_preferences.c_verbatim_back);
   }
-  if (IS_FONT_NAME(current_highlighting_element, _("C globalclass"))) {
-    get_control_values_to_highlight(_("C globalclass"), &temp_preferences.c_globalclass_font, &temp_preferences.c_globalclass_size,
+  if (IS_FONT_NAME(current_highlighting_element, _("C Globalclass"))) {
+    get_control_values_to_highlight(_("C Globalclass"), &temp_preferences.c_globalclass_font, &temp_preferences.c_globalclass_size,
       &temp_preferences.c_globalclass_bold, &temp_preferences.c_globalclass_italic,
       &temp_preferences.c_globalclass_fore, &temp_preferences.c_globalclass_back);
   }
