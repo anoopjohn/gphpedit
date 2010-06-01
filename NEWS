@@ -9,6 +9,7 @@ New Features and Fixes
 -Fix Hidden caret when editor is opened without files in session
 -Fix Crash when press toolbar close button
 -Fix External modification notification grows window beyond screen
+-New japanese translation. Thanks to Tadashi Jokagi <elf@elf.no-ip.org>
 
 
 ============================
