@@ -1,14 +1,13 @@
-# SOME DESCRIPTIVE TITLE.
-# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
-# This file is distributed under the same license as the PACKAGE package.
-# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+# Japanese translation for gphpedit
+# This file is distributed under the same license as the gphpedit.
+# Tadashi Jokagi <elf@elf.no-ip.org>, 2010.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: gphpedit\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2010-05-31 08:56+0000\n"
-"PO-Revision-Date: 2010-06-01 10:53+0900\n"
+"PO-Revision-Date: 2010-06-02 16:21+0900\n"
 "Last-Translator: Tadashi Jokagi <elf@elf.no-ip.org>\n"
 "Language-Team: Japanese <elf@elf.no-ip.org>\n"
 "MIME-Version: 1.0\n"
@@ -1030,7 +1029,7 @@ msgstr ""
 #: ../src/tab.c:418
 #, c-format
 msgid "Could not get the file info. GIO error: %s \n"
-msgstr ""
+msgstr "ファイルの情報を取得できません。GIO エラー: %s \n"
 
 #: ../src/tab.c:424
 msgid "Sorry, I can open this kind of file.\n"
@@ -1043,11 +1042,11 @@ msgstr "名称未設定"
 #: ../src/tab.c:493
 #, c-format
 msgid "Could not get file info for file %s. GIO error: %s \n"
-msgstr ""
+msgstr "ファイル %s の情報を取得できません。GIO エラー: %s\n"
 
 #: ../src/tab.c:511
 msgid "File size and loaded size not matching"
-msgstr ""
+msgstr "ファイルの大きさと読み込んだ大きさが一致しません"
 
 #: ../src/tab.c:580 ../src/tab.c:592
 #, c-format
@@ -1076,6 +1075,8 @@ msgid ""
 "Error opening file GIO error:%s\n"
 "file:%s"
 msgstr ""
+"ファイルを開く際の GIO エラー:%s\n"
+"ファイル:%s"
 
 #: ../src/tab.c:1090
 #, c-format
@@ -1104,7 +1105,7 @@ msgstr "PHP ヘルプ(_P)"
 
 #: ../src/menu.c:236
 msgid "Look for help on the currently selected function"
-msgstr ""
+msgstr "現在選択中の関数のヘルプを検索する"
 
 #: ../src/menu.c:239
 msgid "_Report a bug in gPHPEdit"
@@ -1112,7 +1113,7 @@ msgstr "gPHPEdit のバグを報告する(_R)"
 
 #: ../src/menu.c:239
 msgid "Go to bug report page to report a bug"
-msgstr ""
+msgstr "バグ報告ページに移動してバグを報告する"
 
 #: ../src/menu.c:243
 msgid "_Translate this application"
@@ -1204,7 +1205,7 @@ msgstr "最近のファイルを開く(_R)"
 
 #: ../src/menu.c:319
 msgid "_Recent"
-msgstr ""
+msgstr "最近(_R)"
 
 #: ../src/menu.c:324
 msgid "_Reload current file"
@@ -1216,12 +1217,11 @@ msgstr "エディターで選択したすべてのファイルを再読み込み
 
 #: ../src/menu.c:329 ../src/menu.c:331
 msgid "Save the file currently selected in the editor"
-msgstr ""
+msgstr "エディターで現在背短託したファイルを保存する"
 
 #: ../src/menu.c:333
-#, fuzzy
 msgid "Save A_ll"
-msgstr "ファイルを保存する"
+msgstr "すべて保存する(_L)"
 
 #: ../src/menu.c:333
 msgid "Save all open unsaved files"
@@ -1229,7 +1229,7 @@ msgstr "未保存のファイルをすべて保存する"
 
 #: ../src/menu.c:335
 msgid "_Rename"
-msgstr "名称を変更する(_R)"
+msgstr "名前を変更する(_R)"
 
 #: ../src/menu.c:335
 msgid "Rename the current file 'on-the-fly'"
@@ -1329,25 +1329,24 @@ msgid "Check the syntax using the PHP command line binary"
 msgstr ""
 
 #: ../src/menu.c:417
-#, fuzzy
 msgid "_Clear Syntax check"
-msgstr "文法確認プログラム"
+msgstr "文法確認を消去する(_C)"
 
 #: ../src/menu.c:417
 msgid "Remove the syntax check window"
-msgstr ""
+msgstr "文法確認のウィンドウを削除する"
 
 #: ../src/menu.c:422
 msgid "_Record keyboard macro start/stop"
-msgstr ""
+msgstr "キーボード マクロの記録を開始/停止する(_R)"
 
 #: ../src/menu.c:422
 msgid "Record keyboard actions"
-msgstr ""
+msgstr "キーボード操作を記録する"
 
 #: ../src/menu.c:424
 msgid "_Playback keyboard macro"
-msgstr ""
+msgstr "キーボード マクロを再生する(_P)"
 
 #: ../src/menu.c:424
 msgid "Playback the stored keyboard macro"
@@ -1371,15 +1370,15 @@ msgstr "_CSS"
 
 #: ../src/menu.c:434
 msgid "Force syntax highlighting to CSS mode"
-msgstr ""
+msgstr "強制的に CSS モードで<文法のハイライトをする"
 
 #: ../src/menu.c:436
 msgid "C/C_++"
-msgstr ""
+msgstr "C/C_++"
 
 #: ../src/menu.c:436
 msgid "Force syntax highlighting to C/C++ mode"
-msgstr ""
+msgstr "強制的に C/C++ モードで<文法のハイライトをする"
 
 #: ../src/menu.c:438
 msgid "_SQL"
@@ -1387,23 +1386,23 @@ msgstr "_SQL"
 
 #: ../src/menu.c:438
 msgid "Force syntax highlighting to SQL mode"
-msgstr ""
+msgstr "強制的に SQL モードで<文法のハイライトをする"
 
 #: ../src/menu.c:440
 msgid "_Perl"
-msgstr "_PERL"
+msgstr "_Perl"
 
 #: ../src/menu.c:440
 msgid "Force syntax highlighting to Perl mode"
-msgstr ""
+msgstr "強制的に Perl モードで<文法のハイライトをする"
 
 #: ../src/menu.c:442
 msgid "_Cobol"
-msgstr ""
+msgstr "_COBOL"
 
 #: ../src/menu.c:442
 msgid "Force syntax highlighting to Cobol mode"
-msgstr ""
+msgstr "強制的に COBOL モードで<文法のハイライトをする"
 
 #: ../src/menu.c:444
 msgid "P_ython"
@@ -1411,41 +1410,38 @@ msgstr "P_ython"
 
 #: ../src/menu.c:444
 msgid "Force syntax highlighting to Python mode"
-msgstr ""
+msgstr "強制的に Python モードで<文法のハイライトをする"
 
 #. create menus
 #. Menu file
 #: ../src/menu.c:461
-#, fuzzy
 msgid "_File"
-msgstr "新規ファイル"
+msgstr "ファイル(_F)"
 
 #. Menu edit
 #: ../src/menu.c:464
-#, fuzzy
 msgid "_Edit"
-msgstr "エディタ"
+msgstr "編集(_E)"
 
 #. view menu
 #: ../src/menu.c:467
 msgid "_View"
-msgstr ""
+msgstr "表示(_V)"
 
 #. menu code
 #: ../src/menu.c:470
-#, fuzzy
 msgid "_Code"
-msgstr "コード:"
+msgstr "コード(_C)"
 
 #. plugin menu
 #: ../src/menu.c:473 ../src/menu.c:476
 msgid "_Plugin"
-msgstr ""
+msgstr "プラグイン(_P)"
 
 #. help menu
 #: ../src/menu.c:483
 msgid "_Help"
-msgstr ""
+msgstr "ヘルプ(_H)"
 
 #~ msgid "New File"
 #~ msgstr "新規ファイル"
