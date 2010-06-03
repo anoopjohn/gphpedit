@@ -704,7 +704,7 @@ void view_popup_menu (GtkWidget *treeview, GdkEventButton *event, gpointer userd
   }
   gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuopen);
 
-  menurename = gtk_menu_item_new_with_label(_("Rename file"));
+  menurename = gtk_menu_item_new_with_label(_("Rename File"));
   g_signal_connect(menurename, "activate", (GCallback) popup_rename_file, (gpointer) pop.filename);
   gtk_menu_shell_append(GTK_MENU_SHELL(menu), menurename);
 

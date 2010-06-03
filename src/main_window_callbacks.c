@@ -1052,7 +1052,7 @@ gboolean try_save_page(Editor *editor, gboolean close_if_can)
 
 gboolean try_close_page(Editor *editor)
 {
-  if (!editor->saved && editor->type!=TAB_HELP) {
+  if (!editor->saved && editor->type!=TAB_HELP && !(editor->is_untitled && gtk_scintilla_get_text_length(GTK_SCINTILLA(editor->scintilla))==0)) {
     return try_save_page(editor, TRUE);
   }
   else {
