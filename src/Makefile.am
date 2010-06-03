@@ -33,8 +33,11 @@ AM_CFLAGS = \
 
 nodist_EXTRA_gphpedit_SOURCES = dummy.cxx
 gphpedit_SOURCES = \
+	gvfs_utils.c		\
+	gvfs_utils.h		\
 	calltip.c		\
 	calltip.h		\
+	images.h		\
 	classbrowser.c		\
 	classbrowser.h		\
 	classbrowser_parse.c	\

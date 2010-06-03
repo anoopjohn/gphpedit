@@ -28,12 +28,13 @@
 #include "stdlib.h"
 #include "main_window_callbacks.h"
 #include "find_replace.h"
-#include "main_window.h"
 #include "preferences_dialog.h"
 #include "tab.h"
 #include "templates.h"
 #include "folderbrowser.h"
 #include "plugin.h"
+#include "gvfs_utils.h"
+#include <gdk/gdkkeysyms.h>
 
 gboolean is_app_closing = FALSE;
 gint classbrowser_hidden_position;
@@ -47,58 +48,52 @@ void session_save(void)
   Editor *editor;
   Editor *current_focus_editor;
   GString *session_file;
-  FILE *fp;
+  GString *session_file_contents;
 
   session_file = g_string_new( g_get_home_dir());
   session_file = g_string_append(session_file, "/.gphpedit/session");
   
-  unlink(session_file->str);
-  
+  GFile *file=get_gfile_from_filename(session_file->str);
+  GError *error=NULL;
+
+
   if (preferences.save_session && (g_slist_length(editors) > 0)) {
     current_focus_editor = main_window.current_editor;
-  
-    fp = fopen(session_file->str, "w");
-      if (!fp) {  
-      g_print(_("ERROR: cannot save session to %s\n"), session_file->str);
-      return;
-      }
+    session_file_contents=g_string_new(NULL);
     for(walk = editors; walk!= NULL; walk = g_slist_next(walk)) {
       editor = walk->data;
       if (editor) {
         if (!editor->is_untitled) {
           if (editor == current_focus_editor) {
-            fputs("*", fp);
+            session_file_contents = g_string_append(session_file_contents,"*");
           }
           if (GTK_IS_SCINTILLA(editor->scintilla)) {
-            fputs(editor->filename->str, fp);
-            fputs("\n", fp);
+            g_string_append_printf (session_file_contents,"%s\n",editor->filename->str);
           } else {
             if (editor->type==TAB_HELP){
-              // it's a help page
-              fputs("phphelp:", fp);
-              fputs(editor->help_function, fp);
-              fputs("\n", fp);
+              /* it's a help page */
+            g_string_append_printf (session_file_contents,"phphelp:%s\n",editor->help_function);
             } else {
-              // it's a preview page
-              fputs("preview:", fp);
+              /* it's a preview page */
               gchar *temp=editor->filename->str;
               temp+=9;
-              fputs(temp, fp);
-              fputs("\n", fp);
+              g_string_append_printf (session_file_contents,"preview:%s\n",temp);
             }
           }
         }
       }
-    }  
-    fclose(fp);
+    }
+    if(!g_file_replace_contents (file,session_file_contents->str,session_file_contents->len,NULL,FALSE,G_FILE_CREATE_NONE,NULL,NULL,&error)){
+      g_print(_("Error Saving session file: %s\n"),error->message);
+      g_error_free (error);
+    }
   }
+   g_object_unref(file);
 }
 
 void session_reopen(void)
 {
   GString *session_file;
-  FILE *fp;
-  char buf[16384];
   char *filename;
   int focus_tab=-1;
   gboolean focus_this_one = FALSE;
@@ -106,24 +101,27 @@ void session_reopen(void)
 
   session_file = g_string_new( g_get_home_dir());
   session_file = g_string_append(session_file, "/.gphpedit/session");
-  
-  if (g_file_test(session_file->str,G_FILE_TEST_EXISTS)){
-    fp = fopen(session_file->str, "r");
-      if (!fp) {  
-      g_print(_("ERROR: cannot open session file (%s)\n"), session_file->str);
-      return;
-      }
-    while (fgets(buf, sizeof(buf), fp)) {
-      /* buf contains possibly:
+
+  if (filename_file_exist(session_file->str)){
+    gchar *content=read_text_file_sync(session_file->str);
+    gchar **strings;
+    strings = g_strsplit (content,"\n",0);
+    int i=0;
+    while (strings[i]){
+      /* strings[i] contains possibly:
         file:///blah\n
         *file:///blah\n
         phphelp:function\n
         *phphelp:function\n
+        preview:function\n
+        *preview:function\n
+
       */
-      
-      filename = buf;
+
+      if (strings[i][0]==0) break;
+      filename = strings[i];
       str_replace(filename, 10, 0);
-      if (buf[0]=='*') {
+      if (strings[i][0]=='*') {
         filename++;
         focus_this_one = TRUE;
       }
@@ -153,12 +151,21 @@ void session_reopen(void)
       }
         
       focus_this_one=FALSE;
+      i++;    
     }
-    
-  fclose(fp);
-  gtk_notebook_set_current_page( GTK_NOTEBOOK(main_window.notebook_editor), focus_tab);
-  unlink(session_file->str);
+    g_strfreev (strings);
+    g_free(content);
+    gtk_notebook_set_current_page( GTK_NOTEBOOK(main_window.notebook_editor), focus_tab);
   }
+  GFile *file=get_gfile_from_filename(session_file->str);
+  GError *error=NULL;
+  if (!g_file_delete (file,NULL,&error)){
+      if (error->code!=G_FILE_ERROR_NOENT && error->code!=1){
+        g_print(_("GIO Error deleting file: %s, code %d\n"),error->message,error->code);
+      }
+      g_error_free (error);
+  }
+  g_object_unref (file);
 }
 
 
@@ -176,13 +183,11 @@ void quit_application()
 
 void main_window_destroy_event(GtkWidget *widget, gpointer data)
 {
-  //g_io_channel_unref(inter_gphpedit_io);
-  //unlink("/tmp/gphpedit.sock");
   quit_application();
   g_slice_free(Mainmenu, main_window.menu); /* free menu struct*/
   g_slice_free(Maintoolbar, main_window.toolbar_main); /* free toolbar struct*/
   g_slice_free(Findtoolbar, main_window.toolbar_find); /* free toolbar struct*/
-  // Old code had a main_window_delete_event call in here, not necessary, Gtk/GNOME does that anyway...
+  cleanup_classbrowser();
   cleanup_calltip();
   cleanup_plugins();
   gtk_main_quit();
@@ -455,52 +460,19 @@ void run_plugin(GtkWidget *widget, gpointer data) {
   plugin_exec((gulong) data);// was (gint)
 }
 
-gchar *get_gnome_vfs_dirname(gchar *filename) {
-  gchar *end = NULL;
-  gchar *dirname = NULL;
-  gint length=0;
-  
-  end = strrchr(filename, '/');
-  if (end) {
-    length = (end-filename);
-    dirname = g_malloc0(length+1);
-    strncpy(dirname, filename, length);
-  }
-  return dirname;
-}
-
-GString *get_folder(GString *filename) {
-  gchar *dir;
-  GString *folder;
-
-  if (strstr(filename->str, "/")) {
-    dir = get_gnome_vfs_dirname(filename->str);
-  }
-  else {
-    dir = g_get_current_dir();
-  }
-  folder = g_string_new(dir);
-  folder = g_string_append(folder, "/");
-  g_free(dir);
-
-  return folder;
-}
-
 void on_openselected1_activate(GtkWidget *widget)
 {
   GSList *li;
   Editor *editor;
 
-  gint current_pos;
   gint wordStart;
   gint wordEnd;
   gchar *ac_buffer;
   gint ac_length;
-  GString *file;
+  gchar *file;
 
   if (main_window.current_editor == NULL || main_window.current_editor->type == TAB_HELP || main_window.current_editor->type == TAB_PREVIEW) return;
   
-  current_pos = gtk_scintilla_get_current_pos(GTK_SCINTILLA(main_window.current_editor->scintilla));
   wordStart = gtk_scintilla_get_selection_start(GTK_SCINTILLA(main_window.current_editor->scintilla));
   wordEnd = gtk_scintilla_get_selection_end(GTK_SCINTILLA(main_window.current_editor->scintilla));
   ac_buffer = gtk_scintilla_get_text_range (GTK_SCINTILLA(main_window.current_editor->scintilla), wordStart, wordEnd, &ac_length);
@@ -509,26 +481,27 @@ void on_openselected1_activate(GtkWidget *widget)
       editor = li->data;
       if (editor) {
         if (editor->opened_from) {
-          file = get_folder(editor->opened_from);
-          if (DEBUG_MODE) { g_print("DEBUG: main_window_callbacks.c:on_selected1_activate (opened_from) :file->str: %s\n", file->str); }
+          file = filename_parent_uri(editor->opened_from->str);
+          if (DEBUG_MODE) { g_print("DEBUG: main_window_callbacks.c:on_selected1_activate (opened_from) :file: %s\n", file); }
         }
         else {
-          file = get_folder(editor->filename);
-          if (DEBUG_MODE) { g_print("DEBUG: main_window_callbacks.c:on_selected1_activate:file->str: %s\n", file->str); }
+          file = filename_parent_uri(editor->filename->str);
+          if (DEBUG_MODE) { g_print("DEBUG: main_window_callbacks.c:on_selected1_activate:file: %s\n", file); }
         }
 
-        if (!strstr(ac_buffer, "://") && file->str) {
-          file = g_string_append(file, ac_buffer);
+        if (!strstr(ac_buffer, "://") && file) {
+          gchar *filetemp= g_strdup_printf("%s/%s",file, ac_buffer);
+          g_free(file);
+          file=g_strdup(filetemp);
+          g_free(filetemp);
         }
         else if (strstr(ac_buffer, "://")) {
-          file = g_string_new(ac_buffer);
+            if (file) g_free(file);
+            file = g_strdup(ac_buffer);
         }
-        GFile *fi;
-        fi=g_file_new_for_uri (file->str);
-        if(g_file_query_exists (fi,NULL)) switch_to_file_or_open(file->str,0);
-        g_object_unref(fi);
+        if(filename_file_exist(file)) switch_to_file_or_open(file,0);
         if (file) {
-          g_string_free(file, TRUE);
+          g_free(file);
         }
       }
     }
@@ -627,7 +600,7 @@ void add_file_filters(GtkFileChooser *chooser){
 void on_open1_activate(GtkWidget *widget)
 {
   GtkWidget *file_selection_box;
-  GString *folder;
+  gchar *folder;
   gchar *last_opened_folder;
   // Create the selector widget
   file_selection_box = gtk_file_chooser_dialog_new("Please select files for editing", GTK_WINDOW(main_window.window),
@@ -645,12 +618,12 @@ void on_open1_activate(GtkWidget *widget)
   /* opening of multiple files at once */
   gtk_file_chooser_set_select_multiple(GTK_FILE_CHOOSER(file_selection_box), TRUE);
   if (main_window.current_editor && !main_window.current_editor->is_untitled) {
-    folder = get_folder(main_window.current_editor->filename);
-    if (DEBUG_MODE) { g_print("DEBUG: main_window_callbacks.c:on_open1_activate:folder: %s\n", folder->str); }
-    gtk_file_chooser_set_current_folder_uri(GTK_FILE_CHOOSER(file_selection_box),  folder->str);
-    g_string_free(folder, TRUE);
+    folder = filename_parent_uri(main_window.current_editor->filename->str);
+    if (DEBUG_MODE) { g_print("DEBUG: main_window_callbacks.c:on_open1_activate:folder: %s\n", folder); }
+    gtk_file_chooser_set_current_folder_uri(GTK_FILE_CHOOSER(file_selection_box),  folder);
+    g_free(folder);
   }
-  else if (!last_opened_folder){
+  else if (last_opened_folder){
     gtk_file_chooser_set_current_folder_uri(GTK_FILE_CHOOSER(file_selection_box),  last_opened_folder);
   }
   
@@ -661,44 +634,19 @@ void on_open1_activate(GtkWidget *widget)
   gtk_widget_destroy(file_selection_box);
 }
 
-void save_file_as_confirm_overwrite(gint reply,gpointer data)
-{
-  GString *filename;
-
-  if (reply==0) {
-    filename = data; //g_string_new(gtk_file_selection_get_filename(GTK_FILE_SELECTION(data)));
-
-    // Set the filename of the current editor to be that
-    if (main_window.current_editor->filename) {
-      g_string_free(main_window.current_editor->filename, TRUE);
-    }
-    main_window.current_editor->filename=g_string_new(filename->str);
-    main_window.current_editor->short_filename = g_path_get_basename(filename->str);
-
-    tab_check_php_file(main_window.current_editor);
-
-    if (main_window.current_editor->opened_from) {
-      g_string_free(main_window.current_editor->opened_from, TRUE);
-      main_window.current_editor->opened_from = NULL;
-    }
-
-    // Call Save method to actually save it now it has a filename
-    on_save1_activate(NULL);
-  }
-}
-
-
 void save_file_as_ok(GtkFileChooser *file_selection_box)
 {
   GString *filename;
-  filename = g_string_new(gtk_file_chooser_get_uri(file_selection_box));
+  gchar *uri=gtk_file_chooser_get_uri(file_selection_box);
+  filename = g_string_new(uri);
+  g_free(uri);
   // Set the filename of the current editor to be that
   if (main_window.current_editor->filename) {
     g_string_free(main_window.current_editor->filename, TRUE);
   }
   main_window.current_editor->filename=g_string_new(filename->str);
   main_window.current_editor->is_untitled=FALSE;
-  main_window.current_editor->short_filename = g_path_get_basename(filename->str);
+  main_window.current_editor->short_filename = filename_get_basename(filename->str);
   tab_check_php_file(main_window.current_editor);
   tab_check_css_file(main_window.current_editor);
 
@@ -723,7 +671,7 @@ void on_save1_activate(GtkWidget *widget)
     if (main_window.current_editor->is_untitled) {
       on_save_as1_activate(widget);
     } else {
-      file=g_file_new_for_uri (filename);
+      file=get_gfile_from_filename(filename);
       tab_file_save_opened(main_window.current_editor,file);
     }
   }
@@ -745,7 +693,7 @@ void on_saveall1_activate(GtkWidget *widget)
     if (editor && editor->type!=TAB_HELP && editor->type!=TAB_PREVIEW && editor->is_untitled!=TRUE) {
       filename = editor->filename->str;
         GFile *file;
-        file=g_file_new_for_uri (filename);
+        file=get_gfile_from_filename(filename);
         text_length = gtk_scintilla_get_length(GTK_SCINTILLA(editor->scintilla));
         write_buffer = g_malloc0(text_length+1); // Include terminating null
         if (write_buffer == NULL) {
@@ -800,25 +748,26 @@ void on_save_as1_activate(GtkWidget *widget)
     gtk_file_chooser_set_do_overwrite_confirmation (GTK_FILE_CHOOSER(file_selection_box), TRUE);
     gtk_dialog_set_default_response (GTK_DIALOG(file_selection_box), GTK_RESPONSE_ACCEPT);
     
-    GConfClient *config;
-    GError *error = NULL;
-    config=gconf_client_get_default ();
-    last_opened_folder = gconf_client_get_string(config,"/gPHPEdit/general/last_opened_folder",&error);
-    if (DEBUG_MODE) { g_print("DEBUG: main_window_callbacks.c:on_save_as1_activate:last_opened_folder: %s\n", last_opened_folder); }
-  
     if (main_window.current_editor) {
       filename = main_window.current_editor->filename->str;
       if (main_window.current_editor->is_untitled == FALSE) {
-        gtk_file_chooser_set_uri(GTK_FILE_CHOOSER(file_selection_box), filename);
+          gchar *uri=filename_get_uri(filename);
+          gtk_file_chooser_set_uri(GTK_FILE_CHOOSER(file_selection_box), uri);
+          g_free(uri);
       }
       else {
-        if (!last_opened_folder){
+        GConfClient *config;
+        GError *error = NULL;
+        config=gconf_client_get_default ();
+        last_opened_folder = gconf_client_get_string(config,"/gPHPEdit/general/last_opened_folder",&error);
+        if (DEBUG_MODE) { g_print("DEBUG: main_window_callbacks.c:on_save_as1_activate:last_opened_folder: %s\n", last_opened_folder); }
+        if (last_opened_folder){
           if (DEBUG_MODE) { g_print("DEBUG: main_window_callbacks.c:on_save_as1_activate:Setting current_folder_uri to %s\n", last_opened_folder); }
           gtk_file_chooser_set_current_folder_uri(GTK_FILE_CHOOSER(file_selection_box),  last_opened_folder);
+              g_free(last_opened_folder);
         }
       }
     }
-    g_free(last_opened_folder);
     if (gtk_dialog_run (GTK_DIALOG(file_selection_box)) == GTK_RESPONSE_ACCEPT) {
       save_file_as_ok(GTK_FILE_CHOOSER(file_selection_box));
     }
@@ -847,6 +796,7 @@ void on_reload1_activate(GtkWidget *widget)
 void on_tab_close_activate(GtkWidget *widget, Editor *editor)
 {
   try_close_page(editor);
+  classbrowser_update();
 }
 
 void on_tab_close_set_style(GtkWidget *hbox, GtkWidget *button)
@@ -865,8 +815,8 @@ void rename_file(GString *newfilename)
 {
   GFile *file;
   GError *error;
-  file=g_file_new_for_uri ((const gchar *)main_window.current_editor->filename->str);
-  char *basename=g_path_get_basename(newfilename->str);
+  file=get_gfile_from_filename(main_window.current_editor->filename->str);
+  gchar *basename=filename_get_basename(newfilename->str);
   file=g_file_set_display_name (file,basename,NULL,&error);
   g_free(basename);
   if (!file){
@@ -875,7 +825,7 @@ void rename_file(GString *newfilename)
         
   // set current_editor->filename
   main_window.current_editor->filename=newfilename;
-  main_window.current_editor->short_filename = g_path_get_basename(newfilename->str);
+  main_window.current_editor->short_filename = filename_get_basename(newfilename->str);
 
   // save as new filename
   on_save1_activate(NULL);
@@ -889,7 +839,7 @@ void rename_file_ok(GtkFileChooser *file_selection)
   gchar *fileuri=gtk_file_chooser_get_uri(file_selection);
   filename = g_string_new(fileuri);
   g_free(fileuri);
-  GFile *file = g_file_new_for_uri (filename->str);
+  GFile *file = get_gfile_from_filename(filename->str);
   if (g_file_query_exists (file,NULL)) {
     file_exists_dialog = gtk_message_dialog_new(GTK_WINDOW(main_window.window),GTK_DIALOG_DESTROY_WITH_PARENT,GTK_MESSAGE_QUESTION,GTK_BUTTONS_YES_NO,
        _("This file already exists, are you sure you want to overwrite it?"));
@@ -1969,7 +1919,7 @@ void check_externally_modified(void){
   if (!main_window.current_editor->is_untitled && GTK_IS_SCINTILLA(main_window.current_editor->scintilla)){
     /* verify if file has been externally modified */
     GError *error=NULL;
-    GFile *file=g_file_new_for_uri (main_window.current_editor->filename->str);
+    GFile *file=get_gfile_from_filename(main_window.current_editor->filename->str);
     GFileInfo *info;
     info= g_file_query_info (file,"time::modified,time::modified-usec",G_FILE_QUERY_INFO_NONE, NULL,&error);
     g_object_unref(file);

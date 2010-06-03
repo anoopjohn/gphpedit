@@ -22,7 +22,7 @@
    The GNU General Public License is contained in the file COPYING.
 */
 #ifdef HAVE_CONFIG_H
-  #include <config.h>
+#include <config.h>
 #endif
 
 #ifndef MAIN_H
@@ -30,7 +30,6 @@
 
 #include <glib.h>
 #include <gtk/gtk.h>
-#include <gdk/gdkkeysyms.h>
 #include <gtkscintilla.h>
 
 #ifdef ENABLE_NLS

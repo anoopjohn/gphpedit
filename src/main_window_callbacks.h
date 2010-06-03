@@ -24,15 +24,12 @@
 
 #ifndef MAIN_WINDOW_CALLBACKS_H
 #define MAIN_WINDOW_CALLBACKS_H
-#include <webkit/webkit.h> 
 #include "main.h"
-#include "tab.h"
 #include "main_window.h"
 #include "preferences.h"
 #include "syntax_check.h"
 #include "classbrowser.h"
 
-GString *get_folder(GString *filename);
 void main_window_destroy_event(GtkWidget *widget, gpointer data);
 gboolean main_window_delete_event(GtkWidget *widget, GdkEvent *event, gpointer user_data);
 gint main_window_key_press_event(GtkWidget   *widget, GdkEventKey *event,gpointer user_data);
@@ -41,7 +38,6 @@ void open_file_ok(GtkFileChooser *file_selection);
 void reopen_recent(GtkWidget *widget, gpointer data);
 void on_open1_activate(GtkWidget *widget);
 void on_openselected1_activate(GtkWidget *widget);
-void save_file_as_confirm_overwrite(gint reply,gpointer filename);
 void save_file_as_ok(GtkFileChooser *file_selection_box);
 void on_save1_activate(GtkWidget *widget);
 void on_save_as1_activate(GtkWidget *widget);

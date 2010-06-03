@@ -24,8 +24,6 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-#include <gtkscintilla.h>
-#include "folderbrowser.h"
 #include "tab.h"
 #include "tab_php.h"
 #include "tab_css.h"
@@ -34,13 +32,10 @@
 #include "tab_perl.h"
 #include "tab_cobol.h"
 #include "tab_python.h"
-#include "calltip.h"
-#include "main_window.h"
 #include "main_window_callbacks.h"
-#include "preferences.h"
 #include "grel2abs.h"
 #include <gconf/gconf-client.h>
-
+#include "gvfs_utils.h"
 //#define DEBUGTAB
 
 #define INFO_FLAGS "standard::display-name,standard::content-type,standard::edit-name,standard::size,access::can-write,access::can-delete,standard::icon,time::modified,time::modified-usec"
@@ -56,7 +51,6 @@ guint gotoline_after_create_tab = 0;
 static void save_point_reached(GtkWidget *w);
 static void save_point_left(GtkWidget *w);
 static void char_added(GtkWidget *scintilla, guint ch);
-
 
 void debug_dump_editors(void)
 {
@@ -75,7 +69,6 @@ void debug_dump_editors(void)
     g_print("Editor number    :%d\n", editor_number);
     g_print("Scintilla widget :%p\n", editor->scintilla);
     g_print("Scintilla lexer  :%d\n", gtk_scintilla_get_lexer(GTK_SCINTILLA(editor->scintilla)));
-    g_print("Scintilla ID     :%d\n", editor->scintilla_id);
     g_print("File mtime       :%lo\n", editor->file_mtime.tv_sec);
     g_print("File shortname   :%s\n", editor->short_filename);
     g_print("File fullname    :%s\n", editor->filename->str);
@@ -93,6 +86,7 @@ void tab_set_general_scintilla_properties(Editor *editor)
   gtk_scintilla_set_backspace_unindents(GTK_SCINTILLA(editor->scintilla), 1);
   gtk_scintilla_autoc_set_choose_single(GTK_SCINTILLA (editor->scintilla), FALSE);
   gtk_scintilla_autoc_set_ignore_case(GTK_SCINTILLA (editor->scintilla), TRUE);
+  register_autoc_images(GTK_SCINTILLA (editor->scintilla));
   gtk_scintilla_autoc_set_drop_rest_of_word(GTK_SCINTILLA (editor->scintilla), FALSE);
   gtk_scintilla_set_scroll_width_tracking(GTK_SCINTILLA (editor->scintilla), TRUE);
   gtk_scintilla_set_code_page(GTK_SCINTILLA(editor->scintilla), 65001); // Unicode code page
@@ -302,14 +296,14 @@ void tab_validate_buffer_and_insert(gpointer buffer, Editor *editor)
     #ifdef DEBUGTAB
     g_print("Valid UTF8 according to gnome\n");
     #endif
-    gtk_scintilla_add_text(GTK_SCINTILLA (editor->scintilla), strlen(buffer), buffer);//editor->file_size, buffer);
+    gtk_scintilla_add_text(GTK_SCINTILLA (editor->scintilla), strlen(buffer), buffer);
     editor->converted_to_utf8 = FALSE;
   }
   else {
     gchar *converted_text;
     gsize utf8_size;// was guint
     GError *error = NULL;      
-    converted_text = g_locale_to_utf8(buffer, editor->file_size, NULL, &utf8_size, &error);
+    converted_text = g_locale_to_utf8(buffer, strlen(buffer), NULL, &utf8_size, &error);
     if (error != NULL) {
       gssize nchars=strlen(buffer);
       // if locale isn't set
@@ -318,7 +312,7 @@ void tab_validate_buffer_and_insert(gpointer buffer, Editor *editor)
       if (error!=NULL){
         g_print(_("gPHPEdit UTF-8 Error: %s\n"), error->message);
         g_error_free(error);
-        gtk_scintilla_add_text(GTK_SCINTILLA (editor->scintilla), editor->file_size, buffer);
+        gtk_scintilla_add_text(GTK_SCINTILLA (editor->scintilla), strlen(buffer), buffer);
       return;
       }
     }
@@ -377,8 +371,10 @@ void tab_file_opened (GObject *source_object, GAsyncResult *res, gpointer user_d
   GError *error=NULL;
   Editor *editor = (Editor *)user_data;
   gchar* buffer;
-  if (!g_file_load_contents_finish ((GFile *) source_object,res,&(buffer),&(editor->file_size),NULL,&error)) {
+  guint size; 
+  if (!g_file_load_contents_finish ((GFile *) source_object,res,&(buffer),&size,NULL,&error)) {
     g_print("Error reading file. Gio error:%s",error->message);
+    g_error_free(error);
     return;
   }
   #ifdef DEBUGTAB
@@ -410,9 +406,7 @@ void tab_file_opened (GObject *source_object, GAsyncResult *res, gpointer user_d
   editor->current_line = gtk_scintilla_line_from_position(GTK_SCINTILLA(editor->scintilla), editor->current_pos);
 
   // Try getting file size
-  gchar *filename=convert_to_full(editor->filename->str);
-  file=g_file_new_for_uri (filename);
-  g_free(filename);
+  file=get_gfile_from_filename(editor->filename->str);
   info= g_file_query_info (file,INFO_FLAGS,G_FILE_QUERY_INFO_NONE, NULL,&error);
   if (!info){
     g_warning (_("Could not get the file info. GIO error: %s \n"), error->message);
@@ -422,13 +416,12 @@ void tab_file_opened (GObject *source_object, GAsyncResult *res, gpointer user_d
   /*we could open text based types so if it not a text based content don't open and displays error*/
   if (!IS_TEXT(contenttype) && IS_APPLICATION(contenttype)){
     info_dialog (_("gPHPEdit"), _("Sorry, I can open this kind of file.\n"));
+    g_print("%s\n",contenttype);
     editor->filename = g_string_new(_("Untitled"));
     editor->short_filename = g_strdup(editor->filename->str);
     editor->is_untitled=TRUE;
     return;
   }
-  /*initial file size, needed for buffer size*/
-  editor->file_size= g_file_info_get_size (info);
   editor->isreadonly= !g_file_info_get_attribute_boolean (info,"access::can-write");
   editor->contenttype=g_strdup(contenttype);
   GIcon *icon= g_file_info_get_icon (info); /* get Gicon for mimetype*/
@@ -437,7 +430,7 @@ void tab_file_opened (GObject *source_object, GAsyncResult *res, gpointer user_d
   g_free(iconname);
   g_file_info_get_modification_time (info,&editor->file_mtime);
   g_object_unref(info);
-  // Open file
+  /* Open file*/
   /*it's all ok, read file*/
   g_file_load_contents_async (file,NULL,tab_file_opened,editor);
 }
@@ -481,9 +474,7 @@ void tab_help_load_file(Editor *editor, GString *filename)
   goffset size;
 #endif
   gsize nchars;
-  gchar *filenam=convert_to_full(filename->str);
-  file=g_file_new_for_uri (filenam);
-  g_free(filenam);
+  file=get_gfile_from_filename(filename->str);
 #ifdef PHP_DOC_DIR
   info=g_file_query_info (file,"standard::size,standard::icon",0,NULL,&error);
 #else
@@ -502,7 +493,7 @@ void tab_help_load_file(Editor *editor, GString *filename)
   g_free(iconname);
   g_object_unref(info);
   if (!g_file_load_contents (file,NULL,&buffer, &nchars,NULL,&error)){
-    g_print("Error reading file. GIO error:%s\n",error->message);
+    g_print(_("Error reading file. GIO error:%s\n"),error->message);
     g_free (buffer);
     g_object_unref(file);
     return;
@@ -530,7 +521,7 @@ GString *tab_help_try_filename(gchar *prefix, gchar *command, gchar *suffix)
   #ifdef DEBUGTAB
   g_print("DEBUG: tab.c:tab_help_try_filename:long_filename->str: %s\n", long_filename->str);
   #endif
-  if (g_file_test(long_filename->str, G_FILE_TEST_EXISTS)){
+  if (filename_file_exist(long_filename->str)){
     return long_filename;
   }
   else {
@@ -545,7 +536,7 @@ GString *tab_help_try_filename(gchar *prefix, gchar *command, gchar *suffix)
   #ifdef DEBUGTAB
   g_print("DEBUG: tab.c:tab_help_try_filename:long_filename->str: %s\n", long_filename->str);
   #endif
-  if (g_file_test(long_filename->str, G_FILE_TEST_EXISTS)){
+  if (filename_file_exist(long_filename->str)){
     return long_filename;
   }
   g_string_free(long_filename, TRUE);
@@ -583,7 +574,7 @@ GString *tab_help_find_helpfile(gchar *command)
   long_filename = g_string_new("http://www.php.net/manual/en/function.");
   long_filename = g_string_append(long_filename, command);
   long_filename = g_string_append(long_filename, ".php");
-  GFile *temp= g_file_new_for_uri (long_filename->str);
+  GFile *temp= get_gfile_from_filename(long_filename->str);
   if(g_file_query_exists(temp,NULL)){
   g_object_unref(temp);
   return long_filename;
@@ -893,6 +884,7 @@ if (g_str_has_suffix(filename,".sql"))
 void set_editor_to_php(Editor *editor)
 {
   tab_php_set_lexer(editor);
+  gtk_scintilla_set_word_chars((GtkScintilla *)editor->scintilla, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_$");
   editor->type = TAB_PHP;
   tab_set_folding(editor, TRUE);
 }
@@ -988,19 +980,14 @@ void tab_check_sql_file(Editor *editor)
 
 void register_file_opened(gchar *filename)
 {
-  GString *tmp_filename;
-  GString *folder;
-  
-  main_window_add_to_reopen_menu(filename);
-
-  tmp_filename = g_string_new(filename);
-
-  folder = get_folder(tmp_filename);
+  gchar *full_filename=filename_get_uri(filename);
+  main_window_add_to_reopen_menu(full_filename);
+  g_free(full_filename);
+  gchar *folder = filename_parent_uri(filename);
   GConfClient *config;
   config=gconf_client_get_default ();
-  gconf_client_set_string (config,"/gPHPEdit/general/last_opened_folder",folder->str,NULL);
-  g_string_free(folder, TRUE);
-  g_string_free(tmp_filename, TRUE);
+  if (folder)
+    gconf_client_set_string (config,"/gPHPEdit/general/last_opened_folder",folder,NULL);
 }
 
 gboolean switch_to_file_or_open(gchar *filename, gint line_number)
@@ -1009,7 +996,7 @@ gboolean switch_to_file_or_open(gchar *filename, gint line_number)
   GSList *walk;
   GString *tmp_filename;
   // need to check if filename is local before adding to the listen
-  filename = convert_to_full(filename);
+  filename = g_strdup(filename);
   for (walk = editors; walk!=NULL; walk = g_slist_next(walk)) {
     editor = walk->data;
     if (strcmp(editor->filename->str, filename)==0) {
@@ -1066,7 +1053,7 @@ gboolean tab_create_new(gint type, GString *filename)
     else {
       abs_path = g_strdup(filename->str);
     }
-    file=g_file_new_for_uri (abs_path);
+    file=get_gfile_from_filename(abs_path);
     if (!uri_is_local_or_http(abs_path)){
       GError *error2=NULL;
       GMount *ex= g_file_find_enclosing_mount (file,NULL,&error2);
@@ -1077,7 +1064,8 @@ gboolean tab_create_new(gint type, GString *filename)
           gmo= gtk_mount_operation_new(GTK_WINDOW(main_window.window));
           recordar=g_strdup(filename->str);
           g_file_mount_enclosing_volume (file, G_MOUNT_MOUNT_NONE,gmo,NULL, openfile_mount, recordar);
-          error2=NULL;
+          g_error_free(error2);
+          error2=NULL;        
           return FALSE;
         }
         g_print(_("Error opening file GIO error:%s\nfile:%s"),error2->message,abs_path);
@@ -1128,7 +1116,7 @@ gboolean tab_create_new(gint type, GString *filename)
                 
     if (abs_path != NULL) {
       editor->filename = g_string_new(abs_path);
-      editor->short_filename = g_path_get_basename(editor->filename->str);
+      editor->short_filename = filename_get_basename (editor->filename->str);
       if (!file_created) tab_load_file(editor);
       //tab_check_php_file(editor);
       tab_check_css_file(editor);
@@ -1137,13 +1125,15 @@ gboolean tab_create_new(gint type, GString *filename)
       tab_check_cobol_file(editor);
       tab_check_python_file(editor);
       tab_check_sql_file(editor);
-      classbrowser_update();
+//      classbrowser_update();
       editor->is_untitled=FALSE;
     } else {
       editor->filename = g_string_new(_("Untitled"));
       editor->short_filename = g_strdup(editor->filename->str);
       if (main_window.current_editor) {
-        editor->opened_from = get_folder(main_window.current_editor->filename);
+        gchar *tfilename=filename_parent_uri(main_window.current_editor->filename->str);
+        editor->opened_from = g_string_new(tfilename);
+        g_free(tfilename);
       }
       editor->is_untitled=TRUE;
       /* set default text icon */
@@ -1171,7 +1161,7 @@ gboolean tab_create_new(gint type, GString *filename)
     editor->saved=TRUE;
   }
   update_app_title();
-
+  classbrowser_update();
   g_free(abs_path);
 
   return TRUE;
@@ -1244,15 +1234,12 @@ Editor *editor_find_from_help(void *help)
 
 static void save_point_reached(GtkWidget *scintilla)
 {
-  GString *label_caption;
   Editor *editor;
 
   editor = editor_find_from_scintilla(scintilla);
   if (!editor) return;
   if (editor->short_filename != NULL) {
-    label_caption = g_string_new(editor->short_filename);
-    gtk_label_set_markup(GTK_LABEL (editor->label), label_caption->str);
-    g_string_free(label_caption, TRUE);
+    gtk_label_set_text(GTK_LABEL (editor->label), editor->short_filename);
     editor->saved=TRUE;
     update_app_title();
   }
@@ -1260,16 +1247,13 @@ static void save_point_reached(GtkWidget *scintilla)
 
 static void save_point_left(GtkWidget *scintilla)
 {
-  GString *label_caption;
   Editor *editor;
-
+  gchar *caption;
   editor = editor_find_from_scintilla(scintilla);
+  if (!editor) return;
   if (editor->short_filename != NULL) {
-    label_caption = g_string_new("<span color=\"red\">");
-    label_caption = g_string_append(label_caption, editor->short_filename);
-    label_caption = g_string_append(label_caption, "</span>");
-    gtk_label_set_markup(GTK_LABEL (editor->label), label_caption->str);
-    g_string_free(label_caption, TRUE);
+    caption= g_strdup_printf("*%s",editor->short_filename);
+    gtk_label_set_text(GTK_LABEL (editor->label), caption);
     editor->saved=FALSE;
     update_app_title();
   }
@@ -1757,7 +1741,8 @@ static void char_added(GtkWidget *scintilla, guint ch)
   #ifdef DEBUGTAB
   g_print("DEBUG:::char added:%d\n",ch);
   #endif
-  if (type == TAB_HELP || type == TAB_PREVIEW || type==TAB_FILE) return;
+//  if (type == TAB_HELP || type == TAB_PREVIEW || type==TAB_FILE) return;
+  if (type == TAB_HELP || type == TAB_PREVIEW) return;
   if ((type != TAB_PHP) && (ch=='\r'|| ch=='\n' || ch=='\t'))return;
   current_pos = gtk_scintilla_get_current_pos(GTK_SCINTILLA(scintilla));
   current_line = gtk_scintilla_line_from_position(GTK_SCINTILLA(scintilla), current_pos);
@@ -1797,6 +1782,7 @@ static void char_added(GtkWidget *scintilla, guint ch)
         if (*previous_char_buffer=='{') {
             previous_line_indentation+=preferences.indentation_size;
         }
+        g_free(previous_char_buffer);
         indent_line(scintilla, current_line, previous_line_indentation);
         #ifdef DEBUGTAB
         g_print("DEBUG: tab.c:char_added:previous_line=%d, previous_indent=%d\n", previous_line, previous_line_indentation);
@@ -1809,7 +1795,7 @@ static void char_added(GtkWidget *scintilla, guint ch)
         pos=gtk_scintilla_position_from_line(GTK_SCINTILLA(scintilla), current_line)+(previous_line_indentation);
         }
         gtk_scintilla_goto_pos(GTK_SCINTILLA(scintilla), pos);
-        } 
+        }
           case (')'):
         if (gtk_scintilla_call_tip_active(GTK_SCINTILLA(scintilla))) {
         gtk_scintilla_call_tip_cancel(GTK_SCINTILLA(scintilla));
@@ -1823,17 +1809,27 @@ static void char_added(GtkWidget *scintilla, guint ch)
         }
         break;
           default:      
-        member_function_buffer = gtk_scintilla_get_text_range (GTK_SCINTILLA(scintilla), wordStart-2, wordStart, &member_function_length);
-        if (strcmp(member_function_buffer, "->")==0 && (gtk_scintilla_get_line_state(GTK_SCINTILLA(scintilla), current_line)==274)) {
-          if (gtk_scintilla_autoc_active(GTK_SCINTILLA(scintilla))==1) {
-          autocomplete_member_function(scintilla, wordStart, wordEnd);
-          } else {
+        member_function_buffer = gtk_scintilla_get_text_range (GTK_SCINTILLA(scintilla), wordEnd-1, wordEnd +1, &member_function_length);
+        if (strcmp(member_function_buffer, "->")==0 || strcmp(member_function_buffer, "::")==0) {
+          /*search back for a '$' in that line */
+          gint initial_pos=gtk_scintilla_position_from_line(GTK_SCINTILLA(scintilla), current_line);
+          gint line_size;
+          gchar *line_text= gtk_scintilla_get_text_range (GTK_SCINTILLA(scintilla), initial_pos, wordStart-1, &line_size);
+            if (!check_php_variable_before(line_text))return;
             if (completion_timer_set==FALSE) {
               completion_timer_id = g_timeout_add(preferences.auto_complete_delay, auto_memberfunc_complete_callback, (gpointer) current_pos);
               completion_timer_set=TRUE;
             }
-          }  
-              } else if ((current_word_length>=3) && ( (gtk_scintilla_get_line_state(GTK_SCINTILLA(scintilla), current_line)==274))) {
+        }
+        g_free(member_function_buffer);
+        member_function_buffer = gtk_scintilla_get_text_range (GTK_SCINTILLA(scintilla), wordStart, wordEnd, &member_function_length);
+        if (g_str_has_prefix(member_function_buffer,"$") || g_str_has_prefix(member_function_buffer,"__")) {
+            autocomplete_php_variables(scintilla, wordStart, wordEnd);
+        } else if (strcmp(member_function_buffer,"instanceof")==0 || strcmp(member_function_buffer,"is_subclass_of")==0) {
+        gtk_scintilla_insert_text(GTK_SCINTILLA(scintilla), current_pos," ");
+        gtk_scintilla_goto_pos(GTK_SCINTILLA(scintilla), current_pos +1);
+        autocomplete_php_classes(scintilla, wordStart, wordEnd);
+        } else if ((current_word_length>=3) && ( (gtk_scintilla_get_line_state(GTK_SCINTILLA(scintilla), current_line)==274))) {
         // check to see if they've typed <?php and if so do nothing
         if (wordStart>1) {
           ac_buffer = gtk_scintilla_get_text_range (GTK_SCINTILLA(scintilla), wordStart-2, wordEnd, &ac_length);
@@ -1846,7 +1842,7 @@ static void char_added(GtkWidget *scintilla, guint ch)
         if (gtk_scintilla_autoc_active(GTK_SCINTILLA(scintilla))==1) {
           autocomplete_word(scintilla, wordStart, wordEnd);
         } else {
-              completion_timer_id = g_timeout_add(preferences.auto_complete_delay, auto_complete_callback, (gpointer) current_pos);
+          completion_timer_id = g_timeout_add(preferences.auto_complete_delay, auto_complete_callback, (gpointer) current_pos);
         }
         }
         g_free(member_function_buffer);
@@ -1908,26 +1904,33 @@ static void char_added(GtkWidget *scintilla, guint ch)
         break;
       }
       // Drop down for HTML here (line_state = 272)
-      
+     default:
+            member_function_buffer = gtk_scintilla_get_text_range (GTK_SCINTILLA(scintilla), wordStart-2, wordEnd, &member_function_length);
+            /* if we type <?php then we are in a php file so force php syntax mode */
+            if (strcmp(member_function_buffer,"<?php")==0) set_editor_to_php(main_window.current_editor);
+//          g_print("buffer:%s",member_function_buffer);
+            g_free(member_function_buffer);
+            break;
     }
 }
 
 gboolean editor_is_local(Editor *editor)
 {
+  gboolean result=FALSE;
   gchar *filename;
   
-  filename = (editor->filename)->str;
-  if (g_str_has_prefix(filename, "file://")){
-    return TRUE;  
-  }
-  if (g_str_has_prefix(filename, "/")){
-    return TRUE;
+  filename = filename_get_path(editor->filename->str);
+  if (filename){
+  g_free(filename);
+  result=TRUE;
   }
   #ifdef DEBUGTAB
-  g_print("DEBUG::: FALSE - not local!!! filename:%s",filename);
+  g_print("DEBUG::: %s filename:%s",(result)?"TRUE - local!!!":"FALSE - not local!!!",editor->filename->str);
   #endif
-  return FALSE;
+
+  return result;
 }
+
 gboolean uri_is_local_or_http(gchar *uri)
 {
   gchar *filename;
@@ -1950,46 +1953,3 @@ gboolean uri_is_local_or_http(gchar *uri)
   #endif
   return FALSE;
 }
-gchar * editor_convert_to_local(Editor *editor)
-{
-  gchar *filename;
-  
-  if (!editor_is_local(editor)) {
-    return NULL;
-  }
-  filename = editor->filename->str;
-  if (g_str_has_prefix(filename, "file://")){
-    filename += 7;
-  }
-  
-  return filename;
-}
-
-/*
-* return a newly allocated string that may be freed with g_free()
-*/
-gchar *convert_to_full(gchar *filename)
-{
-  gchar *new_filename;
-  gchar *cwd;
-  gchar abs_buffer[2048];
-  GString *gstr_filename;
-
-  if (strstr(filename, "://") != NULL) {
-    return g_strdup(filename);  
-  }
-
-  cwd = g_get_current_dir();
-  // g_rel2abs returns a pointer in to abs_buffer!
-  new_filename = g_strdup(g_rel2abs (filename, cwd, abs_buffer, 2048));
-  g_free(cwd);
-  
-  gstr_filename = g_string_new("file://");
-  gstr_filename = g_string_append(gstr_filename, new_filename);
-  g_free(new_filename);
-    
-  new_filename = gstr_filename->str;
-  g_string_free(gstr_filename, FALSE);
-  return new_filename;
-}
-
