@@ -27,13 +27,11 @@
 */
 
 
-#include "main_window.h"
 #include "tab.h"
 #include "main_window_callbacks.h"
-#include "preferences.h"
-#include "classbrowser.h"
 #include "plugin.h"
 #include "templates.h"
+#include "gvfs_utils.h"
 
 #define BACKSLASH 92
 #define NEWLINE 10
@@ -43,19 +41,26 @@
 GHashTable *templates = NULL;
 gboolean templates_updated = FALSE;
 
-FILE *template_db_create(gchar *filename)
+gboolean template_db_create(gchar *filename)
 {
-  FILE *fp;
-  fp = fopen(filename, "w+");
-  fputs("class\tclass |\\n{\\n\\t\\n}\n", fp);
-  fputs("for\tfor (|; ; )\n{\\n\\t\\n}\n", fp);
-  fputs("function\tfunction |\\n{\\n\\t\\n}\n", fp);
-  fputs("if\tif (|) {\\n\\t\\n}\n", fp);
-  fputs("ife\tif (|) {\\n\\t\\n}\\nelse {\\n\\t\\n}\n", fp);
-  fputs("switch\tswitch(|) {\\n\\tcase ():;break;\\n\\tcase ():;break;\\n}\n", fp);
-  fputs("while\twhile (|)\\n{\\n\\t\\n}\n", fp);
-  rewind(fp);
-  return fp;
+  gboolean result=TRUE;
+  GError *error=NULL;
+  GString *contents=g_string_new(NULL);
+  contents = g_string_append(contents,"class\tclass |\\n{\\n\\t\\n}\n#");
+  contents = g_string_append(contents,"for\tfor (|; ; )\n{\\n\\t\\n}\n#");
+  contents = g_string_append(contents,"function\tfunction |\\n{\\n\\t\\n}\n#");
+  contents = g_string_append(contents,"if\tif (|) {\\n\\t\\n}\n#");
+  contents = g_string_append(contents,"ife\tif (|) {\\n\\t\\n}\\nelse {\\n\\t\\n}\n#");
+  contents = g_string_append(contents,"switch\tswitch(|) {\\n\\tcase ():;break;\\n\\tcase ():;break;\\n}\n#");
+  contents = g_string_append(contents,"while\twhile (|)\\n{\\n\\t\\n}\n#");
+  contents = g_string_append(contents,"declare\tdeclare(|);\n#");
+  GFile *file =get_gfile_from_filename(filename);
+  if(!g_file_replace_contents (file,contents->str,contents->len,NULL,FALSE,G_FILE_CREATE_NONE,NULL,NULL,&error)){
+    g_error_free (error);
+    result=FALSE;
+  }
+  g_object_unref(file);
+  return result;
 }
 
 GString *template_get_filename(void)
@@ -69,31 +74,31 @@ GString *template_get_filename(void)
 
 void template_db_open(void)
 {
-    GString *template_filename;
-  FILE *fp;
-  char buf[16384];
+  GString *template_filename;
   
   template_filename = template_get_filename();
-    
+   
   templates = g_hash_table_new(g_str_hash, g_str_equal);
-  fp = fopen(template_filename->str, "r");
-    if (!fp) {  
-    fp = template_db_create(template_filename->str);
-    if (!fp) {
+    if (!filename_file_exist(template_filename->str)){
+      if (!template_db_create(template_filename->str)){
       g_print(_("CANNOT Create templates file: %s\n"), template_filename->str);
       return;
     }
   }
-        
-  while(fgets(buf, sizeof(buf), fp)) {
-    gchar *key, *value;
-    gpointer *old_key=NULL, *old_value=NULL;
+  
+  gchar *content=read_text_file_sync(template_filename->str);
+    gchar **strings;
+    strings = g_strsplit (content,"#",0);
+    int i=0;
+    while (strings[i] && strings[i][0]!=0){
+      gchar *key, *value;
+      gpointer *old_key=NULL, *old_value=NULL;
         
     /* get the first and the second field */
-        key = (gpointer)strtok(buf, "\t");
-        if(!key) continue;
+      key = (gpointer)strtok(strings[i], "\t");
+      if(!key) continue;
         value = (gpointer)strtok(NULL, "\t");
-        if(!value) continue;
+      if(!value) continue;
 
     /* try looking up this key */
       if(g_hash_table_lookup_extended(templates, key, old_key, old_value)) {
@@ -107,43 +112,45 @@ void template_db_open(void)
           /* insert the new value */
           g_hash_table_insert(templates, g_strdup(key), g_strdup(value));
       }
+      i++;
     }
-    fclose(fp);
+    g_strfreev (strings);
+    g_free(content);
   
   g_string_free(template_filename, TRUE);
 }
-
+  GString *file_contents=NULL;
 static void template_save_entry(gpointer key, gpointer value, gpointer user_data)
 {
-  FILE *fp;
-  GString *entry;
-  
-  fp = (FILE *)user_data;
-  entry = g_string_new(key);
-  entry = g_string_append(entry, "\t");
-  entry = g_string_append(entry, value);
-  
-  fputs(entry->str, fp);
-  
-  g_string_free(entry, TRUE);
+  if (file_contents){
+  file_contents = g_string_new(key);
+  } else{
+  file_contents = g_string_append(file_contents,key);
+  }
+  file_contents = g_string_append(file_contents, "\t");
+  file_contents = g_string_append(file_contents, value);
+  if (!g_str_has_suffix(value,"#")){
+  file_contents = g_string_append(file_contents, "#");
+  }
 }
 
 void template_db_save(void)
 {
   GString *template_filename;
-  FILE *fp;
   
   template_filename = template_get_filename();
     
-  fp = fopen(template_filename->str, "w");
-    if (!fp) {
-    g_print(_("CANNOT Create templates file: %s\n"), template_filename->str);
-    return;
+  g_hash_table_foreach(templates, template_save_entry, NULL);
+  if (file_contents){
+    GFile *file=get_gfile_from_filename(template_filename->str);
+    GError *error=NULL;
+    if(!g_file_replace_contents (file,file_contents->str,file_contents->len,NULL,FALSE,G_FILE_CREATE_NONE,NULL,NULL,&error)){
+      g_print(_("CANNOT Create templates file:: %s\n"),error->message);
+      g_error_free (error);
+    }
+    g_string_free(file_contents,TRUE);
+    g_object_unref(file);
   }
-
-    g_hash_table_foreach(templates, template_save_entry, (gpointer) fp);
-  
-    fclose(fp);
   
   g_string_free(template_filename, TRUE);
 }

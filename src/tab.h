@@ -25,9 +25,6 @@
 #ifndef TAB_H
 #define TAB_H
 
-#include <sys/types.h>
-#include <fcntl.h>
-#include <gio/gio.h>
 #include "main.h"
 #include "classbrowser.h"
 #include <webkit/webkit.h> 
@@ -49,31 +46,26 @@
 typedef struct
 {
 	gint type;
-	GSList components;
 	GtkWidget *scintilla;
 	GtkWidget *help_scrolled_window;
 	WebKitWebView *help_view;
-	gint scintilla_id;
 	GTimeVal file_mtime;
 	GString *filename;
 	gchar *short_filename;
-	gboolean isreadonly;
+	gboolean isreadonly:1;
 	GdkPixbuf *file_icon;
 	gchar *help_function;
 	GString *opened_from;
-	gint last_parsed_time; // TODO: Change to something more meaningful
-	GSList functions_and_classes;
-	gboolean saved;
+	gboolean saved:1;
 	GtkWidget *label;
 	GSList *keyboard_macro_list;
-	gboolean is_macro_recording;
-	gboolean is_pasting;
-	gboolean converted_to_utf8;
-	gboolean is_untitled;
+	gboolean is_macro_recording:1;
+	gboolean is_pasting:1;
+	gboolean converted_to_utf8:1;
+	gboolean is_untitled:1;
 	guint current_pos;
 	guint current_line;
-	guint file_size;
-        const char *contenttype;
+  const char *contenttype;
 } Editor;
 
 typedef struct
@@ -83,7 +75,6 @@ typedef struct
 	glong lparam;
 } MacroEvent;
 
-extern GtkWidget *label;
 extern GSList *editors;
 
 Editor *editor_find_from_scintilla(GtkWidget *scintilla);
@@ -117,10 +108,8 @@ gboolean auto_memberfunc_complete_callback(gpointer data);
 void info_dialog (gchar *title, gchar *message);
 void debug_dump_editors(void);
 void register_file_opened(gchar *filename);
-gchar * editor_convert_to_local(Editor *editor);
 gboolean editor_is_local(Editor *editor);
 gboolean uri_is_local_or_http(gchar *uri);
-gchar *convert_to_full(gchar *filename);
 void str_replace(char *Str, char ToRp, char WithC);
 void tab_file_save_opened(Editor *editor,GFile *file);
 char *macro_message_to_string(gint message);
@@ -132,4 +121,5 @@ void set_editor_to_cxx(Editor *editor);
 void set_editor_to_perl(Editor *editor);
 void set_editor_to_cobol(Editor *editor);
 void set_editor_to_python(Editor *editor);
+gboolean is_cobol_file(const gchar *filename);
 #endif

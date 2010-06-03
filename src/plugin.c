@@ -26,6 +26,7 @@
 #include "main_window.h"
 #include <gdk/gdkkeysyms.h>
 #include <stdlib.h>
+#include "gvfs_utils.h"
 //#define DEBUG
 /*
 * transform a number into it's corresponding keysym
@@ -380,7 +381,9 @@ void plugin_exec(gint plugin_num)
     g_free(escape);
   }
   else if (plugin->type == GPHPEDIT_PLUGIN_TYPE_FILENAME) {
-    command_line = g_string_append(command_line, editor_convert_to_local(main_window.current_editor));    
+    gchar *temp_path=filename_get_path(main_window.current_editor->filename->str);
+    command_line = g_string_append(command_line, temp_path);
+    g_free(temp_path);
   }
   command_line = g_string_append(command_line, "\"");
   #ifdef DEBUG

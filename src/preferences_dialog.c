@@ -221,7 +221,6 @@ void set_current_preferences(void)
 {
   // Copy the local copy back to the global list
   memcpy(&preferences, &temp_preferences, sizeof(preferences));
-
   // Save the preferences
   preferences_save();
 }
@@ -775,9 +774,7 @@ void get_control_values_to_highlight(gchar *setting_name, gchar **fontname, gint
   GString *message;
   gint newfontsize; // Back to being a gint, g_string_printf complains
   gint result;
-
   if (preferences_dialog.changing_highlight_element) return;
-
   tempfontname = g_string_new(gtk_combo_box_get_active_text(GTK_COMBO_BOX(preferences_dialog.font_combo)));
   tempfontname = g_string_prepend(tempfontname, "!");
   
@@ -810,7 +807,6 @@ void get_control_values_to_highlight(gchar *setting_name, gchar **fontname, gint
   }
   *bold = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(preferences_dialog.bold_button));
   *italic = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(preferences_dialog.italic_button));
-  
   GdkColor color;
   gtk_color_button_get_color (GTK_COLOR_BUTTON(preferences_dialog.foreground_colour),&color);
   *fore = color.red >> 8 | ((color.green >> 8) << 8) | ((color.blue >> 8) << 16);

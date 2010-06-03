@@ -78,11 +78,6 @@ typedef struct
   GtkTreeSelection *classtreeselect;
   GtkWidget *treeviewlabel;
   GtkWidget *label1;
-  /*
-  GtkWidget *notebook_manager_functions_page;
-  GtkWidget *label2;
-  GtkWidget *notebook_manager_files_page;
-  GtkWidget *label3;*/
   GtkWidget *classlabel;
   GtkClipboard* clipboard;
 
