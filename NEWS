@@ -4,13 +4,26 @@ gphpedit 0.9.98~RC2 (not released)
 
 New Features and Fixes
 ======================
--Use GtkRecentManager for recent files
--Fix Missing cursor in search and goto boxes
--Fix Hidden caret when editor is opened without files in session
--Fix Crash when press toolbar close button
--Fix External modification notification grows window beyond screen
--New japanese translation. Thanks to Tadashi Jokagi <elf@elf.no-ip.org>
-
+- Use GtkRecentManager for recent files
+- Fix Missing cursor in search and goto boxes
+- Fix Hidden caret when editor is opened without files in session
+- Fix Crash when press toolbar close button
+- Fix External modification notification grows window beyond screen
+- New japanese translation. Thanks to Tadashi Jokagi <elf@elf.no-ip.org>
+- Port remaining I/O code to GVFS
+- Fix Freezes when directory contains big XML files
+- Fix classbrowser not working in some directories
+- Added perl sintax check
+- Added images to the autocompletion list
+- Added custom PHP functions autocompletion funtionality
+- Added PHP class members autocompletion
+- Improve Classbrowser parse performance
+- Improve autocompletion performance
+- Improve tab switch performance
+- Fix last folder bug in open/save dialog
+- Fix sintaxcheck when file contains %xx scapes chars
+- Fix folderbrowser Drag-Drop bug
+- Misc bugfixes and code cleanups
 
 ============================
 gphpedit 0.9.98~RC1
