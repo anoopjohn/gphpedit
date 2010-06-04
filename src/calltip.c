@@ -25,6 +25,7 @@
 #include <stdio.h>
 #include "calltip.h"
 #include "tab.h"
+#include "images.h"
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
@@ -63,6 +64,14 @@ gchar *sql_keywords[] = {"ADD", "ALL", "ALTER", "ANALYZE", "AND", "AS", "ASC", "
   "UNLOCK", "UNSIGNED", "UNTIL", "UPDATE", "USAGE", "USE", "USER_RESOURCES", 
   "USING", "VALUES", "VARBINARY", "VARCHAR", "VARCHARACTER", "VARYING", "WARNINGS", 
   "WHEN", "WHERE", "WHILE", "WITH", "WRITE", "XOR", "YEAR_MONTH", "ZEROFILL", NULL};
+
+void register_autoc_images(GtkScintilla *sci){
+  gtk_scintilla_register_image(sci, 1, (const gchar *) function_xpm);
+  gtk_scintilla_register_image(sci, 2, (const gchar *) bullet_blue_xpm);
+  gtk_scintilla_register_image(sci, 3, (const gchar *) variable_xpm);
+  gtk_scintilla_register_image(sci, 4, (const gchar *) class_xpm);
+}
+
 void function_list_prepare(void)
 {
   FILE *apifile;
@@ -152,9 +161,11 @@ gboolean make_completion_string (gpointer key, gpointer value, gpointer data){
   if(g_str_has_prefix(key, (gchar *)data)){
 	    if (!completion_list_tree) {
 	      completion_list_tree = g_string_new(key);
+        completion_list_tree = g_string_append(completion_list_tree, "?2");
 	    }else{
 	      completion_list_tree = g_string_append(completion_list_tree, " ");
         completion_list_tree = g_string_append(completion_list_tree, key);
+        completion_list_tree = g_string_append(completion_list_tree, "?2");
       }
   }
   if (strncmp(key, (gchar *)data,MIN(strlen(key),strlen(data)))>0){
@@ -181,7 +192,11 @@ GString *get_css_completion_list(GtkWidget *scintilla, gint wordStart, gint word
   g_free(buffer);
   return NULL;
 }
-
+/*
+void autocomplete_php_variables(GtkWidget *scintilla, gint wordStart, gint wordEnd){
+  autocomplete_vars(scintilla,wordStart, wordEnd);
+}
+*/
 static void get_api_line(GtkWidget *scintilla, gint wordStart, gint wordEnd)
 {
   gchar *buffer = NULL;
@@ -209,21 +224,77 @@ static void get_api_line(GtkWidget *scintilla, gint wordStart, gint wordEnd)
     gtk_scintilla_call_tip_show(GTK_SCINTILLA(scintilla), wordStart, callti);
     g_free(callti);
     g_free(copy_line);	
+  } else {
+  /*maybe a custom function*/
+    gchar *result=classbrowser_custom_function_calltip(buffer);
+    if (result){
+      gtk_scintilla_call_tip_show(GTK_SCINTILLA(scintilla), wordStart, result);
+      g_free(result);
+    }
   }
   g_free (buffer);
 }
 
+GSList *list = NULL;
+gboolean make_completion_list (gpointer key, gpointer value, gpointer data){
+  if(g_str_has_prefix(key, (gchar *)data)){
+      gchar *string=g_strdup_printf("%s?2",(gchar *)key); /*must free when no longer needed*/
+	    list=g_slist_prepend(list,string);
+      }
+  if (strncmp(key, (gchar *)data,MIN(strlen(key),strlen(data)))>0){
+    return TRUE;
+  }
+  return FALSE;
+}
+static inline void clear_list(void){
+g_slist_foreach (list,(GFunc) g_free,NULL);
+g_slist_free(list);
+list=NULL;
+}
+char cache_str[200]={'1'}; /*is this enougth?*/
+gchar *cache_completion;
 static void get_completion_list(GtkWidget *scintilla, gint wordStart, gint wordEnd)
 {
   gchar *buffer = NULL;
   gint length;
 
   buffer = gtk_scintilla_get_text_range (GTK_SCINTILLA(scintilla), wordStart, wordEnd, &length);
-  g_tree_foreach (php_api_tree, make_completion_string, buffer);
-  if (completion_list_tree != NULL) {
-    gtk_scintilla_autoc_show(GTK_SCINTILLA(scintilla), wordEnd-wordStart, completion_list_tree->str);
-    g_string_free (completion_list_tree,TRUE);
-    completion_list_tree=NULL;
+  /*  Autocompletion optimization:
+  *   we store last text typed and we compare with actual text. If current text typed
+  *   refine last search we take that search and remove words that don't match new text
+  *   so we improve performance a lot because we don't make another full search.
+  */
+  if (strlen(buffer) > strlen(cache_str) && g_str_has_prefix(buffer,cache_str)){ 
+    gchar **strings;
+    strings = g_strsplit (cache_completion," ",0);
+    int i=0;
+    GString *result=NULL;
+    result = g_string_new(NULL);
+    while (strings[i]!=0){
+      if (g_str_has_prefix(strings[i],buffer)){
+         result = g_string_append(result, strings[i]);
+         result = g_string_append(result, " ");
+      }    
+      i++;    
+    }
+    g_strfreev (strings);
+    gtk_scintilla_autoc_show(GTK_SCINTILLA(scintilla), wordEnd-wordStart, result->str);
+    g_free(cache_completion);
+    cache_completion=g_strdup(result->str);
+    g_string_free(result,TRUE);
+    strncpy(cache_str,buffer,MIN(strlen(buffer),200));
+  }else{ 
+  g_tree_foreach (php_api_tree, make_completion_list, buffer);
+  /* add custom php functions */
+  gchar *custom= classbrowser_add_custom_autocompletion(buffer,list);
+  if (custom){
+    gtk_scintilla_autoc_show(GTK_SCINTILLA(scintilla), wordEnd-wordStart, custom);
+    if (cache_completion) g_free(cache_completion);
+    cache_completion=g_strdup(custom);
+    g_free(custom);
+    strncpy(cache_str,buffer,MIN(strlen(buffer),200));
+  }
+  clear_list();
   }
   g_free(buffer);
 }
@@ -281,7 +352,7 @@ GString *get_sql_completion_list(GtkWidget *scintilla, gint wordStart, gint word
     if (g_str_has_prefix(sql_keywords[n], buffer)) {
         if (completion_list == NULL) {
           completion_list = g_string_new(sql_keywords[n]);
-        }	else {
+        } else {
           completion_list = g_string_append(completion_list, " ");
           completion_list = g_string_append(completion_list, sql_keywords[n]);
         }
@@ -363,12 +434,16 @@ gboolean free_css_tree_item (gpointer key, gpointer value, gpointer data){
   g_free (key);
   return FALSE;	
 }
+
 void cleanup_calltip(void){
   if (php_api_tree) 
     g_tree_foreach (php_api_tree,free_php_tree_item,NULL);
   if (completion_list_tree != NULL) {
     g_string_free (completion_list_tree,TRUE);	
   }
+  g_tree_foreach (css_api_tree,free_css_tree_item,NULL);
+  if (cache_completion) g_free(cache_completion);
   if (css_api_tree)
     g_tree_foreach (css_api_tree,free_css_tree_item,NULL);
 }
+

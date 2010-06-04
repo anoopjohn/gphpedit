@@ -156,7 +156,7 @@ AC_DEFINE_UNQUOTED(GETTEXT_PACKAGE,"$GETTEXT_PACKAGE", [Gettext package])
 AM_GLIB_GNU_GETTEXT
 
 dnl Please keep this in alphabetical order
-ALL_LINGUAS="de es"
+ALL_LINGUAS="de es ja"
 
 dnl AM_GNU_GETTEXT
 

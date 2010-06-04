@@ -24,13 +24,8 @@
 
 #ifndef CLASSBROWSER_PARSE_H
 #define CLASSBROWSER_PARSE_H
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <unistd.h>
-#include "preferences.h"
-#include "tab.h"
 #include "classbrowser.h"
 
 void classbrowser_parse_file(gchar *filename);
-
+gboolean check_php_variable_before(const gchar *line_text);
 #endif

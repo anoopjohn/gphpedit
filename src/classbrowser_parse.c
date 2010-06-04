@@ -23,34 +23,38 @@
 */
 
 #include "classbrowser_parse.h"
+#include "gvfs_utils.h"
 //#define DEBUG_CLASSBROWSER
 
+static gchar *read_text_file(gchar *filename){
 
-static gchar *read_text_file( gchar *filename )
-{
-  FILE *fp;
-  gchar *buffer = NULL;
-  struct stat buf;
-  size_t size_read;
+  gchar *buffer=NULL;
+  gsize nchars=0;
 
-  stat(filename, &buf);
+  GSList *walk;
+  Editor *editor;
 
-  buffer = g_malloc(buf.st_size+1);
-
-  fp = fopen( filename, "r" );
-
-  if (fp) {
-    size_read = fread(buffer, 1, buf.st_size, fp);
-    if (size_read != buf.st_size) {
-      g_print("ERROR: classbrowser reading %s, read in %d bytes, expecting %d bytes\n", filename, size_read, (guint)(buf.st_size));
+  for (walk = editors; walk != NULL; walk = g_slist_next (walk)) {
+    editor = walk->data;
+    if (strcmp(editor->filename->str,filename)==0) {
+        /* found read text from scintilla */ 
+          nchars = gtk_scintilla_get_length(GTK_SCINTILLA(editor->scintilla));
+          buffer = g_malloc0(nchars+1); // Include terminating null
+          if (buffer == NULL) {
+            g_warning ("%s", _("Classbrowser::Cannot allocate buffer"));
+            return NULL;
+          }
+          gtk_scintilla_get_text(GTK_SCINTILLA(editor->scintilla), nchars+1, buffer);
+//          g_print("Classbrowser::Using scintilla text\n");
+          break;
     }
-    buffer[buf.st_size] = '\0';
-    fclose(fp);
   }
-
+  if (!buffer || nchars==0){
+    buffer=read_text_file_sync(filename);
+  }
+//  g_print("buffer:<---\n%s\n--->",buffer);
   return buffer;
 }
-
 
 static gboolean is_whitespace(gchar character)
 {
@@ -230,8 +234,13 @@ void classbrowser_parse_file(gchar *filename)
   guint param_list_length;
   gboolean function_awaiting_brace_or_parenthesis;
 
+  gboolean posiblevar=FALSE;
+  gchar *startvarname=NULL;
+  gchar *posvarname=NULL;
+  gchar *varname=NULL;
+  gchar *beforevarname=NULL;
   file_contents = read_text_file(filename);
-
+  if (!file_contents) return;
   o = file_contents;
   c = o;
 
@@ -472,6 +481,40 @@ void classbrowser_parse_file(gchar *filename)
             }
             within_function_param_list = FALSE;
           }
+          if (posiblevar){
+            if (is_identifier_char(*c)){
+              posvarname=c;
+            } else {
+              //g_print("char:%c ret:false\n",*c);
+              posiblevar=FALSE;
+            int len=posvarname - startvarname +1; /*include initial $*/
+              if (len>1){ /*only if we have $ and something more */
+                varname = g_malloc(len +1);
+                strncpy(varname,startvarname,len);
+                varname[len]='\0';
+                if (!beforevarname){ beforevarname=g_strdup(varname); /*store lasat variable name found*/
+                } else {
+                  if (strcmp(beforevarname,varname)==0){
+#ifdef DEBUGCLASSBROWSER
+                    g_print("Duplicate variable: %s\n",varname);
+#endif
+                  } else {
+#ifdef DEBUGCLASSBROWSER
+                    g_print("Classbrowser var added:%s\n",varname);
+#endif
+                    classbrowser_varlist_add(varname, within_function, filename);
+                    g_free(beforevarname);
+                    beforevarname=g_strdup(varname);
+                  }
+                }
+                g_free(varname);
+              }
+            }
+          }
+          if (*c=='$' && !within_function_param_list && !within_multi_line_comment && !within_single_line_comment){ /* skip params vars */
+            posiblevar=TRUE;
+            startvarname=c;
+          }
           if (is_opening_brace(*c)) {
             brace_count++;
             #ifdef DEBUG_CLASSBROWSER
@@ -509,6 +552,28 @@ void classbrowser_parse_file(gchar *filename)
   }
   if (param_list) g_free(param_list);
   if (within_function) g_free(within_function);
+  if (beforevarname) g_free(beforevarname);
   g_free(file_contents);
 }
-
+/*
+ * gboolean check_variable_before(const gchar *line_text)
+ * check if there is a valid php variable has suffix in the gchar input
+ * something like this "p$sk->" return FALSE
+ * $this-> return TRUE
+ * $var($this-> return TRUE
+ * $var[$this-> return TRUE
+ */
+gboolean check_php_variable_before(const gchar *line_text){
+  gboolean r=FALSE;
+  int i;
+  if (!strchr(line_text,'$')) return r;
+  for (i=strlen(line_text)-1;i>=0;i--){
+    if (*(line_text+i)==';') break;
+    if (*(line_text+i)==' ') break;
+    if (*(line_text+i)=='$' && (*(line_text+i-1)==' ' || *(line_text+i-1)=='(' || *(line_text+i-1)=='[' || i==0)){  
+    r=TRUE; 
+    break;
+    }
+  }
+  return r;
+}

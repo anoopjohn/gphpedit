@@ -2283,6 +2283,7 @@ void ListBoxX::GetValue(int n, char *value, int len) {
 	} else {
 		value[0] = '\0';
 	}
+  g_free(text);
 }
 
 // g_return_if_fail causes unnecessary compiler warning in release compile.
@@ -2529,6 +2530,7 @@ int Platform::DBCSCharMaxLength() {
 }
 
 // These are utility functions not really tied to a platform
+
 
 int Platform::Minimum(int a, int b) {
 	if (a < b)

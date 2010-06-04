@@ -25,7 +25,7 @@
 #include "config.h"
 #include "find_replace.h"
 #include "main_window.h"
-
+#include <gdk/gdkkeysyms.h>
 
 FindDialog find_dialog;
 ReplaceDialog replace_dialog;

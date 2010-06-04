@@ -32,6 +32,7 @@
 #include "classbrowser.h"
 #include "plugin.h"
 #include "templates.h"
+#include "gvfs_utils.h"
 #include "syntax_check.h"
 
 MainWindow main_window;
@@ -160,6 +161,7 @@ static void main_window_create_panes(void)
   gtk_paned_pack2 (GTK_PANED (main_window.main_horizontal_pane), main_window.prin_hbox, TRUE, TRUE);  
 }
 
+
 static void create_side_panel(void){
   GtkWidget *prin_sidebox;
   GtkWidget *box2;
@@ -238,7 +240,7 @@ static void create_side_panel(void){
   gtk_box_pack_start(GTK_BOX(box2), main_window.treeviewlabel, FALSE, FALSE, 0);
   gtk_box_pack_end(GTK_BOX(notebox), box2, FALSE, FALSE, 4);
   
-  main_window.classtreestore = gtk_tree_store_new (N_COLUMNS, G_TYPE_STRING, G_TYPE_INT, G_TYPE_STRING, G_TYPE_INT, G_TYPE_INT);
+  main_window.classtreestore = gtk_tree_store_new (N_COLUMNS, G_TYPE_STRING, G_TYPE_INT, G_TYPE_STRING, G_TYPE_INT, G_TYPE_INT, G_TYPE_INT);
   /* enable sorting of the columns */
   classbrowser_set_sortable(main_window.classtreestore);
 
@@ -405,21 +407,21 @@ void update_app_title(void)
     if (main_window.current_editor->type != TAB_HELP && main_window.current_editor->type != TAB_PREVIEW
         && main_window.current_editor->filename) {
       //debug("Full Name - %s, Short Name - %s", main_window.current_editor->filename->str, main_window.current_editor->short_filename);
-      //title = get_differing_part_editor(main_window.current_editor);
       char *str = NULL;
       title = g_string_new(str);
-      dir = g_path_get_dirname(main_window.current_editor->filename->str);
-      if (dir) unquote(dir);
+      dir = filename_parent_uri(main_window.current_editor->filename->str);
+      if (dir) {
+        unquote(dir);
+      } else {
+        dir=g_strdup(".");
+      }
       g_string_printf (title,"%s (%s)",main_window.current_editor->short_filename,dir);
       g_free(dir);
       //debug("Title - %s, Short name - %s", title->str, main_window.current_editor->short_filename);
-      if (main_window.current_editor->saved == TRUE) {
-        g_string_append(title, _(" - gPHPEdit"));
-      }
+      g_string_append(title, _(" - gPHPEdit"));
+      if (!main_window.current_editor->saved) {
       //If the content is not saved then add a * to the begining of the title
-      else {
         g_string_prepend(title, "*");
-        g_string_append(title, _(" - gPHPEdit"));
       }
       update_zoom_level();
       update_controls();
@@ -573,11 +575,11 @@ void main_window_create(void){
   g_signal_connect (G_OBJECT (main_window.window), "size_allocate", G_CALLBACK (main_window_resize), NULL);
   g_signal_connect (G_OBJECT (main_window.window), "window-state-event", G_CALLBACK (main_window_state_changed), NULL);
   g_signal_connect (G_OBJECT (main_window.window), "focus-in-event", G_CALLBACK (main_window_activate_focus), NULL);
-
+  
   main_window.clipboard = gtk_clipboard_get(GDK_SELECTION_CLIPBOARD);
 
   gtk_widget_show(main_window.window);
-
+  
   update_app_title();
   // folder browser init
   if (preferences.showfolderbrowser) folderbrowser_create(&main_window);

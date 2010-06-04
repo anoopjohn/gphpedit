@@ -30,7 +30,7 @@
 #include "main_window.h"
 #include "main_window_callbacks.h"
 #include "plugin.h"
-
+#include <gdk/gdkkeysyms.h>
 /*needed for menu hints*/
 guint context_id;
 guint message_id;

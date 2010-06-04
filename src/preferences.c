@@ -352,7 +352,7 @@ void preferences_load(void)
 	preferences.php_simplestring_bold = gconf_client_get_bool(config,"/gPHPEdit/php_simplestring/bold",NULL);
 	preferences.php_simplestring_italic = gconf_client_get_bool(config,"/gPHPEdit/php_simplestring/italic",NULL);
 
-	preferences.php_word_fore = getcolor(config,"/gPHPEdit/php_word/fore","php_word",0);
+	preferences.php_word_fore = getcolor(config,"/gPHPEdit/php_word/fore","php_word",3946645);
 	preferences.php_word_font = get_string(config,"/gPHPEdit/php_word/font",DEFAULT_FONT);
 	preferences.php_word_back = getcolor(config,"/gPHPEdit/php_word/back","php_word",DEFAULT_BACK_COLOR);
   preferences.php_word_size = get_size(config,"/gPHPEdit/php_word/size",DEFAULT_FONT_SIZE);

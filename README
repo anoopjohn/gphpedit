@@ -179,12 +179,13 @@ The following list all gphpedit’s shortcut keys.
     * Search and replace (Ctrl + H)
     * Incremental search (Ctrl + I)
 
- 4) Tools:
+ 6) Tools:
 
     * Syntax check (Ctrl + F9)
     * Hide Syntax Check Panel (SHIFT + F9)
     * Record Keyboard macro start/stop (Alt + K)
     * Playback Keyboard macro (Ctrl + K)
-
+ 7) Autocompletion:
+    * Insert template (Ctrl + j)
 	The gphpedit team.
 	
