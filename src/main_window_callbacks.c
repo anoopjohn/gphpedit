@@ -50,10 +50,11 @@ void session_save(void)
   GString *session_file;
   GString *session_file_contents;
 
-  session_file = g_string_new( g_get_home_dir());
+  session_file = g_string_new(g_get_home_dir());
   session_file = g_string_append(session_file, "/.gphpedit/session");
   
   GFile *file=get_gfile_from_filename(session_file->str);
+  g_string_free(session_file,TRUE);
   GError *error=NULL;
 
 
@@ -87,6 +88,7 @@ void session_save(void)
       g_print(_("Error Saving session file: %s\n"),error->message);
       g_error_free (error);
     }
+  if (session_file_contents) g_string_free(session_file_contents,TRUE);
   }
    g_object_unref(file);
 }
@@ -165,6 +167,7 @@ void session_reopen(void)
       }
       g_error_free (error);
   }
+  g_string_free(session_file,TRUE);
   g_object_unref (file);
 }
 
@@ -950,6 +953,8 @@ void close_page(Editor *editor)
   }
   set_active_tab(page_num);
   g_string_free(editor->filename, TRUE);
+  g_free(editor->short_filename);
+  g_free(editor->contenttype);
   g_slice_free(Editor,editor);
   gtk_notebook_remove_page(GTK_NOTEBOOK(main_window.notebook_editor), page_num_closing);
 }
@@ -1148,7 +1153,7 @@ void selectiontolower(void){
 }
 void on_paste1_activate(GtkWidget *widget)
 {
-  if (main_window.current_editor == NULL || main_window.current_editor->type == TAB_HELP)
+  if (main_window.current_editor == NULL || main_window.current_editor->type == TAB_HELP || main_window.current_editor->type == TAB_PREVIEW)
     return;
   
   gtk_clipboard_request_text(main_window.clipboard, on_paste_got_from_cliboard,main_window.current_editor->scintilla);
@@ -1918,23 +1923,7 @@ void check_externally_modified(void){
   if (!main_window.current_editor) return;
   if (!main_window.current_editor->is_untitled && GTK_IS_SCINTILLA(main_window.current_editor->scintilla)){
     /* verify if file has been externally modified */
-    GError *error=NULL;
-    GFile *file=get_gfile_from_filename(main_window.current_editor->filename->str);
-    GFileInfo *info;
-    info= g_file_query_info (file,"time::modified,time::modified-usec",G_FILE_QUERY_INFO_NONE, NULL,&error);
-    g_object_unref(file);
-    if (!info){
-      if (error->code!=G_IO_ERROR_NOT_FOUND && error->code!=G_IO_ERROR_NOT_SUPPORTED){
-        g_warning (_("Could not get the file modification time for file: '%s'. GIO error: %s \n"), main_window.current_editor->short_filename,error->message);
-       }
-        g_error_free (error);
-        gtk_widget_hide (main_window.infobar);
-        return;
-      }
-    GTimeVal file_mtime;
-    g_file_info_get_modification_time (info,&file_mtime);
-    g_object_unref(info);  
-    if ((file_mtime.tv_sec > main_window.current_editor->file_mtime.tv_sec) || (file_mtime.tv_sec == main_window.current_editor->file_mtime.tv_sec && file_mtime.tv_usec > main_window.current_editor->file_mtime.tv_usec)){
+    if (get_file_modified(main_window.current_editor->filename->str, &main_window.current_editor->file_mtime, FALSE)){
       gchar *message=g_strdup_printf(_("The file %s has been externally modified. Do you want reload it?"), main_window.current_editor->filename->str);
       gtk_label_set_text (GTK_LABEL (main_window.infolabel), message);
       g_free(message);

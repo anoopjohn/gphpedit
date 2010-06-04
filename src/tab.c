@@ -986,8 +986,10 @@ void register_file_opened(gchar *filename)
   gchar *folder = filename_parent_uri(filename);
   GConfClient *config;
   config=gconf_client_get_default ();
-  if (folder)
+  if (folder){
     gconf_client_set_string (config,"/gPHPEdit/general/last_opened_folder",folder,NULL);
+    g_free(folder);
+  }
 }
 
 gboolean switch_to_file_or_open(gchar *filename, gint line_number)
@@ -1084,6 +1086,7 @@ gboolean tab_create_new(gint type, GString *filename)
       }
       file_created = TRUE;
     }
+    g_object_unref(file); /* not sure */
   }
   // When a new tab request is processed if the only current tab is an untitled
   // and unmodified tab then close it 
@@ -1254,6 +1257,7 @@ static void save_point_left(GtkWidget *scintilla)
   if (editor->short_filename != NULL) {
     caption= g_strdup_printf("*%s",editor->short_filename);
     gtk_label_set_text(GTK_LABEL (editor->label), caption);
+    g_free(caption);
     editor->saved=FALSE;
     update_app_title();
   }
