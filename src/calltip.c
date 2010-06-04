@@ -84,7 +84,7 @@ void function_list_prepare(void)
   #endif
   apifile = fopen(api_dir, "r");
   if( apifile != NULL ) {
-    php_api_tree=g_tree_new ((GCompareFunc)strcmp);
+    php_api_tree=g_tree_new_full((GCompareDataFunc) strcmp, NULL, g_free, NULL);
     while( fgets( buffer, MAX_API_LINE_LENGTH, apifile ) != NULL ) {
       gchar *line=g_strdup(buffer);
       gchar *token_line = line;
@@ -114,7 +114,7 @@ void css_function_list_prepare(void)
   #endif
   apifile = fopen(api_dir, "r");
   if( apifile != NULL ) {
-    css_api_tree=g_tree_new ((GCompareFunc)strcmp);
+    css_api_tree=g_tree_new_full((GCompareDataFunc) strcmp, NULL, g_free, NULL);
     while( fgets( buffer, MAX_API_LINE_LENGTH, apifile ) != NULL ) {
       gchar *line=g_strdup(buffer);
       gchar *token_line = line;
@@ -423,27 +423,16 @@ void show_call_tip(GtkWidget *scintilla,gint type, gint pos)
   }
 }
 
-gboolean free_php_tree_item (gpointer key, gpointer value, gpointer data){
-  g_tree_remove(css_api_tree, key);
-  g_free (key);
-  return FALSE;	
-}
-
-gboolean free_css_tree_item (gpointer key, gpointer value, gpointer data){
-  g_tree_remove(css_api_tree, key);
-  g_free (key);
-  return FALSE;	
-}
-
 void cleanup_calltip(void){
-  if (php_api_tree) 
-    g_tree_foreach (php_api_tree,free_php_tree_item,NULL);
+  if (php_api_tree){
+     g_tree_destroy(php_api_tree);
+  }
   if (completion_list_tree != NULL) {
     g_string_free (completion_list_tree,TRUE);	
   }
-  g_tree_foreach (css_api_tree,free_css_tree_item,NULL);
+  if (css_api_tree){
+     g_tree_destroy(css_api_tree);
+  }
   if (cache_completion) g_free(cache_completion);
-  if (css_api_tree)
-    g_tree_foreach (css_api_tree,free_css_tree_item,NULL);
 }
 
