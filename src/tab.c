@@ -377,6 +377,7 @@ void tab_file_opened (GObject *source_object, GAsyncResult *res, gpointer user_d
     g_error_free(error);
     return;
   }
+  g_object_unref(source_object);
   #ifdef DEBUGTAB
   g_print("DEBUG:: Loaded %d bytes\n",editor->file_size);
   #endif
@@ -918,6 +919,7 @@ void set_editor_to_perl(Editor *editor)
 
 void set_editor_to_cobol(Editor *editor)
 {
+  gtk_scintilla_set_word_chars((GtkScintilla *)editor->scintilla, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-");
   tab_cobol_set_lexer(editor);
   editor->type = TAB_COBOL;
 }
