@@ -143,7 +143,7 @@ void classbrowser_start_update(void)
   }
   if (!php_class_tree){
      /* create new tree */
-     php_class_tree=g_tree_new ((GCompareFunc)strcmp);
+     php_class_tree=g_tree_new ((GCompareFunc)g_utf8_collate);
   } else {
     g_tree_foreach (php_class_tree,classbrowser_php_class_set_remove_item,NULL);
   }
@@ -161,7 +161,7 @@ gboolean classbrowser_safe_equality(gchar *a, gchar *b)
   }
 
   // (a && b)
-  return (strcmp(a, b)==0);
+  return (g_utf8_collate(a, b)==0);
 }
 
 ClassBrowserFunction *classbrowser_functionlist_find(gchar *funcname, gchar *param_list, gchar *filename, gchar *classname)
@@ -561,11 +561,11 @@ void classbrowser_update(void)
   static guint release_event = 0;
   if (!php_files_tree){
      /* create new tree */
-     php_files_tree=g_tree_new ((GCompareFunc)strcmp);
+     php_files_tree=g_tree_new ((GCompareFunc)g_utf8_collate);
   }
   if (!php_variables_tree){
      /* create new tree */
-     php_variables_tree=g_tree_new ((GCompareFunc)strcmp);
+     php_variables_tree=g_tree_new ((GCompareFunc)g_utf8_collate);
 
      /*add php global vars*/
      add_global_var("$GLOBALS");
@@ -623,7 +623,7 @@ void classbrowser_update(void)
 
 gint member_function_list_sort(gconstpointer a, gconstpointer b)
 {
-  return (strcmp((gchar *)a, (gchar *)b));
+  return (g_utf8_collate((gchar *)a, (gchar *)b));
 }
 
 
@@ -691,7 +691,7 @@ gchar *classbrowser_custom_function_calltip(gchar *function_name){
   for(li = functionlist; li!= NULL; li = g_slist_next(li)) {
     function = li->data;
     if (function) {
-      if (strcmp(function->functionname, function_name)==0) {
+      if (g_utf8_collate(function->functionname, function_name)==0) {
           calltip=g_strdup_printf("%s (%s)",function->functionname,function->paramlist);
           break;
       }
@@ -754,7 +754,7 @@ gboolean classbrowser_file_in_list_find(GSList *list, gchar *file)
 
   for(list_walk = list; list_walk!= NULL; list_walk = g_slist_next(list_walk)) {
     data = list_walk->data;
-    if (strcmp(data, file)==0) {
+    if (g_utf8_collate(data, file)==0) {
       return TRUE;
     }
   }
