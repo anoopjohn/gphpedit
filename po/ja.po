@@ -7,7 +7,7 @@ msgstr ""
 "Project-Id-Version: gphpedit\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2010-05-31 08:56+0000\n"
-"PO-Revision-Date: 2010-06-02 16:21+0900\n"
+"PO-Revision-Date: 2010-06-07 01:05+0900\n"
 "Last-Translator: Tadashi Jokagi <elf@elf.no-ip.org>\n"
 "Language-Team: Japanese <elf@elf.no-ip.org>\n"
 "MIME-Version: 1.0\n"
@@ -123,7 +123,7 @@ msgstr "すべて置換する(_A)"
 #: ../src/plugin.c:362
 #, c-format
 msgid "Plugin is null!\n"
-msgstr ""
+msgstr "プラグインが NULL です!\n"
 
 #: ../src/plugin.c:428
 #, c-format
@@ -137,7 +137,7 @@ msgstr ""
 
 #: ../src/main_window.c:132
 msgid "Zoom:100%"
-msgstr ""
+msgstr "拡大:100%"
 
 #: ../src/main_window.c:180
 msgid "Close side panel"
@@ -146,7 +146,7 @@ msgstr "サイドパネルを閉じる"
 #. set tooltip
 #: ../src/main_window.c:207
 msgid "Class Browser"
-msgstr ""
+msgstr "クラス ブラウザー"
 
 #: ../src/main_window.c:218
 msgid "Parse only current file"
@@ -171,12 +171,12 @@ msgstr " - gPHPEdit"
 #: ../src/main_window.c:428 ../src/tab.c:624 ../src/tab.c:630 ../src/tab.c:648
 #: ../src/tab.c:669
 msgid "Help: "
-msgstr ""
+msgstr "ヘルプ: "
 
 #: ../src/main_window.c:434 ../src/tab.c:632 ../src/tab.c:633 ../src/tab.c:650
 #: ../src/tab.c:716
 msgid "Preview: "
-msgstr ""
+msgstr "プレビュー: "
 
 #: ../src/main_window.c:441 ../src/main_window.c:446 ../src/main_window.c:553
 #: ../src/main_window_callbacks.c:896 ../src/tab.c:424
@@ -281,16 +281,14 @@ msgstr "このファイルの新しい名前を入力してください..."
 
 #: ../src/main_window_callbacks.c:961
 msgid "Zoom:"
-msgstr ""
+msgstr "拡大:"
 
 #: ../src/main_window_callbacks.c:1025 ../src/main_window_callbacks.c:1026
 #, c-format
 msgid ""
 "The file '%s' has not been saved since your last changes, are you sure you "
 "want to close it and lose these changes?"
-msgstr ""
-"最後の変更からファイル「%s」は保存されて居ません。本当に変更を捨てて閉じます"
-"か?"
+msgstr "最後の変更からファイル「%s」は保存していません。本当に変更を捨てて閉じますか?"
 
 #: ../src/main_window_callbacks.c:1027
 #, c-format
@@ -337,7 +335,7 @@ msgstr ""
 #: ../src/main_window_callbacks.c:1460
 #, c-format
 msgid "Unable to get data for page %d\n"
-msgstr ""
+msgstr "ページ %d のデータを取得できませんでした\n"
 
 #: ../src/main_window_callbacks.c:1978 ../src/tab.c:253
 #, c-format
@@ -348,7 +346,7 @@ msgstr ""
 #: ../src/main_window_callbacks.c:1988
 #, c-format
 msgid "The file %s has been externally modified. Do you want reload it?"
-msgstr ""
+msgstr "ファイル %s は外部で修正されました。再読み込みしますか?"
 
 #. Font drop down elements : General
 #: ../src/preferences_dialog.c:141 ../src/preferences_dialog.c:273
@@ -712,11 +710,11 @@ msgstr ""
 #: ../src/preferences_dialog.c:213 ../src/preferences_dialog.c:578
 #: ../src/preferences_dialog.c:579
 msgid "C Globalclass"
-msgstr ""
+msgstr "C 言語グローバル クラス"
 
 #: ../src/preferences_dialog.c:553 ../src/preferences_dialog.c:554
 msgid "C Preprocesor"
-msgstr ""
+msgstr "C 言語プリ プロセッサー"
 
 #: ../src/preferences_dialog.c:787
 #, c-format
@@ -821,9 +819,8 @@ msgstr "常にひとつの gPHPEdit のコピーのみを実行する"
 #. end session
 #. edge part
 #: ../src/preferences_dialog.c:1518
-#, fuzzy
 msgid "Hand edge guide:"
-msgstr "右側の端のガイドを表示する"
+msgstr ""
 
 #: ../src/preferences_dialog.c:1526
 msgid "Show right hand edge guide"
@@ -844,12 +841,12 @@ msgstr "サイドパネル:"
 
 #: ../src/preferences_dialog.c:1575
 msgid "Show folderbrowser (need restart)"
-msgstr ""
+msgstr "フォルダー ブラウザーを表示する (再起動が必要)"
 
 #. set tooltip
 #: ../src/preferences_dialog.c:1577
 msgid "Show/Hide side-panel Folder Browser"
-msgstr ""
+msgstr "サイドパネル フォルダー ブラウザーを表示する/隠す"
 
 #. end side panel part
 #. autocompletion part
@@ -859,12 +856,12 @@ msgstr "自動補完:"
 
 #: ../src/preferences_dialog.c:1590
 msgid "Auto-Completion of Brackets and Quotes"
-msgstr ""
+msgstr "ブラケットとクォートの自動補完"
 
 #. set tooltip
 #: ../src/preferences_dialog.c:1592
 msgid "Auto-complete the closing brackets/quotes"
-msgstr ""
+msgstr "閉じブラケットとクォートの自動補完"
 
 #. end autocompletion part
 #: ../src/preferences_dialog.c:1601
@@ -911,11 +908,11 @@ msgstr "現在行:"
 
 #: ../src/preferences_dialog.c:1698
 msgid "Highlight Caret Line"
-msgstr ""
+msgstr "キャレット行のハイライト"
 
 #: ../src/preferences_dialog.c:1710
 msgid "Highlight Caret Line colour:"
-msgstr ""
+msgstr "キャレット行ハイライトの色"
 
 #: ../src/preferences_dialog.c:1731
 msgid "Font Quality"
@@ -952,7 +949,7 @@ msgstr "色"
 
 #: ../src/preferences_dialog.c:1888
 msgid "Font"
-msgstr ""
+msgstr "フォント"
 
 #: ../src/preferences_dialog.c:1913
 msgid "Element"
@@ -972,11 +969,11 @@ msgstr "認識される PHP ファイルの拡張子:"
 
 #: ../src/preferences_dialog.c:1962
 msgid "Shared library path(s):"
-msgstr ""
+msgstr "共有ライブラリーのパス:"
 
 #: ../src/preferences_dialog.c:1977
 msgid "Delay (calltip/function list):"
-msgstr ""
+msgstr "遅延 (コール ティップ/関数一覧)"
 
 #: ../src/preferences_dialog.c:1991
 msgid "Templates:"
@@ -1014,7 +1011,7 @@ msgstr ""
 
 #: ../src/syntax_check.c:270
 msgid "You don't have any files open to check\n"
-msgstr ""
+msgstr "確認のためにいくつかのファイルを開きません\n"
 
 #: ../src/tab.c:319
 #, c-format
@@ -1285,15 +1282,15 @@ msgstr "フルスクリーンモードの有効/無効化"
 
 #: ../src/menu.c:373
 msgid "Increases zoom in 10%"
-msgstr ""
+msgstr "10% 拡大する"
 
 #: ../src/menu.c:375
 msgid "Decreases zoom in 10%"
-msgstr ""
+msgstr "10% 縮小する"
 
 #: ../src/menu.c:377
 msgid "Restores normal zoom level"
-msgstr ""
+msgstr "通常のズーム レベルに復元する"
 
 #. toolbar icon size menu
 #: ../src/menu.c:383
@@ -1326,7 +1323,7 @@ msgstr "文法を確認する(_S)"
 
 #: ../src/menu.c:415
 msgid "Check the syntax using the PHP command line binary"
-msgstr ""
+msgstr "PHP コマンドライン バイナリーを用いて文法の確認をする"
 
 #: ../src/menu.c:417
 msgid "_Clear Syntax check"
@@ -1350,11 +1347,11 @@ msgstr "キーボード マクロを再生する(_P)"
 
 #: ../src/menu.c:424
 msgid "Playback the stored keyboard macro"
-msgstr ""
+msgstr "保存したキーボード マクロを再生する"
 
 #: ../src/menu.c:427
 msgid "_Force"
-msgstr ""
+msgstr "強制(_F)"
 
 #: ../src/menu.c:432
 msgid "_PHP/HTML/XML"
@@ -1362,7 +1359,7 @@ msgstr "_PHP/HTML/XML"
 
 #: ../src/menu.c:432
 msgid "Force syntax highlighting to PHP/HTML/XML mode"
-msgstr ""
+msgstr "PHP/HTML/XML モードで強制的に文法をハイライトにする"
 
 #: ../src/menu.c:434
 msgid "_CSS"
@@ -1370,7 +1367,7 @@ msgstr "_CSS"
 
 #: ../src/menu.c:434
 msgid "Force syntax highlighting to CSS mode"
-msgstr "強制的に CSS モードで<文法のハイライトをする"
+msgstr "強制的に CSS モードで文法をハイライトにする"
 
 #: ../src/menu.c:436
 msgid "C/C_++"
@@ -1378,7 +1375,7 @@ msgstr "C/C_++"
 
 #: ../src/menu.c:436
 msgid "Force syntax highlighting to C/C++ mode"
-msgstr "強制的に C/C++ モードで<文法のハイライトをする"
+msgstr "強制的に C/C++ モードで文法をハイライトにする"
 
 #: ../src/menu.c:438
 msgid "_SQL"
@@ -1386,7 +1383,7 @@ msgstr "_SQL"
 
 #: ../src/menu.c:438
 msgid "Force syntax highlighting to SQL mode"
-msgstr "強制的に SQL モードで<文法のハイライトをする"
+msgstr "強制的に SQL モードで文法をハイライトにする"
 
 #: ../src/menu.c:440
 msgid "_Perl"
@@ -1394,7 +1391,7 @@ msgstr "_Perl"
 
 #: ../src/menu.c:440
 msgid "Force syntax highlighting to Perl mode"
-msgstr "強制的に Perl モードで<文法のハイライトをする"
+msgstr "強制的に Perl モードで文法をハイライトにする"
 
 #: ../src/menu.c:442
 msgid "_Cobol"
@@ -1402,7 +1399,7 @@ msgstr "_COBOL"
 
 #: ../src/menu.c:442
 msgid "Force syntax highlighting to Cobol mode"
-msgstr "強制的に COBOL モードで<文法のハイライトをする"
+msgstr "強制的に COBOL モードで文法をハイライトにする"
 
 #: ../src/menu.c:444
 msgid "P_ython"
@@ -1410,7 +1407,7 @@ msgstr "P_ython"
 
 #: ../src/menu.c:444
 msgid "Force syntax highlighting to Python mode"
-msgstr "強制的に Python モードで<文法のハイライトをする"
+msgstr "強制的に Python モードで文法をハイライトにする"
 
 #. create menus
 #. Menu file

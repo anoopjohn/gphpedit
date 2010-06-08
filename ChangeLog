@@ -1,8 +1,56 @@
-2009-02-26  Anoop John <anoop.john at zyxware.com>
+2010-06-05  Anoop John <anoop.john at zyxware.com>
+
+          * Fixed Bug - Fix External modification notification grows window beyond screen.
+
+2010-06-05  Tadashi Jokagi <elf@elf.no-ip.org>
+
+          * New Feature - New japanese translation
+
+2010-06-05  Rostagno Jose <joserostagno at hotmail.com>
+
+          * Fixed Bug - Fix Missing cursor in search and goto boxes.
+          * Fixed Bug - Fix Missing cursor in search and goto boxes.
+          * Fixed Bug - Fix Hidden caret when editor is opened without files in session.
+          * Fixed Bug - Port remaining I/O code to GVFS.
+          * Fixed Bug - Fix Freezes when directory contains big XML files.
+          * Fixed Bug - Fix classbrowser not working in some directories.
+          * Fixed Bug - Fix last folder bug in open/save dialog.
+          * Fixed Bug - Fix sintaxcheck when file contains %xx scapes chars.
+          * Fixed Bug - Fix folderbrowser Drag-Drop bug.
+          * Fixed Bug - Fix leaks in scintilla widget.
+          * Fixed Bug - Improve autocompletion performance.
+          * Fixed Bug - Improve Classbrowser parse performance.
+          * New Feature - Custom PHP functions autocompletion funtionality
+          * New Feature - Added PHP class members autocompletion
+          * New Feature - Added Global PHP variables completion
+          * New Feature - Use GtkRecentManager for recent files
+          * New Feature - Added Global PHP variables completion
+
+2010-05-22  Rostagno Jose <joserostagno at hotmail.com>
+
+          * Fixed Bug - Folderbrowser async load.
+          * New Feature - New folderbrowser up and home buttons
+          * Fixed Bug - Fix error loading / saving to remote filesystems.
+          * Fixed Bug - Fix error converting colors in preferences dialog.
+          * Fixed Bug - Fix tab caption in tab-help after one level navigation.
+          * Fixed Bug - Various improvements to build system.
+          * Fixed Bug - Speed up Calltip/autocomplete lists.
+          * New Feature - RGBA colormap support
+          * New Feature - Various plugin system upgrades
+          * New Feature - Add check for externally modified files
+          * New Feature - Added CSS calltips support
+          * New Feature - Auto-Completion of Brackets and Quotes
+          * New Feature - Added HTML files webkit preview
+          * New Feature - Remember incremental search strings
+          * New Feature - Hightlight current caret line
+          * New Feature - Add Translation/Bug report buttons to help menu
+
+2010-02-26  Anoop John <anoop.john at zyxware.com>
 
           * New Feature - Added color picker for selection background color
             
 2010-02-04  Rostagno Jose <joserostagno at hotmail.com>
+
           * Fixed Bug - GTKScintilla Completely migrated from old GtkObject implementation to Gobject.
           * Fixed Bug - Delete duplicated function to load window icon.
           * Fixed Bug - if nothing is selected the function open selected tries to open a folder
@@ -19,6 +67,7 @@
           * Fixed Bug - Incorrect color when change color from preferences dialog.
 
 2010-01-12  Rostagno Jose <joserostagno at hotmail.com>
+
           * New Feature - Folderbrowser
           * New Feature - Current zoom level in statusbar
           * Fixed Bug - PHP files filter, now uses php file extensions from preferences
@@ -30,6 +79,7 @@
           * Fixed Bug - Open files across smb gvfs fails (sr #107099)
 
 2010-01-07  Rostagno Jose <joserostagno at hotmail.com>
+
           * New Feature - Fullscreen mode support (sr #106708)
           * New Feature - Added clean button to incremental search and goto gtkentry
           * New Feature - Toolbar, statusbar and sidepanel show/hide toglebutton
@@ -39,6 +89,7 @@
           * Fixed Bug - gnome-vfs replaced by GIO/GVFS
 
 2009-11-28  Rostagno Jose <joserostagno at hotmail.com>
+
           * New Feature - Added Bookmarks
           * Fixed Bug - Remove gtkhtml2 dependency, now uses webkit.
         

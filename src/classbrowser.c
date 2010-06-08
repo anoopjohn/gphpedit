@@ -114,24 +114,7 @@ g_tree_foreach (php_files_tree, classbrowser_file_set_remove,NULL);
 }
 
 gboolean classbrowser_file_modified(gchar *filename,GTimeVal *act){
-  GFileInfo *info;
-  GError *error=NULL;
-  GFile *file;
-  if (!filename) return FALSE;
-  file= g_file_new_for_uri (filename);
-  info=g_file_query_info (file,"time::modified,time::modified-usec",0,NULL,&error);
-  if (error){
-  g_object_unref(file);
-  return FALSE;  
-  }
-  GTimeVal result;
-  g_file_info_get_modification_time (info,&result);
-  gboolean hr=FALSE;
-  if ((result.tv_sec > act->tv_sec) || (result.tv_sec == act->tv_sec && result.tv_usec > act->tv_usec)) hr=TRUE;
-  /*make current mark as file mark*/
-  act=memcpy (act,&result, sizeof(GTimeVal));
-  g_object_unref(info);  
-  g_object_unref(file);
+  gboolean hr=get_file_modified(filename,act, TRUE);
 #ifdef DEBUGCLASSBROWSER
     g_print("filename:'%s' returned %d modified status\n",filename,hr);
 #endif

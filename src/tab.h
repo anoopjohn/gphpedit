@@ -65,7 +65,7 @@ typedef struct
 	gboolean is_untitled:1;
 	guint current_pos;
 	guint current_line;
-  const char *contenttype;
+	gchar *contenttype;
 } Editor;
 
 typedef struct

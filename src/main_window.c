@@ -100,27 +100,33 @@ void force_config_folder(void)
   GError *error=NULL;
   GFile *config;
   gchar *uri=g_strdup_printf("%s/%s",g_get_home_dir(),".gphpedit");
-  config=g_file_new_for_path (uri);
-  g_free(uri);
-  if (!g_file_make_directory (config, NULL, &error)){
-    if (error->code !=2){
-      g_print(_("Unable to create ~/.gphpedit/ (%d) %s"), error->code,error->message);
-      exit(-1);
+  if (!filename_file_exist(uri)){
+    config=get_gfile_from_filename (uri);
+    if (!g_file_make_directory (config, NULL, &error)){
+      if (error->code !=2){
+        g_print(_("Unable to create ~/.gphpedit/ (%d) %s"), error->code,error->message);
+        exit(-1);
+        }
+        g_error_free(error);
       }
-    }
-  g_object_unref(config);
-  error=NULL;
-  gchar *plu=g_strdup_printf("%s/%s/%s",g_get_home_dir(),".gphpedit","plugins");
-  GFile *plugin=g_file_new_for_path (plu);
-  g_free(plu);
-  if (!g_file_make_directory (plugin, NULL, &error)){
-    //if error code = 2 dir already exist
-    if (error->code !=2){
-      g_print(_("Unable to create ~/.gphpedit/ (%d) %s"), error->code,error->message);
-      exit(-1);
-    }
+    g_object_unref(config);
+    error=NULL;
   }
-  g_object_unref(plugin);
+  g_free(uri);
+  gchar *plu=g_strdup_printf("%s/%s/%s",g_get_home_dir(),".gphpedit","plugins");
+  if (!filename_file_exist(plu)){
+    GFile *plugin=get_gfile_from_filename (plu);
+    if (!g_file_make_directory (plugin, NULL, &error)){
+      //if error code = 2 dir already exist
+      if (error->code !=2){
+        g_print(_("Unable to create ~/.gphpedit/ (%d) %s"), error->code,error->message);
+        exit(-1);
+      }
+      g_error_free(error);
+    }
+    g_object_unref(plugin);
+  }
+  g_free(plu);
 }
 
 static void main_window_create_appbar(void)
@@ -432,7 +438,7 @@ void update_app_title(void)
                         update_zoom_level();
                         update_controls();
     }
-    else if(main_window.current_editor->type == TAB_HELP) {
+    else if(main_window.current_editor->type == TAB_PREVIEW) {
       title = g_string_new(_("Preview: "));
       title = g_string_append(title, main_window.current_editor->help_function);
                         update_zoom_level();

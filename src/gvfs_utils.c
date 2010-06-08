@@ -85,4 +85,31 @@ gchar *read_text_file_sync( gchar *filename )
 //  g_print("buffer:<---\n%s\n--->",buffer);
   return buffer;
 }
+/*
+*
+*
+*/
+gboolean get_file_modified(gchar *filename,GTimeVal *act, gboolean update_mark){
+  GFileInfo *info;
+  GError *error=NULL;
+  GFile *file;
+  if (!filename) return FALSE;
+  file= get_gfile_from_filename (filename);
+  info=g_file_query_info (file,"time::modified,time::modified-usec",0,NULL,&error);
+  if (error){
+  g_object_unref(file);
+  return FALSE;  
+  }
+  GTimeVal result;
+  g_file_info_get_modification_time (info,&result);
+  gboolean hr=FALSE;
+  if ((result.tv_sec > act->tv_sec) || (result.tv_sec == act->tv_sec && result.tv_usec > act->tv_usec)) hr=TRUE;
+  if (update_mark){
+    /*make current mark as file mark*/
+    act=memcpy (act,&result, sizeof(GTimeVal));
+  }
+  g_object_unref(info);  
+  g_object_unref(file);
+  return hr;
+}
 

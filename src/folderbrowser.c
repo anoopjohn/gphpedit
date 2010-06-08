@@ -905,6 +905,7 @@ void init_folderbrowser(GtkTreeStore *pTree, gchar *filename, GtkTreeIter *iter,
     #ifdef DEBUGFOLDERBROWSER
       g_print("DEBUG::: file '%s' don't exist?\n",filename);
     #endif
+    g_object_unref(file);
     restore_folderbrowser();
     return;
   }
@@ -914,6 +915,7 @@ void init_folderbrowser(GtkTreeStore *pTree, gchar *filename, GtkTreeIter *iter,
     #ifdef DEBUGFOLDERBROWSER
       g_print("DEBUG::folder %s\n",filename);
     #endif
+    g_object_unref(file);
     restore_folderbrowser();
     return;
   }
