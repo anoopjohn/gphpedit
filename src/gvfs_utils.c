@@ -44,6 +44,8 @@ gchar *filename_get_relative_path(gchar *filename){
   GFile *file= get_gfile_from_filename(filename);
   GFile *home= get_gfile_from_filename((gchar *) g_get_home_dir());
   gchar *rel =g_file_get_relative_path (home,file);
+  g_object_unref(file);
+  g_object_unref(home);
   if (rel) {
   gchar *relpath=g_strdup_printf("~/%s",rel);
   g_free(rel);

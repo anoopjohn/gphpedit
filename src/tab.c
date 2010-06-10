@@ -76,9 +76,31 @@ void debug_dump_editors(void)
       g_print("Opened from      :%s\n", editor->opened_from->str);
     }
     g_print("Saved?           :%d\n", editor->saved);
-    g_print("Converted to UTF?:%d\n\n", editor->saved);
+    g_print("Converted to UTF-8?:%d\n\n", editor->saved);
   }
   g_print("--------------------------------------------------------------\n");
+}
+/*
+* process_drag_uri
+* send open signal for uris dropped in scintilla widget
+*/
+void process_drag_uri(GtkWidget *scintilla, gpointer data){
+  if (data){
+    gchar **uris= g_strsplit (data,"\n",0);
+    int i=0;
+    while (uris[i]!=0){
+        int k=strlen(uris[i]);
+        if (k!=0){
+          gchar *uri=g_malloc(k);
+          strncpy(uri,uris[i],k); /* skip \n */
+          uri[k-1]=0;
+          switch_to_file_or_open(uri, 0);
+          g_free(uri);
+        }
+      i++;
+    }
+    g_strfreev (uris);
+  }
 }
 
 void tab_set_general_scintilla_properties(Editor *editor)
@@ -225,6 +247,7 @@ static void tab_set_event_handlers(Editor *editor)
 {
   g_signal_connect (G_OBJECT (editor->scintilla), "char_added", G_CALLBACK (char_added), NULL);
   g_signal_connect (G_OBJECT (editor->scintilla), "update_ui", G_CALLBACK (update_ui), NULL);
+  g_signal_connect (G_OBJECT (editor->scintilla), "uri_dropped", G_CALLBACK (process_drag_uri), NULL);
 }
 
 gchar *write_buffer = NULL; /*needed for save buffer*/
