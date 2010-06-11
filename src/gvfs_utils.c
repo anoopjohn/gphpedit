@@ -106,7 +106,8 @@ gboolean get_file_modified(gchar *filename,GTimeVal *act, gboolean update_mark){
   if ((result.tv_sec > act->tv_sec) || (result.tv_sec == act->tv_sec && result.tv_usec > act->tv_usec)) hr=TRUE;
   if (update_mark){
     /*make current mark as file mark*/
-    act=memcpy (act,&result, sizeof(GTimeVal));
+    act->tv_sec=result.tv_sec;
+    act->tv_usec =result.tv_usec;
   }
   g_object_unref(info);  
   g_object_unref(file);

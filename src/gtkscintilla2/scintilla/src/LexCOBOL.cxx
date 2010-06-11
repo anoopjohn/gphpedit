@@ -90,11 +90,11 @@ static int classifyWordCOBOL(unsigned int start, unsigned int end, /*WordList &k
     getRange(start, end, styler, s, sizeof(s));
 
     char chAttr = SCE_C_IDENTIFIER;
-    if (isdigit(s[0]) || (s[0] == '.')) {
+    if (isdigit(s[0]) || (s[0] == '.') || (s[0] == 'v')) {
         chAttr = SCE_C_NUMBER;
 		char *p = s + 1;
 		while (*p) {
-			if (!isdigit(*p) && isCOBOLwordchar(*p)) {
+			if ((!isdigit(*p) && (*p) != 'v') && isCOBOLwordchar(*p)) {
 				chAttr = SCE_C_IDENTIFIER;
 			    break;
 			}
@@ -202,7 +202,7 @@ static void ColouriseCOBOLDoc(unsigned int startPos, int length, int initStyle, 
         }
 
         if (state == SCE_C_DEFAULT) {
-            if (isCOBOLwordstart(ch) || (ch == '$' && isalpha(chNext))) {
+            if (isCOBOLwordstart(ch) || (ch == '$' && isascii(chNext) && isalpha(chNext))) {
                 ColourTo(styler, i-1, state);
                 state = SCE_C_IDENTIFIER;
             } else if (column == 0 && ch == '*' && chNext != '*') {

@@ -547,8 +547,10 @@ ClassBrowserFile *file=(ClassBrowserFile *)value;
     #ifdef DEBUGCLASSBROWSER
       g_print("Parsing %s\n", file->filename);
     #endif
+    if (classbrowser_file_modified(file->filename,&file->modified_time)){
+      classbrowser_parse_file(file->filename);
+    }
 
-    classbrowser_parse_file(file->filename);
   return FALSE;
 }
 
