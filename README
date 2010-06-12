@@ -1,5 +1,4 @@
-
-Introduction to gPHPedit
+Introduction to gPHPedit:
 ========================
 The gPHPedit package contains a lightweight UTF-8 text editor based in 
 scintilla component for the GNOME desktop.
@@ -11,9 +10,13 @@ Installation of gPHPEdit: (UBUNTU AND DEBIAN USERS)
 ===================================================
 0) To install gPHPEdit from source:
 
-    You can download source packages from: http://www.gphpedit.org
+    You can download lastest source packages from: http://www.gphpedit.org
 
-	TODO: installing from git?
+   0.1) installing from git
+
+   In a terminal write:
+   git clone git://github.com/anoopjohn/gphpedit.git ~/gphpedit-git
+   cd ~/gphpedit-git
 
 1) Install gPHPEdit by running the following commands:
 
@@ -36,8 +39,8 @@ Compilation needs the following software packages - usually the headers
 and libraries (search for packages with a -dev or -devel suffix and/or 
 prefix lib, e.g. libgtk2.0-dev)
 
-		 - Glib 2.0 (>= 2.18)
-	     - Gtk 2.0 (>= 2.18)
+	     - Glib 2.0 (>= 2.18)
+	     - Gtk 2.0 (>= 2.20)
 	     - automake (>= 1.8)
 	     - autoconf (>= 2.59)
 	     - intltool
@@ -46,7 +49,8 @@ prefix lib, e.g. libgtk2.0-dev)
 	     - gvfs
 	     - webkit-1.0
 	     - php5-cli (optional for php sintax checking)
-	     - php-doc (for php help support)
+	     - php-doc (optional for php help support) *
+   * if you don't have php-doc pakage installed gphpedit will search help in PHP online resources.
 
 How to report bugs
 ==================
@@ -121,6 +125,12 @@ that of your teammates.
 
 gphpedit in Transifex: http://www.transifex.net/projects/p/gphpedit/c/main/
 
+  b) Current translations:
+      gPHPEdit is currently translated to:
+       * English
+       * Spanish
+       * German
+       * Japanese
 
 Shortcuts
 =========
@@ -185,7 +195,9 @@ The following list all gphpedit’s shortcut keys.
     * Hide Syntax Check Panel (SHIFT + F9)
     * Record Keyboard macro start/stop (Alt + K)
     * Playback Keyboard macro (Ctrl + K)
+
  7) Autocompletion:
     * Insert template (Ctrl + j)
+
 	The gphpedit team.
 	
