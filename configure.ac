@@ -79,8 +79,7 @@ dnl  --------------
 
 # Checks for libraries.
 dnl Checking for the required libraries.
-GTK_REQUIRED_VERSION=2.19.0
-dnl LIBGNOMEUI_REQUIRED_VERSION=2.0.0
+GTK_REQUIRED_VERSION=2.20.0
 GCONF_REQUIRED_VERSION=2.0.0
 
 PKG_CHECK_MODULES(GTK, gtk+-2.0 >= $GTK_REQUIRED_VERSION)
