@@ -66,7 +66,6 @@ typedef struct
 
   Editor *current_editor;
   //widget for close side bar button
-  GtkWidget *close_image;
   GtkWidget *close_sidebar_button;
   
   //Checkbox above treeview to parse only the current tab  
