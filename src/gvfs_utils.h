@@ -10,4 +10,5 @@ gchar *filename_get_uri(gchar *filename);
 gchar *filename_get_path(gchar *filename);
 gchar *filename_get_basename (gchar *filename);
 gboolean get_file_modified(gchar *filename,GTimeVal *act, gboolean update_mark);
+gchar *filename_get_relative_path(gchar *filename);
 #endif

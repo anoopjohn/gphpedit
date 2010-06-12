@@ -1101,7 +1101,10 @@ void on_paste_got_from_cliboard(GtkClipboard *clipboard, const gchar *text, gpoi
   editor->is_pasting = editor->is_macro_recording;
   gtk_scintilla_replace_sel(GTK_SCINTILLA(data), text);
   editor->is_pasting = FALSE;
-
+  if (editor->type==TAB_FILE){
+  /* if we type <?php then we are in a php file so force php syntax mode */
+  if (strstr(text,"<?php")) set_editor_to_php(editor);
+  }
   // Possible fix for rendering issues after pasting
   gtk_scintilla_colourise(GTK_SCINTILLA(main_window.current_editor->scintilla), 0, -1);
 }

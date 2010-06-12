@@ -415,7 +415,9 @@ void update_app_title(void)
       //debug("Full Name - %s, Short Name - %s", main_window.current_editor->filename->str, main_window.current_editor->short_filename);
       char *str = NULL;
       title = g_string_new(str);
-      dir = filename_parent_uri(main_window.current_editor->filename->str);
+      gchar *tmp=filename_parent_uri(main_window.current_editor->filename->str);
+      dir = filename_get_relative_path(tmp);
+      g_free(tmp);
       if (dir) {
         unquote(dir);
       } else {

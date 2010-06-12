@@ -779,7 +779,7 @@ void get_control_values_to_highlight(gchar *setting_name, gchar **fontname, gint
   tempfontname = g_string_prepend(tempfontname, "!");
   
   if (!g_str_has_prefix(*fontname, tempfontname->str)) {
-  
+
     message = g_string_new(NULL);
     g_string_printf(message, _("You have just changed the font to %s\n\nWould you like to use this font as the default for every element?"), gtk_combo_box_get_active_text(GTK_COMBO_BOX(preferences_dialog.font_combo)));
     dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_MESSAGE_QUESTION,
@@ -819,6 +819,7 @@ void get_control_values_to_highlight(gchar *setting_name, gchar **fontname, gint
 
 void set_current_highlighting_font()
 {
+  current_highlighting_element=gtk_combo_box_get_active_text (GTK_COMBO_BOX(preferences_dialog.element_combo));
   if (IS_FONT_NAME(current_highlighting_element, _("Default"))) {
     get_control_values_to_highlight(_("Default"), &temp_preferences.default_font, &temp_preferences.default_size,
       &temp_preferences.default_bold, &temp_preferences.default_italic,
@@ -1183,9 +1184,9 @@ void on_fontqualities_entry_changed(GtkEntry *Entry, gpointer data)
 {
   gchar *texttemp=gtk_combo_box_get_active_text(GTK_COMBO_BOX(preferences_dialog.fontstyle));
 
-  if(strcmp(texttemp,"Non Antialiased")==0){
+  if(g_strcmp0(texttemp,"Non Antialiased")==0){
     temp_preferences.font_quality=SC_EFF_QUALITY_NON_ANTIALIASED;    
-  } else if(strcmp(texttemp,"LCD Optimized")==0){
+  } else if(g_strcmp0(texttemp,"LCD Optimized")==0){
     temp_preferences.font_quality= SC_EFF_QUALITY_LCD_OPTIMIZED;
   } else {
     /* set default */
