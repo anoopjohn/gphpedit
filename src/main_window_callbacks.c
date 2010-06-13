@@ -35,6 +35,7 @@
 #include "plugin.h"
 #include "gvfs_utils.h"
 #include <gdk/gdkkeysyms.h>
+#include "gphpedit-statusbar.h"
 
 gboolean is_app_closing = FALSE;
 gint classbrowser_hidden_position;
@@ -668,12 +669,15 @@ void on_save1_activate(GtkWidget *widget)
   gchar *filename = NULL;
   GFile *file;
   if (main_window.current_editor) {
+
     filename = main_window.current_editor->filename->str;
 
     //if filename is Untitled
     if (main_window.current_editor->is_untitled) {
       on_save_as1_activate(widget);
     } else {
+      /* show status in statusbar */
+      gphpedit_statusbar_flash_message (GPHPEDIT_STATUSBAR(main_window.appbar),0,_("Saving %s"),filename);
       file=get_gfile_from_filename(filename);
       tab_file_save_opened(main_window.current_editor,file);
     }
@@ -787,11 +791,13 @@ void on_reload1_activate(GtkWidget *widget)
     gtk_window_set_title(GTK_WINDOW(file_revert_dialog), "Question");
     gint result = gtk_dialog_run (GTK_DIALOG (file_revert_dialog));
     if (result==GTK_RESPONSE_YES) {
+      gphpedit_statusbar_flash_message (GPHPEDIT_STATUSBAR(main_window.appbar),0,_("Opening %s"),main_window.current_editor->filename->str);
       tab_load_file(main_window.current_editor);
     }
     gtk_widget_destroy(file_revert_dialog);
   }
   else if (main_window.current_editor) {
+    gphpedit_statusbar_flash_message (GPHPEDIT_STATUSBAR(main_window.appbar),0,_("Opening %s"),main_window.current_editor->filename->str);
     tab_load_file(main_window.current_editor);
   }
 }
@@ -899,9 +905,7 @@ void update_zoom_level(void){
         p=d*100;
       }
   }
-  gchar *caption=g_strdup_printf("%s%d%s",_("Zoom:"),p,"%");
-  gtk_label_set_text (GTK_LABEL(main_window.zoomlabel),caption);
-  g_free(caption);
+  gphpedit_statusbar_set_zoom_level(GPHPEDIT_STATUSBAR(main_window.appbar),p);
 }
 
 /**
@@ -1497,7 +1501,7 @@ void inc_search_activate(GtkEntry *entry,gpointer user_data)
   }
 }
 
-
+/*
 gboolean is_valid_digits_only(gchar *text)
 {
   while (*text) {
@@ -1508,7 +1512,7 @@ gboolean is_valid_digits_only(gchar *text)
 
   return TRUE;
 }
-
+*/
 void goto_line_int(gint line)
 {
   //gint current_pos;
@@ -1904,8 +1908,12 @@ gint on_tab_change_update_classbrowser(GtkWidget *widget)
 }
 
 void process_external (GtkInfoBar *info_bar, gint response_id, Editor *editor){
-  if (response_id==1) tab_load_file(main_window.current_editor);
-  else g_get_current_time (&main_window.current_editor->file_mtime); /*set current time*/
+  if (response_id==1){
+   gphpedit_statusbar_flash_message (GPHPEDIT_STATUSBAR(main_window.appbar),0,_("Opening %s"),main_window.current_editor->filename->str);
+   tab_load_file(main_window.current_editor);
+  } else { 
+    g_get_current_time (&main_window.current_editor->file_mtime); /*set current time*/
+  }
   gtk_widget_hide (GTK_WIDGET(info_bar));  
 }
 
