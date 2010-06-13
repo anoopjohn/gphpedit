@@ -1664,7 +1664,7 @@ void find_next_marker(line_start){
         //bugfix the maker is in the next line
         goto_line_int(line+1);
       }else{  
-        g_print("No marker found\n");
+        gphpedit_statusbar_flash_message (GPHPEDIT_STATUSBAR(main_window.appbar),0,"%s",_("No marker found"));
       }
     }else{
       //goto the marker posicion
