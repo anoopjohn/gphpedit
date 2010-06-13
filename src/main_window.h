@@ -50,7 +50,6 @@ typedef struct
   GtkWidget *main_horizontal_pane;
   /* status bar */
   GtkWidget *appbar;
-  GtkWidget *zoomlabel;
 
   GtkWidget *notebook_manager;
   

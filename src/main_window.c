@@ -35,7 +35,7 @@
 #include "gvfs_utils.h"
 #include "syntax_check.h"
 #include "gphpedit-close-button.h"
-
+#include "gphpedit-statusbar.h"
 
 MainWindow main_window;
 GIOChannel* inter_gphpedit_io;
@@ -133,16 +133,9 @@ void force_config_folder(void)
 
 static void main_window_create_appbar(void)
 {
-  main_window.appbar = gtk_statusbar_new();
+  main_window.appbar = gphpedit_statusbar_new ();
   gtk_box_pack_start(GTK_BOX(main_window.prinbox), main_window.appbar, FALSE, TRUE, 1);
-  gtk_statusbar_set_has_resize_grip (GTK_STATUSBAR (main_window.appbar), FALSE);
-  GtkWidget *box;
-  box = gtk_hbox_new(FALSE, 0);
-  main_window.zoomlabel=gtk_label_new(_("Zoom:100%"));
-  gtk_widget_show (main_window.zoomlabel);
-  gtk_box_pack_start(GTK_BOX(box), main_window.zoomlabel, FALSE, FALSE, 0);
-  gtk_box_pack_end(GTK_BOX(main_window.appbar), box, FALSE, FALSE, 25);
-  gtk_widget_show (box);
+  gphpedit_statusbar_set_zoom_level(GPHPEDIT_STATUSBAR(main_window.appbar),100);
   gtk_widget_show (main_window.appbar);
 }
 
@@ -272,7 +265,6 @@ static void main_window_fill_panes(void)
    Hence the focus-tab event (which GTK doesn't seem to recognise
   */
   gtk_widget_set_receives_default (main_window.notebook_editor,FALSE);
-  GTK_WIDGET_UNSET_FLAGS(main_window.notebook_editor, GTK_CAN_FOCUS);
   gtk_widget_show (main_window.notebook_editor);
   gtk_box_pack_start(GTK_BOX(main_window.prin_hbox), main_window.notebook_editor, TRUE, TRUE, 2);
 

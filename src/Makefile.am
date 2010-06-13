@@ -35,6 +35,10 @@ nodist_EXTRA_gphpedit_SOURCES = dummy.cxx
 gphpedit_SOURCES = \
 	gvfs_utils.c		\
 	gvfs_utils.h		\
+	gphpedit-close-button.h		\
+	gphpedit-close-button.c		\
+	gphpedit-statusbar.h		\
+	gphpedit-statusbar.c		\
 	calltip.c		\
 	calltip.h		\
 	images.h		\
