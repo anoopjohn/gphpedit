@@ -72,6 +72,7 @@ typedef struct
 
   GtkWidget *scrolledwindow3;
   GtkTreeStore *classtreestore;
+  GtkTreeModel *new_model;
   GtkWidget *classtreeview;
   GtkTreeSelection *classtreeselect;
   GtkWidget *treeviewlabel;
@@ -105,6 +106,7 @@ enum {
   FILENAME_COLUMN,
   TYPE_COLUMN,
   ID_COLUMN,
+  FILE_TYPE,
   N_COLUMNS
 };
 

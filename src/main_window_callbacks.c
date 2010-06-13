@@ -905,7 +905,10 @@ void update_zoom_level(void){
         p=d*100;
       }
   }
-  gphpedit_statusbar_set_zoom_level(GPHPEDIT_STATUSBAR(main_window.appbar),p);
+//  gchar *caption=g_strdup_printf("%s%d%s",_("Zoom:"),p,"%");
+//  gtk_label_set_text (GTK_LABEL(main_window.zoomlabel),caption);
+//  g_free(caption);
+    gphpedit_statusbar_set_zoom_level((GphpeditStatusbar *)main_window.appbar,p);
 }
 
 /**
@@ -1411,8 +1414,8 @@ void on_notebook_switch_page (GtkNotebook *notebook, GtkNotebookPage *page,
   if (!is_app_closing) {
     // Change the title of the main application window to the full filename
     update_app_title();
+    on_tab_change_update_classbrowser(main_window.notebook_editor);
   }
-  on_tab_change_update_classbrowser(main_window.notebook_editor);
   check_externally_modified();
 }
 
@@ -1798,7 +1801,7 @@ gint treeview_double_click(GtkWidget *widget, GdkEventButton *event, gpointer fu
   if (event->type==GDK_2BUTTON_PRESS ||
       event->type==GDK_3BUTTON_PRESS) {
       if (gtk_tree_selection_get_selected (main_window.classtreeselect, NULL, &iter)) {
-        gtk_tree_model_get (GTK_TREE_MODEL(main_window.classtreestore), &iter, FILENAME_COLUMN, &filename, LINE_NUMBER_COLUMN, &line_number, -1);
+          gtk_tree_model_get (GTK_TREE_MODEL(main_window.new_model), &iter, FILENAME_COLUMN, &filename, LINE_NUMBER_COLUMN, &line_number, -1);
         if (filename) {
           switch_to_file_or_open(filename, line_number);
           g_free (filename);
@@ -1816,7 +1819,7 @@ gint treeview_click_release(GtkWidget *widget, GdkEventButton *event, gpointer f
   guint line_number;
 
   if (gtk_tree_selection_get_selected (main_window.classtreeselect, NULL, &iter)) {
-    gtk_tree_model_get (GTK_TREE_MODEL(main_window.classtreestore), &iter, FILENAME_COLUMN, &filename, LINE_NUMBER_COLUMN, &line_number, -1);
+    gtk_tree_model_get (GTK_TREE_MODEL(main_window.new_model), &iter, FILENAME_COLUMN, &filename, LINE_NUMBER_COLUMN, &line_number, -1);
     if (filename) {
       classbrowser_update_selected_label(filename, line_number);
       g_free (filename);
@@ -1896,14 +1899,7 @@ gint on_parse_current_click (GtkWidget *widget)
 //view is refreshed only if the parse only current file parameter is set
 gint on_tab_change_update_classbrowser(GtkWidget *widget)
 {
-  //debug("Toggled");
-  //if parse only current file is set then add only the file in the current tab
-  //the filteration logic is set inside classbrowser_update
-  if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON (main_window.chkOnlyCurFileFuncs)))
-  {
-    //debug("Is set");
     classbrowser_update();
-  }
   return 0;
 }
 

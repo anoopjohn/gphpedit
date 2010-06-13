@@ -1190,7 +1190,7 @@ gboolean tab_create_new(gint type, GString *filename)
     editor->saved=TRUE;
   }
   update_app_title();
-  classbrowser_update();
+//  classbrowser_update();
   g_free(abs_path);
 
   return TRUE;

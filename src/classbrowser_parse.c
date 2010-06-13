@@ -24,6 +24,7 @@
 
 #include "classbrowser_parse.h"
 #include "gvfs_utils.h"
+#include "stdlib.h"
 //#define DEBUG_CLASSBROWSER
 
 static gchar *read_text_file(gchar *filename){
@@ -45,7 +46,9 @@ static gchar *read_text_file(gchar *filename){
             return NULL;
           }
           gtk_scintilla_get_text(GTK_SCINTILLA(editor->scintilla), nchars+1, buffer);
-//          g_print("Classbrowser::Using scintilla text\n");
+          #ifdef DEBUG_CLASSBROWSER
+            g_print("Classbrowser::Using scintilla text\n");
+          #endif
           break;
     }
   }
@@ -58,14 +61,19 @@ static gchar *read_text_file(gchar *filename){
 
 static gboolean is_whitespace(gchar character)
 {
+/*
+  Determines whether a character is a control character or a white-space character
+*/
+/*
   if ( (character == ' ') ||
           (character == '\t') ||
           (character == '\n') ||
           (character == '\r') ) {
     return TRUE;
   }
-
-  return FALSE;
+ return FALSE;
+*/
+  return (g_ascii_iscntrl(character) || g_ascii_isspace(character));
 }
 
 
@@ -405,7 +413,7 @@ void classbrowser_parse_file(gchar *filename)
             #ifdef DEBUG_CLASSBROWSER
               g_print("%s(%d): Class '%s'\n", filename, line_number, within_class);
             #endif
-            classbrowser_classlist_add(within_class, filename, line_number);
+            classbrowser_classlist_add(within_class, filename, line_number,TAB_PHP);
             within_class_name = FALSE;
           }
           else if (check_previous(o, c, "function ") && non_letter_before(o, c, "function ")) {
@@ -441,13 +449,13 @@ void classbrowser_parse_file(gchar *filename)
           if ( function_awaiting_brace_or_parenthesis && is_opening_brace(*c)) {
             function_awaiting_brace_or_parenthesis = FALSE;
             if (within_class) {
-              classbrowser_functionlist_add(within_class, within_function, filename, line_number, NULL);
+              classbrowser_functionlist_add(within_class, within_function, filename, TAB_PHP, line_number, NULL);
               #ifdef DEBUG_CLASSBROWSER
                 g_print("%s(%d): Class method %s::%s\n", filename, line_number, within_class, within_function);
               #endif
             }
             else {
-              classbrowser_functionlist_add(NULL, within_function, filename, line_number, NULL);
+              classbrowser_functionlist_add(NULL, within_function, filename, TAB_PHP, line_number, NULL);
               #ifdef DEBUG_CLASSBROWSER
                 g_print("%s(%d): Function %s\n", filename, line_number, within_function);
               #endif
@@ -468,13 +476,13 @@ void classbrowser_parse_file(gchar *filename)
             param_list[param_list_length]='\0';
             //TODO: condense_param_list(&param_list);
             if (within_class) {
-              classbrowser_functionlist_add(within_class, within_function, filename, line_number, param_list);
+              classbrowser_functionlist_add(within_class, within_function, filename, TAB_PHP, line_number, param_list);
               #ifdef DEBUG_CLASSBROWSER
                 g_print("%s(%d): Class method %s::%s(%s)\n", filename, line_number, within_class, within_function, param_list);
               #endif
             }
             else {
-              classbrowser_functionlist_add(NULL, within_function, filename, line_number, param_list);
+              classbrowser_functionlist_add(NULL, within_function, filename, TAB_PHP,line_number, param_list);
               #ifdef DEBUG_CLASSBROWSER
                 g_print("%s(%d): Function %s(%s)\n", filename, line_number, within_function, param_list);
               #endif
@@ -492,7 +500,7 @@ void classbrowser_parse_file(gchar *filename)
                 varname = g_malloc(len +1);
                 strncpy(varname,startvarname,len);
                 varname[len]='\0';
-                if (!beforevarname){ beforevarname=g_strdup(varname); /*store lasat variable name found*/
+                if (!beforevarname){ beforevarname=g_strdup(varname); /*store last variable name found*/
                 } else {
                   if (strcmp(beforevarname,varname)==0){
 #ifdef DEBUGCLASSBROWSER
@@ -577,3 +585,14 @@ gboolean check_php_variable_before(const gchar *line_text){
   }
   return r;
 }
+
+static inline gboolean is_cobol_banned_word(gchar *word){
+  return (g_strcmp0(word,"AUTHOR")==0 || g_strcmp0(word,"OBJECT-COMPUTER")==0 || g_strcmp0(word,"DATE-WRITTEN")==0 || g_strcmp0(word,"PROGRAM-ID")==0 || g_strcmp0(word,"SOURCE-COMPUTER")==0 || g_strcmp0(word,"SPECIAL-NAMES")==0 || g_strcmp0(word,"END-IF")==0);
+}
+
+void process_cobol_word( gchar *name,gchar *filename,gchar *type,gchar *line){
+ if (g_strcmp0(type,"paragraph")==0 && !is_cobol_banned_word(name)) {
+          classbrowser_functionlist_add(NULL, name, filename, TAB_COBOL, atoi(line), NULL);
+ } /* not support for autocomplete yet */
+}
+
