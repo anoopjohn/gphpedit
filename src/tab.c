@@ -1082,7 +1082,7 @@ gboolean tab_create_new(gint type, GString *filename)
       abs_path = g_strdup(filename->str);
     }
     file=get_gfile_from_filename(abs_path);
-    if (!uri_is_local_or_http(abs_path)){
+    if (!filename_is_local_or_http(abs_path)){
       GError *error2=NULL;
       GMount *ex= g_file_find_enclosing_mount (file,NULL,&error2);
       if (!ex){
@@ -1928,44 +1928,4 @@ static void char_added(GtkWidget *scintilla, guint ch)
             g_free(member_function_buffer);
             break;
     }
-}
-
-gboolean editor_is_local(Editor *editor)
-{
-  gboolean result=FALSE;
-  gchar *filename;
-  
-  filename = filename_get_path(editor->filename->str);
-  if (filename){
-  g_free(filename);
-  result=TRUE;
-  }
-  #ifdef DEBUGTAB
-  g_print("DEBUG::: %s filename:%s",(result)?"TRUE - local!!!":"FALSE - not local!!!",editor->filename->str);
-  #endif
-
-  return result;
-}
-
-gboolean uri_is_local_or_http(gchar *uri)
-{
-  gchar *filename;
-
-  filename = uri;
-  if (g_str_has_prefix(filename, "file://")){
-    return TRUE;
-  }
-  if (g_str_has_prefix(filename, "http://")){
-    return TRUE;
-  }
-  if (g_str_has_prefix(filename, "https://")){
-    return TRUE;
-  }
-  if (g_str_has_prefix(filename, "/")){
-    return TRUE;
-  }
-  #ifdef DEBUGTAB
-  g_print("DEBUG:: %s - not local!!!",uri);
-  #endif
-  return FALSE;
 }

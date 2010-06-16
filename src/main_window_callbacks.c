@@ -905,9 +905,6 @@ void update_zoom_level(void){
         p=d*100;
       }
   }
-//  gchar *caption=g_strdup_printf("%s%d%s",_("Zoom:"),p,"%");
-//  gtk_label_set_text (GTK_LABEL(main_window.zoomlabel),caption);
-//  g_free(caption);
     gphpedit_statusbar_set_zoom_level((GphpeditStatusbar *)main_window.appbar,p);
 }
 
@@ -1679,7 +1676,7 @@ void find_next_marker(line_start){
 void syntax_check(GtkWidget *widget)
 {
   if (main_window.current_editor) {
-    if (editor_is_local(main_window.current_editor)) {
+    if (filename_is_native(main_window.current_editor->filename->str)){
       gtk_widget_show(main_window.scrolledwindow1);
       gtk_widget_show(main_window.lint_view);
       syntax_check_run();

@@ -393,7 +393,7 @@ static void go_home_cb(void){
   /*if there is a file open set file folder as home dir*/
     gchar *folderpath;
     if (main_window.current_editor->is_untitled==FALSE){
-      if (editor_is_local(main_window.current_editor)){
+      if (filename_is_native(main_window.current_editor->filename->str)){
         folderpath=filename_parent_uri(main_window.current_editor->filename->str);
       }else{
         /* set default dir as home dir*/

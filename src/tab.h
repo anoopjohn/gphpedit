@@ -105,14 +105,12 @@ void macro_record (GtkWidget *scintilla, gint message, gulong wparam, glong lpar
 void keyboard_macro_empty_old(Editor *editor);
 void update_ui(GtkWidget *scintilla);
 gboolean auto_memberfunc_complete_callback(gpointer data);
-void info_dialog (gchar *title, gchar *message);
 void debug_dump_editors(void);
 void register_file_opened(gchar *filename);
-gboolean editor_is_local(Editor *editor);
-gboolean uri_is_local_or_http(gchar *uri);
 void str_replace(char *Str, char ToRp, char WithC);
 void tab_file_save_opened(Editor *editor,GFile *file);
 char *macro_message_to_string(gint message);
+void info_dialog (gchar *title, gchar *message);
 gint yes_no_dialog (gchar *title, gchar *message);
 void set_editor_to_php(Editor *editor);
 void set_editor_to_css(Editor *editor);
