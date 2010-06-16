@@ -31,7 +31,7 @@
 #include "gphpedit_ipc.h"
 #include "templates.h"
 #include <gconf/gconf-client.h>
-
+#include "classbrowser.h"
 #ifdef ENABLE_NLS
 #include <locale.h>
 #endif              /* ENABLE_NLS */
@@ -57,7 +57,6 @@ int main (int argc, char **argv)
     return 0;
 
   main_window_create();
-
   force_config_folder();
   template_db_open();
   main_window_open_command_line_files(argv, argc);
@@ -65,7 +64,11 @@ int main (int argc, char **argv)
     session_reopen();
   }
   create_untitled_if_empty();
-
+  //
+  g_signal_connect (G_OBJECT (main_window.notebook_editor), "switch_page", G_CALLBACK (on_notebook_switch_page), NULL);
+  update_app_title();
+  classbrowser_update();
+  check_externally_modified();
   gtk_main();
         
   /* it makes sense to install sigterm handler that would call this too */

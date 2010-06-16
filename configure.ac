@@ -20,6 +20,12 @@ dnl 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
 dnl
 AC_PREREQ([2.59])
 AC_INIT([gPHPEdit],[0.9.98],[https://savannah.nongnu.org/support/?group=gphpedit],[gphpedit],[http://www.gphpedit.org])
+
+dnl autoconf versions before 2.64 don't have AC_PACKAGE_URL
+m4_ifdef([AC_PACKAGE_URL],,
+  [AC_DEFINE([PACKAGE_URL], ["http://www.gphpedit.org"], [Define to the home page for this package.])
+   AC_SUBST([PACKAGE_URL], ["http://www.gphpedit.org"])])
+
 # give autoconf the name of a file whose existence is a hint that
 # autoconf has been started from the right directory.
 AC_CONFIG_SRCDIR([src/main.c])
@@ -73,7 +79,7 @@ dnl  --------------
 
 # Checks for libraries.
 dnl Checking for the required libraries.
-GTK_REQUIRED_VERSION=2.0.0
+GTK_REQUIRED_VERSION=2.19.0
 dnl LIBGNOMEUI_REQUIRED_VERSION=2.0.0
 GCONF_REQUIRED_VERSION=2.0.0
 
@@ -87,6 +93,13 @@ AC_SUBST(GCONF_CFLAGS)
 AC_SUBST(GCONF_LIBS)
 AC_SUBST(WEBKIT_CFLAGS)
 AC_SUBST(WEBKIT_LIBS)
+
+AC_PATH_PROG([CTAGS_EXUBERANT], [ctags-exuberant], [/usr/bin/ctags-exuberant],
+                   [$PATH$PATH_SEPARATOR/usr/bin$PATH_SEPARATOR]dnl
+     [/usr/sbin$PATH_SEPARATOR/usr/etc$PATH_SEPARATOR/etc])
+if test "$CTAGS_EXUBERANT" != ""; then
+ AC_DEFINE_UNQUOTED(HAVE_CTAGS_EXUBERANT, $ctags-exuberant,	[ctags-exuberant])
+fi
 
 dnl **********************
 dnl  function declaration

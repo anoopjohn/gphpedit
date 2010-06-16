@@ -60,6 +60,7 @@ typedef struct
   gchar *classname;
   gboolean remove;
   guint identifierid;
+  gint file_type;
 }
 ClassBrowserFunction;
 
@@ -70,6 +71,7 @@ typedef struct
   guint line_number;
   gboolean remove;
   guint identifierid;
+  gint file_type;
 }
 ClassBrowserClass;
 void autocomplete_php_variables(GtkWidget *scintilla, gint wordStart, gint wordEnd);
@@ -84,8 +86,8 @@ void classbrowser_varlist_add(gchar *varname, gchar *funcname, gchar *filename);
 void classbrowser_filelist_remove(ClassBrowserFile *file);
 void classbrowser_functionlist_start_file(gchar *filename);
 void classbrowser_functionlist_remove_dead_wood(void);
-void classbrowser_classlist_add(gchar *classname, gchar *filename, gint line_number);
-void classbrowser_functionlist_add(gchar *classname, gchar *funcname, gchar *filename, guint line_number, gchar *param_list);
+void classbrowser_classlist_add(gchar *classname, gchar *filename, gint line_number,gint file_type);
+void classbrowser_functionlist_add(gchar *classname, gchar *funcname, gchar *filename, gint file_type, guint line_number, gchar *param_list);
 void autocomplete_member_function(GtkWidget *scintilla, gint wordStart, gint wordEnd);
 void classbrowser_update_selected_label(gchar *filename, gint line);
 gint classbrowser_compare_function_names(GtkTreeModel *model, GtkTreeIter *a, GtkTreeIter *b, gpointer user_data);

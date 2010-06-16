@@ -50,7 +50,6 @@ typedef struct
   GtkWidget *main_horizontal_pane;
   /* status bar */
   GtkWidget *appbar;
-  GtkWidget *zoomlabel;
 
   GtkWidget *notebook_manager;
   
@@ -66,7 +65,6 @@ typedef struct
 
   Editor *current_editor;
   //widget for close side bar button
-  GtkWidget *close_image;
   GtkWidget *close_sidebar_button;
   
   //Checkbox above treeview to parse only the current tab  
@@ -74,6 +72,7 @@ typedef struct
 
   GtkWidget *scrolledwindow3;
   GtkTreeStore *classtreestore;
+  GtkTreeModel *new_model;
   GtkWidget *classtreeview;
   GtkTreeSelection *classtreeselect;
   GtkWidget *treeviewlabel;
@@ -107,6 +106,7 @@ enum {
   FILENAME_COLUMN,
   TYPE_COLUMN,
   ID_COLUMN,
+  FILE_TYPE,
   N_COLUMNS
 };
 

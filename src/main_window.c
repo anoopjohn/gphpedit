@@ -34,6 +34,8 @@
 #include "templates.h"
 #include "gvfs_utils.h"
 #include "syntax_check.h"
+#include "gphpedit-close-button.h"
+#include "gphpedit-statusbar.h"
 
 MainWindow main_window;
 GIOChannel* inter_gphpedit_io;
@@ -131,16 +133,9 @@ void force_config_folder(void)
 
 static void main_window_create_appbar(void)
 {
-  main_window.appbar = gtk_statusbar_new();
+  main_window.appbar = gphpedit_statusbar_new ();
   gtk_box_pack_start(GTK_BOX(main_window.prinbox), main_window.appbar, FALSE, TRUE, 1);
-  gtk_statusbar_set_has_resize_grip (GTK_STATUSBAR (main_window.appbar), FALSE);
-  GtkWidget *box;
-  box = gtk_hbox_new(FALSE, 0);
-  main_window.zoomlabel=gtk_label_new(_("Zoom:100%"));
-  gtk_widget_show (main_window.zoomlabel);
-  gtk_box_pack_start(GTK_BOX(box), main_window.zoomlabel, FALSE, FALSE, 0);
-  gtk_box_pack_end(GTK_BOX(main_window.appbar), box, FALSE, FALSE, 25);
-  gtk_widget_show (box);
+  gphpedit_statusbar_set_zoom_level(GPHPEDIT_STATUSBAR(main_window.appbar),100);
   gtk_widget_show (main_window.appbar);
 }
 
@@ -180,17 +175,12 @@ static void create_side_panel(void){
 
   /* Close button for the side bar */
   GtkWidget *close_box;
+
   close_box = gtk_hbox_new(FALSE, 0);
   gtk_container_set_border_width(GTK_CONTAINER(close_box), 0);
-  main_window.close_image = gtk_image_new_from_stock(GTK_STOCK_CLOSE, GTK_ICON_SIZE_MENU);
-  gtk_misc_set_padding(GTK_MISC(main_window.close_image), 0, 0);
-  main_window.close_sidebar_button = gtk_button_new();
+  main_window.close_sidebar_button = gphpedit_close_button_new();
   gtk_widget_set_tooltip_text(main_window.close_sidebar_button, _("Close side panel"));
-  gtk_button_set_image(GTK_BUTTON(main_window.close_sidebar_button), main_window.close_image);
-  gtk_button_set_relief(GTK_BUTTON(main_window.close_sidebar_button), GTK_RELIEF_NONE);
-  gtk_button_set_focus_on_click(GTK_BUTTON(main_window.close_sidebar_button), FALSE);
   g_signal_connect(G_OBJECT(main_window.close_sidebar_button), "clicked", G_CALLBACK (classbrowser_show_hide),NULL);
-  gtk_widget_show(main_window.close_image);
   gtk_widget_show(main_window.close_sidebar_button);
   gtk_box_pack_end(GTK_BOX(close_box), main_window.close_sidebar_button, FALSE, FALSE, 0);
   gtk_widget_show(close_box);
@@ -275,12 +265,11 @@ static void main_window_fill_panes(void)
    Hence the focus-tab event (which GTK doesn't seem to recognise
   */
   gtk_widget_set_receives_default (main_window.notebook_editor,FALSE);
-  GTK_WIDGET_UNSET_FLAGS(main_window.notebook_editor, GTK_CAN_FOCUS);
   gtk_widget_show (main_window.notebook_editor);
   gtk_box_pack_start(GTK_BOX(main_window.prin_hbox), main_window.notebook_editor, TRUE, TRUE, 2);
 
   gtk_widget_set_size_request (main_window.notebook_editor, 400,400);
-  g_signal_connect (G_OBJECT (main_window.notebook_editor), "switch_page", G_CALLBACK (on_notebook_switch_page), NULL);
+  //g_signal_connect (G_OBJECT (main_window.notebook_editor), "switch_page", G_CALLBACK (on_notebook_switch_page), NULL);
   g_signal_connect (G_OBJECT (main_window.notebook_editor), "focus-tab", G_CALLBACK (on_notebook_focus_tab), NULL);
 
 
@@ -515,6 +504,7 @@ void main_window_update_reopen_menu(void)
 
 void main_window_add_to_reopen_menu(gchar *full_filename)
 {
+  if (!full_filename) return;
   GtkRecentManager *manager;
   manager = gtk_recent_manager_get_default ();
   gtk_recent_manager_add_item (manager, full_filename);
@@ -583,7 +573,7 @@ void main_window_create(void){
   g_signal_connect (G_OBJECT (main_window.window), "size_allocate", G_CALLBACK (main_window_resize), NULL);
   g_signal_connect (G_OBJECT (main_window.window), "window-state-event", G_CALLBACK (main_window_state_changed), NULL);
   g_signal_connect (G_OBJECT (main_window.window), "focus-in-event", G_CALLBACK (main_window_activate_focus), NULL);
-  
+
   main_window.clipboard = gtk_clipboard_get(GDK_SELECTION_CLIPBOARD);
 
   gtk_widget_show(main_window.window);

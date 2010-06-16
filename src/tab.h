@@ -65,7 +65,7 @@ typedef struct
 	gboolean is_untitled:1;
 	guint current_pos;
 	guint current_line;
-	gchar *contenttype;
+  gchar *contenttype;
 } Editor;
 
 typedef struct
@@ -116,6 +116,7 @@ char *macro_message_to_string(gint message);
 gint yes_no_dialog (gchar *title, gchar *message);
 void set_editor_to_php(Editor *editor);
 void set_editor_to_css(Editor *editor);
+gboolean is_css_file(const gchar *filename);
 void set_editor_to_sql(Editor *editor);
 void set_editor_to_cxx(Editor *editor);
 void set_editor_to_perl(Editor *editor);

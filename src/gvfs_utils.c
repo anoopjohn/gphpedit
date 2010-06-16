@@ -8,7 +8,7 @@ GFile *get_gfile_from_filename(gchar *filename){
     file=g_file_new_for_uri (filename);
   } else {
     file=g_file_new_for_path (filename);  
-  }        
+  }
   return file;
 }
 
@@ -44,6 +44,8 @@ gchar *filename_get_relative_path(gchar *filename){
   GFile *file= get_gfile_from_filename(filename);
   GFile *home= get_gfile_from_filename((gchar *) g_get_home_dir());
   gchar *rel =g_file_get_relative_path (home,file);
+  g_object_unref(file);
+  g_object_unref(home);
   if (rel) {
   gchar *relpath=g_strdup_printf("~/%s",rel);
   g_free(rel);
@@ -133,3 +135,26 @@ gboolean get_file_modified(gchar *filename,GTimeVal *act, gboolean update_mark){
   return hr;
 }
 
+gboolean filename_is_local_or_http(gchar *filename){
+  GFile *file;
+  if (!filename) return FALSE;
+  file= get_gfile_from_filename (filename);
+  gchar *scheme= g_file_get_uri_scheme (file);
+  gboolean result= g_str_has_prefix(filename, "file://") || g_str_has_prefix(filename, "http://") || g_str_has_prefix(filename, "https://");
+  g_free(scheme);
+  g_object_unref(file);
+  return result;
+}
+
+gboolean filename_is_native(gchar *filename)
+{
+  gboolean result=FALSE;
+  gchar *ret=NULL;
+  ret = filename_get_path(filename);
+  if (ret){
+    g_free(ret);
+    result=TRUE;
+  }
+
+  return result;
+}

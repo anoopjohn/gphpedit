@@ -35,6 +35,7 @@
 #include "plugin.h"
 #include "gvfs_utils.h"
 #include <gdk/gdkkeysyms.h>
+#include "gphpedit-statusbar.h"
 
 gboolean is_app_closing = FALSE;
 gint classbrowser_hidden_position;
@@ -668,12 +669,15 @@ void on_save1_activate(GtkWidget *widget)
   gchar *filename = NULL;
   GFile *file;
   if (main_window.current_editor) {
+
     filename = main_window.current_editor->filename->str;
 
     //if filename is Untitled
     if (main_window.current_editor->is_untitled) {
       on_save_as1_activate(widget);
     } else {
+      /* show status in statusbar */
+      gphpedit_statusbar_flash_message (GPHPEDIT_STATUSBAR(main_window.appbar),0,_("Saving %s"),filename);
       file=get_gfile_from_filename(filename);
       tab_file_save_opened(main_window.current_editor,file);
     }
@@ -787,11 +791,13 @@ void on_reload1_activate(GtkWidget *widget)
     gtk_window_set_title(GTK_WINDOW(file_revert_dialog), "Question");
     gint result = gtk_dialog_run (GTK_DIALOG (file_revert_dialog));
     if (result==GTK_RESPONSE_YES) {
+      gphpedit_statusbar_flash_message (GPHPEDIT_STATUSBAR(main_window.appbar),0,_("Opening %s"),main_window.current_editor->filename->str);
       tab_load_file(main_window.current_editor);
     }
     gtk_widget_destroy(file_revert_dialog);
   }
   else if (main_window.current_editor) {
+    gphpedit_statusbar_flash_message (GPHPEDIT_STATUSBAR(main_window.appbar),0,_("Opening %s"),main_window.current_editor->filename->str);
     tab_load_file(main_window.current_editor);
   }
 }
@@ -801,18 +807,6 @@ void on_tab_close_activate(GtkWidget *widget, Editor *editor)
   try_close_page(editor);
   classbrowser_update();
 }
-
-void on_tab_close_set_style(GtkWidget *hbox, GtkWidget *button)
-{
-  gint w=0, h=0;
-  gtk_icon_size_lookup_for_settings(gtk_widget_get_settings(hbox), GTK_ICON_SIZE_MENU, &w, &h);
-  //debug("%d-%d", w, h);
-  if (button){
-   gtk_widget_set_size_request(button, w+2, h+2);
-  }
-}
-
-
 
 void rename_file(GString *newfilename)
 {
@@ -911,9 +905,10 @@ void update_zoom_level(void){
         p=d*100;
       }
   }
-  gchar *caption=g_strdup_printf("%s%d%s",_("Zoom:"),p,"%");
-  gtk_label_set_text (GTK_LABEL(main_window.zoomlabel),caption);
-  g_free(caption);
+//  gchar *caption=g_strdup_printf("%s%d%s",_("Zoom:"),p,"%");
+//  gtk_label_set_text (GTK_LABEL(main_window.zoomlabel),caption);
+//  g_free(caption);
+    gphpedit_statusbar_set_zoom_level((GphpeditStatusbar *)main_window.appbar,p);
 }
 
 /**
@@ -1400,7 +1395,6 @@ void on_notebook_switch_page (GtkNotebook *notebook, GtkNotebookPage *page,
 {
   Editor *data;
   GtkWidget *child;
-
   child = gtk_notebook_get_nth_page(GTK_NOTEBOOK(main_window.notebook_editor), page_num);
   if (GTK_IS_SCINTILLA(child)){
     data = editor_find_from_scintilla(child);
@@ -1420,8 +1414,8 @@ void on_notebook_switch_page (GtkNotebook *notebook, GtkNotebookPage *page,
   if (!is_app_closing) {
     // Change the title of the main application window to the full filename
     update_app_title();
+    on_tab_change_update_classbrowser(main_window.notebook_editor);
   }
-  on_tab_change_update_classbrowser(main_window.notebook_editor);
   check_externally_modified();
 }
 
@@ -1510,7 +1504,7 @@ void inc_search_activate(GtkEntry *entry,gpointer user_data)
   }
 }
 
-
+/*
 gboolean is_valid_digits_only(gchar *text)
 {
   while (*text) {
@@ -1521,7 +1515,7 @@ gboolean is_valid_digits_only(gchar *text)
 
   return TRUE;
 }
-
+*/
 void goto_line_int(gint line)
 {
   //gint current_pos;
@@ -1673,7 +1667,7 @@ void find_next_marker(line_start){
         //bugfix the maker is in the next line
         goto_line_int(line+1);
       }else{  
-        g_print("No marker found\n");
+        gphpedit_statusbar_flash_message (GPHPEDIT_STATUSBAR(main_window.appbar),0,"%s",_("No marker found"));
       }
     }else{
       //goto the marker posicion
@@ -1807,7 +1801,7 @@ gint treeview_double_click(GtkWidget *widget, GdkEventButton *event, gpointer fu
   if (event->type==GDK_2BUTTON_PRESS ||
       event->type==GDK_3BUTTON_PRESS) {
       if (gtk_tree_selection_get_selected (main_window.classtreeselect, NULL, &iter)) {
-        gtk_tree_model_get (GTK_TREE_MODEL(main_window.classtreestore), &iter, FILENAME_COLUMN, &filename, LINE_NUMBER_COLUMN, &line_number, -1);
+          gtk_tree_model_get (GTK_TREE_MODEL(main_window.new_model), &iter, FILENAME_COLUMN, &filename, LINE_NUMBER_COLUMN, &line_number, -1);
         if (filename) {
           switch_to_file_or_open(filename, line_number);
           g_free (filename);
@@ -1825,7 +1819,7 @@ gint treeview_click_release(GtkWidget *widget, GdkEventButton *event, gpointer f
   guint line_number;
 
   if (gtk_tree_selection_get_selected (main_window.classtreeselect, NULL, &iter)) {
-    gtk_tree_model_get (GTK_TREE_MODEL(main_window.classtreestore), &iter, FILENAME_COLUMN, &filename, LINE_NUMBER_COLUMN, &line_number, -1);
+    gtk_tree_model_get (GTK_TREE_MODEL(main_window.new_model), &iter, FILENAME_COLUMN, &filename, LINE_NUMBER_COLUMN, &line_number, -1);
     if (filename) {
       classbrowser_update_selected_label(filename, line_number);
       g_free (filename);
@@ -1905,20 +1899,17 @@ gint on_parse_current_click (GtkWidget *widget)
 //view is refreshed only if the parse only current file parameter is set
 gint on_tab_change_update_classbrowser(GtkWidget *widget)
 {
-  //debug("Toggled");
-  //if parse only current file is set then add only the file in the current tab
-  //the filteration logic is set inside classbrowser_update
-  if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON (main_window.chkOnlyCurFileFuncs)))
-  {
-    //debug("Is set");
     classbrowser_update();
-  }
   return 0;
 }
 
 void process_external (GtkInfoBar *info_bar, gint response_id, Editor *editor){
-  if (response_id==1) tab_load_file(main_window.current_editor);
-  else g_get_current_time (&main_window.current_editor->file_mtime); /*set current time*/
+  if (response_id==1){
+   gphpedit_statusbar_flash_message (GPHPEDIT_STATUSBAR(main_window.appbar),0,_("Opening %s"),main_window.current_editor->filename->str);
+   tab_load_file(main_window.current_editor);
+  } else { 
+    g_get_current_time (&main_window.current_editor->file_mtime); /*set current time*/
+  }
   gtk_widget_hide (GTK_WIDGET(info_bar));  
 }
 

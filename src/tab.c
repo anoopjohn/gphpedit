@@ -36,6 +36,7 @@
 #include "grel2abs.h"
 #include <gconf/gconf-client.h>
 #include "gvfs_utils.h"
+#include "gphpedit-close-button.h"
 //#define DEBUGTAB
 
 #define INFO_FLAGS "standard::display-name,standard::content-type,standard::edit-name,standard::size,access::can-write,access::can-delete,standard::icon,time::modified,time::modified-usec"
@@ -76,9 +77,31 @@ void debug_dump_editors(void)
       g_print("Opened from      :%s\n", editor->opened_from->str);
     }
     g_print("Saved?           :%d\n", editor->saved);
-    g_print("Converted to UTF?:%d\n\n", editor->saved);
+    g_print("Converted to UTF-8?:%d\n\n", editor->saved);
   }
   g_print("--------------------------------------------------------------\n");
+}
+/*
+* process_drag_uri
+* send open signal for uris dropped in scintilla widget
+*/
+void process_drag_uri(GtkWidget *scintilla, gpointer data){
+  if (data){
+    gchar **uris= g_strsplit (data,"\n",0);
+    int i=0;
+    while (uris[i]!=0){
+        int k=strlen(uris[i]);
+        if (k!=0){
+          gchar *uri=g_malloc(k);
+          strncpy(uri,uris[i],k); /* skip \n */
+          uri[k-1]=0;
+          switch_to_file_or_open(uri, 0);
+          g_free(uri);
+        }
+      i++;
+    }
+    g_strfreev (uris);
+  }
 }
 
 void tab_set_general_scintilla_properties(Editor *editor)
@@ -225,6 +248,7 @@ static void tab_set_event_handlers(Editor *editor)
 {
   g_signal_connect (G_OBJECT (editor->scintilla), "char_added", G_CALLBACK (char_added), NULL);
   g_signal_connect (G_OBJECT (editor->scintilla), "update_ui", G_CALLBACK (update_ui), NULL);
+  g_signal_connect (G_OBJECT (editor->scintilla), "uri_dropped", G_CALLBACK (process_drag_uri), NULL);
 }
 
 gchar *write_buffer = NULL; /*needed for save buffer*/
@@ -377,6 +401,7 @@ void tab_file_opened (GObject *source_object, GAsyncResult *res, gpointer user_d
     g_error_free(error);
     return;
   }
+  g_object_unref(source_object);
   #ifdef DEBUGTAB
   g_print("DEBUG:: Loaded %d bytes\n",editor->file_size);
   #endif
@@ -918,6 +943,7 @@ void set_editor_to_perl(Editor *editor)
 
 void set_editor_to_cobol(Editor *editor)
 {
+  gtk_scintilla_set_word_chars((GtkScintilla *)editor->scintilla, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-");
   tab_cobol_set_lexer(editor);
   editor->type = TAB_COBOL;
 }
@@ -1164,33 +1190,20 @@ gboolean tab_create_new(gint type, GString *filename)
     editor->saved=TRUE;
   }
   update_app_title();
-  classbrowser_update();
+//  classbrowser_update();
   g_free(abs_path);
 
   return TRUE;
 }
 
 GtkWidget *get_close_tab_widget(Editor *editor) {
-  GtkWidget *hbox, *image, *close_button;
-  GtkRcStyle *rcstyle;
-
+  GtkWidget *hbox;
+  GtkWidget *close_button;
   hbox = gtk_hbox_new(FALSE, 0);
-  image = gtk_image_new_from_stock(GTK_STOCK_CLOSE, GTK_ICON_SIZE_MENU);
-  gtk_misc_set_padding(GTK_MISC(image), 0, 0);
-  gtk_container_set_border_width(GTK_CONTAINER(hbox), 0);
-  close_button = gtk_button_new();
-  gtk_widget_set_tooltip_text(close_button, "Close Tab");
+  close_button = gphpedit_close_button_new ();
+  gtk_widget_set_tooltip_text(close_button, _("Close Tab"));
 
-  gtk_button_set_image(GTK_BUTTON(close_button), image);
-  gtk_button_set_relief(GTK_BUTTON(close_button), GTK_RELIEF_NONE);
-  gtk_button_set_focus_on_click(GTK_BUTTON(close_button), FALSE);
-
-  rcstyle = gtk_rc_style_new ();
-  rcstyle->xthickness = rcstyle->ythickness = 0;
-  gtk_widget_modify_style (close_button, rcstyle);
-  g_object_unref(rcstyle);
   g_signal_connect(G_OBJECT(close_button), "clicked", G_CALLBACK(on_tab_close_activate), editor);
-  g_signal_connect(G_OBJECT(hbox), "style-set", G_CALLBACK(on_tab_close_set_style), close_button);
   /* load file icon */
   GtkWidget *icon= gtk_image_new_from_pixbuf (editor->file_icon);
   gtk_widget_show (icon);
@@ -1198,7 +1211,6 @@ GtkWidget *get_close_tab_widget(Editor *editor) {
   gtk_box_pack_start(GTK_BOX(hbox), editor->label, FALSE, FALSE, 0);
   gtk_box_pack_end(GTK_BOX(hbox), close_button, FALSE, FALSE, 0);
   gtk_widget_show(editor->label);
-  gtk_widget_show(image);
   gtk_widget_show(close_button);
   gtk_widget_show(hbox);
   return hbox;
