@@ -54,8 +54,6 @@ gphpedit_SOURCES = \
 	find_replace.h		\
 	gphpedit_ipc.c		\
 	gphpedit_ipc.h		\
-	grel2abs.c		\
-	grel2abs.h		\
 	plugin.c		\
 	plugin.h		\
 	main.c			\

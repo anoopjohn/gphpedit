@@ -33,7 +33,6 @@
 #include "tab_cobol.h"
 #include "tab_python.h"
 #include "main_window_callbacks.h"
-#include "grel2abs.h"
 #include <gconf/gconf-client.h>
 #include "gvfs_utils.h"
 #include "gphpedit-close-button.h"
@@ -1063,7 +1062,6 @@ gboolean tab_create_new(gint type, GString *filename)
   Editor *editor;
   GString *dialog_message;
   GtkWidget *editor_tab;
-  gchar abs_buffer[2048];
   gchar *abs_path = NULL;
   gchar *cwd;
   gboolean result;
@@ -1075,7 +1073,7 @@ gboolean tab_create_new(gint type, GString *filename)
   if (filename != NULL) {
     if (strstr(filename->str, ":")==NULL) {
       cwd = g_get_current_dir();
-      abs_path = g_strdup(g_rel2abs (filename->str, cwd, abs_buffer, 2048));
+      abs_path = get_absolute_from_relative(filename->str, cwd);
       g_free(cwd);
     }
     else {

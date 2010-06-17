@@ -13,4 +13,5 @@ gboolean get_file_modified(gchar *filename,GTimeVal *act, gboolean update_mark);
 gchar *filename_get_relative_path(gchar *filename);
 gboolean filename_is_local_or_http(gchar *filename);
 gboolean filename_is_native(gchar *filename);
+gchar *get_absolute_from_relative(gchar *path, gchar *base);
 #endif

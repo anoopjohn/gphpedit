@@ -107,8 +107,9 @@ gchar *read_text_file_sync( gchar *filename )
   return buffer;
 }
 /*
-*
-*
+* get_file_modified
+* return TRUE if the file has been modified or FALSE otherwise
+* if updatemark = TRUE, the GTimeVal parameter will be updated will lastest mark
 */
 gboolean get_file_modified(gchar *filename,GTimeVal *act, gboolean update_mark){
   GFileInfo *info;
@@ -157,4 +158,23 @@ gboolean filename_is_native(gchar *filename)
   }
 
   return result;
+}
+/**
+* get_absolute_from_relative
+* return an absolute uri from a relatice path or NULL. must free the returned value with gfree when no longer needed
+* if base = NULL then home dir will be used as base path
+*/
+
+gchar *get_absolute_from_relative(gchar *path, gchar *base){
+  GFile *parent=NULL;
+  if (!base){
+    parent= get_gfile_from_filename((gchar *) g_get_home_dir());
+  }else{
+    parent= get_gfile_from_filename (base);
+  }
+  GFile *result= g_file_resolve_relative_path (parent,path);
+  gchar *file_uri= g_file_get_uri (result);
+  g_object_unref(parent);
+  g_object_unref(result);
+  return file_uri;
 }
