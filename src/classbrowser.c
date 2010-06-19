@@ -50,7 +50,7 @@ gchar *get_ctags_token(gchar *text,gint *advancing){
   *advancing=i+k; /* skip spaces*/
   return name;
 }
-
+#ifdef HAVE_CTAGS_EXUBERANT
 void call_ctags(gchar *filename){
   if (!filename){
     g_print("skip\n");
@@ -97,7 +97,7 @@ void call_ctags(gchar *filename){
     g_free(stdout);
   }
 }
-
+#endif
 gboolean free_php_files_tree_item (gpointer key, gpointer value, gpointer data){
   ClassBrowserFile *file=(ClassBrowserFile *)value;
   if (php_files_tree && key && value) g_tree_steal (php_files_tree, key);
