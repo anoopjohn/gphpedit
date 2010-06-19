@@ -459,24 +459,14 @@ void update_app_title(void)
   g_string_free(title, TRUE);
 }
 
-gint minimum(gint val1, gint val2)
-{
-  if (val1 < val2) {
-    return val1;
-  }
-  return val2;
-}
-
-
-gint maximum(gint val1, gint val2)
-{
-  if (val1 > val2) {
-    return val1;
-  }
-  return val2;
-}
-
 /****/
+
+static gint sort_recent (GtkRecentInfo *a, GtkRecentInfo *b)
+{
+  /* most recent upper */
+  g_assert (a != NULL && b != NULL);
+  return gtk_recent_info_get_modified (b) - gtk_recent_info_get_modified (a);
+}
 
 void main_window_update_reopen_menu(void)
 {
@@ -484,7 +474,7 @@ void main_window_update_reopen_menu(void)
   GtkRecentManager *manager;
   manager = gtk_recent_manager_get_default ();
   GList *recent_items= gtk_recent_manager_get_items (manager);
-
+  recent_items = g_list_sort (recent_items, (GCompareFunc)sort_recent); /* order items most recent first*/
   gtk_widget_show(main_window.menu->reciente);
 
   GList *walk = NULL;//recent_items;
@@ -508,7 +498,7 @@ void main_window_update_reopen_menu(void)
   for (hideitem=entry;hideitem<NUM_REOPEN_MAX;hideitem++){
       gtk_widget_hide(main_window.menu->recent[hideitem]);
   }
-  if (!gtk_widget_get_visible (main_window.menu->recent[0])){
+  if (!gtk_widget_get_visible (main_window.menu->recent[0])){ /* no items so hide menu*/
     gtk_widget_hide(main_window.menu->reciente);
   }
 }
