@@ -29,7 +29,17 @@ find -type f \( -name missing -o -name install-sh -o -name mkinstalldirs \
 	-o -name Makefile.in \) -print0 | xargs -0 rm -f
 
 echo Running autoreconf...
-autoreconf -v -i -f
-
+autoreconf -v -i
+# run ./autogen.sh --rebuild-po-files
+# to update po files with lastest strings from source code
+if [ $1 = "--rebuild-po-files" ]
+then
+echo Running configure
+./configure
+cd "po"
+make check
+make update-po
+else
 echo Running configure with arguments "$@"
 ./configure $@
+fi

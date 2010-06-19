@@ -1,10 +1,11 @@
 src/calltip.c
+src/gvfs_utils.c
 src/classbrowser.c
 src/classbrowser_parse.c
 src/edit_template.c
 src/find_replace.c
 src/gphpedit_ipc.c
-src/grel2abs.c
+src/gphpedit-statusbar.c
 src/plugin.c
 src/main.c
 src/main_window.c
