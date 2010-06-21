@@ -217,7 +217,7 @@ void close_all_tabs(void)
     }
   }
   editors = NULL;
-  main_window.current_editor=FALSE;
+  main_window.current_editor=NULL;
   is_app_closing = FALSE;
   return;
 }
@@ -452,12 +452,12 @@ void open_file_ok(GtkFileChooser *file_selection)
   g_slist_free(filenames);
 }
 
-void reopen_recent(GtkWidget *widget, gpointer data) {
-  const gchar *filename;
-  filename=gtk_menu_item_get_label ((GtkMenuItem *)widget);
+void reopen_recent(GtkRecentChooser *chooser, gpointer data) {
+  gchar *filename =gtk_recent_chooser_get_current_uri  (chooser);
   if (DEBUG_MODE) { g_print("DEBUG: main_window_callbacks.c:reopen_recent:filename: %s\n", filename); }
-  
-  switch_to_file_or_open((gchar *)filename, 0);
+ 
+  switch_to_file_or_open(filename, 0);
+  g_free(filename);
 }
 
 void run_plugin(GtkWidget *widget, gpointer data) {
@@ -806,6 +806,7 @@ void on_tab_close_activate(GtkWidget *widget, Editor *editor)
 {
   try_close_page(editor);
   classbrowser_update();
+  update_app_title();
 }
 
 void rename_file(GString *newfilename)

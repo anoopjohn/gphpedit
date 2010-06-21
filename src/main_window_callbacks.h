@@ -35,7 +35,7 @@ gboolean main_window_delete_event(GtkWidget *widget, GdkEvent *event, gpointer u
 gint main_window_key_press_event(GtkWidget   *widget, GdkEventKey *event,gpointer user_data);
 void on_new1_activate(GtkWidget *widget);
 void open_file_ok(GtkFileChooser *file_selection);
-void reopen_recent(GtkWidget *widget, gpointer data);
+void reopen_recent(GtkRecentChooser *chooser, gpointer data);
 void on_open1_activate(GtkWidget *widget);
 void on_openselected1_activate(GtkWidget *widget);
 void save_file_as_ok(GtkFileChooser *file_selection_box);
