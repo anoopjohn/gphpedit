@@ -370,8 +370,8 @@ void replace_clicked(GtkButton *button, gpointer data)
         gtk_scintilla_set_selection_start(GTK_SCINTILLA(main_window.current_editor->scintilla), selection_start);
         gtk_scintilla_set_selection_end(GTK_SCINTILLA(main_window.current_editor->scintilla), selection_start + strlen(replace));
         }
-      replace_clicked(NULL, NULL);
       gtk_widget_destroy(replace_prompt_dialog);
+      replace_clicked(NULL, NULL);
     } else {
       gtk_scintilla_replace_sel(GTK_SCINTILLA(main_window.current_editor->scintilla), replace);
       gtk_scintilla_goto_pos(GTK_SCINTILLA(main_window.current_editor->scintilla), start_found);  
