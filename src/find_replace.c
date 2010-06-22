@@ -27,6 +27,7 @@
 #include "main_window.h"
 #include <gdk/gdkkeysyms.h>
 #include "gphpedit-statusbar.h"
+#include "history-entry.h"
 
 FindDialog find_dialog;
 ReplaceDialog replace_dialog;
@@ -58,7 +59,8 @@ void find_clicked(GtkButton *button, gpointer data)
   current_pos = gtk_scintilla_get_current_pos(GTK_SCINTILLA(main_window.current_editor->scintilla));
 
   whole_document = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON(find_dialog.radiobutton1));
-  text =  gtk_entry_get_text (GTK_ENTRY(find_dialog.entry1));
+  text = gtk_combo_box_get_active_text (GTK_COMBO_BOX(find_dialog.entry1));
+  gphpedit_history_entry_prepend_text	(GPHPEDIT_HISTORY_ENTRY(find_dialog.entry1), text);
 
   if (whole_document) {
     current_pos = 0;
@@ -135,7 +137,7 @@ void find_create(void)
   gtk_alignment_set_padding(GTK_ALIGNMENT(find_dialog.alignment1), 6, 6, 6, 6);
   gtk_widget_show(find_dialog.alignment1);
   
-  find_dialog.entry1 = gtk_entry_new ();
+  find_dialog.entry1 = gphpedit_history_entry_new ("find",TRUE);
   gtk_widget_show (find_dialog.entry1);
 
   gtk_container_add (GTK_CONTAINER (find_dialog.alignment1), find_dialog.entry1);
@@ -150,7 +152,8 @@ void find_create(void)
     wordEnd = gtk_scintilla_get_selection_end(GTK_SCINTILLA(main_window.current_editor->scintilla));
     if (wordStart != wordEnd) {
       buffer = gtk_scintilla_get_text_range (GTK_SCINTILLA(main_window.current_editor->scintilla), wordStart, wordEnd, &length);
-      gtk_entry_set_text(GTK_ENTRY(find_dialog.entry1), buffer);
+      gphpedit_history_entry_prepend_text	(GPHPEDIT_HISTORY_ENTRY(find_dialog.entry1),buffer);
+      gtk_combo_box_set_active (GTK_COMBO_BOX(find_dialog.entry1), 0);
     }
   }
   /* End get selected text */
@@ -308,8 +311,10 @@ void replace_clicked(GtkButton *button, gpointer data)
   current_pos = gtk_scintilla_get_current_pos(GTK_SCINTILLA(main_window.current_editor->scintilla));
 
   whole_document = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON(replace_dialog.radiobutton17));
-  text = gtk_entry_get_text (GTK_ENTRY(replace_dialog.entry1));
-  replace = gtk_entry_get_text (GTK_ENTRY(replace_dialog.entry2));
+  text = gtk_combo_box_get_active_text (GTK_COMBO_BOX(replace_dialog.entry1));
+  gphpedit_history_entry_prepend_text	(GPHPEDIT_HISTORY_ENTRY(replace_dialog.entry1), text);
+  replace = gtk_combo_box_get_active_text (GTK_COMBO_BOX(replace_dialog.entry2));
+  gphpedit_history_entry_prepend_text	(GPHPEDIT_HISTORY_ENTRY(replace_dialog.entry2), text);
 
   if (whole_document) {
     current_pos = 0;
@@ -355,7 +360,8 @@ void replace_clicked(GtkButton *button, gpointer data)
       gint selection_start;
       const gchar *replace;
       if (result==GTK_RESPONSE_YES) {
-        replace =  gtk_entry_get_text (GTK_ENTRY(replace_dialog.entry2));
+        replace = gtk_combo_box_get_active_text (GTK_COMBO_BOX(replace_dialog.entry2));
+        gphpedit_history_entry_prepend_text	(GPHPEDIT_HISTORY_ENTRY(replace_dialog.entry2), text);
         selection_start = gtk_scintilla_get_selection_start(GTK_SCINTILLA(main_window.current_editor->scintilla));
         gtk_scintilla_replace_sel(GTK_SCINTILLA(main_window.current_editor->scintilla), replace);
         gtk_scintilla_set_selection_start(GTK_SCINTILLA(main_window.current_editor->scintilla), selection_start);
@@ -389,8 +395,10 @@ void replace_all_clicked(GtkButton *button, gpointer data)
   
   length_of_document = gtk_scintilla_get_length(GTK_SCINTILLA(main_window.current_editor->scintilla));
 
-  text = gtk_entry_get_text (GTK_ENTRY(replace_dialog.entry1));
-  replace =gtk_entry_get_text (GTK_ENTRY(replace_dialog.entry2));
+  text = gtk_combo_box_get_active_text (GTK_COMBO_BOX(replace_dialog.entry1));
+  gphpedit_history_entry_prepend_text	(GPHPEDIT_HISTORY_ENTRY(replace_dialog.entry1), text);
+  replace = gtk_combo_box_get_active_text (GTK_COMBO_BOX(replace_dialog.entry2));
+  gphpedit_history_entry_prepend_text	(GPHPEDIT_HISTORY_ENTRY(replace_dialog.entry2), text);
 
   start_pos = gtk_scintilla_get_current_pos(GTK_SCINTILLA(main_window.current_editor->scintilla));
 
@@ -487,7 +495,7 @@ void replace_create(void)
   gtk_alignment_set_padding(GTK_ALIGNMENT(replace_dialog.alignment1), 6, 6, 6, 6);
   gtk_widget_show(replace_dialog.alignment1);
   
-  replace_dialog.entry1 = gtk_entry_new ();
+  replace_dialog.entry1 = gphpedit_history_entry_new ("replace",TRUE);
   gtk_widget_show (replace_dialog.entry1);
   gtk_container_add (GTK_CONTAINER (replace_dialog.alignment1), replace_dialog.entry1);
   /* Get selected text (Wendell) */
@@ -501,7 +509,8 @@ void replace_create(void)
     wordEnd = gtk_scintilla_get_selection_end(GTK_SCINTILLA(main_window.current_editor->scintilla));
     if (wordStart != wordEnd) {
       buffer = gtk_scintilla_get_text_range (GTK_SCINTILLA(main_window.current_editor->scintilla), wordStart, wordEnd, &length);
-      gtk_entry_set_text(GTK_ENTRY(replace_dialog.entry1), buffer);
+      gphpedit_history_entry_prepend_text	(GPHPEDIT_HISTORY_ENTRY(replace_dialog.entry1),buffer);
+      gtk_combo_box_set_active (GTK_COMBO_BOX(replace_dialog.entry1), 0);
     }
   }
   /* End get selected text */
@@ -520,7 +529,7 @@ void replace_create(void)
   gtk_alignment_set_padding(GTK_ALIGNMENT(replace_dialog.alignment2), 6, 6, 6, 6);
   gtk_widget_show(replace_dialog.alignment2);
   
-  replace_dialog.entry2 = gtk_entry_new ();
+  replace_dialog.entry2 = gphpedit_history_entry_new ("replace_with",TRUE);//gtk_entry_new ();
   gtk_widget_show (replace_dialog.entry2);
   gtk_container_add (GTK_CONTAINER (replace_dialog.alignment2), replace_dialog.entry2);
 

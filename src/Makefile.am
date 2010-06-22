@@ -44,6 +44,8 @@ gphpedit_SOURCES = \
 	images.h		\
 	classbrowser.c		\
 	classbrowser.h		\
+	history-entry.c		\
+	history-entry.h		\
 	classbrowser_parse.c	\
 	classbrowser_parse.h	\
 	folderbrowser.h		\
