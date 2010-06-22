@@ -297,7 +297,7 @@ void replace_destroy(GtkWidget *widget, gpointer data)
 
 void replace_clicked(GtkButton *button, gpointer data)
 {
-  static gint last_found = 0;
+  static gint last_found = -1;
   gboolean whole_document;
   gint search_flags = 0;
   const gchar *text;
@@ -370,8 +370,8 @@ void replace_clicked(GtkButton *button, gpointer data)
         gtk_scintilla_set_selection_start(GTK_SCINTILLA(main_window.current_editor->scintilla), selection_start);
         gtk_scintilla_set_selection_end(GTK_SCINTILLA(main_window.current_editor->scintilla), selection_start + strlen(replace));
         }
-      replace_clicked(NULL, NULL);
       gtk_widget_destroy(replace_prompt_dialog);
+      replace_clicked(NULL, NULL);
     } else {
       gtk_scintilla_replace_sel(GTK_SCINTILLA(main_window.current_editor->scintilla), replace);
       gtk_scintilla_goto_pos(GTK_SCINTILLA(main_window.current_editor->scintilla), start_found);  
@@ -383,7 +383,7 @@ void replace_clicked(GtkButton *button, gpointer data)
 
 void replace_all_clicked(GtkButton *button, gpointer data)
 {
-  static gint last_found = 0;
+  static gint last_found = -1;
   gint search_flags = 0;
   const gchar *text;
   const gchar *replace;
@@ -397,8 +397,6 @@ void replace_all_clicked(GtkButton *button, gpointer data)
   GString *message;
   gint start_pos;
   
-  gtk_widget_hide(replace_dialog.window2);
-
   length_of_document = gtk_scintilla_get_length(GTK_SCINTILLA(main_window.current_editor->scintilla));
 
   text = gtk_entry_get_text (GTK_ENTRY(replace_dialog.entry1));
