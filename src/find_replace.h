@@ -25,7 +25,7 @@
 #ifndef FIND_REPLACE_H
 #define FIND_REPLACE_H
 
-#include "main.h"
+#include <gtk/gtk.h>
 
 typedef struct
 {

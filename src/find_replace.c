@@ -26,6 +26,7 @@
 #include "find_replace.h"
 #include "main_window.h"
 #include <gdk/gdkkeysyms.h>
+#include "gphpedit-statusbar.h"
 
 FindDialog find_dialog;
 ReplaceDialog replace_dialog;
@@ -81,12 +82,7 @@ void find_clicked(GtkButton *button, gpointer data)
                                     search_flags, (gchar *) text, current_pos, length_of_document, &start_found, &end_found);
   if (result == -1) {
     // Show message saying could not be found.
-    GtkWidget *dialog;
-    dialog = gtk_message_dialog_new(GTK_WINDOW(main_window.window),GTK_DIALOG_DESTROY_WITH_PARENT,GTK_MESSAGE_ERROR,GTK_BUTTONS_OK,_("The text \"%s\" was not found."), text);
-    gtk_window_set_title(GTK_WINDOW(dialog), "gphpedit");
-    gtk_window_set_transient_for (GTK_WINDOW(dialog),GTK_WINDOW(main_window.window));
-    gtk_dialog_run(GTK_DIALOG(dialog));
-    gtk_widget_destroy(dialog);
+    gphpedit_statusbar_flash_message (GPHPEDIT_STATUSBAR(main_window.appbar),0,_("The text \"%s\" was not found."), text);
   } else {
     if (start_found == last_found) {
       return;
@@ -297,7 +293,7 @@ void replace_destroy(GtkWidget *widget, gpointer data)
 
 void replace_clicked(GtkButton *button, gpointer data)
 {
-  static gint last_found = 0;
+  static gint last_found = -1;
   gboolean whole_document;
   gint search_flags = 0;
   const gchar *text;
@@ -338,12 +334,7 @@ void replace_clicked(GtkButton *button, gpointer data)
 
   if (result == -1) {
     // Show message saying could not be found.
-    GtkWidget *dialog;
-    dialog = gtk_message_dialog_new(GTK_WINDOW(main_window.window),GTK_DIALOG_DESTROY_WITH_PARENT,GTK_MESSAGE_ERROR,GTK_BUTTONS_OK,_("The text \"%s\" was not found."), text);
-    gtk_window_set_title(GTK_WINDOW(dialog), "gphpedit");
-    gtk_window_set_transient_for (GTK_WINDOW(dialog),GTK_WINDOW(main_window.window));
-    gtk_dialog_run(GTK_DIALOG(dialog));
-    gtk_widget_destroy(dialog);
+    gphpedit_statusbar_flash_message (GPHPEDIT_STATUSBAR(main_window.appbar),0,_("The text \"%s\" was not found."), text);
   }
   else {
     if (start_found == last_found) {
@@ -370,8 +361,8 @@ void replace_clicked(GtkButton *button, gpointer data)
         gtk_scintilla_set_selection_start(GTK_SCINTILLA(main_window.current_editor->scintilla), selection_start);
         gtk_scintilla_set_selection_end(GTK_SCINTILLA(main_window.current_editor->scintilla), selection_start + strlen(replace));
         }
-      replace_clicked(NULL, NULL);
       gtk_widget_destroy(replace_prompt_dialog);
+      replace_clicked(NULL, NULL);
     } else {
       gtk_scintilla_replace_sel(GTK_SCINTILLA(main_window.current_editor->scintilla), replace);
       gtk_scintilla_goto_pos(GTK_SCINTILLA(main_window.current_editor->scintilla), start_found);  
@@ -383,7 +374,7 @@ void replace_clicked(GtkButton *button, gpointer data)
 
 void replace_all_clicked(GtkButton *button, gpointer data)
 {
-  static gint last_found = 0;
+  static gint last_found = -1;
   gint search_flags = 0;
   const gchar *text;
   const gchar *replace;
@@ -393,12 +384,9 @@ void replace_all_clicked(GtkButton *button, gpointer data)
   glong end_found;
   glong result;
   gint numfound;
-  GtkWidget *replace_all_dialog;
   GString *message;
   gint start_pos;
   
-  gtk_widget_hide(replace_dialog.window2);
-
   length_of_document = gtk_scintilla_get_length(GTK_SCINTILLA(main_window.current_editor->scintilla));
 
   text = gtk_entry_get_text (GTK_ENTRY(replace_dialog.entry1));
@@ -452,12 +440,7 @@ void replace_all_clicked(GtkButton *button, gpointer data)
     g_string_printf(message, _("%d occurences of %s found, all replaced."), numfound, text);
   }
 
-  replace_all_dialog = gtk_message_dialog_new(GTK_WINDOW(main_window.window),GTK_DIALOG_DESTROY_WITH_PARENT,GTK_MESSAGE_INFO,GTK_BUTTONS_OK,"%s",message->str);
-  gtk_window_set_title(GTK_WINDOW(replace_all_dialog), "gphpedit");
-  gtk_window_set_transient_for (GTK_WINDOW(replace_all_dialog),GTK_WINDOW(main_window.window));
-  gtk_dialog_run(GTK_DIALOG(replace_all_dialog));
-  gtk_widget_destroy(replace_all_dialog);
-
+  gphpedit_statusbar_flash_message (GPHPEDIT_STATUSBAR(main_window.appbar),0,"%s",message->str);
   gtk_scintilla_goto_pos(GTK_SCINTILLA(main_window.current_editor->scintilla), start_pos);
 }
 
