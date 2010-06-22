@@ -110,7 +110,6 @@ typedef struct
   GtkWidget *menuplugin;
   GtkWidget *plugin;
   GtkWidget *plugins[NUM_PLUGINS_MAX];
-  GtkWidget *recent[NUM_REOPEN_MAX];
   GtkWidget *reciente;
   GtkWidget *menureciente;
   GtkWidget *menuhelp;

@@ -459,56 +459,11 @@ void update_app_title(void)
   g_string_free(title, TRUE);
 }
 
-/****/
-
-static gint sort_recent (GtkRecentInfo *a, GtkRecentInfo *b)
-{
-  /* most recent upper */
-  g_assert (a != NULL && b != NULL);
-  return gtk_recent_info_get_modified (b) - gtk_recent_info_get_modified (a);
-}
-
-void main_window_update_reopen_menu(void)
-{
-  guint entry=0;
-  GtkRecentManager *manager;
-  manager = gtk_recent_manager_get_default ();
-  GList *recent_items= gtk_recent_manager_get_items (manager);
-  recent_items = g_list_sort (recent_items, (GCompareFunc)sort_recent); /* order items most recent first*/
-  gtk_widget_show(main_window.menu->reciente);
-
-  GList *walk = NULL;//recent_items;
-  for (walk = recent_items;walk!=NULL;walk = g_list_next (walk)){
-    if (entry==NUM_REOPEN_MAX) break;
-    GtkRecentInfo *recent_info=(GtkRecentInfo *)walk->data;
-    if (gtk_recent_info_has_application (recent_info,"gPHPEdit")){ /* only show our files */
-      const gchar *full_filename= gtk_recent_info_get_uri (recent_info);
-      if (full_filename){
-        unquote((gchar *)full_filename);
-        gtk_menu_item_set_label ((GtkMenuItem *)main_window.menu->recent[entry],full_filename);
-        gtk_widget_show(main_window.menu->recent[entry]);
-      }
-      entry++;
-    }
-    gtk_recent_info_unref(recent_info);
-  }
-  g_list_free(recent_items);
-  /* hide other items */
-  guint hideitem;
-  for (hideitem=entry;hideitem<NUM_REOPEN_MAX;hideitem++){
-      gtk_widget_hide(main_window.menu->recent[hideitem]);
-  }
-  if (!gtk_widget_get_visible (main_window.menu->recent[0])){ /* no items so hide menu*/
-    gtk_widget_hide(main_window.menu->reciente);
-  }
-}
-
 void main_window_add_to_reopen_menu(gchar *full_filename)
 {
   GtkRecentManager *manager;
   manager = gtk_recent_manager_get_default ();
   gtk_recent_manager_add_item (manager, full_filename);
-  main_window_update_reopen_menu();
 }
 static void main_window_create_prinbox(void){
   main_window.prinbox = gtk_vbox_new (FALSE, 0);
@@ -561,7 +516,6 @@ void main_window_create(void){
   create_infobar();
   main_window_fill_panes();
   main_window_create_appbar();
-  main_window_update_reopen_menu();
   
   plugin_setup_menu();
   function_list_prepare();

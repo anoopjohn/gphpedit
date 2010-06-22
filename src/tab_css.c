@@ -166,13 +166,6 @@ void tab_css_set_lexer(Editor *editor)
   gtk_scintilla_style_set_italic (GTK_SCINTILLA(editor->scintilla), SCE_CSS_IMPORTANT, preferences.css_important_italic);
   gtk_scintilla_style_set_bold (GTK_SCINTILLA(editor->scintilla), SCE_CSS_IMPORTANT, preferences.css_important_bold);
 
-  gtk_scintilla_style_set_font (GTK_SCINTILLA(editor->scintilla), SCE_CSS_MEDIA, preferences.css_important_font);
-  gtk_scintilla_style_set_fore (GTK_SCINTILLA(editor->scintilla), SCE_CSS_MEDIA, preferences.css_important_fore);
-  gtk_scintilla_style_set_back (GTK_SCINTILLA(editor->scintilla), SCE_CSS_MEDIA, preferences.css_important_back);
-  gtk_scintilla_style_set_size (GTK_SCINTILLA(editor->scintilla), SCE_CSS_MEDIA, preferences.css_important_size);
-  gtk_scintilla_style_set_italic (GTK_SCINTILLA(editor->scintilla), SCE_CSS_MEDIA, preferences.css_important_italic);
-  gtk_scintilla_style_set_bold (GTK_SCINTILLA(editor->scintilla), SCE_CSS_MEDIA, preferences.css_important_bold);
-
   gtk_scintilla_style_set_fore (GTK_SCINTILLA(editor->scintilla), SCE_CSS_DIRECTIVE, preferences.css_directive_fore);
   gtk_scintilla_style_set_font (GTK_SCINTILLA(editor->scintilla), SCE_CSS_DIRECTIVE, preferences.css_directive_font);
   gtk_scintilla_style_set_back (GTK_SCINTILLA(editor->scintilla), SCE_CSS_DIRECTIVE, preferences.css_directive_back);

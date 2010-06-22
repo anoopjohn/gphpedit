@@ -301,7 +301,6 @@ static void fill_menu_edit(void){
 * create file menu widgets and fill file menu
 */
 static void fill_menu_file(void){
-  int i;
   create_stock_menu_item(&main_window.menu->newi,main_window.menu->menunew,GTK_STOCK_NEW, _("Creates a new file"), GDK_n, GDK_CONTROL_MASK);
   g_signal_connect(G_OBJECT(main_window.menu->newi), "activate", G_CALLBACK(on_new1_activate), NULL);
   create_stock_menu_item(&main_window.menu->open,main_window.menu->menunew,GTK_STOCK_OPEN, _("Open a file"), GDK_o, GDK_CONTROL_MASK);
@@ -309,17 +308,17 @@ static void fill_menu_file(void){
   create_mnemonic_menu_item(&main_window.menu->opensel ,main_window.menu->menunew,_("_Open selected file"), _("Open a file with the name currently selected in the editor"), GDK_o, GDK_CONTROL_MASK);
   g_signal_connect(G_OBJECT(main_window.menu->opensel), "activate", G_CALLBACK(on_openselected1_activate), NULL);
 
+  /* recent menu setup */
   main_window.menu->reciente = gtk_menu_item_new_with_mnemonic(_("_Recent Files"));
   gtk_container_add (GTK_CONTAINER (main_window.menu->menunew), main_window.menu->reciente);
-  main_window.menu->menureciente = gtk_menu_new();
+  main_window.menu->menureciente = gtk_recent_chooser_menu_new (); /* create recent menu for default recent manager*/
   gtk_menu_item_set_submenu (GTK_MENU_ITEM (main_window.menu->reciente), main_window.menu->menureciente);
-  
-  /* create empty widgets */
-  for (i=0;i<NUM_REOPEN_MAX;i++){
-  main_window.menu->recent[i]= gtk_menu_item_new_with_mnemonic(_("_Recent"));
-  g_signal_connect(G_OBJECT(main_window.menu->recent[i]), "activate", G_CALLBACK(reopen_recent), NULL);
-  gtk_menu_shell_append(GTK_MENU_SHELL(main_window.menu->menureciente), main_window.menu->recent[i]);
-  }
+  gtk_recent_chooser_set_limit (GTK_RECENT_CHOOSER(main_window.menu->menureciente), NUM_REOPEN_MAX); /* set max files in menu */
+  gtk_recent_chooser_set_sort_type (GTK_RECENT_CHOOSER(main_window.menu->menureciente),GTK_RECENT_SORT_MRU); /* Most recent first*/
+  GtkRecentFilter *filter = gtk_recent_filter_new ();
+  gtk_recent_filter_add_application (filter, "gPHPEdit"); /* only show our files */
+  gtk_recent_chooser_add_filter (GTK_RECENT_CHOOSER(main_window.menu->menureciente), filter);
+  g_signal_connect(G_OBJECT(main_window.menu->menureciente), "item-activated", G_CALLBACK(reopen_recent), NULL);
 
   create_mnemonic_menu_item(&main_window.menu->reload ,main_window.menu->menunew,_("_Reload current file"), _("Reload the file currently selected in the editor"), GDK_r, GDK_SHIFT_MASK | GDK_CONTROL_MASK);
   g_signal_connect(G_OBJECT(main_window.menu->reload), "activate", G_CALLBACK(on_reload1_activate), NULL); 
