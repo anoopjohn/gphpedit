@@ -37,13 +37,11 @@ gphpedit.spec
 po/stamp-it
 po/*.gmo
 src/gtkscintilla2/libgtkscintilla2.so.*
-src/gtkscintilla2/scintilla/delbin.bat
-src/gtkscintilla2/scintilla/delcvs.bat
+src/gtkscintilla2/scintilla/*.bat
 src/gtkscintilla2/scintilla/test/
 src/gtkscintilla2/scintilla/tgzsrc
 src/gtkscintilla2/scintilla/vcbuild/
 src/gtkscintilla2/scintilla/win32/
-src/gtkscintilla2/scintilla/zipsrc.bat
 src/gtkscintilla2/scintilla/CVS/
 src/gtkscintilla2/scintilla/cocoa/
 src/gtkscintilla2/scintilla/doc/

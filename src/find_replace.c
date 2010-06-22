@@ -297,7 +297,7 @@ void replace_destroy(GtkWidget *widget, gpointer data)
 
 void replace_clicked(GtkButton *button, gpointer data)
 {
-  static gint last_found = 0;
+  static gint last_found = -1;
   gboolean whole_document;
   gint search_flags = 0;
   const gchar *text;
@@ -383,7 +383,7 @@ void replace_clicked(GtkButton *button, gpointer data)
 
 void replace_all_clicked(GtkButton *button, gpointer data)
 {
-  static gint last_found = 0;
+  static gint last_found = -1;
   gint search_flags = 0;
   const gchar *text;
   const gchar *replace;
