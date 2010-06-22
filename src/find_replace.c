@@ -397,8 +397,6 @@ void replace_all_clicked(GtkButton *button, gpointer data)
   GString *message;
   gint start_pos;
   
-  gtk_widget_hide(replace_dialog.window2);
-
   length_of_document = gtk_scintilla_get_length(GTK_SCINTILLA(main_window.current_editor->scintilla));
 
   text = gtk_entry_get_text (GTK_ENTRY(replace_dialog.entry1));
