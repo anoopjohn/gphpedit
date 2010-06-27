@@ -59,6 +59,8 @@ GtkWidget	*gphpedit_statusbar_new			(void);
 void    gphpedit_statusbar_set_zoom_level (GphpeditStatusbar *statusbar,
 				     gint            level);
 
+void set_status_combo_item (GphpeditStatusbar *statusbar,const gchar *label);
+
 void		 gphpedit_statusbar_flash_message		(GphpeditStatusbar   *statusbar,
 							 guint             context_id,
 							 const gchar      *format,

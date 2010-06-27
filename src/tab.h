@@ -115,6 +115,7 @@ gint yes_no_dialog (gchar *title, gchar *message);
 void set_editor_to_php(Editor *editor);
 void set_editor_to_css(Editor *editor);
 gboolean is_css_file(const gchar *filename);
+void set_editor_to_text_plain (Editor *editor);
 void set_editor_to_sql(Editor *editor);
 void set_editor_to_cxx(Editor *editor);
 void set_editor_to_perl(Editor *editor);

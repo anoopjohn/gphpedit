@@ -36,6 +36,7 @@ Folderbrowser has the following features:
 -Drag and drop: if you drop uri into the folderbrowser these files will be copied to current folderbrowser folder
 */
 #include "folderbrowser.h"
+#include "main_window_callbacks.h"
 #include "tab.h"
 #include "gvfs_utils.h"
 #include <gdk/gdkkeysyms.h>
@@ -100,15 +101,6 @@ static inline void clear_folderbrowser(void){
   filesinfolder=NULL;
 }
 
-static inline void store_last_folder(gchar *newpath){
-  if (newpath){
-  /*store folder in config*/
-  GConfClient *config;
-  config=gconf_client_get_default ();
-  gconf_client_set_string (config,"/gPHPEdit/main_window/folderbrowser/folder", newpath,NULL);
-  g_object_unref(config);
-  }
-}
 static inline void search_control_sensible(gboolean status){
     gtk_widget_set_sensitive (main_window.searchentry, status);
     gtk_entry_set_icon_sensitive (GTK_ENTRY(main_window.searchentry), GTK_ENTRY_ICON_PRIMARY, status);
@@ -570,10 +562,11 @@ void popup_delete_file(void){
   }
 }
 
-void popup_rename_file(gchar *file){
+void popup_rename_file(void){
   GFile *fi;
   GError *error=NULL;
-  fi=get_gfile_from_filename(file);
+  //
+  fi=get_gfile_from_filename((gchar *)pop.filename);
   GFileInfo *info= g_file_query_info (fi, "standard::display-name",G_FILE_QUERY_INFO_NOFOLLOW_SYMLINKS, NULL,&error);
   if (!info){
     g_print(_("Error renaming file. GIO Error:%s\n"),error->message);
@@ -678,7 +671,7 @@ void view_popup_menu (GtkWidget *treeview, GdkEventButton *event, gpointer userd
   gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuopen);
 
   menurename = gtk_menu_item_new_with_label(_("Rename File"));
-  g_signal_connect(menurename, "activate", (GCallback) popup_rename_file, (gpointer) pop.filename);
+  g_signal_connect(menurename, "activate", (GCallback) popup_rename_file, NULL);
   gtk_menu_shell_append(GTK_MENU_SHELL(menu), menurename);
 
   menudelete = gtk_menu_item_new_with_label(_("Delete file"));
@@ -817,12 +810,7 @@ extern void folderbrowser_create(MainWindow *main_window)
   GtkWidget *label= gtk_image_new_from_file (PIXMAP_DIR "/folderbrowser.png");
   /* set tooltip */
   gtk_widget_set_tooltip_text (label,_("Folder Browser"));
-  GConfClient *config;
-  config=gconf_client_get_default ();
-  /*load folder from config*/
-  gchar *folderpath;
-  folderpath=gconf_client_get_string(config,"/gPHPEdit/main_window/folderbrowser/folder",NULL);
-  g_object_unref(config);
+  gchar *folderpath = get_folderbrowser_last_folder();
   if (!folderpath){
     main_window->button_dialog = gtk_button_new_with_label (DEFAULT_DIR);
   } else {

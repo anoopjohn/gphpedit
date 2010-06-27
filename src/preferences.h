@@ -439,7 +439,7 @@ typedef struct
 	gint c_verbatim_size;
 	gboolean c_verbatim_bold;
 	gboolean c_verbatim_italic; 
-    	gint c_globalclass_back;
+  gint c_globalclass_back;
 	gchar *c_globalclass_font;
 	gint c_globalclass_fore;
 	gint c_globalclass_size;
@@ -455,7 +455,15 @@ void preferences_load(void);
 void preferences_save(void);
 //void preferences_show(void);
 void main_window_size_save_details(void);
-
+int classbrowser_status(void);
+gchar *get_folderbrowser_last_folder(void);
+gchar *get_last_opened_folder(void);
+void set_last_opened_folder(gchar *folder);
+inline void store_last_folder(gchar *newpath);
+inline void set_classbrowser_status(gint status);
+gint classbrowser_get_size(void);
+inline void set_parse_only_current_file(int option);
+int get_parse_only_current_file(void);
 void move_classbrowser_position(void);
 void save_classbrowser_position(void);
 void preferences_apply(void);

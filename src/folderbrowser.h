@@ -25,7 +25,7 @@
 #ifndef FOLDER_BROWSER_H
 #define FOLDER_BROWSER_H
 
-#include "main_window_callbacks.h"
+#include <gtk/gtk.h>
 
 #define MIME_ISDIR(string) (strcmp(string, "inode/directory")==0)
 #define IS_MIME(stringa,stringb) (g_content_type_equals (stringa, stringb))
@@ -42,7 +42,7 @@ enum {
   MIME_COLUMN,
   N_COL
 };
-
+void update_folderbrowser (gchar *newpath);
 void init_folderbrowser(GtkTreeStore *pTree, gchar *filename, GtkTreeIter *iter, GtkTreeIter *iter2);
 void update_folderbrowser_signal (GFileMonitor *monitor,GFile *file,GFile *other_file, GFileMonitorEvent event_type, gpointer user_data);
 void tree_double_clicked(GtkTreeView *tree_view,GtkTreePath *path,GtkTreeViewColumn *column,gpointer user_data);

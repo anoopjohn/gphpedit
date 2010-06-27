@@ -113,6 +113,7 @@ gboolean free_php_files_tree_item (gpointer key, gpointer value, gpointer data){
 
 static gboolean visible_func (GtkTreeModel *model, GtkTreeIter  *iter, gpointer data) {
   /* Visible if row is non-empty and name column contain filename as prefix */
+  if (!main_window.current_editor) return FALSE;
   guint file_type;
   gboolean visible = FALSE;
   guint data_type= main_window.current_editor->type;

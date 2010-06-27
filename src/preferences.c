@@ -28,6 +28,7 @@
 #include "preferences.h"
 #include "main_window.h"
 #include "main.h"
+#include <gconf/gconf-client.h>
 //debug macro
 //#define DEBUG
 
@@ -614,6 +615,85 @@ void preferences_load(void)
 	gconf_client_clear_cache(config);
 }
 
+/*
+ *classbrowser_status
+ *return 0  if classbrowser is hidden
+ *return 1 if classbrowser is show
+*/
+int classbrowser_status(void){
+  gint hidden;
+  GConfClient *config;
+  config=gconf_client_get_default ();
+  hidden = gconf_client_get_int (config,"/gPHPEdit/main_window/classbrowser_hidden",NULL);
+  return hidden;
+}
+/*
+ *set_classbrowser_status
+*/
+inline void set_classbrowser_status(gint status){
+  GConfClient *config;
+  config=gconf_client_get_default ();
+  gconf_client_set_int (config, "/gPHPEdit/main_window/classbrowser_hidden", status,NULL);
+}
+/*
+ *classbrowser_get_size
+ *return current classbrowser size
+*/
+
+gint classbrowser_get_size(void){
+  GConfClient *config;
+  config=gconf_client_get_default ();
+  GError *error = NULL;
+  gint classbrowser_hidden_position = gconf_client_get_int (config,"/gPHPEdit/main_window/classbrowser_size",&error);
+  if (classbrowser_hidden_position==0 && error!=NULL){
+    classbrowser_hidden_position=100;
+  }
+  return classbrowser_hidden_position;
+}
+
+inline void set_parse_only_current_file(int option){
+  GConfClient *config;
+  config=gconf_client_get_default ();
+  gconf_client_set_int (config,"/gPHPEdit/classbrowser/onlycurrentfile", option,NULL);
+}
+int get_parse_only_current_file(void){
+  GConfClient *config;
+  config=gconf_client_get_default ();
+  return gconf_client_get_int (config,"/gPHPEdit/classbrowser/onlycurrentfile",NULL);
+}
+
+gchar *get_last_opened_folder(void){
+  GConfClient *config;
+  GError *error = NULL;
+  config = gconf_client_get_default ();
+  gchar *last_opened_folder = gconf_client_get_string(config,"/gPHPEdit/general/last_opened_folder",&error);
+  return last_opened_folder;
+}
+void set_last_opened_folder(gchar *folder){
+  GConfClient *config;
+  config=gconf_client_get_default ();
+  if (folder){
+    gconf_client_set_string (config,"/gPHPEdit/general/last_opened_folder",folder,NULL);
+  }
+}
+inline void store_last_folder(gchar *newpath){
+  if (newpath){
+  /*store folder in config*/
+  GConfClient *config;
+  config=gconf_client_get_default ();
+  gconf_client_set_string (config,"/gPHPEdit/main_window/folderbrowser/folder", newpath,NULL);
+  g_object_unref(config);
+  }
+}
+gchar *get_folderbrowser_last_folder(void){
+  GConfClient *config;
+  config=gconf_client_get_default ();
+  /*load folder from config*/
+  gchar *folderpath;
+  folderpath=gconf_client_get_string(config,"/gPHPEdit/main_window/folderbrowser/folder",NULL);
+  g_object_unref(config);
+  return folderpath;
+}
 
 void move_classbrowser_position(void)
 {

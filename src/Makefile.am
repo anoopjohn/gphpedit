@@ -29,7 +29,7 @@ AM_CFLAGS = \
 	$(WEBKIT_CFLAGS) $(GTK_CFLAGS) $(GCONF_CFLAGS) \
 	-I$(top_srcdir)/src/gtkscintilla2 \
 	-Wall -DGTK -DSCI_LEXER \
-	-DPIXMAP_DIR=\""$(datadir)/pixmaps"\"
+	-DPIXMAP_DIR=\""$(datadir)/pixmaps"\" 
 
 nodist_EXTRA_gphpedit_SOURCES = dummy.cxx
 gphpedit_SOURCES = \
@@ -39,6 +39,8 @@ gphpedit_SOURCES = \
 	gphpedit-close-button.c		\
 	gphpedit-statusbar.h		\
 	gphpedit-statusbar.c		\
+	status-combo-box.h		\
+	status-combo-box.c		\
 	calltip.c		\
 	calltip.h		\
 	images.h		\

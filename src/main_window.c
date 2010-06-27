@@ -150,12 +150,12 @@ static void main_window_create_panes(void)
   gtk_paned_pack1 (GTK_PANED (main_window.main_horizontal_pane), main_window.main_vertical_pane, FALSE, TRUE);
   g_signal_connect (G_OBJECT (main_window.window), "size_allocate", G_CALLBACK (classbrowser_accept_size), NULL);
   move_classbrowser_position();
-  GConfClient *config;
-  config=gconf_client_get_default ();
-        
-  if (gconf_client_get_int (config,"/gPHPEdit/main_window/classbrowser_hidden",NULL) == 1)
+//  GConfClient *config;
+//  config=gconf_client_get_default ();
+      
+  if (classbrowser_status()==1)//gconf_client_get_int (config,"/gPHPEdit/main_window/classbrowser_hidden",NULL) == 1)
     classbrowser_hide();
-  g_object_unref(config);
+//  g_object_unref(config);
 
   main_window.prin_hbox = gtk_vbox_new(FALSE, 0);
   gtk_widget_show(main_window.prin_hbox);
@@ -214,9 +214,7 @@ static void create_side_panel(void){
   GtkWidget *hbox;
   hbox = gtk_hbox_new(FALSE, 0);
   main_window.chkOnlyCurFileFuncs = gtk_check_button_new_with_label(_("Parse only current file"));
-  GConfClient *config;
-  config=gconf_client_get_default ();
-  gtk_toggle_button_set_active ((GtkToggleButton *)main_window.chkOnlyCurFileFuncs,gconf_client_get_int (config,"/gPHPEdit/classbrowser/onlycurrentfile",NULL));
+  gtk_toggle_button_set_active ((GtkToggleButton *)main_window.chkOnlyCurFileFuncs, get_parse_only_current_file());
   gtk_widget_show (main_window.chkOnlyCurFileFuncs);
   gtk_widget_show (hbox);
   gtk_box_pack_start(GTK_BOX(hbox), main_window.chkOnlyCurFileFuncs, TRUE, TRUE, 10);
@@ -399,6 +397,7 @@ void update_app_title(void)
   GString *title;
   gchar *dir;
   if (main_window.current_editor != NULL) {
+      update_status_combobox(main_window.current_editor);
     if (main_window.current_editor->type != TAB_HELP && main_window.current_editor->type != TAB_PREVIEW
         && main_window.current_editor->filename) {
       //debug("Full Name - %s, Short Name - %s", main_window.current_editor->filename->str, main_window.current_editor->short_filename);

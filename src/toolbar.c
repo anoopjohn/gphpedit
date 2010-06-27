@@ -19,13 +19,12 @@
 
    You should have received a copy of the GNU General Public License
    along with gPHPEdit. If not, see <http://www.gnu.org/licenses/>.
-
+pressed_button_file_chooser
    The GNU General Public License is contained in the file COPYING.
 */
 
 #include "toolbar.h"
-#include "main_window.h"
-
+#include "main_window_callbacks.h"
 /* Creates a tree model containing the completions */
 GtkTreeModel *create_completion_model (void)
   
@@ -44,7 +43,6 @@ GtkTreeModel *create_completion_model (void)
  
   return GTK_TREE_MODEL (store);
 }
-
 
 /**
 * on_cleanicon_press

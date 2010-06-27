@@ -614,10 +614,7 @@ void on_open1_activate(GtkWidget *widget)
   gtk_dialog_set_default_response (GTK_DIALOG(file_selection_box), GTK_RESPONSE_ACCEPT);  
   //Add filters to the open dialog
   add_file_filters(GTK_FILE_CHOOSER(file_selection_box));
-  GConfClient *config;
-  GError *error = NULL;
-  config=gconf_client_get_default ();
-  last_opened_folder = gconf_client_get_string(config,"/gPHPEdit/general/last_opened_folder",&error);
+  last_opened_folder = get_last_opened_folder();
   if (DEBUG_MODE) { g_print("DEBUG: main_window_callbacks.c:on_open1_activate:last_opened_folder: %s\n", last_opened_folder); }
   /* opening of multiple files at once */
   gtk_file_chooser_set_select_multiple(GTK_FILE_CHOOSER(file_selection_box), TRUE);
@@ -763,10 +760,7 @@ void on_save_as1_activate(GtkWidget *widget)
           g_free(uri);
       }
       else {
-        GConfClient *config;
-        GError *error = NULL;
-        config=gconf_client_get_default ();
-        last_opened_folder = gconf_client_get_string(config,"/gPHPEdit/general/last_opened_folder",&error);
+        last_opened_folder = get_last_opened_folder();
         if (DEBUG_MODE) { g_print("DEBUG: main_window_callbacks.c:on_save_as1_activate:last_opened_folder: %s\n", last_opened_folder); }
         if (last_opened_folder){
           if (DEBUG_MODE) { g_print("DEBUG: main_window_callbacks.c:on_save_as1_activate:Setting current_folder_uri to %s\n", last_opened_folder); }
@@ -1096,7 +1090,10 @@ void on_paste_got_from_cliboard(GtkClipboard *clipboard, const gchar *text, gpoi
   editor->is_pasting = FALSE;
   if (editor->type==TAB_FILE){
   /* if we type <?php then we are in a php file so force php syntax mode */
-  if (strstr(text,"<?php")) set_editor_to_php(editor);
+  if (strstr(text,"<?php")){
+     set_editor_to_php(editor);
+     update_status_combobox(main_window.current_editor);
+     }
   }
   // Possible fix for rendering issues after pasting
   gtk_scintilla_colourise(GTK_SCINTILLA(main_window.current_editor->scintilla), 0, -1);
@@ -1387,7 +1384,34 @@ void on_about1_activate(GtkWidget *widget)
   gtk_dialog_run(GTK_DIALOG (dialog));
   gtk_widget_destroy(dialog);
 }
-
+void update_status_combobox(Editor *editor){
+      /* set statuscombo */
+      switch(editor->type) {
+        case(TAB_PHP):   
+         set_status_combo_item (GPHPEDIT_STATUSBAR(main_window.appbar),_("PHP/HTML/XML"));          
+         break;
+        case (TAB_CSS):
+          set_status_combo_item (GPHPEDIT_STATUSBAR(main_window.appbar),_("CSS"));
+          break;
+        case (TAB_CXX):
+          set_status_combo_item (GPHPEDIT_STATUSBAR(main_window.appbar),_("C/C++"));
+          break;
+        case (TAB_COBOL):
+          set_status_combo_item (GPHPEDIT_STATUSBAR(main_window.appbar),_("Cobol"));
+          break;
+        case (TAB_SQL):
+          set_status_combo_item (GPHPEDIT_STATUSBAR(main_window.appbar),_("SQL"));
+          break;
+        case (TAB_PERL):
+          set_status_combo_item (GPHPEDIT_STATUSBAR(main_window.appbar),_("Perl"));
+          break;
+        case (TAB_PYTHON):
+          set_status_combo_item (GPHPEDIT_STATUSBAR(main_window.appbar),_("Python"));
+          break;
+        default:
+          set_status_combo_item (GPHPEDIT_STATUSBAR(main_window.appbar),_("Text-Plain"));
+      }
+}
 void on_notebook_switch_page (GtkNotebook *notebook, GtkNotebookPage *page,
                 gint page_num, gpointer user_data)
 {
@@ -1720,12 +1744,7 @@ void pressed_button_file_chooser(GtkButton *widget, gpointer data) {
   if(sChemin){
     gtk_button_set_label(GTK_BUTTON(widget), sChemin);
     /*store folder in config*/
-    GConfClient *config;
-    config=gconf_client_get_default ();
-    gconf_client_set_string (config,"/gPHPEdit/main_window/folderbrowser/folder", sChemin,NULL);
-    GtkTreeIter iter2;
-    GtkTreeIter* iter=NULL;
-    init_folderbrowser(main_window.pTree,sChemin,iter,&iter2);
+    update_folderbrowser (sChemin);
     g_free(sChemin);
    }
 }
@@ -1733,35 +1752,22 @@ void pressed_button_file_chooser(GtkButton *widget, gpointer data) {
 void classbrowser_show(void)
 {
   gtk_paned_set_position(GTK_PANED(main_window.main_horizontal_pane),classbrowser_hidden_position);
-  //g_print("Width of class browser is %d\n", classbrowser_hidden_position);
-  GConfClient *config;
-  config=gconf_client_get_default ();
-       
-  gconf_client_set_int (config, "/gPHPEdit/main_window/classbrowser_hidden", 0,NULL);
+  set_classbrowser_status(0);
   classbrowser_update();
 }
 
 
 void classbrowser_hide(void)
 {
-  GConfClient *config;
-  config=gconf_client_get_default ();
-  GError *error = NULL;
-  classbrowser_hidden_position = gconf_client_get_int (config,"/gPHPEdit/main_window/classbrowser_size",&error);
-  if (classbrowser_hidden_position==0 && error!=NULL){
-    classbrowser_hidden_position=100;
-  }
+  classbrowser_hidden_position =classbrowser_get_size();
   //g_print("Width of class browser is %d\n", classbrowser_hidden_position);
   gtk_paned_set_position(GTK_PANED(main_window.main_horizontal_pane),0);
-  gconf_client_set_int (config, "/gPHPEdit/main_window/classbrowser_hidden", 1,NULL);
+  set_classbrowser_status(1);
 }
 
 void classbrowser_show_hide(GtkWidget *widget)
 {
-  gint hidden;
-  GConfClient *config;
-  config=gconf_client_get_default ();
-  hidden = gconf_client_get_int (config,"/gPHPEdit/main_window/classbrowser_hidden",NULL);
+  gint hidden = classbrowser_status();
   gtk_check_menu_item_set_active ((GtkCheckMenuItem *) main_window.menu->tog_class,hidden);
   if (hidden == 1)
     classbrowser_show();
@@ -1886,10 +1892,7 @@ void force_python(GtkWidget *widget)
 //or when the checkbox is clicked and the files tabbar is clicked
 gint on_parse_current_click (GtkWidget *widget)
 {
-  GConfClient *config;
-  config=gconf_client_get_default ();
-  gconf_client_set_int (config,"/gPHPEdit/classbrowser/onlycurrentfile", gtk_toggle_button_get_active((GtkToggleButton *)widget),NULL);
-  
+  set_parse_only_current_file(gtk_toggle_button_get_active((GtkToggleButton *)widget));
   classbrowser_update();
   return 0;
 }

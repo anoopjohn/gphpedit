@@ -21,9 +21,6 @@
  
    The GNU General Public License is contained in the file COPYING.
 */
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
 #include "tab.h"
 #include "tab_php.h"
 #include "tab_css.h"
@@ -33,10 +30,11 @@
 #include "tab_cobol.h"
 #include "tab_python.h"
 #include "main_window_callbacks.h"
-#include <gconf/gconf-client.h>
 #include "gvfs_utils.h"
 #include "gphpedit-close-button.h"
+#include "gphpedit-statusbar.h"
 //#define DEBUGTAB
+
 
 #define INFO_FLAGS "standard::display-name,standard::content-type,standard::edit-name,standard::size,access::can-write,access::can-delete,standard::icon,time::modified,time::modified-usec"
 
@@ -592,7 +590,9 @@ GString *tab_help_find_helpfile(gchar *command)
  g_free(temp);
  if (long_filename)
   return long_filename;
- g_print(_("Help for function not found: %s\n"), command);
+   #ifdef DEBUGTAB
+   g_print(_("Help for function not found: %s\n"), command);
+   #endif
  return long_filename;
 #else
   long_filename = g_string_new("http://www.php.net/manual/en/function.");
@@ -604,7 +604,9 @@ GString *tab_help_find_helpfile(gchar *command)
   return long_filename;
   }else{
   g_object_unref(temp);
+  #ifdef DEBUGTAB
   g_print(_("Help for function not found: %s\n"), command);
+  #endif
   return NULL;
   }
 #endif
@@ -678,18 +680,14 @@ gboolean tab_create_help(Editor *editor, GString *filename)
 {
   GString *caption;
   GString *long_filename = NULL;
-  GtkWidget *dialog, *editor_tab;
+  GtkWidget *editor_tab;
  
   caption = g_string_new(filename->str);
   caption = g_string_prepend(caption, _("Help: "));
 
   long_filename = tab_help_find_helpfile(filename->str);
   if (!long_filename) {
-    dialog = gtk_message_dialog_new (NULL, GTK_DIALOG_MODAL, GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE,
-      _("Could not find the required command in the online help"));
-    gtk_window_set_transient_for (GTK_WINDOW(dialog),GTK_WINDOW(main_window.window));
-    gtk_dialog_run (GTK_DIALOG (dialog));
-    gtk_widget_destroy (dialog);
+    gphpedit_statusbar_flash_message (GPHPEDIT_STATUSBAR(main_window.appbar),0,"%s",_("Could not find the required command in the online help"));
     return FALSE;
   }
   else {
@@ -743,9 +741,9 @@ gboolean tab_create_preview(Editor *editor, GString *filename)
   
   tab_help_load_file(editor, filename);
 
-    #ifdef DEBUGTAB
+  #ifdef DEBUGTAB
     g_print("DEBUG::Preview file->filename:%s - caption:->%s\n", long_filename, caption->str);
-    #endif
+  #endif
 
   g_signal_connect(G_OBJECT(editor->help_view), "navigation-policy-decision-requested",
        G_CALLBACK(webkit_link_clicked),editor);
@@ -904,7 +902,12 @@ if (g_str_has_suffix(filename,".sql"))
       return TRUE;
   return FALSE;
 }
-
+void set_editor_to_text_plain (Editor *editor)
+{
+  gtk_scintilla_clear_document_style (GTK_SCINTILLA(editor->scintilla));
+  /* SCLEX_NULL to select no lexing action */
+  gtk_scintilla_set_lexer(GTK_SCINTILLA (editor->scintilla), SCLEX_NULL); 
+}
 void set_editor_to_php(Editor *editor)
 {
   tab_php_set_lexer(editor);
@@ -1009,12 +1012,8 @@ void register_file_opened(gchar *filename)
   main_window_add_to_reopen_menu(full_filename);
   g_free(full_filename);
   gchar *folder = filename_parent_uri(filename);
-  GConfClient *config;
-  config=gconf_client_get_default ();
-  if (folder){
-    gconf_client_set_string (config,"/gPHPEdit/general/last_opened_folder",folder,NULL);
-    g_free(folder);
-  }
+  set_last_opened_folder(folder);
+  g_free(folder);
 }
 
 gboolean switch_to_file_or_open(gchar *filename, gint line_number)
@@ -1921,7 +1920,10 @@ static void char_added(GtkWidget *scintilla, guint ch)
      default:
             member_function_buffer = gtk_scintilla_get_text_range (GTK_SCINTILLA(scintilla), wordStart-2, wordEnd, &member_function_length);
             /* if we type <?php then we are in a php file so force php syntax mode */
-            if (strcmp(member_function_buffer,"<?php")==0) set_editor_to_php(main_window.current_editor);
+            if (strcmp(member_function_buffer,"<?php")==0){
+               set_editor_to_php(main_window.current_editor);
+               update_status_combobox(main_window.current_editor);
+               }
 //          g_print("buffer:%s",member_function_buffer);
             g_free(member_function_buffer);
             break;

@@ -263,6 +263,8 @@ void scintilla_php_set_lexer(GtkScintilla *scintilla, Preferences prefs)
   gtk_scintilla_style_set_italic (scintilla, SCE_HPHP_COMMENTLINE, prefs.php_comment_line_italic);
   gtk_scintilla_style_set_bold (scintilla, SCE_HPHP_COMMENTLINE, prefs.php_comment_line_bold);
 
+  gtk_scintilla_style_set_fore (scintilla, SCE_HPHP_OPERATOR, prefs.php_word_fore);
+  gtk_scintilla_style_set_back (scintilla, SCE_HPHP_OPERATOR, prefs.php_word_back);
 
   gtk_scintilla_indic_set_style(scintilla, 0, INDIC_SQUIGGLE);
   gtk_scintilla_indic_set_fore(scintilla, 0, scintilla_color(255,0,0));

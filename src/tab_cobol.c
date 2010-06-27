@@ -129,6 +129,13 @@ void scintilla_cobol_set_lexer(GtkScintilla *scintilla, Preferences prefs)
   gtk_scintilla_style_set_italic (scintilla, SCE_C_COMMENT, prefs.c_comment_italic);
   gtk_scintilla_style_set_bold (scintilla, SCE_C_COMMENT, prefs.c_comment_bold);
 
+  gtk_scintilla_style_set_fore (scintilla, SCE_C_COMMENTDOC, prefs.c_comment_fore);
+  gtk_scintilla_style_set_font (scintilla, SCE_C_COMMENTDOC, prefs.c_comment_font);
+  gtk_scintilla_style_set_back (scintilla, SCE_C_COMMENTDOC, prefs.c_comment_back);
+  gtk_scintilla_style_set_size (scintilla, SCE_C_COMMENTDOC, prefs.c_comment_size);
+  gtk_scintilla_style_set_italic (scintilla, SCE_C_COMMENTDOC, prefs.c_comment_italic);
+  gtk_scintilla_style_set_bold (scintilla, SCE_C_COMMENTDOC, prefs.c_comment_bold);
+
   gtk_scintilla_style_set_fore (scintilla, SCE_C_COMMENTLINE, prefs.c_commentline_fore);
   gtk_scintilla_style_set_font (scintilla, SCE_C_COMMENTLINE, prefs.c_commentline_font);
   gtk_scintilla_style_set_back (scintilla, SCE_C_COMMENTLINE, prefs.c_commentline_back);

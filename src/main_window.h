@@ -28,7 +28,6 @@
 #include "main.h"
 #include "calltip.h"
 #include "tab.h"
-#include <gconf/gconf-client.h>
 #include "folderbrowser.h"
 #include "menu.h"
 #include "toolbar.h"

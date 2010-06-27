@@ -31,22 +31,11 @@
 #include "main_window_callbacks.h"
 #include "plugin.h"
 #include <gdk/gdkkeysyms.h>
+
 /*needed for menu hints*/
 guint context_id;
 guint message_id;
 
-/*
- *classbrowser_status
- *return 0  if classbrowser is hidden
- *return 1 if classbrowser is show
-*/
-static int classbrowser_status(void){
-  gint hidden;
-  GConfClient *config;
-  config=gconf_client_get_default ();
-  hidden = gconf_client_get_int (config,"/gPHPEdit/main_window/classbrowser_hidden",NULL);
-  return hidden;
-}
 /*
  * tog_classbrowser
  * Show/hide side panel

@@ -27,8 +27,10 @@
 
 #include <string.h>
 #include <glib/gi18n.h>
-
 #include "gphpedit-statusbar.h"
+#include "status-combo-box.h"
+#include "tab.h"
+#include "main_window.h"
 
 #define GPHPEDIT_STATUSBAR_GET_PRIVATE(object)(G_TYPE_INSTANCE_GET_PRIVATE ((object),\
 					    GPHPEDIT_TYPE_STATUSBAR,\
@@ -37,6 +39,7 @@
 struct _GphpeditStatusbarPrivate
 {
 	GtkWidget     *zoom_level;
+  GtkWidget     *filetype_menu;
 
 	GtkWidget     *error_frame;
 	GtkWidget     *error_event_box;
@@ -123,6 +126,85 @@ set_statusbar_width_chars (GtkWidget *statusbar,
 	gtk_widget_set_size_request (statusbar, width, -1);
 }
 
+void set_higthlight (GphpeditStatusComboBox *combo, GtkMenuItem *item){
+  const gchar *label =gtk_menu_item_get_label (item);
+  if (g_strcmp0(label,_("Cobol"))==0){
+    if (main_window.current_editor) {
+      set_editor_to_cobol(main_window.current_editor);
+    }
+  } else if (g_strcmp0(label,_("C/C++"))==0){
+    if (main_window.current_editor) {
+      set_editor_to_cxx(main_window.current_editor);
+    }
+  } else if (g_strcmp0(label,_("CSS"))==0){
+    if (main_window.current_editor) {
+      set_editor_to_css(main_window.current_editor);
+    }
+  } else if (g_strcmp0(label,_("PHP/HTML/XML"))==0){
+      if (main_window.current_editor) {
+      set_editor_to_php(main_window.current_editor);
+      }
+  } else if (g_strcmp0(label,_("Perl"))==0){
+    if (main_window.current_editor) {
+      set_editor_to_perl(main_window.current_editor);
+    }
+  } else if (g_strcmp0(label,_("SQL"))==0){
+    if (main_window.current_editor) {
+      set_editor_to_sql(main_window.current_editor);
+    }
+  } else if (g_strcmp0(label,_("Python"))==0){
+    if (main_window.current_editor) {
+      set_editor_to_python(main_window.current_editor);
+    }
+  } else {
+    set_editor_to_text_plain (main_window.current_editor);
+  }
+/* seleccionar el tipo de resaltado de acuerdo a la etiqueta del item */
+}
+
+void set_status_combo_item (GphpeditStatusbar *statusbar,const gchar *label)
+{
+  GList *items = gphpedit_status_combo_box_get_items (GPHPEDIT_STATUS_COMBO_BOX(statusbar->priv->filetype_menu));
+  GList *walk;
+  for (walk = items; walk != NULL; walk = g_list_next (walk)) {
+    const gchar *lbl = gphpedit_status_combo_box_get_item_text 	(GPHPEDIT_STATUS_COMBO_BOX(statusbar->priv->filetype_menu), (GtkMenuItem *)walk->data);
+    if (g_strcmp0(label,lbl)==0) {
+        gphpedit_status_combo_box_set_item (GPHPEDIT_STATUS_COMBO_BOX(statusbar->priv->filetype_menu),(GtkMenuItem *)walk->data);
+        break;
+    }
+  }
+  g_list_free (items);
+}
+static void fill_combo_box(GphpeditStatusComboBox 	*combo)
+{
+  GtkMenuItem *item;
+  item = GTK_MENU_ITEM(gtk_menu_item_new_with_mnemonic(_("Cobol")));
+  gtk_widget_show (GTK_WIDGET(item));
+  gphpedit_status_combo_box_add_item (combo, item, _("Cobol"));
+  item = GTK_MENU_ITEM(gtk_menu_item_new_with_mnemonic(_("C/C++")));
+  gtk_widget_show (GTK_WIDGET(item));
+  gphpedit_status_combo_box_add_item (combo, item, _("C/C++"));
+  item = GTK_MENU_ITEM(gtk_menu_item_new_with_mnemonic(_("CSS")));
+  gtk_widget_show (GTK_WIDGET(item));
+  gphpedit_status_combo_box_add_item (combo, item, _("CSS"));
+  item = GTK_MENU_ITEM(gtk_menu_item_new_with_mnemonic(_("PHP/HTML/XML")));
+  gtk_widget_show (GTK_WIDGET(item));
+  gphpedit_status_combo_box_add_item (combo, item, _("PHP/HTML/XML"));
+  item = GTK_MENU_ITEM(gtk_menu_item_new_with_mnemonic(_("Perl")));
+  gtk_widget_show (GTK_WIDGET(item));
+  gphpedit_status_combo_box_add_item (combo, item, _("Perl"));
+  item = GTK_MENU_ITEM(gtk_menu_item_new_with_mnemonic(_("Python")));
+  gtk_widget_show (GTK_WIDGET(item));
+  gphpedit_status_combo_box_add_item (combo, item, _("Python"));
+  item = GTK_MENU_ITEM(gtk_menu_item_new_with_mnemonic(_("SQL")));
+  gtk_widget_show (GTK_WIDGET(item));
+  gphpedit_status_combo_box_add_item (combo, item, _("SQL"));
+  item = GTK_MENU_ITEM(gtk_menu_item_new_with_mnemonic(_("Text-Plain")));
+  gtk_widget_show (GTK_WIDGET(item));
+  gphpedit_status_combo_box_add_item (combo, item, _("Text-Plain"));
+  
+  g_signal_connect (combo, "changed", G_CALLBACK (set_higthlight), NULL);
+}
 static void
 gphpedit_statusbar_init (GphpeditStatusbar *statusbar)
 {
@@ -140,6 +222,11 @@ gphpedit_statusbar_init (GphpeditStatusbar *statusbar)
 	gtk_box_pack_end (GTK_BOX (statusbar),
 			  statusbar->priv->zoom_level,
 			  FALSE, TRUE, 0);
+
+  statusbar->priv->filetype_menu= gphpedit_status_combo_box_new ("");
+  gtk_widget_show (statusbar->priv->filetype_menu);
+  gtk_box_pack_end (GTK_BOX (statusbar), statusbar->priv->filetype_menu, FALSE, TRUE, 0);
+  fill_combo_box(GPHPEDIT_STATUS_COMBO_BOX(statusbar->priv->filetype_menu));
 
 	statusbar->priv->error_frame = gtk_frame_new (NULL);
 	gtk_frame_set_shadow_type (GTK_FRAME (statusbar->priv->error_frame), GTK_SHADOW_IN);
