@@ -55,9 +55,10 @@ AC_PROG_CPP
 AC_PROG_INSTALL
 AC_PROG_LN_S
 AC_PROG_MAKE_SET
-AC_LIBTOOL_DLOPEN
-AC_PROG_LIBTOOL
-AC_PROG_INTLTOOL
+
+# Initialize libtool
+LT_PREREQ([2.2.6])
+LT_INIT(disable-static)
 
 # Checks for libraries.
 
@@ -160,17 +161,11 @@ dnl  ------------------
 dnl ================================================================
 dnl Gettext stuff.
 dnl ================================================================
-
-GETTEXT_PACKAGE=gphpedit
-AC_SUBST(GETTEXT_PACKAGE)
-AC_DEFINE_UNQUOTED(GETTEXT_PACKAGE,"$GETTEXT_PACKAGE", [Gettext package])
-
+IT_PROG_INTLTOOL([0.40.0])
+AC_SUBST([GETTEXT_PACKAGE], [gphpedit])
+AM_GNU_GETTEXT_VERSION([0.17])
 AM_GLIB_GNU_GETTEXT
-
-dnl Please keep this in alphabetical order
-ALL_LINGUAS="de es ja"
-
-dnl AM_GNU_GETTEXT
+AC_DEFINE(GETTEXT_PACKAGE,[PACKAGE_TARNAME], [Gettext package])
 
 dnl AM_GLIB_GNU_GETTEXT sets $DATADIRNAME
  AC_MSG_CHECKING(locale directory)

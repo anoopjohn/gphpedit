@@ -20,7 +20,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gphpedit 0.9.96-1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2010-06-19 17:46-0300\n"
+"POT-Creation-Date: 2010-06-26 15:10-0300\n"
 "PO-Revision-Date: 2006-07-21 19:11+0200\n"
 "Last-Translator: Holger Wansing <linux@wansing-online.de>\n"
 "Language-Team: German <debian-l10n-german@lists.debian.org>\n"
@@ -33,7 +33,12 @@ msgstr ""
 msgid "WARNING: Could not open php-gphpedit.api file\n"
 msgstr ""
 
-#: ../src/classbrowser.c:891 ../src/main_window.c:233
+#: ../src/gvfs_utils.c:103
+#, fuzzy, c-format
+msgid "Error reading file sync '%s'. GIO error:%s\n"
+msgstr "Konnte die Datei %s nicht mit stat abfragen"
+
+#: ../src/classbrowser.c:892 ../src/main_window.c:231
 msgid "FILE: "
 msgstr "DATEI: "
 
@@ -54,90 +59,137 @@ msgstr "Name/Tastaturkürzel:"
 msgid "Code:"
 msgstr "Code:"
 
-#: ../src/find_replace.c:85 ../src/find_replace.c:342
+#. Show message saying could not be found.
+#: ../src/find_replace.c:87 ../src/find_replace.c:342
 #, c-format
 msgid "The text \"%s\" was not found."
 msgstr "Text »%s« wurde nicht gefunden."
 
-#: ../src/find_replace.c:125
+#: ../src/find_replace.c:123
 msgid "Find"
 msgstr "Suchen"
 
 #. End get selected text
-#: ../src/find_replace.c:162 ../src/find_replace.c:526
+#: ../src/find_replace.c:161 ../src/find_replace.c:518
 msgid "RegExp/String to search"
 msgstr "Zu suchende RegExp/Zeichenfolge"
 
-#: ../src/find_replace.c:187 ../src/find_replace.c:569
+#: ../src/find_replace.c:186 ../src/find_replace.c:561
 msgid "Whole document"
 msgstr "Ganzes Dokument"
 
-#: ../src/find_replace.c:195 ../src/find_replace.c:576
+#: ../src/find_replace.c:194 ../src/find_replace.c:568
 msgid "From cursor"
 msgstr "Ab dem Cursor"
 
-#: ../src/find_replace.c:203 ../src/find_replace.c:584
+#: ../src/find_replace.c:202 ../src/find_replace.c:576
 msgid "Search"
 msgstr "Durchsuchen"
 
-#: ../src/find_replace.c:216 ../src/find_replace.c:597
+#: ../src/find_replace.c:215 ../src/find_replace.c:589
 msgid "RegExp"
 msgstr "RegExp"
 
-#: ../src/find_replace.c:223 ../src/find_replace.c:604
+#: ../src/find_replace.c:222 ../src/find_replace.c:596
 msgid "String"
 msgstr "Zeichenfolge"
 
-#: ../src/find_replace.c:231 ../src/find_replace.c:612
+#: ../src/find_replace.c:230 ../src/find_replace.c:604
 msgid "Type"
 msgstr "Typ"
 
-#: ../src/find_replace.c:240 ../src/find_replace.c:621
+#: ../src/find_replace.c:239 ../src/find_replace.c:613
 msgid "Whole word"
 msgstr "Ganzes Wort"
 
-#: ../src/find_replace.c:244 ../src/find_replace.c:625
+#: ../src/find_replace.c:243 ../src/find_replace.c:617
 msgid "Ignore case while searching"
 msgstr "Groß-/Kleinschreibung während der Suche ignorieren"
 
-#: ../src/find_replace.c:249 ../src/find_replace.c:635
+#: ../src/find_replace.c:248 ../src/find_replace.c:627
 msgid "Options"
 msgstr "Optionen"
 
-#: ../src/find_replace.c:360
+#: ../src/find_replace.c:356
 msgid "Do you want to replace this occurence?"
 msgstr "Möchten Sie diese Zeichenfolge ersetzen?"
 
-#: ../src/find_replace.c:446
+#: ../src/find_replace.c:442
 #, c-format
 msgid "%s not found, no replacements made."
 msgstr "»%s« nicht gefunden, nichts ersetzt."
 
-#: ../src/find_replace.c:449
+#: ../src/find_replace.c:445
 #, c-format
 msgid "1 occurence of %s found, replaced."
 msgstr "»%s« einmal gefunden, ersetzt."
 
-#: ../src/find_replace.c:452
+#: ../src/find_replace.c:448
 #, c-format
 msgid "%d occurences of %s found, all replaced."
 msgstr "%d Mal »%s« gefunden, alle ersetzt."
 
-#: ../src/find_replace.c:490
+#: ../src/find_replace.c:481
 msgid "Find and Replace"
 msgstr "Suchen und Ersetzen"
 
-#: ../src/find_replace.c:544
+#: ../src/find_replace.c:536
 msgid "String to Replace"
 msgstr "Ersetzen durch"
 
-#: ../src/find_replace.c:630
+#: ../src/find_replace.c:622
 msgid "Prompt before Replace"
 msgstr "Vor dem Ersetzen fragen"
 
-#: ../src/find_replace.c:656
+#: ../src/find_replace.c:648
 msgid "Replace _all"
 msgstr "Ersetze _alle"
+
+#: ../src/gphpedit-statusbar.c:131 ../src/gphpedit-statusbar.c:181
+#: ../src/gphpedit-statusbar.c:183 ../src/main_window_callbacks.c:1400
+msgid "Cobol"
+msgstr ""
+
+#: ../src/gphpedit-statusbar.c:135 ../src/gphpedit-statusbar.c:184
+#: ../src/gphpedit-statusbar.c:186 ../src/main_window_callbacks.c:1397
+msgid "C/C++"
+msgstr ""
+
+#: ../src/gphpedit-statusbar.c:139 ../src/gphpedit-statusbar.c:187
+#: ../src/gphpedit-statusbar.c:189 ../src/main_window_callbacks.c:1394
+#, fuzzy
+msgid "CSS"
+msgstr "CSS ID"
+
+#: ../src/gphpedit-statusbar.c:143 ../src/gphpedit-statusbar.c:190
+#: ../src/gphpedit-statusbar.c:192 ../src/main_window_callbacks.c:1391
+msgid "PHP/HTML/XML"
+msgstr ""
+
+#: ../src/gphpedit-statusbar.c:147 ../src/gphpedit-statusbar.c:193
+#: ../src/gphpedit-statusbar.c:195 ../src/main_window_callbacks.c:1406
+msgid "Perl"
+msgstr ""
+
+#: ../src/gphpedit-statusbar.c:151 ../src/gphpedit-statusbar.c:199
+#: ../src/gphpedit-statusbar.c:201 ../src/main_window_callbacks.c:1403
+msgid "SQL"
+msgstr ""
+
+#: ../src/gphpedit-statusbar.c:155 ../src/gphpedit-statusbar.c:196
+#: ../src/gphpedit-statusbar.c:198 ../src/main_window_callbacks.c:1409
+msgid "Python"
+msgstr ""
+
+#: ../src/gphpedit-statusbar.c:202 ../src/gphpedit-statusbar.c:204
+#: ../src/main_window_callbacks.c:1412
+msgid "Text-Plain"
+msgstr ""
+
+#: ../src/gphpedit-statusbar.c:290
+#, c-format
+msgid "Zoom: %d%s"
+msgstr ""
 
 #: ../src/plugin.c:363
 #, c-format
@@ -169,16 +221,16 @@ msgstr ""
 msgid "Parse only current file"
 msgstr "Aktuelle Markierung einfügen"
 
-#: ../src/main_window.c:250
+#: ../src/main_window.c:248
 msgid "Name"
 msgstr "Name"
 
-#: ../src/main_window.c:281
+#: ../src/main_window.c:279
 msgid "Syntax Check Output"
 msgstr "Ergebnis der Syntax-Überprüfung"
 
 #. debug("Title - %s, Short name - %s", title->str, main_window.current_editor->short_filename);
-#: ../src/main_window.c:418
+#: ../src/main_window.c:417
 msgid " - gPHPEdit"
 msgstr " - gPHPEdit"
 
@@ -186,28 +238,29 @@ msgstr " - gPHPEdit"
 #. is uncommented stating that there were duplicate free calls.
 #. g_free(editor->short_filename);
 #. g_free(editor->help_function);
-#: ../src/main_window.c:427 ../src/tab.c:639 ../src/tab.c:645 ../src/tab.c:663
-#: ../src/tab.c:684
+#: ../src/main_window.c:426 ../src/tab.c:641 ../src/tab.c:647 ../src/tab.c:665
+#: ../src/tab.c:686
 msgid "Help: "
 msgstr "Hilfe: "
 
-#: ../src/main_window.c:433 ../src/tab.c:647 ../src/tab.c:648 ../src/tab.c:665
-#: ../src/tab.c:731
+#: ../src/main_window.c:432 ../src/tab.c:649 ../src/tab.c:650 ../src/tab.c:667
+#: ../src/tab.c:729
 msgid "Preview: "
 msgstr ""
 
-#: ../src/main_window.c:440 ../src/main_window.c:445 ../src/main_window.c:543
-#: ../src/main_window_callbacks.c:841 ../src/tab.c:442
+#: ../src/main_window.c:439 ../src/main_window.c:444 ../src/main_window.c:498
+#: ../src/main_window_callbacks.c:838 ../src/tab.c:440
+#: ../gphpedit.desktop.in.h:3
 #, fuzzy
 msgid "gPHPEdit"
 msgstr " - gPHPEdit"
 
 #. set up info bar
-#: ../src/main_window.c:517
+#: ../src/main_window.c:472
 msgid "Reload"
 msgstr ""
 
-#: ../src/main_window.c:517
+#: ../src/main_window.c:472
 msgid "Cancel"
 msgstr ""
 
@@ -221,104 +274,104 @@ msgstr "VFS-Fehler: %s\n"
 msgid "GIO Error deleting file: %s, code %d\n"
 msgstr "VFS-Fehler: %s\n"
 
-#: ../src/main_window_callbacks.c:521
+#: ../src/main_window_callbacks.c:523
 #, fuzzy
 msgid "PHP files ("
 msgstr "PHP Variable"
 
-#: ../src/main_window_callbacks.c:543
+#: ../src/main_window_callbacks.c:545
 msgid "HTML files (*.html *.htm *.xhtml *tpl)"
 msgstr ""
 
-#: ../src/main_window_callbacks.c:550
+#: ../src/main_window_callbacks.c:552
 msgid "XML files (*.xml)"
 msgstr ""
 
-#: ../src/main_window_callbacks.c:554
+#: ../src/main_window_callbacks.c:556
 msgid "Stylesheet files (*.css)"
 msgstr ""
 
-#: ../src/main_window_callbacks.c:558
+#: ../src/main_window_callbacks.c:560
 msgid "SQL files (*.sql)"
 msgstr ""
 
-#: ../src/main_window_callbacks.c:562
+#: ../src/main_window_callbacks.c:564
 msgid "Javascript files (*.js)"
 msgstr ""
 
-#: ../src/main_window_callbacks.c:566
+#: ../src/main_window_callbacks.c:568
 msgid "C/C++ files (*.c *.h *.cpp *.hh *.cc)"
 msgstr ""
 
-#: ../src/main_window_callbacks.c:576
+#: ../src/main_window_callbacks.c:578
 msgid "Perl Files (*.pl *.ph *.pm)"
 msgstr ""
 
-#: ../src/main_window_callbacks.c:584
+#: ../src/main_window_callbacks.c:586
 msgid "Cobol Files (*.cbl)"
 msgstr ""
 
-#: ../src/main_window_callbacks.c:590
+#: ../src/main_window_callbacks.c:592
 msgid "Python Files (*.py *.pyd *.pyw)"
 msgstr ""
 
-#: ../src/main_window_callbacks.c:598
+#: ../src/main_window_callbacks.c:600
 msgid "All files"
 msgstr ""
 
 #. show status in statusbar
-#: ../src/main_window_callbacks.c:678
+#: ../src/main_window_callbacks.c:677
 #, c-format
 msgid "Saving %s"
 msgstr ""
 
-#: ../src/main_window_callbacks.c:705 ../src/syntax_check.c:170
-#: ../src/tab.c:292
+#: ../src/main_window_callbacks.c:704 ../src/syntax_check.c:170
+#: ../src/tab.c:290
 msgid "Cannot allocate write buffer"
 msgstr "Kann Schreibpuffer nicht zuweisen"
 
-#: ../src/main_window_callbacks.c:713 ../src/tab.c:301
+#: ../src/main_window_callbacks.c:712 ../src/tab.c:299
 #, c-format
 msgid "UTF-8 Error: %s\n"
 msgstr "UTF-8-Fehler: %s\n"
 
-#: ../src/main_window_callbacks.c:727 ../src/tab.c:260
+#: ../src/main_window_callbacks.c:726 ../src/tab.c:258
 #, fuzzy, c-format
 msgid "GIO Error: %s saving file:%s\n"
 msgstr "VFS-Fehler: %s\n"
 
 #. Create the selector widget
-#: ../src/main_window_callbacks.c:748
+#: ../src/main_window_callbacks.c:747
 msgid "Please type the filename to save as..."
 msgstr ""
 "Geben Sie bitte den Dateiname ein, unter dem gespeichert werden soll ..."
 
-#: ../src/main_window_callbacks.c:788
+#: ../src/main_window_callbacks.c:784
 msgid "Are you sure you wish to reload the current file, losing your changes?"
 msgstr ""
 "Sind Sie sicher, dass Sie die aktuelle Datei neu laden und dabei Ihre "
 "Änderungen verwerfen möchten?"
 
-#: ../src/main_window_callbacks.c:792 ../src/main_window_callbacks.c:798
-#: ../src/main_window_callbacks.c:1903
+#: ../src/main_window_callbacks.c:788 ../src/main_window_callbacks.c:794
+#: ../src/main_window_callbacks.c:1909
 #, c-format
 msgid "Opening %s"
 msgstr ""
 
-#: ../src/main_window_callbacks.c:840
+#: ../src/main_window_callbacks.c:837
 msgid "This file already exists, are you sure you want to overwrite it?"
 msgstr ""
 "Diese Datei besteht bereits; sind Sie sicher, dass Sie sie überschreiben "
 "möchten?"
 
 #. Create the selector widget
-#: ../src/main_window_callbacks.c:861
+#: ../src/main_window_callbacks.c:858
 msgid "Please type the filename to rename this file to..."
 msgstr ""
 "Geben Sie bitte den Dateinamen ein, in den die Datei unbenannt werden "
 "soll ..."
 
-#: ../src/main_window_callbacks.c:970 ../src/main_window_callbacks.c:971
+#: ../src/main_window_callbacks.c:967 ../src/main_window_callbacks.c:968
 #, c-format
 msgid ""
 "The file '%s' has not been saved since your last changes, are you sure you "
@@ -327,24 +380,24 @@ msgstr ""
 "Die Datei »%s« wurde nach Ihren letzten Änderungen nicht gesichert; sind Sie "
 "sicher, dass Sie sie schließen und die Änderungen verwerfen möchten?"
 
-#: ../src/main_window_callbacks.c:972
+#: ../src/main_window_callbacks.c:969
 #, c-format
 msgid "Unsaved changes to '%s'"
 msgstr "Ungesicherte Änderungen in »%s«"
 
-#: ../src/main_window_callbacks.c:974
+#: ../src/main_window_callbacks.c:971
 msgid "Close and _lose changes"
 msgstr "Schließen und Änderungen _verwerfen"
 
-#: ../src/main_window_callbacks.c:975
+#: ../src/main_window_callbacks.c:972
 msgid "_Save file"
 msgstr "Datei _speichern"
 
-#: ../src/main_window_callbacks.c:976
+#: ../src/main_window_callbacks.c:973
 msgid "_Cancel closing"
 msgstr "S_chließen abbrechen"
 
-#: ../src/main_window_callbacks.c:1025
+#: ../src/main_window_callbacks.c:1022
 msgid "FILE:"
 msgstr "DATEI:"
 
@@ -372,17 +425,17 @@ msgstr ""
 "gPHPEdit ist ein GNOME2-Editor, der auf das Bearbeiten von PHP-Skriptenund "
 "verwandten Dateien (HTML/CSS/JS) spezialisiert ist."
 
-#: ../src/main_window_callbacks.c:1407
+#: ../src/main_window_callbacks.c:1434
 #, c-format
 msgid "Unable to get data for page %d\n"
 msgstr "Kann Daten für Seite %d nicht bekommen\n"
 
-#: ../src/main_window_callbacks.c:1665
+#: ../src/main_window_callbacks.c:1692
 #, fuzzy
 msgid "No marker found"
 msgstr "Vordergrund:"
 
-#: ../src/main_window_callbacks.c:1916
+#: ../src/main_window_callbacks.c:1922
 #, c-format
 msgid "The file %s has been externally modified. Do you want reload it?"
 msgstr ""
@@ -1032,78 +1085,78 @@ msgstr ""
 msgid "You don't have any files open to check\n"
 msgstr "Sie haben keine Dateien zur Überprüfung geöffnet\n"
 
-#: ../src/tab.c:270
+#: ../src/tab.c:268
 #, fuzzy, c-format
 msgid ""
 "Could not get the file modification time for file: '%s'. GIO error: %s \n"
 msgstr "Konnte die Datei %s nicht mit stat abfragen"
 
-#: ../src/tab.c:336
+#: ../src/tab.c:334
 #, c-format
 msgid "gPHPEdit UTF-8 Error: %s\n"
 msgstr "gPHPEdit UTF-8-Fehler: %s\n"
 
-#: ../src/tab.c:342
+#: ../src/tab.c:340
 #, c-format
 msgid "Converted to UTF-8 size: %d\n"
 msgstr "Umgewandelt nach UTF-8-Größe: %d\n"
 
-#: ../src/tab.c:436
+#: ../src/tab.c:434
 #, fuzzy, c-format
 msgid "Could not get the file info. GIO error: %s \n"
 msgstr "Konnte die Datei %s nicht mit stat abfragen"
 
-#: ../src/tab.c:442
+#: ../src/tab.c:440
 msgid "Sorry, I can open this kind of file.\n"
 msgstr ""
 
-#: ../src/tab.c:444 ../src/tab.c:1141 ../src/tab.c:1158
+#: ../src/tab.c:442 ../src/tab.c:1140 ../src/tab.c:1157
 msgid "Untitled"
 msgstr "Unbenannt"
 
-#: ../src/tab.c:508
+#: ../src/tab.c:506
 #, fuzzy, c-format
 msgid "Could not get file info for file %s. GIO error: %s \n"
 msgstr "Konnte die Datei %s nicht mit stat abfragen"
 
-#: ../src/tab.c:520
+#: ../src/tab.c:518
 #, fuzzy, c-format
 msgid "Error reading file. GIO error:%s\n"
 msgstr "Konnte die Datei %s nicht mit stat abfragen"
 
-#: ../src/tab.c:526
+#: ../src/tab.c:524
 msgid "File size and loaded size not matching"
 msgstr "Dateigröße und geladene Größe stimmen nicht überein"
 
-#: ../src/tab.c:595 ../src/tab.c:607
+#: ../src/tab.c:594 ../src/tab.c:608
 #, c-format
 msgid "Help for function not found: %s\n"
 msgstr "Hilfe für Funktion nicht gefunden: %s\n"
 
-#: ../src/tab.c:689
+#: ../src/tab.c:690
 msgid "Could not find the required command in the online help"
 msgstr "Konnte den verlangten Befehl in der Online-Hilfe nicht finden"
 
-#: ../src/tab.c:1055
+#: ../src/tab.c:1054
 #, c-format
 msgid "Error mounting volume. GIO error:%s\n"
 msgstr ""
 
-#: ../src/tab.c:1088
+#: ../src/tab.c:1087
 #, c-format
 msgid ""
 "Error filesystem not mounted.\n"
 "Mounting filesystem, this will take a few seconds...\n"
 msgstr ""
 
-#: ../src/tab.c:1097
+#: ../src/tab.c:1096
 #, c-format
 msgid ""
 "Error opening file GIO error:%s\n"
 "file:%s"
 msgstr ""
 
-#: ../src/tab.c:1104
+#: ../src/tab.c:1103
 #, c-format
 msgid ""
 "The file %s was not found.\n"
@@ -1114,11 +1167,11 @@ msgstr ""
 "\n"
 "Möchten Sie sie als leeres Dokument erstellen?"
 
-#: ../src/tab.c:1105
+#: ../src/tab.c:1104
 msgid "File not found"
 msgstr "Datei nicht gefunden"
 
-#: ../src/tab.c:1202
+#: ../src/tab.c:1201
 msgid "Close Tab"
 msgstr ""
 
@@ -1133,588 +1186,583 @@ msgid "CANNOT Create templates file:: %s\n"
 msgstr ""
 
 #. help menu
-#: ../src/menu.c:236
+#: ../src/menu.c:225
 #, fuzzy
 msgid "_PHP Help"
 msgstr "PHP Standard"
 
-#: ../src/menu.c:236
+#: ../src/menu.c:225
 msgid "Look for help on the currently selected function"
 msgstr ""
 
-#: ../src/menu.c:239
+#: ../src/menu.c:228
 msgid "_Report a bug in gPHPEdit"
 msgstr ""
 
-#: ../src/menu.c:239
+#: ../src/menu.c:228
 msgid "Go to bug report page to report a bug"
 msgstr ""
 
-#: ../src/menu.c:243
+#: ../src/menu.c:232
 msgid "_Translate this application"
 msgstr ""
 
-#: ../src/menu.c:243
+#: ../src/menu.c:232
 msgid "Start translating this application"
 msgstr ""
 
-#: ../src/menu.c:246
+#: ../src/menu.c:235
 msgid "Shows info about gPHPEdit"
 msgstr ""
 
-#: ../src/menu.c:256
+#: ../src/menu.c:245
 #, fuzzy
 msgid "Undo last action"
 msgstr "Letzte Änderung rückgängig machen"
 
-#: ../src/menu.c:258
+#: ../src/menu.c:247
 #, fuzzy
 msgid "Redo last action"
 msgstr "Letzte rückgängig gemachte Änderung wiederholen"
 
-#: ../src/menu.c:264
+#: ../src/menu.c:253
 #, fuzzy
 msgid "Cut Selected Text"
 msgstr "Text suchen und ersetzen"
 
-#: ../src/menu.c:266
+#: ../src/menu.c:255
 #, fuzzy
 msgid "Copy Selected Text"
 msgstr "Text suchen und ersetzen"
 
-#: ../src/menu.c:268
+#: ../src/menu.c:257
 msgid "Paste Text from clipboard"
 msgstr ""
 
-#: ../src/menu.c:270
+#: ../src/menu.c:259
 #, fuzzy
 msgid "Select all Text in current file"
 msgstr "Aktuelle Markierung einfügen"
 
-#: ../src/menu.c:276
+#: ../src/menu.c:265
 #, fuzzy
 msgid "Find text in current file"
 msgstr "Aktuelle Markierung einfügen"
 
-#: ../src/menu.c:278
+#: ../src/menu.c:267
 #, fuzzy
 msgid "Find and replace text in current file"
 msgstr "Aktuelle Markierung einfügen"
 
-#: ../src/menu.c:284
+#: ../src/menu.c:273
 msgid "Indent the currently selected block"
 msgstr ""
 
-#: ../src/menu.c:286
+#: ../src/menu.c:275
 msgid "Unindent the currently selected block"
 msgstr ""
 
-#: ../src/menu.c:292
+#: ../src/menu.c:281
 msgid "_ToUpper"
 msgstr ""
 
-#: ../src/menu.c:292
+#: ../src/menu.c:281
 msgid "Convert the current selection text to upper case"
 msgstr ""
 
-#: ../src/menu.c:294
+#: ../src/menu.c:283
 msgid "_ToLower"
 msgstr ""
 
-#: ../src/menu.c:294
+#: ../src/menu.c:283
 msgid "Convert the current selection text to lower case"
 msgstr ""
 
-#: ../src/menu.c:305
+#: ../src/menu.c:293
 msgid "Creates a new file"
 msgstr ""
 
-#: ../src/menu.c:307
+#: ../src/menu.c:295
 #, fuzzy
 msgid "Open a file"
 msgstr "Datei öffnen"
 
-#: ../src/menu.c:309
+#: ../src/menu.c:297
 msgid "_Open selected file"
 msgstr ""
 
-#: ../src/menu.c:309
+#: ../src/menu.c:297
 msgid "Open a file with the name currently selected in the editor"
 msgstr ""
 
-#: ../src/menu.c:312
+#. recent menu setup
+#: ../src/menu.c:300
 #, fuzzy
 msgid "_Recent Files"
 msgstr "Datei speichern"
 
-#: ../src/menu.c:319
-msgid "_Recent"
-msgstr ""
-
-#: ../src/menu.c:323
+#: ../src/menu.c:311
 #, fuzzy
 msgid "_Reload current file"
 msgstr "Datei speichern"
 
-#: ../src/menu.c:323
+#: ../src/menu.c:311
 msgid "Reload the file currently selected in the editor"
 msgstr ""
 
-#: ../src/menu.c:328 ../src/menu.c:330
+#: ../src/menu.c:316 ../src/menu.c:318
 msgid "Save the file currently selected in the editor"
 msgstr ""
 
-#: ../src/menu.c:332
+#: ../src/menu.c:320
 #, fuzzy
 msgid "Save A_ll"
 msgstr "Datei _speichern"
 
-#: ../src/menu.c:332
+#: ../src/menu.c:320
 msgid "Save all open unsaved files"
 msgstr ""
 
-#: ../src/menu.c:334
+#: ../src/menu.c:322
 msgid "_Rename"
 msgstr ""
 
-#: ../src/menu.c:334
+#: ../src/menu.c:322
 msgid "Rename the current file 'on-the-fly'"
 msgstr ""
 
-#: ../src/menu.c:336
+#: ../src/menu.c:324
 #, fuzzy
 msgid "Close the current file"
 msgstr "Datei schließen"
 
-#: ../src/menu.c:342
+#: ../src/menu.c:330
 msgid "Quit the application"
 msgstr ""
 
-#: ../src/menu.c:350
+#: ../src/menu.c:338
 msgid "Statusbar"
 msgstr ""
 
-#: ../src/menu.c:350
+#: ../src/menu.c:338
 msgid "Show/Hide Application Statusbar"
 msgstr ""
 
-#: ../src/menu.c:352
+#: ../src/menu.c:340
 msgid "Main Toolbar"
 msgstr ""
 
-#: ../src/menu.c:352
+#: ../src/menu.c:340
 msgid "Show/Hide Application Main Toolbar"
 msgstr ""
 
-#: ../src/menu.c:354
+#: ../src/menu.c:342
 msgid "Find Toolbar"
 msgstr ""
 
-#: ../src/menu.c:354
+#: ../src/menu.c:342
 msgid "Show/Hide Application Find Toolbar"
 msgstr ""
 
-#: ../src/menu.c:361 ../src/menu.c:363
+#: ../src/menu.c:349 ../src/menu.c:351
 msgid "Show Side Panel"
 msgstr ""
 
-#: ../src/menu.c:361 ../src/menu.c:363
+#: ../src/menu.c:349 ../src/menu.c:351
 msgid "Show/Hide Application Side Panel"
 msgstr ""
 
-#: ../src/menu.c:367
+#: ../src/menu.c:355
 msgid "Fullscreen"
 msgstr ""
 
-#: ../src/menu.c:367
+#: ../src/menu.c:355
 msgid "Enable/Disable Fullscreen mode"
 msgstr ""
 
-#: ../src/menu.c:372
+#: ../src/menu.c:360
 msgid "Increases zoom in 10%"
 msgstr ""
 
-#: ../src/menu.c:374
+#: ../src/menu.c:362
 msgid "Decreases zoom in 10%"
 msgstr ""
 
-#: ../src/menu.c:376
+#: ../src/menu.c:364
 msgid "Restores normal zoom level"
 msgstr ""
 
 #. toolbar icon size menu
-#: ../src/menu.c:382
+#: ../src/menu.c:370
 msgid "_Toolbar Icon Size"
 msgstr ""
 
-#: ../src/menu.c:390
+#: ../src/menu.c:378
 msgid "Big Icons"
 msgstr ""
 
-#: ../src/menu.c:394
+#: ../src/menu.c:382
 msgid "Small Icons"
 msgstr ""
 
-#: ../src/menu.c:400
+#: ../src/menu.c:388
 msgid "_Show Preview"
 msgstr ""
 
-#: ../src/menu.c:400
+#: ../src/menu.c:388
 msgid "Preview the Document"
 msgstr ""
 
-#: ../src/menu.c:405
+#: ../src/menu.c:393
 msgid "Application Config"
 msgstr ""
 
-#: ../src/menu.c:414
+#: ../src/menu.c:402
 #, fuzzy
 msgid "_Syntax check"
 msgstr "Syntax-Prüfprogramm:"
 
-#: ../src/menu.c:414
+#: ../src/menu.c:402
 msgid "Check the syntax using the PHP command line binary"
 msgstr ""
 
-#: ../src/menu.c:416
+#: ../src/menu.c:404
 #, fuzzy
 msgid "_Clear Syntax check"
 msgstr "Syntax-Prüfprogramm:"
 
-#: ../src/menu.c:416
+#: ../src/menu.c:404
 msgid "Remove the syntax check window"
 msgstr ""
 
-#: ../src/menu.c:421
+#: ../src/menu.c:409
 msgid "_Record keyboard macro start/stop"
 msgstr ""
 
-#: ../src/menu.c:421
+#: ../src/menu.c:409
 msgid "Record keyboard actions"
 msgstr ""
 
-#: ../src/menu.c:423
+#: ../src/menu.c:411
 msgid "_Playback keyboard macro"
 msgstr ""
 
-#: ../src/menu.c:423
+#: ../src/menu.c:411
 msgid "Playback the stored keyboard macro"
 msgstr ""
 
-#: ../src/menu.c:426
+#: ../src/menu.c:414
 msgid "_Force"
 msgstr ""
 
-#: ../src/menu.c:431
+#: ../src/menu.c:419
 msgid "_PHP/HTML/XML"
 msgstr ""
 
-#: ../src/menu.c:431
+#: ../src/menu.c:419
 msgid "Force syntax highlighting to PHP/HTML/XML mode"
 msgstr ""
 
-#: ../src/menu.c:433
+#: ../src/menu.c:421
 #, fuzzy
 msgid "_CSS"
 msgstr "CSS ID"
 
-#: ../src/menu.c:433
+#: ../src/menu.c:421
 msgid "Force syntax highlighting to CSS mode"
 msgstr ""
 
-#: ../src/menu.c:435
+#: ../src/menu.c:423
 msgid "C/C_++"
 msgstr ""
 
-#: ../src/menu.c:435
+#: ../src/menu.c:423
 msgid "Force syntax highlighting to C/C++ mode"
 msgstr ""
 
-#: ../src/menu.c:437
+#: ../src/menu.c:425
 msgid "_SQL"
 msgstr ""
 
-#: ../src/menu.c:437
+#: ../src/menu.c:425
 msgid "Force syntax highlighting to SQL mode"
 msgstr ""
 
-#: ../src/menu.c:439
+#: ../src/menu.c:427
 msgid "_Perl"
 msgstr ""
 
-#: ../src/menu.c:439
+#: ../src/menu.c:427
 msgid "Force syntax highlighting to Perl mode"
 msgstr ""
 
-#: ../src/menu.c:441
+#: ../src/menu.c:429
 msgid "_Cobol"
 msgstr ""
 
-#: ../src/menu.c:441
+#: ../src/menu.c:429
 msgid "Force syntax highlighting to Cobol mode"
 msgstr ""
 
-#: ../src/menu.c:443
+#: ../src/menu.c:431
 msgid "P_ython"
 msgstr ""
 
-#: ../src/menu.c:443
+#: ../src/menu.c:431
 msgid "Force syntax highlighting to Python mode"
 msgstr ""
 
 #. create menus
 #. Menu file
-#: ../src/menu.c:460
+#: ../src/menu.c:448
 #, fuzzy
 msgid "_File"
 msgstr "Neue Datei"
 
 #. Menu edit
-#: ../src/menu.c:463
+#: ../src/menu.c:451
 #, fuzzy
 msgid "_Edit"
 msgstr "Editor"
 
 #. view menu
-#: ../src/menu.c:466
+#: ../src/menu.c:454
 msgid "_View"
 msgstr ""
 
 #. menu code
-#: ../src/menu.c:469
+#: ../src/menu.c:457
 #, fuzzy
 msgid "_Code"
 msgstr "Code:"
 
 #. plugin menu
-#: ../src/menu.c:472 ../src/menu.c:475
+#: ../src/menu.c:460 ../src/menu.c:463
 msgid "_Plugin"
 msgstr ""
 
 #. help menu
-#: ../src/menu.c:482
+#: ../src/menu.c:470
 #, fuzzy
 msgid "_Help"
 msgstr "Hilfe: "
 
-#: ../src/folderbrowser.c:300
+#: ../gphpedit.desktop.in.h:1
+msgid "Edit PHP source files"
+msgstr ""
+
+#: ../gphpedit.desktop.in.h:2
+msgid "PHP/HTML/CSS editor"
+msgstr ""
+
+#: ../src/folderbrowser.c:292
 #, c-format
 msgid "Error getting folderbrowser files. GIO Error:%s\t"
 msgstr ""
 
-#: ../src/folderbrowser.c:317
+#: ../src/folderbrowser.c:309
 #, fuzzy, c-format
 msgid "Error::%s"
 msgstr "VFS-Fehler: %s\n"
 
-#: ../src/folderbrowser.c:550
+#: ../src/folderbrowser.c:542
 #, fuzzy
 msgid "Are you sure you wish to delete this file?"
 msgstr "Sind Sie sicher, dass Sie die Vorlage »%s« löschen möchten?"
 
-#: ../src/folderbrowser.c:551
+#: ../src/folderbrowser.c:543
 #, fuzzy
 msgid "Question"
 msgstr "HTML Question"
 
-#: ../src/folderbrowser.c:561 ../src/folderbrowser.c:565
+#: ../src/folderbrowser.c:553 ../src/folderbrowser.c:557
 #, fuzzy, c-format
 msgid "GIO Error deleting file: %s\n"
 msgstr "VFS-Fehler: %s\n"
 
-#: ../src/folderbrowser.c:580
+#: ../src/folderbrowser.c:572
 #, c-format
 msgid "Error renaming file. GIO Error:%s\n"
 msgstr ""
 
-#: ../src/folderbrowser.c:585 ../src/folderbrowser.c:681
+#: ../src/folderbrowser.c:577 ../src/folderbrowser.c:673
 #, fuzzy
 msgid "Rename File"
 msgstr "Datei öffnen"
 
-#: ../src/folderbrowser.c:592
+#: ../src/folderbrowser.c:584
 #, fuzzy
 msgid "New Filename"
 msgstr "Neue Datei"
 
-#: ../src/folderbrowser.c:614
+#: ../src/folderbrowser.c:606
 #, fuzzy
 msgid "New Dir"
 msgstr "Neue Datei"
 
-#: ../src/folderbrowser.c:621
+#: ../src/folderbrowser.c:613
 msgid "Directory Name"
 msgstr ""
 
-#: ../src/folderbrowser.c:650
+#: ../src/folderbrowser.c:642
 #, c-format
 msgid "Error creating folder. GIO error:%s\n"
 msgstr ""
 
-#: ../src/folderbrowser.c:673
+#: ../src/folderbrowser.c:665
 #, fuzzy
 msgid "Open file"
 msgstr "Datei öffnen"
 
-#: ../src/folderbrowser.c:685
+#: ../src/folderbrowser.c:677
 #, fuzzy
 msgid "Delete file"
 msgstr "Löschen"
 
-#: ../src/folderbrowser.c:692
+#: ../src/folderbrowser.c:684
 msgid "Create New Directory"
 msgstr ""
 
-#: ../src/folderbrowser.c:806
+#: ../src/folderbrowser.c:798
 #, fuzzy
 msgid "File"
 msgstr "Neue Datei"
 
-#: ../src/folderbrowser.c:812
+#: ../src/folderbrowser.c:804
 msgid "Mime"
 msgstr ""
 
 #. set tooltip
-#: ../src/folderbrowser.c:820
+#: ../src/folderbrowser.c:812
 msgid "Folder Browser"
 msgstr ""
 
-#: ../src/folderbrowser.c:847
+#: ../src/folderbrowser.c:834
 msgid "Go Home Dir"
 msgstr ""
 
-#: ../src/folderbrowser.c:857
+#: ../src/folderbrowser.c:844
 msgid "Go Up one level"
 msgstr ""
 
-#: ../src/folderbrowser.c:866
+#: ../src/folderbrowser.c:853
 msgid "Refresh folderbrowser"
 msgstr ""
 
-#: ../src/folderbrowser.c:871
+#: ../src/folderbrowser.c:858
 msgid "Search Files in Folder Browser"
 msgstr ""
 
-#: ../src/folderbrowser.c:1020
+#: ../src/folderbrowser.c:1007
 #, c-format
 msgid "%s cannot be copied, it already exists, overwrite?"
 msgstr ""
 
-#: ../src/folderbrowser.c:1021
+#: ../src/folderbrowser.c:1008
 msgid "Overwrite file?"
 msgstr ""
 
 #. Add the File operations to the Main Toolbar
-#: ../src/toolbar.c:107
+#: ../src/toolbar.c:106
 msgid "New File"
 msgstr "Neue Datei"
 
-#: ../src/toolbar.c:109
+#: ../src/toolbar.c:108
 msgid "Open File"
 msgstr "Datei öffnen"
 
-#: ../src/toolbar.c:111
+#: ../src/toolbar.c:110
 #, fuzzy
 msgid "Save current File"
 msgstr "Datei speichern"
 
-#: ../src/toolbar.c:113
+#: ../src/toolbar.c:112
 msgid "Save File As..."
 msgstr "Datei speichern unter ..."
 
-#: ../src/toolbar.c:115
+#: ../src/toolbar.c:114
 #, fuzzy
 msgid "Close Current File"
 msgstr "Datei schließen"
 
 #. Add the Undo operations to the Main Toolbar
-#: ../src/toolbar.c:126
+#: ../src/toolbar.c:125
 msgid "Undo last change"
 msgstr "Letzte Änderung rückgängig machen"
 
-#: ../src/toolbar.c:128
+#: ../src/toolbar.c:127
 msgid "Redo last change"
 msgstr "Letzte rückgängig gemachte Änderung wiederholen"
 
 #. Add the Clipboard operations to the Main Toolbar
-#: ../src/toolbar.c:137
+#: ../src/toolbar.c:136
 #, fuzzy
 msgid "Cut Current Selection"
 msgstr "Aktuelle Markierung ausschneiden"
 
-#: ../src/toolbar.c:140
+#: ../src/toolbar.c:139
 #, fuzzy
 msgid "Copy Current Selection"
 msgstr "Aktuelle Markierung kopieren"
 
-#: ../src/toolbar.c:143
+#: ../src/toolbar.c:142
 msgid "Paste text from clipboard"
 msgstr ""
 
 #. Add the Search operations to the Main Toolbar
-#: ../src/toolbar.c:150
+#: ../src/toolbar.c:149
 msgid "Find text"
 msgstr "Text suchen"
 
-#: ../src/toolbar.c:153
+#: ../src/toolbar.c:152
 #, fuzzy
 msgid "Replace Text"
 msgstr "Text suchen und ersetzen"
 
 #. Add the indent/unindent operations to the Main Toolbar
 #. indent block
-#: ../src/toolbar.c:162
+#: ../src/toolbar.c:161
 msgid "Indent Selected Text"
 msgstr ""
 
 #. unindent block
-#: ../src/toolbar.c:165
+#: ../src/toolbar.c:164
 msgid "Unindent Selected Text"
 msgstr ""
 
 #. Add Zoom operations to the main Toolbar
 #. zoom in
-#: ../src/toolbar.c:173
+#: ../src/toolbar.c:172
 msgid "Increases Zoom level"
 msgstr ""
 
 #. zoom out
-#: ../src/toolbar.c:176
+#: ../src/toolbar.c:175
 msgid "Decreases Zoom level"
 msgstr ""
 
 #. zoom 100%
-#: ../src/toolbar.c:179
+#: ../src/toolbar.c:178
 msgid "Zoom 100%"
 msgstr ""
 
-#: ../src/toolbar.c:207
+#: ../src/toolbar.c:206
 msgid "Search for: "
 msgstr "Suchen nach: "
 
-#: ../src/toolbar.c:211
+#: ../src/toolbar.c:210
 msgid "Incremental search"
 msgstr "Inkrementelle Suche"
 
 #. goto widgets
-#: ../src/toolbar.c:246
+#: ../src/toolbar.c:245
 msgid "Go to line: "
 msgstr "Gehe zu Zeile: "
 
 #. create goto entry
-#: ../src/toolbar.c:250
+#: ../src/toolbar.c:249
 msgid "Go to line"
 msgstr "Gehe zu Zeile"
-
-#: ../src/gphpedit-statusbar.c:203
-#, c-format
-msgid "Zoom: %d%s"
-msgstr ""
-
-#: ../src/gvfs_utils.c:103
-#, fuzzy, c-format
-msgid "Error reading file sync '%s'. GIO error:%s\n"
-msgstr "Konnte die Datei %s nicht mit stat abfragen"
 
 #~ msgid "ERROR: cannot save session to %s\n"
 #~ msgstr "FEHLER: kann Sitzung nicht unter %s speichern\n"

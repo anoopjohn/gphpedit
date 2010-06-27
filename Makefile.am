@@ -68,5 +68,13 @@ CLEANFILES = 			\
 	pixmaps/Makefile \
 	po/*.gmo \
   po/POTFILES \
-	po/Makefile.in	\
-	po/Makefile
+	po/Makefile*	\
+	intl/* \
+  ABOUT-NLS \
+  m4/* \
+  po/*.sin \
+  po/*.sed \
+  po/*.header \
+  po/Makevars.template \
+  po/Rules-quot \
+  libtool

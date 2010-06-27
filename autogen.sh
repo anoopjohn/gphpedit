@@ -29,7 +29,10 @@ find -type f \( -name missing -o -name install-sh -o -name mkinstalldirs \
 	-o -name Makefile.in \) -print0 | xargs -0 rm -f
 
 echo Running autoreconf...
-autoreconf -v -i
+autoreconf -v -i -f
+echo Running intltoolize
+intltoolize --copy --force --automake
+
 # run ./autogen.sh --rebuild-po-files
 # to update po files with lastest strings from source code
 if [ $1 = "--rebuild-po-files" ]
