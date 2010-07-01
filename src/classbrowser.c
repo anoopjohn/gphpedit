@@ -32,6 +32,27 @@ static GTree *php_class_tree;
 guint identifierid = 0;
 GString *completion_result=NULL;
 
+void free_php_class_tree_item (gpointer data) {
+  ClassBrowserClass *class = (ClassBrowserClass *) data;
+  if (class->filename) g_free(class->filename);
+  if (class->classname) g_free(class->classname);
+  if (class) g_slice_free(ClassBrowserClass, class);
+}
+
+void free_php_variables_tree_item (gpointer data) {
+  ClassBrowserVar *var=(ClassBrowserVar *)data;
+  if (var->varname) g_free(var->varname);
+  if (var->functionname) g_free(var->functionname);
+  if (var->filename) g_free(var->filename);
+  if (var) g_slice_free(ClassBrowserVar, var);
+}
+
+void free_php_files_tree_items (gpointer data) {
+  ClassBrowserFile *file=(ClassBrowserFile *)data;
+  if (file->filename) g_free(file->filename);
+  if (file) g_slice_free(ClassBrowserFile, file);
+}
+
 gchar *get_ctags_token(gchar *text,gint *advancing){
   int i;
   int k=0;
@@ -98,18 +119,6 @@ void call_ctags(gchar *filename){
   }
 }
 #endif
-gboolean free_php_files_tree_item (gpointer key, gpointer value, gpointer data){
-  ClassBrowserFile *file=(ClassBrowserFile *)value;
-  if (php_files_tree && key && value) g_tree_steal (php_files_tree, key);
-  if (file->filename) g_free(file->filename);
-  //if (file) g_slice_free(ClassBrowserFile, file);
-//  if (key){
-//  g_tree_remove(php_files_tree, key);
-//  }
-//  g_free (key);
-
-  return FALSE;	
-}
 
 static gboolean visible_func (GtkTreeModel *model, GtkTreeIter  *iter, gpointer data) {
   /* Visible if row is non-empty and name column contain filename as prefix */
@@ -123,76 +132,21 @@ static gboolean visible_func (GtkTreeModel *model, GtkTreeIter  *iter, gpointer 
   return visible;
 }
 
-
-void classbrowser_filelist_clear(void)
-{
-    g_tree_foreach (php_files_tree,free_php_files_tree_item,NULL);
-}
 void classbrowser_filelist_add(gchar *filename)
 {
+  if (!filename) return;
   ClassBrowserFile *file;
   if (!g_tree_lookup (php_files_tree,filename)){
 #ifdef DEBUGCLASSBROWSER
     g_print("Added filename to classbrowser:%s\n",filename);
 #endif
-    file = g_slice_new(ClassBrowserFile);
+    file = g_slice_new0(ClassBrowserFile);
     file->filename = g_strdup(filename);
     file->accessible = TRUE;
     file->modified_time.tv_sec = 0;
     file->modified_time.tv_usec = 0;
     g_tree_insert (php_files_tree,g_strdup(file->filename),file);
   }
-}
-gboolean classbrowser_file_accessible(gchar *filename)
-{
-  GFileInfo *info;
-  GError *error=NULL;
-  GFile *file;
-  if (!filename) return FALSE;
-#ifdef DEBUGCLASSBROWSER
-  g_print("can read filename:'%s'?\n",filename);
-#endif
-  file= get_gfile_from_filename(filename);
-  
-  info=g_file_query_info (file,G_FILE_ATTRIBUTE_ACCESS_CAN_READ,0,NULL,&error);
-  if (error){
-  g_object_unref(file);
-  return FALSE;  
-  }
-  gboolean hr= g_file_info_get_attribute_boolean (info, G_FILE_ATTRIBUTE_ACCESS_CAN_READ);
-  g_object_unref(info);  
-  g_object_unref(file);
-  
-  return hr;
-}
-
-gboolean classbrowser_file_exist(gchar *filename)
-{
-#ifdef DEBUGCLASSBROWSER
-  g_print("exist filename?:%s\n",filename);
-#endif
-  return filename_file_exist(filename);
-}
-
-gboolean classbrowser_file_set_remove (gpointer key, gpointer value, gpointer data){
-  ClassBrowserFile *file=  (ClassBrowserFile *)value;
-    if (file) {
-      if (!classbrowser_file_exist(file->filename)){
-        classbrowser_filelist_remove(file);
-      }
-      else if (!classbrowser_file_accessible(file->filename)) {
-        file->accessible = FALSE;
-      }
-      else {
-        file->accessible = TRUE;
-      }
-    }
-  return FALSE;
-}
-
-void classbrowser_filelist_update(void)
-{
-g_tree_foreach (php_files_tree, classbrowser_file_set_remove,NULL);
 }
 
 gboolean classbrowser_file_modified(gchar *filename,GTimeVal *act){
@@ -225,20 +179,10 @@ void classbrowser_start_update(void)
   }
   if (!php_class_tree){
      /* create new tree */
-     php_class_tree=g_tree_new ((GCompareFunc)g_utf8_collate);
+     php_class_tree= g_tree_new_full((GCompareDataFunc) g_utf8_collate, NULL, g_free, free_php_class_tree_item);
   } else {
     g_tree_foreach (php_class_tree,classbrowser_php_class_set_remove_item,NULL);
   }
-}
-
-
-gboolean classbrowser_safe_equality(gchar *a, gchar *b)
-{
-  /*
-  * g_strcmp0
-  * Compares str1 and str2 like strcmp(). Handles NULL gracefully by sorting it before non-NULL strings. 
-  */
-  return (g_strcmp0(a,b)==0);
 }
 
 ClassBrowserFunction *classbrowser_functionlist_find(gchar *funcname, gchar *param_list, gchar *filename, gchar *classname)
@@ -251,10 +195,10 @@ ClassBrowserFunction *classbrowser_functionlist_find(gchar *funcname, gchar *par
     function = li->data;
     if (function) {
       found = TRUE;
-      if (classbrowser_safe_equality(function->functionname, funcname) &&
-              classbrowser_safe_equality(function->filename, filename) &&
-              classbrowser_safe_equality(function->paramlist, param_list) &&
-              classbrowser_safe_equality(function->classname, classname)) {
+      if (g_strcmp0(function->functionname, funcname)==0 &&
+              g_strcmp0(function->filename, filename)==0 &&
+              g_strcmp0(function->paramlist, param_list)==0 &&
+              g_strcmp0(function->classname, classname)==0) {
         return function;
       }
     }
@@ -341,10 +285,7 @@ void classbrowser_classlist_remove(ClassBrowserClass *class)
     }
   }
   gchar *keyname=g_strdup_printf("%s%s",class->classname,class->filename);
-  g_free(class->filename);
-  g_free(class->classname);
   g_tree_remove (php_class_tree,keyname);
-  g_slice_free(ClassBrowserClass, class);
   g_free(keyname);
 }
 
@@ -388,7 +329,7 @@ void classbrowser_classlist_add(gchar *classname, gchar *filename, gint line_num
     class->remove= FALSE;
     g_free(keyname);
   } else {
-    class = g_slice_new(ClassBrowserClass);
+    class = g_slice_new0(ClassBrowserClass);
     class->classname = g_strdup(classname);
     class->filename = g_strdup(filename);
     class->line_number = line_number;
@@ -436,7 +377,7 @@ void classbrowser_varlist_add(gchar *varname, gchar *funcname, gchar *filename)
   if (var){
     var->remove = FALSE;
   } else {
-    var = g_slice_new(ClassBrowserVar);
+    var = g_slice_new0(ClassBrowserVar);
     var->varname = g_strdup(varname);
     if (funcname) {
       var->functionname = g_strdup(funcname);
@@ -587,13 +528,6 @@ void classbrowser_remove_dead_wood(void)
   g_tree_foreach (php_class_tree, classbrowser_remove_class, NULL);
 }
 
-void classbrowser_filelist_remove(ClassBrowserFile *file)
-{
-  g_tree_remove (php_files_tree,file->filename);
-  g_free(file->filename);
-  g_slice_free(ClassBrowserFile,file);
-}
-
 void list_php_files_open(void){
   GSList *li;
   Editor *editor;
@@ -647,13 +581,9 @@ void classbrowser_update(void)
 {
   static guint press_event = 0;
   static guint release_event = 0;
-  if (!php_files_tree){
-     /* create new tree */
-     php_files_tree=g_tree_new ((GCompareFunc)g_utf8_collate);
-  }
   if (!php_variables_tree){
      /* create new tree */
-     php_variables_tree=g_tree_new ((GCompareFunc)g_utf8_collate);
+     php_variables_tree=g_tree_new_full((GCompareDataFunc) g_utf8_collate, NULL, g_free, free_php_variables_tree_item);
 
      /*add php global vars*/
      add_global_var("$GLOBALS");
@@ -681,7 +611,12 @@ void classbrowser_update(void)
     return;
   }
   if (main_window.current_editor && php_files_tree){
-    classbrowser_filelist_clear();
+    g_tree_destroy (php_files_tree);
+    php_files_tree=NULL;
+  }
+  if (!php_files_tree){
+     /* create new tree */
+     php_files_tree=g_tree_new_full((GCompareDataFunc) g_utf8_collate, NULL, g_free, free_php_files_tree_items);
   }
   //if parse only current file is set then add only the file in the current tab
   if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON (main_window.chkOnlyCurFileFuncs))){
@@ -698,7 +633,6 @@ void classbrowser_update(void)
   if (release_event) {
     g_signal_handler_disconnect(main_window.classtreeview,release_event);
   }
-  classbrowser_filelist_update();
   classbrowser_start_update();
   g_tree_foreach (php_files_tree,classbrowser_files_parse,NULL);
   classbrowser_remove_dead_wood();
@@ -712,13 +646,6 @@ void classbrowser_update(void)
   release_event = g_signal_connect(GTK_OBJECT(main_window.classtreeview), "button_release_event",
                                      G_CALLBACK(treeview_click_release), NULL);
 }
-
-
-gint member_function_list_sort(gconstpointer a, gconstpointer b)
-{
-  return (g_utf8_collate((gchar *)a, (gchar *)b));
-}
-
 
 GString *get_member_function_completion_list(GtkWidget *scintilla, gint wordStart, gint wordEnd)
 {
@@ -742,7 +669,7 @@ GString *get_member_function_completion_list(GtkWidget *scintilla, gint wordStar
     }
   }
 
-  sorted_member_functions = g_list_sort(member_functions, member_function_list_sort);
+  sorted_member_functions = g_list_sort(member_functions, (GCompareFunc) g_utf8_collate);
   member_functions = sorted_member_functions;
 
   for(li2 = member_functions; li2!= NULL; li2 = g_list_next(li2)) {
@@ -792,7 +719,7 @@ gchar *classbrowser_custom_function_calltip(gchar *function_name){
   }
   return calltip;
 }
-gchar *classbrowser_add_custom_autocompletion(gchar *prefix,GSList *list){
+gchar *classbrowser_add_custom_autocompletion(gchar *prefix, GSList *list){
   GSList *li;
   GList *li2;
   ClassBrowserFunction *function;
@@ -815,7 +742,7 @@ gchar *classbrowser_add_custom_autocompletion(gchar *prefix,GSList *list){
         member_functions = g_list_prepend(member_functions, function);
     }
   }
-  sorted_member_functions = g_list_sort(member_functions, member_function_list_sort);
+  sorted_member_functions = g_list_sort(member_functions, (GCompareFunc) g_utf8_collate);
   member_functions = sorted_member_functions;
 
   for(li2 = member_functions; li2!= NULL; li2 = g_list_next(li2)) {
@@ -927,21 +854,4 @@ gint classbrowser_compare_function_names(GtkTreeModel *model,
   g_free(aName);
   g_free(bName);
   return retVal;
-}
-
-/* release resources used by classbrowser */
-gboolean free_php_variables_tree_item (gpointer key, gpointer value, gpointer data){
-  ClassBrowserVar *var=(ClassBrowserVar *)value;
-  g_free(var->varname);
-  if (var->functionname) g_free(var->functionname);
-  if (var->filename) g_free(var->filename);
-  g_slice_free(ClassBrowserVar, var);
-  g_tree_remove(php_variables_tree, key);
-  g_free (key);
-  return FALSE;	
-}
-
-void cleanup_classbrowser(void){
-  if (php_variables_tree)
-    g_tree_foreach (php_variables_tree,free_php_variables_tree_item,NULL);
 }
