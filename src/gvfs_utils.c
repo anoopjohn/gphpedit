@@ -119,6 +119,7 @@ gboolean get_file_modified(gchar *filename,GTimeVal *act, gboolean update_mark){
   file= get_gfile_from_filename (filename);
   info=g_file_query_info (file,"time::modified,time::modified-usec",0,NULL,&error);
   if (error){
+  g_error_free(error);
   g_object_unref(file);
   return FALSE;  
   }

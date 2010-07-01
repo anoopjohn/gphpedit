@@ -336,7 +336,6 @@ GString *get_cobol_completion_list(GtkWidget *scintilla, gint wordStart, gint wo
   return completion_list;
 }
 
-
 GString *get_sql_completion_list(GtkWidget *scintilla, gint wordStart, gint wordEnd)
 {
   GString *completion_list;

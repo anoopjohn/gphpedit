@@ -150,12 +150,9 @@ static void main_window_create_panes(void)
   gtk_paned_pack1 (GTK_PANED (main_window.main_horizontal_pane), main_window.main_vertical_pane, FALSE, TRUE);
   g_signal_connect (G_OBJECT (main_window.window), "size_allocate", G_CALLBACK (classbrowser_accept_size), NULL);
   move_classbrowser_position();
-//  GConfClient *config;
-//  config=gconf_client_get_default ();
       
-  if (classbrowser_status()==1)//gconf_client_get_int (config,"/gPHPEdit/main_window/classbrowser_hidden",NULL) == 1)
+  if (classbrowser_status()==1)
     classbrowser_hide();
-//  g_object_unref(config);
 
   main_window.prin_hbox = gtk_vbox_new(FALSE, 0);
   gtk_widget_show(main_window.prin_hbox);

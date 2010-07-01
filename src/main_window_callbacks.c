@@ -191,7 +191,6 @@ void main_window_destroy_event(GtkWidget *widget, gpointer data)
   g_slice_free(Mainmenu, main_window.menu); /* free menu struct*/
   g_slice_free(Maintoolbar, main_window.toolbar_main); /* free toolbar struct*/
   g_slice_free(Findtoolbar, main_window.toolbar_find); /* free toolbar struct*/
-  cleanup_classbrowser();
   cleanup_calltip();
   cleanup_plugins();
   gtk_main_quit();
@@ -454,8 +453,8 @@ void open_file_ok(GtkFileChooser *file_selection)
 
 void reopen_recent(GtkRecentChooser *chooser, gpointer data) {
   gchar *filename =gtk_recent_chooser_get_current_uri  (chooser);
+  if (!filename) return;
   if (DEBUG_MODE) { g_print("DEBUG: main_window_callbacks.c:reopen_recent:filename: %s\n", filename); }
- 
   switch_to_file_or_open(filename, 0);
   g_free(filename);
 }
