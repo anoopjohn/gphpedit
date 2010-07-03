@@ -801,7 +801,7 @@ void get_control_values_to_highlight(gchar *setting_name, gchar **fontname, gint
       GTK_BUTTONS_YES_NO,"%s", message->str);
     result = gtk_dialog_run (GTK_DIALOG (dialog));
     gtk_widget_destroy (dialog);
-    change_size_global_callback(result, (gpointer)newfontsize);    
+    change_size_global_callback(result, GINT_TO_POINTER(newfontsize));    
     g_string_free(message, TRUE);
     *fontsize = atoi(gtk_combo_box_get_active_text(GTK_COMBO_BOX(preferences_dialog.size_combo)));
   }

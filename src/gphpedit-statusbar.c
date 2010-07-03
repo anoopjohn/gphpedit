@@ -129,35 +129,37 @@ set_statusbar_width_chars (GtkWidget *statusbar,
 void set_higthlight (GphpeditStatusComboBox *combo, GtkMenuItem *item){
   const gchar *label =gtk_menu_item_get_label (item);
   if (g_strcmp0(label,_("Cobol"))==0){
-    if (main_window.current_editor) {
+    if (main_window.current_editor && GTK_IS_SCINTILLA(main_window.current_editor->scintilla)) {
       set_editor_to_cobol(main_window.current_editor);
     }
   } else if (g_strcmp0(label,_("C/C++"))==0){
-    if (main_window.current_editor) {
+    if (main_window.current_editor && GTK_IS_SCINTILLA(main_window.current_editor->scintilla)) {
       set_editor_to_cxx(main_window.current_editor);
     }
   } else if (g_strcmp0(label,_("CSS"))==0){
-    if (main_window.current_editor) {
+    if (main_window.current_editor && GTK_IS_SCINTILLA(main_window.current_editor->scintilla)) {
       set_editor_to_css(main_window.current_editor);
     }
   } else if (g_strcmp0(label,_("PHP/HTML/XML"))==0){
-      if (main_window.current_editor) {
+      if (main_window.current_editor && GTK_IS_SCINTILLA(main_window.current_editor->scintilla)) {
       set_editor_to_php(main_window.current_editor);
       }
   } else if (g_strcmp0(label,_("Perl"))==0){
-    if (main_window.current_editor) {
+    if (main_window.current_editor && GTK_IS_SCINTILLA(main_window.current_editor->scintilla)) {
       set_editor_to_perl(main_window.current_editor);
     }
   } else if (g_strcmp0(label,_("SQL"))==0){
-    if (main_window.current_editor) {
+    if (main_window.current_editor && GTK_IS_SCINTILLA(main_window.current_editor->scintilla)) {
       set_editor_to_sql(main_window.current_editor);
     }
   } else if (g_strcmp0(label,_("Python"))==0){
-    if (main_window.current_editor) {
+    if (main_window.current_editor && GTK_IS_SCINTILLA(main_window.current_editor->scintilla)) {
       set_editor_to_python(main_window.current_editor);
     }
   } else {
+    if (GTK_IS_SCINTILLA(main_window.current_editor->scintilla)) {
     set_editor_to_text_plain (main_window.current_editor);
+    }
   }
 /* seleccionar el tipo de resaltado de acuerdo a la etiqueta del item */
 }

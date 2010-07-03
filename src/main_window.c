@@ -86,7 +86,7 @@ void main_window_pass_command_line_files(char **argv)
 
 gboolean channel_pass_filename_callback(GIOChannel *source, GIOCondition condition, gpointer data )
 {
-  guint size;
+  gsize size;
   gchar buf[1024];
   GError *error=NULL;
   if (g_io_channel_read_chars (inter_gphpedit_io,buf,sizeof(buf), &size,&error)!=G_IO_STATUS_NORMAL){

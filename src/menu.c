@@ -458,10 +458,10 @@ void main_window_create_menu(void){
   fill_menu_code();
   /*plugin menu*/
   create_menu(&main_window.menu->menuplugin, &main_window.menu->plugin, _("_Plugin"),main_window.menu->menubar);
-  int i;
+  gint i;
   for (i=0;i<NUM_PLUGINS_MAX;i++){
     main_window.menu->plugins[i]= gtk_menu_item_new_with_mnemonic(_("_Plugin"));
-    g_signal_connect(G_OBJECT(main_window.menu->plugins[i]), "activate", G_CALLBACK(run_plugin), (gpointer)i);
+    g_signal_connect(G_OBJECT(main_window.menu->plugins[i]), "activate", G_CALLBACK(run_plugin), GINT_TO_POINTER(i));
     gtk_menu_shell_append(GTK_MENU_SHELL(main_window.menu->menuplugin), main_window.menu->plugins[i]);
     if (i<10)
       gtk_widget_add_accelerator(main_window.menu->plugins[i], "activate", main_window.menu->accel_group, parse_shortcut(i), GDK_CONTROL_MASK, GTK_ACCEL_VISIBLE);

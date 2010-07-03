@@ -337,7 +337,7 @@ void tab_validate_buffer_and_insert(gpointer buffer, Editor *editor)
       return;
       }
     }
-    g_print(_("Converted to UTF-8 size: %d\n"), utf8_size);
+    g_print(_("Converted to UTF-8 size: %u\n"), utf8_size);
     gtk_scintilla_add_text(GTK_SCINTILLA (editor->scintilla), utf8_size, converted_text);
     g_free(converted_text);
     editor->converted_to_utf8 = TRUE;
@@ -392,7 +392,7 @@ void tab_file_opened (GObject *source_object, GAsyncResult *res, gpointer user_d
   GError *error=NULL;
   Editor *editor = (Editor *)user_data;
   gchar* buffer;
-  guint size; 
+  gsize size; 
   if (!g_file_load_contents_finish ((GFile *) source_object,res,&(buffer),&size,NULL,&error)) {
     g_print("Error reading file. Gio error:%s",error->message);
     g_error_free(error);
@@ -659,8 +659,9 @@ gboolean webkit_link_clicked (WebKitWebView *web_view, WebKitWebFrame *frame, We
 static void
 notify_title_cb (WebKitWebView* web_view, GParamSpec* pspec, Editor *editor)
 {
-   char *main_title = g_strdup (webkit_web_view_get_title(web_view));
+   gchar *main_title = g_strdup (webkit_web_view_get_title(web_view));
    if (main_title){
+   if (editor->short_filename) g_free(editor->short_filename);
    if (editor->type==TAB_HELP){
      editor->short_filename = g_strconcat(_("Help: "), main_title, NULL);
    } else {
@@ -672,13 +673,14 @@ notify_title_cb (WebKitWebView* web_view, GParamSpec* pspec, Editor *editor)
 #endif
      gtk_label_set_text(GTK_LABEL(editor->label), editor->short_filename);
      update_app_title();
+     g_free(main_title);
    }
 }
 
 
 gboolean tab_create_help(Editor *editor, GString *filename)
 {
-  GString *caption;
+  GString *caption=NULL;
   GString *long_filename = NULL;
   GtkWidget *editor_tab;
  
@@ -717,6 +719,7 @@ gboolean tab_create_help(Editor *editor, GString *filename)
     gtk_notebook_append_page (GTK_NOTEBOOK (main_window.notebook_editor), editor->help_scrolled_window, editor_tab);
     gtk_notebook_set_current_page (GTK_NOTEBOOK (main_window.notebook_editor), -1);
   }
+  g_string_free(caption,TRUE);
   return TRUE;
 }
 
@@ -1233,10 +1236,10 @@ Editor *editor_find_from_help(void *help)
 {
   GSList *walk;
   Editor *editor;
-
+  
   for (walk = editors; walk != NULL; walk = g_slist_next (walk)) {
     editor = walk->data;
-    if ((void *)(editor->help_scrolled_window == help)) {
+    if (editor->help_scrolled_window == GTK_WIDGET(help)) {
       return walk->data;
     }
   }
@@ -1566,7 +1569,7 @@ gboolean auto_complete_callback(gpointer data)
 
   current_pos = gtk_scintilla_get_current_pos(GTK_SCINTILLA(main_window.current_editor->scintilla));
 
-  if (current_pos == (gint)data) {
+  if (current_pos == GPOINTER_TO_INT(data)) {
     wordStart = gtk_scintilla_word_start_position(GTK_SCINTILLA(main_window.current_editor->scintilla), current_pos-1, TRUE);
     wordEnd = gtk_scintilla_word_end_position(GTK_SCINTILLA(main_window.current_editor->scintilla), current_pos-1, TRUE);
     autocomplete_word(main_window.current_editor->scintilla, wordStart, wordEnd);
@@ -1584,7 +1587,7 @@ gboolean css_auto_complete_callback(gpointer data)
 
   current_pos = gtk_scintilla_get_current_pos(GTK_SCINTILLA(main_window.current_editor->scintilla));
 
-  if (current_pos == (gint)data) {
+  if (current_pos == GPOINTER_TO_INT(data)) {
     wordStart = gtk_scintilla_word_start_position(GTK_SCINTILLA(main_window.current_editor->scintilla), current_pos-1, TRUE);
     wordEnd = gtk_scintilla_word_end_position(GTK_SCINTILLA(main_window.current_editor->scintilla), current_pos-1, TRUE);
     css_autocomplete_word(main_window.current_editor->scintilla, wordStart, wordEnd);
@@ -1601,7 +1604,7 @@ gboolean cobol_auto_complete_callback(gpointer data)
 
   current_pos = gtk_scintilla_get_current_pos(GTK_SCINTILLA(main_window.current_editor->scintilla));
 
-  if (current_pos == (gint)data) {
+  if (current_pos == GPOINTER_TO_INT(data)) {
     wordStart = gtk_scintilla_word_start_position(GTK_SCINTILLA(main_window.current_editor->scintilla), current_pos-1, TRUE);
     wordEnd = gtk_scintilla_word_end_position(GTK_SCINTILLA(main_window.current_editor->scintilla), current_pos-1, TRUE);
     cobol_autocomplete_word(main_window.current_editor->scintilla, wordStart, wordEnd);
@@ -1618,7 +1621,7 @@ gboolean sql_auto_complete_callback(gpointer data)
 
   current_pos = gtk_scintilla_get_current_pos(GTK_SCINTILLA(main_window.current_editor->scintilla));
 
-  if (current_pos == (gint)data) {
+  if (current_pos == GPOINTER_TO_INT(data)) {
     wordStart = gtk_scintilla_word_start_position(GTK_SCINTILLA(main_window.current_editor->scintilla), current_pos-1, TRUE);
     wordEnd = gtk_scintilla_word_end_position(GTK_SCINTILLA(main_window.current_editor->scintilla), current_pos-1, TRUE);
     sql_autocomplete_word(main_window.current_editor->scintilla, wordStart, wordEnd);
@@ -1636,7 +1639,7 @@ gboolean auto_memberfunc_complete_callback(gpointer data)
 
   current_pos = gtk_scintilla_get_current_pos(GTK_SCINTILLA(main_window.current_editor->scintilla));
 
-  if (current_pos == (gint)data) {
+  if (current_pos == GPOINTER_TO_INT(data)) {
     wordStart = gtk_scintilla_word_start_position(GTK_SCINTILLA(main_window.current_editor->scintilla), current_pos-1, TRUE);
     wordEnd = gtk_scintilla_word_end_position(GTK_SCINTILLA(main_window.current_editor->scintilla), current_pos-1, TRUE);
     autocomplete_member_function(main_window.current_editor->scintilla, wordStart, wordEnd);
@@ -1651,7 +1654,7 @@ gboolean calltip_callback(gpointer data)
 
   current_pos = gtk_scintilla_get_current_pos(GTK_SCINTILLA(main_window.current_editor->scintilla));
 
-  if (current_pos == (gint)data) {
+  if (current_pos == GPOINTER_TO_INT(data)) {
     show_call_tip(main_window.current_editor->scintilla, main_window.current_editor->type,current_pos);
   }
   calltip_timer_set=FALSE;
@@ -1817,7 +1820,7 @@ static void char_added(GtkWidget *scintilla, guint ch)
           case ('('):
         if ((gtk_scintilla_get_line_state(GTK_SCINTILLA(scintilla), current_line))==274 &&
         (calltip_timer_set==FALSE)) {
-          calltip_timer_id = g_timeout_add(preferences.calltip_delay, calltip_callback, (gpointer) current_pos);
+          calltip_timer_id = g_timeout_add(preferences.calltip_delay, calltip_callback, GINT_TO_POINTER(current_pos));
           calltip_timer_set=TRUE;
         }
         break;
@@ -1830,7 +1833,7 @@ static void char_added(GtkWidget *scintilla, guint ch)
           gchar *line_text= gtk_scintilla_get_text_range (GTK_SCINTILLA(scintilla), initial_pos, wordStart-1, &line_size);
             if (!check_php_variable_before(line_text))return;
             if (completion_timer_set==FALSE) {
-              completion_timer_id = g_timeout_add(preferences.auto_complete_delay, auto_memberfunc_complete_callback, (gpointer) current_pos);
+              completion_timer_id = g_timeout_add(preferences.auto_complete_delay, auto_memberfunc_complete_callback, GINT_TO_POINTER(current_pos));
               completion_timer_set=TRUE;
             }
         }
@@ -1855,7 +1858,7 @@ static void char_added(GtkWidget *scintilla, guint ch)
         if (gtk_scintilla_autoc_active(GTK_SCINTILLA(scintilla))==1) {
           autocomplete_word(scintilla, wordStart, wordEnd);
         } else {
-          completion_timer_id = g_timeout_add(preferences.auto_complete_delay, auto_complete_callback, (gpointer) current_pos);
+          completion_timer_id = g_timeout_add(preferences.auto_complete_delay, auto_complete_callback, GINT_TO_POINTER(current_pos));
         }
         }
         g_free(member_function_buffer);
@@ -1871,7 +1874,7 @@ static void char_added(GtkWidget *scintilla, guint ch)
         break; /*exit nothing to do*/
           case (':'):
         if ((calltip_timer_set==FALSE)) {
-          calltip_timer_id = g_timeout_add(preferences.calltip_delay, calltip_callback, (gpointer) current_pos);
+          calltip_timer_id = g_timeout_add(preferences.calltip_delay, calltip_callback, GINT_TO_POINTER(current_pos));
           calltip_timer_set=TRUE;
         }
         break;
@@ -1882,7 +1885,7 @@ static void char_added(GtkWidget *scintilla, guint ch)
         }
         if (gtk_scintilla_autoc_active(GTK_SCINTILLA(scintilla))!=1) {
             if (completion_timer_set==FALSE) {
-              completion_timer_id = g_timeout_add(preferences.auto_complete_delay, auto_memberfunc_complete_callback, (gpointer) current_pos);
+              completion_timer_id = g_timeout_add(preferences.auto_complete_delay, auto_memberfunc_complete_callback, GINT_TO_POINTER(current_pos));
               completion_timer_set=TRUE;
             }
           }  
@@ -1896,7 +1899,7 @@ static void char_added(GtkWidget *scintilla, guint ch)
         }
         if (gtk_scintilla_autoc_active(GTK_SCINTILLA(scintilla))!=1) {
             if (completion_timer_set==FALSE) {
-              completion_timer_id = g_timeout_add(preferences.auto_complete_delay, auto_memberfunc_complete_callback, (gpointer) current_pos);
+              completion_timer_id = g_timeout_add(preferences.auto_complete_delay, auto_memberfunc_complete_callback, GINT_TO_POINTER(current_pos));
               completion_timer_set=TRUE;
             }
           }  
@@ -1909,7 +1912,7 @@ static void char_added(GtkWidget *scintilla, guint ch)
         }
         if (gtk_scintilla_autoc_active(GTK_SCINTILLA(scintilla))!=1) {
             if (completion_timer_set==FALSE) {
-              completion_timer_id = g_timeout_add(preferences.auto_complete_delay, auto_memberfunc_complete_callback, (gpointer) current_pos);
+              completion_timer_id = g_timeout_add(preferences.auto_complete_delay, auto_memberfunc_complete_callback, GINT_TO_POINTER(current_pos));
               completion_timer_set=TRUE;
             }
           }  

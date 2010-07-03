@@ -938,6 +938,7 @@ void close_page(Editor *editor)
     }  
   }
   set_active_tab(page_num);
+  if (editor->type==TAB_HELP || editor->type==TAB_PREVIEW) g_free(editor->help_function);
   g_string_free(editor->filename, TRUE);
   g_free(editor->short_filename);
   g_free(editor->contenttype);
