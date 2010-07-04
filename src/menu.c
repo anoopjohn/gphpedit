@@ -29,7 +29,7 @@
 #endif
 #include "main_window.h"
 #include "main_window_callbacks.h"
-#include "plugin.h"
+#include "pluginmenu.h"
 #include <gdk/gdkkeysyms.h>
 
 /*needed for menu hints*/
@@ -457,15 +457,11 @@ void main_window_create_menu(void){
   create_menu(&main_window.menu->menucode, &main_window.menu->code, _("_Code"),main_window.menu->menubar);
   fill_menu_code();
   /*plugin menu*/
-  create_menu(&main_window.menu->menuplugin, &main_window.menu->plugin, _("_Plugin"),main_window.menu->menubar);
-  gint i;
-  for (i=0;i<NUM_PLUGINS_MAX;i++){
-    main_window.menu->plugins[i]= gtk_menu_item_new_with_mnemonic(_("_Plugin"));
-    g_signal_connect(G_OBJECT(main_window.menu->plugins[i]), "activate", G_CALLBACK(run_plugin), GINT_TO_POINTER(i));
-    gtk_menu_shell_append(GTK_MENU_SHELL(main_window.menu->menuplugin), main_window.menu->plugins[i]);
-    if (i<10)
-      gtk_widget_add_accelerator(main_window.menu->plugins[i], "activate", main_window.menu->accel_group, parse_shortcut(i), GDK_CONTROL_MASK, GTK_ACCEL_VISIBLE);
-  }
+  main_window.menu->menuplugin= gtk_plugin_manager_menu_new ();
+  main_window.menu->plugin = gtk_menu_item_new_with_mnemonic(_("_Plugin"));
+  gtk_menu_item_set_submenu(GTK_MENU_ITEM(main_window.menu->plugin), main_window.menu->menuplugin);
+  gtk_menu_shell_append(GTK_MENU_SHELL(main_window.menu->menubar), main_window.menu->plugin);
+
   /* help menu */
   create_menu(&main_window.menu->menuhelp, &main_window.menu->help, _("_Help"),main_window.menu->menubar);
   fill_help_menu();

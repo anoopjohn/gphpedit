@@ -58,8 +58,12 @@ gphpedit_SOURCES = \
 	find_replace.h		\
 	gphpedit_ipc.c		\
 	gphpedit_ipc.h		\
-	plugin.c		\
-	plugin.h		\
+	plugins.c		\
+	plugins.h		\
+	pluginmanager.h		\
+	pluginmanager.c		\
+	pluginmenu.h		\
+	pluginmenu.c		\
 	main.c			\
 	main.h			\
 	menu.c			\

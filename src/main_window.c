@@ -30,7 +30,6 @@
 #include "main_window_callbacks.h"
 #include "preferences.h"
 #include "classbrowser.h"
-#include "plugin.h"
 #include "templates.h"
 #include "gvfs_utils.h"
 #include "syntax_check.h"
@@ -385,6 +384,7 @@ GString *get_differing_part_editor(Editor *editor)
   g_free(cwd);
   return result;
 }
+
 /**
  * Update the application title when switching tabs, closing or opening
  * or opening new tabs or opening new files.
@@ -504,7 +504,6 @@ void main_window_create(void){
   main_window_fill_panes();
   main_window_create_appbar();
   
-  plugin_setup_menu();
   function_list_prepare();
   css_function_list_prepare();
 

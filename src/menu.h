@@ -26,8 +26,7 @@
 #ifndef MAIN_WINDOW_MENU_H
 #define MAIN_WINDOW_MENU_H
 #include <gtk/gtk.h>
-/*max plugins */
-#define NUM_PLUGINS_MAX 30
+
 /*max reopen files shown */
 #define NUM_REOPEN_MAX 20
 typedef struct
@@ -109,7 +108,6 @@ typedef struct
   GtkWidget *forcepython;
   GtkWidget *menuplugin;
   GtkWidget *plugin;
-  GtkWidget *plugins[NUM_PLUGINS_MAX];
   GtkWidget *reciente;
   GtkWidget *menureciente;
   GtkWidget *menuhelp;

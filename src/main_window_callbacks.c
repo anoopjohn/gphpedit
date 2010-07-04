@@ -32,7 +32,7 @@
 #include "tab.h"
 #include "templates.h"
 #include "folderbrowser.h"
-#include "plugin.h"
+#include "pluginmenu.h"
 #include "gvfs_utils.h"
 #include <gdk/gdkkeysyms.h>
 #include "gphpedit-statusbar.h"
@@ -192,7 +192,6 @@ void main_window_destroy_event(GtkWidget *widget, gpointer data)
   g_slice_free(Maintoolbar, main_window.toolbar_main); /* free toolbar struct*/
   g_slice_free(Findtoolbar, main_window.toolbar_find); /* free toolbar struct*/
   cleanup_calltip();
-  cleanup_plugins();
   gtk_main_quit();
 }
 
@@ -352,43 +351,43 @@ gint main_window_key_press_event(GtkWidget   *widget, GdkEventKey *event,gpointe
       return TRUE;
     }
     else if ((event->state & GDK_CONTROL_MASK)==GDK_CONTROL_MASK && ((event->keyval == GDK_0)))  {
-      if (main_window.menu->plugins[0]) plugin_exec(0);
+      plugin_exec_with_num(main_window.menu->menuplugin,0);
       return TRUE;
     }
     else if ((event->state & GDK_CONTROL_MASK)==GDK_CONTROL_MASK && ((event->keyval == GDK_1)))  {
-      if (main_window.menu->plugins[1]) plugin_exec(1);
+      plugin_exec_with_num(main_window.menu->menuplugin,1);
       return TRUE;
     }
     else if ((event->state & GDK_CONTROL_MASK)==GDK_CONTROL_MASK && ((event->keyval == GDK_2)))  {
-      if (main_window.menu->plugins[2]) plugin_exec(2);
+      plugin_exec_with_num(main_window.menu->menuplugin,2);
       return TRUE;
     }
     else if ((event->state & GDK_CONTROL_MASK)==GDK_CONTROL_MASK && ((event->keyval == GDK_3)))  {
-      if (main_window.menu->plugins[3]) plugin_exec(3);
+      plugin_exec_with_num(main_window.menu->menuplugin,3);
       return TRUE;
     }
     else if ((event->state & GDK_CONTROL_MASK)==GDK_CONTROL_MASK && ((event->keyval == GDK_4)))  {
-      if (main_window.menu->plugins[4]) plugin_exec(4);
+      plugin_exec_with_num(main_window.menu->menuplugin,4);
       return TRUE;
     }
     else if ((event->state & GDK_CONTROL_MASK)==GDK_CONTROL_MASK && ((event->keyval == GDK_5)))  {
-      if (main_window.menu->plugins[5]) plugin_exec(5);
+      plugin_exec_with_num(main_window.menu->menuplugin,5);
       return TRUE;
     }
     else if ((event->state & GDK_CONTROL_MASK)==GDK_CONTROL_MASK && ((event->keyval == GDK_6)))  {
-      if (main_window.menu->plugins[6]) plugin_exec(6);
+      plugin_exec_with_num(main_window.menu->menuplugin,6);
       return TRUE;
     }
     else if ((event->state & GDK_CONTROL_MASK)==GDK_CONTROL_MASK && ((event->keyval == GDK_7)))  {
-      if (main_window.menu->plugins[7]) plugin_exec(7);
+      plugin_exec_with_num(main_window.menu->menuplugin,7);
       return TRUE;
     }
     else if ((event->state & GDK_CONTROL_MASK)==GDK_CONTROL_MASK && ((event->keyval == GDK_8)))  {
-      if (main_window.menu->plugins[8]) plugin_exec(8);
+      plugin_exec_with_num(main_window.menu->menuplugin,8);
       return TRUE;
     }
     else if ((event->state & GDK_CONTROL_MASK)==GDK_CONTROL_MASK && ((event->keyval == GDK_9)))  {
-      if (main_window.menu->plugins[9]) plugin_exec(9);
+      plugin_exec_with_num(main_window.menu->menuplugin,9);
       return TRUE;
     }
     else if ((event->keyval == GDK_F2))  {
@@ -457,10 +456,6 @@ void reopen_recent(GtkRecentChooser *chooser, gpointer data) {
   if (DEBUG_MODE) { g_print("DEBUG: main_window_callbacks.c:reopen_recent:filename: %s\n", filename); }
   switch_to_file_or_open(filename, 0);
   g_free(filename);
-}
-
-void run_plugin(GtkWidget *widget, gpointer data) {
-  plugin_exec((gulong) data);// was (gint)
 }
 
 void on_openselected1_activate(GtkWidget *widget)
@@ -964,10 +959,10 @@ gboolean try_save_page(Editor *editor, gboolean close_if_can)
   gint ret;
   GString *string;
   string = g_string_new("");
-  g_string_printf(string, _("The file '%s' has not been saved since your last changes, are you sure you want to close it and lose these changes?"), editor->short_filename);
   confirm_dialog=gtk_message_dialog_new (GTK_WINDOW(main_window.window),GTK_DIALOG_DESTROY_WITH_PARENT,GTK_MESSAGE_WARNING,GTK_BUTTONS_NONE,_("The file '%s' has not been saved since your last changes, are you sure you want to close it and lose these changes?"),editor->short_filename);
   g_string_printf(string,_("Unsaved changes to '%s'"), editor->filename->str);
   gtk_window_set_title(GTK_WINDOW(confirm_dialog), string->str);
+  g_string_free(string,TRUE);
   gtk_dialog_add_button (GTK_DIALOG(confirm_dialog),_("Close and _lose changes"),0);
   gtk_dialog_add_button (GTK_DIALOG(confirm_dialog),_("_Save file"),1);
   gtk_dialog_add_button (GTK_DIALOG(confirm_dialog),_("_Cancel closing"),2);

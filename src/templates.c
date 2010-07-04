@@ -29,7 +29,6 @@
 
 #include "tab.h"
 #include "main_window_callbacks.h"
-#include "plugin.h"
 #include "templates.h"
 #include "gvfs_utils.h"
 
