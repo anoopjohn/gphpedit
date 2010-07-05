@@ -268,3 +268,9 @@ gtk_plugin_manager_menu_new (void)
 {
   return g_object_new (GTK_TYPE_PLUGIN_MANAGER_MENU, NULL);
 }
+
+Plugin_Manager *get_plugin_manager(GtkPlugin_Manager_Menu *menu)
+{
+  GtkPlugin_Manager_MenuPrivate *priv = menu->priv;
+  return priv->plugmg;
+}

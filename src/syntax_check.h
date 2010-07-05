@@ -25,7 +25,7 @@
 #ifndef SYNTAX_CHECK_H
 #define SYNTAX_CHECK_H
 
-#include "main.h"
+#include <gtk/gtk.h>
 
 void syntax_check_run(void);
 

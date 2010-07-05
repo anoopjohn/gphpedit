@@ -210,3 +210,24 @@ GList *get_plugin_manager_items(Plugin_Manager *plugmg){
 	plugmgdet = PLUGIN_MANAGER_GET_PRIVATE(plugmg);
   return g_hash_table_get_values (plugmgdet->plugins_table);
 }
+
+gboolean get_syntax_plugin_by_ftype (gpointer key, gpointer value, gpointer user_data){
+  Plugin *plug= PLUGIN(value);
+  if (get_plugin_syntax_type(plug)==GPOINTER_TO_INT (user_data)) return TRUE;
+  return FALSE;
+}
+
+gboolean run_syntax_plugin_by_ftype(Plugin_Manager *plugmg, Editor *editor, gint ftype){
+  g_return_val_if_fail (OBJECT_IS_PLUGIN_MANAGER(plugmg), FALSE);
+  Plugin_Manager_Details *plugmgdet;
+	plugmgdet = PLUGIN_MANAGER_GET_PRIVATE(plugmg);
+  Plugin *plug=g_hash_table_find (plugmgdet->plugins_table, get_syntax_plugin_by_ftype, GINT_TO_POINTER(ftype));
+  if (plug){
+    //g_print("Plugin FOUND!!\n");
+    plugin_run(plug, editor);
+    return TRUE;
+  } else {
+    //g_print("Plugin NOT FOUND!!\n");
+    return FALSE;
+  }
+}

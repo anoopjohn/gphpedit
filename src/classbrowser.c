@@ -533,7 +533,7 @@ void list_php_files_open(void){
   Editor *editor;
   for(li = editors; li!= NULL; li = g_slist_next(li)) {
     editor = li->data;
-    if (editor && GTK_IS_SCINTILLA(editor->scintilla)
+    if (editor && GTK_IS_SCINTILLA(editor->scintilla)) {
 #ifdef CLASSBROWSER
       g_print("classbrowser found:%s\n",editor->filename->str);
 #endif

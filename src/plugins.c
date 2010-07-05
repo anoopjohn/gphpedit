@@ -22,7 +22,10 @@
 
    The GNU General Public License is contained in the file COPYING.
 */
-
+/*
+* TODO::inline plugins docs
+*
+*/
 #include <config.h>
 #include <stdlib.h>
 #include <gtk/gtk.h>
@@ -36,6 +39,7 @@ enum {
   GPHPEDIT_PLUGIN_TYPE_NOINPUT,
   GPHPEDIT_PLUGIN_TYPE_SELECTION,
   GPHPEDIT_PLUGIN_TYPE_FILENAME,
+  GPHPEDIT_PLUGIN_TYPE_SYNTAX,
   GPHPEDIT_PLUGIN_TYPE_DEBUG
 };
 
@@ -45,6 +49,7 @@ enum {
 struct PluginDetails
 {
   guint type;
+  gint file_type; /* only needed for SYNTAX PLUGINS*/
   gchar *filename;
   gchar *name;
   gchar *description;
@@ -204,6 +209,9 @@ int plugin_discover_type(gchar *filename)
     if (g_str_has_prefix(result, "SELECTION")){
       type = GPHPEDIT_PLUGIN_TYPE_SELECTION;
   }
+  else if (g_str_has_prefix(result, "SYNTAX")){
+    type = GPHPEDIT_PLUGIN_TYPE_SYNTAX;
+  }
   else if (g_str_has_prefix(result, "NO-INPUT")){
     type = GPHPEDIT_PLUGIN_TYPE_NOINPUT;
   }
@@ -223,6 +231,34 @@ int plugin_discover_type(gchar *filename)
   return type;
 }
 
+/* internal function*/
+static gint plugin_syntax_discover_type(gchar *filename)
+{
+  GString *command_line;
+  gchar *ftype=NULL;
+  gint file_type;
+  command_line = g_string_new(filename);
+  command_line = g_string_prepend(command_line, "'");
+  command_line = g_string_append(command_line, "' -ftype");
+  ftype = command_spawn(command_line->str);
+  #ifdef DEBUG
+  g_print("Plugin syntax File type:%s\n",ftype);
+  #endif
+  g_string_free(command_line, TRUE);
+  
+  if (g_strcmp0(ftype,"PHP")==0 || g_strcmp0(ftype,"HTML")==0 || g_strcmp0(ftype,"XML")==0) file_type=TAB_PHP;
+  else if (g_strcmp0(ftype,"CSS")==0) file_type=TAB_CSS;
+  else if (g_strcmp0(ftype,"C")==0 || g_strcmp0(ftype,"C++")==0) file_type=TAB_CXX;
+  else if (g_strcmp0(ftype,"CSS")==0) file_type=TAB_CSS;
+  else if (g_strcmp0(ftype,"COBOL")==0) file_type=TAB_COBOL;
+  else if (g_strcmp0(ftype,"SQL")==0) file_type=TAB_SQL;
+  else if (g_strcmp0(ftype,"PERL")==0) file_type=TAB_PERL;
+  else if (g_strcmp0(ftype,"PYTHON")==0) file_type=TAB_PYTHON;
+  else file_type=TAB_FILE;
+  if (file_type==TAB_FILE) g_print("Unknown file type for Syntax plugin:%s\n",ftype);
+  return file_type;
+}
+
 Plugin *plugin_new (gchar *filename)
 {
 	Plugin *plug;
@@ -234,6 +270,8 @@ Plugin *plugin_new (gchar *filename)
   plugdet->name= plugin_discover_name(filename);
   plugdet->description= plugin_discover_desc(filename);
   plugdet->type= plugin_discover_type(filename);
+  if (plugdet->type==GPHPEDIT_PLUGIN_TYPE_SYNTAX) plugdet->file_type = plugin_syntax_discover_type(filename);
+
 	return plug; /* return new object */
 }
 
@@ -249,6 +287,14 @@ const gchar *get_plugin_description(Plugin *plugin){
   PluginDetails *plugdet;
 	plugdet = PLUGIN_GET_PRIVATE(plugin);
   return plugdet->description;
+}
+
+gint get_plugin_syntax_type(Plugin *plugin){
+  g_return_val_if_fail (OBJECT_IS_PLUGIN (plugin), 0); /**/
+  PluginDetails *plugdet;
+	plugdet = PLUGIN_GET_PRIVATE(plugin);
+  if (plugdet->type!=GPHPEDIT_PLUGIN_TYPE_SYNTAX) return 0;
+  return plugdet->file_type;
 }
 
 /* 
@@ -357,8 +403,8 @@ void plugin_run(Plugin *plugin, Editor *editor)
     g_free(current_selection);
     g_free(escape);
   }
-  else if (plugdet->type == GPHPEDIT_PLUGIN_TYPE_FILENAME) {
-    gchar *temp_path=filename_get_path(editor->filename->str); /* remove scaped chars*/
+  else if (plugdet->type == GPHPEDIT_PLUGIN_TYPE_FILENAME || plugdet->type == GPHPEDIT_PLUGIN_TYPE_SYNTAX) {
+    gchar *temp_path=filename_get_path(editor->filename->str); /* remove escaped chars*/
     command_line = g_string_append(command_line, temp_path);
     g_free(temp_path);
   }
@@ -396,7 +442,7 @@ void plugin_run(Plugin *plugin, Editor *editor)
       debug_dump_editors();
       DEBUG_MODE = TRUE;
     } else {
-      g_print("unexpected command");
+      g_print("Unexpected command");
     }
   g_free(stdout);
   g_string_free (command_line,TRUE);

@@ -29,6 +29,7 @@
 #include "gvfs_utils.h"
 #include <unistd.h>
 #include "main_window_callbacks.h"
+#include "pluginmenu.h"
 
 gchar *run_php_lint(gchar *command_line)
 {
@@ -235,8 +236,8 @@ void syntax_check_run(void)
     command_line = g_string_append(command_line, "'");
 //    g_print("eject:%s\n", command_line->str);
     } else {
-      if (main_window.current_editor->type!=TAB_FILE){
-      g_print("syntax check not implement\n");
+      if (!run_syntax_plugin_by_ftype(get_plugin_manager(GTK_PLUGIN_MANAGER_MENU(main_window.menu->menuplugin)), main_window.current_editor, main_window.current_editor->type)){
+//      g_print("syntax check not implement\n");
       }
       return;
     }
