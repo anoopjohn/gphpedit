@@ -67,15 +67,22 @@ void syntax_add_lines(gchar *output)
   gtk_scintilla_set_indicator_current(GTK_SCINTILLA(main_window.current_editor->scintilla), 20);
   gtk_scintilla_indic_set_style(GTK_SCINTILLA(main_window.current_editor->scintilla), 20, INDIC_SQUIGGLE);
   gtk_scintilla_indic_set_fore(GTK_SCINTILLA(main_window.current_editor->scintilla), 20, 0x0000ff);
+
+  GtkListStore *lint_store =  gtk_list_store_new (1, G_TYPE_STRING);
+  /*clear tree */
+  gtk_list_store_clear(lint_store);
+
   if (main_window.current_editor->type==TAB_PHP){
     while ((token = strtok(copy, "\n"))) {
-      if ((strncmp(token, "PHP Warning:  ", MIN(strlen(token), 14))!=0) && (strncmp(token, "Content-type", MIN(strlen(token), 12))!=0)) { 
+      if ((g_str_has_prefix(token, "PHP Warning:  ") || g_str_has_prefix(token,"PHP Parse error:  syntax error, ")) && (!g_str_has_prefix(token, "Content-type"))) { 
         if (g_str_has_prefix(token,"PHP Parse error:  syntax error, ")){
         token+=strlen("PHP Parse error:  syntax error, ");
+        } else if (g_str_has_prefix(token, "PHP Warning:  ")){
+        token+=strlen("PHP Warning:  ");
         }
-        gtk_list_store_append (main_window.lint_store, &iter);
-        gtk_list_store_set (main_window.lint_store, &iter, 0, token, -1);
-    
+        gtk_list_store_append (lint_store, &iter);
+        gtk_list_store_set (lint_store, &iter, 0, token, -1);
+
         line_number = strrchr(token, ' ');
         line_number++;
         if (atoi(line_number)>0) {
@@ -96,6 +103,11 @@ void syntax_add_lines(gchar *output)
       }
       copy = NULL;
     }
+    if (output && g_str_has_prefix(output,"\nNo syntax errors detected")){
+      output++;
+      gtk_list_store_append (lint_store, &iter);
+      gtk_list_store_set (lint_store, &iter, 0, output, -1);
+    }
   } else if (main_window.current_editor->type==TAB_PERL){
       gint quote=0;
       gint a=0;
@@ -109,8 +121,8 @@ void syntax_add_lines(gchar *output)
 //      g_print("char:%c, quote:%d,pos:%d\n",*cop,quote,a);
       }      
       while ((token = strtok(copy, "\n"))) {
-        gtk_list_store_append (main_window.lint_store, &iter);
-        gtk_list_store_set (main_window.lint_store, &iter, 0, token, -1);
+        gtk_list_store_append (lint_store, &iter);
+        gtk_list_store_set (lint_store, &iter, 0, token, -1);
         gchar number[15];  
         int i=15;
         line_number = strstr(token, "line ");
@@ -142,11 +154,11 @@ void syntax_add_lines(gchar *output)
       number[0]='a'; /*force new number */
       copy = NULL;
     }
-
   }
   if (first_error) {
     goto_line(first_error);
   }
+  gtk_syntax_check_window_set_model(main_window.win, lint_store);
 }
 
 
@@ -188,88 +200,17 @@ GString *save_as_temp_file(void)
   return NULL;
 }
 
-// function from http://devpinoy.org/blogs/cvega/archive/2006/06/19/xtoi-hex-to-integer-c-function.aspx
-// Converts a hexadecimal string to integer
-int xtoi(const char* xs, unsigned int* result)
-{
-  size_t szlen = strlen(xs);
-  int i, xv, fact;
-
- if (szlen > 0)
- {
-
-  // Converting more than 32bit hexadecimal value?
-  if (szlen>8) return 2; // exit
-
-  // Begin conversion here
-  *result = 0;
-  fact = 1;
-
-  // Run until no more character to convert
-  for(i=szlen-1; i>=0 ;i--)
-  {
-   if (g_ascii_isxdigit(*(xs+i)))
-   {
-    if (*(xs+i)>=97)
-    {
-     xv = ( *(xs+i) - 97) + 10;
-    }
-    else if ( *(xs+i) >= 65)
-    {
-     xv = (*(xs+i) - 65) + 10;
-    }
-    else
-    {
-     xv = *(xs+i) - 48;
-    }
-    *result += (xv * fact);
-    fact *= 16;
-   }
-   else
-   {
-    // Conversion was abnormally terminated
-    // by non hexadecimal digit, hence
-    // returning only the converted with
-    // an error value 4 (illegal hex character)
-    return 4;
-   }
-  }
- }
-
- // Nothing to convert
- return 1;
-}
-/**
- * Replace any %xx escapes by their single-character equivalent.
- */
-void unquote(char *s) {
-	char *o = s;
-	while (*s) {
-		if ((*s == '%') && s[1] && s[2]) {
-      guint a;
-      char xl[3]={*(s+1),*(s+2),0};
-      const char *t=xl;
-      xtoi(t, &a);
-			*o = a;
-			s += 2;
-		} else {
-			*o = *s;
-		}
-		o++;
-		s++;
-	}
-	*o = '\0';
-}
-
 void syntax_check_run(void)
 {
-  GtkTreeIter iter;
-  GString *command_line;
+  GString *command_line=NULL;
   gchar *output;
   gboolean using_temp;
   GString *filename;
-  
+
   if (main_window.current_editor) {
+    if (!filename_is_native(main_window.current_editor->filename->str)){
+      return;
+    }
     if (main_window.current_editor->saved==TRUE) {
       gchar *local_path=filename_get_path(main_window.current_editor->filename->str);
       filename = g_string_new(local_path);
@@ -286,32 +227,32 @@ void syntax_check_run(void)
     command_line = g_string_append(command_line, " -q -l -d html_errors=Off -f '");
     command_line = g_string_append(command_line, filename->str);
     command_line = g_string_append(command_line, "'");
-    g_print("eject:%s\n", command_line->str);
-    } else {
+//    g_print("eject:%s\n", command_line->str);
+    } else if (main_window.current_editor->type==TAB_PERL){
     command_line = g_string_new("perl -c ");
     command_line = g_string_append(command_line, "'");
     command_line = g_string_append(command_line, filename->str);
     command_line = g_string_append(command_line, "'");
-    g_print("eject:%s\n", command_line->str);
+//    g_print("eject:%s\n", command_line->str);
+    } else {
+      if (main_window.current_editor->type!=TAB_FILE){
+      g_print("syntax check not implement\n");
+      }
+      return;
     }
+    gtk_widget_show(GTK_WIDGET(main_window.win));
     output = run_php_lint(command_line->str);
     g_string_free(command_line, TRUE);
 
-    
-    main_window.lint_store = gtk_list_store_new (1, G_TYPE_STRING);
-
     gtk_scintilla_indicator_clear_range(GTK_SCINTILLA(main_window.current_editor->scintilla), 0, gtk_scintilla_get_text_length(GTK_SCINTILLA(main_window.current_editor->scintilla)));
 
-    gtk_list_store_clear(main_window.lint_store);
     if (output) {
       syntax_add_lines(output);
       g_free(output);
     }
     else {
-      gtk_list_store_append (main_window.lint_store, &iter);
-      gtk_list_store_set (main_window.lint_store, &iter, 0, _("Error calling PHP CLI (is PHP command line binary installed? If so, check if it's in your path or set php_binary in Preferences)\n"), -1);
+        gtk_syntax_check_window_set_string(main_window.win, _("Error calling PHP CLI (is PHP command line binary installed? If so, check if it's in your path or set php_binary in Preferences)\n"));
     }
-    gtk_tree_view_set_model(GTK_TREE_VIEW(main_window.lint_view), GTK_TREE_MODEL(main_window.lint_store));
     
     if (using_temp) {
       g_unlink(filename->str);
@@ -319,10 +260,6 @@ void syntax_check_run(void)
     g_string_free(filename, TRUE);
   }
   else {
-    main_window.lint_store = gtk_list_store_new (1, G_TYPE_STRING);
-    gtk_list_store_clear(main_window.lint_store);
-    gtk_list_store_append (main_window.lint_store, &iter);
-    gtk_list_store_set (main_window.lint_store, &iter, 0, _("You don't have any files open to check\n"), -1);
-    gtk_tree_view_set_model(GTK_TREE_VIEW(main_window.lint_view), GTK_TREE_MODEL(main_window.lint_store));
+   gtk_syntax_check_window_set_string(main_window.win, _("You don't have any files open to check\n"));
   }
 }

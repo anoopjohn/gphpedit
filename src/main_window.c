@@ -32,9 +32,9 @@
 #include "classbrowser.h"
 #include "templates.h"
 #include "gvfs_utils.h"
-#include "syntax_check.h"
 #include "gphpedit-close-button.h"
 #include "gphpedit-statusbar.h"
+#include "syntax_check_window.h"
 
 MainWindow main_window;
 GIOChannel* inter_gphpedit_io;
@@ -266,123 +266,9 @@ static void main_window_fill_panes(void)
   //g_signal_connect (G_OBJECT (main_window.notebook_editor), "switch_page", G_CALLBACK (on_notebook_switch_page), NULL);
   g_signal_connect (G_OBJECT (main_window.notebook_editor), "focus-tab", G_CALLBACK (on_notebook_focus_tab), NULL);
 
-
-  main_window.scrolledwindow1 = gtk_scrolled_window_new (NULL, NULL);
-  gtk_box_pack_start(GTK_BOX(main_window.prin_hbox), main_window.scrolledwindow1, TRUE, TRUE, 2);
-  main_window.lint_view = gtk_tree_view_new ();
-  gtk_container_add (GTK_CONTAINER (main_window.scrolledwindow1), main_window.lint_view);
-  main_window.lint_renderer = gtk_cell_renderer_text_new ();
-  main_window.lint_column = gtk_tree_view_column_new_with_attributes (_("Syntax Check Output"),
-                main_window.lint_renderer, "text", 0, NULL);
-  gtk_tree_view_append_column (GTK_TREE_VIEW (main_window.lint_view), main_window.lint_column);
-  gtk_widget_set_size_request (main_window.lint_view, 80,80);
-  main_window.lint_select = gtk_tree_view_get_selection (GTK_TREE_VIEW (main_window.lint_view));
-  gtk_tree_selection_set_mode (main_window.lint_select, GTK_SELECTION_SINGLE);
-  g_signal_connect (G_OBJECT (main_window.lint_select), "changed",
-            G_CALLBACK (lint_row_activated), NULL);
-}
-
-/**
- * Compare two filenames and find the length of the part of the
- * directory names that match each other. Eg: passing ./home/src/a.php
- * and ./home/b.php will return 7 i.e. the length of the common
- * part of the directory names.
- */
-guint get_longest_matching_length(gchar *filename1, gchar *filename2)
-{
-  gchar *base1, *base1_alloc;
-  gchar *base2, *base2_alloc;
-  guint length;
-
-  //Store the pointers so as to be freed in the end.
-  base1 = g_path_get_dirname(filename1);
-  base1_alloc = base1;
-  base2 = g_path_get_dirname(filename2);
-  base2_alloc = base2;
-
-  length = 0;
-  //Check only if both base paths are not ".".
-  if (strcmp(base2_alloc, ".")!=0 && strcmp(base2_alloc, ".")!=0) {
-    //Increment count and move along the characters in both paths
-    //while they are equal and compare till the shorter of the two.
-    while (*base1 && *base2 && (*base1 == *base2)) {
-      base1++;
-      base2++;
-      length++;
-    }
-  }
-
-  g_free(base1_alloc);
-  g_free(base2_alloc);
-
-  return length;
-}
-
-/**
- * 
- */
-GString *get_differing_part(GSList *filenames, gchar *file_requested)
-{
-  GSList *temp_list;
-  gchar buffer[1024];
-  guint longest_match;
-  guint match;
-
-  longest_match = 9999;
-
-  // Loop through and find the length of the shortest matching basepath
-  // Seems to miss the first one - if that's not required, change to temp_list = filenames
-  for(temp_list = filenames; temp_list!= NULL; temp_list = g_slist_next(temp_list)) {
-    match = get_longest_matching_length(temp_list->data, file_requested);
-    //debug("String: %s\nString: %s\nMatch: %d", temp_list->data, file_requested, match);
-    if (match < longest_match) {
-      longest_match = match;
-    }
-  }
-  //debug("Match: %d", longest_match);
-  if (longest_match!=9999) {
-    if (*(file_requested + longest_match) == '/') {
-      strcpy(buffer, (file_requested + longest_match+1));
-    }
-    else {
-      strcpy(buffer, (file_requested + longest_match));
-    }
-  }
-  else {
-    strcpy(buffer, file_requested);
-  }
-
-  return g_string_new(buffer);
-}
-
-GString *get_differing_part_editor(Editor *editor)
-{
-  gchar *cwd;
-  GSList *list_editors;
-  GSList *list_filenames;
-  Editor *data;
-  gchar *str;
-  GString *result;
-
-  if (editor == NULL) 
-    return NULL;
-  
-  cwd = g_get_current_dir();
-
-  list_filenames = NULL;
-  list_filenames = g_slist_append(list_filenames, cwd);
-
-  for(list_editors = editors; list_editors!= NULL; list_editors = g_slist_next(list_editors)) {
-    data = list_editors->data;
-    if (data->type == TAB_FILE) {
-      str = ((Editor *)data)->filename->str;
-      list_filenames = g_slist_append(list_filenames, str);
-    }
-  }
-
-  result = get_differing_part(list_filenames, editor->filename->str);
-  g_free(cwd);
-  return result;
+  /* add syntax check window */
+  main_window.win= GTK_SYNTAX_CHECK_WINDOW(gtk_syntax_check_window_new ());
+  gtk_box_pack_start(GTK_BOX(main_window.prin_hbox), GTK_WIDGET(main_window.win), TRUE, TRUE, 2);
 }
 
 /**

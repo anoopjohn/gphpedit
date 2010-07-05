@@ -152,6 +152,7 @@ gboolean filename_is_native(gchar *filename)
 {
   gboolean result=FALSE;
   gchar *ret=NULL;
+  if (!filename) return TRUE;
   ret = filename_get_path(filename);
   if (ret){
     g_free(ret);
@@ -178,4 +179,77 @@ gchar *get_absolute_from_relative(gchar *path, gchar *base){
   g_object_unref(parent);
   g_object_unref(result);
   return file_uri;
+}
+
+// function from http://devpinoy.org/blogs/cvega/archive/2006/06/19/xtoi-hex-to-integer-c-function.aspx
+// Converts a hexadecimal string to integer
+int xtoi(const char* xs, unsigned int* result)
+{
+  size_t szlen = strlen(xs);
+  int i, xv, fact;
+
+ if (szlen > 0)
+ {
+
+  // Converting more than 32bit hexadecimal value?
+  if (szlen>8) return 2; // exit
+
+  // Begin conversion here
+  *result = 0;
+  fact = 1;
+
+  // Run until no more character to convert
+  for(i=szlen-1; i>=0 ;i--)
+  {
+   if (g_ascii_isxdigit(*(xs+i)))
+   {
+    if (*(xs+i)>=97)
+    {
+     xv = ( *(xs+i) - 97) + 10;
+    }
+    else if ( *(xs+i) >= 65)
+    {
+     xv = (*(xs+i) - 65) + 10;
+    }
+    else
+    {
+     xv = *(xs+i) - 48;
+    }
+    *result += (xv * fact);
+    fact *= 16;
+   }
+   else
+   {
+    // Conversion was abnormally terminated
+    // by non hexadecimal digit, hence
+    // returning only the converted with
+    // an error value 4 (illegal hex character)
+    return 4;
+   }
+  }
+ }
+
+ // Nothing to convert
+ return 1;
+}
+/**
+ * Replace any %xx escapes by their single-character equivalent.
+ */
+void unquote(char *s) {
+	char *o = s;
+	while (*s) {
+		if ((*s == '%') && s[1] && s[2]) {
+      guint a;
+      char xl[3]={*(s+1),*(s+2),0};
+      const char *t=xl;
+      xtoi(t, &a);
+			*o = a;
+			s += 2;
+		} else {
+			*o = *s;
+		}
+		o++;
+		s++;
+	}
+	*o = '\0';
 }

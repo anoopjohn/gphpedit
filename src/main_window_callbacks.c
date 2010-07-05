@@ -1695,20 +1695,13 @@ void find_next_marker(line_start){
 
 void syntax_check(GtkWidget *widget)
 {
-  if (main_window.current_editor) {
-    if (filename_is_native(main_window.current_editor->filename->str)){
-      gtk_widget_show(main_window.scrolledwindow1);
-      gtk_widget_show(main_window.lint_view);
       syntax_check_run();
-    }
-  }
 }
 
 
 void syntax_check_clear(GtkWidget *widget)
 {
-  gtk_widget_hide(main_window.scrolledwindow1);
-  gtk_widget_hide(main_window.lint_view);
+  gtk_widget_hide(GTK_WIDGET(main_window.win));
 }
 
 void pressed_button_file_chooser(GtkButton *widget, gpointer data) {
@@ -1769,27 +1762,6 @@ void classbrowser_show_hide(GtkWidget *widget)
   else
     classbrowser_hide();
 }
-
-void lint_row_activated (GtkTreeSelection *selection, gpointer data)
-{
-  GtkTreeIter iter;
-  GtkTreeModel *model;
-  gchar *line;
-  gchar *space;
-
-  if (gtk_tree_selection_get_selected (selection, &model, &iter)) {
-    gtk_tree_model_get (model, &iter, 0, &line, -1);
-
-    // Get the line
-    space = strrchr(line, ' ');
-    space++;
-    // Go to that line
-      goto_line(space);
-
-    g_free (line);
-  }
-}
-
 
 gint treeview_double_click(GtkWidget *widget, GdkEventButton *event, gpointer func_data)
 {

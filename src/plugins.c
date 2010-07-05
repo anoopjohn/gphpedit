@@ -29,7 +29,7 @@
 #include "plugins.h"
 #include "main_window.h"
 #include "gvfs_utils.h"
-
+#include "syntax_check_window.h"
 /* plugin type enum*/
 enum {
   GPHPEDIT_PLUGIN_TYPE_UNKNOWN=0, 
@@ -38,13 +38,7 @@ enum {
   GPHPEDIT_PLUGIN_TYPE_FILENAME,
   GPHPEDIT_PLUGIN_TYPE_DEBUG
 };
-/*
-#define GPHPEDIT_PLUGIN_TYPE_UNKNOWN 0
-#define GPHPEDIT_PLUGIN_TYPE_NOINPUT 1
-#define GPHPEDIT_PLUGIN_TYPE_SELECTION 2
-#define GPHPEDIT_PLUGIN_TYPE_FILENAME 3
-#define GPHPEDIT_PLUGIN_TYPE_DEBUG 4
-*/
+
 /*
 * plugin private struct
 */
@@ -282,12 +276,11 @@ static void syntax_window(GtkScintilla *scintilla, gchar *data){
   /* clear document before start any styling action */
   gtk_scintilla_indicator_clear_range(scintilla, 0, gtk_scintilla_get_text_length(scintilla));
 
-  gtk_widget_show(main_window.scrolledwindow1);
-  gtk_widget_show(main_window.lint_view);
+  gtk_widget_show(GTK_WIDGET(main_window.win));
   GtkTreeIter iter;
-  main_window.lint_store = gtk_list_store_new (1, G_TYPE_STRING);
+  GtkListStore *lint_store = gtk_list_store_new (1, G_TYPE_STRING);
   /*clear tree */
-  gtk_list_store_clear(main_window.lint_store);
+  gtk_list_store_clear(lint_store);
   copy = data;
   /* este codigo esta repetido aca y en el sintax check tal vez unificar en un solo lugar */
   gtk_scintilla_set_indicator_current(scintilla, 20);
@@ -302,8 +295,8 @@ static void syntax_window(GtkScintilla *scintilla, gchar *data){
   */
 
   while ((token = strtok(copy, "\n"))) {
-    gtk_list_store_append (main_window.lint_store, &iter);
-    gtk_list_store_set (main_window.lint_store, &iter, 0, token, -1);
+    gtk_list_store_append (lint_store, &iter);
+    gtk_list_store_set (lint_store, &iter, 0, token, -1);
     gchar *anotationtext=g_strdup(token);
     line_number = strchr(token, ' ');
     line_number=strncpy(line_number,token,(int)(line_number-token));
@@ -331,7 +324,7 @@ static void syntax_window(GtkScintilla *scintilla, gchar *data){
     g_free(anotationtext);
     copy = NULL;
   }
-  gtk_tree_view_set_model(GTK_TREE_VIEW(main_window.lint_view), GTK_TREE_MODEL(main_window.lint_store));
+ gtk_syntax_check_window_set_model(main_window.win, lint_store);
 }
 
 

@@ -14,4 +14,5 @@ gchar *filename_get_relative_path(gchar *filename);
 gboolean filename_is_local_or_http(gchar *filename);
 gboolean filename_is_native(gchar *filename);
 gchar *get_absolute_from_relative(gchar *path, gchar *base);
+void unquote(char *s);
 #endif

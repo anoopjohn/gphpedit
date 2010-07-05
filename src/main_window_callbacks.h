@@ -90,7 +90,6 @@ void mod_marker(int line);
 void find_next_marker(int line_start);
 void syntax_check(GtkWidget *widget);
 void syntax_check_clear(GtkWidget *widget);
-void lint_row_activated (GtkTreeSelection *selection, gpointer data);
 void goto_line_int(gint line);
 void goto_line(gchar *text);
 GdkPixbuf *get_window_icon (void);

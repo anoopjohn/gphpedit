@@ -533,7 +533,7 @@ void list_php_files_open(void){
   Editor *editor;
   for(li = editors; li!= NULL; li = g_slist_next(li)) {
     editor = li->data;
-    if (editor && GTK_IS_SCINTILLA(editor->scintilla)) {
+    if (editor && GTK_IS_SCINTILLA(editor->scintilla)
 #ifdef CLASSBROWSER
       g_print("classbrowser found:%s\n",editor->filename->str);
 #endif
@@ -765,6 +765,109 @@ gchar *classbrowser_add_custom_autocompletion(gchar *prefix, GSList *list){
   } else {
     return NULL;
   }
+}
+
+/**
+ * Compare two filenames and find the length of the part of the
+ * directory names that match each other. Eg: passing ./home/src/a.php
+ * and ./home/b.php will return 7 i.e. the length of the common
+ * part of the directory names.
+ */
+guint get_longest_matching_length(gchar *filename1, gchar *filename2)
+{
+  gchar *base1, *base1_alloc;
+  gchar *base2, *base2_alloc;
+  guint length;
+
+  //Store the pointers so as to be freed in the end.
+  base1 = g_path_get_dirname(filename1);
+  base1_alloc = base1;
+  base2 = g_path_get_dirname(filename2);
+  base2_alloc = base2;
+
+  length = 0;
+  //Check only if both base paths are not ".".
+  if (strcmp(base2_alloc, ".")!=0 && strcmp(base2_alloc, ".")!=0) {
+    //Increment count and move along the characters in both paths
+    //while they are equal and compare till the shorter of the two.
+    while (*base1 && *base2 && (*base1 == *base2)) {
+      base1++;
+      base2++;
+      length++;
+    }
+  }
+
+  g_free(base1_alloc);
+  g_free(base2_alloc);
+
+  return length;
+}
+
+/**
+ * 
+ */
+GString *get_differing_part(GSList *filenames, gchar *file_requested)
+{
+  GSList *temp_list;
+  gchar buffer[1024];
+  guint longest_match;
+  guint match;
+
+  longest_match = 9999;
+
+  // Loop through and find the length of the shortest matching basepath
+  // Seems to miss the first one - if that's not required, change to temp_list = filenames
+  for(temp_list = filenames; temp_list!= NULL; temp_list = g_slist_next(temp_list)) {
+    match = get_longest_matching_length(temp_list->data, file_requested);
+    //debug("String: %s\nString: %s\nMatch: %d", temp_list->data, file_requested, match);
+    if (match < longest_match) {
+      longest_match = match;
+    }
+  }
+  //debug("Match: %d", longest_match);
+  if (longest_match!=9999) {
+    if (*(file_requested + longest_match) == '/') {
+      strcpy(buffer, (file_requested + longest_match+1));
+    }
+    else {
+      strcpy(buffer, (file_requested + longest_match));
+    }
+  }
+  else {
+    strcpy(buffer, file_requested);
+  }
+
+  return g_string_new(buffer);
+}
+
+GString *get_differing_part_editor(Editor *editor)
+{
+  gchar *cwd;
+  GSList *list_editors;
+  GSList *list_filenames;
+  Editor *data;
+  gchar *str;
+  GString *result;
+
+  if (editor == NULL) 
+    return NULL;
+  
+  cwd = g_get_current_dir();
+
+  list_filenames = NULL;
+  list_filenames = g_slist_append(list_filenames, cwd);
+
+  for(list_editors = editors; list_editors!= NULL; list_editors = g_slist_next(list_editors)) {
+    data = list_editors->data;
+    if (data->type == TAB_FILE) {
+      str = ((Editor *)data)->filename->str;
+      list_filenames = g_slist_append(list_filenames, str);
+    }
+  }
+
+  result = get_differing_part(list_filenames, editor->filename->str);
+  g_free(cwd);
+  return result;
 }
 
 gboolean classbrowser_file_in_list_find(GSList *list, gchar *file)

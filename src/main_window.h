@@ -31,6 +31,7 @@
 #include "folderbrowser.h"
 #include "menu.h"
 #include "toolbar.h"
+#include "syntax_check_window.h"
 
 typedef struct
 {
@@ -53,14 +54,8 @@ typedef struct
   GtkWidget *notebook_manager;
   
   GtkWidget *notebook_editor;
-
-  GtkWidget *scrolledwindow1;
-  // My new best friend: http://developer.gnome.org/doc/API/2.0/gtk/TreeWidget.html
-  GtkListStore *lint_store;
-  GtkCellRenderer *lint_renderer;
-  GtkWidget *lint_view;
-  GtkTreeViewColumn *lint_column;
-  GtkTreeSelection *lint_select;
+  /* syntax check widget */
+  GtkSyntax_Check_Window *win;
 
   Editor *current_editor;
   //widget for close side bar button
@@ -118,7 +113,6 @@ void main_window_open_command_line_files(char **argv, gint argc);
 void update_app_title(void);
 void main_window_pass_command_line_files(char **argv);
 gboolean channel_pass_filename_callback(GIOChannel *source, GIOCondition condition, gpointer data );
-GString *get_differing_part(GSList *filenames, gchar *file_requested);
 void main_window_add_to_reopen_menu(gchar *full_filename);
 void create_untitled_if_empty(void);
 extern GIOChannel* inter_gphpedit_io;
