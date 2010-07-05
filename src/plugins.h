@@ -26,7 +26,6 @@
 #define PLUGINS_H
 
 #include <gtk/gtk.h>
-#include <gio/gio.h>
 #include "tab.h"
 
 #define PLUGIN_TYPE plugin_get_type()

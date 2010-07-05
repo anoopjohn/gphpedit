@@ -23,9 +23,52 @@
    The GNU General Public License is contained in the file COPYING.
 */
 /*
-* TODO::inline plugins docs
-*
+PLUGIN SYSTEM:
+
+A gPHPEdit plugin is a script that gPHPEdit will list in the menu and allow you to integrate somewhat with the editor. The files must be executable by the current user. There are a limited number of things a plugin will receive from gPHPEdit and a limited number of things it can return.
+
+The plugins should be stored either in /usr/share/gphpedit/plugins/ if you want them to be available for all users on your machine or in ~/.gphpedit/plugins/ if you only want them to be available for the current user.
+
+The number of plugins available is limited to 30. User specific plugins take preference over global plugins if the number is over 30.
+The menu will asing automatically a shortcut to the first 10 plugins. [CONTROL + number]
+
+How it works
+The general mechanism for interacting with a plugin is as follows:
+
+* gPHPEdit runs your script/plugin with a command line parameter of -type
+* gPHPEdit will ask for plugin name with a command line parameter of -name and a description with -desc
+  ** name will be show in plugin menu and description in the statusbar
+* Your plugin must print one of the following types to STDOUT:
+  o SELECTION - your plugin requires the current selection of text or nothing if none is selected
+  o NO-INPUT - your plugin doesn't require anything
+  o FNAME - your plugin requires the current full filename (local files only)
+  o SYNTAX - like FNAME but will act as a syntax checker. (if no default check are present can be run by press F9)
+    * Syntax plugins must return the file tipe when run with a command line parameter of -ftype
+      ** languages supported:
+        *** PHP
+        *** HTML
+        *** XML
+        *** C
+        *** C++
+        *** C/C++
+        *** COBOL
+        *** SQL
+        *** PERL
+        *** PYTHON
+* When the menu item is clicked, gPHPEdit runs your plugin with either the selection or the filename in single quotes.
+* Your plugin must then print to STDOUT one of the following actions:
+  o INSERT - your plugin requires that the gPHPEdit inserts the text that is about to be returned at the cursor position (i.e. after any current selection)
+  o REPLACE - your plugin requires that the gPHPEdit replaces any current selection with the text that is about to be returned
+  o OPEN - your plugin requires that gPHPEdit opens the file that is about to be specified (NB: this can be the same as the file specified inwards with FNAME, this will reload the current file)
+  o MESSAGE - your plugin requires that the gPHPEdit show an info dialog
+  o SYNTAX - your plugin requires that the gPHPEdit process syntax check output, show it in syntax pane and apply style to text
+    ** output must have the following struct line number space message dot like next example:
+    ** 59 invalid operator.\n
+    ** lines end with \n 
+* The next thing your plugin must print is a newline character
+* Finally your editor should print either the content or the filename, then close
 */
+
 #include <config.h>
 #include <stdlib.h>
 #include <gtk/gtk.h>
@@ -240,7 +283,9 @@ static gint plugin_syntax_discover_type(gchar *filename)
   command_line = g_string_new(filename);
   command_line = g_string_prepend(command_line, "'");
   command_line = g_string_append(command_line, "' -ftype");
-  ftype = command_spawn(command_line->str);
+  gchar *result= command_spawn(command_line->str);
+  ftype = g_ascii_strup (result,-1);
+  g_free(result);
   #ifdef DEBUG
   g_print("Plugin syntax File type:%s\n",ftype);
   #endif
@@ -248,7 +293,7 @@ static gint plugin_syntax_discover_type(gchar *filename)
   
   if (g_strcmp0(ftype,"PHP")==0 || g_strcmp0(ftype,"HTML")==0 || g_strcmp0(ftype,"XML")==0) file_type=TAB_PHP;
   else if (g_strcmp0(ftype,"CSS")==0) file_type=TAB_CSS;
-  else if (g_strcmp0(ftype,"C")==0 || g_strcmp0(ftype,"C++")==0) file_type=TAB_CXX;
+  else if (g_strcmp0(ftype,"C")==0 || g_strcmp0(ftype,"C++")==0 || g_strcmp0(ftype,"C/C++")==0) file_type=TAB_CXX;
   else if (g_strcmp0(ftype,"CSS")==0) file_type=TAB_CSS;
   else if (g_strcmp0(ftype,"COBOL")==0) file_type=TAB_COBOL;
   else if (g_strcmp0(ftype,"SQL")==0) file_type=TAB_SQL;
