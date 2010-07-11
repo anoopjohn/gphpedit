@@ -161,6 +161,16 @@ dnl  ------------------
 dnl ================================================================
 dnl Gettext stuff.
 dnl ================================================================
+
+# Generate po/LINGUAS on the fly rather than relying on translators
+# to maintain it manually. This also overcome the problem that Transifex
+# cannot add a language to po/LINGUAS if a new po file is submitted.
+rm -f $srcdir/po/LINGUAS
+for po_file in `ls $srcdir/po/*.po | sort`;
+do
+  lang=`echo "$po_file" | sed "s|.*/po/\(.*\)\.po|\1|g"`
+  echo $lang >> $srcdir/po/LINGUAS
+done
 IT_PROG_INTLTOOL([0.40.0])
 AC_SUBST([GETTEXT_PACKAGE], [gphpedit])
 AM_GNU_GETTEXT_VERSION([0.17])
