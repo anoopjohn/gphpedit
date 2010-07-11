@@ -23,17 +23,16 @@
 */
 #include "stdlib.h"
 #include "preferences_dialog.h"
-#include "preferences.h"
 #include "main_window.h"
 #include "tab_php.h"
 #include "tab.h"
+#include "tab_util.h"
 #include "templates.h"
 #include "edit_template.h"
 #include <gtkscintilla.h>
 
 #define IS_FONT_NAME(name1, name2) g_str_has_prefix(name1, name2)
 PreferencesDialog preferences_dialog;
-Preferences temp_preferences;
 gchar *current_highlighting_element = NULL;
 gchar *current_key = NULL;
 
@@ -134,9 +133,6 @@ void get_current_preferences(void)
 {
   GList *highlighting_list = NULL;
 
-  // Copy the global preferences struct in to a local copy for editing (in case they click cancel)
-  memcpy(&temp_preferences, &preferences, sizeof(preferences));
-
   // Font drop down elements : General
   highlighting_list = g_list_prepend(highlighting_list, _("Default"));
   highlighting_list = g_list_prepend(highlighting_list, _("Line Number (margin)"));
@@ -217,21 +213,13 @@ void get_current_preferences(void)
   preferences_dialog.highlighting_elements = highlighting_list;
 }
 
-void set_current_preferences(void)
-{
-  // Copy the local copy back to the global list
-  memcpy(&preferences, &temp_preferences, sizeof(preferences));
-  // Save the preferences
-  preferences_save();
-}
-
 void set_controls_to_highlight(gchar *setting_name, gchar *fontname, gint fontsize, gboolean bold, gboolean italic, gint fore, gint back)
 {
   gchar *sfontsize;
   gint row;
   
   // Debug print for preferences being set
-  // g_print("Getting %s: %s %d %d %d %d %d\n", setting_name, fontname, fontsize, bold, italic, fore, back);
+//  g_print("Getting %s: %s %d %d %d %d %d\n", setting_name, fontname, fontsize, bold, italic, fore, back);
   
   preferences_dialog.changing_highlight_element=TRUE;
   
@@ -268,316 +256,257 @@ void get_current_highlighting_settings(gchar *name)
 {
   if (!name) return;
   if (strlen(name)==0) return;
+  gchar *font =NULL;
+  gint size, fore, back;
+  gboolean italic, bold;
 
   if (IS_FONT_NAME(current_highlighting_element, _("Default"))) {
-    set_controls_to_highlight(_("Default"), temp_preferences.default_font, temp_preferences.default_size, 
-      temp_preferences.default_bold, temp_preferences.default_italic,
-      temp_preferences.default_fore, temp_preferences.default_back);
+    get_preferences_manager_style_settings(main_window.prefmg, "default_style", &font , &size, &fore, &back, &italic, &bold);
+    set_controls_to_highlight(_("Default"), font, size, bold, italic, fore, back);
   }
   if (IS_FONT_NAME(current_highlighting_element, _("Line Number (margin)"))) {
-    set_controls_to_highlight(_("Line Number (margin)"), temp_preferences.line_number_font, temp_preferences.line_number_size, 
-      temp_preferences.line_number_bold, temp_preferences.line_number_italic,
-      temp_preferences.line_number_fore, temp_preferences.line_number_back);
+    get_preferences_manager_style_settings(main_window.prefmg, "line_numbers", &font , &size, &fore, &back, &italic, &bold);
+    set_controls_to_highlight(_("Line Number (margin)"), font, size, bold, italic, fore, back);
   }
   if (IS_FONT_NAME(current_highlighting_element, _("HTML Tag"))) {
-    set_controls_to_highlight(_("HTML Tag"), temp_preferences.html_tag_font, temp_preferences.html_tag_size, 
-      temp_preferences.html_tag_bold, temp_preferences.html_tag_italic,
-      temp_preferences.html_tag_fore, temp_preferences.html_tag_back);
+    get_preferences_manager_style_settings(main_window.prefmg, "html_tag", &font , &size, &fore, &back, &italic, &bold);
+    set_controls_to_highlight(_("HTML Tag"), font, size, bold, italic, fore, back);
   }
   if (IS_FONT_NAME(current_highlighting_element, _("HTML Unknown Tag"))) {
-    set_controls_to_highlight(_("HTML Unknown Tag"), temp_preferences.html_tag_unknown_font, temp_preferences.html_tag_unknown_size, 
-      temp_preferences.html_tag_unknown_bold, temp_preferences.html_tag_unknown_italic,
-      temp_preferences.html_tag_unknown_fore, temp_preferences.html_tag_unknown_back);
-  }
+    get_preferences_manager_style_settings(main_window.prefmg, "html_tag_unknown", &font , &size, &fore, &back, &italic, &bold);
+    set_controls_to_highlight(_("HTML Unknown Tag"), font, size, bold, italic, fore, back);
+   }
   if (IS_FONT_NAME(current_highlighting_element, _("HTML Attribute"))) {
-    set_controls_to_highlight(_("HTML Attribute"), temp_preferences.html_attribute_font, temp_preferences.html_attribute_size, 
-      temp_preferences.html_attribute_bold, temp_preferences.html_attribute_italic,
-      temp_preferences.html_attribute_fore, temp_preferences.html_attribute_back);
-  }
+    get_preferences_manager_style_settings(main_window.prefmg, "html_attribute", &font , &size, &fore, &back, &italic, &bold);
+    set_controls_to_highlight(_("HTML Attribute"), font, size, bold, italic, fore, back);
+ }
   if (IS_FONT_NAME(current_highlighting_element, _("HTML Unknown Attribute"))) {
-    set_controls_to_highlight(_("HTML Unknown Attribute"), temp_preferences.html_attribute_unknown_font, temp_preferences.html_attribute_unknown_size, 
-      temp_preferences.html_attribute_unknown_bold, temp_preferences.html_attribute_unknown_italic,
-      temp_preferences.html_attribute_unknown_fore, temp_preferences.html_attribute_unknown_back);
+    get_preferences_manager_style_settings(main_window.prefmg, "html_attribute_unknown", &font , &size, &fore, &back, &italic, &bold);
+    set_controls_to_highlight(_("HTML Unknown Attribute"), font, size, bold, italic, fore, back);
   }
   if (IS_FONT_NAME(current_highlighting_element, _("HTML Number"))) {
-    set_controls_to_highlight(_("HTML Number"), temp_preferences.html_number_font, temp_preferences.html_number_size, 
-      temp_preferences.html_number_bold, temp_preferences.html_number_italic,
-      temp_preferences.html_number_fore, temp_preferences.html_number_back);
+    get_preferences_manager_style_settings(main_window.prefmg, "html_number", &font , &size, &fore, &back, &italic, &bold);
+    set_controls_to_highlight(_("HTML Number"), font, size, bold, italic, fore, back);
   }
   if (IS_FONT_NAME(current_highlighting_element, _("HTML Single-quoted String"))) {
-    set_controls_to_highlight(_("HTML Single-quoted String"), temp_preferences.html_single_string_font, temp_preferences.html_single_string_size, 
-      temp_preferences.html_single_string_bold, temp_preferences.html_single_string_italic,
-      temp_preferences.html_single_string_fore, temp_preferences.html_single_string_back);
+    get_preferences_manager_style_settings(main_window.prefmg, "html_single_string", &font , &size, &fore, &back, &italic, &bold);
+    set_controls_to_highlight(_("HTML Single-quoted String"), font, size, bold, italic, fore, back);
   }
   if (IS_FONT_NAME(current_highlighting_element, _("HTML Double-quoted String"))) {
-    set_controls_to_highlight(_("HTML Double-quoted String"), temp_preferences.html_double_string_font, temp_preferences.html_double_string_size, 
-      temp_preferences.html_double_string_bold, temp_preferences.html_double_string_italic,
-      temp_preferences.html_double_string_fore, temp_preferences.html_double_string_back);
+    get_preferences_manager_style_settings(main_window.prefmg, "html_double_string", &font , &size, &fore, &back, &italic, &bold);
+    set_controls_to_highlight(_("HTML Double-quoted String"), font, size, bold, italic, fore, back);
   }
   if (IS_FONT_NAME(current_highlighting_element, _("HTML Comment"))) {
-    set_controls_to_highlight(_("HTML Comment"), temp_preferences.html_comment_font, temp_preferences.html_comment_size, 
-      temp_preferences.html_comment_bold, temp_preferences.html_comment_italic,
-      temp_preferences.html_comment_fore, temp_preferences.html_comment_back);
+    get_preferences_manager_style_settings(main_window.prefmg, "html_comment", &font , &size, &fore, &back, &italic, &bold);
+    set_controls_to_highlight(_("HTML Comment"), font, size, bold, italic, fore, back);
   }
   if (IS_FONT_NAME(current_highlighting_element, _("HTML Entity"))) {
-    set_controls_to_highlight(_("HTML Entity"), temp_preferences.html_entity_font, temp_preferences.html_entity_size, 
-      temp_preferences.html_entity_bold , temp_preferences.html_entity_italic,
-      temp_preferences.html_entity_fore, temp_preferences.html_entity_back);
+    get_preferences_manager_style_settings(main_window.prefmg, "html_entity", &font , &size, &fore, &back, &italic, &bold);
+    set_controls_to_highlight(_("HTML Entity"), font, size, bold, italic, fore, back);
   }
   if (IS_FONT_NAME(current_highlighting_element, _("HTML Script"))) {
-    set_controls_to_highlight(_("HTML Script"), temp_preferences.html_script_font, temp_preferences.html_script_size, 
-      temp_preferences.html_script_bold, temp_preferences.html_script_italic,
-      temp_preferences.html_script_fore, temp_preferences.html_script_back);
+    get_preferences_manager_style_settings(main_window.prefmg, "html_script", &font , &size, &fore, &back, &italic, &bold);
+    set_controls_to_highlight(_("HTML Script"), font, size, bold, italic, fore, back); 
   }
   if (IS_FONT_NAME(current_highlighting_element, _("HTML Question"))) {
-    set_controls_to_highlight(_("HTML Question"), temp_preferences.html_question_font, temp_preferences.html_question_size, 
-      temp_preferences.html_question_bold, temp_preferences.html_question_italic,
-      temp_preferences.html_question_fore, temp_preferences.html_question_back);
-  }
+    get_preferences_manager_style_settings(main_window.prefmg, "html_question", &font , &size, &fore, &back, &italic, &bold);
+    set_controls_to_highlight(_("HTML Question"), font, size, bold, italic, fore, back);
+ }
   if (IS_FONT_NAME(current_highlighting_element, _("HTML Value"))) {
-    set_controls_to_highlight(_("HTML Value"), temp_preferences.html_value_font, temp_preferences.html_value_size, 
-      temp_preferences.html_value_bold, temp_preferences.html_value_italic,
-      temp_preferences.html_value_fore, temp_preferences.html_value_back);
+    get_preferences_manager_style_settings(main_window.prefmg, "html_value", &font , &size, &fore, &back, &italic, &bold);
+    set_controls_to_highlight(_("HTML Value"), font, size, bold, italic, fore, back);  
   }
   if (IS_FONT_NAME(current_highlighting_element, _("JavaScript Multiple-line Comment"))) {
-    set_controls_to_highlight(_("JavaScript Multiple-line Comment"), temp_preferences.javascript_comment_font, temp_preferences.javascript_comment_size, 
-      temp_preferences.javascript_comment_bold, temp_preferences.javascript_comment_italic,
-      temp_preferences.javascript_comment_fore, temp_preferences.javascript_comment_back);
+    get_preferences_manager_style_settings(main_window.prefmg, "javascript_comment", &font , &size, &fore, &back, &italic, &bold);
+    set_controls_to_highlight(_("JavaScript Multiple-line Comment"), font, size, bold, italic, fore, back);
   }
   if (IS_FONT_NAME(current_highlighting_element, _("JavaScript Single-line Comment"))) {
-    set_controls_to_highlight(_("JavaScript Single-line Comment"), temp_preferences.javascript_comment_line_font, temp_preferences.javascript_comment_line_size, 
-      temp_preferences.javascript_comment_line_bold, temp_preferences.javascript_comment_line_italic,
-      temp_preferences.javascript_comment_line_fore, temp_preferences.javascript_comment_line_back);
+    get_preferences_manager_style_settings(main_window.prefmg, "javascript_comment_line", &font , &size, &fore, &back, &italic, &bold);
+    set_controls_to_highlight(_("JavaScript Single-line Comment"), font, size, bold, italic, fore, back);
   }
   if (IS_FONT_NAME(current_highlighting_element, _("JavaScript Document Comment"))) {
-    set_controls_to_highlight(_("JavaScript Document Comment"), temp_preferences.javascript_comment_doc_font, temp_preferences.javascript_comment_doc_size, 
-      temp_preferences.javascript_comment_doc_bold, temp_preferences.javascript_comment_doc_italic,
-      temp_preferences.javascript_comment_doc_fore, temp_preferences.javascript_comment_doc_back);
+    get_preferences_manager_style_settings(main_window.prefmg, "javascript_comment_doc", &font , &size, &fore, &back, &italic, &bold);
+    set_controls_to_highlight(_("JavaScript Document Comment"), font, size, bold, italic, fore, back);
   }
   if (IS_FONT_NAME(current_highlighting_element, _("JavaScript Word"))) {
-    set_controls_to_highlight(_("JavaScript Word"), temp_preferences.javascript_word_font, temp_preferences.javascript_word_size, 
-      temp_preferences.javascript_word_bold, temp_preferences.javascript_word_italic,
-      temp_preferences.javascript_word_fore, temp_preferences.javascript_word_back);
+    get_preferences_manager_style_settings(main_window.prefmg, "javascript_word", &font , &size, &fore, &back, &italic, &bold);
+    set_controls_to_highlight(_("JavaScript Word"), font, size, bold, italic, fore, back);
   }
   if (IS_FONT_NAME(current_highlighting_element, _("JavaScript Keyword"))) {
-    set_controls_to_highlight(_("JavaScript Keyword"), temp_preferences.javascript_keyword_font, temp_preferences.javascript_keyword_size, 
-      temp_preferences.javascript_keyword_bold, temp_preferences.javascript_keyword_italic,
-      temp_preferences.javascript_keyword_fore, temp_preferences.javascript_keyword_back);
+    get_preferences_manager_style_settings(main_window.prefmg, "javascript_keyword", &font , &size, &fore, &back, &italic, &bold);
+    set_controls_to_highlight(_("JavaScript Keyword"), font, size, bold, italic, fore, back);
   }
   if (IS_FONT_NAME(current_highlighting_element, _("JavaScript Single-quoted String"))) {
-    set_controls_to_highlight(_("JavaScript Single-quoted String"), temp_preferences.javascript_doublestring_font, temp_preferences.javascript_doublestring_size, 
-      temp_preferences.javascript_doublestring_bold, temp_preferences.javascript_doublestring_italic,
-      temp_preferences.javascript_doublestring_fore, temp_preferences.javascript_doublestring_back);
+    get_preferences_manager_style_settings(main_window.prefmg, "javascript_singlestring", &font , &size, &fore, &back, &italic, &bold);
+    set_controls_to_highlight(_("JavaScript Single-quoted String"), font, size, bold, italic, fore, back);
   }
   if (IS_FONT_NAME(current_highlighting_element, _("JavaScript Double-quoted String"))) {
-    set_controls_to_highlight(_("JavaScript Double-quoted String"), temp_preferences.javascript_singlestring_font, temp_preferences.javascript_singlestring_size, 
-      temp_preferences.javascript_singlestring_bold, temp_preferences.javascript_singlestring_italic,
-      temp_preferences.javascript_singlestring_fore, temp_preferences.javascript_singlestring_back);
+    get_preferences_manager_style_settings(main_window.prefmg, "javascript_doublestring", &font , &size, &fore, &back, &italic, &bold);
+    set_controls_to_highlight(_("JavaScript Double-quoted String"), font, size, bold, italic, fore, back);
   }
   if (IS_FONT_NAME(current_highlighting_element, _("JavaScript Symbol"))) {
-    set_controls_to_highlight(_("JavaScript Symbol"), temp_preferences.javascript_symbols_font, temp_preferences.javascript_symbols_size, 
-      temp_preferences.javascript_symbols_bold, temp_preferences.javascript_symbols_italic,
-      temp_preferences.javascript_symbols_fore, temp_preferences.javascript_symbols_back);
+    get_preferences_manager_style_settings(main_window.prefmg, "javascript_symbols", &font , &size, &fore, &back, &italic, &bold);
+    set_controls_to_highlight(_("JavaScript Symbol"), font, size, bold, italic, fore, back);
   }
   if (IS_FONT_NAME(current_highlighting_element, _("PHP Default"))) {
-    set_controls_to_highlight(_("PHP Default"), temp_preferences.php_default_font, temp_preferences.php_default_size, 
-      temp_preferences.php_default_bold, temp_preferences.php_default_italic,
-      temp_preferences.php_default_fore, temp_preferences.php_default_back);
+    get_preferences_manager_style_settings(main_window.prefmg, "php_default", &font , &size, &fore, &back, &italic, &bold);
+    set_controls_to_highlight(_("PHP Default"), font, size, bold, italic, fore, back);
   }
   if (IS_FONT_NAME(current_highlighting_element, _("PHP 'HString'"))) {
-    set_controls_to_highlight(_("PHP 'HString'"), temp_preferences.php_hstring_font, temp_preferences.php_hstring_size, 
-      temp_preferences.php_hstring_bold, temp_preferences.php_hstring_italic,
-      temp_preferences.php_hstring_fore, temp_preferences.php_hstring_back);
+    get_preferences_manager_style_settings(main_window.prefmg, "php_hstring", &font , &size, &fore, &back, &italic, &bold);
+    set_controls_to_highlight(_("PHP 'HString'"), font, size, bold, italic, fore, back);
   }
   if (IS_FONT_NAME(current_highlighting_element, _("PHP Simple String"))) {
-    set_controls_to_highlight(_("PHP Simple String"), temp_preferences.php_simplestring_font, temp_preferences.php_simplestring_size, 
-      temp_preferences.php_simplestring_bold, temp_preferences.php_simplestring_italic,
-      temp_preferences.php_simplestring_fore, temp_preferences.php_simplestring_back);
+    get_preferences_manager_style_settings(main_window.prefmg, "php_simplestring", &font , &size, &fore, &back, &italic, &bold);
+    set_controls_to_highlight(_("PHP Simple String"), font, size, bold, italic, fore, back);
   }
   if (IS_FONT_NAME(current_highlighting_element, _("PHP Word"))) {
-    set_controls_to_highlight(_("PHP Word"), temp_preferences.php_word_font, temp_preferences.php_word_size, 
-      temp_preferences.php_word_bold, temp_preferences.php_word_italic,
-      temp_preferences.php_word_fore, temp_preferences.php_word_back);
+    get_preferences_manager_style_settings(main_window.prefmg, "php_word", &font , &size, &fore, &back, &italic, &bold);
+    set_controls_to_highlight(_("PHP Word"), font, size, bold, italic, fore, back);
   }
   if (IS_FONT_NAME(current_highlighting_element, _("PHP Number"))) {
-    set_controls_to_highlight(_("PHP Number"), temp_preferences.php_number_font, temp_preferences.php_number_size, 
-      temp_preferences.php_number_bold, temp_preferences.php_number_italic,
-      temp_preferences.php_number_fore, temp_preferences.php_number_back);
+    get_preferences_manager_style_settings(main_window.prefmg, "php_number", &font , &size, &fore, &back, &italic, &bold);
+    set_controls_to_highlight(_("PHP Number"), font, size, bold, italic, fore, back);
   }
   if (IS_FONT_NAME(current_highlighting_element, _("PHP Variable"))) {
-    set_controls_to_highlight(_("PHP Variable"), temp_preferences.php_variable_font, temp_preferences.php_variable_size, 
-      temp_preferences.php_variable_bold, temp_preferences.php_variable_italic,
-      temp_preferences.php_variable_fore, temp_preferences.php_variable_back);
+    get_preferences_manager_style_settings(main_window.prefmg, "php_variable", &font , &size, &fore, &back, &italic, &bold);
+    set_controls_to_highlight(_("PHP Variable"), font, size, bold, italic, fore, back);
   }
   if (IS_FONT_NAME(current_highlighting_element, _("PHP Single-line Comment"))) {
-    set_controls_to_highlight(_("PHP Single-line Comment"), temp_preferences.php_comment_line_font, temp_preferences.php_comment_line_size, 
-      temp_preferences.php_comment_line_bold, temp_preferences.php_comment_line_italic,
-      temp_preferences.php_comment_line_fore, temp_preferences.php_comment_line_back);
-  }
+   get_preferences_manager_style_settings(main_window.prefmg, "php_comment_line", &font , &size, &fore, &back, &italic, &bold);
+    set_controls_to_highlight(_("PHP Single-line Comment"), font, size, bold, italic, fore, back);  
+}
   if (IS_FONT_NAME(current_highlighting_element, _("PHP Multiple-line Comment"))) {
-    set_controls_to_highlight(_("PHP Multiple-line Comment"), temp_preferences.php_comment_font, temp_preferences.php_comment_size, 
-      temp_preferences.php_comment_bold, temp_preferences.php_comment_italic,
-      temp_preferences.php_comment_fore, temp_preferences.php_comment_back);
-  }
+   get_preferences_manager_style_settings(main_window.prefmg, "php_comment", &font , &size, &fore, &back, &italic, &bold);
+    set_controls_to_highlight(_("PHP Multiple-line Comment"), font, size, bold, italic, fore, back);  
+}
   if (IS_FONT_NAME(current_highlighting_element, _("CSS Tag"))) {
-    set_controls_to_highlight(_("CSS Tag"), temp_preferences.css_tag_font, temp_preferences.css_tag_size, 
-      temp_preferences.css_tag_bold, temp_preferences.css_tag_italic,
-      temp_preferences.css_tag_fore, temp_preferences.css_tag_back);
+   get_preferences_manager_style_settings(main_window.prefmg, "css_tag", &font , &size, &fore, &back, &italic, &bold);
+    set_controls_to_highlight(_("CSS_Tag"), font, size, bold, italic, fore, back);
   }
   if (IS_FONT_NAME(current_highlighting_element, _("CSS Class"))) {
-    set_controls_to_highlight(_("CSS Class"), temp_preferences.css_class_font, temp_preferences.css_class_size, 
-      temp_preferences.css_class_bold, temp_preferences.css_class_italic,
-      temp_preferences.css_class_fore, temp_preferences.css_class_back);
+   get_preferences_manager_style_settings(main_window.prefmg, "css_class", &font , &size, &fore, &back, &italic, &bold);
+    set_controls_to_highlight(_("CSS Class"), font, size, bold, italic, fore, back);
   }
-  if (IS_FONT_NAME(current_highlighting_element, _("CSS Psuedoclass"))) {
-    set_controls_to_highlight(_("CSS Psuedoclass"), temp_preferences.css_pseudoclass_font, temp_preferences.css_pseudoclass_size, 
-      temp_preferences.css_pseudoclass_bold, temp_preferences.css_pseudoclass_italic,
-      temp_preferences.css_pseudoclass_fore, temp_preferences.css_pseudoclass_back);
+  if (IS_FONT_NAME(current_highlighting_element, _("CSS Pseudoclass"))) {
+   get_preferences_manager_style_settings(main_window.prefmg, "css_pseudoclass", &font , &size, &fore, &back, &italic, &bold);
+    set_controls_to_highlight(_("CSS Pseudoclass"), font, size, bold, italic, fore, back);
   }
   if (IS_FONT_NAME(current_highlighting_element, _("CSS Unknown Pseudoclass"))) {
-    set_controls_to_highlight(_("CSS Unknown Pseudoclass"), temp_preferences.css_unknown_pseudoclass_font, temp_preferences.css_unknown_pseudoclass_size, 
-      temp_preferences.css_unknown_pseudoclass_bold, temp_preferences.css_unknown_pseudoclass_italic,
-      temp_preferences.css_unknown_pseudoclass_fore, temp_preferences.css_unknown_pseudoclass_back);
+   get_preferences_manager_style_settings(main_window.prefmg, "css_unknown_pseudoclass", &font , &size, &fore, &back, &italic, &bold);
+    set_controls_to_highlight(_("CSS Unknown Pseudoclass"), font, size, bold, italic, fore, back);
   }
   if (IS_FONT_NAME(current_highlighting_element, _("CSS Operator"))) {
-    set_controls_to_highlight(_("CSS Operator"), temp_preferences.css_operator_font, temp_preferences.css_operator_size, 
-      temp_preferences.css_operator_bold, temp_preferences.css_operator_italic,
-      temp_preferences.css_operator_fore, temp_preferences.css_operator_back);
+   get_preferences_manager_style_settings(main_window.prefmg, "css_operator", &font , &size, &fore, &back, &italic, &bold);
+    set_controls_to_highlight(_("CSS Operator"), font, size, bold, italic, fore, back);
   }
   if (IS_FONT_NAME(current_highlighting_element, _("CSS Identifier"))) {
-    set_controls_to_highlight(_("CSS Identifier"), temp_preferences.css_identifier_font, temp_preferences.css_identifier_size, 
-      temp_preferences.css_identifier_bold, temp_preferences.css_identifier_italic,
-      temp_preferences.css_identifier_fore, temp_preferences.css_identifier_back);
+   get_preferences_manager_style_settings(main_window.prefmg, "css_identifier", &font , &size, &fore, &back, &italic, &bold);
+    set_controls_to_highlight(_("CSS Identifier"), font, size, bold, italic, fore, back);
   }
   if (IS_FONT_NAME(current_highlighting_element, _("CSS Unknown Identifier"))) {
-    set_controls_to_highlight(_("CSS Unknown Identifier"), temp_preferences.css_unknown_identifier_font, temp_preferences.css_unknown_identifier_size, 
-      temp_preferences.css_unknown_identifier_bold, temp_preferences.css_unknown_identifier_italic,
-      temp_preferences.css_unknown_identifier_fore, temp_preferences.css_unknown_identifier_back);
+   get_preferences_manager_style_settings(main_window.prefmg, "css_unknown_identifier", &font , &size, &fore, &back, &italic, &bold);
+    set_controls_to_highlight(_("CSS Unknown Identifier"), font, size, bold, italic, fore, back);
   }
   if (IS_FONT_NAME(current_highlighting_element, _("CSS Value"))) {
-    set_controls_to_highlight(_("CSS Value"), temp_preferences.css_value_font, temp_preferences.css_value_size, 
-      temp_preferences.css_value_bold, temp_preferences.css_value_italic,
-      temp_preferences.css_value_fore, temp_preferences.css_value_back);
+   get_preferences_manager_style_settings(main_window.prefmg, "css_value", &font , &size, &fore, &back, &italic, &bold);
+    set_controls_to_highlight(_("CSS Value"), font, size, bold, italic, fore, back);
   }
   if (IS_FONT_NAME(current_highlighting_element, _("CSS Comment"))) {
-    set_controls_to_highlight(_("CSS Comment"), temp_preferences.css_comment_font, temp_preferences.css_comment_size, 
-      temp_preferences.css_comment_bold, temp_preferences.css_comment_italic,
-      temp_preferences.css_comment_fore, temp_preferences.css_comment_back);
+   get_preferences_manager_style_settings(main_window.prefmg, "css_comment", &font , &size, &fore, &back, &italic, &bold);
+    set_controls_to_highlight(_("CSS Comment"), font, size, bold, italic, fore, back);
   }
   if (IS_FONT_NAME(current_highlighting_element, _("CSS ID"))) {
-    set_controls_to_highlight(_("CSS ID"), temp_preferences.css_id_font, temp_preferences.css_id_size, 
-      temp_preferences.css_id_bold, temp_preferences.css_id_italic,
-      temp_preferences.css_id_fore, temp_preferences.css_id_back);
+   get_preferences_manager_style_settings(main_window.prefmg, "css_id", &font , &size, &fore, &back, &italic, &bold);
+    set_controls_to_highlight(_("CSS Id"), font, size, bold, italic, fore, back);
   }
   if (IS_FONT_NAME(current_highlighting_element, _("CSS Important"))) {
-    set_controls_to_highlight(_("CSS Important"), temp_preferences.css_important_font, temp_preferences.css_important_size, 
-      temp_preferences.css_important_bold, temp_preferences.css_important_italic,
-      temp_preferences.css_important_fore, temp_preferences.css_important_back);
+   get_preferences_manager_style_settings(main_window.prefmg, "css_important", &font , &size, &fore, &back, &italic, &bold);
+    set_controls_to_highlight(_("CSS Important"), font, size, bold, italic, fore, back);
   }
   if (IS_FONT_NAME(current_highlighting_element, _("CSS Directive"))) {
-    set_controls_to_highlight(_("CSS Directive"), temp_preferences.css_directive_font, temp_preferences.css_directive_size, 
-      temp_preferences.css_directive_bold, temp_preferences.css_directive_italic,
-      temp_preferences.css_directive_fore, temp_preferences.css_directive_back);
+    get_preferences_manager_style_settings(main_window.prefmg, "css_directive", &font , &size, &fore, &back, &italic, &bold);
+    set_controls_to_highlight(_("CSS Directive"), font, size, bold, italic, fore, back);
   }
   if (IS_FONT_NAME(current_highlighting_element, _("SQL Word"))) {
-    set_controls_to_highlight(_("SQL Word"), temp_preferences.sql_word_font, temp_preferences.sql_word_size, 
-      temp_preferences.sql_word_bold, temp_preferences.sql_word_italic,
-      temp_preferences.sql_word_fore, temp_preferences.sql_word_back);
+    get_preferences_manager_style_settings(main_window.prefmg, "sql_word", &font , &size, &fore, &back, &italic, &bold);
+    set_controls_to_highlight(_("SQL Word"), font, size, bold, italic, fore, back);
   }
   if (IS_FONT_NAME(current_highlighting_element, _("SQL Identifier"))) {
-    set_controls_to_highlight(_("SQL Identifier"), temp_preferences.sql_identifier_font, temp_preferences.sql_identifier_size, 
-      temp_preferences.sql_identifier_bold, temp_preferences.sql_identifier_italic,
-      temp_preferences.sql_identifier_fore, temp_preferences.sql_identifier_back);
+    get_preferences_manager_style_settings(main_window.prefmg, "sql_identifier", &font , &size, &fore, &back, &italic, &bold);
+    set_controls_to_highlight(_("SQL Identifier"), font, size, bold, italic, fore, back);
   }
   if (IS_FONT_NAME(current_highlighting_element, _("SQL Number"))) {
-    set_controls_to_highlight(_("SQL Number"), temp_preferences.sql_number_font, temp_preferences.sql_number_size, 
-      temp_preferences.sql_number_bold, temp_preferences.sql_number_italic,
-      temp_preferences.sql_number_fore, temp_preferences.sql_number_back);
+    get_preferences_manager_style_settings(main_window.prefmg, "sql_number", &font , &size, &fore, &back, &italic, &bold);
+    set_controls_to_highlight(_("SQL Number"), font, size, bold, italic, fore, back);
   }
   if (IS_FONT_NAME(current_highlighting_element, _("SQL String"))) {
-    set_controls_to_highlight(_("SQL String"), temp_preferences.sql_string_font, temp_preferences.sql_string_size, 
-      temp_preferences.sql_string_bold, temp_preferences.sql_string_italic,
-      temp_preferences.sql_string_fore, temp_preferences.sql_string_back);
+    get_preferences_manager_style_settings(main_window.prefmg, "sql_string", &font , &size, &fore, &back, &italic, &bold);
+    set_controls_to_highlight(_("SQL String"), font, size, bold, italic, fore, back);
   }
   if (IS_FONT_NAME(current_highlighting_element, _("SQL Operator"))) {
-    set_controls_to_highlight(_("SQL Operator"), temp_preferences.sql_operator_font, temp_preferences.sql_operator_size, 
-      temp_preferences.sql_operator_bold, temp_preferences.sql_operator_italic,
-      temp_preferences.sql_operator_fore, temp_preferences.sql_operator_back);
+    get_preferences_manager_style_settings(main_window.prefmg, "sql_operator", &font , &size, &fore, &back, &italic, &bold);
+    set_controls_to_highlight(_("SQL Operator"), font, size, bold, italic, fore, back);
   }
   if (IS_FONT_NAME(current_highlighting_element, _("SQL Comment"))) {
-    set_controls_to_highlight(_("SQL Comment"), temp_preferences.sql_comment_font, temp_preferences.sql_comment_size, 
-      temp_preferences.sql_comment_bold, temp_preferences.sql_comment_italic,
-      temp_preferences.sql_comment_fore, temp_preferences.sql_comment_back);
+    get_preferences_manager_style_settings(main_window.prefmg, "sql_comment", &font , &size, &fore, &back, &italic, &bold);
+    set_controls_to_highlight(_("SQL Comment"), font, size, bold, italic, fore, back);
   }
   if (IS_FONT_NAME(current_highlighting_element, _("C Default"))) {
-    set_controls_to_highlight(_("C Default"), temp_preferences.c_default_font, temp_preferences.c_default_size, 
-      temp_preferences.c_default_bold, temp_preferences.c_default_italic,
-      temp_preferences.c_default_fore, temp_preferences.c_default_back);
+    get_preferences_manager_style_settings(main_window.prefmg, "c_default", &font , &size, &fore, &back, &italic, &bold);
+    set_controls_to_highlight(_("C Default"), font, size, bold, italic, fore, back);
   }
   if (IS_FONT_NAME(current_highlighting_element, _("C String"))) {
-    set_controls_to_highlight(_("C String"), temp_preferences.c_string_font, temp_preferences.c_string_size,
-      temp_preferences.c_string_bold, temp_preferences.c_string_italic,
-      temp_preferences.c_string_fore, temp_preferences.c_string_back);
+    get_preferences_manager_style_settings(main_window.prefmg, "c_string", &font , &size, &fore, &back, &italic, &bold);
+    set_controls_to_highlight(_("C String"), font, size, bold, italic, fore, back);
   }
   if (IS_FONT_NAME(current_highlighting_element, _("C Character"))) {
-    set_controls_to_highlight(_("C Character"), temp_preferences.c_character_font, temp_preferences.c_character_size,
-      temp_preferences.c_character_bold, temp_preferences.c_character_italic,
-      temp_preferences.c_character_fore, temp_preferences.c_character_back);
+    get_preferences_manager_style_settings(main_window.prefmg, "c_character", &font , &size, &fore, &back, &italic, &bold);
+    set_controls_to_highlight(_("C Character"), font, size, bold, italic, fore, back);
   }
   if (IS_FONT_NAME(current_highlighting_element, _("C Word"))) {
-    set_controls_to_highlight(_("C Word"), temp_preferences.c_word_font, temp_preferences.c_word_size,
-      temp_preferences.c_word_bold, temp_preferences.c_word_italic,
-      temp_preferences.c_word_fore, temp_preferences.c_word_back);
+    get_preferences_manager_style_settings(main_window.prefmg, "c_word", &font , &size, &fore, &back, &italic, &bold);
+    set_controls_to_highlight(_("C Word"), font, size, bold, italic, fore, back);
   }
   if (IS_FONT_NAME(current_highlighting_element, _("C Number"))) {
-    set_controls_to_highlight(_("C Number"), temp_preferences.c_number_font, temp_preferences.c_number_size,
-      temp_preferences.c_number_bold, temp_preferences.c_number_italic,
-      temp_preferences.c_number_fore, temp_preferences.c_number_back);
+    get_preferences_manager_style_settings(main_window.prefmg, "c_number", &font , &size, &fore, &back, &italic, &bold);
+    set_controls_to_highlight(_("C Number"), font, size, bold, italic, fore, back);
   }
   if (IS_FONT_NAME(current_highlighting_element, _("C Identifier"))) {
-    set_controls_to_highlight(_("C Identifier"), temp_preferences.c_identifier_font, temp_preferences.c_identifier_size,
-      temp_preferences.c_identifier_bold, temp_preferences.c_identifier_italic,
-      temp_preferences.c_identifier_fore, temp_preferences.c_identifier_back);
+    get_preferences_manager_style_settings(main_window.prefmg, "c_identifier", &font , &size, &fore, &back, &italic, &bold);
+    set_controls_to_highlight(_("C Identifier"), font, size, bold, italic, fore, back);
   }
   if (IS_FONT_NAME(current_highlighting_element, _("C Comment"))) {
-    set_controls_to_highlight(_("C Comment"), temp_preferences.c_comment_font, temp_preferences.c_comment_size,
-      temp_preferences.c_comment_bold, temp_preferences.c_comment_italic,
-      temp_preferences.c_comment_fore, temp_preferences.c_comment_back);
+    get_preferences_manager_style_settings(main_window.prefmg, "c_comment", &font , &size, &fore, &back, &italic, &bold);
+    set_controls_to_highlight(_("C Comment"), font, size, bold, italic, fore, back);
   }
   if (IS_FONT_NAME(current_highlighting_element, _("C Commentline"))) {
-    set_controls_to_highlight(_("C Commentline"), temp_preferences.c_commentline_font, temp_preferences.c_commentline_size,
-      temp_preferences.c_commentline_bold, temp_preferences.c_commentline_italic,
-      temp_preferences.c_commentline_fore, temp_preferences.c_commentline_back);
+    get_preferences_manager_style_settings(main_window.prefmg, "c_commentline", &font , &size, &fore, &back, &italic, &bold);
+    set_controls_to_highlight(_("C Commentline"), font, size, bold, italic, fore, back);
   }
   if (IS_FONT_NAME(current_highlighting_element, _("C Preprocesor"))) {
-    set_controls_to_highlight(_("C Preprocesor"), temp_preferences.c_preprocesor_font, temp_preferences.c_preprocesor_size,
-      temp_preferences.c_preprocesor_bold, temp_preferences.c_preprocesor_italic,
-      temp_preferences.c_preprocesor_fore, temp_preferences.c_preprocesor_back);
+    get_preferences_manager_style_settings(main_window.prefmg, "c_preprocesor", &font , &size, &fore, &back, &italic, &bold);
+    set_controls_to_highlight(_("C Preprocesor"), font, size, bold, italic, fore, back);
   }
   if (IS_FONT_NAME(current_highlighting_element, _("C Operator"))) {
-    set_controls_to_highlight(_("C Operator"), temp_preferences.c_operator_font, temp_preferences.c_operator_size,
-      temp_preferences.c_operator_bold, temp_preferences.c_operator_italic,
-      temp_preferences.c_operator_fore, temp_preferences.c_operator_back);
+    get_preferences_manager_style_settings(main_window.prefmg, "c_operator", &font , &size, &fore, &back, &italic, &bold);
+    set_controls_to_highlight(_("C Operator"), font, size, bold, italic, fore, back);
   }
   if (IS_FONT_NAME(current_highlighting_element, _("C Regex"))) {
-    set_controls_to_highlight(_("C Regex"), temp_preferences.c_regex_font, temp_preferences.c_regex_size,
-      temp_preferences.c_regex_bold, temp_preferences.c_regex_italic,
-      temp_preferences.c_regex_fore, temp_preferences.c_regex_back);
+    get_preferences_manager_style_settings(main_window.prefmg, "c_regex", &font , &size, &fore, &back, &italic, &bold);
+    set_controls_to_highlight(_("C Regex"), font, size, bold, italic, fore, back);
   }
   if (IS_FONT_NAME(current_highlighting_element, _("C UUID"))) {
-    set_controls_to_highlight(_("C UUID"), temp_preferences.c_uuid_font, temp_preferences.c_uuid_size,
-      temp_preferences.c_uuid_bold, temp_preferences.c_uuid_italic,
-      temp_preferences.c_uuid_fore, temp_preferences.c_uuid_back);
+    get_preferences_manager_style_settings(main_window.prefmg, "c_uuid", &font , &size, &fore, &back, &italic, &bold);
+    set_controls_to_highlight(_("C UUID"), font, size, bold, italic, fore, back);
   }
   if (IS_FONT_NAME(current_highlighting_element, _("C Verbatim"))) {
-    set_controls_to_highlight(_("C Verbatim"), temp_preferences.c_verbatim_font, temp_preferences.c_verbatim_size,
-      temp_preferences.c_verbatim_bold, temp_preferences.c_verbatim_italic,
-      temp_preferences.c_verbatim_fore, temp_preferences.c_verbatim_back);
+    get_preferences_manager_style_settings(main_window.prefmg, "c_verbatim", &font , &size, &fore, &back, &italic, &bold);
+    set_controls_to_highlight(_("C Verbatim"), font, size, bold, italic, fore, back);
   }
   if (IS_FONT_NAME(current_highlighting_element, _("C Globalclass"))) {
-    set_controls_to_highlight(_("C Globalclass"), temp_preferences.c_globalclass_font, temp_preferences.c_globalclass_size,
-      temp_preferences.c_globalclass_bold, temp_preferences.c_globalclass_italic,
-      temp_preferences.c_globalclass_fore, temp_preferences.c_globalclass_back);
+    get_preferences_manager_style_settings(main_window.prefmg, "c_globalclass", &font , &size, &fore, &back, &italic, &bold);
+    set_controls_to_highlight(_("C Globalclass"), font, size, bold, italic, fore, back);
   }
 }
 
@@ -593,10 +522,9 @@ void apply_preferences(GtkButton *button, gpointer data)
   GSList *walk;
   Editor *editor;
 
-  set_current_preferences();
   for (walk = editors; walk!=NULL; walk = g_slist_next(walk)) {
     editor = walk->data;
-    tab_set_configured_scintilla_properties(GTK_SCINTILLA(editor->scintilla), preferences);
+    tab_set_configured_scintilla_properties(GTK_SCINTILLA(editor->scintilla));
     tab_check_php_file(editor);
     tab_check_css_file(editor);
     tab_check_cxx_file(editor);
@@ -607,15 +535,19 @@ void apply_preferences(GtkButton *button, gpointer data)
   }
 }
 
-
-void ok_clicked(GtkButton *button, gpointer data)
+void response_preferences (GtkDialog *dialog, gint response_id, gpointer   user_data)
 {
-  apply_preferences(button, data);
-  //g_print("OK\n");
-  gtk_widget_destroy(preferences_dialog.window);
+  if (response_id == GTK_RESPONSE_DELETE_EVENT){
+    preferences_manager_restore_data(main_window.prefmg);
+  } else if (response_id == GTK_RESPONSE_ACCEPT){
+      apply_preferences(NULL, NULL);      
+      // Save the preferences definitely
+      preferences_manager_save_data(main_window.prefmg);
+  } else { //GTK_RESPONSE_REJECT
+    preferences_manager_restore_data(main_window.prefmg);  
+    apply_preferences(NULL, NULL);
+  }
 }
-
-
 void change_font_global_callback(gint reply, gpointer data)
 {
   gchar *fontname;
@@ -623,72 +555,71 @@ void change_font_global_callback(gint reply, gpointer data)
   //g_print("change_font_global: %d, YES=%d, NO=%d\n", reply, GTK_RESPONSE_YES, GTK_RESPONSE_NO);
   if (reply==GTK_RESPONSE_YES) {
     fontname = g_strdup((gchar *)data); 
-    
-    temp_preferences.default_font = fontname;
-    temp_preferences.line_number_font = fontname;
-    temp_preferences.html_tag_font = fontname;
-    temp_preferences.html_tag_unknown_font = fontname;
-    temp_preferences.html_attribute_font = fontname;
-    temp_preferences.html_attribute_unknown_font = fontname;
-    temp_preferences.html_number_font = fontname;
-    temp_preferences.html_single_string_font = fontname;
-    temp_preferences.html_double_string_font = fontname;
-    temp_preferences.html_comment_font = fontname;
-    temp_preferences.html_entity_font = fontname;
-    temp_preferences.html_script_font = fontname;
-    temp_preferences.html_question_font = fontname;
-    temp_preferences.html_value_font = fontname;
-    temp_preferences.javascript_comment_font = fontname;
-    temp_preferences.javascript_comment_line_font = fontname;
-    temp_preferences.javascript_comment_doc_font = fontname;
-    temp_preferences.javascript_word_font = fontname;
-    temp_preferences.javascript_keyword_font = fontname;
-    temp_preferences.javascript_doublestring_font = fontname;
-    temp_preferences.javascript_singlestring_font = fontname;
-    temp_preferences.javascript_symbols_font = fontname;
-    temp_preferences.php_default_font = fontname;
-    temp_preferences.php_hstring_font = fontname;
-    temp_preferences.php_simplestring_font = fontname;
-    temp_preferences.php_word_font = fontname;
-    temp_preferences.php_number_font = fontname;
-    temp_preferences.php_variable_font = fontname;
-    temp_preferences.php_comment_font = fontname;
-    temp_preferences.php_comment_line_font = fontname;
-    temp_preferences.css_tag_font = fontname;
-    temp_preferences.css_class_font = fontname;
-    temp_preferences.css_pseudoclass_font = fontname;
-    temp_preferences.css_unknown_pseudoclass_font = fontname;
-    temp_preferences.css_operator_font = fontname;
-    temp_preferences.css_identifier_font = fontname;
-    temp_preferences.css_unknown_identifier_font = fontname;
-    temp_preferences.css_value_font = fontname;
-    temp_preferences.css_comment_font = fontname;
-    temp_preferences.css_id_font = fontname;
-    temp_preferences.css_important_font = fontname;
-    temp_preferences.css_directive_font = fontname;
-    temp_preferences.sql_word_font = fontname;
-    temp_preferences.sql_string_font = fontname;
-    temp_preferences.sql_operator_font = fontname;
-    temp_preferences.sql_comment_font = fontname;
-    temp_preferences.sql_number_font = fontname;
-    temp_preferences.sql_identifier_font = fontname;
-    temp_preferences.c_default_font=fontname;
-    temp_preferences.c_string_font=fontname;
-    temp_preferences.c_character_font=fontname;
-    temp_preferences.c_word_font=fontname;
-    temp_preferences.c_number_font=fontname;
-    temp_preferences.c_identifier_font=fontname;
-    temp_preferences.c_comment_font=fontname;
-    temp_preferences.c_commentline_font=fontname;
-    temp_preferences.c_preprocesor_font=fontname;
-    temp_preferences.c_operator_font=fontname;
-    temp_preferences.c_regex_font=fontname;
-    temp_preferences.c_uuid_font=fontname;
-    temp_preferences.c_verbatim_font=fontname;
-    temp_preferences.c_globalclass_font=fontname;
+    set_preferences_manager_style_settings(main_window.prefmg, "default_style", fontname , NULL, NULL, NULL, NULL, NULL);
+    set_preferences_manager_style_settings(main_window.prefmg, "line_numbers", fontname , NULL, NULL, NULL, NULL, NULL);
+    set_preferences_manager_style_settings(main_window.prefmg, "html_tag", fontname , NULL, NULL, NULL, NULL, NULL);
+    set_preferences_manager_style_settings(main_window.prefmg, "html_tag_unknown", fontname , NULL, NULL, NULL, NULL, NULL);
+    set_preferences_manager_style_settings(main_window.prefmg, "html_attribute", fontname , NULL, NULL, NULL, NULL, NULL);
+    set_preferences_manager_style_settings(main_window.prefmg, "html_attribute_unknown", fontname , NULL, NULL, NULL, NULL, NULL);
+    set_preferences_manager_style_settings(main_window.prefmg, "html_number", fontname , NULL, NULL, NULL, NULL, NULL);
+    set_preferences_manager_style_settings(main_window.prefmg, "html_single_string", fontname , NULL, NULL, NULL, NULL, NULL);
+    set_preferences_manager_style_settings(main_window.prefmg, "html_double_string", fontname , NULL, NULL, NULL, NULL, NULL);
+    set_preferences_manager_style_settings(main_window.prefmg, "html_comment", fontname , NULL, NULL, NULL, NULL, NULL);
+    set_preferences_manager_style_settings(main_window.prefmg, "html_entity", fontname , NULL, NULL, NULL, NULL, NULL);
+    set_preferences_manager_style_settings(main_window.prefmg, "html_script", fontname , NULL, NULL, NULL, NULL, NULL);
+    set_preferences_manager_style_settings(main_window.prefmg, "html_question", fontname , NULL, NULL, NULL, NULL, NULL);
+    set_preferences_manager_style_settings(main_window.prefmg, "html_value", fontname , NULL, NULL, NULL, NULL, NULL);
+    set_preferences_manager_style_settings(main_window.prefmg, "javascript_comment", fontname , NULL, NULL, NULL, NULL, NULL);
+    set_preferences_manager_style_settings(main_window.prefmg, "javascript_comment_line", fontname , NULL, NULL, NULL, NULL, NULL);
+    set_preferences_manager_style_settings(main_window.prefmg, "javascript_comment_doc", fontname , NULL, NULL, NULL, NULL, NULL);
+    set_preferences_manager_style_settings(main_window.prefmg, "javascript_word", fontname , NULL, NULL, NULL, NULL, NULL);
+    set_preferences_manager_style_settings(main_window.prefmg, "javascript_keyword", fontname , NULL, NULL, NULL, NULL, NULL);
+    set_preferences_manager_style_settings(main_window.prefmg, "javascript_doublestring", fontname , NULL, NULL, NULL, NULL, NULL);
+    set_preferences_manager_style_settings(main_window.prefmg, "javascript_singlestring", fontname , NULL, NULL, NULL, NULL, NULL);
+    set_preferences_manager_style_settings(main_window.prefmg, "javascript_symbols", fontname , NULL, NULL, NULL, NULL, NULL);
+    set_preferences_manager_style_settings(main_window.prefmg, "php_default", fontname , NULL, NULL, NULL, NULL, NULL);
+    set_preferences_manager_style_settings(main_window.prefmg, "php_hstring", fontname , NULL, NULL, NULL, NULL, NULL);
+    set_preferences_manager_style_settings(main_window.prefmg, "php_simplestring", fontname , NULL, NULL, NULL, NULL, NULL);
+    set_preferences_manager_style_settings(main_window.prefmg, "php_word", fontname , NULL, NULL, NULL, NULL, NULL);
+    set_preferences_manager_style_settings(main_window.prefmg, "php_number", fontname , NULL, NULL, NULL, NULL, NULL);
+    set_preferences_manager_style_settings(main_window.prefmg, "php_variable", fontname , NULL, NULL, NULL, NULL, NULL);
+    set_preferences_manager_style_settings(main_window.prefmg, "php_comment", fontname , NULL, NULL, NULL, NULL, NULL);
+    set_preferences_manager_style_settings(main_window.prefmg, "php_comment_line", fontname , NULL, NULL, NULL, NULL, NULL);
+    set_preferences_manager_style_settings(main_window.prefmg, "css_tag", fontname , NULL, NULL, NULL, NULL, NULL);
+    set_preferences_manager_style_settings(main_window.prefmg, "css_class", fontname , NULL, NULL, NULL, NULL, NULL);
+    set_preferences_manager_style_settings(main_window.prefmg, "css_pseudoclass", fontname , NULL, NULL, NULL, NULL, NULL);
+    set_preferences_manager_style_settings(main_window.prefmg, "css_unknown_pseudoclass", fontname , NULL, NULL, NULL, NULL, NULL);
+    set_preferences_manager_style_settings(main_window.prefmg, "css_operator", fontname , NULL, NULL, NULL, NULL, NULL);
+    set_preferences_manager_style_settings(main_window.prefmg, "css_identifier", fontname , NULL, NULL, NULL, NULL, NULL);
+    set_preferences_manager_style_settings(main_window.prefmg, "css_unknown_identifier", fontname , NULL, NULL, NULL, NULL, NULL);
+    set_preferences_manager_style_settings(main_window.prefmg, "css_value", fontname , NULL, NULL, NULL, NULL, NULL);
+    set_preferences_manager_style_settings(main_window.prefmg, "css_comment", fontname , NULL, NULL, NULL, NULL, NULL);
+    set_preferences_manager_style_settings(main_window.prefmg, "css_id", fontname , NULL, NULL, NULL, NULL, NULL);
+    set_preferences_manager_style_settings(main_window.prefmg, "css_important", fontname , NULL, NULL, NULL, NULL, NULL);
+    set_preferences_manager_style_settings(main_window.prefmg, "css_directive", fontname , NULL, NULL, NULL, NULL, NULL);
+    set_preferences_manager_style_settings(main_window.prefmg, "sql_word", fontname , NULL, NULL, NULL, NULL, NULL);
+    set_preferences_manager_style_settings(main_window.prefmg, "sql_string", fontname , NULL, NULL, NULL, NULL, NULL);
+    set_preferences_manager_style_settings(main_window.prefmg, "sql_operator", fontname , NULL, NULL, NULL, NULL, NULL);
+    set_preferences_manager_style_settings(main_window.prefmg, "sql_comment", fontname , NULL, NULL, NULL, NULL, NULL);
+    set_preferences_manager_style_settings(main_window.prefmg, "sql_number", fontname , NULL, NULL, NULL, NULL, NULL);
+    set_preferences_manager_style_settings(main_window.prefmg, "sql_identifier", fontname , NULL, NULL, NULL, NULL, NULL);
+    set_preferences_manager_style_settings(main_window.prefmg, "c_default", fontname , NULL, NULL, NULL, NULL, NULL);
+    set_preferences_manager_style_settings(main_window.prefmg, "c_string", fontname , NULL, NULL, NULL, NULL, NULL);
+    set_preferences_manager_style_settings(main_window.prefmg, "c_character", fontname , NULL, NULL, NULL, NULL, NULL);
+    set_preferences_manager_style_settings(main_window.prefmg, "c_word", fontname , NULL, NULL, NULL, NULL, NULL);
+    set_preferences_manager_style_settings(main_window.prefmg, "c_commentline", fontname , NULL, NULL, NULL, NULL, NULL);
+    set_preferences_manager_style_settings(main_window.prefmg, "c_number", fontname , NULL, NULL, NULL, NULL, NULL);
+	  set_preferences_manager_style_settings(main_window.prefmg, "c_identifier", fontname , NULL, NULL, NULL, NULL, NULL);
+    set_preferences_manager_style_settings(main_window.prefmg, "c_comment", fontname , NULL, NULL, NULL, NULL, NULL);
+    set_preferences_manager_style_settings(main_window.prefmg, "c_preprocesor", fontname , NULL, NULL, NULL, NULL, NULL);
+    set_preferences_manager_style_settings(main_window.prefmg, "c_operator", fontname , NULL, NULL, NULL, NULL, NULL);
+    set_preferences_manager_style_settings(main_window.prefmg, "c_regex", fontname , NULL, NULL, NULL, NULL, NULL);
+    set_preferences_manager_style_settings(main_window.prefmg, "c_uuid", fontname , NULL, NULL, NULL, NULL, NULL);
+    set_preferences_manager_style_settings(main_window.prefmg, "c_verbatim", fontname , NULL, NULL, NULL, NULL, NULL);
+    set_preferences_manager_style_settings(main_window.prefmg, "c_globalclass", fontname , NULL, NULL, NULL, NULL, NULL);
   }
   
-  scintilla_php_set_lexer(GTK_SCINTILLA(preferences_dialog.highlighting_editor->scintilla), temp_preferences);
+  scintilla_php_set_lexer(GTK_SCINTILLA(preferences_dialog.highlighting_editor->scintilla));
 }
 
 
@@ -698,439 +629,315 @@ void change_size_global_callback(gint reply,gpointer data)
 
   //g_print("change_size_global: %d\n", reply);
   if (reply==GTK_RESPONSE_YES) {
-    fontsize = (gulong)data; // was (gint)
+    fontsize =  GPOINTER_TO_INT (data);
     
-    temp_preferences.default_size = fontsize;
-    temp_preferences.line_number_size = fontsize;
-    temp_preferences.html_tag_size = fontsize;
-    temp_preferences.html_tag_unknown_size = fontsize;
-    temp_preferences.html_attribute_size = fontsize;
-    temp_preferences.html_attribute_unknown_size = fontsize;
-    temp_preferences.html_number_size = fontsize;
-    temp_preferences.html_single_string_size = fontsize;
-    temp_preferences.html_double_string_size = fontsize;
-    temp_preferences.html_comment_size = fontsize;
-    temp_preferences.html_entity_size = fontsize;
-    temp_preferences.html_script_size = fontsize;
-    temp_preferences.html_question_size = fontsize;
-    temp_preferences.html_value_size = fontsize;
-    temp_preferences.javascript_comment_size = fontsize;
-    temp_preferences.javascript_comment_line_size = fontsize;
-    temp_preferences.javascript_comment_doc_size = fontsize;
-    temp_preferences.javascript_word_size = fontsize;
-    temp_preferences.javascript_keyword_size = fontsize;
-    temp_preferences.javascript_doublestring_size = fontsize;
-    temp_preferences.javascript_singlestring_size = fontsize;
-    temp_preferences.javascript_symbols_size = fontsize;
-    temp_preferences.php_default_size = fontsize;
-    temp_preferences.php_hstring_size = fontsize;
-    temp_preferences.php_simplestring_size = fontsize;
-    temp_preferences.php_word_size = fontsize;
-    temp_preferences.php_number_size = fontsize;
-    temp_preferences.php_variable_size = fontsize;
-    temp_preferences.php_comment_size = fontsize;
-    temp_preferences.php_comment_line_size = fontsize;
-    temp_preferences.css_tag_size = fontsize;
-    temp_preferences.css_class_size = fontsize;
-    temp_preferences.css_pseudoclass_size = fontsize;
-    temp_preferences.css_unknown_pseudoclass_size = fontsize;
-    temp_preferences.css_operator_size = fontsize;
-    temp_preferences.css_identifier_size = fontsize;
-    temp_preferences.css_unknown_identifier_size = fontsize;
-    temp_preferences.css_value_size = fontsize;
-    temp_preferences.css_comment_size = fontsize;
-    temp_preferences.css_id_size = fontsize;
-    temp_preferences.css_important_size = fontsize;
-    temp_preferences.css_directive_size = fontsize;
-    temp_preferences.sql_word_size = fontsize;
-    temp_preferences.sql_string_size = fontsize;
-    temp_preferences.sql_operator_size = fontsize;
-    temp_preferences.sql_comment_size = fontsize;
-    temp_preferences.sql_number_size = fontsize;
-    temp_preferences.sql_identifier_size = fontsize;
-    temp_preferences.c_default_size=fontsize;
-    temp_preferences.c_string_size=fontsize;
-    temp_preferences.c_character_size=fontsize;
-    temp_preferences.c_word_size=fontsize;
-    temp_preferences.c_number_size=fontsize;
-    temp_preferences.c_identifier_size=fontsize;
-    temp_preferences.c_comment_size=fontsize;
-    temp_preferences.c_commentline_size=fontsize;
-    temp_preferences.c_preprocesor_size=fontsize;
-    temp_preferences.c_operator_size=fontsize;
-    temp_preferences.c_regex_size=fontsize;
-    temp_preferences.c_uuid_size=fontsize;
-    temp_preferences.c_verbatim_size=fontsize;
-    temp_preferences.c_globalclass_size=fontsize;
+    set_preferences_manager_style_settings(main_window.prefmg, "default_style", NULL, &fontsize, NULL, NULL, NULL, NULL);
+    set_preferences_manager_style_settings(main_window.prefmg, "line_numbers", NULL, &fontsize, NULL, NULL, NULL, NULL);
+    set_preferences_manager_style_settings(main_window.prefmg, "html_tag", NULL, &fontsize, NULL, NULL, NULL, NULL);
+    set_preferences_manager_style_settings(main_window.prefmg, "html_tag_unknown", NULL, &fontsize, NULL, NULL, NULL, NULL);
+    set_preferences_manager_style_settings(main_window.prefmg, "html_attribute", NULL, &fontsize, NULL, NULL, NULL, NULL);
+    set_preferences_manager_style_settings(main_window.prefmg, "html_attribute_unknown", NULL, &fontsize, NULL, NULL, NULL, NULL);
+    set_preferences_manager_style_settings(main_window.prefmg, "html_number", NULL, &fontsize, NULL, NULL, NULL, NULL);
+    set_preferences_manager_style_settings(main_window.prefmg, "html_single_string", NULL, &fontsize, NULL, NULL, NULL, NULL);
+    set_preferences_manager_style_settings(main_window.prefmg, "html_double_string", NULL, &fontsize, NULL, NULL, NULL, NULL);
+    set_preferences_manager_style_settings(main_window.prefmg, "html_comment", NULL, &fontsize, NULL, NULL, NULL, NULL);
+    set_preferences_manager_style_settings(main_window.prefmg, "html_entity", NULL, &fontsize, NULL, NULL, NULL, NULL);
+    set_preferences_manager_style_settings(main_window.prefmg, "html_script", NULL, &fontsize, NULL, NULL, NULL, NULL);
+    set_preferences_manager_style_settings(main_window.prefmg, "html_question", NULL, &fontsize, NULL, NULL, NULL, NULL);
+    set_preferences_manager_style_settings(main_window.prefmg, "html_value", NULL, &fontsize, NULL, NULL, NULL, NULL);
+    set_preferences_manager_style_settings(main_window.prefmg, "javascript_comment", NULL, &fontsize, NULL, NULL, NULL, NULL);
+    set_preferences_manager_style_settings(main_window.prefmg, "javascript_comment_line", NULL, &fontsize, NULL, NULL, NULL, NULL);
+    set_preferences_manager_style_settings(main_window.prefmg, "javascript_comment_doc", NULL, &fontsize, NULL, NULL, NULL, NULL);
+    set_preferences_manager_style_settings(main_window.prefmg, "javascript_word", NULL, &fontsize, NULL, NULL, NULL, NULL);
+    set_preferences_manager_style_settings(main_window.prefmg, "javascript_keyword", NULL, &fontsize, NULL, NULL, NULL, NULL);
+    set_preferences_manager_style_settings(main_window.prefmg, "javascript_doublestring", NULL, &fontsize, NULL, NULL, NULL, NULL);
+    set_preferences_manager_style_settings(main_window.prefmg, "javascript_singlestring", NULL, &fontsize, NULL, NULL, NULL, NULL);
+    set_preferences_manager_style_settings(main_window.prefmg, "javascript_symbols", NULL, &fontsize, NULL, NULL, NULL, NULL);
+    set_preferences_manager_style_settings(main_window.prefmg, "php_default", NULL, &fontsize, NULL, NULL, NULL, NULL);
+    set_preferences_manager_style_settings(main_window.prefmg, "php_hstring", NULL, &fontsize, NULL, NULL, NULL, NULL);
+    set_preferences_manager_style_settings(main_window.prefmg, "php_simplestring", NULL, &fontsize, NULL, NULL, NULL, NULL);
+    set_preferences_manager_style_settings(main_window.prefmg, "php_word", NULL, &fontsize, NULL, NULL, NULL, NULL);
+    set_preferences_manager_style_settings(main_window.prefmg, "php_number", NULL, &fontsize, NULL, NULL, NULL, NULL);
+    set_preferences_manager_style_settings(main_window.prefmg, "php_variable", NULL, &fontsize, NULL, NULL, NULL, NULL);
+    set_preferences_manager_style_settings(main_window.prefmg, "php_comment", NULL, &fontsize, NULL, NULL, NULL, NULL);
+    set_preferences_manager_style_settings(main_window.prefmg, "php_comment_line", NULL, &fontsize, NULL, NULL, NULL, NULL);
+    set_preferences_manager_style_settings(main_window.prefmg, "css_tag", NULL, &fontsize, NULL, NULL, NULL, NULL);
+    set_preferences_manager_style_settings(main_window.prefmg, "css_class", NULL, &fontsize, NULL, NULL, NULL, NULL);
+    set_preferences_manager_style_settings(main_window.prefmg, "css_pseudoclass", NULL, &fontsize, NULL, NULL, NULL, NULL);
+    set_preferences_manager_style_settings(main_window.prefmg, "css_unknown_pseudoclass", NULL, &fontsize, NULL, NULL, NULL, NULL);
+    set_preferences_manager_style_settings(main_window.prefmg, "css_operator", NULL, &fontsize, NULL, NULL, NULL, NULL);
+    set_preferences_manager_style_settings(main_window.prefmg, "css_identifier", NULL, &fontsize, NULL, NULL, NULL, NULL);
+    set_preferences_manager_style_settings(main_window.prefmg, "css_unknown_identifier", NULL, &fontsize, NULL, NULL, NULL, NULL);
+    set_preferences_manager_style_settings(main_window.prefmg, "css_value", NULL, &fontsize, NULL, NULL, NULL, NULL);
+    set_preferences_manager_style_settings(main_window.prefmg, "css_comment", NULL, &fontsize, NULL, NULL, NULL, NULL);
+    set_preferences_manager_style_settings(main_window.prefmg, "css_id", NULL, &fontsize, NULL, NULL, NULL, NULL);
+    set_preferences_manager_style_settings(main_window.prefmg, "css_important", NULL, &fontsize, NULL, NULL, NULL, NULL);
+    set_preferences_manager_style_settings(main_window.prefmg, "css_directive", NULL, &fontsize, NULL, NULL, NULL, NULL);
+    set_preferences_manager_style_settings(main_window.prefmg, "sql_word", NULL, &fontsize, NULL, NULL, NULL, NULL);
+    set_preferences_manager_style_settings(main_window.prefmg, "sql_string", NULL, &fontsize, NULL, NULL, NULL, NULL);
+    set_preferences_manager_style_settings(main_window.prefmg, "sql_operator", NULL, &fontsize, NULL, NULL, NULL, NULL);
+    set_preferences_manager_style_settings(main_window.prefmg, "sql_comment", NULL, &fontsize, NULL, NULL, NULL, NULL);
+    set_preferences_manager_style_settings(main_window.prefmg, "sql_number", NULL, &fontsize, NULL, NULL, NULL, NULL);
+    set_preferences_manager_style_settings(main_window.prefmg, "sql_identifier", NULL, &fontsize, NULL, NULL, NULL, NULL);
+    set_preferences_manager_style_settings(main_window.prefmg, "c_default", NULL, &fontsize, NULL, NULL, NULL, NULL);
+    set_preferences_manager_style_settings(main_window.prefmg, "c_string", NULL, &fontsize, NULL, NULL, NULL, NULL);
+    set_preferences_manager_style_settings(main_window.prefmg, "c_character", NULL, &fontsize, NULL, NULL, NULL, NULL);
+    set_preferences_manager_style_settings(main_window.prefmg, "c_word", NULL, &fontsize, NULL, NULL, NULL, NULL);
+    set_preferences_manager_style_settings(main_window.prefmg, "c_commentline", NULL, &fontsize, NULL, NULL, NULL, NULL);
+    set_preferences_manager_style_settings(main_window.prefmg, "c_number", NULL, &fontsize, NULL, NULL, NULL, NULL);
+	  set_preferences_manager_style_settings(main_window.prefmg, "c_identifier", NULL, &fontsize, NULL, NULL, NULL, NULL);
+    set_preferences_manager_style_settings(main_window.prefmg, "c_comment", NULL, &fontsize, NULL, NULL, NULL, NULL);
+    set_preferences_manager_style_settings(main_window.prefmg, "c_preprocesor", NULL, &fontsize, NULL, NULL, NULL, NULL);
+    set_preferences_manager_style_settings(main_window.prefmg, "c_operator", NULL, &fontsize, NULL, NULL, NULL, NULL);
+    set_preferences_manager_style_settings(main_window.prefmg, "c_regex", NULL, &fontsize, NULL, NULL, NULL, NULL);
+    set_preferences_manager_style_settings(main_window.prefmg, "c_uuid", NULL, &fontsize, NULL, NULL, NULL, NULL);
+    set_preferences_manager_style_settings(main_window.prefmg, "c_verbatim", NULL, &fontsize, NULL, NULL, NULL, NULL);
+    set_preferences_manager_style_settings(main_window.prefmg, "c_globalclass", NULL, &fontsize, NULL, NULL, NULL, NULL);
   }
-  scintilla_php_set_lexer(GTK_SCINTILLA(preferences_dialog.highlighting_editor->scintilla), temp_preferences);
+  scintilla_php_set_lexer(GTK_SCINTILLA(preferences_dialog.highlighting_editor->scintilla));
 }
 
 
-void get_control_values_to_highlight(gchar *setting_name, gchar **fontname, gint *fontsize, gboolean *bold, gboolean *italic, gint *fore, gint *back)
+void get_control_values_to_highlight(gchar *setting_name)
 {
   GString *tempfontname;
-  GtkWidget *dialog;
   GString *message;
-  gint newfontsize; // Back to being a gint, g_string_printf complains
+  gchar *fontname;
+  gboolean bold, italic;
+  gint fore, back, fontsize;
+
+  gint newfontsize;
   gint result;
+
+  get_preferences_manager_style_settings(main_window.prefmg, setting_name, &fontname , &fontsize, NULL, NULL, NULL, NULL);
+
   if (preferences_dialog.changing_highlight_element) return;
   tempfontname = g_string_new(gtk_combo_box_get_active_text(GTK_COMBO_BOX(preferences_dialog.font_combo)));
   tempfontname = g_string_prepend(tempfontname, "!");
   
-  if (!g_str_has_prefix(*fontname, tempfontname->str)) {
+  if (!g_str_has_prefix(fontname, tempfontname->str)) {
 
     message = g_string_new(NULL);
     g_string_printf(message, _("You have just changed the font to %s\n\nWould you like to use this font as the default for every element?"), gtk_combo_box_get_active_text(GTK_COMBO_BOX(preferences_dialog.font_combo)));
-    dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_MESSAGE_QUESTION,
-      GTK_BUTTONS_YES_NO,"%s", message->str);
-    result = gtk_dialog_run (GTK_DIALOG (dialog));
-    gtk_widget_destroy (dialog);
+    result = yes_no_dialog (_("gPHPEdit"), message->str);
     change_font_global_callback(result, tempfontname->str);    
     g_string_free(message, TRUE);
-    *fontname = tempfontname->str;
   }
-  g_string_free(tempfontname, FALSE);
   
   newfontsize = atoi(gtk_combo_box_get_active_text(GTK_COMBO_BOX(preferences_dialog.size_combo)));
-  if (*fontsize != newfontsize &&
+  if (fontsize != newfontsize &&
     newfontsize != 0) {
     message = g_string_new(NULL);
     g_string_printf(message, _("You have just changed the font size to %dpt\n\nWould you like to use this font size as the default for every element?"), newfontsize);
-    dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_MESSAGE_QUESTION,
-      GTK_BUTTONS_YES_NO,"%s", message->str);
-    result = gtk_dialog_run (GTK_DIALOG (dialog));
-    gtk_widget_destroy (dialog);
+    result = yes_no_dialog (_("gPHPEdit"), message->str);
     change_size_global_callback(result, GINT_TO_POINTER(newfontsize));    
     g_string_free(message, TRUE);
-    *fontsize = atoi(gtk_combo_box_get_active_text(GTK_COMBO_BOX(preferences_dialog.size_combo)));
+    fontsize = atoi(gtk_combo_box_get_active_text(GTK_COMBO_BOX(preferences_dialog.size_combo)));
   }
-  *bold = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(preferences_dialog.bold_button));
-  *italic = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(preferences_dialog.italic_button));
+  bold = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(preferences_dialog.bold_button));
+  italic = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(preferences_dialog.italic_button));
   GdkColor color;
   gtk_color_button_get_color (GTK_COLOR_BUTTON(preferences_dialog.foreground_colour),&color);
-  *fore = color.red >> 8 | ((color.green >> 8) << 8) | ((color.blue >> 8) << 16);
+  fore = scintilla_color(color.red >> 8, (color.green >> 8), (color.blue >> 8));
 
   gtk_color_button_get_color (GTK_COLOR_BUTTON(preferences_dialog.background_colour),&color);
-  *back = color.red >> 8 | ((color.green >> 8) << 8) | ((color.blue >> 8) << 16);
+  back = scintilla_color(color.red >> 8, (color.green >> 8), (color.blue >> 8));
   // Debug print for preferences being set
   //g_print("Setting %s: %s %d %d %d %d %d\n", setting_name, *fontname, *fontsize, *bold, *italic, *fore, *back);  
+  set_preferences_manager_style_settings(main_window.prefmg, setting_name, tempfontname->str , &newfontsize, &fore, &back, &italic, &bold);
+  g_string_free(tempfontname, FALSE);
 }
 
 void set_current_highlighting_font()
 {
   current_highlighting_element=gtk_combo_box_get_active_text (GTK_COMBO_BOX(preferences_dialog.element_combo));
   if (IS_FONT_NAME(current_highlighting_element, _("Default"))) {
-    get_control_values_to_highlight(_("Default"), &temp_preferences.default_font, &temp_preferences.default_size,
-      &temp_preferences.default_bold, &temp_preferences.default_italic,
-      &temp_preferences.default_fore, &temp_preferences.default_back);
+    get_control_values_to_highlight("default_style");
   }
   if (IS_FONT_NAME(current_highlighting_element, _("Line Number (margin)"))) {
-    get_control_values_to_highlight(_("Line Number (margin)"), &temp_preferences.line_number_font, &temp_preferences.line_number_size,
-      &temp_preferences.line_number_bold, &temp_preferences.line_number_italic,
-      &temp_preferences.line_number_fore, &temp_preferences.line_number_back);
+    get_control_values_to_highlight("line_numbers");
   }
   if (IS_FONT_NAME(current_highlighting_element, _("HTML Tag"))) {
-    get_control_values_to_highlight(_("HTML Tag"), &temp_preferences.html_tag_font, &temp_preferences.html_tag_size,
-      &temp_preferences.html_tag_bold, &temp_preferences.html_tag_italic,
-      &temp_preferences.html_tag_fore, &temp_preferences.html_tag_back);
+    get_control_values_to_highlight("html_tag");
   }
   if (IS_FONT_NAME(current_highlighting_element, _("HTML Unknown Tag"))) {
-    get_control_values_to_highlight(_("HTML Unknown Tag"), &temp_preferences.html_tag_unknown_font, &temp_preferences.html_tag_unknown_size,
-      &temp_preferences.html_tag_unknown_bold, &temp_preferences.html_tag_unknown_italic,
-      &temp_preferences.html_tag_unknown_fore, &temp_preferences.html_tag_unknown_back);
+    get_control_values_to_highlight("html_tag_unknown");
   }
   if (IS_FONT_NAME(current_highlighting_element, _("HTML Attribute"))) {
-    get_control_values_to_highlight(_("HTML Attribute"), &temp_preferences.html_attribute_font, &temp_preferences.html_attribute_size,
-      &temp_preferences.html_attribute_bold, &temp_preferences.html_attribute_italic,
-      &temp_preferences.html_attribute_fore, &temp_preferences.html_attribute_back);
+    get_control_values_to_highlight("html_attribute");
   }
   if (IS_FONT_NAME(current_highlighting_element, _("HTML Unknown Attribute"))) {
-    get_control_values_to_highlight(_("HTML Unknown Attribute"), &temp_preferences.html_attribute_unknown_font, &temp_preferences.html_attribute_unknown_size,
-      &temp_preferences.html_attribute_unknown_bold, &temp_preferences.html_attribute_unknown_italic,
-      &temp_preferences.html_attribute_unknown_fore, &temp_preferences.html_attribute_unknown_back);
+    get_control_values_to_highlight("html_attribute_unknown");
   }
   if (IS_FONT_NAME(current_highlighting_element, _("HTML Number"))) {
-    get_control_values_to_highlight(_("HTML Number"), &temp_preferences.html_number_font, &temp_preferences.html_number_size,
-      &temp_preferences.html_number_bold, &temp_preferences.html_number_italic,
-      &temp_preferences.html_number_fore, &temp_preferences.html_number_back);
+    get_control_values_to_highlight("html_number");
   }
   if (IS_FONT_NAME(current_highlighting_element, _("HTML Single-quoted String"))) {
-    get_control_values_to_highlight(_("HTML Single-quoted String"), &temp_preferences.html_single_string_font, &temp_preferences.html_single_string_size,
-      &temp_preferences.html_single_string_bold, &temp_preferences.html_single_string_italic,
-      &temp_preferences.html_single_string_fore, &temp_preferences.html_single_string_back);
+    get_control_values_to_highlight("html_single_string");
   }
   if (IS_FONT_NAME(current_highlighting_element, _("HTML Double-quoted String"))) {
-    get_control_values_to_highlight(_("HTML Double-quoted String"), &temp_preferences.html_double_string_font, &temp_preferences.html_double_string_size,
-      &temp_preferences.html_double_string_italic, &temp_preferences.html_double_string_italic,
-      &temp_preferences.html_double_string_fore, &temp_preferences.html_double_string_back);
+    get_control_values_to_highlight("html_double_string");
   }
   if (IS_FONT_NAME(current_highlighting_element, _("HTML Comment"))) {
-    get_control_values_to_highlight(_("HTML Comment"), &temp_preferences.html_comment_font, &temp_preferences.html_comment_size,
-      &temp_preferences.html_comment_bold, &temp_preferences.html_comment_italic,
-      &temp_preferences.html_comment_fore, &temp_preferences.html_comment_back);
+    get_control_values_to_highlight("html_comment");
   }
   if (IS_FONT_NAME(current_highlighting_element, _("HTML Entity"))) {
-    get_control_values_to_highlight(_("HTML Entity"), &temp_preferences.html_entity_font, &temp_preferences.html_entity_size,
-      &temp_preferences.html_entity_bold, &temp_preferences.html_entity_italic,
-      &temp_preferences.html_entity_fore, &temp_preferences.html_entity_back);
+    get_control_values_to_highlight("html_entity");
   }
   if (IS_FONT_NAME(current_highlighting_element, _("HTML Script"))) {
-    get_control_values_to_highlight(_("HTML Script"), &temp_preferences.html_script_font, &temp_preferences.html_script_size,
-      &temp_preferences.html_script_bold, &temp_preferences.html_script_italic,
-      &temp_preferences.html_script_fore, &temp_preferences.html_script_back);
+    get_control_values_to_highlight("html_script");
   }
   if (IS_FONT_NAME(current_highlighting_element, _("HTML Question"))) {
-    get_control_values_to_highlight(_("HTML Question"), &temp_preferences.html_question_font, &temp_preferences.html_question_size,
-      &temp_preferences.html_question_bold, &temp_preferences.html_question_italic,
-      &temp_preferences.html_question_fore, &temp_preferences.html_question_back);
+    get_control_values_to_highlight("html_question");
   }
   if (IS_FONT_NAME(current_highlighting_element, _("HTML Value"))) {
-    get_control_values_to_highlight(_("HTML Value"), &temp_preferences.html_value_font, &temp_preferences.html_value_size,
-      &temp_preferences.html_value_bold, &temp_preferences.html_value_italic,
-      &temp_preferences.html_value_fore, &temp_preferences.html_value_back);
+    get_control_values_to_highlight("html_value");
   }
   if (IS_FONT_NAME(current_highlighting_element, _("JavaScript Multiple-line Comment"))) {
-    get_control_values_to_highlight(_("JavaScript Multiple-line Comment"), &temp_preferences.javascript_comment_font, &temp_preferences.javascript_comment_size,
-      &temp_preferences.javascript_comment_bold, &temp_preferences.javascript_comment_italic,
-      &temp_preferences.javascript_comment_fore, &temp_preferences.javascript_comment_back);
+    get_control_values_to_highlight("javascript_comment");
   }
   if (IS_FONT_NAME(current_highlighting_element, _("JavaScript Single-line Comment"))) {
-    get_control_values_to_highlight(_("JavaScript Single-line Comment"), &temp_preferences.javascript_comment_line_font, &temp_preferences.javascript_comment_line_size,
-      &temp_preferences.javascript_comment_line_bold, &temp_preferences.javascript_comment_line_italic,
-      &temp_preferences.javascript_comment_line_fore, &temp_preferences.javascript_comment_line_back);
+    get_control_values_to_highlight("javascript_comment_line");
   }
   if (IS_FONT_NAME(current_highlighting_element, _("JavaScript Document Comment"))) {
-    get_control_values_to_highlight(_("JavaScript Document Comment"), &temp_preferences.javascript_comment_doc_font, &temp_preferences.javascript_comment_doc_size,
-      &temp_preferences.javascript_comment_doc_bold, &temp_preferences.javascript_comment_doc_italic,
-      &temp_preferences.javascript_comment_doc_fore, &temp_preferences.javascript_comment_doc_back);
+    get_control_values_to_highlight("javascript_comment_doc");
   }
   if (IS_FONT_NAME(current_highlighting_element, _("JavaScript Word"))) {
-    get_control_values_to_highlight(_("JavaScript Word"), &temp_preferences.javascript_word_font, &temp_preferences.javascript_word_size,
-      &temp_preferences.javascript_word_bold, &temp_preferences.javascript_word_italic,
-      &temp_preferences.javascript_word_fore, &temp_preferences.javascript_word_back);
+    get_control_values_to_highlight("javascript_word");
   }
   if (IS_FONT_NAME(current_highlighting_element, _("JavaScript Keyword"))) {
-    get_control_values_to_highlight(_("JavaScript Keyword"), &temp_preferences.javascript_keyword_font, &temp_preferences.javascript_keyword_size,
-      &temp_preferences.javascript_keyword_bold, &temp_preferences.javascript_keyword_italic,
-      &temp_preferences.javascript_keyword_fore, &temp_preferences.javascript_keyword_back);
+    get_control_values_to_highlight("javascript_keyword");
   }
   if (IS_FONT_NAME(current_highlighting_element, _("JavaScript Single-quoted String"))) {
-    get_control_values_to_highlight(_("JavaScript Single-quoted String"), &temp_preferences.javascript_doublestring_font, &temp_preferences.javascript_doublestring_size,
-      &temp_preferences.javascript_doublestring_bold, &temp_preferences.javascript_doublestring_italic,
-      &temp_preferences.javascript_doublestring_fore, &temp_preferences.javascript_doublestring_back);
+    get_control_values_to_highlight("javascript_singlestring");
   }
   if (IS_FONT_NAME(current_highlighting_element, _("JavaScript Double-quoted String"))) {
-    get_control_values_to_highlight(_("JavaScript Double-quoted String"), &temp_preferences.javascript_singlestring_font, &temp_preferences.javascript_singlestring_size,
-      &temp_preferences.javascript_singlestring_bold, &temp_preferences.javascript_singlestring_italic,
-      &temp_preferences.javascript_singlestring_fore, &temp_preferences.javascript_singlestring_back);
+    get_control_values_to_highlight("javascript_doublestring");
   }
   if (IS_FONT_NAME(current_highlighting_element, _("JavaScript Symbol"))) {
-    get_control_values_to_highlight(_("JavaScript Symbol"), &temp_preferences.javascript_symbols_font, &temp_preferences.javascript_symbols_size,
-      &temp_preferences.javascript_symbols_bold, &temp_preferences.default_italic,
-      &temp_preferences.javascript_symbols_fore, &temp_preferences.javascript_symbols_back);
+    get_control_values_to_highlight("javascript_symbols");
   }
   if (IS_FONT_NAME(current_highlighting_element, _("PHP Default"))) {
-    get_control_values_to_highlight(_("PHP Default"), &temp_preferences.php_default_font, &temp_preferences.php_default_size,
-      &temp_preferences.php_default_bold, &temp_preferences.php_default_italic,
-      &temp_preferences.php_default_fore, &temp_preferences.php_default_back);
+    get_control_values_to_highlight("php_default");
   }
   if (IS_FONT_NAME(current_highlighting_element, _("PHP 'HString'"))) {
-    get_control_values_to_highlight(_("PHP 'HString'"), &temp_preferences.php_hstring_font, &temp_preferences.php_hstring_size,
-      &temp_preferences.php_hstring_bold, &temp_preferences.php_hstring_italic,
-      &temp_preferences.php_hstring_fore, &temp_preferences.php_hstring_back);
+    get_control_values_to_highlight("php_hstring");
   }
   if (IS_FONT_NAME(current_highlighting_element, _("PHP Simple String"))) {
-    get_control_values_to_highlight(_("PHP Simple String"), &temp_preferences.php_simplestring_font, &temp_preferences.php_simplestring_size,
-      &temp_preferences.php_simplestring_bold, &temp_preferences.php_simplestring_italic,
-      &temp_preferences.php_simplestring_fore, &temp_preferences.php_simplestring_back);
+    get_control_values_to_highlight("php_simplestring");
   }
   if (IS_FONT_NAME(current_highlighting_element, _("PHP Word"))) {
-    get_control_values_to_highlight(_("PHP Word"), &temp_preferences.php_word_font, &temp_preferences.php_word_size,
-      &temp_preferences.php_word_bold, &temp_preferences.php_word_italic,
-      &temp_preferences.php_word_fore, &temp_preferences.php_word_back);
+    get_control_values_to_highlight("php_word");
   }
   if (IS_FONT_NAME(current_highlighting_element, _("PHP Number"))) {
-    get_control_values_to_highlight(_("PHP Number"), &temp_preferences.php_number_font, &temp_preferences.php_number_size,
-      &temp_preferences.php_number_bold, &temp_preferences.php_number_italic,
-      &temp_preferences.php_number_fore, &temp_preferences.php_number_back);
+    get_control_values_to_highlight("php_number");
   }
   if (IS_FONT_NAME(current_highlighting_element, _("PHP Variable"))) {
-    get_control_values_to_highlight(_("PHP Variable"), &temp_preferences.php_variable_font, &temp_preferences.php_variable_size,
-      &temp_preferences.php_variable_bold, &temp_preferences.php_variable_italic,
-      &temp_preferences.php_variable_fore, &temp_preferences.php_variable_back);
+    get_control_values_to_highlight("php_variable");
   }
   if (IS_FONT_NAME(current_highlighting_element, _("PHP Single-line Comment"))) {
-    get_control_values_to_highlight(_("PHP Single-line Comment"), &temp_preferences.php_comment_line_font, &temp_preferences.php_comment_line_size,
-      &temp_preferences.php_comment_line_bold, &temp_preferences.php_comment_line_italic,
-      &temp_preferences.php_comment_line_fore, &temp_preferences.php_comment_line_back);
+    get_control_values_to_highlight("php_comment_line");
   }
   if (IS_FONT_NAME(current_highlighting_element, _("PHP Multiple-line Comment"))) {
-    get_control_values_to_highlight(_("PHP Multiple-line Comment"), &temp_preferences.php_comment_font, &temp_preferences.php_comment_size,
-      &temp_preferences.php_comment_bold, &temp_preferences.php_comment_italic,
-      &temp_preferences.php_comment_fore, &temp_preferences.php_comment_back);
+    get_control_values_to_highlight("php_comment");
   }
   if (IS_FONT_NAME(current_highlighting_element, _("CSS Tag"))) {
-    get_control_values_to_highlight(_("CSS Tag"), &temp_preferences.css_tag_font, &temp_preferences.css_tag_size,
-      &temp_preferences.css_tag_bold, &temp_preferences.css_tag_italic,
-      &temp_preferences.css_tag_fore, &temp_preferences.css_tag_back);
+    get_control_values_to_highlight("css_tag");
   }
   if (IS_FONT_NAME(current_highlighting_element, _("CSS Class"))) {
-    get_control_values_to_highlight(_("CSS Class"), &temp_preferences.css_class_font, &temp_preferences.css_class_size,
-      &temp_preferences.css_class_bold, &temp_preferences.css_class_italic,
-      &temp_preferences.css_class_fore, &temp_preferences.css_class_back);
+    get_control_values_to_highlight("css_class");
   }
   if (IS_FONT_NAME(current_highlighting_element, _("CSS Psuedoclass"))) {
-    get_control_values_to_highlight(_("CSS Psuedoclass"), &temp_preferences.css_pseudoclass_font, &temp_preferences.css_pseudoclass_size,
-      &temp_preferences.css_pseudoclass_bold, &temp_preferences.css_pseudoclass_italic,
-      &temp_preferences.css_pseudoclass_fore, &temp_preferences.css_pseudoclass_back);
+    get_control_values_to_highlight("css_pseudoclass");
   }
   if (IS_FONT_NAME(current_highlighting_element, _("CSS Unknown Pseudoclass"))) {
-    get_control_values_to_highlight(_("CSS Unknown Pseudoclass"), &temp_preferences.css_unknown_pseudoclass_font, &temp_preferences.css_unknown_pseudoclass_size,
-      &temp_preferences.css_unknown_pseudoclass_bold, &temp_preferences.css_unknown_pseudoclass_italic,
-      &temp_preferences.css_unknown_pseudoclass_fore, &temp_preferences.css_unknown_pseudoclass_back);
+    get_control_values_to_highlight("css_unknown_pseudoclass");
   }
   if (IS_FONT_NAME(current_highlighting_element, _("CSS Operator"))) {
-    get_control_values_to_highlight(_("CSS Operator"), &temp_preferences.css_operator_font, &temp_preferences.css_operator_size,
-      &temp_preferences.css_operator_bold, &temp_preferences.css_operator_italic,
-      &temp_preferences.css_operator_fore, &temp_preferences.css_operator_back);
+    get_control_values_to_highlight("css_operator");
   }
   if (IS_FONT_NAME(current_highlighting_element, _("CSS Identifier"))) {
-    get_control_values_to_highlight(_("CSS Identifier"), &temp_preferences.css_identifier_font, &temp_preferences.css_identifier_size,
-      &temp_preferences.css_identifier_bold, &temp_preferences.css_identifier_italic,
-      &temp_preferences.css_identifier_fore, &temp_preferences.css_identifier_back);
+    get_control_values_to_highlight("css_identifier");
   }
   if (IS_FONT_NAME(current_highlighting_element, _("CSS Unknown Identifier"))) {
-    get_control_values_to_highlight(_("CSS Unknown Identifier"), &temp_preferences.css_unknown_identifier_font, &temp_preferences.css_unknown_identifier_size,
-      &temp_preferences.css_unknown_identifier_bold, &temp_preferences.css_unknown_identifier_italic,
-      &temp_preferences.css_unknown_identifier_fore, &temp_preferences.css_unknown_identifier_back);
+    get_control_values_to_highlight("css_unknown_identifier");
   }
   if (IS_FONT_NAME(current_highlighting_element, _("CSS Value"))) {
-    get_control_values_to_highlight(_("CSS Value"), &temp_preferences.css_value_font, &temp_preferences.css_value_size,
-      &temp_preferences.css_value_bold, &temp_preferences.css_value_italic,
-      &temp_preferences.css_value_fore, &temp_preferences.css_value_back);
+    get_control_values_to_highlight("css_value");
   }
   if (IS_FONT_NAME(current_highlighting_element, _("CSS Comment"))) {
-    get_control_values_to_highlight(_("CSS Comment"), &temp_preferences.css_comment_font, &temp_preferences.css_comment_size,
-      &temp_preferences.css_comment_bold, &temp_preferences.css_comment_italic,
-      &temp_preferences.css_comment_fore, &temp_preferences.css_comment_back);
+    get_control_values_to_highlight("css_comment");
   }
   if (IS_FONT_NAME(current_highlighting_element, _("CSS ID"))) {
-    get_control_values_to_highlight(_("CSS ID"), &temp_preferences.css_id_font, &temp_preferences.css_id_size,
-      &temp_preferences.css_id_bold, &temp_preferences.css_id_italic,
-      &temp_preferences.css_id_fore, &temp_preferences.css_id_back);
+    get_control_values_to_highlight("css_id");
   }
   if (IS_FONT_NAME(current_highlighting_element, _("CSS Important"))) {
-    get_control_values_to_highlight(_("CSS Important"), &temp_preferences.css_important_font, &temp_preferences.css_important_size,
-      &temp_preferences.css_important_bold, &temp_preferences.css_important_italic,
-      &temp_preferences.css_important_fore, &temp_preferences.css_important_back);
+    get_control_values_to_highlight("css_important");
   }
   if (IS_FONT_NAME(current_highlighting_element, _("CSS Directive"))) {
-    get_control_values_to_highlight(_("CSS Directive"), &temp_preferences.css_directive_font, &temp_preferences.css_directive_size,
-      &temp_preferences.css_directive_bold, &temp_preferences.css_directive_italic,
-      &temp_preferences.css_directive_fore, &temp_preferences.css_directive_back);
+    get_control_values_to_highlight("css_directive");
   }
   if (IS_FONT_NAME(current_highlighting_element, _("SQL Word"))) {
-    get_control_values_to_highlight(_("SQL Word"), &temp_preferences.sql_word_font, &temp_preferences.sql_word_size,
-      &temp_preferences.sql_word_bold, &temp_preferences.sql_word_italic,
-      &temp_preferences.sql_word_fore, &temp_preferences.sql_word_back);
+    get_control_values_to_highlight("sql_word");
   }
   if (IS_FONT_NAME(current_highlighting_element, _("SQL Identifier"))) {
-    get_control_values_to_highlight(_("SQL Identifier"), &temp_preferences.sql_identifier_font, &temp_preferences.sql_identifier_size,
-      &temp_preferences.sql_identifier_bold, &temp_preferences.sql_identifier_italic,
-      &temp_preferences.sql_identifier_fore, &temp_preferences.sql_identifier_back);
+    get_control_values_to_highlight("sql_identifier");
   }
   if (IS_FONT_NAME(current_highlighting_element, _("SQL Number"))) {
-    get_control_values_to_highlight(_("SQL Number"), &temp_preferences.sql_number_font, &temp_preferences.sql_number_size,
-      &temp_preferences.sql_number_bold, &temp_preferences.sql_number_italic,
-      &temp_preferences.sql_number_fore, &temp_preferences.sql_number_back);
+    get_control_values_to_highlight("sql_number");
   }
   if (IS_FONT_NAME(current_highlighting_element, _("SQL String"))) {
-    get_control_values_to_highlight(_("SQL String"), &temp_preferences.sql_string_font, &temp_preferences.sql_string_size,
-      &temp_preferences.sql_string_bold, &temp_preferences.sql_string_italic,
-      &temp_preferences.sql_string_fore, &temp_preferences.sql_string_back);
+    get_control_values_to_highlight("sql_string");
   }
   if (IS_FONT_NAME(current_highlighting_element, _("SQL Operator"))) {
-    get_control_values_to_highlight(_("SQL Operator"), &temp_preferences.sql_operator_font, &temp_preferences.sql_operator_size,
-      &temp_preferences.sql_operator_bold, &temp_preferences.sql_operator_italic,
-      &temp_preferences.sql_operator_fore, &temp_preferences.sql_operator_back);
+    get_control_values_to_highlight("sql_operator");
   }
   if (IS_FONT_NAME(current_highlighting_element, _("SQL Comment"))) {
-    get_control_values_to_highlight(_("SQL Comment"), &temp_preferences.sql_comment_font, &temp_preferences.sql_comment_size,
-      &temp_preferences.sql_comment_bold, &temp_preferences.sql_comment_italic,
-      &temp_preferences.sql_comment_fore, &temp_preferences.sql_comment_back);
+    get_control_values_to_highlight("sql_comment");
   }
   if (IS_FONT_NAME(current_highlighting_element, _("C Default"))) {
-    get_control_values_to_highlight(_("C Default"), &temp_preferences.c_default_font, &temp_preferences.c_default_size, 
-      &temp_preferences.c_default_bold, &temp_preferences.c_default_italic,
-      &temp_preferences.c_default_fore, &temp_preferences.c_default_back);
+    get_control_values_to_highlight("c_default");
   }
   if (IS_FONT_NAME(current_highlighting_element, _("C String"))) {
-    get_control_values_to_highlight(_("C String"), &temp_preferences.c_string_font, &temp_preferences.c_string_size,
-      &temp_preferences.c_string_bold, &temp_preferences.c_string_italic,
-      &temp_preferences.c_string_fore, &temp_preferences.c_string_back);
+    get_control_values_to_highlight("c_string");
   }
   if (IS_FONT_NAME(current_highlighting_element, _("C Character"))) {
-    get_control_values_to_highlight(_("C Character"), &temp_preferences.c_character_font, &temp_preferences.c_character_size,
-      &temp_preferences.c_character_bold, &temp_preferences.c_character_italic,
-      &temp_preferences.c_character_fore, &temp_preferences.c_character_back);
+    get_control_values_to_highlight("c_character");
   }
   if (IS_FONT_NAME(current_highlighting_element, _("C Word"))) {
-    get_control_values_to_highlight(_("C Word"), &temp_preferences.c_word_font, &temp_preferences.c_word_size,
-      &temp_preferences.c_word_bold, &temp_preferences.c_word_italic,
-      &temp_preferences.c_word_fore, &temp_preferences.c_word_back);
+    get_control_values_to_highlight("c_word");
   }
   if (IS_FONT_NAME(current_highlighting_element, _("C Number"))) {
-    get_control_values_to_highlight(_("C Number"), &temp_preferences.c_number_font, &temp_preferences.c_number_size,
-      &temp_preferences.c_number_bold, &temp_preferences.c_number_italic,
-      &temp_preferences.c_number_fore, &temp_preferences.c_number_back);
+    get_control_values_to_highlight("c_number");
   }
   if (IS_FONT_NAME(current_highlighting_element, _("C Identifier"))) {
-    get_control_values_to_highlight(_("C Identifier"), &temp_preferences.c_identifier_font, &temp_preferences.c_identifier_size,
-      &temp_preferences.c_identifier_bold, &temp_preferences.c_identifier_italic,
-      &temp_preferences.c_identifier_fore, &temp_preferences.c_identifier_back);
+    get_control_values_to_highlight("c_identifier");
   }
   if (IS_FONT_NAME(current_highlighting_element, _("C Comment"))) {
-    get_control_values_to_highlight(_("C Comment"), &temp_preferences.c_comment_font, &temp_preferences.c_comment_size,
-      &temp_preferences.c_comment_bold, &temp_preferences.c_comment_italic,
-      &temp_preferences.c_comment_fore, &temp_preferences.c_comment_back);
+    get_control_values_to_highlight("c_comment");
   }
   if (IS_FONT_NAME(current_highlighting_element, _("C Commentline"))) {
-    get_control_values_to_highlight(_("C Commentline"), &temp_preferences.c_commentline_font, &temp_preferences.c_commentline_size,
-      &temp_preferences.c_commentline_bold, &temp_preferences.c_commentline_italic,
-      &temp_preferences.c_commentline_fore, &temp_preferences.c_commentline_back);
+    get_control_values_to_highlight("c_commentline");
   }
   if (IS_FONT_NAME(current_highlighting_element, _("C Preprocesor"))) {
-    get_control_values_to_highlight(_("C Preprocesor"), &temp_preferences.c_preprocesor_font, &temp_preferences.c_preprocesor_size,
-      &temp_preferences.c_preprocesor_bold, &temp_preferences.c_preprocesor_italic,
-      &temp_preferences.c_preprocesor_fore, &temp_preferences.c_preprocesor_back);
+    get_control_values_to_highlight("c_preprocesor");
   }
   if (IS_FONT_NAME(current_highlighting_element, _("C Operator"))) {
-    get_control_values_to_highlight(_("C Operator"), &temp_preferences.c_operator_font, &temp_preferences.c_operator_size,
-      &temp_preferences.c_operator_bold, &temp_preferences.c_operator_italic,
-      &temp_preferences.c_operator_fore, &temp_preferences.c_operator_back);
+    get_control_values_to_highlight("c_operator");
   }
   if (IS_FONT_NAME(current_highlighting_element, _("C Regex"))) {
-    get_control_values_to_highlight(_("C Regex"), &temp_preferences.c_regex_font, &temp_preferences.c_regex_size,
-      &temp_preferences.c_regex_bold, &temp_preferences.c_regex_italic,
-      &temp_preferences.c_regex_fore, &temp_preferences.c_regex_back);
+    get_control_values_to_highlight("c_regex");
   }
   if (IS_FONT_NAME(current_highlighting_element, _("C UUID"))) {
-    get_control_values_to_highlight(_("C UUID"), &temp_preferences.c_uuid_font, &temp_preferences.c_uuid_size,
-      &temp_preferences.c_uuid_bold, &temp_preferences.c_uuid_italic,
-      &temp_preferences.c_uuid_fore, &temp_preferences.c_uuid_back);
+    get_control_values_to_highlight("c_uuid");
   }
   if (IS_FONT_NAME(current_highlighting_element, _("C Verbatim"))) {
-    get_control_values_to_highlight(_("C Verbatim"), &temp_preferences.c_verbatim_font, &temp_preferences.c_verbatim_size,
-      &temp_preferences.c_verbatim_bold, &temp_preferences.c_verbatim_italic,
-      &temp_preferences.c_verbatim_fore, &temp_preferences.c_verbatim_back);
+    get_control_values_to_highlight("c_verbatim");
   }
   if (IS_FONT_NAME(current_highlighting_element, _("C Globalclass"))) {
-    get_control_values_to_highlight(_("C Globalclass"), &temp_preferences.c_globalclass_font, &temp_preferences.c_globalclass_size,
-      &temp_preferences.c_globalclass_bold, &temp_preferences.c_globalclass_italic,
-      &temp_preferences.c_globalclass_fore, &temp_preferences.c_globalclass_back);
+    get_control_values_to_highlight("c_globalclass");
   }
-  scintilla_php_set_lexer(GTK_SCINTILLA(preferences_dialog.highlighting_editor->scintilla), temp_preferences);
+  scintilla_php_set_lexer(GTK_SCINTILLA(preferences_dialog.highlighting_editor->scintilla));
 }
 
 void on_bold_toggle(GtkToggleButton *togglebutton, gpointer user_data)
@@ -1177,7 +984,7 @@ void on_edge_colour_changed(GtkColorButton *widget, gpointer user_data)
 {
   GdkColor color;
   gtk_color_button_get_color (widget,&color);
-  temp_preferences.edge_colour = color.red >> 8 | ((color.green >> 8) << 8) | ((color.blue >> 8) << 16);
+  set_preferences_manager_edge_colour(main_window.prefmg, scintilla_color(color.red >> 8, (color.green >> 8), (color.blue >> 8)));
 }
 
 void on_fontqualities_entry_changed(GtkEntry *Entry, gpointer data)
@@ -1185,12 +992,12 @@ void on_fontqualities_entry_changed(GtkEntry *Entry, gpointer data)
   gchar *texttemp=gtk_combo_box_get_active_text(GTK_COMBO_BOX(preferences_dialog.fontstyle));
 
   if(g_strcmp0(texttemp,"Non Antialiased")==0){
-    temp_preferences.font_quality=SC_EFF_QUALITY_NON_ANTIALIASED;    
+    set_preferences_manager_font_quality(main_window.prefmg, SC_EFF_QUALITY_NON_ANTIALIASED);    
   } else if(g_strcmp0(texttemp,"LCD Optimized")==0){
-    temp_preferences.font_quality= SC_EFF_QUALITY_LCD_OPTIMIZED;
+    set_preferences_manager_font_quality(main_window.prefmg, SC_EFF_QUALITY_LCD_OPTIMIZED);
   } else {
     /* set default */
-    temp_preferences.font_quality=SC_EFF_QUALITY_DEFAULT;
+    set_preferences_manager_font_quality(main_window.prefmg, SC_EFF_QUALITY_DEFAULT);
   }
   g_free(texttemp);
 }
@@ -1203,8 +1010,7 @@ void on_sel_back_changed(GtkColorButton *widget, gpointer user_data)
 {
   GdkColor color;
   gtk_color_button_get_color (widget, &color);
-
-  temp_preferences.set_sel_back = color.red >> 8 | ((color.green >> 8) << 8) | ((color.blue >> 8) << 16);
+  set_preferences_manager_set_sel_back(main_window.prefmg, scintilla_color(color.red >> 8, (color.green >> 8), (color.blue >> 8)));
 }
 
 void on_caretline_back_changed(GtkColorButton *widget, gpointer user_data)
@@ -1212,82 +1018,82 @@ void on_caretline_back_changed(GtkColorButton *widget, gpointer user_data)
   GdkColor color;
   gtk_color_button_get_color (widget, &color);
 
-  temp_preferences.higthlightcaretline_color = color.red >> 8 | ((color.green >> 8) << 8) | ((color.blue >> 8) << 16);
+  set_preferences_manager_higthlight_caret_line_color(main_window.prefmg, scintilla_color(color.red >> 8, (color.green >> 8), (color.blue >> 8)));
 }
 
 void on_tab_size_changed(GtkRange *range, gpointer user_data)
 {
-  temp_preferences.tab_size = (int)gtk_range_get_value(range);  
-  temp_preferences.indentation_size = temp_preferences.tab_size;  
+  set_preferences_manager_tab_size(main_window.prefmg, (int)gtk_range_get_value(range));
+  set_preferences_manager_indentation_size(main_window.prefmg, (int)gtk_range_get_value(range));
 }
 
 void on_calltip_delay_changed(GtkRange *range, gpointer user_data)
 {
-  temp_preferences.calltip_delay = (int) gtk_range_get_value(range);
-  temp_preferences.auto_complete_delay = (int)gtk_range_get_value(range);  
+  set_preferences_manager_calltip_delay(main_window.prefmg, (int) gtk_range_get_value(range));
+  set_preferences_manager_auto_complete_delay(main_window.prefmg, (int) gtk_range_get_value(range));
 }
 
 void on_edge_column_changed(GtkRange *range, gpointer user_data)
 {
-  temp_preferences.edge_column = (int)gtk_range_get_value(range);  
+  set_preferences_manager_edge_column(main_window.prefmg, (int) gtk_range_get_value(range));
 }
 
 void on_show_indentation_guides_toggle(GtkToggleButton *togglebutton, gpointer user_data)
 {
-  temp_preferences.show_indentation_guides = gtk_toggle_button_get_active(togglebutton);  
+  set_preferences_manager_show_indentation_guides(main_window.prefmg, gtk_toggle_button_get_active(togglebutton));  
 }
 
 void on_edge_mode_toggle(GtkToggleButton *togglebutton, gpointer user_data)
 {
-  temp_preferences.edge_mode = gtk_toggle_button_get_active(togglebutton);  
+  set_preferences_manager_edge_mode(main_window.prefmg, gtk_toggle_button_get_active(togglebutton));  
 }
 
 void on_line_wrapping_toggle(GtkToggleButton *togglebutton, gpointer user_data)
 {
-  temp_preferences.line_wrapping = gtk_toggle_button_get_active(togglebutton);  
+  set_preferences_manager_line_wrapping(main_window.prefmg, gtk_toggle_button_get_active(togglebutton));
 }
 
 void on_use_tabs_instead_spaces_toggle(GtkToggleButton *togglebutton, gpointer user_data)
 {
-  temp_preferences.use_tabs_instead_spaces = gtk_toggle_button_get_active(togglebutton);  
+  set_preferences_manager_use_tabs_instead_spaces(main_window.prefmg, gtk_toggle_button_get_active(togglebutton));
 }
 
 void on_save_session_toggle(GtkToggleButton *togglebutton, gpointer user_data)
 {
-  temp_preferences.save_session = gtk_toggle_button_get_active(togglebutton);
+ set_preferences_manager_saved_session(main_window.prefmg, gtk_toggle_button_get_active(togglebutton));
 }
 
 void on_save_folderbrowser_toggle(GtkToggleButton *togglebutton, gpointer user_data)
 {
-  temp_preferences.showfolderbrowser = gtk_toggle_button_get_active(togglebutton);
+  set_preferences_manager_show_folderbrowser(main_window.prefmg, gtk_toggle_button_get_active(togglebutton));
 }
 void on_save_autobrace_toggle(GtkToggleButton *togglebutton, gpointer user_data)
 {
-  temp_preferences.auto_complete_braces = gtk_toggle_button_get_active(togglebutton);
+  set_preferences_manager_auto_complete_braces(main_window.prefmg, gtk_toggle_button_get_active(togglebutton));
 }
 void on_save_higthlightcaretline_toggle(GtkToggleButton *togglebutton, gpointer user_data)
 {
-  temp_preferences.higthlightcaretline = gtk_toggle_button_get_active(togglebutton);
+  set_preferences_manager_higthlight_caret_line(main_window.prefmg, gtk_toggle_button_get_active(togglebutton));
 }
 
 void on_single_instance_only_toggle(GtkToggleButton *togglebutton, gpointer user_data)
 {
-  temp_preferences.single_instance_only = gtk_toggle_button_get_active(togglebutton);
+  set_preferences_manager_single_instance_only(main_window.prefmg, gtk_toggle_button_get_active(togglebutton));
 }
 
 void on_php_binary_location_changed (GtkEntry *entry, gpointer user_data)
 {
-  temp_preferences.php_binary_location = g_strdup(gtk_entry_get_text(entry));
+  set_preferences_manager_php_binary_location(main_window.prefmg, g_strdup(gtk_entry_get_text(entry)));
 }
 
 void on_php_file_extensions_changed (GtkEntry *entry, gpointer user_data)
 {
-  temp_preferences.php_file_extensions = g_strdup(gtk_entry_get_text(entry));
+  set_preferences_manager_php_file_extensions(main_window.prefmg, g_strdup(gtk_entry_get_text(entry)));
 }
 
 void on_shared_source_changed (GtkEntry *entry, gpointer user_data)
 {
-  temp_preferences.shared_source_location = g_strdup(gtk_entry_get_text(entry));
+  set_preferences_manager_shared_source_location(main_window.prefmg, g_strdup(gtk_entry_get_text(entry)));
 }
 
 void update_template_display(gchar *template)
@@ -1499,14 +1305,14 @@ GTK_STOCK_OK, GTK_RESPONSE_ACCEPT, GTK_STOCK_CANCEL, GTK_RESPONSE_REJECT, NULL);
   gtk_widget_show (preferences_dialog.save_session);
   gtk_box_pack_start (GTK_BOX (preferences_dialog.sessionbox), preferences_dialog.save_session, FALSE, FALSE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (preferences_dialog.save_session), 8);
-  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(preferences_dialog.save_session), temp_preferences.save_session);
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(preferences_dialog.save_session), get_preferences_manager_saved_session(main_window.prefmg));
   g_signal_connect(G_OBJECT(GTK_CHECK_BUTTON(preferences_dialog.save_session)), "toggled", G_CALLBACK(on_save_session_toggle), NULL);
 
   preferences_dialog.single_instance_only = gtk_check_button_new_with_mnemonic (_("Only ever run 1 copy of gPHPEdit at a time"));
   gtk_widget_show (preferences_dialog.single_instance_only);
   gtk_box_pack_start (GTK_BOX (preferences_dialog.sessionbox), preferences_dialog.single_instance_only, FALSE, FALSE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (preferences_dialog.single_instance_only), 8);
-  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(preferences_dialog.single_instance_only), temp_preferences.single_instance_only);
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(preferences_dialog.single_instance_only), get_preferences_manager_single_instance_only(main_window.prefmg));
   g_signal_connect(G_OBJECT(GTK_CHECK_BUTTON(preferences_dialog.single_instance_only)), "toggled", G_CALLBACK(on_single_instance_only_toggle), NULL);
   /*end session*/
 
@@ -1524,7 +1330,7 @@ GTK_STOCK_OK, GTK_RESPONSE_ACCEPT, GTK_STOCK_CANCEL, GTK_RESPONSE_REJECT, NULL);
   gtk_widget_show (preferences_dialog.edge_mode);
   gtk_container_add (GTK_CONTAINER (preferences_dialog.edgebox), preferences_dialog.edge_mode);
   gtk_container_set_border_width (GTK_CONTAINER (preferences_dialog.edge_mode), 8);
-  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(preferences_dialog.edge_mode), temp_preferences.edge_mode);
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(preferences_dialog.edge_mode), get_preferences_manager_edge_mode(main_window.prefmg));
   g_signal_connect(G_OBJECT(GTK_CHECK_BUTTON(preferences_dialog.edge_mode)), "toggled", G_CALLBACK(on_edge_mode_toggle), NULL);
   
   /*Begin: Right Hand Edge Color*/
@@ -1537,9 +1343,9 @@ GTK_STOCK_OK, GTK_RESPONSE_ACCEPT, GTK_STOCK_CANCEL, GTK_RESPONSE_REJECT, NULL);
   gtk_box_pack_start (GTK_BOX (preferences_dialog.hbox15), preferences_dialog.label33, FALSE, FALSE, 8);
 
   GdkColor color;
-  color.red = (temp_preferences.edge_colour & 0xff) << 8;
-  color.green = ((temp_preferences.edge_colour & 0xff00) >> 8) << 8;
-  color.blue = ((temp_preferences.edge_colour & 0xff0000) >> 16) << 8;  
+  color.red = (get_preferences_manager_edge_colour(main_window.prefmg) & 0xff) << 8;
+  color.green = ((get_preferences_manager_edge_colour(main_window.prefmg) & 0xff00) >> 8) << 8;
+  color.blue = ((get_preferences_manager_edge_colour(main_window.prefmg) & 0xff0000) >> 16) << 8;  
   preferences_dialog.edge_colour = gtk_color_button_new_with_color (&color);
   gtk_color_button_set_color (GTK_COLOR_BUTTON(preferences_dialog.edge_colour),&color);
 
@@ -1556,7 +1362,7 @@ GTK_STOCK_OK, GTK_RESPONSE_ACCEPT, GTK_STOCK_CANCEL, GTK_RESPONSE_REJECT, NULL);
   gtk_widget_show (preferences_dialog.label34);
   gtk_box_pack_start (GTK_BOX (preferences_dialog.hbox16), preferences_dialog.label34, FALSE, FALSE, 8);
   
-  preferences_dialog.edge_column = gtk_hscale_new (GTK_ADJUSTMENT (gtk_adjustment_new (temp_preferences.edge_column, 0, 160, 0, 0, 0)));
+  preferences_dialog.edge_column = gtk_hscale_new (GTK_ADJUSTMENT (gtk_adjustment_new (get_preferences_manager_edge_column(main_window.prefmg), 0, 160, 0, 0, 0)));
   gtk_widget_show (preferences_dialog.edge_column);
   gtk_box_pack_start (GTK_BOX (preferences_dialog.hbox16), preferences_dialog.edge_column, TRUE, TRUE, 0);
   gtk_scale_set_digits (GTK_SCALE (preferences_dialog.edge_column), 0);
@@ -1575,7 +1381,7 @@ GTK_STOCK_OK, GTK_RESPONSE_ACCEPT, GTK_STOCK_CANCEL, GTK_RESPONSE_REJECT, NULL);
   gtk_widget_show (preferences_dialog.folderbrowser);
   gtk_container_add (GTK_CONTAINER (preferences_dialog.sidepanel), preferences_dialog.folderbrowser);
   gtk_container_set_border_width (GTK_CONTAINER (preferences_dialog.folderbrowser), 8);
-  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(preferences_dialog.folderbrowser), temp_preferences.showfolderbrowser);
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(preferences_dialog.folderbrowser), get_preferences_manager_show_folderbrowser(main_window.prefmg));
   g_signal_connect(G_OBJECT(GTK_CHECK_BUTTON(preferences_dialog.folderbrowser)), "toggled", G_CALLBACK(on_save_folderbrowser_toggle), NULL);
   /*end side panel part*/
 
@@ -1590,7 +1396,7 @@ GTK_STOCK_OK, GTK_RESPONSE_ACCEPT, GTK_STOCK_CANCEL, GTK_RESPONSE_REJECT, NULL);
   gtk_widget_show (preferences_dialog.autobrace);
   gtk_container_add (GTK_CONTAINER (preferences_dialog.autocomp), preferences_dialog.autobrace);
   gtk_container_set_border_width (GTK_CONTAINER (preferences_dialog.autobrace), 8);
-  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(preferences_dialog.autobrace), temp_preferences.auto_complete_braces);
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(preferences_dialog.autobrace), get_preferences_manager_auto_complete_braces(main_window.prefmg));
   g_signal_connect(G_OBJECT(GTK_CHECK_BUTTON(preferences_dialog.autobrace)), "toggled", G_CALLBACK(on_save_autobrace_toggle), NULL);
 
 /*end autocompletion part*/
@@ -1622,7 +1428,7 @@ GTK_STOCK_OK, GTK_RESPONSE_ACCEPT, GTK_STOCK_CANCEL, GTK_RESPONSE_REJECT, NULL);
   gtk_widget_show (preferences_dialog.label32);
   gtk_box_pack_start (GTK_BOX (preferences_dialog.hbox14), preferences_dialog.label32, FALSE, FALSE, 8);
 
-  preferences_dialog.tab_size = gtk_hscale_new (GTK_ADJUSTMENT (gtk_adjustment_new (temp_preferences.tab_size, 0, 16, 1, 0, 0)));
+  preferences_dialog.tab_size = gtk_hscale_new (GTK_ADJUSTMENT (gtk_adjustment_new (get_preferences_manager_tab_size(main_window.prefmg), 0, 16, 1, 0, 0)));
   gtk_widget_show (preferences_dialog.tab_size);
   gtk_box_pack_start (GTK_BOX (preferences_dialog.hbox14), preferences_dialog.tab_size, TRUE, TRUE, 0);
   gtk_scale_set_digits (GTK_SCALE (preferences_dialog.tab_size), 0);
@@ -1633,14 +1439,14 @@ GTK_STOCK_OK, GTK_RESPONSE_ACCEPT, GTK_STOCK_CANCEL, GTK_RESPONSE_REJECT, NULL);
   gtk_widget_show (preferences_dialog.use_tabs_instead_spaces);
   gtk_box_pack_start (GTK_BOX (preferences_dialog.tabsbox), preferences_dialog.use_tabs_instead_spaces, FALSE, FALSE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (preferences_dialog.use_tabs_instead_spaces), 8);
-  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(preferences_dialog.use_tabs_instead_spaces), temp_preferences.use_tabs_instead_spaces);
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(preferences_dialog.use_tabs_instead_spaces), get_preferences_manager_use_tabs_instead_spaces(main_window.prefmg));
   g_signal_connect(G_OBJECT(GTK_CHECK_BUTTON(preferences_dialog.use_tabs_instead_spaces)), "toggled", G_CALLBACK(on_use_tabs_instead_spaces_toggle), NULL);
 
   preferences_dialog.show_indentation_guides = gtk_check_button_new_with_mnemonic (_("Show indentation guides"));
   gtk_widget_show (preferences_dialog.show_indentation_guides);
   gtk_box_pack_start (GTK_BOX (preferences_dialog.tabsbox), preferences_dialog.show_indentation_guides, FALSE, FALSE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (preferences_dialog.show_indentation_guides), 8);
-  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(preferences_dialog.show_indentation_guides), temp_preferences.show_indentation_guides);
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(preferences_dialog.show_indentation_guides), get_preferences_manager_show_indentation_guides(main_window.prefmg));
   g_signal_connect(G_OBJECT(GTK_CHECK_BUTTON(preferences_dialog.show_indentation_guides)), "toggled", G_CALLBACK(on_show_indentation_guides_toggle), NULL);
 
   preferences_dialog.lblwrap=gtk_frame_new (_("Text wrap:"));
@@ -1651,7 +1457,7 @@ GTK_STOCK_OK, GTK_RESPONSE_ACCEPT, GTK_STOCK_CANCEL, GTK_RESPONSE_REJECT, NULL);
   gtk_widget_show (preferences_dialog.line_wrapping);
   gtk_container_add (GTK_CONTAINER (preferences_dialog.lblwrap), preferences_dialog.line_wrapping);
   gtk_container_set_border_width (GTK_CONTAINER (preferences_dialog.line_wrapping), 8);
-  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(preferences_dialog.line_wrapping), temp_preferences.line_wrapping);
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(preferences_dialog.line_wrapping), get_preferences_manager_line_wrapping(main_window.prefmg));
   g_signal_connect(G_OBJECT(GTK_CHECK_BUTTON(preferences_dialog.line_wrapping)), "toggled", G_CALLBACK(on_line_wrapping_toggle), NULL);
 
 
@@ -1673,9 +1479,9 @@ GTK_STOCK_OK, GTK_RESPONSE_ACCEPT, GTK_STOCK_CANCEL, GTK_RESPONSE_REJECT, NULL);
   gtk_box_pack_start (GTK_BOX (preferences_dialog.hbox27), preferences_dialog.label46, FALSE, FALSE, 8);
 
   GdkColor sel_back;
-  sel_back.red = (temp_preferences.set_sel_back & 0xff) << 8;
-  sel_back.green = ((temp_preferences.set_sel_back & 0xff00) >> 8) << 8;
-  sel_back.blue = ((temp_preferences.set_sel_back & 0xff0000) >> 16) << 8;  
+  sel_back.red = (get_preferences_manager_set_sel_back(main_window.prefmg) & 0xff) << 8;
+  sel_back.green = ((get_preferences_manager_set_sel_back(main_window.prefmg) & 0xff00) >> 8) << 8;
+  sel_back.blue = ((get_preferences_manager_set_sel_back(main_window.prefmg) & 0xff0000) >> 16) << 8;  
   preferences_dialog.sel_back = gtk_color_button_new_with_color (&sel_back);
   gtk_color_button_set_color (GTK_COLOR_BUTTON(preferences_dialog.sel_back),&sel_back);
 
@@ -1697,7 +1503,7 @@ GTK_STOCK_OK, GTK_RESPONSE_ACCEPT, GTK_STOCK_CANCEL, GTK_RESPONSE_REJECT, NULL);
   gtk_widget_show (preferences_dialog.higthlightcaretline);
   gtk_box_pack_start (GTK_BOX (preferences_dialog.curlbox), preferences_dialog.higthlightcaretline, FALSE, FALSE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (preferences_dialog.higthlightcaretline), 8);
-  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(preferences_dialog.higthlightcaretline), temp_preferences.higthlightcaretline);
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(preferences_dialog.higthlightcaretline), get_preferences_manager_higthlight_caret_line(main_window.prefmg));
   g_signal_connect(G_OBJECT(GTK_CHECK_BUTTON(preferences_dialog.higthlightcaretline)), "toggled", G_CALLBACK(on_save_higthlightcaretline_toggle), NULL);
 
   preferences_dialog.colcaret = gtk_hbox_new (FALSE, 0);
@@ -1709,9 +1515,9 @@ GTK_STOCK_OK, GTK_RESPONSE_ACCEPT, GTK_STOCK_CANCEL, GTK_RESPONSE_REJECT, NULL);
   gtk_box_pack_start (GTK_BOX (preferences_dialog.colcaret), preferences_dialog.lblcol, FALSE, FALSE, 8);
 
   GdkColor caret_back;
-  caret_back.red = (temp_preferences.higthlightcaretline_color & 0xff) << 8;
-  caret_back.green = ((temp_preferences.higthlightcaretline_color & 0xff00) >> 8) << 8;
-  caret_back.blue = ((temp_preferences.higthlightcaretline_color & 0xff0000) >> 16) << 8;  
+  caret_back.red = (get_preferences_manager_higthlight_caret_line_color(main_window.prefmg) & 0xff) << 8;
+  caret_back.green = ((get_preferences_manager_higthlight_caret_line_color(main_window.prefmg) & 0xff00) >> 8) << 8;
+  caret_back.blue = ((get_preferences_manager_higthlight_caret_line_color(main_window.prefmg) & 0xff0000) >> 16) << 8;  
   preferences_dialog.caretline_color = gtk_color_button_new_with_color (&caret_back);
   gtk_color_button_set_color (GTK_COLOR_BUTTON(preferences_dialog.caretline_color),&caret_back);
 
@@ -1747,7 +1553,7 @@ GTK_STOCK_OK, GTK_RESPONSE_ACCEPT, GTK_STOCK_CANCEL, GTK_RESPONSE_REJECT, NULL);
 
   g_list_free (comboitems);
   /* set actual quality */
-  gtk_combo_box_set_active (GTK_COMBO_BOX(preferences_dialog.fontstyle), (temp_preferences.font_quality!=0)?temp_preferences.font_quality -1 :0);
+  gtk_combo_box_set_active (GTK_COMBO_BOX(preferences_dialog.fontstyle), (get_preferences_manager_font_quality(main_window.prefmg)!=0)?get_preferences_manager_font_quality(main_window.prefmg) -1 :0);
 
 /*end editor page */
   preferences_dialog.lbled = gtk_label_new (_("Editor"));
@@ -1931,7 +1737,7 @@ GTK_STOCK_OK, GTK_RESPONSE_ACCEPT, GTK_STOCK_CANCEL, GTK_RESPONSE_REJECT, NULL);
   preferences_dialog.php_file_entry = gtk_entry_new();
   gtk_widget_show (preferences_dialog.php_file_entry);
   gtk_box_pack_start (GTK_BOX (preferences_dialog.hbox17), preferences_dialog.php_file_entry, TRUE, TRUE, 0);
-  gtk_entry_set_text(GTK_ENTRY(preferences_dialog.php_file_entry), temp_preferences.php_binary_location);
+  gtk_entry_set_text(GTK_ENTRY(preferences_dialog.php_file_entry), get_preferences_manager_php_binary_location(main_window.prefmg));
   g_signal_connect(G_OBJECT(preferences_dialog.php_file_entry),
                        "changed",
                        G_CALLBACK(on_php_binary_location_changed),
@@ -1948,7 +1754,7 @@ GTK_STOCK_OK, GTK_RESPONSE_ACCEPT, GTK_STOCK_CANCEL, GTK_RESPONSE_REJECT, NULL);
   preferences_dialog.file_extensions = gtk_entry_new ();
   gtk_widget_show (preferences_dialog.file_extensions);
   gtk_box_pack_start (GTK_BOX (preferences_dialog.hbox18), preferences_dialog.file_extensions, TRUE, TRUE, 0);
-  gtk_entry_set_text(GTK_ENTRY(preferences_dialog.file_extensions), temp_preferences.php_file_extensions);
+  gtk_entry_set_text(GTK_ENTRY(preferences_dialog.file_extensions), get_preferences_manager_php_file_extensions(main_window.prefmg));
   g_signal_connect(G_OBJECT(preferences_dialog.file_extensions),
                     "changed", G_CALLBACK(on_php_file_extensions_changed),NULL);
 
@@ -1963,7 +1769,7 @@ GTK_STOCK_OK, GTK_RESPONSE_ACCEPT, GTK_STOCK_CANCEL, GTK_RESPONSE_REJECT, NULL);
   preferences_dialog.shared_source = gtk_entry_new ();
   gtk_widget_show (preferences_dialog.shared_source);
   gtk_box_pack_start (GTK_BOX (preferences_dialog.hbox26), preferences_dialog.shared_source, TRUE, TRUE, 0);
-  gtk_entry_set_text(GTK_ENTRY(preferences_dialog.shared_source), temp_preferences.shared_source_location);
+  gtk_entry_set_text(GTK_ENTRY(preferences_dialog.shared_source), get_preferences_manager_shared_source_location(main_window.prefmg));
   g_signal_connect(G_OBJECT(preferences_dialog.shared_source),
                    "changed", G_CALLBACK(on_shared_source_changed),NULL);
 
@@ -1975,7 +1781,7 @@ GTK_STOCK_OK, GTK_RESPONSE_ACCEPT, GTK_STOCK_CANCEL, GTK_RESPONSE_REJECT, NULL);
   gtk_widget_show (preferences_dialog.label37);
   gtk_box_pack_start (GTK_BOX (preferences_dialog.hbox19), preferences_dialog.label37, FALSE, FALSE, 8);
           
-  preferences_dialog.delay = gtk_hscale_new (GTK_ADJUSTMENT (gtk_adjustment_new (temp_preferences.calltip_delay, 0, 2500, 0, 0, 0)));
+  preferences_dialog.delay = gtk_hscale_new (GTK_ADJUSTMENT (gtk_adjustment_new (get_preferences_manager_calltip_delay(main_window.prefmg), 0, 2500, 0, 0, 0)));
   gtk_widget_show (preferences_dialog.delay);
   gtk_box_pack_start (GTK_BOX (preferences_dialog.hbox19), preferences_dialog.delay, TRUE, TRUE, 0);
   g_signal_connect (G_OBJECT (GTK_HSCALE (preferences_dialog.delay)), "value_changed",
@@ -2060,6 +1866,8 @@ GTK_STOCK_OK, GTK_RESPONSE_ACCEPT, GTK_STOCK_CANCEL, GTK_RESPONSE_REJECT, NULL);
   gtk_container_add (GTK_CONTAINER (gtk_dialog_get_action_area(GTK_DIALOG(preferences_dialog.window))),preferences_dialog.apply_button);
   g_signal_connect (G_OBJECT (preferences_dialog.apply_button),
                       "clicked", G_CALLBACK (apply_preferences), NULL);
+  g_signal_connect (G_OBJECT (preferences_dialog.window),
+                      "response", G_CALLBACK (response_preferences), NULL);
   
   get_current_highlighting_settings(current_highlighting_element);
 }

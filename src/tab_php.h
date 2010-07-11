@@ -26,8 +26,7 @@
 #define TAB_PHP_H
 
 #include "tab.h"
-
 void tab_php_set_lexer(Editor *editor);
-void scintilla_php_set_lexer(GtkScintilla *scintilla, Preferences prefs);
+void scintilla_php_set_lexer(GtkScintilla *scintilla);
 
 #endif

@@ -28,7 +28,6 @@
 #include "main.h"
 #include "classbrowser.h"
 #include <webkit/webkit.h> 
-
 #define TAB_FILE 1
 #define TAB_PHP 2
 #define TAB_CSS 3
@@ -43,6 +42,7 @@
 /* annotations styles */
 #define STYLE_ANNOTATION_ERROR 200
 #define STYLE_ANNOTATION_WARNING 201
+
 typedef struct
 {
 	gint type;
@@ -92,7 +92,7 @@ void tab_load_file(Editor *editor);
 gboolean is_php_file(Editor *editor);
 gboolean is_php_file_from_filename(const gchar *filename);
 gboolean switch_to_file_or_open(gchar *filename, gint line_number);
-void tab_set_configured_scintilla_properties(GtkScintilla *scintilla, Preferences prefs);
+void tab_set_configured_scintilla_properties(GtkScintilla *scintilla);
 GtkWidget *get_close_tab_widget(Editor *editor);
 // Probably don't need all of these declared in the .h file, but I'll remove the unnecessary ones later - AJ
 void fold_clicked(GtkWidget *scintilla, guint lineClick,guint bstate);

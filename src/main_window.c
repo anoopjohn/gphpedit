@@ -28,13 +28,13 @@
 #include "main_window.h"
 #include "tab.h"
 #include "main_window_callbacks.h"
-#include "preferences.h"
 #include "classbrowser.h"
 #include "templates.h"
 #include "gvfs_utils.h"
 #include "gphpedit-close-button.h"
 #include "gphpedit-statusbar.h"
 #include "syntax_check_window.h"
+
 
 MainWindow main_window;
 GIOChannel* inter_gphpedit_io;
@@ -148,9 +148,9 @@ static void main_window_create_panes(void)
   gtk_widget_show (main_window.main_vertical_pane);
   gtk_paned_pack1 (GTK_PANED (main_window.main_horizontal_pane), main_window.main_vertical_pane, FALSE, TRUE);
   g_signal_connect (G_OBJECT (main_window.window), "size_allocate", G_CALLBACK (classbrowser_accept_size), NULL);
-  move_classbrowser_position();
-      
-  if (classbrowser_status()==1)
+  gtk_paned_set_position(GTK_PANED(main_window.main_horizontal_pane),get_preferences_manager_classbrowser_get_size(main_window.prefmg));
+    
+  if (get_preferences_manager_classbrowser_status(main_window.prefmg)==1)
     classbrowser_hide();
 
   main_window.prin_hbox = gtk_vbox_new(FALSE, 0);
@@ -210,7 +210,7 @@ static void create_side_panel(void){
   GtkWidget *hbox;
   hbox = gtk_hbox_new(FALSE, 0);
   main_window.chkOnlyCurFileFuncs = gtk_check_button_new_with_label(_("Parse only current file"));
-  gtk_toggle_button_set_active ((GtkToggleButton *)main_window.chkOnlyCurFileFuncs, get_parse_only_current_file());
+  gtk_toggle_button_set_active ((GtkToggleButton *)main_window.chkOnlyCurFileFuncs, get_preferences_manager_parse_only_current_file(main_window.prefmg));
   gtk_widget_show (main_window.chkOnlyCurFileFuncs);
   gtk_widget_show (hbox);
   gtk_box_pack_start(GTK_BOX(hbox), main_window.chkOnlyCurFileFuncs, TRUE, TRUE, 10);
@@ -369,8 +369,10 @@ static void create_app_main_window(const gchar *title, gint height, gint width){
   main_window.window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
   gtk_window_set_title(GTK_WINDOW(main_window.window), title);
   gtk_window_set_default_size(GTK_WINDOW(main_window.window), height, width);
-  /* center the window in the screen */
-  gtk_window_set_position(GTK_WINDOW(main_window.window), GTK_WIN_POS_CENTER);
+  gtk_window_move(GTK_WINDOW(main_window.window), get_preferences_manager_window_left(main_window.prefmg), get_preferences_manager_window_top(main_window.prefmg));
+  if (get_preferences_manager_window_maximized(main_window.prefmg)) {
+ 		gtk_window_maximize(GTK_WINDOW(main_window.window));
+	}
   g_set_application_name (title);
   gtk_window_set_default_icon_name ("gphpedit");
   /* set RGBA colormap */        
@@ -378,8 +380,8 @@ static void create_app_main_window(const gchar *title, gint height, gint width){
 }
 
 void main_window_create(void){
-  create_app_main_window(_("gPHPEdit"), 230, 150);
-  preferences_apply();
+
+  create_app_main_window(_("gPHPEdit"), get_preferences_manager_window_height(main_window.prefmg), get_preferences_manager_window_width(main_window.prefmg));
   main_window_create_prinbox();
   main_window_create_menu();
   main_window_create_maintoolbar();
@@ -406,7 +408,7 @@ void main_window_create(void){
   
   update_app_title();
   // folder browser init
-  if (preferences.showfolderbrowser) folderbrowser_create(&main_window);
+  if (get_preferences_manager_show_folderbrowser(main_window.prefmg)) folderbrowser_create(&main_window);
 }
 
 void update_controls(void){

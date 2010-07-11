@@ -50,10 +50,10 @@ int main (int argc, char **argv)
   gtk_init(&argc, &argv);
   gconf_init(argc, argv, NULL);
         
-  preferences_load();
+  main_window.prefmg = preferences_manager_new();
 
   /* Start of IPC communication */
-  if (preferences.single_instance_only && poke_existing_instance (argc - 1, argv + 1))
+  if (get_preferences_manager_single_instance_only(main_window.prefmg) && poke_existing_instance (argc - 1, argv + 1))
     return 0;
 
   main_window_create();

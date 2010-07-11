@@ -25,6 +25,7 @@ gboolean filename_file_exist(gchar *filename)
 * return a gchar with the parent uri of the Gfile
 */
 gchar *filename_parent_uri(gchar *filename){
+    if (!filename) return NULL;
     GFile *file= get_gfile_from_filename(filename);
     if (!g_file_query_exists (file,NULL)){
      g_object_unref(file);
@@ -71,6 +72,7 @@ gchar *filename_get_basename (gchar *filename){
 * return a gchar with the uri of the Gfile
 */
 gchar *filename_get_uri(gchar *filename){
+    if (!filename) return NULL;
     GFile *file= get_gfile_from_filename(filename);
     if (!g_file_query_exists (file,NULL)) return NULL;
     gchar *file_uri= g_file_get_uri (file);

@@ -59,7 +59,7 @@ void session_save(void)
   GError *error=NULL;
 
 
-  if (preferences.save_session && (g_slist_length(editors) > 0)) {
+  if (get_preferences_manager_saved_session(main_window.prefmg) && (g_slist_length(editors) > 0)) {
     current_focus_editor = main_window.current_editor;
     session_file_contents=g_string_new(NULL);
     for(walk = editors; walk!= NULL; walk = g_slist_next(walk)) {
@@ -177,7 +177,7 @@ void session_reopen(void)
 
 void quit_application()
 {
-  preferences_save();
+  preferences_manager_save_data(main_window.prefmg);
   if (DEBUG_MODE) { g_print("DEBUG: main_window_callbacks.c:quit_application:Saved preferences\n"); }
   template_db_close();
   session_save();
@@ -262,17 +262,27 @@ gboolean main_window_delete_event(GtkWidget *widget, GdkEvent *event, gpointer u
 
 
 void main_window_resize(GtkWidget *widget, GtkAllocation *allocation, gpointer user_data) {
-  main_window_size_save_details();
+  if (!get_preferences_manager_window_maximized(main_window.prefmg)) {
+    gint left, width, top, height;
+    gtk_window_get_position(GTK_WINDOW(main_window.window), &left, &top);
+    gtk_window_get_size(GTK_WINDOW(main_window.window), &width, &height);
+    set_preferences_manager_window_height(main_window.prefmg, height);
+    set_preferences_manager_window_width(main_window.prefmg, width);
+    set_preferences_manager_window_left(main_window.prefmg, left);
+    set_preferences_manager_window_top(main_window.prefmg, top);
+  }
 }
 
 void main_window_state_changed(GtkWidget *widget, GdkEventWindowState *event, gpointer user_data)
 {
-  preferences.maximized = GDK_WINDOW_STATE_MAXIMIZED && event->new_window_state;
+  set_preferences_manager_window_maximized(main_window.prefmg, GDK_WINDOW_STATE_MAXIMIZED && event->new_window_state);
 }
 
 gboolean classbrowser_accept_size(GtkPaned *paned, gpointer user_data)
 {
-  save_classbrowser_position();
+  if (gtk_paned_get_position(GTK_PANED(main_window.main_horizontal_pane)) != 0) {
+    set_preferences_manager_classbrowser_size(main_window.prefmg, gtk_paned_get_position(GTK_PANED(main_window.main_horizontal_pane)));
+  }
   return TRUE;
 }
 
@@ -517,7 +527,7 @@ void add_file_filters(GtkFileChooser *chooser){
   caption = g_string_new(_("PHP files ("));
   gchar **php_file_extensions;
   gint i;
-  php_file_extensions = g_strsplit(preferences.php_file_extensions,",",-1);
+  php_file_extensions = g_strsplit(get_preferences_manager_php_file_extensions(main_window.prefmg),",",-1);
 
   for (i = 0; php_file_extensions[i] != NULL; i++) {
     //make file pattern
@@ -599,7 +609,7 @@ void on_open1_activate(GtkWidget *widget)
 {
   GtkWidget *file_selection_box;
   gchar *folder;
-  gchar *last_opened_folder;
+  const gchar *last_opened_folder;
   // Create the selector widget
   file_selection_box = gtk_file_chooser_dialog_new("Please select files for editing", GTK_WINDOW(main_window.window),
     GTK_FILE_CHOOSER_ACTION_OPEN, GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL, GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT, NULL);
@@ -608,7 +618,7 @@ void on_open1_activate(GtkWidget *widget)
   gtk_dialog_set_default_response (GTK_DIALOG(file_selection_box), GTK_RESPONSE_ACCEPT);  
   //Add filters to the open dialog
   add_file_filters(GTK_FILE_CHOOSER(file_selection_box));
-  last_opened_folder = get_last_opened_folder();
+  last_opened_folder = get_preferences_manager_last_opened_folder(main_window.prefmg);
   if (DEBUG_MODE) { g_print("DEBUG: main_window_callbacks.c:on_open1_activate:last_opened_folder: %s\n", last_opened_folder); }
   /* opening of multiple files at once */
   gtk_file_chooser_set_select_multiple(GTK_FILE_CHOOSER(file_selection_box), TRUE);
@@ -625,7 +635,6 @@ void on_open1_activate(GtkWidget *widget)
   if (gtk_dialog_run(GTK_DIALOG(file_selection_box)) == GTK_RESPONSE_ACCEPT) {
     open_file_ok(GTK_FILE_CHOOSER(file_selection_box));
   }
-  g_free(last_opened_folder);
   gtk_widget_destroy(file_selection_box);
 }
 
@@ -734,7 +743,7 @@ void on_save_as1_activate(GtkWidget *widget)
 {
   GtkWidget *file_selection_box;
   gchar *filename;
-  gchar *last_opened_folder;
+  const gchar *last_opened_folder;
 
   if (main_window.current_editor) {
     // Create the selector widget
@@ -754,12 +763,11 @@ void on_save_as1_activate(GtkWidget *widget)
           g_free(uri);
       }
       else {
-        last_opened_folder = get_last_opened_folder();
+        last_opened_folder = get_preferences_manager_last_opened_folder(main_window.prefmg);
         if (DEBUG_MODE) { g_print("DEBUG: main_window_callbacks.c:on_save_as1_activate:last_opened_folder: %s\n", last_opened_folder); }
         if (last_opened_folder){
           if (DEBUG_MODE) { g_print("DEBUG: main_window_callbacks.c:on_save_as1_activate:Setting current_folder_uri to %s\n", last_opened_folder); }
           gtk_file_chooser_set_current_folder_uri(GTK_FILE_CHOOSER(file_selection_box),  last_opened_folder);
-              g_free(last_opened_folder);
         }
       }
     }
@@ -799,14 +807,16 @@ void on_tab_close_activate(GtkWidget *widget, Editor *editor)
 
 void rename_file(GString *newfilename)
 {
-  GFile *file;
-  GError *error;
-  file=get_gfile_from_filename(main_window.current_editor->filename->str);
+  GError *error=NULL;
+  GFile *file = get_gfile_from_filename(main_window.current_editor->filename->str);
   gchar *basename=filename_get_basename(newfilename->str);
+  if (!file || !basename) return ;
   file=g_file_set_display_name (file,basename,NULL,&error);
   g_free(basename);
   if (!file){
   g_print("GIO Error renaming file: %s\n",error->message);
+  g_error_free(error);
+  return;
   }
         
   // set current_editor->filename
@@ -820,21 +830,16 @@ void rename_file(GString *newfilename)
 void rename_file_ok(GtkFileChooser *file_selection)
 {
   GString *filename;
-  GtkWidget *file_exists_dialog;
   // Extract filename from the file chooser dialog
   gchar *fileuri=gtk_file_chooser_get_uri(file_selection);
   filename = g_string_new(fileuri);
   g_free(fileuri);
   GFile *file = get_gfile_from_filename(filename->str);
   if (g_file_query_exists (file,NULL)) {
-    file_exists_dialog = gtk_message_dialog_new(GTK_WINDOW(main_window.window),GTK_DIALOG_DESTROY_WITH_PARENT,GTK_MESSAGE_QUESTION,GTK_BUTTONS_YES_NO,
-       _("This file already exists, are you sure you want to overwrite it?"));
-    gtk_window_set_title(GTK_WINDOW(file_exists_dialog), _("gPHPEdit"));
-    gint result = gtk_dialog_run (GTK_DIALOG (file_exists_dialog));
+    gint result = yes_no_dialog (_("gPHPEdit"), _("This file already exists, are you sure you want to overwrite it?"));
     if (result==GTK_RESPONSE_YES) {
       rename_file(filename);
     }
-    gtk_widget_destroy(file_exists_dialog);
     } else {
       rename_file(filename);
     }
@@ -1477,18 +1482,13 @@ void add_to_search_history(const gchar *current_text){
     /* add text to search history*/
     GSList *walk;
     gint i=0;
-    for (walk = preferences.search_history; walk!=NULL; walk = g_slist_next(walk)) {
+    for (walk = get_preferences_manager_php_search_history(main_window.prefmg); walk!=NULL; walk = g_slist_next(walk)) {
       i++;
       if (strcmp((gchar *) walk->data,current_text)==0){
         return;  /* already in the list */
         }
     }
-    preferences.search_history = g_slist_prepend (preferences.search_history, g_strdup(current_text));
-    if (i==16){
-    /* delete last item */
-    GSList *temp= g_slist_nth (preferences.search_history,16);
-    preferences.search_history = g_slist_remove (preferences.search_history, temp->data);
-    }
+    set_preferences_manager_new_search_history_item(main_window.prefmg, i, current_text);
     #ifdef DEBUG
     g_print("added:%s\n",current_text);
     #endif
@@ -1589,7 +1589,7 @@ void block_indent(GtkWidget *widget)
 {
 //bugfix:segfault if not scintilla
   if (GTK_IS_SCINTILLA(main_window.current_editor->scintilla)){ 
-    move_block(preferences.indentation_size);
+    move_block(get_preferences_manager_indentation_size(main_window.prefmg));
   }
 }
 
@@ -1598,7 +1598,7 @@ void block_unindent(GtkWidget *widget)
 {
 //bugfix:segfault if not scintilla
   if (GTK_IS_SCINTILLA(main_window.current_editor->scintilla)){ 
-    move_block(0-preferences.indentation_size);
+    move_block(0-get_preferences_manager_indentation_size(main_window.prefmg));
   }
 }
 
@@ -1740,22 +1740,22 @@ void pressed_button_file_chooser(GtkButton *widget, gpointer data) {
 void classbrowser_show(void)
 {
   gtk_paned_set_position(GTK_PANED(main_window.main_horizontal_pane),classbrowser_hidden_position);
-  set_classbrowser_status(0);
+  set_preferences_manager_parse_classbrowser_status(main_window.prefmg, 0);
   classbrowser_update();
 }
 
 
 void classbrowser_hide(void)
 {
-  classbrowser_hidden_position =classbrowser_get_size();
+  classbrowser_hidden_position = get_preferences_manager_classbrowser_get_size(main_window.prefmg);
   //g_print("Width of class browser is %d\n", classbrowser_hidden_position);
   gtk_paned_set_position(GTK_PANED(main_window.main_horizontal_pane),0);
-  set_classbrowser_status(1);
+  set_preferences_manager_parse_classbrowser_status(main_window.prefmg,1);
 }
 
 void classbrowser_show_hide(GtkWidget *widget)
 {
-  gint hidden = classbrowser_status();
+  gint hidden = get_preferences_manager_classbrowser_status(main_window.prefmg);
   gtk_check_menu_item_set_active ((GtkCheckMenuItem *) main_window.menu->tog_class,hidden);
   if (hidden == 1)
     classbrowser_show();
@@ -1859,7 +1859,7 @@ void force_python(GtkWidget *widget)
 //or when the checkbox is clicked and the files tabbar is clicked
 gint on_parse_current_click (GtkWidget *widget)
 {
-  set_parse_only_current_file(gtk_toggle_button_get_active((GtkToggleButton *)widget));
+  set_preferences_manager_parse_only_current_file(main_window.prefmg, gtk_toggle_button_get_active((GtkToggleButton *)widget));
   classbrowser_update();
   return 0;
 }

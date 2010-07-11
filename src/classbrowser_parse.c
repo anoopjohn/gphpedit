@@ -21,7 +21,7 @@
  
    The GNU General Public License is contained in the file COPYING.
 */
-
+#include "tab.h"
 #include "classbrowser_parse.h"
 #include "gvfs_utils.h"
 #include "stdlib.h"
@@ -63,15 +63,6 @@ static gboolean is_whitespace(gchar character)
 {
 /*
   Determines whether a character is a control character or a white-space character
-*/
-/*
-  if ( (character == ' ') ||
-          (character == '\t') ||
-          (character == '\n') ||
-          (character == '\r') ) {
-    return TRUE;
-  }
- return FALSE;
 */
   return (g_ascii_iscntrl(character) || g_ascii_isspace(character));
 }

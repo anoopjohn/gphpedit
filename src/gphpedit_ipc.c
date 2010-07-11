@@ -24,6 +24,7 @@
 
 #include "main.h"
 #include "gphpedit_ipc.h"
+#include "main_window.h"
 
 #include <sys/types.h>
 #include <sys/stat.h>

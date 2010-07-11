@@ -32,9 +32,13 @@
 #include "menu.h"
 #include "toolbar.h"
 #include "syntax_check_window.h"
+#include "preferences_manager.h"
 
 typedef struct
 {
+  /* preferences manager */
+  Preferences_Manager *prefmg;
+
   GtkWidget *window;
   GtkWidget *prinbox;
   GtkWidget *prin_hbox;

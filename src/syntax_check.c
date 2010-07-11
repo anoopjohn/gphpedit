@@ -23,7 +23,6 @@
 */
 #include "stdlib.h"
 #include "syntax_check.h"
-#include "preferences.h"
 #include "main_window.h"
 #include <glib/gstdio.h>
 #include "gvfs_utils.h"
@@ -93,7 +92,7 @@ void syntax_add_lines(gchar *output)
           indent = gtk_scintilla_get_line_indentation(GTK_SCINTILLA(main_window.current_editor->scintilla), atoi(line_number)-1);
     
           line_start = gtk_scintilla_position_from_line(GTK_SCINTILLA(main_window.current_editor->scintilla), atoi(line_number)-1);
-          line_start += (indent/preferences.indentation_size);
+          line_start += (indent/get_preferences_manager_indentation_size(main_window.prefmg));
     
           line_end = gtk_scintilla_get_line_end_position(GTK_SCINTILLA(main_window.current_editor->scintilla), atoi(line_number)-1);
           gtk_scintilla_indicator_fill_range(GTK_SCINTILLA(main_window.current_editor->scintilla), line_start, line_end-line_start);
@@ -144,7 +143,7 @@ void syntax_add_lines(gchar *output)
           indent = gtk_scintilla_get_line_indentation(GTK_SCINTILLA(main_window.current_editor->scintilla), num-1);
     
           line_start = gtk_scintilla_position_from_line(GTK_SCINTILLA(main_window.current_editor->scintilla), num-1);
-          line_start += (indent/preferences.indentation_size);
+          line_start += (indent/get_preferences_manager_indentation_size(main_window.prefmg));
     
           line_end = gtk_scintilla_get_line_end_position(GTK_SCINTILLA(main_window.current_editor->scintilla), num-1);
           gtk_scintilla_indicator_fill_range(GTK_SCINTILLA(main_window.current_editor->scintilla), line_start, line_end-line_start);
@@ -224,7 +223,7 @@ void syntax_check_run(void)
     }
     unquote(filename->str);
     if(main_window.current_editor->type==TAB_PHP){
-    command_line = g_string_new(preferences.php_binary_location);
+    command_line = g_string_new(get_preferences_manager_php_binary_location(main_window.prefmg));
     command_line = g_string_append(command_line, " -q -l -d html_errors=Off -f '");
     command_line = g_string_append(command_line, filename->str);
     command_line = g_string_append(command_line, "'");

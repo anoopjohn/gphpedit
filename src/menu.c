@@ -345,7 +345,7 @@ static void fill_menu_view(void){
   create_separator_item(&main_window.menu->sep6,main_window.menu->menuview);
 
 
-  if (classbrowser_status()==0){
+  if (get_preferences_manager_classbrowser_status(main_window.prefmg)==0){
     create_check_menu_item(&main_window.menu->tog_class,main_window.menu->menuview,_("Show Side Panel"), _("Show/Hide Application Side Panel"), GDK_F8, 0,TRUE);
   }else {
     create_check_menu_item(&main_window.menu->tog_class,main_window.menu->menuview,_("Show Side Panel"), _("Show/Hide Application Side Panel"), GDK_F8, 0,FALSE);

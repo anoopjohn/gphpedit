@@ -26,7 +26,6 @@
 #define GPHPEDIT_IPC_H
 
 #include <glib.h>
-#include "main_window.h"
 
 G_BEGIN_DECLS
 

@@ -34,7 +34,7 @@ GtkTreeModel *create_completion_model (void)
   
   store = gtk_list_store_new (1, G_TYPE_STRING);
   GSList *walk;
-  for (walk = preferences.search_history; walk!=NULL; walk = g_slist_next(walk)) {
+  for (walk = get_preferences_manager_search_history(main_window.prefmg); walk!=NULL; walk = g_slist_next(walk)) {
     /* Append one word */
     gtk_list_store_append (store, &iter);
     gtk_list_store_set (store, &iter, 0, (gchar *) walk->data, -1);

@@ -399,7 +399,7 @@ static void syntax_window(GtkScintilla *scintilla, gchar *data){
       indent = gtk_scintilla_get_line_indentation(scintilla, current_line_number);
   
       line_start = gtk_scintilla_position_from_line(scintilla, current_line_number);
-      line_start += (indent/preferences.indentation_size);
+      line_start += (indent/get_preferences_manager_indentation_size(main_window.prefmg));
   
       line_end = gtk_scintilla_get_line_end_position(scintilla, current_line_number);
       gtk_scintilla_indicator_fill_range(scintilla, line_start, line_end-line_start);

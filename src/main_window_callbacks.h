@@ -26,7 +26,6 @@
 #define MAIN_WINDOW_CALLBACKS_H
 #include "main.h"
 #include "main_window.h"
-#include "preferences.h"
 #include "syntax_check.h"
 #include "classbrowser.h"
 

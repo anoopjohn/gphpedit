@@ -108,10 +108,10 @@ static inline void search_control_sensible(gboolean status){
 }
 
 static inline void restore_folderbrowser(void){
-    gtk_button_set_label(GTK_BUTTON(main_window.button_dialog), DEFAULT_DIR);
-    clear_folderbrowser();
-    search_control_sensible(FALSE);
-    store_last_folder(DEFAULT_DIR);
+  gtk_button_set_label(GTK_BUTTON(main_window.button_dialog), DEFAULT_DIR);
+  clear_folderbrowser();
+  search_control_sensible(FALSE);
+  set_preferences_manager_folderbrowser_last_folder(main_window.prefmg, DEFAULT_DIR);
 }
 static gboolean visible_func (GtkTreeModel *model, GtkTreeIter  *iter, gpointer data) {
   /* Visible if row is non-empty and name column contain filename as prefix */
@@ -239,7 +239,7 @@ static void print_files(gchar *path){
   } else {
     search_control_sensible(FALSE);
   }
-  store_last_folder(path);
+    set_preferences_manager_folderbrowser_last_folder(main_window.prefmg, path);
 }
 
 static void create_tree_async(GFile *file){
@@ -810,13 +810,12 @@ extern void folderbrowser_create(MainWindow *main_window)
   GtkWidget *label= gtk_image_new_from_file (PIXMAP_DIR "/folderbrowser.png");
   /* set tooltip */
   gtk_widget_set_tooltip_text (label,_("Folder Browser"));
-  gchar *folderpath = get_folderbrowser_last_folder();
+  const gchar *folderpath = get_preferences_manager_folderbrowser_last_folder(main_window->prefmg);//get_folderbrowser_last_folder();
   if (!folderpath){
     main_window->button_dialog = gtk_button_new_with_label (DEFAULT_DIR);
   } else {
-    gchar *real_path=filename_get_path(folderpath);
+    gchar *real_path=filename_get_path((gchar *)folderpath);
     main_window->button_dialog = gtk_button_new_with_label (real_path);
-    g_free(folderpath);
     g_free(real_path);
   }
   g_signal_connect(G_OBJECT(main_window->button_dialog), "pressed", G_CALLBACK(pressed_button_file_chooser), NULL);
@@ -921,7 +920,7 @@ void init_folderbrowser(GtkTreeStore *pTree, gchar *filename, GtkTreeIter *iter,
   #ifdef DEBUGFOLDERBROWSER
   g_print("DEBUG:: clear tree and cache data\n");
   #endif
-  store_last_folder(filename);
+  set_preferences_manager_folderbrowser_last_folder(main_window.prefmg, filename);
   create_tree_async(file);
 }
 

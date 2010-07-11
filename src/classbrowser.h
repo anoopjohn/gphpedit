@@ -25,7 +25,6 @@
 #ifndef CLASS_BROWSER_H
 #define CLASS_BROWSER_H
 
-#include "preferences.h"
 #include "tab.h"
 #include "classbrowser_parse.h"
 

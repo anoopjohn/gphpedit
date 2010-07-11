@@ -25,7 +25,7 @@
 #include "tab_php.h"
 #include "tab_css.h"
 #include "tab_util.h"
-#include "preferences.h"
+#include "main_window.h"
 
 void tab_css_set_lexer(Editor *editor)
 {
@@ -33,152 +33,160 @@ void tab_css_set_lexer(Editor *editor)
   gtk_scintilla_set_lexer(GTK_SCINTILLA (editor->scintilla), SCLEX_CSS);
   gtk_scintilla_set_style_bits(GTK_SCINTILLA(editor->scintilla), 5);
 
-  /* Example style setting up code! */
-  gtk_scintilla_autoc_set_choose_single (GTK_SCINTILLA(editor->scintilla), TRUE);
-  gtk_scintilla_set_use_tabs (GTK_SCINTILLA(editor->scintilla), 1);
-  gtk_scintilla_set_tab_indents (GTK_SCINTILLA(editor->scintilla), 1);
-  gtk_scintilla_set_backspace_unindents (GTK_SCINTILLA(editor->scintilla), 1);
-  gtk_scintilla_set_tab_width (GTK_SCINTILLA(editor->scintilla), preferences.indentation_size);
-  gtk_scintilla_set_indent (GTK_SCINTILLA(editor->scintilla), preferences.tab_size);
+  gchar *font =NULL;
+  gint size, fore, back;
+  gboolean italic, bold;
 
-  gtk_scintilla_style_set_font (GTK_SCINTILLA(editor->scintilla), STYLE_DEFAULT, preferences.default_font);
-  gtk_scintilla_style_set_fore (GTK_SCINTILLA(editor->scintilla), STYLE_DEFAULT, preferences.default_fore);
-  gtk_scintilla_style_set_back (GTK_SCINTILLA(editor->scintilla), STYLE_DEFAULT, preferences.default_back);
-  gtk_scintilla_style_set_size (GTK_SCINTILLA(editor->scintilla), STYLE_DEFAULT, preferences.default_size);
-  gtk_scintilla_style_set_italic (GTK_SCINTILLA(editor->scintilla), STYLE_DEFAULT, preferences.default_italic);
-  gtk_scintilla_style_set_bold (GTK_SCINTILLA(editor->scintilla), STYLE_DEFAULT, preferences.default_bold);
+  get_preferences_manager_style_settings(main_window.prefmg, "default_style", &font , &size, &fore, &back, &italic, &bold);
 
-  gtk_scintilla_style_set_font (GTK_SCINTILLA(editor->scintilla), SCE_CSS_DEFAULT, preferences.default_font);
-  gtk_scintilla_style_set_fore (GTK_SCINTILLA(editor->scintilla), SCE_CSS_DEFAULT, preferences.default_fore);
-  gtk_scintilla_style_set_back (GTK_SCINTILLA(editor->scintilla), SCE_CSS_DEFAULT, preferences.default_back);
-  gtk_scintilla_style_set_size (GTK_SCINTILLA(editor->scintilla), SCE_CSS_DEFAULT, preferences.default_size);
-  gtk_scintilla_style_set_italic (GTK_SCINTILLA(editor->scintilla), SCE_CSS_DEFAULT, preferences.default_italic);
-  gtk_scintilla_style_set_bold (GTK_SCINTILLA(editor->scintilla), SCE_CSS_DEFAULT, preferences.default_bold);
+  gtk_scintilla_style_set_font (GTK_SCINTILLA(editor->scintilla), SCE_CSS_DEFAULT, font);
+  gtk_scintilla_style_set_fore (GTK_SCINTILLA(editor->scintilla), SCE_CSS_DEFAULT, fore);
+  gtk_scintilla_style_set_back (GTK_SCINTILLA(editor->scintilla), SCE_CSS_DEFAULT, back);
+  gtk_scintilla_style_set_size (GTK_SCINTILLA(editor->scintilla), SCE_CSS_DEFAULT, size);
+  gtk_scintilla_style_set_italic (GTK_SCINTILLA(editor->scintilla), SCE_CSS_DEFAULT, italic);
+  gtk_scintilla_style_set_bold (GTK_SCINTILLA(editor->scintilla), SCE_CSS_DEFAULT, bold);
 
-  //gtk_scintilla_set_sel_back (GTK_SCINTILLA(editor->scintilla), TRUE, preferences.set_sel_back);
-  //gtk_scintilla_marker_set_back (GTK_SCINTILLA(editor->scintilla), TRUE, preferences.marker_back);
+  get_preferences_manager_style_settings(main_window.prefmg, "php_default", &font , &size, &fore, &back, &italic, &bold);
 
-  gtk_scintilla_style_set_font (GTK_SCINTILLA(editor->scintilla), STYLE_BRACELIGHT, preferences.php_default_font);
+  gtk_scintilla_style_set_font (GTK_SCINTILLA(editor->scintilla), STYLE_BRACELIGHT, font);
   gtk_scintilla_style_set_fore (GTK_SCINTILLA(editor->scintilla), STYLE_BRACELIGHT, 16711680);// Matching bracket
-  if(preferences.higthlightcaretline)
-    gtk_scintilla_style_set_back (GTK_SCINTILLA(editor->scintilla), STYLE_BRACELIGHT, preferences.higthlightcaretline_color);
+  if(get_preferences_manager_higthlight_caret_line (main_window.prefmg))
+    gtk_scintilla_style_set_back (GTK_SCINTILLA(editor->scintilla), STYLE_BRACELIGHT, get_preferences_manager_higthlight_caret_line_color(main_window.prefmg));
   else
-    gtk_scintilla_style_set_back (GTK_SCINTILLA(editor->scintilla), STYLE_BRACELIGHT, preferences.php_default_back);
-
-  gtk_scintilla_style_set_size (GTK_SCINTILLA(editor->scintilla), STYLE_BRACELIGHT, preferences.php_default_size);
-  gtk_scintilla_style_set_italic (GTK_SCINTILLA(editor->scintilla), STYLE_BRACELIGHT, preferences.php_default_italic);
+    gtk_scintilla_style_set_back (GTK_SCINTILLA(editor->scintilla), STYLE_BRACELIGHT, back);
+  gtk_scintilla_style_set_size (GTK_SCINTILLA(editor->scintilla), STYLE_BRACELIGHT, size);
+  gtk_scintilla_style_set_italic (GTK_SCINTILLA(editor->scintilla), STYLE_BRACELIGHT, italic);
   gtk_scintilla_style_set_bold (GTK_SCINTILLA(editor->scintilla), STYLE_BRACELIGHT, TRUE);
-  gtk_scintilla_style_set_font (GTK_SCINTILLA(editor->scintilla), STYLE_BRACEBAD, preferences.php_default_font);
+  gtk_scintilla_style_set_font (GTK_SCINTILLA(editor->scintilla), STYLE_BRACEBAD, font);
   gtk_scintilla_style_set_fore (GTK_SCINTILLA(editor->scintilla), STYLE_BRACEBAD, 255);
-  if(preferences.higthlightcaretline)
-    gtk_scintilla_style_set_back (GTK_SCINTILLA(editor->scintilla), STYLE_BRACEBAD, preferences.higthlightcaretline_color);
+  if(get_preferences_manager_higthlight_caret_line (main_window.prefmg))
+    gtk_scintilla_style_set_back (GTK_SCINTILLA(editor->scintilla), STYLE_BRACEBAD, get_preferences_manager_higthlight_caret_line_color(main_window.prefmg));
   else
-    gtk_scintilla_style_set_back (GTK_SCINTILLA(editor->scintilla), STYLE_BRACEBAD, preferences.php_default_back);
-
-  gtk_scintilla_style_set_size (GTK_SCINTILLA(editor->scintilla), STYLE_BRACEBAD, preferences.php_default_size);
-  gtk_scintilla_style_set_italic (GTK_SCINTILLA(editor->scintilla), STYLE_BRACEBAD, preferences.php_default_italic);
+    gtk_scintilla_style_set_back (GTK_SCINTILLA(editor->scintilla), STYLE_BRACEBAD, back);
+  gtk_scintilla_style_set_size (GTK_SCINTILLA(editor->scintilla), STYLE_BRACEBAD, size);
+  gtk_scintilla_style_set_italic (GTK_SCINTILLA(editor->scintilla), STYLE_BRACEBAD, italic);
   gtk_scintilla_style_set_bold (GTK_SCINTILLA(editor->scintilla), STYLE_BRACEBAD, TRUE);
-  
-  gtk_scintilla_set_indentation_guides (GTK_SCINTILLA(editor->scintilla), preferences.show_indentation_guides);
-  gtk_scintilla_set_edge_mode (GTK_SCINTILLA(editor->scintilla), preferences.edge_mode);
-  gtk_scintilla_set_edge_column (GTK_SCINTILLA(editor->scintilla), preferences.edge_column);
-  gtk_scintilla_set_edge_colour (GTK_SCINTILLA(editor->scintilla), preferences.edge_colour);
 
   gtk_scintilla_set_keywords(GTK_SCINTILLA(editor->scintilla), 0, "aqua auto background background-attachment background-color background-image background-position background-repeat baseline black blink block blue bold bolder border border-bottom border-bottom-width border-color border-left border-left-width border-right border-right-width border-style border-top border-top-width border-width both bottom capitalize center circle clear color dashed decimal disc display dotted double fixed float font font-family font-size font-style font-variant font-weight fuchsia gray green groove height inline inset inside italic justify large larger left letter-spacing lighter lime line-height line-through list-item list-style list-style-image list-style-position list-style-type lower-alpha lower-roman lowercase margin margin-bottom margin-left margin-right margin-top maroon medium medium middle navy no-repeat no-wrap none normal oblique olive outset outside overline padding padding-bottom padding-left padding-right padding-top pre purple red repeat repeat-x repeat-y ridge right scroll silver small small-caps smaller solid square sub super teal text-align text-bottom text-decoration text-indent text-top text-transform thick thin top transparent underline upper-alpha upper-roman uppercase vertical-align white white-space width word-spacing x-large x-small xx-large xx-small yellow");
   gtk_scintilla_set_keywords(GTK_SCINTILLA(editor->scintilla), 1, "active after before first first-child first-letter first-line focus hover lang left link right visited");
   gtk_scintilla_set_keywords(GTK_SCINTILLA(editor->scintilla), 2, "ActiveBorder ActiveCaption AppWorkspace Background ButtonFace ButtonHighlight ButtonShadow ButtonText CaptionText GrayText Highlight HighlightText InactiveBorder InactiveCaption InactiveCaptionText InfoBackground InfoText Menu MenuText Scrollbar ThreeDDarkShadow ThreeDFace ThreeDHighlight ThreeDLightShadow ThreeDShadow Window WindowFrame WindowText above absolute always armenian ascent avoid azimuth baseline bbox behind below bidi-override border-bottom-color border-bottom-style border-collapse border-color border-left-color border-left-style border-right-color border-right-style border-spacing border-style border-top-color border-top-style bottom cap-height caption caption-side center-left center-right centerline child cjk-ideographic clip close-quote code collapse compact condensed content continous counter-increment counter-reset crop cross crosshair cue cue-after cue-before cursor decimal-leading-zero default definition-src descent digits direction e-resize elevation embed empty-cells expanded extra-condensed extra-expanded far-left far-right fast faster female fixed font-size-adjust font-stretch georgian hebrew help hidden hide high higher hiragana hiragana-iroha icon inherit inline-table katakana katakana-iroha landscape left left-side leftwards level loud low lower lower-greek lower-latin ltr male marker marker-offset marks mathline max-height max-width medium medium menu message-box min-height min-width mix move n-resize narrower ne-resize no-close-quote no-open-quote nw-resize once open-quote orphans outline outline-color outline-style outline-width overflow page page-break-after page-break-before page-break-inside panose-1 pause pause-after pause-before pitch pitch-range play-during pointer portrait position quotes relative richness right right-side rightwards rtl run-in s-resize scroll se-resize semi-condensed semi-expanded separate show silent size slope slow slower small-caption soft speak speak-header speak-numeral speak-punctuation speech-rate spell-out src static status-bar stemh stemv stress sw-resize table table-caption table-cell table-column table-column-group table-footer-group table-header-group table-layout table-row table-row-group text text-shadow top topline ultra-condensed ultra-expanded unicode-bidi unicode-range units-per-em upper-latin visibility visible voice-family volume w-resize wait wider widows widths x-fast x-height x-high x-loud x-low x-slow x-soft z-index");
   gtk_scintilla_set_keywords(GTK_SCINTILLA(editor->scintilla), 4, "@charset @font-face @import @media @page");
 
-  gtk_scintilla_style_set_back (GTK_SCINTILLA(editor->scintilla), SCE_CSS_TAG, preferences.css_tag_back);
-  gtk_scintilla_style_set_font (GTK_SCINTILLA(editor->scintilla), SCE_CSS_TAG, preferences.css_tag_font);
-  gtk_scintilla_style_set_fore (GTK_SCINTILLA(editor->scintilla), SCE_CSS_TAG, preferences.css_tag_fore);
-  gtk_scintilla_style_set_size (GTK_SCINTILLA(editor->scintilla), SCE_CSS_TAG, preferences.css_tag_size);
-  gtk_scintilla_style_set_italic (GTK_SCINTILLA(editor->scintilla), SCE_CSS_TAG, preferences.css_tag_italic);
-  gtk_scintilla_style_set_bold (GTK_SCINTILLA(editor->scintilla), SCE_CSS_TAG, preferences.css_tag_bold);
+  get_preferences_manager_style_settings(main_window.prefmg, "css_tag", &font , &size, &fore, &back, &italic, &bold);
 
-  gtk_scintilla_style_set_fore (GTK_SCINTILLA(editor->scintilla), SCE_CSS_CLASS, preferences.css_class_fore);
-  gtk_scintilla_style_set_font (GTK_SCINTILLA(editor->scintilla), SCE_CSS_CLASS, preferences.css_class_font);
-  gtk_scintilla_style_set_back (GTK_SCINTILLA(editor->scintilla), SCE_CSS_CLASS, preferences.css_class_back);
-  gtk_scintilla_style_set_size (GTK_SCINTILLA(editor->scintilla), SCE_CSS_CLASS, preferences.css_class_size);
-  gtk_scintilla_style_set_italic (GTK_SCINTILLA(editor->scintilla), SCE_CSS_CLASS, preferences.css_class_italic);
-  gtk_scintilla_style_set_bold (GTK_SCINTILLA(editor->scintilla), SCE_CSS_CLASS, preferences.css_class_bold);
+  gtk_scintilla_style_set_back (GTK_SCINTILLA(editor->scintilla), SCE_CSS_TAG, back);
+  gtk_scintilla_style_set_font (GTK_SCINTILLA(editor->scintilla), SCE_CSS_TAG, font);
+  gtk_scintilla_style_set_fore (GTK_SCINTILLA(editor->scintilla), SCE_CSS_TAG, fore);
+  gtk_scintilla_style_set_size (GTK_SCINTILLA(editor->scintilla), SCE_CSS_TAG, size);
+  gtk_scintilla_style_set_italic (GTK_SCINTILLA(editor->scintilla), SCE_CSS_TAG, italic);
+  gtk_scintilla_style_set_bold (GTK_SCINTILLA(editor->scintilla), SCE_CSS_TAG, bold);
 
-  gtk_scintilla_style_set_back (GTK_SCINTILLA(editor->scintilla), SCE_CSS_PSEUDOCLASS, preferences.css_pseudoclass_back);
-  gtk_scintilla_style_set_font (GTK_SCINTILLA(editor->scintilla), SCE_CSS_PSEUDOCLASS, preferences.css_pseudoclass_font);
-  gtk_scintilla_style_set_fore (GTK_SCINTILLA(editor->scintilla), SCE_CSS_PSEUDOCLASS, preferences.css_pseudoclass_fore);
-  gtk_scintilla_style_set_size (GTK_SCINTILLA(editor->scintilla), SCE_CSS_PSEUDOCLASS, preferences.css_pseudoclass_size);
-  gtk_scintilla_style_set_italic (GTK_SCINTILLA(editor->scintilla), SCE_CSS_PSEUDOCLASS, preferences.css_pseudoclass_italic);
-  gtk_scintilla_style_set_bold (GTK_SCINTILLA(editor->scintilla), SCE_CSS_PSEUDOCLASS, preferences.css_pseudoclass_bold);
+  get_preferences_manager_style_settings(main_window.prefmg, "css_class", &font , &size, &fore, &back, &italic, &bold);
 
-  gtk_scintilla_style_set_fore (GTK_SCINTILLA(editor->scintilla), SCE_CSS_UNKNOWN_PSEUDOCLASS, preferences.css_unknown_pseudoclass_fore);
-  gtk_scintilla_style_set_font (GTK_SCINTILLA(editor->scintilla), SCE_CSS_UNKNOWN_PSEUDOCLASS, preferences.css_unknown_pseudoclass_font);
-  gtk_scintilla_style_set_back (GTK_SCINTILLA(editor->scintilla), SCE_CSS_UNKNOWN_PSEUDOCLASS, preferences.css_unknown_pseudoclass_back);
-  gtk_scintilla_style_set_size (GTK_SCINTILLA(editor->scintilla), SCE_CSS_UNKNOWN_PSEUDOCLASS, preferences.css_unknown_pseudoclass_size);
-  gtk_scintilla_style_set_italic (GTK_SCINTILLA(editor->scintilla), SCE_CSS_UNKNOWN_PSEUDOCLASS, preferences.css_unknown_pseudoclass_italic);
-  gtk_scintilla_style_set_bold (GTK_SCINTILLA(editor->scintilla), SCE_CSS_UNKNOWN_PSEUDOCLASS, preferences.css_unknown_pseudoclass_bold);
+  gtk_scintilla_style_set_fore (GTK_SCINTILLA(editor->scintilla), SCE_CSS_CLASS, fore);
+  gtk_scintilla_style_set_font (GTK_SCINTILLA(editor->scintilla), SCE_CSS_CLASS, font);
+  gtk_scintilla_style_set_back (GTK_SCINTILLA(editor->scintilla), SCE_CSS_CLASS, back);
+  gtk_scintilla_style_set_size (GTK_SCINTILLA(editor->scintilla), SCE_CSS_CLASS, size);
+  gtk_scintilla_style_set_italic (GTK_SCINTILLA(editor->scintilla), SCE_CSS_CLASS, italic);
+  gtk_scintilla_style_set_bold (GTK_SCINTILLA(editor->scintilla), SCE_CSS_CLASS, bold);
 
-  gtk_scintilla_style_set_fore (GTK_SCINTILLA(editor->scintilla), SCE_CSS_OPERATOR, preferences.css_operator_fore);
-  gtk_scintilla_style_set_font (GTK_SCINTILLA(editor->scintilla), SCE_CSS_OPERATOR, preferences.css_operator_font);
-  gtk_scintilla_style_set_back (GTK_SCINTILLA(editor->scintilla), SCE_CSS_OPERATOR, preferences.css_operator_back);
-  gtk_scintilla_style_set_size (GTK_SCINTILLA(editor->scintilla), SCE_CSS_OPERATOR, preferences.css_operator_size);
-  gtk_scintilla_style_set_italic (GTK_SCINTILLA(editor->scintilla), SCE_CSS_OPERATOR, preferences.css_operator_italic);
-  gtk_scintilla_style_set_bold (GTK_SCINTILLA(editor->scintilla), SCE_CSS_OPERATOR, preferences.css_operator_bold);
+  get_preferences_manager_style_settings(main_window.prefmg, "css_pseudoclass", &font , &size, &fore, &back, &italic, &bold);
 
-  gtk_scintilla_style_set_fore (GTK_SCINTILLA(editor->scintilla), SCE_CSS_IDENTIFIER, preferences.css_identifier_fore);
-  gtk_scintilla_style_set_font (GTK_SCINTILLA(editor->scintilla), SCE_CSS_IDENTIFIER, preferences.css_identifier_font);
-  gtk_scintilla_style_set_back (GTK_SCINTILLA(editor->scintilla), SCE_CSS_IDENTIFIER, preferences.css_identifier_back);
-  gtk_scintilla_style_set_size (GTK_SCINTILLA(editor->scintilla), SCE_CSS_IDENTIFIER, preferences.css_identifier_size);
-  gtk_scintilla_style_set_italic (GTK_SCINTILLA(editor->scintilla), SCE_CSS_IDENTIFIER, preferences.css_identifier_italic);
-  gtk_scintilla_style_set_bold (GTK_SCINTILLA(editor->scintilla), SCE_CSS_IDENTIFIER, preferences.css_identifier_bold);
+  gtk_scintilla_style_set_back (GTK_SCINTILLA(editor->scintilla), SCE_CSS_PSEUDOCLASS, back);
+  gtk_scintilla_style_set_font (GTK_SCINTILLA(editor->scintilla), SCE_CSS_PSEUDOCLASS, font);
+  gtk_scintilla_style_set_fore (GTK_SCINTILLA(editor->scintilla), SCE_CSS_PSEUDOCLASS, fore);
+  gtk_scintilla_style_set_size (GTK_SCINTILLA(editor->scintilla), SCE_CSS_PSEUDOCLASS, size);
+  gtk_scintilla_style_set_italic (GTK_SCINTILLA(editor->scintilla), SCE_CSS_PSEUDOCLASS, italic);
+  gtk_scintilla_style_set_bold (GTK_SCINTILLA(editor->scintilla), SCE_CSS_PSEUDOCLASS, bold);
 
-  gtk_scintilla_style_set_fore (GTK_SCINTILLA(editor->scintilla), SCE_CSS_UNKNOWN_IDENTIFIER, preferences.css_unknown_identifier_fore);
-  gtk_scintilla_style_set_font (GTK_SCINTILLA(editor->scintilla), SCE_CSS_UNKNOWN_IDENTIFIER, preferences.css_unknown_identifier_font);
-  gtk_scintilla_style_set_back (GTK_SCINTILLA(editor->scintilla), SCE_CSS_UNKNOWN_IDENTIFIER, preferences.css_unknown_identifier_back);
-  gtk_scintilla_style_set_size (GTK_SCINTILLA(editor->scintilla), SCE_CSS_UNKNOWN_IDENTIFIER, preferences.css_unknown_identifier_size);
-  gtk_scintilla_style_set_italic (GTK_SCINTILLA(editor->scintilla), SCE_CSS_UNKNOWN_IDENTIFIER, preferences.css_unknown_identifier_italic);
-  gtk_scintilla_style_set_bold (GTK_SCINTILLA(editor->scintilla), SCE_CSS_UNKNOWN_IDENTIFIER, preferences.css_unknown_identifier_bold);
+  get_preferences_manager_style_settings(main_window.prefmg, "css_unknown_pseudoclass", &font , &size, &fore, &back, &italic, &bold);
 
-  gtk_scintilla_style_set_fore (GTK_SCINTILLA(editor->scintilla), SCE_CSS_VALUE, preferences.css_value_fore);
-  gtk_scintilla_style_set_font (GTK_SCINTILLA(editor->scintilla), SCE_CSS_VALUE, preferences.css_value_font);
-  gtk_scintilla_style_set_back (GTK_SCINTILLA(editor->scintilla), SCE_CSS_VALUE, preferences.css_value_back);
-  gtk_scintilla_style_set_size (GTK_SCINTILLA(editor->scintilla), SCE_CSS_VALUE, preferences.css_value_size);
-  gtk_scintilla_style_set_italic (GTK_SCINTILLA(editor->scintilla), SCE_CSS_VALUE, preferences.css_value_italic);
-  gtk_scintilla_style_set_bold (GTK_SCINTILLA(editor->scintilla), SCE_CSS_VALUE, preferences.css_value_bold);
+  gtk_scintilla_style_set_fore (GTK_SCINTILLA(editor->scintilla), SCE_CSS_UNKNOWN_PSEUDOCLASS, fore);
+  gtk_scintilla_style_set_font (GTK_SCINTILLA(editor->scintilla), SCE_CSS_UNKNOWN_PSEUDOCLASS, font);
+  gtk_scintilla_style_set_back (GTK_SCINTILLA(editor->scintilla), SCE_CSS_UNKNOWN_PSEUDOCLASS, back);
+  gtk_scintilla_style_set_size (GTK_SCINTILLA(editor->scintilla), SCE_CSS_UNKNOWN_PSEUDOCLASS, size);
+  gtk_scintilla_style_set_italic (GTK_SCINTILLA(editor->scintilla), SCE_CSS_UNKNOWN_PSEUDOCLASS, italic);
+  gtk_scintilla_style_set_bold (GTK_SCINTILLA(editor->scintilla), SCE_CSS_UNKNOWN_PSEUDOCLASS, bold);
 
-  gtk_scintilla_style_set_fore (GTK_SCINTILLA(editor->scintilla), SCE_CSS_COMMENT, preferences.css_comment_fore);
-  gtk_scintilla_style_set_font (GTK_SCINTILLA(editor->scintilla), SCE_CSS_COMMENT, preferences.css_comment_font);
-  gtk_scintilla_style_set_back (GTK_SCINTILLA(editor->scintilla), SCE_CSS_COMMENT, preferences.css_comment_back);
-  gtk_scintilla_style_set_size (GTK_SCINTILLA(editor->scintilla), SCE_CSS_COMMENT, preferences.css_comment_size);
-  gtk_scintilla_style_set_italic (GTK_SCINTILLA(editor->scintilla), SCE_CSS_COMMENT, preferences.css_comment_italic);
-  gtk_scintilla_style_set_bold (GTK_SCINTILLA(editor->scintilla), SCE_CSS_COMMENT, preferences.css_comment_bold);
+  get_preferences_manager_style_settings(main_window.prefmg, "css_operator", &font , &size, &fore, &back, &italic, &bold);
 
-  gtk_scintilla_style_set_font (GTK_SCINTILLA(editor->scintilla), SCE_CSS_ID, preferences.css_id_font);
-  gtk_scintilla_style_set_fore (GTK_SCINTILLA(editor->scintilla), SCE_CSS_ID, preferences.css_id_fore);
-  gtk_scintilla_style_set_back (GTK_SCINTILLA(editor->scintilla), SCE_CSS_ID, preferences.css_id_back);
-  gtk_scintilla_style_set_size (GTK_SCINTILLA(editor->scintilla), SCE_CSS_ID, preferences.css_id_size);
-  gtk_scintilla_style_set_italic (GTK_SCINTILLA(editor->scintilla), SCE_CSS_ID, preferences.css_id_italic);
-  gtk_scintilla_style_set_bold (GTK_SCINTILLA(editor->scintilla), SCE_CSS_ID, preferences.css_id_bold);
+  gtk_scintilla_style_set_fore (GTK_SCINTILLA(editor->scintilla), SCE_CSS_OPERATOR, fore);
+  gtk_scintilla_style_set_font (GTK_SCINTILLA(editor->scintilla), SCE_CSS_OPERATOR, font);
+  gtk_scintilla_style_set_back (GTK_SCINTILLA(editor->scintilla), SCE_CSS_OPERATOR, back);
+  gtk_scintilla_style_set_size (GTK_SCINTILLA(editor->scintilla), SCE_CSS_OPERATOR, size);
+  gtk_scintilla_style_set_italic (GTK_SCINTILLA(editor->scintilla), SCE_CSS_OPERATOR, italic);
+  gtk_scintilla_style_set_bold (GTK_SCINTILLA(editor->scintilla), SCE_CSS_OPERATOR, bold);
 
-  gtk_scintilla_style_set_font (GTK_SCINTILLA(editor->scintilla), SCE_CSS_IMPORTANT, preferences.css_important_font);
-  gtk_scintilla_style_set_fore (GTK_SCINTILLA(editor->scintilla), SCE_CSS_IMPORTANT, preferences.css_important_fore);
-  gtk_scintilla_style_set_back (GTK_SCINTILLA(editor->scintilla), SCE_CSS_IMPORTANT, preferences.css_important_back);
-  gtk_scintilla_style_set_size (GTK_SCINTILLA(editor->scintilla), SCE_CSS_IMPORTANT, preferences.css_important_size);
-  gtk_scintilla_style_set_italic (GTK_SCINTILLA(editor->scintilla), SCE_CSS_IMPORTANT, preferences.css_important_italic);
-  gtk_scintilla_style_set_bold (GTK_SCINTILLA(editor->scintilla), SCE_CSS_IMPORTANT, preferences.css_important_bold);
+  get_preferences_manager_style_settings(main_window.prefmg, "css_identifier", &font , &size, &fore, &back, &italic, &bold);
 
-  gtk_scintilla_style_set_font (GTK_SCINTILLA(editor->scintilla), SCE_CSS_MEDIA, preferences.css_important_font);
-  gtk_scintilla_style_set_fore (GTK_SCINTILLA(editor->scintilla), SCE_CSS_MEDIA, preferences.css_important_fore);
-  gtk_scintilla_style_set_back (GTK_SCINTILLA(editor->scintilla), SCE_CSS_MEDIA, preferences.css_important_back);
-  gtk_scintilla_style_set_size (GTK_SCINTILLA(editor->scintilla), SCE_CSS_MEDIA, preferences.css_important_size);
-  gtk_scintilla_style_set_italic (GTK_SCINTILLA(editor->scintilla), SCE_CSS_MEDIA, preferences.css_important_italic);
-  gtk_scintilla_style_set_bold (GTK_SCINTILLA(editor->scintilla), SCE_CSS_MEDIA, preferences.css_important_bold);
+  gtk_scintilla_style_set_fore (GTK_SCINTILLA(editor->scintilla), SCE_CSS_IDENTIFIER, fore);
+  gtk_scintilla_style_set_font (GTK_SCINTILLA(editor->scintilla), SCE_CSS_IDENTIFIER, font);
+  gtk_scintilla_style_set_back (GTK_SCINTILLA(editor->scintilla), SCE_CSS_IDENTIFIER, back);
+  gtk_scintilla_style_set_size (GTK_SCINTILLA(editor->scintilla), SCE_CSS_IDENTIFIER, size);
+  gtk_scintilla_style_set_italic (GTK_SCINTILLA(editor->scintilla), SCE_CSS_IDENTIFIER, italic);
+  gtk_scintilla_style_set_bold (GTK_SCINTILLA(editor->scintilla), SCE_CSS_IDENTIFIER, bold);
 
-  gtk_scintilla_style_set_fore (GTK_SCINTILLA(editor->scintilla), SCE_CSS_DIRECTIVE, preferences.css_directive_fore);
-  gtk_scintilla_style_set_font (GTK_SCINTILLA(editor->scintilla), SCE_CSS_DIRECTIVE, preferences.css_directive_font);
-  gtk_scintilla_style_set_back (GTK_SCINTILLA(editor->scintilla), SCE_CSS_DIRECTIVE, preferences.css_directive_back);
-  gtk_scintilla_style_set_size (GTK_SCINTILLA(editor->scintilla), SCE_CSS_DIRECTIVE, preferences.css_directive_size);
-  gtk_scintilla_style_set_italic (GTK_SCINTILLA(editor->scintilla), SCE_CSS_DIRECTIVE, preferences.css_directive_italic);
-  gtk_scintilla_style_set_bold (GTK_SCINTILLA(editor->scintilla), SCE_CSS_DIRECTIVE, preferences.css_directive_bold);
+  get_preferences_manager_style_settings(main_window.prefmg, "css_unknown_identifier", &font , &size, &fore, &back, &italic, &bold);
+
+  gtk_scintilla_style_set_fore (GTK_SCINTILLA(editor->scintilla), SCE_CSS_UNKNOWN_IDENTIFIER, fore);
+  gtk_scintilla_style_set_font (GTK_SCINTILLA(editor->scintilla), SCE_CSS_UNKNOWN_IDENTIFIER, font);
+  gtk_scintilla_style_set_back (GTK_SCINTILLA(editor->scintilla), SCE_CSS_UNKNOWN_IDENTIFIER, back);
+  gtk_scintilla_style_set_size (GTK_SCINTILLA(editor->scintilla), SCE_CSS_UNKNOWN_IDENTIFIER, size);
+  gtk_scintilla_style_set_italic (GTK_SCINTILLA(editor->scintilla), SCE_CSS_UNKNOWN_IDENTIFIER, italic);
+  gtk_scintilla_style_set_bold (GTK_SCINTILLA(editor->scintilla), SCE_CSS_UNKNOWN_IDENTIFIER, bold);
+
+  get_preferences_manager_style_settings(main_window.prefmg, "css_value", &font , &size, &fore, &back, &italic, &bold);
+
+  gtk_scintilla_style_set_fore (GTK_SCINTILLA(editor->scintilla), SCE_CSS_VALUE, fore);
+  gtk_scintilla_style_set_font (GTK_SCINTILLA(editor->scintilla), SCE_CSS_VALUE, font);
+  gtk_scintilla_style_set_back (GTK_SCINTILLA(editor->scintilla), SCE_CSS_VALUE, back);
+  gtk_scintilla_style_set_size (GTK_SCINTILLA(editor->scintilla), SCE_CSS_VALUE, size);
+  gtk_scintilla_style_set_italic (GTK_SCINTILLA(editor->scintilla), SCE_CSS_VALUE, italic);
+  gtk_scintilla_style_set_bold (GTK_SCINTILLA(editor->scintilla), SCE_CSS_VALUE, bold);
+
+  get_preferences_manager_style_settings(main_window.prefmg, "css_comment", &font , &size, &fore, &back, &italic, &bold);
+
+  gtk_scintilla_style_set_fore (GTK_SCINTILLA(editor->scintilla), SCE_CSS_COMMENT, fore);
+  gtk_scintilla_style_set_font (GTK_SCINTILLA(editor->scintilla), SCE_CSS_COMMENT, font);
+  gtk_scintilla_style_set_back (GTK_SCINTILLA(editor->scintilla), SCE_CSS_COMMENT, back);
+  gtk_scintilla_style_set_size (GTK_SCINTILLA(editor->scintilla), SCE_CSS_COMMENT, size);
+  gtk_scintilla_style_set_italic (GTK_SCINTILLA(editor->scintilla), SCE_CSS_COMMENT, italic);
+  gtk_scintilla_style_set_bold (GTK_SCINTILLA(editor->scintilla), SCE_CSS_COMMENT, bold);
+
+  get_preferences_manager_style_settings(main_window.prefmg, "css_id", &font , &size, &fore, &back, &italic, &bold);
+
+  gtk_scintilla_style_set_font (GTK_SCINTILLA(editor->scintilla), SCE_CSS_ID, font);
+  gtk_scintilla_style_set_fore (GTK_SCINTILLA(editor->scintilla), SCE_CSS_ID, fore);
+  gtk_scintilla_style_set_back (GTK_SCINTILLA(editor->scintilla), SCE_CSS_ID, back);
+  gtk_scintilla_style_set_size (GTK_SCINTILLA(editor->scintilla), SCE_CSS_ID, size);
+  gtk_scintilla_style_set_italic (GTK_SCINTILLA(editor->scintilla), SCE_CSS_ID, italic);
+  gtk_scintilla_style_set_bold (GTK_SCINTILLA(editor->scintilla), SCE_CSS_ID, bold);
+
+  get_preferences_manager_style_settings(main_window.prefmg, "css_important", &font , &size, &fore, &back, &italic, &bold);
+
+  gtk_scintilla_style_set_font (GTK_SCINTILLA(editor->scintilla), SCE_CSS_IMPORTANT, font);
+  gtk_scintilla_style_set_fore (GTK_SCINTILLA(editor->scintilla), SCE_CSS_IMPORTANT, fore);
+  gtk_scintilla_style_set_back (GTK_SCINTILLA(editor->scintilla), SCE_CSS_IMPORTANT, back);
+  gtk_scintilla_style_set_size (GTK_SCINTILLA(editor->scintilla), SCE_CSS_IMPORTANT, size);
+  gtk_scintilla_style_set_italic (GTK_SCINTILLA(editor->scintilla), SCE_CSS_IMPORTANT, italic);
+  gtk_scintilla_style_set_bold (GTK_SCINTILLA(editor->scintilla), SCE_CSS_IMPORTANT, bold);
+
+  /* same style*/
+  gtk_scintilla_style_set_font (GTK_SCINTILLA(editor->scintilla), SCE_CSS_MEDIA, font);
+  gtk_scintilla_style_set_fore (GTK_SCINTILLA(editor->scintilla), SCE_CSS_MEDIA, fore);
+  gtk_scintilla_style_set_back (GTK_SCINTILLA(editor->scintilla), SCE_CSS_MEDIA, back);
+  gtk_scintilla_style_set_size (GTK_SCINTILLA(editor->scintilla), SCE_CSS_MEDIA, size);
+  gtk_scintilla_style_set_italic (GTK_SCINTILLA(editor->scintilla), SCE_CSS_MEDIA, italic);
+  gtk_scintilla_style_set_bold (GTK_SCINTILLA(editor->scintilla), SCE_CSS_MEDIA, bold);
+
+  get_preferences_manager_style_settings(main_window.prefmg, "css_directive", &font , &size, &fore, &back, &italic, &bold);
+
+  gtk_scintilla_style_set_fore (GTK_SCINTILLA(editor->scintilla), SCE_CSS_DIRECTIVE, fore);
+  gtk_scintilla_style_set_font (GTK_SCINTILLA(editor->scintilla), SCE_CSS_DIRECTIVE, font);
+  gtk_scintilla_style_set_back (GTK_SCINTILLA(editor->scintilla), SCE_CSS_DIRECTIVE, back);
+  gtk_scintilla_style_set_size (GTK_SCINTILLA(editor->scintilla), SCE_CSS_DIRECTIVE, size);
+  gtk_scintilla_style_set_italic (GTK_SCINTILLA(editor->scintilla), SCE_CSS_DIRECTIVE, italic);
+  gtk_scintilla_style_set_bold (GTK_SCINTILLA(editor->scintilla), SCE_CSS_DIRECTIVE, bold);
 
 
   gtk_scintilla_colourise(GTK_SCINTILLA (editor->scintilla), 0, -1);

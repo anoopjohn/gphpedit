@@ -139,9 +139,7 @@ typedef struct
   GtkWidget *template_sample;
   GtkWidget *label31;
   GtkWidget *hbox13;
-  GtkWidget *ok_button;
   GtkWidget *apply_button;
-  GtkWidget *cancel_button;
   GtkWidget *show_indentation_guides;
   GtkWidget *edge_mode;
   GtkWidget *showfolderbrowser;
