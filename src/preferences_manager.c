@@ -185,8 +185,6 @@ void clean_style (gpointer data){
 
 void clean_default_settings(Preferences_ManagerDetails *prefdet){
   /* free object resources*/
-  if (prefdet->last_opened_folder) g_free(prefdet->last_opened_folder);
-  if (prefdet->folderbrowser_last_folder) g_free(prefdet->folderbrowser_last_folder);
   if (prefdet->php_binary_location) g_free(prefdet->php_binary_location);
   if (prefdet->shared_source_location) g_free(prefdet->shared_source_location);
   if (prefdet->php_file_extensions) g_free(prefdet->php_file_extensions);
@@ -210,6 +208,8 @@ static void preferences_manager_dispose (GObject *object)
 	prefdet = PREFERENCES_MANAGER_GET_PRIVATE(pref);
   /* free object resources*/
   clean_default_settings(prefdet);
+  if (prefdet->last_opened_folder) g_free(prefdet->last_opened_folder);
+  if (prefdet->folderbrowser_last_folder) g_free(prefdet->folderbrowser_last_folder);
   /* Chain up to the parent class */
   G_OBJECT_CLASS (parent_class)->dispose (object);
 }

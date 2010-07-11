@@ -750,7 +750,7 @@ void get_control_values_to_highlight(gchar *setting_name)
 
 void set_current_highlighting_font()
 {
-  current_highlighting_element=gtk_combo_box_get_active_text (GTK_COMBO_BOX(preferences_dialog.element_combo));
+  current_highlighting_element = gtk_combo_box_get_active_text (GTK_COMBO_BOX(preferences_dialog.element_combo));
   if (IS_FONT_NAME(current_highlighting_element, _("Default"))) {
     get_control_values_to_highlight("default_style");
   }
@@ -938,6 +938,7 @@ void set_current_highlighting_font()
     get_control_values_to_highlight("c_globalclass");
   }
   scintilla_php_set_lexer(GTK_SCINTILLA(preferences_dialog.highlighting_editor->scintilla));
+  g_free(current_highlighting_element);
 }
 
 void on_bold_toggle(GtkToggleButton *togglebutton, gpointer user_data)
@@ -1021,10 +1022,10 @@ void on_caretline_back_changed(GtkColorButton *widget, gpointer user_data)
   set_preferences_manager_higthlight_caret_line_color(main_window.prefmg, scintilla_color(color.red >> 8, (color.green >> 8), (color.blue >> 8)));
 }
 
-void on_tab_size_changed(GtkRange *range, gpointer user_data)
+void on_tab_size_changed(GtkSpinButton *spinbutton, gpointer user_data)
 {
-  set_preferences_manager_tab_size(main_window.prefmg, (int)gtk_range_get_value(range));
-  set_preferences_manager_indentation_size(main_window.prefmg, (int)gtk_range_get_value(range));
+  set_preferences_manager_tab_size(main_window.prefmg, gtk_spin_button_get_value_as_int(spinbutton));
+  set_preferences_manager_indentation_size(main_window.prefmg, gtk_spin_button_get_value_as_int(spinbutton));
 }
 
 void on_calltip_delay_changed(GtkRange *range, gpointer user_data)
@@ -1033,9 +1034,9 @@ void on_calltip_delay_changed(GtkRange *range, gpointer user_data)
   set_preferences_manager_auto_complete_delay(main_window.prefmg, (int) gtk_range_get_value(range));
 }
 
-void on_edge_column_changed(GtkRange *range, gpointer user_data)
+void on_edge_column_changed(GtkSpinButton *spinbutton, gpointer user_data)
 {
-  set_preferences_manager_edge_column(main_window.prefmg, (int) gtk_range_get_value(range));
+  set_preferences_manager_edge_column(main_window.prefmg, gtk_spin_button_get_value_as_int(spinbutton));
 }
 
 void on_show_indentation_guides_toggle(GtkToggleButton *togglebutton, gpointer user_data)
@@ -1353,7 +1354,6 @@ GTK_STOCK_OK, GTK_RESPONSE_ACCEPT, GTK_STOCK_CANCEL, GTK_RESPONSE_REJECT, NULL);
   gtk_box_pack_start (GTK_BOX (preferences_dialog.hbox15), preferences_dialog.edge_colour, FALSE, FALSE, 0);
   g_signal_connect(G_OBJECT(GTK_COLOR_BUTTON(preferences_dialog.edge_colour)), "color-set", G_CALLBACK(on_edge_colour_changed), NULL);
   /*End: Right Hand Edge Color*/
-  /*TODO poner otro control el de la barra de escalas no es bueno */
   preferences_dialog.hbox16 = gtk_hbox_new (FALSE, 0);
   gtk_widget_show (preferences_dialog.hbox16);
   gtk_container_add (GTK_CONTAINER (preferences_dialog.edgebox), preferences_dialog.hbox16);
@@ -1362,11 +1362,11 @@ GTK_STOCK_OK, GTK_RESPONSE_ACCEPT, GTK_STOCK_CANCEL, GTK_RESPONSE_REJECT, NULL);
   gtk_widget_show (preferences_dialog.label34);
   gtk_box_pack_start (GTK_BOX (preferences_dialog.hbox16), preferences_dialog.label34, FALSE, FALSE, 8);
   
-  preferences_dialog.edge_column = gtk_hscale_new (GTK_ADJUSTMENT (gtk_adjustment_new (get_preferences_manager_edge_column(main_window.prefmg), 0, 160, 0, 0, 0)));
+  preferences_dialog.edge_column = gtk_spin_button_new_with_range(0, 160, 1);
+  gtk_spin_button_set_value (GTK_SPIN_BUTTON(preferences_dialog.edge_column), get_preferences_manager_edge_column(main_window.prefmg));
   gtk_widget_show (preferences_dialog.edge_column);
-  gtk_box_pack_start (GTK_BOX (preferences_dialog.hbox16), preferences_dialog.edge_column, TRUE, TRUE, 0);
-  gtk_scale_set_digits (GTK_SCALE (preferences_dialog.edge_column), 0);
-  g_signal_connect (G_OBJECT (GTK_HSCALE (preferences_dialog.edge_column)), "value_changed",
+  gtk_box_pack_start (GTK_BOX (preferences_dialog.hbox16), preferences_dialog.edge_column, FALSE, TRUE, 0);
+  g_signal_connect (G_OBJECT (preferences_dialog.edge_column), "value_changed",
                     G_CALLBACK (on_edge_column_changed), NULL);
 
 /*end edge part*/
@@ -1428,11 +1428,11 @@ GTK_STOCK_OK, GTK_RESPONSE_ACCEPT, GTK_STOCK_CANCEL, GTK_RESPONSE_REJECT, NULL);
   gtk_widget_show (preferences_dialog.label32);
   gtk_box_pack_start (GTK_BOX (preferences_dialog.hbox14), preferences_dialog.label32, FALSE, FALSE, 8);
 
-  preferences_dialog.tab_size = gtk_hscale_new (GTK_ADJUSTMENT (gtk_adjustment_new (get_preferences_manager_tab_size(main_window.prefmg), 0, 16, 1, 0, 0)));
+  preferences_dialog.tab_size = gtk_spin_button_new_with_range(1, 16, 1);
+  gtk_spin_button_set_value (GTK_SPIN_BUTTON(preferences_dialog.tab_size), get_preferences_manager_tab_size(main_window.prefmg));
   gtk_widget_show (preferences_dialog.tab_size);
-  gtk_box_pack_start (GTK_BOX (preferences_dialog.hbox14), preferences_dialog.tab_size, TRUE, TRUE, 0);
-  gtk_scale_set_digits (GTK_SCALE (preferences_dialog.tab_size), 0);
-  g_signal_connect (G_OBJECT (GTK_HSCALE (preferences_dialog.tab_size)), "value_changed",
+  gtk_box_pack_start (GTK_BOX (preferences_dialog.hbox14), preferences_dialog.tab_size, FALSE, TRUE, 0);
+  g_signal_connect (G_OBJECT (preferences_dialog.tab_size), "value_changed",
                     G_CALLBACK (on_tab_size_changed), NULL);
 
   preferences_dialog.use_tabs_instead_spaces = gtk_check_button_new_with_mnemonic (_("Use tabs instead of spaces for indentation"));

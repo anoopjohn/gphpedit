@@ -813,12 +813,11 @@ void rename_file(GString *newfilename)
   if (!file || !basename) return ;
   file=g_file_set_display_name (file,basename,NULL,&error);
   g_free(basename);
-  if (!file){
+  if (!file && error->code!=G_IO_ERROR_EXISTS){
   g_print("GIO Error renaming file: %s\n",error->message);
   g_error_free(error);
   return;
-  }
-        
+  }     
   // set current_editor->filename
   main_window.current_editor->filename=newfilename;
   main_window.current_editor->short_filename = filename_get_basename(newfilename->str);

@@ -128,6 +128,7 @@ void tab_set_configured_scintilla_properties(GtkScintilla *scintilla)
   gint width;
   width = gtk_scintilla_text_width(scintilla, STYLE_LINENUMBER, "_99999");
   gtk_scintilla_set_margin_width_n(scintilla, 0, width);
+//  gtk_scintilla_set_margin_width_n (scintilla, 1, 0); //esta mas abajo
   gtk_scintilla_set_margin_width_n (scintilla, 2, 0);
   gtk_scintilla_set_wrap_mode(scintilla, get_preferences_manager_line_wrapping(main_window.prefmg));
   if (get_preferences_manager_line_wrapping(main_window.prefmg)) {
@@ -822,8 +823,11 @@ gboolean is_php_file(Editor *editor)
     }
     gtk_scintilla_get_text(GTK_SCINTILLA(editor->scintilla), text_length+1, buffer);
     lines = g_strsplit(buffer, "\n", 10);
-    if (!lines[0])
+    if (!lines[0]) {
+      g_free(buffer);
+      g_strfreev(lines);
       return is_php;
+    }
     if (lines[0][0] == '#' && lines[0][1] == '!' && strstr(lines[0], "php") != NULL) {
       is_php = TRUE;
     }

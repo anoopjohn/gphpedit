@@ -284,7 +284,7 @@ static gint plugin_syntax_discover_type(gchar *filename)
   command_line = g_string_prepend(command_line, "'");
   command_line = g_string_append(command_line, "' -ftype");
   gchar *result= command_spawn(command_line->str);
-  ftype = g_ascii_strup (result,-1);
+  ftype = g_ascii_strup (result, -1);
   g_free(result);
   #ifdef DEBUG
   g_print("Plugin syntax File type:%s\n",ftype);
@@ -301,6 +301,7 @@ static gint plugin_syntax_discover_type(gchar *filename)
   else if (g_strcmp0(ftype,"PYTHON")==0) file_type=TAB_PYTHON;
   else file_type=TAB_FILE;
   if (file_type==TAB_FILE) g_print("Unknown file type for Syntax plugin:%s\n",ftype);
+  g_free(ftype);
   return file_type;
 }
 
