@@ -35,6 +35,7 @@
 #endif
 
 #include <stdlib.h>
+#include <string.h>
 #include <gtk/gtk.h>
 #include "preferences_manager.h"
 //#include "main_window.h"
@@ -185,6 +186,8 @@ void clean_style (gpointer data){
 
 void clean_default_settings(Preferences_ManagerDetails *prefdet){
   /* free object resources*/
+  if (prefdet->last_opened_folder) g_free(prefdet->last_opened_folder);
+  if (prefdet->folderbrowser_last_folder) g_free(prefdet->folderbrowser_last_folder);
   if (prefdet->php_binary_location) g_free(prefdet->php_binary_location);
   if (prefdet->shared_source_location) g_free(prefdet->shared_source_location);
   if (prefdet->php_file_extensions) g_free(prefdet->php_file_extensions);
@@ -208,8 +211,6 @@ static void preferences_manager_dispose (GObject *object)
 	prefdet = PREFERENCES_MANAGER_GET_PRIVATE(pref);
   /* free object resources*/
   clean_default_settings(prefdet);
-  if (prefdet->last_opened_folder) g_free(prefdet->last_opened_folder);
-  if (prefdet->folderbrowser_last_folder) g_free(prefdet->folderbrowser_last_folder);
   /* Chain up to the parent class */
   G_OBJECT_CLASS (parent_class)->dispose (object);
 }
@@ -401,7 +402,7 @@ void set_preferences_manager_folderbrowser_last_folder(Preferences_Manager *pref
   if (!OBJECT_IS_PREFERENCES_MANAGER (preferences_manager)) return ;
   Preferences_ManagerDetails *prefdet;
 	prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
-  if (prefdet->folderbrowser_last_folder) g_free(prefdet->folderbrowser_last_folder);
+  if (prefdet->folderbrowser_last_folder && strlen(prefdet->folderbrowser_last_folder)!=0) g_free(prefdet->folderbrowser_last_folder);
   prefdet->folderbrowser_last_folder= g_strdup(new_last_folder);
   set_string ("/gPHPEdit/main_window/folderbrowser/folder", new_last_folder);
 }
@@ -1213,7 +1214,7 @@ gint load_style_color_back(const gchar *style_name, gint default_back){
 * if value isn't found return default fore
 */
 gint load_style_color_fore(const gchar *style_name, gint default_fore){
-  gchar *key = g_strdup_printf("/gPHPEdit/%s/back",style_name);
+  gchar *key = g_strdup_printf("/gPHPEdit/%s/fore",style_name);
   gint result = get_color(key, style_name, default_fore);
   g_free(key);
   return result;
