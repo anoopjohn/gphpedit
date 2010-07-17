@@ -183,17 +183,21 @@ gchar *filename_get_display_name(gchar *filename)
   return result;
 }
 
-void filename_rename(gchar *filename, gchar *new_name)
+gboolean filename_rename(gchar *filename, gchar *new_name)
 {
-  if (!filename || !new_name) return ;
+  gboolean result=FALSE;
+  if (!filename || !new_name) return result;
   GError *error=NULL;
   GFile *fi= get_gfile_from_filename(filename);
   fi=g_file_set_display_name (fi,new_name,NULL,&error);
   if (error){
     g_print(_("Error renaming file. GIO Error:%s\n"),error->message);
     g_error_free (error);
+  } else {
+    result=TRUE;
   }
   g_object_unref(fi);
+  return result;
 }
 gboolean filename_delete_file(gchar *filename)
 {

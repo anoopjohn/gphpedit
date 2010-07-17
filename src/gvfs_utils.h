@@ -16,6 +16,6 @@ gboolean filename_is_native(gchar *filename);
 gboolean filename_delete_file(gchar *filename);
 gchar *get_absolute_from_relative(gchar *path, gchar *base);
 gchar *filename_get_display_name(gchar *filename);
-void filename_rename(gchar *filename, gchar *new_name);
+gboolean filename_rename(gchar *filename, gchar *new_name);
 void unquote(char *s);
 #endif

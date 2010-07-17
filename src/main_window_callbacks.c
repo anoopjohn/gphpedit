@@ -808,23 +808,16 @@ void on_tab_close_activate(GtkWidget *widget, Editor *editor)
 
 void rename_file(GString *newfilename)
 {
-  GError *error=NULL;
-  GFile *file = get_gfile_from_filename(main_window.current_editor->filename->str);
   gchar *basename=filename_get_basename(newfilename->str);
-  if (!file || !basename) return ;
-  file=g_file_set_display_name (file,basename,NULL,&error);
-  g_free(basename);
-  if (!file && error->code!=G_IO_ERROR_EXISTS){
-  g_print("GIO Error renaming file: %s\n",error->message);
-  g_error_free(error);
-  return;
-  }     
+
+  if (filename_rename(main_window.current_editor->filename->str, basename)){
   // set current_editor->filename
-  main_window.current_editor->filename=newfilename;
-  main_window.current_editor->short_filename = filename_get_basename(newfilename->str);
+  main_window.current_editor->filename=g_string_new (newfilename->str);
+  main_window.current_editor->short_filename = basename;
 
   // save as new filename
   on_save1_activate(NULL);
+  }
 }
 
 void rename_file_ok(GtkFileChooser *file_selection)
