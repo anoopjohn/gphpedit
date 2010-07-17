@@ -219,7 +219,7 @@ static void print_files(gchar *path){
       GdkPixbuf *p_file_image = NULL;
       /* get icon of size menu */
       gchar *icon_name=icon_name_from_icon(current->icon,theme);
-      p_file_image = gtk_icon_theme_load_icon (theme, icon_name, GTK_ICON_SIZE_MENU, 0, NULL);
+      p_file_image = gtk_icon_theme_load_icon (theme, icon_name, 16, 0, NULL);
       g_free(icon_name);
       gtk_tree_store_insert_with_values(GTK_TREE_STORE(main_window.pTree), &iter2, iter, 0, ICON_COLUMN, p_file_image, FILE_COLUMN, current->display_name,MIME_COLUMN,current->mime,-1);
       g_object_unref(p_file_image);
