@@ -208,29 +208,38 @@ gtk_plugin_manager_menu_dispose_items (GtkPlugin_Manager_Menu *menu)
   g_list_free (children);
 }
 
-static void
-gtk_plugin_manager_menu_populate (GtkPlugin_Manager_Menu *menu)
+void add_plugin_to_menu (gpointer data, gpointer user_data)
 {
-  //FIXME: don't show syntax plugins in the menu
-  GtkPlugin_Manager_MenuPrivate *priv = menu->priv;
-  GtkWidget *item;
-  gtk_plugin_manager_menu_dispose_items (menu);
-
-  guint i;
-  guint plug_count= get_plugin_manager_items_count(priv->plugmg);
-  if (plug_count!=0) gtk_widget_hide(priv->placeholder);
-  GList *plugins= get_plugin_manager_items(priv->plugmg);
-  for (i=0;i<plug_count;i++){
+    static int i=0;
+    GtkPlugin_Manager_Menu *menu=(GtkPlugin_Manager_Menu *) user_data;
+    GtkWidget *item;
     Plugin *plugin;
-    plugin = PLUGIN(plugins->data);
+    plugin = PLUGIN(data);
+    /*
+    * Syntax plugins are automatically incorporate to the syntax check system so don't show that plugins here.
+    * TODO: maybe configure this in preferences??
+    */
+    if (get_plugin_syntax_type(plugin)==0){ 
     item =  gtk_menu_item_new_with_mnemonic(get_plugin_name(plugin));
     gtk_widget_show(item);
     install_menu_hint(item, (gchar *)get_plugin_description(plugin));
     g_signal_connect(G_OBJECT(item), "activate", G_CALLBACK(plugin_exec), (gpointer) menu);
     gtk_menu_shell_append(GTK_MENU_SHELL(menu), item);
     if (i<10) gtk_widget_add_accelerator(item, "activate", main_window.menu->accel_group, parse_shortcut(i), GDK_CONTROL_MASK, GTK_ACCEL_VISIBLE);
-    plugins=g_list_next(plugins);
-  }
+    i++;
+    }
+}
+
+static void
+gtk_plugin_manager_menu_populate (GtkPlugin_Manager_Menu *menu)
+{
+  GtkPlugin_Manager_MenuPrivate *priv = menu->priv;
+  gtk_plugin_manager_menu_dispose_items (menu);
+
+  guint plug_count= get_plugin_manager_items_count(priv->plugmg);
+  if (plug_count!=0) gtk_widget_hide(priv->placeholder);
+  GList *plugins= get_plugin_manager_items(priv->plugmg);
+  g_list_foreach (plugins, add_plugin_to_menu,menu);
   g_list_free(plugins);
 }
 

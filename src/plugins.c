@@ -1,8 +1,8 @@
 /* This file is part of gPHPEdit, a GNOME2 PHP Editor.
 
    Copyright (C) 2003, 2004, 2005 Andy Jeffries <andy at gphpedit.org>
-   Copyright (C) 2009 Anoop John <anoop dot john at zyxware.com>
-   Copyright (C) 2009 José Rostagno (for vijona.com.ar) 
+   Copyright (C) 2009-2010 Anoop John <anoop dot john at zyxware.com>
+   Copyright (C) 2009-2010 José Rostagno (for vijona.com.ar) 
 
    For more information or to find the latest release, visit our 
    website at http://www.gphpedit.org/
@@ -31,7 +31,7 @@ The plugins should be stored either in /usr/share/gphpedit/plugins/ if you want 
 
 The number of plugins available is limited to 30. User specific plugins take preference over global plugins if the number is over 30.
 The menu will asing automatically a shortcut to the first 10 plugins. [CONTROL + number]
-
+Syntax plugins aren't show in plugins menu, because they are incorporate to the syntax check system. When you run the syntax check, they will be automatically run.
 How it works
 The general mechanism for interacting with a plugin is as follows:
 
@@ -334,7 +334,11 @@ const gchar *get_plugin_description(Plugin *plugin){
 	plugdet = PLUGIN_GET_PRIVATE(plugin);
   return plugdet->description;
 }
-
+/*
+* get_plugin_syntax_type
+* return the file type of the syntax plugin
+* if plugin isn't a syntax plugin return 0
+*/
 gint get_plugin_syntax_type(Plugin *plugin){
   g_return_val_if_fail (OBJECT_IS_PLUGIN (plugin), 0); /**/
   PluginDetails *plugdet;
