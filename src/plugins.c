@@ -70,12 +70,12 @@ The general mechanism for interacting with a plugin is as follows:
 */
 
 #include <config.h>
-#include <stdlib.h>
 #include <gtk/gtk.h>
 #include "plugins.h"
 #include "main_window.h"
 #include "gvfs_utils.h"
 #include "syntax_check_window.h"
+
 /* plugin type enum*/
 enum {
   GPHPEDIT_PLUGIN_TYPE_UNKNOWN=0, 
@@ -343,83 +343,6 @@ gint get_plugin_syntax_type(Plugin *plugin){
   return plugdet->file_type;
 }
 
-/* 
-* syntax_window:
-* this función accept debug info, show it in syntax pane and apply style to text.
-* lines has form line number space message dot like next example:
-* 59 invalid operator.\n
-* lines end with \n 
-* if data hasn't got that format it'll be shown be error will not be styled.
-*/
-/*
-* TODO: double click in tree row should goto the corresponding line.
-*/
-static void syntax_window(GtkScintilla *scintilla, gchar *data){
-  if (!scintilla) return;
-  if (!data) return;
-  gchar *copy;
-  gchar *token;
-  gchar *line_number;
-  gchar *first_error = NULL;
-  gint line_start;
-  gint line_end;
-  gint indent;
-
-  /* clear document before start any styling action */
-  gtk_scintilla_indicator_clear_range(scintilla, 0, gtk_scintilla_get_text_length(scintilla));
-
-  gtk_widget_show(GTK_WIDGET(main_window.win));
-  GtkTreeIter iter;
-  GtkListStore *lint_store = gtk_list_store_new (1, G_TYPE_STRING);
-  /*clear tree */
-  gtk_list_store_clear(lint_store);
-  copy = data;
-  /* este codigo esta repetido aca y en el sintax check tal vez unificar en un solo lugar */
-  gtk_scintilla_set_indicator_current(scintilla, 20);
-  gtk_scintilla_indic_set_style(scintilla, 20, INDIC_SQUIGGLE);
-  gtk_scintilla_indic_set_fore(scintilla, 20, 0x0000ff);
-
-  gtk_scintilla_annotation_clear_all(scintilla);
-  gtk_scintilla_annotation_set_visible(scintilla, 2);
-  /* lines has form line number space message dot like 
-  * 59 invalid operator.\n
-  * lines end with \n
-  */
-
-  while ((token = strtok(copy, "\n"))) {
-    gtk_list_store_append (lint_store, &iter);
-    gtk_list_store_set (lint_store, &iter, 0, token, -1);
-    gchar *anotationtext=g_strdup(token);
-    line_number = strchr(token, ' ');
-    line_number=strncpy(line_number,token,(int)(line_number-token));
-    if (atoi(line_number)>0) {
-      if (!first_error) {
-      first_error = line_number;
-      }
-      guint current_line_number=atoi(line_number)-1;
-      indent = gtk_scintilla_get_line_indentation(scintilla, current_line_number);
-  
-      line_start = gtk_scintilla_position_from_line(scintilla, current_line_number);
-      line_start += (indent/get_preferences_manager_indentation_size(main_window.prefmg));
-  
-      line_end = gtk_scintilla_get_line_end_position(scintilla, current_line_number);
-      gtk_scintilla_indicator_fill_range(scintilla, line_start, line_end-line_start);
-      token=anotationtext + (int)(line_number-token+1);
-      /* if first char is an E then set error style, else if first char is W set warning style */
-      if (strncmp(token,"E",1)==0)
-        gtk_scintilla_annotation_set_style(scintilla, current_line_number, STYLE_ANNOTATION_ERROR);
-      else if (strncmp(token,"W",1)==0)
-        gtk_scintilla_annotation_set_style(scintilla, current_line_number, STYLE_ANNOTATION_WARNING);
-      token+=1;
-      gtk_scintilla_annotation_set_text(scintilla, current_line_number, token);
-    }
-    g_free(anotationtext);
-    copy = NULL;
-  }
- gtk_syntax_check_window_set_model(main_window.win, lint_store);
-}
-
-
 void plugin_run(Plugin *plugin, Editor *editor)
 {
   /* initial checks*/
@@ -478,7 +401,7 @@ void plugin_run(Plugin *plugin, Editor *editor)
     }
     else if (g_str_has_prefix(stdout, "SYNTAX")){
         /*TODO: save file before execute plugin?*/
-        syntax_window(GTK_SCINTILLA(editor->scintilla), data);
+        syntax_window(main_window.win, GTK_SCINTILLA(editor->scintilla), data);
     }
     else if (g_str_has_prefix(stdout, "OPEN")){
       if (DEBUG_MODE) { g_print("DEBUG: main_window.c:plugin_exec: Opening file :date: %s\n", data); }

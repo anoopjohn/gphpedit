@@ -25,6 +25,7 @@
 
 #include "syntax_check_window.h"
 #include "main_window_callbacks.h"
+#include <stdlib.h>
 struct _GtkSyntax_Check_WindowPrivate
 {
   
@@ -106,8 +107,7 @@ gtk_syntax_check_window_init (GtkSyntax_Check_Window *win)
   gtk_widget_set_size_request (priv->lint_view, 80,80);
   priv->lint_select = gtk_tree_view_get_selection (GTK_TREE_VIEW (priv->lint_view));
   gtk_tree_selection_set_mode (priv->lint_select, GTK_SELECTION_SINGLE);
-  g_signal_connect (G_OBJECT (priv->lint_select), "changed",
-            G_CALLBACK (lint_row_activated), NULL);
+  g_signal_connect (G_OBJECT (priv->lint_select), "changed", G_CALLBACK (lint_row_activated), NULL);
   gtk_box_pack_start(GTK_BOX(win), GTK_WIDGET(priv->scrolledwindow), TRUE, TRUE, 2);
   gtk_widget_show(priv->scrolledwindow);
   gtk_widget_show(priv->lint_view);
@@ -172,6 +172,83 @@ void lint_row_activated (GtkTreeSelection *selection, gpointer data)
 
     g_free (line);
   }
+}
+
+
+/* 
+* syntax_window:
+* this función accept debug info, show it in syntax pane and apply style to text.
+* lines has form line number space message dot like next example:
+* 59 invalid operator.\n
+* lines end with \n 
+* if data hasn't got that format it'll be shown be error will not be styled.
+*/
+/*
+* TODO: double click in tree row should goto the corresponding line.
+*/
+void syntax_window(GtkSyntax_Check_Window *win, GtkScintilla *scintilla, gchar *data){
+  GtkSyntax_Check_WindowPrivate *priv = GTK_SYNTAX_CHECK_WINDOW_GET_PRIVATE(win);
+  if (!scintilla) return;
+  if (!data) return;
+  gchar *copy;
+  gchar *token;
+  gchar *line_number;
+  gchar *first_error = NULL;
+  gint line_start;
+  gint line_end;
+  gint indent;
+
+  /* clear document before start any styling action */
+  gtk_scintilla_indicator_clear_range(scintilla, 0, gtk_scintilla_get_text_length(scintilla));
+  gtk_widget_show(GTK_WIDGET(win));
+  GtkTreeIter iter;
+  if (!priv->lint_store) priv->lint_store = gtk_list_store_new (1, G_TYPE_STRING); /* create a new one */
+  /*clear tree */
+  gtk_list_store_clear(priv->lint_store);
+  copy = data;
+
+  gtk_scintilla_set_indicator_current(scintilla, 20);
+  gtk_scintilla_indic_set_style(scintilla, 20, INDIC_SQUIGGLE);
+  gtk_scintilla_indic_set_fore(scintilla, 20, 0x0000ff);
+
+  gtk_scintilla_annotation_clear_all(scintilla);
+  gtk_scintilla_annotation_set_visible(scintilla, 2);
+  /* lines has form line number space message dot like 
+  * 59 invalid operator.\n
+  * lines end with \n
+  */
+
+  while ((token = strtok(copy, "\n"))) {
+    gtk_list_store_append (priv->lint_store, &iter);
+    gtk_list_store_set (priv->lint_store, &iter, 0, token, -1);
+    gchar *anotationtext=g_strdup(token);
+    line_number = strchr(token, ' ');
+    line_number=strncpy(line_number,token,(int)(line_number-token));
+    if (atoi(line_number)>0) {
+      if (!first_error) {
+      first_error = line_number;
+      }
+      guint current_line_number=atoi(line_number)-1;
+      indent = gtk_scintilla_get_line_indentation(scintilla, current_line_number);
+  
+      line_start = gtk_scintilla_position_from_line(scintilla, current_line_number);
+      line_start += (indent/get_preferences_manager_indentation_size(main_window.prefmg));
+  
+      line_end = gtk_scintilla_get_line_end_position(scintilla, current_line_number);
+      gtk_scintilla_indicator_fill_range(scintilla, line_start, line_end-line_start);
+      token=anotationtext + (int)(line_number-token+1);
+      /* if first char is an E then set error style, else if first char is W set warning style */
+      if (strncmp(token,"E",1)==0)
+        gtk_scintilla_annotation_set_style(scintilla, current_line_number, STYLE_ANNOTATION_ERROR);
+      else if (strncmp(token,"W",1)==0)
+        gtk_scintilla_annotation_set_style(scintilla, current_line_number, STYLE_ANNOTATION_WARNING);
+      token+=1;
+      gtk_scintilla_annotation_set_text(scintilla, current_line_number, token);
+    }
+    g_free(anotationtext);
+    copy = NULL;
+  }
+  gtk_tree_view_set_model(GTK_TREE_VIEW(priv->lint_view), GTK_TREE_MODEL(priv->lint_store));
 }
 
 /*

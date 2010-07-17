@@ -59,6 +59,7 @@ GType      gtk_syntax_check_window_get_type         (void) G_GNUC_CONST;
 GtkWidget *gtk_syntax_check_window_new              (void);
 void gtk_syntax_check_window_set_string(GtkSyntax_Check_Window *win, const gchar *string);
 void gtk_syntax_check_window_set_model(GtkSyntax_Check_Window *win, GtkListStore *model);
+void syntax_window(GtkSyntax_Check_Window *win, GtkScintilla *scintilla, gchar *data);
 G_END_DECLS
 
 #endif /* ! __GTK_SYNTAX_CHECK_WINDOW_H__ */

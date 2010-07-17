@@ -211,6 +211,7 @@ gtk_plugin_manager_menu_dispose_items (GtkPlugin_Manager_Menu *menu)
 static void
 gtk_plugin_manager_menu_populate (GtkPlugin_Manager_Menu *menu)
 {
+  //FIXME: don't show syntax plugins in the menu
   GtkPlugin_Manager_MenuPrivate *priv = menu->priv;
   GtkWidget *item;
   gtk_plugin_manager_menu_dispose_items (menu);
