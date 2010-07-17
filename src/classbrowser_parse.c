@@ -58,14 +58,10 @@ static gchar *read_text_file(gchar *filename){
 
 static gboolean is_whitespace(gchar character)
 {
-  if ( (character == ' ') ||
-          (character == '\t') ||
-          (character == '\n') ||
-          (character == '\r') ) {
-    return TRUE;
-  }
-
-  return FALSE;
+/*
+  Determines whether a character is a control character or a white-space character
+*/
+  return (g_ascii_iscntrl(character) || g_ascii_isspace(character));
 }
 
 
