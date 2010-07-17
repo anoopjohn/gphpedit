@@ -41,7 +41,7 @@ gchar *filename_parent_uri(gchar *filename){
 *
 */
 gchar *filename_get_relative_path(gchar *filename){
-  if (!filename) return NULL;
+  if (!filename || strlen(filename)==0) return NULL;
   GFile *file= get_gfile_from_filename(filename);
   GFile *home= get_gfile_from_filename((gchar *) g_get_home_dir());
   gchar *rel =g_file_get_relative_path (home,file);
@@ -163,6 +163,59 @@ gboolean filename_is_native(gchar *filename)
 
   return result;
 }
+
+gchar *filename_get_display_name(gchar *filename)
+{
+  if (!filename) return NULL;
+  GFile *fi;
+  GError *error=NULL;
+  fi=get_gfile_from_filename(filename);
+  GFileInfo *info= g_file_query_info (fi, "standard::display-name",G_FILE_QUERY_INFO_NOFOLLOW_SYMLINKS, NULL,&error);
+  if (!info){
+    g_print(_("Error renaming file. GIO Error:%s\n"),error->message);
+    g_error_free (error);
+    return NULL;
+  }
+  gchar *result = g_strdup((gchar *)g_file_info_get_display_name (info));
+  g_object_unref(info);
+  g_object_unref(fi);
+  g_print("%s (%s)", filename, result);
+  return result;
+}
+
+void filename_rename(gchar *filename, gchar *new_name)
+{
+  if (!filename || !new_name) return ;
+  GError *error=NULL;
+  GFile *fi= get_gfile_from_filename(filename);
+  fi=g_file_set_display_name (fi,new_name,NULL,&error);
+  if (error){
+    g_print(_("Error renaming file. GIO Error:%s\n"),error->message);
+    g_error_free (error);
+  }
+  g_object_unref(fi);
+}
+gboolean filename_delete_file(gchar *filename)
+{
+  GFile *fi;
+  GError *error=NULL;
+  fi=get_gfile_from_filename(filename);
+  if (!g_file_trash (fi,NULL,&error)){
+    if (error->code == G_IO_ERROR_NOT_SUPPORTED){
+      if (!g_file_delete (fi,NULL,&error)){
+        g_print(_("GIO Error deleting file: %s\n"),error->message);
+        g_error_free (error);
+        return FALSE;
+        }
+    } else {
+      g_print(_("GIO Error deleting file: %s\n"),error->message);
+      g_error_free (error);
+      return FALSE;
+    }
+  }
+  g_object_unref (fi);
+  return TRUE;
+}
 /**
 * get_absolute_from_relative
 * return an absolute uri from a relatice path or NULL. must free the returned value with gfree when no longer needed
@@ -170,6 +223,7 @@ gboolean filename_is_native(gchar *filename)
 */
 
 gchar *get_absolute_from_relative(gchar *path, gchar *base){
+  if (!path) return NULL;
   GFile *parent=NULL;
   if (!base){
     parent= get_gfile_from_filename((gchar *) g_get_home_dir());
@@ -255,3 +309,4 @@ void unquote(char *s) {
 	}
 	*o = '\0';
 }
+

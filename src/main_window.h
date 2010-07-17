@@ -28,7 +28,6 @@
 #include "main.h"
 #include "calltip.h"
 #include "tab.h"
-#include "folderbrowser.h"
 #include "menu.h"
 #include "toolbar.h"
 #include "syntax_check_window.h"
@@ -78,19 +77,8 @@ typedef struct
   GtkWidget *classlabel;
   GtkClipboard* clipboard;
 
-  /*Element of directory browser*/
-  GtkWidget *folder;  //folderbrowser
-  GtkTreeStore *pTree; 
-  GtkWidget *pListView;
-  GtkWidget *pScrollbar;
-  GtkWidget *button_dialog;
-  GtkWidget *button_home;
-  GtkWidget *image_home;
-  GtkWidget *button_up;
-  GtkWidget *image_up;
-  GtkWidget *searchentry;
-  GtkWidget *button_refresh;
-  GtkWidget *image_refresh;
+  /*filebrowser widget */
+  GtkWidget *folder;//filebrowser;
 }
 MainWindow;
 

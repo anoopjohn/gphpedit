@@ -50,8 +50,10 @@ gphpedit_SOURCES = \
 	history-entry.h		\
 	classbrowser_parse.c	\
 	classbrowser_parse.h	\
-	folderbrowser.h		\
-	folderbrowser.c		\
+	filebrowser_backend.c		\
+	filebrowser_backend.h		\
+	filebrowser_ui.c		\
+	filebrowser_ui.h		\
 	edit_template.c		\
 	edit_template.h		\
 	find_replace.c		\

@@ -31,11 +31,12 @@
 #include "preferences_dialog.h"
 #include "tab.h"
 #include "templates.h"
-#include "folderbrowser.h"
 #include "pluginmenu.h"
 #include "gvfs_utils.h"
 #include <gdk/gdkkeysyms.h>
 #include "gphpedit-statusbar.h"
+
+#include "filebrowser_ui.h"
 
 gboolean is_app_closing = FALSE;
 gint classbrowser_hidden_position;
@@ -1703,38 +1704,6 @@ void syntax_check_clear(GtkWidget *widget)
   gtk_widget_hide(GTK_WIDGET(main_window.win));
 }
 
-void pressed_button_file_chooser(GtkButton *widget, gpointer data) {
-
-  GtkWidget *pFileSelection;
-
-  pFileSelection = gtk_file_chooser_dialog_new("Open...", GTK_WINDOW(main_window.window), GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER,
-   GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL, GTK_STOCK_OPEN, GTK_RESPONSE_OK, NULL);
-  gtk_window_set_modal(GTK_WINDOW(pFileSelection), TRUE);
-  gtk_file_chooser_set_local_only (GTK_FILE_CHOOSER(pFileSelection), FALSE);
-  // sets the label folder as start folder 
-  gchar *lbl;
-  lbl=(gchar*)gtk_button_get_label(GTK_BUTTON(main_window.button_dialog));
-  if (!IS_DEFAULT_DIR(lbl)){
-     gboolean res;
-     res=gtk_file_chooser_set_current_folder (GTK_FILE_CHOOSER(pFileSelection), lbl);
-  }
-  gchar *sChemin=NULL;
-
-  switch(gtk_dialog_run(GTK_DIALOG(pFileSelection))) {
-         case GTK_RESPONSE_OK:
-             sChemin = gtk_file_chooser_get_uri(GTK_FILE_CHOOSER(pFileSelection));
-             break;
-         default:
-             break;
-  }
-  gtk_widget_destroy(pFileSelection);
-  if(sChemin){
-    gtk_button_set_label(GTK_BUTTON(widget), sChemin);
-    /*store folder in config*/
-    update_folderbrowser (sChemin);
-    g_free(sChemin);
-   }
-}
 
 void classbrowser_show(void)
 {

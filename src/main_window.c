@@ -35,6 +35,7 @@
 #include "gphpedit-statusbar.h"
 #include "syntax_check_window.h"
 
+#include "filebrowser_ui.h"
 
 MainWindow main_window;
 GIOChannel* inter_gphpedit_io;
@@ -408,7 +409,14 @@ void main_window_create(void){
   
   update_app_title();
   // folder browser init
-  if (get_preferences_manager_show_folderbrowser(main_window.prefmg)) folderbrowser_create(&main_window);
+  if (get_preferences_manager_show_filebrowser(main_window.prefmg)){
+  main_window.folder= gphpedit_filebrowser_new();
+  gtk_widget_show(main_window.folder);
+  GtkWidget *label= gtk_image_new_from_file (PIXMAP_DIR "/folderbrowser.png");
+  gtk_widget_show(label);
+  gtk_notebook_insert_page (GTK_NOTEBOOK(main_window.notebook_manager), main_window.folder, label, 1);
+  //folderbrowser_create(&main_window);
+  }
 }
 
 void update_controls(void){

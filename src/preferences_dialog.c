@@ -1066,7 +1066,7 @@ void on_save_session_toggle(GtkToggleButton *togglebutton, gpointer user_data)
 
 void on_save_folderbrowser_toggle(GtkToggleButton *togglebutton, gpointer user_data)
 {
-  set_preferences_manager_show_folderbrowser(main_window.prefmg, gtk_toggle_button_get_active(togglebutton));
+  set_preferences_manager_show_filebrowser(main_window.prefmg, gtk_toggle_button_get_active(togglebutton));
 }
 void on_save_autobrace_toggle(GtkToggleButton *togglebutton, gpointer user_data)
 {
@@ -1375,13 +1375,13 @@ GTK_STOCK_OK, GTK_RESPONSE_ACCEPT, GTK_STOCK_CANCEL, GTK_RESPONSE_REJECT, NULL);
   gtk_widget_show (preferences_dialog.sidepanel);
   gtk_box_pack_start (GTK_BOX (preferences_dialog.prinbox), preferences_dialog.sidepanel, FALSE, FALSE, 0);
 
-  preferences_dialog.folderbrowser = gtk_check_button_new_with_mnemonic (_("Show folderbrowser (need restart)"));
+  preferences_dialog.folderbrowser = gtk_check_button_new_with_mnemonic (_("Show file browser (need restart)"));
   /* set tooltip */
   gtk_widget_set_tooltip_text (preferences_dialog.folderbrowser,_("Show/Hide side-panel Folder Browser"));
   gtk_widget_show (preferences_dialog.folderbrowser);
   gtk_container_add (GTK_CONTAINER (preferences_dialog.sidepanel), preferences_dialog.folderbrowser);
   gtk_container_set_border_width (GTK_CONTAINER (preferences_dialog.folderbrowser), 8);
-  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(preferences_dialog.folderbrowser), get_preferences_manager_show_folderbrowser(main_window.prefmg));
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(preferences_dialog.folderbrowser), get_preferences_manager_show_filebrowser(main_window.prefmg));
   g_signal_connect(G_OBJECT(GTK_CHECK_BUTTON(preferences_dialog.folderbrowser)), "toggled", G_CALLBACK(on_save_folderbrowser_toggle), NULL);
   /*end side panel part*/
 

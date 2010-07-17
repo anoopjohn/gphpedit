@@ -122,4 +122,5 @@ void set_editor_to_perl(Editor *editor);
 void set_editor_to_cobol(Editor *editor);
 void set_editor_to_python(Editor *editor);
 gboolean is_cobol_file(const gchar *filename);
+gchar *trunc_on_char(gchar * string, gchar which_char);
 #endif

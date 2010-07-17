@@ -38,6 +38,9 @@
 
 
 #define INFO_FLAGS "standard::display-name,standard::content-type,standard::edit-name,standard::size,access::can-write,access::can-delete,standard::icon,time::modified,time::modified-usec"
+#define IS_MIME(stringa,stringb) (g_content_type_equals (stringa, stringb))
+#define IS_TEXT(stringa) (g_content_type_is_a (stringa, "text/*"))
+#define IS_APPLICATION(stringa) (g_content_type_is_a (stringa, "application/*") && !IS_MIME(stringa,"application/x-php") && !IS_MIME(stringa,"application/javascript") && !IS_MIME(stringa,"application/x-perl"))
 
 GSList *editors;
 guint completion_timer_id;
@@ -128,7 +131,6 @@ void tab_set_configured_scintilla_properties(GtkScintilla *scintilla)
   gint width;
   width = gtk_scintilla_text_width(scintilla, STYLE_LINENUMBER, "_99999");
   gtk_scintilla_set_margin_width_n(scintilla, 0, width);
-//  gtk_scintilla_set_margin_width_n (scintilla, 1, 0); //esta mas abajo
   gtk_scintilla_set_margin_width_n (scintilla, 2, 0);
   gtk_scintilla_set_wrap_mode(scintilla, get_preferences_manager_line_wrapping(main_window.prefmg));
   if (get_preferences_manager_line_wrapping(main_window.prefmg)) {
@@ -360,39 +362,6 @@ void tab_reset_scintilla_after_open(Editor *editor)
   gtk_scintilla_grab_focus(GTK_SCINTILLA(editor->scintilla));
 }
 
-/*
- * icon_name_from_icon
- *
- *   this function returns the icon name of a Gicon
- *   for the current gtk default icon theme
- */
-
-static gchar *icon_name_from_icon(GIcon *icon) {
-  gchar *icon_name=NULL;
-  if (icon && G_IS_THEMED_ICON(icon)) {
-    GStrv names;
-    g_object_get(icon, "names", &names, NULL);
-    if (names && names[0]) {
-      GtkIconTheme *icon_theme;
-      int i;
-      icon_theme = gtk_icon_theme_get_default();
-      for (i = 0; i < g_strv_length (names); i++) {
-        if (gtk_icon_theme_has_icon(icon_theme, names[i])) {
-          icon_name = g_strdup(names[i]);
-          break;
-        }
-      }
-      g_strfreev (names);
-    }
-  } else {
-    icon_name = g_strdup("application-text");
-  }
-  if (!icon_name){
-    icon_name=g_strdup("application-text");
-  }
-  return icon_name;
-}
-
 void tab_file_opened (GObject *source_object, GAsyncResult *res, gpointer user_data)
 {
   GError *error=NULL;
@@ -453,9 +422,8 @@ void tab_file_opened (GObject *source_object, GAsyncResult *res, gpointer user_d
   editor->isreadonly= !g_file_info_get_attribute_boolean (info,"access::can-write");
   editor->contenttype=g_strdup(contenttype);
   GIcon *icon= g_file_info_get_icon (info); /* get Gicon for mimetype*/
-  gchar *iconname=icon_name_from_icon(icon);
-  editor->file_icon=gtk_icon_theme_load_icon (gtk_icon_theme_get_default (), iconname, GTK_ICON_SIZE_MENU, 0, NULL); // get icon of size menu
-  g_free(iconname);
+  GtkIconInfo *ificon= gtk_icon_theme_lookup_by_gicon (gtk_icon_theme_get_default (), icon, 16, 0);
+  editor->file_icon=gtk_icon_info_load_icon (ificon, NULL); // get icon of size menu
   g_file_info_get_modification_time (info,&editor->file_mtime);
   g_object_unref(info);
   /* Open file*/
@@ -516,9 +484,8 @@ void tab_help_load_file(Editor *editor, GString *filename)
   size= g_file_info_get_size (info);
 #endif
   GIcon *icon= g_file_info_get_icon (info); /* get Gicon for mimetype*/
-  gchar *iconname=icon_name_from_icon(icon);
-  editor->file_icon=gtk_icon_theme_load_icon (gtk_icon_theme_get_default (), iconname, GTK_ICON_SIZE_MENU, 0, NULL); // get icon of size menu
-  g_free(iconname);
+  GtkIconInfo *ificon= gtk_icon_theme_lookup_by_gicon (gtk_icon_theme_get_default (), icon, 16, 0);
+  editor->file_icon=gtk_icon_info_load_icon (ificon, NULL); // get icon of size menu
   g_object_unref(info);
   if (!g_file_load_contents (file,NULL,&buffer, &nchars,NULL,&error)){
     g_print(_("Error reading file. GIO error:%s\n"),error->message);
@@ -1175,7 +1142,7 @@ gboolean tab_create_new(gint type, GString *filename)
       }
       editor->is_untitled=TRUE;
       /* set default text icon */
-      editor->file_icon= gtk_icon_theme_load_icon (gtk_icon_theme_get_default (), "text-plain", GTK_ICON_SIZE_MENU, 0, NULL); // get icon of size menu
+      editor->file_icon= gtk_icon_theme_load_icon (gtk_icon_theme_get_default (), "text-plain", 20, 0, NULL); // get icon of size menu
     }
     // Hmmm, I had the same error as the following comment.  A reshuffle here and upgrading GtkScintilla2 to 0.1.0 seems to have fixed it
     if (!gtk_widget_get_visible(editor->scintilla)) gtk_widget_show (editor->scintilla);
@@ -1940,4 +1907,28 @@ static void char_added(GtkWidget *scintilla, guint ch)
             g_free(member_function_buffer);
             break;
     }
+}
+
+/************************/
+/**
+ * trunc_on_char:
+ * @string: a #gchar * to truncate
+ * @which_char: a #gchar with the char to truncate on
+ *
+ * Returns a pointer to the same string which is truncated at the first
+ * occurence of which_char
+ *
+ * Return value: the same gchar * as passed to the function
+ **/
+gchar *trunc_on_char(gchar * string, gchar which_char)
+{
+  gchar *tmpchar = string;
+  while(*tmpchar) {
+    if (*tmpchar == which_char) {
+      *tmpchar = '\0';
+      return string;
+    }
+    tmpchar++;
+  }
+  return string;
 }

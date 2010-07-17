@@ -74,8 +74,8 @@ struct Preferences_ManagerDetails
   guint parseonlycurrentfile:1;
   guint classbrowser_hidden:1;
   gint classbrowser_size;
-  gchar *folderbrowser_last_folder;
-	gboolean showfolderbrowser;
+  gchar *filebrowser_last_folder;
+  gboolean showfilebrowser;
 
 	// Default settings
 	gint set_sel_back;
@@ -187,7 +187,7 @@ void clean_style (gpointer data){
 void clean_default_settings(Preferences_ManagerDetails *prefdet){
   /* free object resources*/
   if (prefdet->last_opened_folder) g_free(prefdet->last_opened_folder);
-  if (prefdet->folderbrowser_last_folder) g_free(prefdet->folderbrowser_last_folder);
+  if (prefdet->filebrowser_last_folder) g_free(prefdet->filebrowser_last_folder);
   if (prefdet->php_binary_location) g_free(prefdet->php_binary_location);
   if (prefdet->shared_source_location) g_free(prefdet->shared_source_location);
   if (prefdet->php_file_extensions) g_free(prefdet->php_file_extensions);
@@ -270,7 +270,7 @@ void load_default_settings(Preferences_ManagerDetails *prefdet)
   prefdet->single_instance_only = get_color("/gPHPEdit/defaults/single_instance_only","defaults", TRUE);
   prefdet->php_file_extensions = get_string("/gPHPEdit/defaults/php_file_extensions",DEFAULT_PHP_EXTENSIONS);
 	prefdet->search_history= get_string_list("/gPHPEdit/search_history");
-	prefdet->showfolderbrowser = get_color("/gPHPEdit/defaults/showfolderbrowser", "defaults",TRUE);
+	prefdet->showfilebrowser = get_color("/gPHPEdit/defaults/showfolderbrowser", "defaults",TRUE);
 }
 
 void load_window_settings(Preferences_ManagerDetails *prefdet)
@@ -288,7 +288,7 @@ void load_session_settings(Preferences_ManagerDetails *prefdet){
   prefdet->parseonlycurrentfile = get_size("/gPHPEdit/classbrowser/onlycurrentfile", FALSE);
   prefdet->classbrowser_hidden = get_size("/gPHPEdit/main_window/classbrowser_hidden", FALSE);
   prefdet->classbrowser_size = get_color("/gPHPEdit/main_window/classbrowser_size", "main_window", 100);
-  prefdet->folderbrowser_last_folder=get_string("/gPHPEdit/main_window/folderbrowser/folder","");
+  prefdet->filebrowser_last_folder=get_string("/gPHPEdit/main_window/folderbrowser/folder","");
 }
 
         /* accesor functions */
@@ -386,41 +386,41 @@ void set_preferences_manager_last_opened_folder(Preferences_Manager *preferences
   set_string ("/gPHPEdit/general/last_opened_folder", new_last_folder);
 }
 /*
- *get_preferences_manager_folderbrowser_last_folder
+ *get_preferences_manager_filebrowser_last_folder
  * return an internal string must not be freed.
 */
-const gchar *get_preferences_manager_folderbrowser_last_folder(Preferences_Manager *preferences_manager){
+const gchar *get_preferences_manager_filebrowser_last_folder(Preferences_Manager *preferences_manager){
   g_return_val_if_fail (OBJECT_IS_PREFERENCES_MANAGER (preferences_manager), 0); /**/
   Preferences_ManagerDetails *prefdet;
 	prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
-  return prefdet->folderbrowser_last_folder;
+  return prefdet->filebrowser_last_folder;
 }
 /*
-*store a new value for folderbrowser last folder
+*store a new value for filebrowser last folder
 */
-void set_preferences_manager_folderbrowser_last_folder(Preferences_Manager *preferences_manager, const gchar *new_last_folder){
+void set_preferences_manager_filebrowser_last_folder(Preferences_Manager *preferences_manager, const gchar *new_last_folder){
   if (!OBJECT_IS_PREFERENCES_MANAGER (preferences_manager)) return ;
   Preferences_ManagerDetails *prefdet;
 	prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
-  if (prefdet->folderbrowser_last_folder && strlen(prefdet->folderbrowser_last_folder)!=0) g_free(prefdet->folderbrowser_last_folder);
-  prefdet->folderbrowser_last_folder= g_strdup(new_last_folder);
+  if (prefdet->filebrowser_last_folder && strlen(prefdet->filebrowser_last_folder)!=0) g_free(prefdet->filebrowser_last_folder);
+  prefdet->filebrowser_last_folder= g_strdup(new_last_folder);
   set_string ("/gPHPEdit/main_window/folderbrowser/folder", new_last_folder);
 }
 
-gboolean get_preferences_manager_show_folderbrowser(Preferences_Manager *preferences_manager)
+gboolean get_preferences_manager_show_filebrowser(Preferences_Manager *preferences_manager)
 {
   g_return_val_if_fail (OBJECT_IS_PREFERENCES_MANAGER (preferences_manager), 0); /**/
   Preferences_ManagerDetails *prefdet;
 	prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
-  return prefdet->showfolderbrowser;
+  return prefdet->showfilebrowser;
 }
 
-void set_preferences_manager_show_folderbrowser(Preferences_Manager *preferences_manager, gboolean newstate)
+void set_preferences_manager_show_filebrowser(Preferences_Manager *preferences_manager, gboolean newstate)
 {
   if (!OBJECT_IS_PREFERENCES_MANAGER (preferences_manager)) return ;
   Preferences_ManagerDetails *prefdet;
 	prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
-  prefdet->showfolderbrowser = newstate; 
+  prefdet->showfilebrowser = newstate; 
 
 }
 
@@ -992,7 +992,7 @@ void preferences_manager_save_data(Preferences_Manager *preferences_manager){
   /* store style settings */
   g_hash_table_foreach (prefdet->styles_table, save_style_settings, NULL);
   /**/
-  set_bool("/gPHPEdit/defaults/showfolderbrowser", prefdet->showfolderbrowser);
+  set_bool("/gPHPEdit/defaults/showfolderbrowser", prefdet->showfilebrowser);
   set_int ("/gPHPEdit/default_style/selection", prefdet->set_sel_back);
   set_int ("/gPHPEdit/default_style/bookmark", prefdet->marker_back);
   set_string ("/gPHPEdit/locations/phpbinary", prefdet->php_binary_location);

@@ -69,8 +69,8 @@ gboolean get_preferences_manager_window_maximized(Preferences_Manager *preferenc
 void set_preferences_manager_window_maximized(Preferences_Manager *preferences_manager, gboolean newstate);
 /**/
 GSList *get_preferences_manager_search_history(Preferences_Manager *preferences_manager);
-gboolean get_preferences_manager_show_folderbrowser(Preferences_Manager *preferences_manager);
-void set_preferences_manager_show_folderbrowser(Preferences_Manager *preferences_manager, gboolean new_status);
+gboolean get_preferences_manager_show_filebrowser(Preferences_Manager *preferences_manager);
+void set_preferences_manager_show_filebrowser(Preferences_Manager *preferences_manager, gboolean new_status);
 gint get_preferences_manager_classbrowser_status(Preferences_Manager *preferences_manager);
 void set_preferences_manager_parse_classbrowser_status(Preferences_Manager *preferences_manager, gint new_status);
 gint get_preferences_manager_classbrowser_get_size(Preferences_Manager *preferences_manager);
@@ -81,8 +81,8 @@ void set_preferences_manager_parse_only_current_file(Preferences_Manager *prefer
 /**/
 const gchar *get_preferences_manager_last_opened_folder(Preferences_Manager *preferences_manager);
 void set_preferences_manager_last_opened_folder(Preferences_Manager *preferences_manager, const gchar *new_last_folder);
-void set_preferences_manager_folderbrowser_last_folder(Preferences_Manager *preferences_manager, const gchar *new_last_folder);
-const gchar *get_preferences_manager_folderbrowser_last_folder(Preferences_Manager *preferences_manager);
+void set_preferences_manager_filebrowser_last_folder(Preferences_Manager *preferences_manager, const gchar *new_last_folder);
+const gchar *get_preferences_manager_filebrowser_last_folder(Preferences_Manager *preferences_manager);
 gint get_preferences_manager_indentation_size (Preferences_Manager *preferences_manager);
 void set_preferences_manager_indentation_size(Preferences_Manager *preferences_manager, gint newstate);
 const gchar *get_preferences_manager_php_binary_location(Preferences_Manager *preferences_manager);
