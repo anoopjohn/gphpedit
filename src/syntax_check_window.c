@@ -25,10 +25,13 @@
 
 #include "syntax_check_window.h"
 #include "main_window_callbacks.h"
+#include "syntax_check_manager.h"
+#include "pluginmenu.h"
 #include <stdlib.h>
 struct _GtkSyntax_Check_WindowPrivate
 {
-  
+  Syntax_Check_Manager *synmg;  
+
   GtkWidget *scrolledwindow;
   // My new best friend: http://developer.gnome.org/doc/API/2.0/gtk/TreeWidget.html
   GtkListStore *lint_store;
@@ -95,8 +98,10 @@ gtk_syntax_check_window_init (GtkSyntax_Check_Window *win)
   GtkSyntax_Check_WindowPrivate *priv;
   
   priv = GTK_SYNTAX_CHECK_WINDOW_GET_PRIVATE (win);
-  
+
   win->priv = priv;
+
+  priv->synmg = syntax_check_manager_new ();
   priv->scrolledwindow = gtk_scrolled_window_new (NULL, NULL);
   priv->lint_view = gtk_tree_view_new ();
   gtk_container_add (GTK_CONTAINER (priv->scrolledwindow), priv->lint_view);
@@ -111,7 +116,6 @@ gtk_syntax_check_window_init (GtkSyntax_Check_Window *win)
   gtk_box_pack_start(GTK_BOX(win), GTK_WIDGET(priv->scrolledwindow), TRUE, TRUE, 2);
   gtk_widget_show(priv->scrolledwindow);
   gtk_widget_show(priv->lint_view);
-
 }
 
 static void
@@ -130,28 +134,9 @@ gtk_syntax_check_window_dispose (GObject *object)
   GtkSyntax_Check_WindowPrivate *priv = menu->priv;
 
   if (priv->lint_store) gtk_list_store_clear(priv->lint_store);
+//  if (priv->synmg) g_object_unref(priv->synmg);
 
   G_OBJECT_CLASS (gtk_syntax_check_window_parent_class)->dispose (object);
-}
-void gtk_syntax_check_window_set_model(GtkSyntax_Check_Window *win, GtkListStore *model){
-  GtkSyntax_Check_WindowPrivate *priv;
-  priv = GTK_SYNTAX_CHECK_WINDOW_GET_PRIVATE (win);
-  if (priv->lint_store) g_object_unref(priv->lint_store);
-  priv->lint_store=model;
-  gtk_tree_view_set_model(GTK_TREE_VIEW(priv->lint_view), GTK_TREE_MODEL(priv->lint_store));
-}
-
-void gtk_syntax_check_window_set_string(GtkSyntax_Check_Window *win, const gchar *string)
-{
-  GtkTreeIter iter;
-  GtkSyntax_Check_WindowPrivate *priv;
-  priv = GTK_SYNTAX_CHECK_WINDOW_GET_PRIVATE (win);
-  if (priv->lint_store) g_object_unref(priv->lint_store);
-  priv->lint_store = gtk_list_store_new (1, G_TYPE_STRING);
-  gtk_list_store_clear(priv->lint_store);
-  gtk_list_store_append (priv->lint_store, &iter);
-  gtk_list_store_set (priv->lint_store, &iter, 0, string, -1);
-  gtk_tree_view_set_model(GTK_TREE_VIEW(priv->lint_view), GTK_TREE_MODEL(priv->lint_store));
 }
 
 void lint_row_activated (GtkTreeSelection *selection, gpointer data)
@@ -183,21 +168,17 @@ void lint_row_activated (GtkTreeSelection *selection, gpointer data)
 * lines end with \n 
 * if data hasn't got that format it'll be shown be error will not be styled.
 */
-/*
-* TODO: double click in tree row should goto the corresponding line.
-*/
 void syntax_window(GtkSyntax_Check_Window *win, GtkScintilla *scintilla, gchar *data){
   GtkSyntax_Check_WindowPrivate *priv = GTK_SYNTAX_CHECK_WINDOW_GET_PRIVATE(win);
   if (!scintilla) return;
   if (!data) return;
   gchar *copy;
   gchar *token;
-  gchar *line_number;
+  gchar *line_number=NULL;
   gchar *first_error = NULL;
   gint line_start;
   gint line_end;
   gint indent;
-
   /* clear document before start any styling action */
   gtk_scintilla_indicator_clear_range(scintilla, 0, gtk_scintilla_get_text_length(scintilla));
   gtk_widget_show(GTK_WIDGET(win));
@@ -219,11 +200,13 @@ void syntax_window(GtkSyntax_Check_Window *win, GtkScintilla *scintilla, gchar *
   */
 
   while ((token = strtok(copy, "\n"))) {
+    g_print("%s (%d)\n", token, strlen(token));
     gtk_list_store_append (priv->lint_store, &iter);
     gtk_list_store_set (priv->lint_store, &iter, 0, token, -1);
     gchar *anotationtext=g_strdup(token);
+    if (g_ascii_isdigit(*token)){
     line_number = strchr(token, ' ');
-    line_number=strncpy(line_number,token,(int)(line_number-token));
+      line_number= strncpy(line_number,token,(int)(line_number-token));
     if (atoi(line_number)>0) {
       if (!first_error) {
       first_error = line_number;
@@ -238,12 +221,15 @@ void syntax_window(GtkSyntax_Check_Window *win, GtkScintilla *scintilla, gchar *
       gtk_scintilla_indicator_fill_range(scintilla, line_start, line_end-line_start);
       token=anotationtext + (int)(line_number-token+1);
       /* if first char is an E then set error style, else if first char is W set warning style */
-      if (strncmp(token,"E",1)==0)
+      if (strncmp(token,"E",1)==0){
         gtk_scintilla_annotation_set_style(scintilla, current_line_number, STYLE_ANNOTATION_ERROR);
-      else if (strncmp(token,"W",1)==0)
+        token+=1;
+      } else if (strncmp(token,"W",1)==0){
         gtk_scintilla_annotation_set_style(scintilla, current_line_number, STYLE_ANNOTATION_WARNING);
-      token+=1;
+        token+=1;
+      }
       gtk_scintilla_annotation_set_text(scintilla, current_line_number, token);
+    }
     }
     g_free(anotationtext);
     copy = NULL;
@@ -259,4 +245,23 @@ GtkWidget *
 gtk_syntax_check_window_new (void)
 {
   return g_object_new (GTK_TYPE_SYNTAX_CHECK_WINDOW, NULL);
+}
+
+void gtk_syntax_check_window_run_check(GtkSyntax_Check_Window *win, Editor *editor)
+{
+  if (!win) return;
+  if (!editor){
+   syntax_window(win, GTK_SCINTILLA(editor->scintilla), _("You don't have any files open to check\n"));
+   return;
+  }
+  gchar *res = syntax_check_manager_run(editor,editor->type);
+  if (res){
+     syntax_window(win, GTK_SCINTILLA(editor->scintilla), res);
+     g_free(res);
+  } else {
+      /* try plugins */
+      if (!run_syntax_plugin_by_ftype(get_plugin_manager(GTK_PLUGIN_MANAGER_MENU(main_window.menu->menuplugin)), editor, editor->type)){
+//      g_print("syntax check not implement\n");
+      }
+  }
 }

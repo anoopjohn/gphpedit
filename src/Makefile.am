@@ -80,8 +80,8 @@ gphpedit_SOURCES = \
 	preferences_manager.c		\
 	preferences_dialog.c	\
 	preferences_dialog.h	\
-	syntax_check.c		\
-	syntax_check.h		\
+  syntax_check_manager.h \
+  syntax_check_manager.c \
 	syntax_check_window.h		\
 	syntax_check_window.c		\
 	tab.c			\

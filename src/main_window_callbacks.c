@@ -35,7 +35,6 @@
 #include "gvfs_utils.h"
 #include <gdk/gdkkeysyms.h>
 #include "gphpedit-statusbar.h"
-
 #include "filebrowser_ui.h"
 
 gboolean is_app_closing = FALSE;
@@ -1688,7 +1687,7 @@ void find_next_marker(line_start){
 
 void syntax_check(GtkWidget *widget)
 {
-      syntax_check_run();
+   gtk_syntax_check_window_run_check(main_window.win, main_window.current_editor);
 }
 
 

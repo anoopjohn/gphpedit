@@ -75,7 +75,7 @@ struct Preferences_ManagerDetails
   guint classbrowser_hidden:1;
   gint classbrowser_size;
   gchar *filebrowser_last_folder;
-  gboolean showfilebrowser;
+	gboolean showfilebrowser;
 
 	// Default settings
 	gint set_sel_back;
@@ -379,6 +379,7 @@ const gchar *get_preferences_manager_last_opened_folder(Preferences_Manager *pre
 */
 void set_preferences_manager_last_opened_folder(Preferences_Manager *preferences_manager, const gchar *new_last_folder){
   if (!OBJECT_IS_PREFERENCES_MANAGER (preferences_manager)) return ;
+  if (!new_last_folder) return ;
   Preferences_ManagerDetails *prefdet;
 	prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
   if (prefdet->last_opened_folder) g_free(prefdet->last_opened_folder);
