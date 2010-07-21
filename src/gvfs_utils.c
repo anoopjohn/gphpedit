@@ -2,6 +2,8 @@
 #include <gio/gio.h>
 #include "gvfs_utils.h"
 
+void unquote(char *s);
+
 GFile *get_gfile_from_filename(gchar *filename){
   GFile *file;
   if (strstr(filename, "://") != NULL) {
@@ -41,7 +43,7 @@ gchar *filename_parent_uri(gchar *filename){
 *
 */
 gchar *filename_get_relative_path(gchar *filename){
-  if (!filename || strlen(filename)==0) return NULL;
+  if (!filename || strlen(filename)==0) return g_strdup(".");
   GFile *file= get_gfile_from_filename(filename);
   GFile *home= get_gfile_from_filename((gchar *) g_get_home_dir());
   gchar *rel =g_file_get_relative_path (home,file);
@@ -50,11 +52,21 @@ gchar *filename_get_relative_path(gchar *filename){
   if (rel) {
   gchar *relpath=g_strdup_printf("~/%s",rel);
   g_free(rel);
+  unquote(relpath);
   return relpath;
   }
+  unquote(filename);
   return g_strdup(filename);
 }
 
+/*
+* return filename path without any %xx scaped char.
+*/
+gchar *filename_get_scaped_path(gchar *filename){
+  gchar *local_path=filename_get_path(filename);
+  unquote(local_path);
+  return local_path;
+}
 /*
 * filename_get_basename
 * return a gchar with the basename of the Gfile
@@ -141,7 +153,7 @@ gboolean get_file_modified(gchar *filename,GTimeVal *act, gboolean update_mark){
 
 gboolean filename_is_local_or_http(gchar *filename){
   GFile *file;
-  if (!filename) return FALSE;
+  if (!filename) return TRUE;
   file= get_gfile_from_filename (filename);
   gchar *scheme= g_file_get_uri_scheme (file);
   gboolean result= g_str_has_prefix(filename, "file://") || g_str_has_prefix(filename, "http://") || g_str_has_prefix(filename, "https://");
@@ -313,4 +325,3 @@ void unquote(char *s) {
 	}
 	*o = '\0';
 }
-

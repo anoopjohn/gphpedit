@@ -290,11 +290,6 @@ void update_app_title(void)
       gchar *tmp=filename_parent_uri(main_window.current_editor->filename->str);
       dir = filename_get_relative_path(tmp);
       g_free(tmp);
-      if (dir) {
-        unquote(dir);
-      } else {
-        dir=g_strdup(".");
-      }
       g_string_printf (title,"%s (%s)",main_window.current_editor->short_filename,dir);
       g_free(dir);
       //debug("Title - %s, Short name - %s", title->str, main_window.current_editor->short_filename);

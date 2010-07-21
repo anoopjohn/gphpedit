@@ -292,7 +292,7 @@ gchar *syntax_check_manager_run(Editor *editor, gint ftype)
   GString *filename;
 
   if (editor->saved==TRUE && filename_is_native(editor->filename->str)) {
-      gchar *local_path=filename_get_path(editor->filename->str);
+      gchar *local_path=filename_get_scaped_path(editor->filename->str);
       filename = g_string_new(local_path);
       g_free(local_path);
       using_temp = FALSE;
@@ -301,7 +301,6 @@ gchar *syntax_check_manager_run(Editor *editor, gint ftype)
       filename = save_as_temp_file(editor);
       using_temp = TRUE;
     }
-    unquote(filename->str);
     if(ftype==TAB_PHP){
     command_line = g_string_new(get_preferences_manager_php_binary_location(main_window.prefmg));
     command_line = g_string_append(command_line, " -q -l -d html_errors=Off -f '");
