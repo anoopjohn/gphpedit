@@ -542,7 +542,7 @@ void response_preferences (GtkDialog *dialog, gint response_id, gpointer   user_
   } else if (response_id == GTK_RESPONSE_ACCEPT){
       apply_preferences(NULL, NULL);      
       // Save the preferences definitely
-      preferences_manager_save_data(main_window.prefmg);
+      preferences_manager_save_data_full(main_window.prefmg);
   } else { //GTK_RESPONSE_REJECT
     preferences_manager_restore_data(main_window.prefmg);  
     apply_preferences(NULL, NULL);

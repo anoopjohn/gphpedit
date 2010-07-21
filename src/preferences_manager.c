@@ -976,9 +976,32 @@ void save_style_settings (gpointer key, gpointer value, gpointer user_data)
 
 /*
 * preferences_manager_save_data
-* update preferences data in gconf with new internal data
+* update session preferences data in gconf with new internal data
+* this version only save a few preferences that can change often in the program.
+* other preferences are only save when you call "preferences_manager_save_data_full"
+* so we speed up process by not save unchanged data.
 */
 void preferences_manager_save_data(Preferences_Manager *preferences_manager){
+  Preferences_ManagerDetails *prefdet;
+	prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
+  /*store window  settings*/
+  if (!prefdet->maximized) {
+  set_int ("/gPHPEdit/main_window/x", prefdet->left);
+  set_int ("/gPHPEdit/main_window/y",prefdet->top);
+  set_int ("/gPHPEdit/main_window/width", prefdet->width);
+  set_int ("/gPHPEdit/main_window/height", prefdet->height);
+  }
+  set_int ("/gPHPEdit/main_window/maximized", prefdet->maximized);
+  /**/
+  set_bool("/gPHPEdit/defaults/showfolderbrowser", prefdet->showfilebrowser);
+  set_string_list ("/gPHPEdit/search_history", prefdet->search_history);
+}
+
+/*
+* preferences_manager_save_data_full
+* update all preferences data in gconf with new internal data
+*/
+void preferences_manager_save_data_full(Preferences_Manager *preferences_manager){
   Preferences_ManagerDetails *prefdet;
 	prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
   /*store window  settings*/
