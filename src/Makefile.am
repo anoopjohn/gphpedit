@@ -44,12 +44,14 @@ gphpedit_SOURCES = \
 	calltip.c		\
 	calltip.h		\
 	images.h		\
-	classbrowser.c		\
-	classbrowser.h		\
-	history-entry.c		\
-	history-entry.h		\
+	classbrowser_ui.h		\
+	classbrowser_ui.c		\
+	classbrowser_backend.h		\
+	classbrowser_backend.c		\
 	classbrowser_parse.c	\
 	classbrowser_parse.h	\
+	history-entry.c		\
+	history-entry.h		\
 	filebrowser_backend.c		\
 	filebrowser_backend.h		\
 	filebrowser_ui.c		\

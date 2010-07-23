@@ -31,7 +31,7 @@
 #include "gphpedit_ipc.h"
 #include "templates.h"
 #include <gconf/gconf-client.h>
-#include "classbrowser.h"
+#include "classbrowser_ui.h"
 #ifdef ENABLE_NLS
 #include <locale.h>
 #endif              /* ENABLE_NLS */
@@ -67,7 +67,9 @@ int main (int argc, char **argv)
   //
   g_signal_connect (G_OBJECT (main_window.notebook_editor), "switch_page", G_CALLBACK (on_notebook_switch_page), NULL);
   update_app_title();
-  classbrowser_update();
+  g_print("main\n");
+  classbrowser_update(GPHPEDIT_CLASSBROWSER(main_window.classbrowser));
+  g_print("main_end\n");
   check_externally_modified();
   gtk_main();
         

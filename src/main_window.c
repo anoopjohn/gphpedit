@@ -28,14 +28,14 @@
 #include "main_window.h"
 #include "tab.h"
 #include "main_window_callbacks.h"
-#include "classbrowser.h"
 #include "templates.h"
 #include "gvfs_utils.h"
 #include "gphpedit-close-button.h"
 #include "gphpedit-statusbar.h"
 #include "syntax_check_window.h"
-
 #include "filebrowser_ui.h"
+
+#include "classbrowser_ui.h"
 
 MainWindow main_window;
 GIOChannel* inter_gphpedit_io;
@@ -162,9 +162,6 @@ static void main_window_create_panes(void)
 
 static void create_side_panel(void){
   GtkWidget *prin_sidebox;
-  GtkWidget *box2;
-  GtkCellRenderer *renderer;
-  GtkTreeViewColumn *column;
 
   prin_sidebox = gtk_vbox_new(FALSE, 0);
   gtk_widget_show(prin_sidebox);
@@ -182,69 +179,34 @@ static void create_side_panel(void){
   gtk_box_pack_end(GTK_BOX(close_box), main_window.close_sidebar_button, FALSE, FALSE, 0);
   gtk_widget_show(close_box);
 
-  /*agrego el boton de cerrar*/
+  /* add close button */
   gtk_box_pack_start(GTK_BOX(prin_sidebox), close_box, FALSE, TRUE, 2);
   
   main_window.notebook_manager= gtk_notebook_new ();
   gtk_notebook_set_tab_pos (GTK_NOTEBOOK (main_window.notebook_manager), GTK_POS_BOTTOM);
   gtk_widget_set_size_request (main_window.notebook_manager, 200,400);
   gtk_widget_show (main_window.notebook_manager);
-  /* agrego el notebook */
+  /* add a notebook */
   gtk_box_pack_start(GTK_BOX(prin_sidebox), main_window.notebook_manager, TRUE, TRUE, 2);
   
-  /* creo un tab y lo agrego el notebook */  
-  GtkWidget *notebox;
-  notebox = gtk_vbox_new(FALSE, 0);
-  gtk_widget_show(notebox);
-
-  main_window.classlabel = gtk_image_new_from_file (PIXMAP_DIR "/classbrowser.png");
+  /* Classbrowser stuff creation */  
+  main_window.classbrowser = gphpedit_classbrowser_new ();
+  gtk_widget_show(main_window.classbrowser);
+  GtkWidget *classlabel;
+  classlabel = gtk_image_new_from_file (PIXMAP_DIR "/classbrowser.png");
   /*set tooltip*/
-  gtk_widget_set_tooltip_text (main_window.classlabel,_("Class Browser"));
-  gtk_widget_show(main_window.classlabel);
+  gtk_widget_set_tooltip_text (classlabel,_("Class Browser"));
+  gtk_widget_show(classlabel);
+  gtk_notebook_insert_page (GTK_NOTEBOOK(main_window.notebook_manager), main_window.classbrowser, classlabel, 0);
 
-  gtk_notebook_insert_page (GTK_NOTEBOOK(main_window.notebook_manager), notebox, main_window.classlabel, 0);
-
-  /* add checkbox to show only current file's classes
-  the signals to be checked for the check box are onclick of the checkbox
-  and the on change of the file.
-  */
-  GtkWidget *hbox;
-  hbox = gtk_hbox_new(FALSE, 0);
-  main_window.chkOnlyCurFileFuncs = gtk_check_button_new_with_label(_("Parse only current file"));
-  gtk_toggle_button_set_active ((GtkToggleButton *)main_window.chkOnlyCurFileFuncs, get_preferences_manager_parse_only_current_file(main_window.prefmg));
-  gtk_widget_show (main_window.chkOnlyCurFileFuncs);
-  gtk_widget_show (hbox);
-  gtk_box_pack_start(GTK_BOX(hbox), main_window.chkOnlyCurFileFuncs, TRUE, TRUE, 10);
-  gtk_box_pack_start(GTK_BOX(notebox), hbox, FALSE, FALSE, 10);
-  g_signal_connect (G_OBJECT (main_window.chkOnlyCurFileFuncs), "clicked",
-            G_CALLBACK (on_parse_current_click), NULL);
-
-  main_window.scrolledwindow3 = gtk_scrolled_window_new (NULL, NULL);
-  gtk_widget_show (main_window.scrolledwindow3);
-  gtk_box_pack_start(GTK_BOX(notebox), main_window.scrolledwindow3, TRUE, TRUE, 0);
-
-  box2 = gtk_hbox_new(FALSE, 0);
-  gtk_widget_show(box2);
-  main_window.treeviewlabel = gtk_label_new(_("FILE: "));
-  gtk_label_set_justify(GTK_LABEL(main_window.treeviewlabel), GTK_JUSTIFY_LEFT);
-  gtk_widget_show(main_window.treeviewlabel);
-  gtk_box_pack_start(GTK_BOX(box2), main_window.treeviewlabel, FALSE, FALSE, 0);
-  gtk_box_pack_end(GTK_BOX(notebox), box2, FALSE, FALSE, 4);
-  
-  main_window.classtreestore = gtk_tree_store_new (N_COLUMNS, G_TYPE_STRING, G_TYPE_INT, G_TYPE_STRING, G_TYPE_INT, G_TYPE_INT, G_TYPE_INT);
-  /* enable sorting of the columns */
-  classbrowser_set_sortable(main_window.classtreestore);
-
-  main_window.classtreeview = gtk_tree_view_new_with_model (GTK_TREE_MODEL (main_window.classtreestore));
-  gtk_widget_show (main_window.classtreeview);
-  gtk_container_add (GTK_CONTAINER (main_window.scrolledwindow3), main_window.classtreeview);
-
-  main_window.classtreeselect = gtk_tree_view_get_selection (GTK_TREE_VIEW (main_window.classtreeview));
-  gtk_tree_selection_set_mode (main_window.classtreeselect, GTK_SELECTION_SINGLE);
-  renderer = gtk_cell_renderer_text_new ();
-  column = gtk_tree_view_column_new_with_attributes (_("Name"),
-           renderer, "text", NAME_COLUMN, NULL);
-  gtk_tree_view_append_column (GTK_TREE_VIEW (main_window.classtreeview), column);
+  /* File browser stuff creation */
+  if (get_preferences_manager_show_filebrowser(main_window.prefmg)){
+  main_window.folder= gphpedit_filebrowser_new();
+  gtk_widget_show(main_window.folder);
+  GtkWidget *label= gtk_image_new_from_file (PIXMAP_DIR "/folderbrowser.png");
+  gtk_widget_show(label);
+  gtk_notebook_insert_page (GTK_NOTEBOOK(main_window.notebook_manager), main_window.folder, label, 1);
+  }
 }
 
 static void main_window_fill_panes(void)
@@ -403,15 +365,6 @@ void main_window_create(void){
   gtk_widget_show(main_window.window);
   
   update_app_title();
-  // folder browser init
-  if (get_preferences_manager_show_filebrowser(main_window.prefmg)){
-  main_window.folder= gphpedit_filebrowser_new();
-  gtk_widget_show(main_window.folder);
-  GtkWidget *label= gtk_image_new_from_file (PIXMAP_DIR "/folderbrowser.png");
-  gtk_widget_show(label);
-  gtk_notebook_insert_page (GTK_NOTEBOOK(main_window.notebook_manager), main_window.folder, label, 1);
-  //folderbrowser_create(&main_window);
-  }
 }
 
 void update_controls(void){

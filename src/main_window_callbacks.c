@@ -36,6 +36,7 @@
 #include <gdk/gdkkeysyms.h>
 #include "gphpedit-statusbar.h"
 #include "filebrowser_ui.h"
+#include "classbrowser_ui.h"
 
 gboolean is_app_closing = FALSE;
 gint classbrowser_hidden_position;
@@ -420,7 +421,7 @@ gint main_window_key_press_event(GtkWidget   *widget, GdkEventKey *event,gpointe
       member_function_buffer = gtk_scintilla_get_text_range (GTK_SCINTILLA(main_window.current_editor->scintilla), current_pos-2, current_pos, &member_function_length);
       if (gtk_scintilla_get_line_state(GTK_SCINTILLA(main_window.current_editor->scintilla), current_line)==274) {
         if (strcmp(member_function_buffer, "->")==0) {
-          autocomplete_member_function(main_window.current_editor->scintilla, wordStart, wordEnd);
+          classbrowser_autocomplete_member_function(GPHPEDIT_CLASSBROWSER(main_window.classbrowser), main_window.current_editor->scintilla, wordStart, wordEnd);
         }
         else if (main_window.current_editor->type == TAB_PHP) {
           autocomplete_word(main_window.current_editor->scintilla, wordStart, wordEnd);
@@ -735,7 +736,7 @@ void on_saveall1_activate(GtkWidget *widget)
         gtk_scintilla_set_save_point (GTK_SCINTILLA(editor->scintilla));
     }
   }
-  classbrowser_update();
+  classbrowser_update(GPHPEDIT_CLASSBROWSER(main_window.classbrowser));
 }
 
 
@@ -801,7 +802,7 @@ void on_reload1_activate(GtkWidget *widget)
 void on_tab_close_activate(GtkWidget *widget, Editor *editor)
 {
   try_close_page(editor);
-  classbrowser_update();
+  classbrowser_update(GPHPEDIT_CLASSBROWSER(main_window.classbrowser));
   update_app_title();
 }
 
@@ -1003,16 +1004,12 @@ gboolean try_close_page(Editor *editor)
 
 void on_close1_activate(GtkWidget *widget)
 {
-  GtkTreeIter iter;
-
   if (main_window.current_editor != NULL) {
     try_close_page(main_window.current_editor);
-    classbrowser_update();
+    classbrowser_update(GPHPEDIT_CLASSBROWSER(main_window.classbrowser));
     update_app_title();
     update_zoom_level();
-    if (!gtk_tree_selection_get_selected (main_window.classtreeselect, NULL, &iter)) {
-      gtk_label_set_text(GTK_LABEL(main_window.treeviewlabel), _("FILE:"));
-    }
+    classbrowser_force_label_update(GPHPEDIT_CLASSBROWSER(main_window.classbrowser));
   }
 }
 
@@ -1701,7 +1698,7 @@ void classbrowser_show(void)
 {
   gtk_paned_set_position(GTK_PANED(main_window.main_horizontal_pane),classbrowser_hidden_position);
   set_preferences_manager_parse_classbrowser_status(main_window.prefmg, 0);
-  classbrowser_update();
+  classbrowser_update(GPHPEDIT_CLASSBROWSER(main_window.classbrowser));
 }
 
 
@@ -1721,50 +1718,6 @@ void classbrowser_show_hide(GtkWidget *widget)
     classbrowser_show();
   else
     classbrowser_hide();
-}
-
-gint treeview_double_click(GtkWidget *widget, GdkEventButton *event, gpointer func_data)
-{
-  GtkTreeIter iter;
-  gchar *filename = NULL;
-  guint line_number;
-
-  if (event->type==GDK_2BUTTON_PRESS ||
-      event->type==GDK_3BUTTON_PRESS) {
-      if (gtk_tree_selection_get_selected (main_window.classtreeselect, NULL, &iter)) {
-          gtk_tree_model_get (GTK_TREE_MODEL(main_window.new_model), &iter, FILENAME_COLUMN, &filename, LINE_NUMBER_COLUMN, &line_number, -1);
-        if (filename) {
-          switch_to_file_or_open(filename, line_number);
-          g_free (filename);
-        }
-      }
-  }
-  return FALSE;
-}
-
-
-gint treeview_click_release(GtkWidget *widget, GdkEventButton *event, gpointer func_data)
-{
-  GtkTreeIter iter;
-  gchar *filename = NULL;
-  guint line_number;
-
-  if (gtk_tree_selection_get_selected (main_window.classtreeselect, NULL, &iter)) {
-    gtk_tree_model_get (GTK_TREE_MODEL(main_window.new_model), &iter, FILENAME_COLUMN, &filename, LINE_NUMBER_COLUMN, &line_number, -1);
-    if (filename) {
-      classbrowser_update_selected_label(filename, line_number);
-      g_free (filename);
-    }
-  }
-  if (main_window.current_editor) {
-    if(GTK_IS_SCINTILLA(main_window.current_editor->scintilla)){
-    gtk_scintilla_grab_focus(GTK_SCINTILLA(main_window.current_editor->scintilla));
-    gtk_scintilla_scroll_caret(GTK_SCINTILLA(main_window.current_editor->scintilla));
-    gtk_scintilla_grab_focus(GTK_SCINTILLA(main_window.current_editor->scintilla));
-    }
-  }
-  
-  return FALSE;
 }
 
 void force_php(GtkWidget *widget)
@@ -1815,19 +1768,11 @@ void force_python(GtkWidget *widget)
   }
 }
 
-//function to refresh treeview when the parse only current file checkbox is clicked
-//or when the checkbox is clicked and the files tabbar is clicked
-gint on_parse_current_click (GtkWidget *widget)
-{
-  set_preferences_manager_parse_only_current_file(main_window.prefmg, gtk_toggle_button_get_active((GtkToggleButton *)widget));
-  classbrowser_update();
-  return 0;
-}
 //function to refresh treeview when the current tab changes 
 //view is refreshed only if the parse only current file parameter is set
 gint on_tab_change_update_classbrowser(GtkWidget *widget)
 {
-    classbrowser_update();
+  classbrowser_update(GPHPEDIT_CLASSBROWSER(main_window.classbrowser));
   return 0;
 }
 

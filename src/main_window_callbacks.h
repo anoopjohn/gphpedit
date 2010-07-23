@@ -26,7 +26,6 @@
 #define MAIN_WINDOW_CALLBACKS_H
 #include "main.h"
 #include "main_window.h"
-#include "classbrowser.h"
 
 void update_status_combobox(Editor *editor);
 void main_window_destroy_event(GtkWidget *widget, gpointer data);
@@ -95,8 +94,8 @@ void selectiontoupper(void);
 void selectiontolower(void);
 gboolean on_notebook_focus_tab(GtkNotebook *notebook, GtkNotebookTab arg1, gpointer user_data);
 void on_reload1_activate(GtkWidget *widget);
-gint treeview_double_click(GtkWidget *widget, GdkEventButton *event, gpointer func_data);
-gint treeview_click_release(GtkWidget *widget, GdkEventButton *event, gpointer func_data);
+//gint treeview_double_click(GtkWidget *widget, GdkEventButton *event, gpointer func_data);
+//gint treeview_click_release(GtkWidget *widget, GdkEventButton *event, gpointer func_data);
 void main_window_resize(GtkWidget *widget, GtkAllocation *allocation, gpointer user_data);
 void main_window_state_changed(GtkWidget *widget, GdkEventWindowState *event, gpointer user_data);
 gboolean classbrowser_accept_size(GtkPaned *paned, gpointer user_data);
@@ -109,7 +108,7 @@ void run_plugin(GtkWidget *widget, gpointer data);
 void close_all_tabs(void);
 void session_reopen(void);
 void session_save(void);
-gint on_parse_current_click(GtkWidget *widget);
+//gint on_parse_current_click(GtkWidget *widget);
 gint on_tab_change_update_classbrowser(GtkWidget *widget);
 void on_tab_close_activate(GtkWidget *widget, Editor *editor);
 void process_external (GtkInfoBar *info_bar, gint response_id, Editor *editor);

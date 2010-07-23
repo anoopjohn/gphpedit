@@ -26,7 +26,6 @@
 #define TAB_H
 
 #include "main.h"
-#include "classbrowser.h"
 #include <webkit/webkit.h> 
 #define TAB_FILE 1
 #define TAB_PHP 2

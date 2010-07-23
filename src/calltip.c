@@ -23,12 +23,15 @@
 */
 
 #include <stdio.h>
-#include "calltip.h"
-#include "tab.h"
-#include "images.h"
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
+
+#include "calltip.h"
+#include "tab.h"
+#include "images.h"
+#include "main_window.h"
+#include "classbrowser_ui.h"
 //#define DEBUGCALLTIP
 GTree *php_api_tree;
 GTree *css_api_tree;
@@ -226,7 +229,7 @@ static void get_api_line(GtkWidget *scintilla, gint wordStart, gint wordEnd)
     g_free(copy_line);	
   } else {
   /*maybe a custom function*/
-    gchar *result=classbrowser_custom_function_calltip(buffer);
+    gchar *result=classbrowser_custom_function_calltip(GPHPEDIT_CLASSBROWSER(main_window.classbrowser), buffer);
     if (result){
       gtk_scintilla_call_tip_show(GTK_SCINTILLA(scintilla), wordStart, result);
       g_free(result);
@@ -286,7 +289,7 @@ static void get_completion_list(GtkWidget *scintilla, gint wordStart, gint wordE
   }else{ 
   g_tree_foreach (php_api_tree, make_completion_list, buffer);
   /* add custom php functions */
-  gchar *custom= classbrowser_add_custom_autocompletion(buffer,list);
+  gchar *custom= classbrowser_add_custom_autocompletion(GPHPEDIT_CLASSBROWSER(main_window.classbrowser),buffer,list);
   if (custom){
     gtk_scintilla_autoc_show(GTK_SCINTILLA(scintilla), wordEnd-wordStart, custom);
     if (cache_completion) g_free(cache_completion);

@@ -140,7 +140,7 @@ gtk_plugin_manager_menu_dispose (GObject *object)
   GtkPlugin_Manager_Menu *menu = GTK_PLUGIN_MANAGER_MENU (object);
   GtkPlugin_Manager_MenuPrivate *priv = menu->priv;
 
-  if (G_IS_OBJECT(priv->plugmg)) g_object_unref(priv->plugmg);
+//  if (G_IS_OBJECT(priv->plugmg)) g_object_unref(priv->plugmg);
 
   G_OBJECT_CLASS (gtk_plugin_manager_menu_parent_class)->dispose (object);
 }

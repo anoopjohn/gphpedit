@@ -218,6 +218,7 @@ gboolean init_filebrowser(FilebrowserBackend *filebackend){
   g_print("DEBUG:: clear tree and cache data\n");
   #endif
   /* enumerate folder files */
+  g_object_unref(file);
   if (g_cancellable_is_cancelled (directory->cancellable)) return FALSE;
   init_enumeration(filebackend);
   return TRUE;
@@ -433,6 +434,7 @@ void filebrowser_backend_rename_file(FilebrowserBackend *filebackend,gchar *file
 static inline void change_current_folder(FilebrowserBackend *filebackend, const gchar *new_folder){
   FilebrowserBackendDetails *directory;
   directory = FILEBROWSER_BACKEND_GET_PRIVATE(filebackend);
+  if (!new_folder && *(new_folder)!=0) return;
   directory->current_folder= g_strdup(new_folder);
   set_preferences_manager_filebrowser_last_folder(main_window.prefmg, directory->current_folder);
   gchar *real_path=filename_get_relative_path((gchar *)new_folder);

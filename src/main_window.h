@@ -61,40 +61,18 @@ typedef struct
   GtkSyntax_Check_Window *win;
 
   Editor *current_editor;
+
   //widget for close side bar button
   GtkWidget *close_sidebar_button;
   
-  //Checkbox above treeview to parse only the current tab  
-  GtkWidget *chkOnlyCurFileFuncs;
+  GtkWidget *classbrowser;
 
-  GtkWidget *scrolledwindow3;
-  GtkTreeStore *classtreestore;
-  GtkTreeModel *new_model;
-  GtkWidget *classtreeview;
-  GtkTreeSelection *classtreeselect;
-  GtkWidget *treeviewlabel;
-  GtkWidget *label1;
-  GtkWidget *classlabel;
   GtkClipboard* clipboard;
 
   /*filebrowser widget */
   GtkWidget *folder;//filebrowser;
 }
 MainWindow;
-
-#define CB_ITEM_TYPE_CLASS 1
-#define CB_ITEM_TYPE_CLASS_METHOD 2
-#define CB_ITEM_TYPE_FUNCTION 3
-
-enum {
-  NAME_COLUMN,
-  LINE_NUMBER_COLUMN,
-  FILENAME_COLUMN,
-  TYPE_COLUMN,
-  ID_COLUMN,
-  FILE_TYPE,
-  N_COLUMNS
-};
 
 extern MainWindow main_window;
 extern gboolean DEBUG_MODE;

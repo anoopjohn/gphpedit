@@ -403,7 +403,7 @@ void set_preferences_manager_filebrowser_last_folder(Preferences_Manager *prefer
   if (!OBJECT_IS_PREFERENCES_MANAGER (preferences_manager)) return ;
   Preferences_ManagerDetails *prefdet;
 	prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
-  if (prefdet->filebrowser_last_folder && strlen(prefdet->filebrowser_last_folder)!=0) g_free(prefdet->filebrowser_last_folder);
+  if (prefdet->filebrowser_last_folder && *(prefdet->filebrowser_last_folder)!=0) g_free(prefdet->filebrowser_last_folder);
   prefdet->filebrowser_last_folder= g_strdup(new_last_folder);
   set_string ("/gPHPEdit/main_window/folderbrowser/folder", new_last_folder);
 }

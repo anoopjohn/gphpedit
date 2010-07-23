@@ -33,7 +33,8 @@
 #include "gvfs_utils.h"
 #include "gphpedit-close-button.h"
 #include "gphpedit-statusbar.h"
-
+#include "classbrowser_ui.h"
+#include "classbrowser_parse.h"
 //#define DEBUGTAB
 
 
@@ -281,7 +282,9 @@ void tab_file_write (GObject *source_object, GAsyncResult *res, gpointer user_da
     g_object_unref(info);  
   }
   register_file_opened(editor->filename->str);
-  classbrowser_update();
+  g_print("tab\n");
+  classbrowser_update(GPHPEDIT_CLASSBROWSER(main_window.classbrowser));
+  g_print("tab-end\n");
   session_save();
 }
 
@@ -1618,7 +1621,7 @@ gboolean auto_memberfunc_complete_callback(gpointer data)
   if (current_pos == GPOINTER_TO_INT(data)) {
     wordStart = gtk_scintilla_word_start_position(GTK_SCINTILLA(main_window.current_editor->scintilla), current_pos-1, TRUE);
     wordEnd = gtk_scintilla_word_end_position(GTK_SCINTILLA(main_window.current_editor->scintilla), current_pos-1, TRUE);
-    autocomplete_member_function(main_window.current_editor->scintilla, wordStart, wordEnd);
+    classbrowser_autocomplete_member_function(GPHPEDIT_CLASSBROWSER(main_window.classbrowser),main_window.current_editor->scintilla, wordStart, wordEnd);
   }
   completion_timer_set=FALSE;
   return FALSE;
@@ -1816,11 +1819,13 @@ static void char_added(GtkWidget *scintilla, guint ch)
         g_free(member_function_buffer);
         member_function_buffer = gtk_scintilla_get_text_range (GTK_SCINTILLA(scintilla), wordStart, wordEnd, &member_function_length);
         if (g_str_has_prefix(member_function_buffer,"$") || g_str_has_prefix(member_function_buffer,"__")) {
-            autocomplete_php_variables(scintilla, wordStart, wordEnd);
+            classbrowser_autocomplete_php_variables(GPHPEDIT_CLASSBROWSER(main_window.classbrowser), scintilla, wordStart, wordEnd);
         } else if (strcmp(member_function_buffer,"instanceof")==0 || strcmp(member_function_buffer,"is_subclass_of")==0) {
         gtk_scintilla_insert_text(GTK_SCINTILLA(scintilla), current_pos," ");
         gtk_scintilla_goto_pos(GTK_SCINTILLA(scintilla), current_pos +1);
-        autocomplete_php_classes(scintilla, wordStart, wordEnd);
+        GString *autocomp = classbrowser_get_autocomplete_php_classes_string(GPHPEDIT_CLASSBROWSER(main_window.classbrowser)); 
+        gtk_scintilla_autoc_show(GTK_SCINTILLA(scintilla), 0, autocomp->str);
+        g_string_free(autocomp,TRUE); /*release resources*/
         } else if ((current_word_length>=3) && ( (gtk_scintilla_get_line_state(GTK_SCINTILLA(scintilla), current_line)==274))) {
         // check to see if they've typed <?php and if so do nothing
         if (wordStart>1) {
