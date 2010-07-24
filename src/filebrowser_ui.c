@@ -481,6 +481,7 @@ static gchar *get_mime_from_tree(GtkTreeView *tree_view){
 
 
 static inline void search_control_sensible(gphpeditFileBrowserPrivate *priv, gboolean status){
+    if (!priv) return ;
     gtk_widget_set_sensitive (priv->searchentry, status);
     gtk_entry_set_icon_sensitive (GTK_ENTRY(priv->searchentry), GTK_ENTRY_ICON_PRIMARY, status);
     gtk_entry_set_icon_sensitive (GTK_ENTRY(priv->searchentry), GTK_ENTRY_ICON_SECONDARY, status);
@@ -677,7 +678,8 @@ gboolean view_onPopupMenu (GtkWidget *treeview, gpointer userdata){
 /*
 * process backend signal and populate files tree
 */
-void print_files (FilebrowserBackend         *directory, gpointer user_data){
+void print_files (FilebrowserBackend *directory, gpointer user_data){
+  if (!directory || !user_data) return ;
   gphpeditFileBrowserPrivate *priv = (gphpeditFileBrowserPrivate *) user_data;
   #ifdef DEBUGFILEBROWSER
   g_print("DEBUG::printing files\n");
@@ -701,8 +703,6 @@ void print_files (FilebrowserBackend         *directory, gpointer user_data){
       p_file_image = gtk_icon_info_load_icon (ificon, NULL);
       gtk_tree_store_insert_with_values(GTK_TREE_STORE(priv->pTree), &iter2, iter, 0, ICON_COLUMN, p_file_image, FILE_COLUMN, current->display_name,MIME_COLUMN,current->mime,-1);
       g_object_unref(p_file_image);
-        while (gtk_events_pending ())
-          gtk_main_iteration ();
     }
   if (get_filebrowser_backend_number_files(priv->fbbackend)!=0){
     priv->cache_model=gtk_tree_view_get_model (GTK_TREE_VIEW(priv->pListView));

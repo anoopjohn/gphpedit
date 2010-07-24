@@ -324,11 +324,13 @@ const gchar *get_filebrowser_backend_current_folder(FilebrowserBackend *fbback){
 }
 
 guint get_filebrowser_backend_number_files(FilebrowserBackend *fbback){
+  if (!fbback) return 0;
 	FilebrowserBackendDetails *directory = FILEBROWSER_BACKEND_GET_PRIVATE(fbback);
 	return g_slist_length (directory->filesinfolder);
 }
 
 GSList *get_filebrowser_backend_files(FilebrowserBackend *fbback){
+  if (!fbback) return NULL;
 	FilebrowserBackendDetails *directory = FILEBROWSER_BACKEND_GET_PRIVATE(fbback);
 	return directory->filesinfolder;
 }
