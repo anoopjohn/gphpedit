@@ -25,18 +25,20 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-#include "stdlib.h"
+#include <stdlib.h>
+#include <gdk/gdkkeysyms.h>
+
 #include "main_window_callbacks.h"
-#include "find_replace.h"
 #include "preferences_dialog.h"
 #include "tab.h"
 #include "templates.h"
 #include "pluginmenu.h"
 #include "gvfs_utils.h"
-#include <gdk/gdkkeysyms.h>
 #include "gphpedit-statusbar.h"
 #include "filebrowser_ui.h"
 #include "classbrowser_ui.h"
+#include "find_dialog.h"
+#include "replace_dialog.h"
 
 gboolean is_app_closing = FALSE;
 gint classbrowser_hidden_position;
@@ -1158,10 +1160,8 @@ void on_selectall1_activate(GtkWidget *widget)
 void on_find1_activate(GtkWidget *widget)
 {
   if (main_window.current_editor && main_window.current_editor->type != TAB_HELP) {
-    if (find_dialog.window1==NULL) {
-      find_create();
-    }
-    gtk_widget_show(find_dialog.window1);
+    GtkWidget *find_dialog = search_dialog_new (GTK_WINDOW(main_window.window));
+    gtk_widget_show(find_dialog);    
   }
 }
 
@@ -1169,10 +1169,8 @@ void on_find1_activate(GtkWidget *widget)
 void on_replace1_activate(GtkWidget *widget)
 {
   if (main_window.current_editor) {
-    if (replace_dialog.window2 == NULL) {
-      replace_create();
-    }
-    gtk_widget_show(replace_dialog.window2);
+    GtkWidget *replace_dialog = replace_dialog_new (GTK_WINDOW(main_window.window));
+    gtk_widget_show(replace_dialog);    
   }
 }
 

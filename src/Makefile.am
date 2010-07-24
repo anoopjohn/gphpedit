@@ -58,8 +58,10 @@ gphpedit_SOURCES = \
 	filebrowser_ui.h		\
 	edit_template.c		\
 	edit_template.h		\
-	find_replace.c		\
-	find_replace.h		\
+	find_dialog.h		\
+	find_dialog.c		\
+	replace_dialog.h		\
+	replace_dialog.c		\
 	gphpedit_ipc.c		\
 	gphpedit_ipc.h		\
 	plugins.c		\

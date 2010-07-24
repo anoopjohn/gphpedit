@@ -199,5 +199,27 @@ The following list all gphpedit’s shortcut keys.
  7) Autocompletion:
     * Insert template (Ctrl + j)
 
+Find and Replace
+================
+
+Regular expressions
+--------------------
+
+GPHPEdit support regular expression search.
+In a regular expression, special characters interpreted are:
+. 	Matches any character
+\( 	This marks the start of a region for tagging a match.
+\) 	This marks the end of a tagged region.
+\n 	Where n is 1 through 9 refers to the first through ninth tagged region when replacing. For example, if the search string was Fred\([1-9]\)XXX and the replace string was Sam\1YYY, when applied to Fred2XXX this would generate Sam2YYY.
+\< 	This matches the start of a word using Scintilla's definitions of words.
+\> 	This matches the end of a word using Scintilla's definition of words.
+\x 	This allows you to use a character x that would otherwise have a special meaning. For example, \[ would be interpreted as [ and not as the start of a character set.
+[...] 	This indicates a set of characters, for example, [abc] means any of the characters a, b or c. You can also use ranges, for example [a-z] for any lower case character.
+[^...] 	The complement of the characters in the set. For example, [^A-Za-z] means any character except an alphabetic character.
+^ 	This matches the start of a line (unless used inside a set, see above).
+$ 	This matches the end of a line.
+* 	This matches 0 or more times. For example, Sa*m matches Sm, Sam, Saam, Saaam and so on.
++ 	This matches 1 or more times. For example, Sa+m matches Sam, Saam, Saaam and so on.
+
 	The gphpedit team.
-	
+
