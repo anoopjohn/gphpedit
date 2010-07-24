@@ -54,6 +54,8 @@ struct _gphpeditClassBrowserPrivate
   GtkWidget *label1;
 
   GtkTreeModel *cache_model;
+
+  gulong  handlerid;
 };
 
 enum {
@@ -122,6 +124,10 @@ gphpedit_classbrowser_destroy (GtkObject *object)
 
 	priv = CLASSBROWSER_BACKEND_GET_PRIVATE(object);
 
+  if (g_signal_handler_is_connected (priv->classbackend, priv->handlerid)){
+   g_signal_handler_disconnect(priv->classbackend, priv->handlerid);
+  }
+
   if (G_IS_OBJECT(priv->classbackend)) g_object_unref(priv->classbackend);
 
 	GTK_OBJECT_CLASS (gphpedit_class_browser_parent_class)->destroy (object);
@@ -162,7 +168,7 @@ gphpedit_classbrowser_init (gphpeditClassBrowser *button)
 
   gphpeditClassBrowserPrivate *priv = CLASSBROWSER_BACKEND_GET_PRIVATE(button);
   priv->classbackend= classbrowser_backend_new ();
-  g_signal_connect(G_OBJECT(priv->classbackend), "done_refresh", G_CALLBACK(classbrowser_update_cb), priv);
+  priv->handlerid = g_signal_connect(G_OBJECT(priv->classbackend), "done_refresh", G_CALLBACK(classbrowser_update_cb), priv);
 
   GtkWidget *notebox;
   notebox = gtk_vbox_new(FALSE, 0);
