@@ -80,9 +80,9 @@ static inline void create_custom_toolbar_item (GtkToolbar *toolbar, GtkWidget *c
 static void sincronice_menu_items_size (GtkToolbar *toolbar){
   /*sincronice with menu items*/
   if (gtk_toolbar_get_icon_size (toolbar)==GTK_ICON_SIZE_SMALL_TOOLBAR){
-    gtk_check_menu_item_set_active (GTK_CHECK_MENU_ITEM (main_window.menu->sizesmall), TRUE);
+    menubar_set_toolbar_size(MENUBAR(main_window.menu), TRUE);
   }else {
-    gtk_check_menu_item_set_active (GTK_CHECK_MENU_ITEM (main_window.menu->sizebig), TRUE);
+    menubar_set_toolbar_size(MENUBAR(main_window.menu), FALSE);
   }
 }
 /* set custom toolbar style */        
@@ -182,7 +182,7 @@ void main_window_create_maintoolbar(void)
   sincronice_menu_items_size (GTK_TOOLBAR (main_window.toolbar_main->toolbar));
 
   /* show toolbar after all the items are created */
-  gtk_widget_show (main_window.toolbar_main->toolbar);
+  if (get_preferences_manager_show_maintoolbar(main_window.prefmg)) gtk_widget_show (main_window.toolbar_main->toolbar);
 }
 
 static inline void create_entry(GtkWidget **entry, const gchar *tooltip_text,gint max_lenght){
@@ -253,5 +253,5 @@ void main_window_create_findtoolbar(void){
   create_custom_toolbar_item (GTK_TOOLBAR(main_window.toolbar_find->toolbar), main_window.toolbar_find->goto_entry);
   
   /* show toolbar after all the items are created */
-  gtk_widget_show (main_window.toolbar_find->toolbar);
+  if (get_preferences_manager_show_findtoolbar(main_window.prefmg)) gtk_widget_show (main_window.toolbar_find->toolbar);
 }

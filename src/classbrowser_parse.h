@@ -29,6 +29,4 @@
 
 void classbrowser_parse_file(Classbrowser_Backend *classback, gchar *filename);
 gboolean check_php_variable_before(const gchar *line_text);
-//gboolean is_cobol_banned_word(gchar *word);
-void process_cobol_word(Classbrowser_Backend *classback, gchar *name,gchar *filename,gchar *type,gchar *line);
 #endif

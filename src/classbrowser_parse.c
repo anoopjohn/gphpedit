@@ -578,15 +578,3 @@ gboolean check_php_variable_before(const gchar *line_text){
   }
   return r;
 }
-
-#ifdef HAVE_CTAGS_EXUBERANT
-static inline gboolean is_cobol_banned_word(gchar *word){
-  return (g_strcmp0(word,"AUTHOR")==0 || g_strcmp0(word,"OBJECT-COMPUTER")==0 || g_strcmp0(word,"DATE-WRITTEN")==0 || g_strcmp0(word,"PROGRAM-ID")==0 || g_strcmp0(word,"SOURCE-COMPUTER")==0 || g_strcmp0(word,"SPECIAL-NAMES")==0 || g_strcmp0(word,"END-IF")==0);
-}
-
-void process_cobol_word(Classbrowser_Backend *classback, gchar *name,gchar *filename,gchar *type,gchar *line){
- if (g_strcmp0(type,"paragraph")==0 && !is_cobol_banned_word(name)) {
-          classbrowser_functionlist_add(classback, NULL, name, filename, TAB_COBOL, atoi(line), NULL);
- } /* not support for autocomplete yet */
-}
-#endif

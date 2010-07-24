@@ -36,6 +36,7 @@
 #include "filebrowser_ui.h"
 
 #include "classbrowser_ui.h"
+#include "menubar.h"
 
 MainWindow main_window;
 GIOChannel* inter_gphpedit_io;
@@ -136,7 +137,7 @@ static void main_window_create_appbar(void)
   main_window.appbar = gphpedit_statusbar_new ();
   gtk_box_pack_start(GTK_BOX(main_window.prinbox), main_window.appbar, FALSE, TRUE, 1);
   gphpedit_statusbar_set_zoom_level(GPHPEDIT_STATUSBAR(main_window.appbar),100);
-  gtk_widget_show (main_window.appbar);
+  if (get_preferences_manager_show_statusbar(main_window.prefmg)) gtk_widget_show (main_window.appbar);
 }
 
 static void main_window_create_panes(void)
@@ -341,7 +342,12 @@ void main_window_create(void){
 
   create_app_main_window(_("gPHPEdit"), get_preferences_manager_window_height(main_window.prefmg), get_preferences_manager_window_width(main_window.prefmg));
   main_window_create_prinbox();
-  main_window_create_menu();
+
+  /* add menu bar to main window */
+  main_window.menu=menubar_new ();
+  gtk_box_pack_start (GTK_BOX (main_window.prinbox), main_window.menu, FALSE, FALSE, 0);
+  gtk_widget_show_all (main_window.menu);
+
   main_window_create_maintoolbar();
   main_window_create_findtoolbar();
 
@@ -368,6 +374,8 @@ void main_window_create(void){
 }
 
 void update_controls(void){
+
+  menubar_update_controls(MENUBAR(main_window.menu), GTK_IS_SCINTILLA(main_window.current_editor->scintilla), WEBKIT_IS_WEB_VIEW(main_window.current_editor->help_view), g_strcmp0(main_window.current_editor->contenttype,"text/html")==0, main_window.current_editor->isreadonly);
   if (GTK_IS_SCINTILLA(main_window.current_editor->scintilla)){
     //activate toolbar items
     gtk_widget_set_sensitive (main_window.toolbar_main->button_cut, TRUE);
@@ -386,38 +394,6 @@ void update_controls(void){
     gtk_widget_set_sensitive (main_window.toolbar_main->button_save_as, TRUE);
     gtk_widget_set_sensitive (main_window.toolbar_find->search_entry, TRUE);
     gtk_widget_set_sensitive (main_window.toolbar_find->goto_entry, TRUE);
-    //activate menu items
-    gtk_widget_set_sensitive (main_window.menu->code, TRUE);
-    gtk_widget_set_sensitive (main_window.menu->cut, TRUE);
-    gtk_widget_set_sensitive (main_window.menu->paste, TRUE);
-    if (main_window.current_editor->isreadonly){
-      gtk_widget_set_sensitive (main_window.menu->save, FALSE);
-    } else {
-      gtk_widget_set_sensitive (main_window.menu->save, TRUE);
-    }
-    gtk_widget_set_sensitive (main_window.menu->saveas, TRUE);
-    gtk_widget_set_sensitive (main_window.menu->reload, TRUE);
-    gtk_widget_set_sensitive (main_window.menu->rename, TRUE);
-    gtk_widget_set_sensitive (main_window.menu->indent, TRUE);
-    gtk_widget_set_sensitive (main_window.menu->unindent, TRUE);
-    gtk_widget_set_sensitive (main_window.menu->replace, TRUE);
-    gtk_widget_set_sensitive (main_window.menu->plugin, TRUE);
-    gtk_widget_set_sensitive (main_window.menu->undo, TRUE);
-    gtk_widget_set_sensitive (main_window.menu->redo, TRUE);
-    gtk_widget_set_sensitive (main_window.menu->phphelp, TRUE);
-    gtk_widget_set_sensitive (main_window.menu->upper, TRUE);
-    gtk_widget_set_sensitive (main_window.menu->lower, TRUE);
-    /* only show preview in html files */
-    if (main_window.current_editor->contenttype){
-      if (strcmp(main_window.current_editor->contenttype,"text/html")==0){
-        gtk_widget_set_sensitive (main_window.menu->preview, TRUE);
-      } else {
-        gtk_widget_set_sensitive (main_window.menu->preview, FALSE);
-      }
-    } else {
-      gtk_widget_set_sensitive (main_window.menu->preview, FALSE);
-    }
-      
   }else{
     if (WEBKIT_IS_WEB_VIEW(main_window.current_editor->help_view)){
       //deactivate toolbar items
@@ -432,24 +408,7 @@ void update_controls(void){
       gtk_widget_set_sensitive (main_window.toolbar_main->button_save_as, FALSE);
       gtk_widget_set_sensitive (main_window.toolbar_find->search_entry, FALSE);
       gtk_widget_set_sensitive (main_window.toolbar_find->goto_entry, FALSE);
-      //deactivate menu items
-      gtk_widget_set_sensitive (main_window.menu->code, FALSE);
-      gtk_widget_set_sensitive (main_window.menu->cut, FALSE);
-      gtk_widget_set_sensitive (main_window.menu->paste, FALSE);
-      gtk_widget_set_sensitive (main_window.menu->save, FALSE);
-      gtk_widget_set_sensitive (main_window.menu->saveas, FALSE);
-      gtk_widget_set_sensitive (main_window.menu->reload, FALSE);
-      gtk_widget_set_sensitive (main_window.menu->rename, FALSE);
-      gtk_widget_set_sensitive (main_window.menu->indent, FALSE);
-      gtk_widget_set_sensitive (main_window.menu->unindent, FALSE);
-      gtk_widget_set_sensitive (main_window.menu->replace, FALSE);
-      gtk_widget_set_sensitive (main_window.menu->plugin, FALSE);
-      gtk_widget_set_sensitive (main_window.menu->undo, FALSE);
-      gtk_widget_set_sensitive (main_window.menu->redo, FALSE);
-      gtk_widget_set_sensitive (main_window.menu->phphelp, FALSE);
-      gtk_widget_set_sensitive (main_window.menu->upper, FALSE);
-      gtk_widget_set_sensitive (main_window.menu->lower, FALSE);
-      gtk_widget_set_sensitive (main_window.menu->preview, FALSE);
       }
   }
+
 }

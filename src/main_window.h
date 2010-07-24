@@ -28,7 +28,7 @@
 #include "main.h"
 #include "calltip.h"
 #include "tab.h"
-#include "menu.h"
+#include "menubar.h"
 #include "toolbar.h"
 #include "syntax_check_window.h"
 #include "preferences_manager.h"
@@ -44,7 +44,7 @@ typedef struct
   GtkWidget *infobar;
   GtkWidget *infolabel;
   /* menu */
-  Mainmenu *menu;
+  GtkWidget *menu;
   /* toolbars */
   Maintoolbar *toolbar_main;
   Findtoolbar *toolbar_find;
@@ -70,7 +70,7 @@ typedef struct
   GtkClipboard* clipboard;
 
   /*filebrowser widget */
-  GtkWidget *folder;//filebrowser;
+  GtkWidget *folder;
 }
 MainWindow;
 

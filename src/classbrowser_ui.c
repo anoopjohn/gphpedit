@@ -31,7 +31,7 @@
 #include "main_window.h"
 
 /* functions */
-static void gphpedit_file_browser_class_init (gphpeditClassBrowserClass *klass);
+static void gphpedit_classbrowser_class_init (gphpeditClassBrowserClass *klass);
 static void gphpedit_classbrowser_init (gphpeditClassBrowser *button);
 
 struct _gphpeditClassBrowserPrivate
@@ -100,7 +100,7 @@ gphpedit_classbrowser_get_type (void)
             sizeof (gphpeditClassBrowserClass),
             NULL,               /* base_init */
             NULL,               /* base_finalize */
-            (GClassInitFunc) gphpedit_file_browser_class_init,
+            (GClassInitFunc) gphpedit_classbrowser_class_init,
             NULL,               /* class_finalize */
             NULL,               /* class_data */
             sizeof (gphpeditClassBrowser),
@@ -116,7 +116,7 @@ gphpedit_classbrowser_get_type (void)
 }
 
 static void
-gphpedit_file_browser_destroy (GtkObject *object)
+gphpedit_classbrowser_destroy (GtkObject *object)
 {
 	gphpeditClassBrowserPrivate *priv;
 
@@ -128,7 +128,7 @@ gphpedit_file_browser_destroy (GtkObject *object)
 }
 
 static void
-gphpedit_file_browser_finalize (GObject *object)
+gphpedit_classbrowser_finalize (GObject *object)
 {
 	gphpeditClassBrowserPrivate *priv;
 
@@ -138,13 +138,13 @@ gphpedit_file_browser_finalize (GObject *object)
 }
 
 static void 
-gphpedit_file_browser_class_init (gphpeditClassBrowserClass *klass)
+gphpedit_classbrowser_class_init (gphpeditClassBrowserClass *klass)
 {
 	GObjectClass   *object_class = G_OBJECT_CLASS (klass);
 	GtkObjectClass *gtkobject_class = GTK_OBJECT_CLASS (klass);
 	gphpedit_class_browser_parent_class = g_type_class_peek_parent (klass);
-	object_class->finalize = gphpedit_file_browser_finalize;
-	gtkobject_class->destroy = gphpedit_file_browser_destroy;
+	object_class->finalize = gphpedit_classbrowser_finalize;
+	gtkobject_class->destroy = gphpedit_classbrowser_destroy;
 	
 	g_type_class_add_private (object_class, sizeof(gphpeditClassBrowserPrivate));
 }

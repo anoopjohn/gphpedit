@@ -76,7 +76,9 @@ struct Preferences_ManagerDetails
   gint classbrowser_size;
   gchar *filebrowser_last_folder;
 	gboolean showfilebrowser;
-
+  guint showstatusbar:1;
+  guint showmaintoolbar:1;
+  guint showfindtoolbar:1;
 	// Default settings
 	gint set_sel_back;
 	gint marker_back;
@@ -271,6 +273,9 @@ void load_default_settings(Preferences_ManagerDetails *prefdet)
   prefdet->php_file_extensions = get_string("/gPHPEdit/defaults/php_file_extensions",DEFAULT_PHP_EXTENSIONS);
 	prefdet->search_history= get_string_list("/gPHPEdit/search_history");
 	prefdet->showfilebrowser = get_color("/gPHPEdit/defaults/showfolderbrowser", "defaults",TRUE);
+	prefdet->showstatusbar = get_color("/gPHPEdit/defaults/showstatusbar", "defaults",TRUE);
+	prefdet->showmaintoolbar = get_color("/gPHPEdit/defaults/showmaintoolbar", "defaults",TRUE);
+	prefdet->showfindtoolbar = get_color("/gPHPEdit/defaults/showfindtoolbar", "defaults",TRUE);
 }
 
 void load_window_settings(Preferences_ManagerDetails *prefdet)
@@ -310,7 +315,7 @@ GSList *get_preferences_manager_search_history(Preferences_Manager *preferences_
  *return 0 if classbrowser is hidden
  *return 1 if classbrowser is show
 */
-gint get_preferences_manager_classbrowser_status(Preferences_Manager *preferences_manager)
+gboolean get_preferences_manager_classbrowser_status(Preferences_Manager *preferences_manager)
 {
   g_return_val_if_fail (OBJECT_IS_PREFERENCES_MANAGER (preferences_manager), 0); /**/
   Preferences_ManagerDetails *prefdet;
@@ -424,6 +429,55 @@ void set_preferences_manager_show_filebrowser(Preferences_Manager *preferences_m
   prefdet->showfilebrowser = newstate; 
 
 }
+
+gboolean get_preferences_manager_show_statusbar(Preferences_Manager *preferences_manager)
+{
+  g_return_val_if_fail (OBJECT_IS_PREFERENCES_MANAGER (preferences_manager), 0); /**/
+  Preferences_ManagerDetails *prefdet;
+	prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
+  return prefdet->showstatusbar;
+}
+
+void set_preferences_manager_show_statusbar(Preferences_Manager *preferences_manager, gboolean newstate)
+{
+  if (!OBJECT_IS_PREFERENCES_MANAGER (preferences_manager)) return ;
+  Preferences_ManagerDetails *prefdet;
+	prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
+  prefdet->showstatusbar = newstate; 
+}
+
+gboolean get_preferences_manager_show_findtoolbar(Preferences_Manager *preferences_manager)
+{
+  g_return_val_if_fail (OBJECT_IS_PREFERENCES_MANAGER (preferences_manager), 0); /**/
+  Preferences_ManagerDetails *prefdet;
+	prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
+  return prefdet->showfindtoolbar;
+}
+
+void set_preferences_manager_show_findtoolbar(Preferences_Manager *preferences_manager, gboolean newstate)
+{
+  if (!OBJECT_IS_PREFERENCES_MANAGER (preferences_manager)) return ;
+  Preferences_ManagerDetails *prefdet;
+	prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
+  prefdet->showfindtoolbar = newstate; 
+}
+
+gboolean get_preferences_manager_show_maintoolbar(Preferences_Manager *preferences_manager)
+{
+  g_return_val_if_fail (OBJECT_IS_PREFERENCES_MANAGER (preferences_manager), 0); /**/
+  Preferences_ManagerDetails *prefdet;
+	prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
+  return prefdet->showmaintoolbar;
+}
+
+void set_preferences_manager_show_maintoolbar(Preferences_Manager *preferences_manager, gboolean newstate)
+{
+  if (!OBJECT_IS_PREFERENCES_MANAGER (preferences_manager)) return ;
+  Preferences_ManagerDetails *prefdet;
+	prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
+  prefdet->showmaintoolbar = newstate; 
+}
+
 
 gint get_preferences_manager_window_height(Preferences_Manager *preferences_manager)
 {
@@ -994,6 +1048,9 @@ void preferences_manager_save_data(Preferences_Manager *preferences_manager){
   set_int ("/gPHPEdit/main_window/maximized", prefdet->maximized);
   /**/
   set_bool("/gPHPEdit/defaults/showfolderbrowser", prefdet->showfilebrowser);
+  set_int("/gPHPEdit/defaults/showstatusbar", prefdet->showstatusbar);
+  set_int("/gPHPEdit/defaults/showmaintoolbar", prefdet->showmaintoolbar);
+  set_int("/gPHPEdit/defaults/showfindtoolbar", prefdet->showfindtoolbar);
   set_string_list ("/gPHPEdit/search_history", prefdet->search_history);
 }
 
@@ -1004,19 +1061,11 @@ void preferences_manager_save_data(Preferences_Manager *preferences_manager){
 void preferences_manager_save_data_full(Preferences_Manager *preferences_manager){
   Preferences_ManagerDetails *prefdet;
 	prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
-  /*store window  settings*/
-  if (!prefdet->maximized) {
-  set_int ("/gPHPEdit/main_window/x", prefdet->left);
-  set_int ("/gPHPEdit/main_window/y",prefdet->top);
-  set_int ("/gPHPEdit/main_window/width", prefdet->width);
-  set_int ("/gPHPEdit/main_window/height", prefdet->height);
-  }
-  set_int ("/gPHPEdit/main_window/maximized", prefdet->maximized);
-  /**/
+  preferences_manager_save_data(preferences_manager);  /* save session data */
   /* store style settings */
   g_hash_table_foreach (prefdet->styles_table, save_style_settings, NULL);
   /**/
-  set_bool("/gPHPEdit/defaults/showfolderbrowser", prefdet->showfilebrowser);
+
   set_int ("/gPHPEdit/default_style/selection", prefdet->set_sel_back);
   set_int ("/gPHPEdit/default_style/bookmark", prefdet->marker_back);
   set_string ("/gPHPEdit/locations/phpbinary", prefdet->php_binary_location);
@@ -1040,7 +1089,6 @@ void preferences_manager_save_data_full(Preferences_Manager *preferences_manager
 	set_bool ("/gPHPEdit/defaults/use_tabs_instead_spaces", prefdet->use_tabs_instead_spaces);
   set_bool ("/gPHPEdit/defaults/single_instance_only", prefdet->single_instance_only);
   set_string ("/gPHPEdit/defaults/php_file_extensions", prefdet->php_file_extensions);
-  set_string_list ("/gPHPEdit/search_history", prefdet->search_history);
 }
 
 /*

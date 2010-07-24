@@ -53,6 +53,7 @@ struct Classbrowser_BackendDetails
   guint identifierid;
 };
 
+/* internal struct */
 typedef struct
 {
   gchar *filename;
@@ -92,6 +93,7 @@ void do_parse_file(Classbrowser_Backend *classback, Editor *editor);
 void free_function_list_item (gpointer data, gpointer user_data);
 #ifdef HAVE_CTAGS_EXUBERANT
 void call_ctags(Classbrowser_Backend *classback, gchar *filename);
+void process_cobol_word(Classbrowser_Backend *classback, gchar *name,gchar *filename,gchar *type,gchar *line);
 #endif
 
 GType
@@ -236,7 +238,6 @@ void add_global_var(Classbrowser_BackendDetails *classbackdet, const gchar *var_
     var->identifierid = classbackdet->identifierid++;
 
     g_tree_insert (classbackdet->php_variables_tree, g_strdup(var_name), var); /* key = variables name value var struct */
-
 }
 
 /* release resources used by classbrowser */
@@ -307,7 +308,7 @@ void classbrowser_backend_update(Classbrowser_Backend *classback, GSList *editor
   if (!classbackdet->php_variables_tree){
      /* create new tree */
      classbackdet->php_variables_tree=g_tree_new_full((GCompareDataFunc) g_strcmp0, NULL, g_free, free_php_variables_tree_item);
-
+      
      /*add php global vars*/
      add_global_var(classbackdet, "$GLOBALS");
      add_global_var(classbackdet, "$HTTP_POST_VARS");
@@ -410,6 +411,7 @@ void classbrowser_varlist_add(Classbrowser_Backend *classback, gchar *varname, g
 	classbackdet = CLASSBROWSER_BACKEND_GET_PRIVATE(classback);
   ClassBrowserVar *var;
   var=g_tree_lookup (classbackdet->php_variables_tree, varname);
+
   if (var){
     var->remove = FALSE;
   } else {
@@ -423,7 +425,6 @@ void classbrowser_varlist_add(Classbrowser_Backend *classback, gchar *varname, g
     var->identifierid = classbackdet->identifierid++;
 
     g_tree_insert (classbackdet->php_variables_tree, g_strdup(varname), var); /* key =variables name value var struct */
-
     #ifdef DEBUGCLASSBROWSER
       g_print("Filename: %s\n", filename);
     #endif
@@ -776,17 +777,18 @@ typedef struct {
  GString *completion_result;
 } var_find;
 
-static gboolean make_completion_string (gpointer key, gpointer value, gpointer data){
+static gboolean make_completion_string (gpointer key, gpointer value, gpointer data)
+{
   var_find *search_data = (var_find *)data;
   ClassBrowserVar *var;
   var=(ClassBrowserVar *)value;
   if (g_str_has_prefix(key,search_data->prefix)){
         if (!search_data->completion_result) {
-        search_data->completion_result = g_string_new(key);
+        search_data->completion_result = g_string_new(var->varname);
         search_data->completion_result = g_string_append(search_data->completion_result, "?3");
         } else {
         search_data->completion_result = g_string_append(search_data->completion_result, " ");
-        search_data->completion_result = g_string_append(search_data->completion_result, key);
+        search_data->completion_result = g_string_append(search_data->completion_result, var->varname);
         search_data->completion_result = g_string_append(search_data->completion_result, "?3"); /* add corresponding image*/
         }
   }
@@ -940,3 +942,15 @@ gchar *classbrowser_backend_add_custom_autocompletion(Classbrowser_Backend *clas
     return NULL;
   }
 }
+
+#ifdef HAVE_CTAGS_EXUBERANT
+static inline gboolean is_cobol_banned_word(gchar *word){
+  return (g_strcmp0(word,"AUTHOR")==0 || g_strcmp0(word,"OBJECT-COMPUTER")==0 || g_strcmp0(word,"DATE-WRITTEN")==0 || g_strcmp0(word,"PROGRAM-ID")==0 || g_strcmp0(word,"SOURCE-COMPUTER")==0 || g_strcmp0(word,"SPECIAL-NAMES")==0 || g_strcmp0(word,"END-IF")==0);
+}
+
+void process_cobol_word(Classbrowser_Backend *classback, gchar *name,gchar *filename,gchar *type,gchar *line){
+ if (g_strcmp0(type,"paragraph")==0 && !is_cobol_banned_word(name)) {
+          classbrowser_functionlist_add(classback, NULL, name, filename, TAB_COBOL, atoi(line), NULL);
+ } /* not support for autocomplete yet */
+}
+#endif

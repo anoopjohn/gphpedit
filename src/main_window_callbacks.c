@@ -191,7 +191,6 @@ void quit_application()
 void main_window_destroy_event(GtkWidget *widget, gpointer data)
 {
   quit_application();
-  g_slice_free(Mainmenu, main_window.menu); /* free menu struct*/
   g_slice_free(Maintoolbar, main_window.toolbar_main); /* free toolbar struct*/
   g_slice_free(Findtoolbar, main_window.toolbar_find); /* free toolbar struct*/
   cleanup_calltip();
@@ -364,43 +363,43 @@ gint main_window_key_press_event(GtkWidget   *widget, GdkEventKey *event,gpointe
       return TRUE;
     }
     else if ((event->state & GDK_CONTROL_MASK)==GDK_CONTROL_MASK && ((event->keyval == GDK_0)))  {
-      plugin_exec_with_num(main_window.menu->menuplugin,0);
+      plugin_exec_with_num(menubar_get_menu_plugin(MENUBAR(main_window.menu)),0);
       return TRUE;
     }
     else if ((event->state & GDK_CONTROL_MASK)==GDK_CONTROL_MASK && ((event->keyval == GDK_1)))  {
-      plugin_exec_with_num(main_window.menu->menuplugin,1);
+      plugin_exec_with_num(menubar_get_menu_plugin(MENUBAR(main_window.menu)),1);
       return TRUE;
     }
     else if ((event->state & GDK_CONTROL_MASK)==GDK_CONTROL_MASK && ((event->keyval == GDK_2)))  {
-      plugin_exec_with_num(main_window.menu->menuplugin,2);
+      plugin_exec_with_num(menubar_get_menu_plugin(MENUBAR(main_window.menu)),2);
       return TRUE;
     }
     else if ((event->state & GDK_CONTROL_MASK)==GDK_CONTROL_MASK && ((event->keyval == GDK_3)))  {
-      plugin_exec_with_num(main_window.menu->menuplugin,3);
+      plugin_exec_with_num(menubar_get_menu_plugin(MENUBAR(main_window.menu)),3);
       return TRUE;
     }
     else if ((event->state & GDK_CONTROL_MASK)==GDK_CONTROL_MASK && ((event->keyval == GDK_4)))  {
-      plugin_exec_with_num(main_window.menu->menuplugin,4);
+      plugin_exec_with_num(menubar_get_menu_plugin(MENUBAR(main_window.menu)),4);
       return TRUE;
     }
     else if ((event->state & GDK_CONTROL_MASK)==GDK_CONTROL_MASK && ((event->keyval == GDK_5)))  {
-      plugin_exec_with_num(main_window.menu->menuplugin,5);
+      plugin_exec_with_num(menubar_get_menu_plugin(MENUBAR(main_window.menu)),5);
       return TRUE;
     }
     else if ((event->state & GDK_CONTROL_MASK)==GDK_CONTROL_MASK && ((event->keyval == GDK_6)))  {
-      plugin_exec_with_num(main_window.menu->menuplugin,6);
+      plugin_exec_with_num(menubar_get_menu_plugin(MENUBAR(main_window.menu)),6);
       return TRUE;
     }
     else if ((event->state & GDK_CONTROL_MASK)==GDK_CONTROL_MASK && ((event->keyval == GDK_7)))  {
-      plugin_exec_with_num(main_window.menu->menuplugin,7);
+      plugin_exec_with_num(menubar_get_menu_plugin(MENUBAR(main_window.menu)),7);
       return TRUE;
     }
     else if ((event->state & GDK_CONTROL_MASK)==GDK_CONTROL_MASK && ((event->keyval == GDK_8)))  {
-      plugin_exec_with_num(main_window.menu->menuplugin,8);
+      plugin_exec_with_num(menubar_get_menu_plugin(MENUBAR(main_window.menu)),8);
       return TRUE;
     }
     else if ((event->state & GDK_CONTROL_MASK)==GDK_CONTROL_MASK && ((event->keyval == GDK_9)))  {
-      plugin_exec_with_num(main_window.menu->menuplugin,9);
+      plugin_exec_with_num(menubar_get_menu_plugin(MENUBAR(main_window.menu)),9);
       return TRUE;
     }
     else if ((event->keyval == GDK_F2))  {
@@ -936,7 +935,7 @@ void close_page(Editor *editor)
   if (editor->type==TAB_HELP || editor->type==TAB_PREVIEW) g_free(editor->help_function);
   g_string_free(editor->filename, TRUE);
   g_free(editor->short_filename);
-  g_free(editor->contenttype);
+  //g_free(editor->contenttype);
   g_slice_free(Editor,editor);
   gtk_notebook_remove_page(GTK_NOTEBOOK(main_window.notebook_editor), page_num_closing);
 }
@@ -1710,8 +1709,8 @@ void classbrowser_hide(void)
 
 void classbrowser_show_hide(GtkWidget *widget)
 {
-  gint hidden = get_preferences_manager_classbrowser_status(main_window.prefmg);
-  gtk_check_menu_item_set_active ((GtkCheckMenuItem *) main_window.menu->tog_class,hidden);
+  gboolean hidden = get_preferences_manager_classbrowser_status(main_window.prefmg);
+  menubar_set_classbrowser_status(MENUBAR(main_window.menu), hidden);
   if (hidden == 1)
     classbrowser_show();
   else

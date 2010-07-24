@@ -72,8 +72,8 @@ gphpedit_SOURCES = \
 	pluginmenu.c		\
 	main.c			\
 	main.h			\
-	menu.c			\
-	menu.h			\
+	menubar.c			\
+	menubar.h			\
 	toolbar.c		\
 	toolbar.h		\
 	main_window.c		\

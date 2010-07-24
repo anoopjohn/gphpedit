@@ -260,7 +260,7 @@ void gtk_syntax_check_window_run_check(GtkSyntax_Check_Window *win, Editor *edit
      g_free(res);
   } else {
       /* try plugins */
-      if (!run_syntax_plugin_by_ftype(get_plugin_manager(GTK_PLUGIN_MANAGER_MENU(main_window.menu->menuplugin)), editor, editor->type)){
+      if (!run_syntax_plugin_by_ftype(get_plugin_manager(GTK_PLUGIN_MANAGER_MENU(menubar_get_menu_plugin(MENUBAR(main_window.menu)))), editor, editor->type)){
 //      g_print("syntax check not implement\n");
       }
   }

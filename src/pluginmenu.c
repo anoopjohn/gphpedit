@@ -27,12 +27,15 @@
 #include "pluginmanager.h"
 #include "main_window.h"
 #include <gdk/gdkkeysyms.h>
+
 struct _GtkPlugin_Manager_MenuPrivate
 {
   /* the recent manager object */
   Plugin_Manager *plugmg;
   
   GtkWidget *placeholder;
+
+  GtkAccelGroup *accel_group;
 };
 
 #define GTK_PLUGIN_MANAGER_MENU_GET_PRIVATE(obj)	(G_TYPE_INSTANCE_GET_PRIVATE ((obj), GTK_TYPE_PLUGIN_MANAGER_MENU, GtkPlugin_Manager_MenuPrivate))
@@ -118,9 +121,6 @@ gtk_plugin_manager_menu_init (GtkPlugin_Manager_Menu *menu)
   gtk_menu_shell_insert (GTK_MENU_SHELL (menu), priv->placeholder, 0);
   gtk_widget_set_no_show_all (priv->placeholder, TRUE);
   gtk_widget_show (priv->placeholder);
-
-  /* (re)populate the menu */
-  gtk_plugin_manager_menu_populate (menu); //aca llamo a la funcion para llenar el menu
 }
 
 static void
@@ -137,8 +137,8 @@ gtk_plugin_manager_menu_finalize (GObject *object)
 static void
 gtk_plugin_manager_menu_dispose (GObject *object)
 {
-  GtkPlugin_Manager_Menu *menu = GTK_PLUGIN_MANAGER_MENU (object);
-  GtkPlugin_Manager_MenuPrivate *priv = menu->priv;
+//  GtkPlugin_Manager_Menu *menu = GTK_PLUGIN_MANAGER_MENU (object);
+//  GtkPlugin_Manager_MenuPrivate *priv = menu->priv;
 
 //  if (G_IS_OBJECT(priv->plugmg)) g_object_unref(priv->plugmg);
 
@@ -225,7 +225,7 @@ void add_plugin_to_menu (gpointer data, gpointer user_data)
     install_menu_hint(item, (gchar *)get_plugin_description(plugin));
     g_signal_connect(G_OBJECT(item), "activate", G_CALLBACK(plugin_exec), (gpointer) menu);
     gtk_menu_shell_append(GTK_MENU_SHELL(menu), item);
-    if (i<10) gtk_widget_add_accelerator(item, "activate", main_window.menu->accel_group, parse_shortcut(i), GDK_CONTROL_MASK, GTK_ACCEL_VISIBLE);
+    if (i<10) gtk_widget_add_accelerator(item, "activate", menu->priv->accel_group, parse_shortcut(i), GDK_CONTROL_MASK, GTK_ACCEL_VISIBLE);
     i++;
     }
 }
@@ -274,9 +274,14 @@ void plugin_exec_with_num(GtkWidget *widget, gint num){
  */
 
 GtkWidget *
-gtk_plugin_manager_menu_new (void)
+gtk_plugin_manager_menu_new (GtkAccelGroup *accel_grup)
 {
-  return g_object_new (GTK_TYPE_PLUGIN_MANAGER_MENU, NULL);
+  GtkPlugin_Manager_Menu *menu = g_object_new (GTK_TYPE_PLUGIN_MANAGER_MENU, NULL);
+  /* (re)populate the menu */
+  GtkPlugin_Manager_MenuPrivate *priv = menu->priv;
+  priv->accel_group= accel_grup;
+  gtk_plugin_manager_menu_populate (menu);
+  return GTK_WIDGET(menu);
 }
 
 Plugin_Manager *get_plugin_manager(GtkPlugin_Manager_Menu *menu)
