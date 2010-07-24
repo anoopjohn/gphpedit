@@ -311,10 +311,10 @@ void classbrowser_update_cb (Classbrowser_Backend *classback, gboolean result, g
   if (get_preferences_manager_classbrowser_status(main_window.prefmg)!=0){ /* do nothing if classbrowser is hidden */
     return;
   }
-  if (press_event) {
+  if (press_event && g_signal_handler_is_connected (priv->classtreeview, press_event)) {
     g_signal_handler_disconnect(priv->classtreeview, press_event);
   }
-  if (release_event) {
+  if (release_event && g_signal_handler_is_connected (priv->classtreeview, release_event)) {
     g_signal_handler_disconnect(priv->classtreeview,release_event);
   }
   if (priv->front==0){

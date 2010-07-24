@@ -86,6 +86,8 @@ struct _gphpeditFileBrowserPrivate
   GtkWidget *image_refresh;
 
   GtkTreeModel *cache_model;
+  gulong  handlerid;
+  gulong  handleridchange;
 };
 
 enum {
@@ -152,6 +154,12 @@ gphpedit_file_browser_destroy (GtkObject *object)
 
 	priv = FILEBROWSER_BACKEND_GET_PRIVATE(object);
 //	gphpedit_file_browser_set_enable_completion (GPHPEDIT_FILEBROWSER (object), FALSE);
+  if (g_signal_handler_is_connected (priv->fbbackend, priv->handlerid)){
+   g_signal_handler_disconnect(priv->fbbackend, priv->handlerid);
+  }
+  if (g_signal_handler_is_connected (priv->fbbackend, priv->handleridchange)){
+   g_signal_handler_disconnect(priv->fbbackend,   priv->handleridchange);
+  }
   filebrowser_backend_cancel (priv->fbbackend);
 
 	GTK_OBJECT_CLASS (gphpedit_file_browser_parent_class)->destroy (object);
@@ -188,8 +196,8 @@ gphpedit_filebrowser_init (gphpeditFileBrowser *button)
 {
   gphpeditFileBrowserPrivate *priv = FILEBROWSER_BACKEND_GET_PRIVATE(button);
   priv->fbbackend= filebrowser_backend_new (get_preferences_manager_filebrowser_last_folder(main_window.prefmg));
-  g_signal_connect(G_OBJECT(priv->fbbackend), "done_loading", G_CALLBACK(print_files), priv);
-  g_signal_connect(G_OBJECT(priv->fbbackend), "change_folder", G_CALLBACK(change_folder_cb), priv);
+  priv->handlerid = g_signal_connect(G_OBJECT(priv->fbbackend), "done_loading", G_CALLBACK(print_files), priv);
+  priv->handleridchange = g_signal_connect(G_OBJECT(priv->fbbackend), "change_folder", G_CALLBACK(change_folder_cb), priv);
   priv->folder = gtk_vbox_new(FALSE, 0);
 
   GtkTreeViewColumn *pColumn;
@@ -486,14 +494,8 @@ void pressed_button_file_chooser(GtkButton *widget, gpointer user_data) {
    GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL, GTK_STOCK_OPEN, GTK_RESPONSE_OK, NULL);
   gtk_window_set_modal(GTK_WINDOW(pFileSelection), TRUE);
   gtk_file_chooser_set_local_only (GTK_FILE_CHOOSER(pFileSelection), FALSE);
-  // sets the label folder as start folder 
- // gchar *lbl;
-//  lbl=(gchar*)get_filebrowser_backend_current_folder(FILEBROWSER_BACKEND(user_data))
-//  if (!IS_DEFAULT_DIR(lbl)){
-    gboolean res;
-//     res=gtk_file_chooser_set_current_folder (GTK_FILE_CHOOSER(pFileSelection), lbl);
-    res=gtk_file_chooser_set_current_folder (GTK_FILE_CHOOSER(pFileSelection), get_filebrowser_backend_current_folder(FILEBROWSER_BACKEND(user_data)));
-//  }
+  gboolean res;
+  res=gtk_file_chooser_set_current_folder (GTK_FILE_CHOOSER(pFileSelection), get_filebrowser_backend_current_folder(FILEBROWSER_BACKEND(user_data)));
   gchar *sChemin=NULL;
 
   switch(gtk_dialog_run(GTK_DIALOG(pFileSelection))) {
