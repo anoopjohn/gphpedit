@@ -34,9 +34,7 @@
 #include "gphpedit-statusbar.h"
 #include "syntax_check_window.h"
 #include "filebrowser_ui.h"
-
 #include "classbrowser_ui.h"
-#include "menubar.h"
 
 MainWindow main_window;
 GIOChannel* inter_gphpedit_io;
@@ -348,8 +346,14 @@ void main_window_create(void){
   gtk_box_pack_start (GTK_BOX (main_window.prinbox), main_window.menu, FALSE, FALSE, 0);
   gtk_widget_show_all (main_window.menu);
 
-  main_window_create_maintoolbar();
-  main_window_create_findtoolbar();
+  main_window.toolbar_main= toolbar_new (FALSE);
+  gtk_box_pack_start (GTK_BOX (main_window.prinbox), main_window.toolbar_main, FALSE, FALSE, 0);
+  if (toolbar_is_visible(TOOLBAR(main_window.toolbar_main))) gtk_widget_show (main_window.toolbar_main);
+
+  main_window.toolbar_find= toolbar_new (TRUE);
+  gtk_box_pack_start (GTK_BOX (main_window.prinbox), main_window.toolbar_find, FALSE, FALSE, 0);
+  if (toolbar_is_visible(TOOLBAR(main_window.toolbar_find))) gtk_widget_show (main_window.toolbar_find);
+
 
   main_window_create_panes();
   create_infobar();
@@ -374,41 +378,7 @@ void main_window_create(void){
 }
 
 void update_controls(void){
-
   menubar_update_controls(MENUBAR(main_window.menu), GTK_IS_SCINTILLA(main_window.current_editor->scintilla), WEBKIT_IS_WEB_VIEW(main_window.current_editor->help_view), g_strcmp0(main_window.current_editor->contenttype,"text/html")==0, main_window.current_editor->isreadonly);
-  if (GTK_IS_SCINTILLA(main_window.current_editor->scintilla)){
-    //activate toolbar items
-    gtk_widget_set_sensitive (main_window.toolbar_main->button_cut, TRUE);
-    gtk_widget_set_sensitive (main_window.toolbar_main->button_paste, TRUE);
-    gtk_widget_set_sensitive (main_window.toolbar_main->button_undo, TRUE);
-    gtk_widget_set_sensitive (main_window.toolbar_main->button_redo, TRUE);
-    gtk_widget_set_sensitive (main_window.toolbar_main->button_replace, TRUE);
-    gtk_widget_set_sensitive (main_window.toolbar_main->button_indent, TRUE);
-    gtk_widget_set_sensitive (main_window.toolbar_main->button_unindent, TRUE);
-    if (main_window.current_editor->isreadonly){
-      gtk_widget_set_sensitive (main_window.toolbar_main->button_save, FALSE);
-    } else {
-      gtk_widget_set_sensitive (main_window.toolbar_main->button_save, TRUE);
-    }
-      
-    gtk_widget_set_sensitive (main_window.toolbar_main->button_save_as, TRUE);
-    gtk_widget_set_sensitive (main_window.toolbar_find->search_entry, TRUE);
-    gtk_widget_set_sensitive (main_window.toolbar_find->goto_entry, TRUE);
-  }else{
-    if (WEBKIT_IS_WEB_VIEW(main_window.current_editor->help_view)){
-      //deactivate toolbar items
-      gtk_widget_set_sensitive (main_window.toolbar_main->button_cut, FALSE);
-      gtk_widget_set_sensitive (main_window.toolbar_main->button_paste, FALSE);
-      gtk_widget_set_sensitive (main_window.toolbar_main->button_undo, FALSE);
-      gtk_widget_set_sensitive (main_window.toolbar_main->button_redo, FALSE);
-      gtk_widget_set_sensitive (main_window.toolbar_main->button_replace, FALSE);
-      gtk_widget_set_sensitive (main_window.toolbar_main->button_indent, FALSE);
-      gtk_widget_set_sensitive (main_window.toolbar_main->button_unindent, FALSE);
-      gtk_widget_set_sensitive (main_window.toolbar_main->button_save, FALSE);
-      gtk_widget_set_sensitive (main_window.toolbar_main->button_save_as, FALSE);
-      gtk_widget_set_sensitive (main_window.toolbar_find->search_entry, FALSE);
-      gtk_widget_set_sensitive (main_window.toolbar_find->goto_entry, FALSE);
-      }
-  }
-
+  toolbar_update_controls(TOOLBAR(main_window.toolbar_main), GTK_IS_SCINTILLA(main_window.current_editor->scintilla), WEBKIT_IS_WEB_VIEW(main_window.current_editor->help_view), main_window.current_editor->isreadonly);
+  toolbar_update_controls(TOOLBAR(main_window.toolbar_find), GTK_IS_SCINTILLA(main_window.current_editor->scintilla), WEBKIT_IS_WEB_VIEW(main_window.current_editor->help_view), main_window.current_editor->isreadonly);
 }

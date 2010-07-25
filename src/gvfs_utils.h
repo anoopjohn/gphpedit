@@ -18,4 +18,6 @@ gboolean filename_delete_file(gchar *filename);
 gchar *get_absolute_from_relative(gchar *path, gchar *base);
 gchar *filename_get_display_name(gchar *filename);
 gboolean filename_rename(gchar *filename, gchar *new_name);
+GString *text_save_as_temp_file(gchar *text);
+void release_temp_file (const gchar *filename);
 #endif

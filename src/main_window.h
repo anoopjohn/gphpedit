@@ -46,8 +46,8 @@ typedef struct
   /* menu */
   GtkWidget *menu;
   /* toolbars */
-  Maintoolbar *toolbar_main;
-  Findtoolbar *toolbar_find;
+  GtkWidget *toolbar_main;
+  GtkWidget *toolbar_find;
 
   GtkWidget *main_vertical_pane;
   GtkWidget *main_horizontal_pane;

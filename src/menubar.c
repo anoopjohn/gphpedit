@@ -1,11 +1,12 @@
 /* This file is part of gPHPEdit, a GNOME2 PHP Editor.
- 
+
    Copyright (C) 2003, 2004, 2005 Andy Jeffries <andy at gphpedit.org>
    Copyright (C) 2009 Anoop John <anoop dot john at zyxware.com>
-    
+   Copyright (C) 2009 José Rostagno (for vijona.com.ar) 
+
    For more information or to find the latest release, visit our 
    website at http://www.gphpedit.org/
- 
+
    gPHPEdit is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
    the Free Software Foundation, either version 3 of the License, or
@@ -13,12 +14,12 @@
 
    gPHPEdit is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
    GNU General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with gPHPEdit.  If not, see <http://www.gnu.org/licenses/>.
- 
+   along with gPHPEdit. If not, see <http://www.gnu.org/licenses/>.
+
    The GNU General Public License is contained in the file COPYING.
 */
 
@@ -167,10 +168,10 @@ static void tog_statusbar(GtkWidget *widget, gpointer user_data)
 static void tog_maintoolbar(GtkWidget *widget, gpointer user_data)
 {
   if (gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(widget))) {
-    gtk_widget_show(main_window.toolbar_main->toolbar);
+    gtk_widget_show(main_window.toolbar_main);
     set_preferences_manager_show_maintoolbar( main_window.prefmg, TRUE);
   } else {
-    gtk_widget_hide(main_window.toolbar_main->toolbar);
+    gtk_widget_hide(main_window.toolbar_main);
     set_preferences_manager_show_maintoolbar(main_window.prefmg, FALSE);
   }
 }
@@ -182,10 +183,10 @@ static void tog_maintoolbar(GtkWidget *widget, gpointer user_data)
 static void tog_findtoolbar(GtkWidget *widget, gpointer user_data)
 {
   if (gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(widget))) {
-    gtk_widget_show(main_window.toolbar_find->toolbar);
+    gtk_widget_show(main_window.toolbar_find);
     set_preferences_manager_show_findtoolbar( main_window.prefmg, TRUE);
   } else {
-    gtk_widget_hide(main_window.toolbar_find->toolbar);
+    gtk_widget_hide(main_window.toolbar_find);
     set_preferences_manager_show_findtoolbar(main_window.prefmg, FALSE);
   }
 }
@@ -217,9 +218,9 @@ static void size_change(GtkWidget *widget, gpointer user_data)
 {
   MenuBarPrivate *priv= (MenuBarPrivate *) user_data;
   if (gtk_check_menu_item_get_active ((GtkCheckMenuItem *)priv->sizebig)){
-    gtk_toolbar_set_icon_size (GTK_TOOLBAR (main_window.toolbar_main->toolbar), GTK_ICON_SIZE_LARGE_TOOLBAR);
+    gtk_toolbar_set_icon_size (GTK_TOOLBAR (main_window.toolbar_main), GTK_ICON_SIZE_LARGE_TOOLBAR);
   } else {
-    gtk_toolbar_set_icon_size (GTK_TOOLBAR (main_window.toolbar_main->toolbar), GTK_ICON_SIZE_SMALL_TOOLBAR);
+    gtk_toolbar_set_icon_size (GTK_TOOLBAR (main_window.toolbar_main), GTK_ICON_SIZE_SMALL_TOOLBAR);
   }
 }
 

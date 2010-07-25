@@ -84,8 +84,8 @@ struct Preferences_ManagerDetails
 	gint marker_back;
 	gint indentation_size;
 	gint tab_size;
-	gint show_indentation_guides:1;
-	gint show_folding:1;
+	guint show_indentation_guides:1;
+	guint show_folding:1;
 	gint edge_mode;
 	gint edge_column;
 	gint edge_colour;
@@ -100,8 +100,8 @@ struct Preferences_ManagerDetails
 	gint auto_complete_delay;
 	gint calltip_delay;
 	guint line_wrapping:1;
-	gboolean use_tabs_instead_spaces;
-	gboolean single_instance_only;
+	guint use_tabs_instead_spaces:1;
+	guint single_instance_only:1;
 	gint font_quality;	
 	GSList *search_history; /* for incremental search history */
   /* style_table:
@@ -267,7 +267,7 @@ void load_default_settings(Preferences_ManagerDetails *prefdet)
 	prefdet->auto_complete_braces= get_bool("/gPHPEdit/defaults/autocompletebraces", FALSE);
 	prefdet->higthlightcaretline= get_bool("/gPHPEdit/defaults/higthlightcaretline", FALSE);
 	prefdet->higthlightcaretline_color= get_color("/gPHPEdit/defaults/higthlightcaretline_color","higthlightcaretline_color",13684944);
-	prefdet->save_session = get_color("/gPHPEdit/defaults/save_session","defaults", 1);
+	prefdet->save_session = get_color("/gPHPEdit/defaults/save_session","defaults", TRUE);
 	prefdet->use_tabs_instead_spaces = get_color("/gPHPEdit/defaults/use_tabs_instead_spaces","defaults", TRUE);
   prefdet->single_instance_only = get_color("/gPHPEdit/defaults/single_instance_only","defaults", TRUE);
   prefdet->php_file_extensions = get_string("/gPHPEdit/defaults/php_file_extensions",DEFAULT_PHP_EXTENSIONS);

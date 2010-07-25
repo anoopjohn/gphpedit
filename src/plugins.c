@@ -186,8 +186,8 @@ static inline gchar *command_spawn(const gchar* command_line)
   #endif
   if (g_spawn_command_line_sync(command_line,&stdout,NULL, &exit_status,&error)) {
     #ifdef DEBUG
-    stdout_len = strlen(stdout);
-    g_print("COMMAND: %s\nOUTPUT: %s (%d)\n", command_line->str, stdout, stdout_len);
+    guint stdout_len = strlen(stdout);
+    g_print("COMMAND: %s\nOUTPUT: %s (%d)\n", command_line, stdout, stdout_len);
     #endif
     ret=g_strdup(stdout);
     g_free(stdout);
@@ -362,7 +362,7 @@ void plugin_run(Plugin *plugin, Editor *editor)
   gchar *current_selection;
   gint ac_length;
   gchar *data;
-  
+
   command_line = g_string_new(plugdet->filename);
   command_line = g_string_prepend(command_line, "'");
   command_line = g_string_append(command_line, "' \"");

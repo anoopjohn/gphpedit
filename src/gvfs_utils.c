@@ -1,6 +1,8 @@
 #include "main.h"
 #include <gio/gio.h>
 #include "gvfs_utils.h"
+#include <glib/gstdio.h>
+#include <unistd.h>
 
 void unquote(char *s);
 
@@ -324,4 +326,39 @@ void unquote(char *s) {
 		s++;
 	}
 	*o = '\0';
+}
+
+
+/*
+* return a new temp filename
+*/
+GString *text_save_as_temp_file(gchar *text)
+{
+  if (!text) return NULL;
+  gchar *rawfilename;
+  GString *filename;
+  int file_handle;
+
+  file_handle = g_file_open_tmp("gphpeditXXXXXX",&rawfilename,NULL);
+  if (file_handle != -1) {
+    close(file_handle);
+    filename = g_string_new(rawfilename);
+    
+    GError *error=NULL;
+    
+    if (!g_file_set_contents (rawfilename, text,strlen(text),&error)){
+      g_print(_("Error saving temp file: '%s'. GIO Error:%s"),rawfilename, error->message);
+      g_error_free(error);
+    }
+    
+    g_free(rawfilename);
+
+    return filename;
+  }
+  
+  return NULL;
+}
+
+void release_temp_file (const gchar *filename){
+    g_unlink(filename);
 }

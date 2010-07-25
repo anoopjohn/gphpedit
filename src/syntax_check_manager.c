@@ -25,9 +25,7 @@
 
 #include <stdlib.h>
 #include "syntax_check_manager.h"
-#include <glib/gstdio.h>
 #include "gvfs_utils.h"
-#include <unistd.h>
 #include "main_window_callbacks.h"
 
 /*
@@ -104,7 +102,6 @@ syntax_check_manager_finalize (GObject *object)
   Syntax_Check_Manager_Details *synmgdet;
 	synmgdet = SYNTAX_CHECK_MANAGER_GET_PRIVATE(plugmg);
   /* free object resources*/
-//  g_hash_table_destroy(synmgdet->plugins_table);
 	G_OBJECT_CLASS (parent_class)->finalize (object);
 }
 
@@ -244,44 +241,26 @@ gchar *process_perl_lines(gchar *output)
 
 
 /*
-* (internal)
+* save_as_temp_file (internal)
+* save the content of an editor and return the filename of the temp file or NULL on error.
 */
 GString *save_as_temp_file(Editor *editor)
 {
   gchar *write_buffer = NULL;
   gsize text_length;
-  gchar *rawfilename;
   GString *filename;
-  int file_handle;
 
-  file_handle = g_file_open_tmp("gphpeditXXXXXX",&rawfilename,NULL);
-  if (file_handle != -1) {
-    close(file_handle);
-    filename = g_string_new(rawfilename);
-    
-    text_length = gtk_scintilla_get_length(GTK_SCINTILLA(editor->scintilla));
-    write_buffer = g_malloc0(text_length+1); // Include terminating null
+  text_length = gtk_scintilla_get_length(GTK_SCINTILLA(editor->scintilla));
+  write_buffer = g_malloc0(text_length+1); // Include terminating null
 
-    if (write_buffer == NULL) {
+  if (write_buffer == NULL) {
       g_warning ("%s", _("Cannot allocate write buffer"));
-      return NULL;
-    }
-    
-    gtk_scintilla_get_text(GTK_SCINTILLA(editor->scintilla), text_length+1, write_buffer);
-    GError *error=NULL;
-    
-    if (!g_file_set_contents (rawfilename, write_buffer,text_length+1,&error)){
-      g_print(_("Error saving temp file: '%s'. GIO Error:%s"),rawfilename,error->message);
-      g_error_free(error);
-    }
-    
-    g_free (write_buffer);
-    g_free(rawfilename);
-
-    return filename;
+     return NULL;
   }
-  
-  return NULL;
+    
+  filename = text_save_as_temp_file(write_buffer);
+  g_free(write_buffer);
+  return filename;
 }
 
 gchar *syntax_check_manager_run(Editor *editor, gint ftype)
@@ -332,7 +311,7 @@ gchar *syntax_check_manager_run(Editor *editor, gint ftype)
       result =g_strdup(_("Error calling PHP CLI (is PHP command line binary installed? If so, check if it's in your path or set php_binary in Preferences)\n"));
     }
     if (using_temp) {
-      g_unlink(filename->str);
+      release_temp_file (filename->str);
     }
     g_string_free(filename, TRUE);
     return result;

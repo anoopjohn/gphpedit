@@ -191,8 +191,6 @@ void quit_application()
 void main_window_destroy_event(GtkWidget *widget, gpointer data)
 {
   quit_application();
-  g_slice_free(Maintoolbar, main_window.toolbar_main); /* free toolbar struct*/
-  g_slice_free(Findtoolbar, main_window.toolbar_find); /* free toolbar struct*/
   cleanup_calltip();
   gtk_main_quit();
 }
@@ -333,14 +331,14 @@ gint main_window_key_press_event(GtkWidget   *widget, GdkEventKey *event,gpointe
         wordEnd = gtk_scintilla_get_selection_end(GTK_SCINTILLA(main_window.current_editor->scintilla));
         if (wordStart != wordEnd && (wordEnd-wordStart)<=25) {
              search_buffer = gtk_scintilla_get_text_range (GTK_SCINTILLA(main_window.current_editor->scintilla), wordStart, wordEnd, &search_length);
-             gtk_entry_set_text(GTK_ENTRY(main_window.toolbar_find->search_entry), search_buffer);
+             toolbar_set_search_text(TOOLBAR(main_window.toolbar_find), search_buffer);
         }
-        gtk_widget_grab_focus(GTK_WIDGET(main_window.toolbar_find->search_entry));
+        toolbar_set_search_text(TOOLBAR(main_window.toolbar_find), NULL);
       }
       return TRUE;
     }
     else if ((event->state & GDK_CONTROL_MASK)==GDK_CONTROL_MASK && ((event->keyval == GDK_g) || (event->keyval == GDK_G))) {
-      gtk_widget_grab_focus(GTK_WIDGET(main_window.toolbar_find->goto_entry));
+      toolbar_grab_goto_focus(TOOLBAR(main_window.toolbar_find));
       return TRUE;
     }
     else if (((event->state & (GDK_CONTROL_MASK | GDK_SHIFT_MASK))==(GDK_CONTROL_MASK | GDK_SHIFT_MASK)) && (event->keyval == GDK_space)) {
@@ -1470,7 +1468,7 @@ void add_to_search_history(const gchar *current_text){
     gint i=0;
     for (walk = get_preferences_manager_php_search_history(main_window.prefmg); walk!=NULL; walk = g_slist_next(walk)) {
       i++;
-      if (strcmp((gchar *) walk->data,current_text)==0){
+      if (g_strcmp0((gchar *) walk->data,current_text)==0){
         return;  /* already in the list */
         }
     }
@@ -1478,7 +1476,7 @@ void add_to_search_history(const gchar *current_text){
     #ifdef DEBUG
     g_print("added:%s\n",current_text);
     #endif
-    gtk_entry_completion_insert_action_text (main_window.toolbar_find->completion,0,g_strdup(current_text));    
+    toolbar_completion_add_text(TOOLBAR(main_window.toolbar_find), current_text);
 }
 
 void inc_search_activate(GtkEntry *entry,gpointer user_data)
@@ -1529,7 +1527,6 @@ void goto_line_int(gint line)
   gtk_scintilla_goto_line(GTK_SCINTILLA(main_window.current_editor->scintilla), line-1); // seems to be off by one...
   }
 }
-
 
 void goto_line(gchar *text)
 {
