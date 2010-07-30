@@ -610,6 +610,12 @@ GtkWidget *menubar_get_menu_plugin(MenuBar *menubar)
   return priv->menuplugin;
 }
 
+GtkAccelGroup *menubar_get_accel_group(MenuBar *menubar)
+{
+  if (!menubar) return NULL;
+  MenuBarPrivate *priv = MENUBAR_GET_PRIVATE(menubar);
+  return priv->accel_group;
+}
 void menubar_set_classbrowser_status(MenuBar *menubar, gboolean value)
 {
   if (!menubar) return;

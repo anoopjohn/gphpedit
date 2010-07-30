@@ -73,7 +73,7 @@ struct _ToolBarClass
  */
 GType 		 TOOLBAR_get_type 		(void) G_GNUC_CONST;
 
-GtkWidget *toolbar_new (gboolean type);
+GtkWidget *toolbar_new (gboolean type, GtkAccelGroup *accel_group);
 gboolean toolbar_is_visible(ToolBar *toolbar);
 void toolbar_set_search_text(ToolBar *toolbar, gchar *text);
 void toolbar_grab_goto_focus(ToolBar *toolbar);

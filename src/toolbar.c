@@ -33,6 +33,8 @@
 
 #include "toolbar.h"
 
+#include <gdk/gdkkeysyms.h>
+
 #define TOOLBAR_GET_PRIVATE(object)(G_TYPE_INSTANCE_GET_PRIVATE ((object), \
 						GOBJECT_TYPE_TOOLBAR,              \
 						ToolBarPrivate))
@@ -257,7 +259,7 @@ GtkTreeModel *create_completion_model (void)
 }
 
 static void
-find_toolbar_init (ToolBar *toolbar)
+find_toolbar_init (ToolBar *toolbar, GtkAccelGroup *accel_group)
 {
   ToolBarPrivate *priv = TOOLBAR_GET_PRIVATE(toolbar);
   
@@ -289,6 +291,7 @@ find_toolbar_init (ToolBar *toolbar)
   g_object_unref (priv->completion);
 
   /* connect entry signals */
+  gtk_widget_add_accelerator (priv->search_entry, "grab-focus", accel_group, GDK_i, GDK_CONTROL_MASK, 0);
   g_signal_connect_after(G_OBJECT(priv->search_entry), "insert_text", G_CALLBACK(inc_search_typed), NULL);
   g_signal_connect_after(G_OBJECT(priv->search_entry), "key_release_event", G_CALLBACK(inc_search_key_release_event), NULL);
   g_signal_connect_after(G_OBJECT(priv->search_entry), "activate", G_CALLBACK(inc_search_activate), NULL);
@@ -306,6 +309,7 @@ find_toolbar_init (ToolBar *toolbar)
   create_custom_toolbar_item (GTK_TOOLBAR(toolbar), priv->goto_label);
   /* create goto entry */
   create_entry(&priv->goto_entry, _("Go to line"),8);
+  gtk_widget_add_accelerator (priv->goto_entry, "grab-focus", accel_group, GDK_g, GDK_CONTROL_MASK, 0);
   g_signal_connect (G_OBJECT (priv->goto_entry), "icon-press", G_CALLBACK (on_cleanicon_press), NULL);
   g_signal_connect_after(G_OBJECT(priv->goto_entry), "activate", G_CALLBACK(goto_line_activate), NULL);
   /* create a new toolbar item with the entry */
@@ -313,11 +317,11 @@ find_toolbar_init (ToolBar *toolbar)
 
 }
 GtkWidget *
-toolbar_new (gboolean type)
+toolbar_new (gboolean type, GtkAccelGroup *accel_group)
 {
   ToolBar *toolbar = g_object_new (GOBJECT_TYPE_TOOLBAR, NULL);
   if (type==0)  main_toolbar_init (toolbar);
-  else find_toolbar_init (toolbar);
+  else find_toolbar_init (toolbar, accel_group);
 
 	return GTK_WIDGET(toolbar);
 }

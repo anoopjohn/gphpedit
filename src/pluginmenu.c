@@ -210,7 +210,7 @@ gtk_plugin_manager_menu_dispose_items (GtkPlugin_Manager_Menu *menu)
 
 void add_plugin_to_menu (gpointer data, gpointer user_data)
 {
-    static int i=0;
+    static int i=1;
     GtkPlugin_Manager_Menu *menu=(GtkPlugin_Manager_Menu *) user_data;
     GtkWidget *item;
     Plugin *plugin;
@@ -246,7 +246,6 @@ gtk_plugin_manager_menu_populate (GtkPlugin_Manager_Menu *menu)
 static void plugin_exec (GtkWidget *widget, gpointer user_data)
 {
   Plugin *plugin;
- 
   if (main_window.current_editor == NULL) {
     return;
   }

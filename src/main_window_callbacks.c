@@ -290,8 +290,6 @@ gint main_window_key_press_event(GtkWidget   *widget, GdkEventKey *event,gpointe
 {
   guint current_pos;
   guint current_line;
-  gint search_length;
-  gchar *search_buffer;
   gchar *member_function_buffer;
   gint member_function_length;
   gint wordStart;
@@ -322,25 +320,6 @@ gint main_window_key_press_event(GtkWidget   *widget, GdkEventKey *event,gpointe
       gtk_notebook_set_current_page(GTK_NOTEBOOK(main_window.notebook_editor),event->keyval - ((event->keyval == GDK_0) ? (GDK_0 - 9) : (GDK_0 + 1)));
       return TRUE;
     }
-    else if ((event->state & GDK_CONTROL_MASK)==GDK_CONTROL_MASK && ((event->keyval == GDK_i) || (event->keyval == GDK_I))) {
-      if ((event->state & GDK_SHIFT_MASK)==GDK_SHIFT_MASK) {
-        return FALSE;
-      }
-      if (main_window.current_editor && main_window.current_editor->type != TAB_HELP) {
-        wordStart = gtk_scintilla_get_selection_start(GTK_SCINTILLA(main_window.current_editor->scintilla));
-        wordEnd = gtk_scintilla_get_selection_end(GTK_SCINTILLA(main_window.current_editor->scintilla));
-        if (wordStart != wordEnd && (wordEnd-wordStart)<=25) {
-             search_buffer = gtk_scintilla_get_text_range (GTK_SCINTILLA(main_window.current_editor->scintilla), wordStart, wordEnd, &search_length);
-             toolbar_set_search_text(TOOLBAR(main_window.toolbar_find), search_buffer);
-        }
-        toolbar_set_search_text(TOOLBAR(main_window.toolbar_find), NULL);
-      }
-      return TRUE;
-    }
-    else if ((event->state & GDK_CONTROL_MASK)==GDK_CONTROL_MASK && ((event->keyval == GDK_g) || (event->keyval == GDK_G))) {
-      toolbar_grab_goto_focus(TOOLBAR(main_window.toolbar_find));
-      return TRUE;
-    }
     else if (((event->state & (GDK_CONTROL_MASK | GDK_SHIFT_MASK))==(GDK_CONTROL_MASK | GDK_SHIFT_MASK)) && (event->keyval == GDK_space)) {
       current_pos = gtk_scintilla_get_current_pos(GTK_SCINTILLA(main_window.current_editor->scintilla));
       show_call_tip(main_window.current_editor->scintilla,main_window.current_editor->type, current_pos);
@@ -358,46 +337,6 @@ gint main_window_key_press_event(GtkWidget   *widget, GdkEventKey *event,gpointe
       current_line = gtk_scintilla_line_from_position(GTK_SCINTILLA(main_window.current_editor->scintilla), current_pos);
       mod_marker(current_line);
       }
-      return TRUE;
-    }
-    else if ((event->state & GDK_CONTROL_MASK)==GDK_CONTROL_MASK && ((event->keyval == GDK_0)))  {
-      plugin_exec_with_num(menubar_get_menu_plugin(MENUBAR(main_window.menu)),0);
-      return TRUE;
-    }
-    else if ((event->state & GDK_CONTROL_MASK)==GDK_CONTROL_MASK && ((event->keyval == GDK_1)))  {
-      plugin_exec_with_num(menubar_get_menu_plugin(MENUBAR(main_window.menu)),1);
-      return TRUE;
-    }
-    else if ((event->state & GDK_CONTROL_MASK)==GDK_CONTROL_MASK && ((event->keyval == GDK_2)))  {
-      plugin_exec_with_num(menubar_get_menu_plugin(MENUBAR(main_window.menu)),2);
-      return TRUE;
-    }
-    else if ((event->state & GDK_CONTROL_MASK)==GDK_CONTROL_MASK && ((event->keyval == GDK_3)))  {
-      plugin_exec_with_num(menubar_get_menu_plugin(MENUBAR(main_window.menu)),3);
-      return TRUE;
-    }
-    else if ((event->state & GDK_CONTROL_MASK)==GDK_CONTROL_MASK && ((event->keyval == GDK_4)))  {
-      plugin_exec_with_num(menubar_get_menu_plugin(MENUBAR(main_window.menu)),4);
-      return TRUE;
-    }
-    else if ((event->state & GDK_CONTROL_MASK)==GDK_CONTROL_MASK && ((event->keyval == GDK_5)))  {
-      plugin_exec_with_num(menubar_get_menu_plugin(MENUBAR(main_window.menu)),5);
-      return TRUE;
-    }
-    else if ((event->state & GDK_CONTROL_MASK)==GDK_CONTROL_MASK && ((event->keyval == GDK_6)))  {
-      plugin_exec_with_num(menubar_get_menu_plugin(MENUBAR(main_window.menu)),6);
-      return TRUE;
-    }
-    else if ((event->state & GDK_CONTROL_MASK)==GDK_CONTROL_MASK && ((event->keyval == GDK_7)))  {
-      plugin_exec_with_num(menubar_get_menu_plugin(MENUBAR(main_window.menu)),7);
-      return TRUE;
-    }
-    else if ((event->state & GDK_CONTROL_MASK)==GDK_CONTROL_MASK && ((event->keyval == GDK_8)))  {
-      plugin_exec_with_num(menubar_get_menu_plugin(MENUBAR(main_window.menu)),8);
-      return TRUE;
-    }
-    else if ((event->state & GDK_CONTROL_MASK)==GDK_CONTROL_MASK && ((event->keyval == GDK_9)))  {
-      plugin_exec_with_num(menubar_get_menu_plugin(MENUBAR(main_window.menu)),9);
       return TRUE;
     }
     else if ((event->keyval == GDK_F2))  {
@@ -1537,8 +1476,8 @@ void goto_line(gchar *text)
 
 void goto_line_activate(GtkEntry *entry,gpointer user_data)
 {
-  gchar *current_text;
 
+  gchar *current_text;
   if (main_window.current_editor) {
     current_text = (gchar *)gtk_entry_get_text(entry);
     goto_line(current_text);
