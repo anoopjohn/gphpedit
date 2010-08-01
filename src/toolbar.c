@@ -48,7 +48,6 @@ struct _ToolBarPrivate
   GtkWidget *button_open;
   GtkWidget *button_save;
   GtkWidget *button_save_as;
-  GtkWidget *button_close;
   GtkWidget *button_undo;
   GtkWidget *button_redo;
   GtkWidget *button_cut;
@@ -130,9 +129,7 @@ main_toolbar_init (ToolBar *toolbar)
   ToolBarPrivate *priv = TOOLBAR_GET_PRIVATE(toolbar);
 
   priv->type = 0;
-  /* Create the Main Toolbar */
-  //gtk_box_pack_start (GTK_BOX (main_window.prinbox), toolbar, FALSE, FALSE, 0); //FIXME: afuera 
-        
+       
   /* Add the File operations to the Main Toolbar */
   create_toolbar_stock_item(&priv->button_new,toolbar,GTK_STOCK_NEW, _("New File"));
 
@@ -142,12 +139,10 @@ main_toolbar_init (ToolBar *toolbar)
 
   create_toolbar_stock_item(&priv->button_save_as,toolbar,GTK_STOCK_SAVE_AS, _("Save File As..."));
 
-  create_toolbar_stock_item(&priv->button_close,toolbar,GTK_STOCK_CLOSE, _("Close Current File"));
   g_signal_connect (G_OBJECT (priv->button_open), "clicked", G_CALLBACK (on_open1_activate), NULL);
   g_signal_connect (G_OBJECT (priv->button_new), "clicked", G_CALLBACK (on_new1_activate), NULL);
   g_signal_connect (G_OBJECT (priv->button_save), "clicked", G_CALLBACK (on_save1_activate), NULL);
   g_signal_connect (G_OBJECT (priv->button_save_as), "clicked", G_CALLBACK (on_save_as1_activate), NULL);
-  g_signal_connect (G_OBJECT (priv->button_close), "clicked", G_CALLBACK (on_close1_activate), NULL);
 
   priv->toolbar_separator=gtk_separator_tool_item_new();
   gtk_toolbar_insert(GTK_TOOLBAR(toolbar), GTK_TOOL_ITEM (priv->toolbar_separator), -1);
