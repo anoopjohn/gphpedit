@@ -58,6 +58,6 @@ typedef struct
 /* Basic GObject requirements. */
 GType syntax_check_manager_get_type (void) G_GNUC_CONST;
 Syntax_Check_Manager *syntax_check_manager_new (void);
-gchar *syntax_check_manager_run(Editor *editor, gint ftype);
+gchar *syntax_check_manager_run(Document *document);
 #endif /* SYNTAX_CHECK_MANAGER_H */
 

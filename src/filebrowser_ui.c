@@ -363,10 +363,10 @@ GtkWidget *_get_image_button(const gchar *type,const gchar *tooltip)
 */
 void _go_home_cb (GtkButton *button, gpointer   user_data) 
 {
-  if(main_window.current_editor){
+  if(main_window.current_document){
   /*if there is a file open set file folder as home dir*/
-    gchar *folderpath=NULL;
-    filebrowser_backend_go_folder_home (FILEBROWSER_BACKEND(user_data), main_window.current_editor->filename->str);
+    gchar *folderpath= document_get_filename(main_window.current_document);
+    filebrowser_backend_go_folder_home (FILEBROWSER_BACKEND(user_data), folderpath);
     if (folderpath) g_free(folderpath);
   }
 }

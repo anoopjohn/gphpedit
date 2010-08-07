@@ -163,6 +163,28 @@ preferences_manager_get_type (void)
     
     return our_type;
 }
+/*
+* overide default contructor to make a singleton.
+* see http://blogs.gnome.org/xclaesse/2010/02/11/how-to-make-a-gobject-singleton/
+*/
+static GObject*
+preferences_manager_constructor (GType type,
+                 guint n_construct_params,
+                 GObjectConstructParam *construct_params)
+{
+  static GObject *self = NULL;
+
+  if (self == NULL)
+    {
+      self = G_OBJECT_CLASS (parent_class)->constructor (
+          type, n_construct_params, construct_params);
+      g_object_add_weak_pointer (self, (gpointer) &self);
+      return self;
+    }
+
+  return g_object_ref (self);
+}
+
 static void
 preferences_manager_class_init (Preferences_ManagerClass *klass)
 {
@@ -172,6 +194,7 @@ preferences_manager_class_init (Preferences_ManagerClass *klass)
   parent_class = g_type_class_peek_parent (klass);
 	object_class->finalize = preferences_manager_finalize;
   object_class->dispose = preferences_manager_dispose;
+  object_class->constructor = preferences_manager_constructor;
 	g_type_class_add_private (klass, sizeof (Preferences_ManagerDetails));
 }
 /*
@@ -201,6 +224,10 @@ preferences_manager_init (gpointer object, gpointer klass)
 	prefdet = PREFERENCES_MANAGER_GET_PRIVATE(object);
   /* init styles table*/
   prefdet->styles_table= g_hash_table_new_full (g_str_hash, g_str_equal,NULL, clean_style);
+  load_default_settings(prefdet);
+  load_window_settings(prefdet); /* load main window settings*/
+  load_session_settings(prefdet);
+  load_styles(prefdet); /* load lexer styles */
 }
 
 /*
@@ -223,7 +250,7 @@ preferences_manager_finalize (GObject *object)
   Preferences_Manager *pref = PREFERENCES_MANAGER(object);
   Preferences_ManagerDetails *prefdet;
 	prefdet = PREFERENCES_MANAGER_GET_PRIVATE(pref);
-
+  clean_default_settings(prefdet);
   g_hash_table_destroy (prefdet->styles_table); /* clean data */
 
 	G_OBJECT_CLASS (parent_class)->finalize (object);
@@ -235,10 +262,6 @@ Preferences_Manager *preferences_manager_new (void)
   pref = g_object_new (PREFERENCES_MANAGER_TYPE, NULL);
   Preferences_ManagerDetails *prefdet;
 	prefdet = PREFERENCES_MANAGER_GET_PRIVATE(pref);
-  load_default_settings(prefdet);
-  load_window_settings(prefdet); /* load main window settings*/
-  load_session_settings(prefdet);
-  load_styles(prefdet); /* load lexer styles */
 	return pref; /* return new object */
 }
 
@@ -289,11 +312,12 @@ void load_window_settings(Preferences_ManagerDetails *prefdet)
 
 void load_session_settings(Preferences_ManagerDetails *prefdet){
 
-  prefdet->last_opened_folder = get_string("/gPHPEdit/general/last_opened_folder","");
+  prefdet->last_opened_folder = get_string("/gPHPEdit/general/last_opened_folder", (gchar *)g_get_home_dir());
   prefdet->parseonlycurrentfile = get_size("/gPHPEdit/classbrowser/onlycurrentfile", FALSE);
   prefdet->classbrowser_hidden = get_size("/gPHPEdit/main_window/classbrowser_hidden", FALSE);
   prefdet->classbrowser_size = get_color("/gPHPEdit/main_window/classbrowser_size", "main_window", 100);
-  prefdet->filebrowser_last_folder=get_string("/gPHPEdit/main_window/folderbrowser/folder","");
+  
+  prefdet->filebrowser_last_folder=get_string("/gPHPEdit/main_window/folderbrowser/folder", (gchar *)g_get_home_dir());
 }
 
         /* accesor functions */
@@ -408,7 +432,7 @@ void set_preferences_manager_filebrowser_last_folder(Preferences_Manager *prefer
   if (!OBJECT_IS_PREFERENCES_MANAGER (preferences_manager)) return ;
   Preferences_ManagerDetails *prefdet;
 	prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
-  if (prefdet->filebrowser_last_folder && *(prefdet->filebrowser_last_folder)!=0) g_free(prefdet->filebrowser_last_folder);
+  if (prefdet->filebrowser_last_folder) g_free(prefdet->filebrowser_last_folder);
   prefdet->filebrowser_last_folder= g_strdup(new_last_folder);
   set_string ("/gPHPEdit/main_window/folderbrowser/folder", new_last_folder);
 }
@@ -1168,7 +1192,7 @@ static gchar *get_string(const gchar *key,gchar *default_string){
   g_object_unref (G_OBJECT (config));
   if (!temp || error){
     if (error) g_error_free (error);
-    return default_string;
+    return g_strdup(default_string);
   }
 	return temp;
 }

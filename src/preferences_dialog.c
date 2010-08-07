@@ -21,7 +21,7 @@
  
    The GNU General Public License is contained in the file COPYING.
 */
-#include "stdlib.h"
+#include <stdlib.h>
 #include "preferences_dialog.h"
 #include "main_window.h"
 #include "tab_php.h"
@@ -520,18 +520,17 @@ void on_element_entry_changed(GtkComboBox *widget, gpointer     user_data)
 void apply_preferences(GtkButton *button, gpointer data)
 {
   GSList *walk;
-  Editor *editor;
 
   for (walk = editors; walk!=NULL; walk = g_slist_next(walk)) {
-    editor = walk->data;
-    tab_set_configured_scintilla_properties(GTK_SCINTILLA(editor->scintilla));
-    tab_check_php_file(editor);
-    tab_check_css_file(editor);
-    tab_check_cxx_file(editor);
-    tab_check_perl_file(editor);
-    tab_check_cobol_file(editor);
-    tab_check_python_file(editor);
-    tab_check_sql_file(editor);
+    Document *document = walk->data;
+    document_refresh_properties(document);
+    tab_check_php_file(document);
+    tab_check_css_file(document);
+    tab_check_cxx_file(document);
+    tab_check_perl_file(document);
+    tab_check_cobol_file(document);
+    tab_check_python_file(document);
+    tab_check_sql_file(document);
   }
 }
 
@@ -619,7 +618,7 @@ void change_font_global_callback(gint reply, gpointer data)
     set_preferences_manager_style_settings(main_window.prefmg, "c_globalclass", fontname , NULL, NULL, NULL, NULL, NULL);
   }
   
-  scintilla_php_set_lexer(GTK_SCINTILLA(preferences_dialog.highlighting_editor->scintilla));
+    set_document_to_php(preferences_dialog.highlighting_document);
 }
 
 
@@ -694,7 +693,7 @@ void change_size_global_callback(gint reply,gpointer data)
     set_preferences_manager_style_settings(main_window.prefmg, "c_verbatim", NULL, &fontsize, NULL, NULL, NULL, NULL);
     set_preferences_manager_style_settings(main_window.prefmg, "c_globalclass", NULL, &fontsize, NULL, NULL, NULL, NULL);
   }
-  scintilla_php_set_lexer(GTK_SCINTILLA(preferences_dialog.highlighting_editor->scintilla));
+  set_document_to_php(preferences_dialog.highlighting_document);
 }
 
 
@@ -937,7 +936,7 @@ void set_current_highlighting_font()
   if (IS_FONT_NAME(current_highlighting_element, _("C Globalclass"))) {
     get_control_values_to_highlight("c_globalclass");
   }
-  scintilla_php_set_lexer(GTK_SCINTILLA(preferences_dialog.highlighting_editor->scintilla));
+  tab_check_php_file(preferences_dialog.highlighting_document);
   g_free(current_highlighting_element);
 }
 
@@ -1634,14 +1633,14 @@ GTK_STOCK_OK, GTK_RESPONSE_ACCEPT, GTK_STOCK_CANCEL, GTK_RESPONSE_REJECT, NULL);
   gtk_widget_show (preferences_dialog.label41);
   gtk_frame_set_label_widget (GTK_FRAME (preferences_dialog.frame3), preferences_dialog.label41);
   
-  preferences_dialog.highlighting_editor = g_new0(Editor,1);
-  preferences_dialog.highlighting_editor->scintilla = gtk_scintilla_new();
-  gtk_scintilla_add_text(GTK_SCINTILLA (preferences_dialog.highlighting_editor->scintilla), strlen(sample_text),sample_text);
-  gtk_scintilla_goto_pos(GTK_SCINTILLA(preferences_dialog.highlighting_editor->scintilla), 0);
-  gtk_scintilla_set_read_only(GTK_SCINTILLA(preferences_dialog.highlighting_editor->scintilla), 1);
-  tab_php_set_lexer(preferences_dialog.highlighting_editor);
+  preferences_dialog.highlighting_document = document_new (TAB_FILE, "", 0);
+  document_set_scintilla(preferences_dialog.highlighting_document, gtk_scintilla_new());
+  document_add_text(preferences_dialog.highlighting_document, sample_text);
+  document_goto_pos(preferences_dialog.highlighting_document, 0);
+  document_set_readonly(preferences_dialog.highlighting_document, TRUE, TRUE);
+  set_document_to_php(preferences_dialog.highlighting_document);
 
-  preferences_dialog.code_sample = preferences_dialog.highlighting_editor->scintilla;  
+  preferences_dialog.code_sample = document_get_editor_widget(preferences_dialog.highlighting_document);
   gtk_widget_set_size_request (preferences_dialog.code_sample, 200, 200);
   gtk_widget_show (preferences_dialog.code_sample);
   gtk_box_pack_end (GTK_BOX (preferences_dialog.vbox10), preferences_dialog.code_sample, TRUE, TRUE, 0);

@@ -25,8 +25,8 @@
 #ifndef TAB_CXX_H
 #define TAB_CXX_H
 
-#include "tab.h"
+#include "document.h"
 
-void tab_cxx_set_lexer(Editor *editor);
+void tab_cxx_set_lexer(Document *document);
 
 #endif

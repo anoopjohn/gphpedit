@@ -26,6 +26,7 @@
 #define MAIN_WINDOW_H
 
 #include "main.h"
+#include "document.h"
 #include "calltip.h"
 #include "tab.h"
 #include "menubar.h"
@@ -60,7 +61,7 @@ typedef struct
   /* syntax check widget */
   GtkSyntax_Check_Window *win;
 
-  Editor *current_editor;
+  Document *current_document;
 
   //widget for close side bar button
   GtkWidget *close_sidebar_button;

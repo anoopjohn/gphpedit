@@ -217,14 +217,15 @@ gboolean get_syntax_plugin_by_ftype (gpointer key, gpointer value, gpointer user
   return FALSE;
 }
 
-gboolean run_syntax_plugin_by_ftype(Plugin_Manager *plugmg, Editor *editor, gint ftype){
+gboolean run_syntax_plugin_by_ftype(Plugin_Manager *plugmg, Document *document){
   g_return_val_if_fail (OBJECT_IS_PLUGIN_MANAGER(plugmg), FALSE);
   Plugin_Manager_Details *plugmgdet;
 	plugmgdet = PLUGIN_MANAGER_GET_PRIVATE(plugmg);
+  gint ftype = document_get_document_type(document);
   Plugin *plug=g_hash_table_find (plugmgdet->plugins_table, get_syntax_plugin_by_ftype, GINT_TO_POINTER(ftype));
   if (plug){
-    //g_print("Plugin FOUND!!\n");
-    plugin_run(plug, editor);
+    g_print("Plugin FOUND!!\n");
+    plugin_run(plug, document);
     return TRUE;
   } else {
     //g_print("Plugin NOT FOUND!!\n");

@@ -208,7 +208,9 @@ static void tog_fullscreen(GtkWidget *widget, gpointer user_data)
 */
 static void showpreview (GtkWidget *widget, gpointer user_data)
 {
-  tab_create_new(TAB_PREVIEW, main_window.current_editor->filename);
+  gchar *filename = document_get_filename(main_window.current_document);
+  add_new_document(TAB_PREVIEW, filename, 0);
+  g_free(filename);
 }
 /*
  *size_change
@@ -232,7 +234,7 @@ gboolean show_hint(GtkWidget *widget, GdkEventCrossing *event, gpointer user_dat
   gtk_widget_set_state (widget, GTK_STATE_PRELIGHT);
   context_id = gtk_statusbar_get_context_id (GTK_STATUSBAR(main_window.appbar), (const gchar *) user_data);
   message_id= gtk_statusbar_push (GTK_STATUSBAR(main_window.appbar),context_id, (const gchar *) user_data);
-  return false;
+  return FALSE;
 }
 /*
  *delete_hint
@@ -242,7 +244,7 @@ gboolean show_hint(GtkWidget *widget, GdkEventCrossing *event, gpointer user_dat
 gboolean delete_hint(GtkWidget *widget, GdkEventCrossing *event, gpointer user_data){
   gtk_widget_set_state (widget, GTK_STATE_NORMAL);
   gtk_statusbar_remove (GTK_STATUSBAR(main_window.appbar), context_id, message_id);
-  return false;
+  return FALSE;
 }
 /*
  * install_menu_hint
@@ -616,6 +618,7 @@ GtkAccelGroup *menubar_get_accel_group(MenuBar *menubar)
   MenuBarPrivate *priv = MENUBAR_GET_PRIVATE(menubar);
   return priv->accel_group;
 }
+
 void menubar_set_classbrowser_status(MenuBar *menubar, gboolean value)
 {
   if (!menubar) return;
@@ -623,7 +626,7 @@ void menubar_set_classbrowser_status(MenuBar *menubar, gboolean value)
   gtk_check_menu_item_set_active ((GtkCheckMenuItem *) priv->tog_class,value);
 }
 
-void menubar_update_controls(MenuBar *menubar, gboolean is_scintilla, gboolean is_webkit, gboolean can_preview, gboolean isreadonly)
+void menubar_update_controls(MenuBar *menubar, gboolean is_scintilla, gboolean can_preview, gboolean isreadonly)
 {
   if (!menubar) return ;
   MenuBarPrivate *priv = MENUBAR_GET_PRIVATE(menubar);
@@ -656,7 +659,6 @@ void menubar_update_controls(MenuBar *menubar, gboolean is_scintilla, gboolean i
         gtk_widget_set_sensitive (priv->preview, FALSE);
       }
   }else{
-    if (is_webkit){
       //deactivate menu items
       gtk_widget_set_sensitive (priv->code, FALSE);
       gtk_widget_set_sensitive (priv->cut, FALSE);
@@ -675,6 +677,5 @@ void menubar_update_controls(MenuBar *menubar, gboolean is_scintilla, gboolean i
       gtk_widget_set_sensitive (priv->upper, FALSE);
       gtk_widget_set_sensitive (priv->lower, FALSE);
       gtk_widget_set_sensitive (priv->preview, FALSE);
-      }
   }
 }

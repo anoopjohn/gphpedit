@@ -292,10 +292,10 @@ void classbrowser_set_sortable(GtkTreeStore *classtreestore)
 
 static gboolean visible_func (GtkTreeModel *model, GtkTreeIter  *iter, gpointer data) {
   /* Visible if row is non-empty and name column contain filename as prefix */
-  if (!main_window.current_editor) return FALSE;
+  g_return_val_if_fail(main_window.current_document, FALSE);
   guint file_type;
   gboolean visible = FALSE;
-  guint data_type= main_window.current_editor->type;
+  guint data_type= document_get_document_type(main_window.current_document);
   gtk_tree_model_get (model, iter, FILE_TYPE, &file_type, -1);
   if (data_type==file_type) visible = TRUE;
  // g_print("%d -> %d (%s)\n",data_type,file_type,main_window.current_editor->filename->str);
@@ -334,7 +334,7 @@ void classbrowser_update_cb (Classbrowser_Backend *classback, gboolean result, g
   GSList *func_list = classbrowser_backend_get_function_list(classback);
   g_slist_foreach (func_list, classbrowser_function_add, user_data);
 
-  if (main_window.current_editor) {
+  if (main_window.current_document) {
   if (priv->front==0){
     priv->new_model= gtk_tree_model_filter_new (GTK_TREE_MODEL(priv->classtreestore),NULL);
   } else {
@@ -509,15 +509,9 @@ gint treeview_click_release(GtkWidget *widget, GdkEventButton *event, gpointer f
       g_free (filename);
     }
   }
-  /* go to position stuff */
-  if (main_window.current_editor) {
-    if(GTK_IS_SCINTILLA(main_window.current_editor->scintilla)){
-    gtk_scintilla_grab_focus(GTK_SCINTILLA(main_window.current_editor->scintilla));
-    gtk_scintilla_scroll_caret(GTK_SCINTILLA(main_window.current_editor->scintilla));
-    gtk_scintilla_grab_focus(GTK_SCINTILLA(main_window.current_editor->scintilla));
-    }
-  }
-  
+  /* go to position */
+  document_scroll_to_current_pos(main_window.current_document);
+ 
   return FALSE;
 }
 /*
@@ -571,16 +565,16 @@ GString *classbrowser_get_autocomplete_php_classes_string(gphpeditClassBrowser *
 * classbrowser_autocomplete_php_variables
 * return a new string with posibly variable matches. 
 */
-void classbrowser_autocomplete_php_variables(gphpeditClassBrowser *classbrowser, GtkWidget *scintilla, gint wordStart, gint wordEnd){
+gchar *classbrowser_autocomplete_php_variables(gphpeditClassBrowser *classbrowser, gchar *prefix){
 	gphpeditClassBrowserPrivate *priv;
 	priv = CLASSBROWSER_BACKEND_GET_PRIVATE(classbrowser);
-  classbrowser_backend_autocomplete_php_variables(priv->classbackend, scintilla, wordStart, wordEnd);
+  return classbrowser_backend_autocomplete_php_variables(priv->classbackend, prefix);
 }
 
-void classbrowser_autocomplete_member_function(gphpeditClassBrowser *classbrowser, GtkWidget *scintilla, gint wordStart, gint wordEnd){
+gchar *classbrowser_autocomplete_member_function(gphpeditClassBrowser *classbrowser, gchar *prefix){
 	gphpeditClassBrowserPrivate *priv;
 	priv = CLASSBROWSER_BACKEND_GET_PRIVATE(classbrowser);
-  classbrowser_backend_autocomplete_member_function(priv->classbackend, scintilla, wordStart, wordEnd);
+  return classbrowser_backend_autocomplete_member_function(priv->classbackend, prefix);
 }
 
 gchar *classbrowser_custom_function_calltip(gphpeditClassBrowser *classbrowser, gchar *function_name)

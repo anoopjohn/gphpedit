@@ -59,7 +59,7 @@ GType plugin_get_type (void);
 Plugin *plugin_new (gchar *filename);
 const gchar *get_plugin_name(Plugin *plugin);
 const gchar *get_plugin_description(Plugin *plugin);
-void plugin_run(Plugin *plugin, Editor *editor);
+void plugin_run(Plugin *plugin, Document *document);
 gint get_plugin_syntax_type(Plugin *plugin);
 #endif /* PLUGINS_H */
 

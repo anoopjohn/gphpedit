@@ -78,7 +78,7 @@ gboolean toolbar_is_visible(ToolBar *toolbar);
 void toolbar_set_search_text(ToolBar *toolbar, gchar *text);
 void toolbar_grab_goto_focus(ToolBar *toolbar);
 void toolbar_completion_add_text(ToolBar *toolbar,const gchar *text);
-void toolbar_update_controls(ToolBar *toolbar, gboolean is_scintilla, gboolean is_webkit, gboolean isreadonly);
+void toolbar_update_controls(ToolBar *toolbar, gboolean is_scintilla, gboolean isreadonly);
 G_END_DECLS
 
 #endif  /* __TOOLBAR_H__  */

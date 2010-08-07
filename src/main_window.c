@@ -24,7 +24,7 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-#include "stdlib.h"
+#include <stdlib.h>
 #include "main_window.h"
 #include "tab.h"
 #include "main_window_callbacks.h"
@@ -41,10 +41,27 @@ GIOChannel* inter_gphpedit_io;
 guint inter_gphpedit_event_id;
 gboolean DEBUG_MODE = FALSE;
 
+void main_window_state_changed(GtkWidget *widget, GdkEventWindowState *event, gpointer user_data)
+{
+  set_preferences_manager_window_maximized(main_window.prefmg, GDK_WINDOW_STATE_MAXIMIZED && event->new_window_state);
+}
+
+void main_window_resize(GtkWidget *widget, GtkAllocation *allocation, gpointer user_data) {
+  if (!get_preferences_manager_window_maximized(main_window.prefmg)) {
+    gint left, width, top, height;
+    gtk_window_get_position(GTK_WINDOW(main_window.window), &left, &top);
+    gtk_window_get_size(GTK_WINDOW(main_window.window), &width, &height);
+    set_preferences_manager_window_height(main_window.prefmg, height);
+    set_preferences_manager_window_width(main_window.prefmg, width);
+    set_preferences_manager_window_left(main_window.prefmg, left);
+    set_preferences_manager_window_top(main_window.prefmg, top);
+  }
+}
+
 void create_untitled_if_empty(void)
 {
   if (!editors) {
-    tab_create_new(TAB_FILE, NULL);
+    add_new_document(TAB_FILE, NULL, 0);
   }
 }
 
@@ -92,7 +109,7 @@ gboolean channel_pass_filename_callback(GIOChannel *source, GIOCondition conditi
     g_print("Error reading GIO Chanel. Error:%s\n",error->message);
   }
   g_print("Passed %s\n", buf);
-  tab_create_new(TAB_FILE, g_string_new(buf));
+  add_new_document(TAB_FILE, buf, 0);
   return FALSE;
 }
 
@@ -189,7 +206,7 @@ static void create_side_panel(void){
   gtk_box_pack_start(GTK_BOX(prin_sidebox), main_window.notebook_manager, TRUE, TRUE, 2);
   
   /* Classbrowser stuff creation */  
-  main_window.classbrowser = gphpedit_classbrowser_new ();
+  main_window.classbrowser = gphpedit_classbrowser_new (); 
   gtk_widget_show(main_window.classbrowser);
   GtkWidget *classlabel;
   classlabel = gtk_image_new_from_file (PIXMAP_DIR "/classbrowser.png");
@@ -197,7 +214,6 @@ static void create_side_panel(void){
   gtk_widget_set_tooltip_text (classlabel,_("Class Browser"));
   gtk_widget_show(classlabel);
   gtk_notebook_insert_page (GTK_NOTEBOOK(main_window.notebook_manager), main_window.classbrowser, classlabel, 0);
-
   /* File browser stuff creation */
   if (get_preferences_manager_show_filebrowser(main_window.prefmg)){
   main_window.folder= gphpedit_filebrowser_new();
@@ -239,52 +255,14 @@ static void main_window_fill_panes(void)
  */
 void update_app_title(void)
 {
-  GString *title;
-  gchar *dir;
-  if (main_window.current_editor != NULL) {
-      update_status_combobox(main_window.current_editor);
-    if (main_window.current_editor->type != TAB_HELP && main_window.current_editor->type != TAB_PREVIEW
-        && main_window.current_editor->filename) {
-      //debug("Full Name - %s, Short Name - %s", main_window.current_editor->filename->str, main_window.current_editor->short_filename);
-      char *str = NULL;
-      title = g_string_new(str);
-      gchar *tmp=filename_parent_uri(main_window.current_editor->filename->str);
-      dir = filename_get_relative_path(tmp);
-      g_free(tmp);
-      g_string_printf (title,"%s (%s)",main_window.current_editor->short_filename,dir);
-      g_free(dir);
-      //debug("Title - %s, Short name - %s", title->str, main_window.current_editor->short_filename);
-      g_string_append(title, _(" - gPHPEdit"));
-      if (!main_window.current_editor->saved) {
-      //If the content is not saved then add a * to the begining of the title
-        g_string_prepend(title, "*");
-      }
-      update_zoom_level();
-      update_controls();
-    }
-    else if(main_window.current_editor->type == TAB_HELP) {
-      title = g_string_new(_("Help: "));
-      title = g_string_append(title, main_window.current_editor->help_function);
-                        update_zoom_level();
-                        update_controls();
-    }
-    else if(main_window.current_editor->type == TAB_PREVIEW) {
-      title = g_string_new(_("Preview: "));
-      title = g_string_append(title, main_window.current_editor->help_function);
-                        update_zoom_level();
-                        update_controls();
-    }
-    //If there is no file opened set the name as gPHPEdit
-    else {
-      title = g_string_new(_("gPHPEdit"));
-    }
-  }
+  gchar *title = document_get_title(main_window.current_document);
+  update_status_combobox(main_window.current_document);
+  update_zoom_level();
+  update_controls();
   //If there is no file opened set the name as gPHPEdit
-  else {
-    title = g_string_new(_("gPHPEdit"));
-  }
-  gtk_window_set_title(GTK_WINDOW(main_window.window), title->str);
-  g_string_free(title, TRUE);
+  if (!title) title = g_strdup(_("gPHPEdit"));
+  gtk_window_set_title(GTK_WINDOW(main_window.window), title);
+  g_free(title);
 }
 
 void main_window_add_to_reopen_menu(gchar *full_filename)
@@ -318,7 +296,7 @@ static void create_infobar(void){
   gtk_box_set_spacing(GTK_BOX (content_area), 0);
   gtk_box_pack_start(GTK_BOX (content_area), main_window.infolabel, FALSE, FALSE, 0);
   gtk_widget_show(main_window.infolabel);
-  g_signal_connect(main_window.infobar, "response", G_CALLBACK (process_external), main_window.current_editor);
+  g_signal_connect(main_window.infobar, "response", G_CALLBACK (process_external), main_window.current_document);
   gtk_box_pack_start(GTK_BOX(main_window.prin_hbox), main_window.infobar, FALSE, FALSE, 0);
 }
 
@@ -378,7 +356,7 @@ void main_window_create(void){
 }
 
 void update_controls(void){
-  menubar_update_controls(MENUBAR(main_window.menu), GTK_IS_SCINTILLA(main_window.current_editor->scintilla), WEBKIT_IS_WEB_VIEW(main_window.current_editor->help_view), g_strcmp0(main_window.current_editor->contenttype,"text/html")==0, main_window.current_editor->isreadonly);
-  toolbar_update_controls(TOOLBAR(main_window.toolbar_main), GTK_IS_SCINTILLA(main_window.current_editor->scintilla), WEBKIT_IS_WEB_VIEW(main_window.current_editor->help_view), main_window.current_editor->isreadonly);
-  toolbar_update_controls(TOOLBAR(main_window.toolbar_find), GTK_IS_SCINTILLA(main_window.current_editor->scintilla), WEBKIT_IS_WEB_VIEW(main_window.current_editor->help_view), main_window.current_editor->isreadonly);
+  menubar_update_controls(MENUBAR(main_window.menu), document_is_scintilla_based(main_window.current_document), document_get_can_preview(main_window.current_document), document_get_readonly(main_window.current_document));
+  toolbar_update_controls(TOOLBAR(main_window.toolbar_main), document_is_scintilla_based(main_window.current_document), document_get_readonly(main_window.current_document));
+  toolbar_update_controls(TOOLBAR(main_window.toolbar_find), document_is_scintilla_based(main_window.current_document), document_get_readonly(main_window.current_document));
 }

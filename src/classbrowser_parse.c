@@ -21,38 +21,34 @@
  
    The GNU General Public License is contained in the file COPYING.
 */
+#include <stdlib.h>
+
 #include "tab.h"
 #include "classbrowser_parse.h"
 #include "gvfs_utils.h"
-#include "stdlib.h"
 //#define DEBUG_CLASSBROWSER
 
 static gchar *read_text_file(gchar *filename){
 
   gchar *buffer=NULL;
-  gsize nchars=0;
 
   GSList *walk;
-  Editor *editor;
+  Document *document;
 
   for (walk = editors; walk != NULL; walk = g_slist_next (walk)) {
-    editor = walk->data;
-    if (strcmp(editor->filename->str,filename)==0) {
-        /* found read text from scintilla */ 
-          nchars = gtk_scintilla_get_length(GTK_SCINTILLA(editor->scintilla));
-          buffer = g_malloc0(nchars+1); // Include terminating null
-          if (buffer == NULL) {
-            g_warning ("%s", _("Classbrowser::Cannot allocate buffer"));
-            return NULL;
-          }
-          gtk_scintilla_get_text(GTK_SCINTILLA(editor->scintilla), nchars+1, buffer);
+    document = walk->data;
+    gchar *doc_filename = document_get_filename(document);
+    if (g_strcmp0(doc_filename,filename)==0) {
+          buffer = document_get_text(document);
           #ifdef DEBUG_CLASSBROWSER
-            g_print("Classbrowser::Using scintilla text\n");
+            g_print("Classbrowser::Using document text\n");
           #endif
+          g_free(doc_filename);
           break;
     }
+    g_free(doc_filename);
   }
-  if (!buffer || nchars==0){
+  if (!buffer){
     buffer=read_text_file_sync(filename);
   }
 //  g_print("buffer:<---\n%s\n--->",buffer);
@@ -193,7 +189,6 @@ gint str_sec_print(gchar *label, gchar *pstart, gchar *pend, guint line_number) 
 
 void classbrowser_parse_file(Classbrowser_Backend *classback, gchar *filename)
 {
-  if (!filename) return;
   gchar *file_contents;
   gchar *o; // original pointer to start of contents
   gchar *c; // current position within contents
@@ -239,10 +234,6 @@ void classbrowser_parse_file(Classbrowser_Backend *classback, gchar *filename)
   gchar *posvarname=NULL;
   gchar *varname=NULL;
   gchar *beforevarname=NULL;
-  file_contents = read_text_file(filename);
-  if (!file_contents) return;
-  o = file_contents;
-  c = o;
 
   within_php = FALSE;
   within_single_line_comment = FALSE;
@@ -266,6 +257,12 @@ void classbrowser_parse_file(Classbrowser_Backend *classback, gchar *filename)
   start_param_list = NULL;
   param_list = NULL;
   function_awaiting_brace_or_parenthesis = FALSE;
+
+  g_return_if_fail(filename);
+  file_contents = read_text_file(filename);
+  g_return_if_fail(file_contents);
+  o = file_contents;
+  c = o;
 
   while (*c) {
     while (gtk_events_pending()) gtk_main_iteration(); /* update ui */

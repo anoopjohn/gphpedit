@@ -22,7 +22,7 @@
    The GNU General Public License is contained in the file COPYING.
 */
 
-#include "tab_php.h"
+#include "tab_cxx.h"
 #include "tab_util.h"
 #include "main_window.h"
 
@@ -217,7 +217,7 @@ void scintilla_cxx_set_lexer(GtkScintilla *scintilla)
   gtk_scintilla_colourise(scintilla, 0, -1);
 }
 
-void tab_cxx_set_lexer(Editor *editor)
+void tab_cxx_set_lexer(Document *document)
 {
-  scintilla_cxx_set_lexer(GTK_SCINTILLA(editor->scintilla));
+  scintilla_cxx_set_lexer(document_get_scintilla(document));
 }

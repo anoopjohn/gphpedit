@@ -26,6 +26,7 @@
 #define PREFERENCES_DIALOG_H
 
 #include "main.h"
+#include "tab.h"
 #include "tab_php.h"
 #include "tab_css.h"
 #include "tab_sql.h"
@@ -150,7 +151,7 @@ typedef struct
   GList *highlighting_elements;
 
   gboolean changing_highlight_element;
-  Editor *highlighting_editor;
+  Document *highlighting_document;
 }
 PreferencesDialog;
 

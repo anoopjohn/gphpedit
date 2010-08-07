@@ -69,6 +69,7 @@ gchar *filename_get_scaped_path(gchar *filename){
   unquote(local_path);
   return local_path;
 }
+
 /*
 * filename_get_basename
 * return a gchar with the basename of the Gfile
@@ -98,6 +99,7 @@ gchar *filename_get_uri(gchar *filename){
 * return a gchar with the local pathname for filename, if one exists
 */
 gchar *filename_get_path(gchar *filename){
+    if (!filename) return NULL;
     GFile *file= get_gfile_from_filename(filename);
     gchar *file_path= g_file_get_path (file);
     g_object_unref(file);
@@ -122,21 +124,20 @@ gchar *read_text_file_sync( gchar *filename )
 //  g_print("buffer:<---\n%s\n--->",buffer);
   return buffer;
 }
+
+
 /*
 * get_file_modified
 * return TRUE if the file has been modified or FALSE otherwise
 * if updatemark = TRUE, the GTimeVal parameter will be updated will lastest mark
 */
-gboolean get_file_modified(gchar *filename,GTimeVal *act, gboolean update_mark){
+gboolean GFile_get_modified(GFile *file,GTimeVal *act, gboolean update_mark){
   GFileInfo *info;
   GError *error=NULL;
-  GFile *file;
-  if (!filename) return FALSE;
-  file= get_gfile_from_filename (filename);
+  if (!file) return FALSE;
   info=g_file_query_info (file,"time::modified,time::modified-usec",0,NULL,&error);
   if (error){
   g_error_free(error);
-  g_object_unref(file);
   return FALSE;  
   }
   GTimeVal result;
@@ -149,17 +150,36 @@ gboolean get_file_modified(gchar *filename,GTimeVal *act, gboolean update_mark){
     act->tv_usec =result.tv_usec;
   }
   g_object_unref(info);  
+  return hr;
+}
+
+/*
+* get_file_modified
+* return TRUE if the file has been modified or FALSE otherwise
+* if updatemark = TRUE, the GTimeVal parameter will be updated will lastest mark
+*/
+gboolean get_file_modified(gchar *filename,GTimeVal *act, gboolean update_mark){
+  GFile *file;
+  if (!filename) return FALSE;
+  file= get_gfile_from_filename (filename);
+  gboolean hr=GFile_get_modified(file, act, update_mark);
   g_object_unref(file);
   return hr;
+}
+
+gboolean GFile_is_local_or_http(GFile *file){
+  if (!file) return TRUE;
+  gchar *scheme= g_file_get_uri_scheme (file);
+  gboolean result= (g_strcmp0(scheme, "file")==0 || g_strcmp0(scheme, "http")==0 || g_strcmp0(scheme, "https")==0);
+  g_free(scheme);
+  return result;
 }
 
 gboolean filename_is_local_or_http(gchar *filename){
   GFile *file;
   if (!filename) return TRUE;
   file= get_gfile_from_filename (filename);
-  gchar *scheme= g_file_get_uri_scheme (file);
-  gboolean result= g_str_has_prefix(filename, "file://") || g_str_has_prefix(filename, "http://") || g_str_has_prefix(filename, "https://");
-  g_free(scheme);
+  gboolean result= GFile_is_local_or_http(file);
   g_object_unref(file);
   return result;
 }

@@ -30,6 +30,7 @@
 #include "gphpedit-statusbar.h"
 #include "status-combo-box.h"
 #include "tab.h"
+#include "document.h"
 #include "main_window.h"
 
 #define GPHPEDIT_STATUSBAR_GET_PRIVATE(object)(G_TYPE_INSTANCE_GET_PRIVATE ((object),\
@@ -129,39 +130,22 @@ set_statusbar_width_chars (GtkWidget *statusbar,
 void set_higthlight (GphpeditStatusComboBox *combo, GtkMenuItem *item){
   const gchar *label =gtk_menu_item_get_label (item);
   if (g_strcmp0(label,_("Cobol"))==0){
-    if (main_window.current_editor && GTK_IS_SCINTILLA(main_window.current_editor->scintilla)) {
-      set_editor_to_cobol(main_window.current_editor);
-    }
+    set_document_to_cobol(main_window.current_document);
   } else if (g_strcmp0(label,_("C/C++"))==0){
-    if (main_window.current_editor && GTK_IS_SCINTILLA(main_window.current_editor->scintilla)) {
-      set_editor_to_cxx(main_window.current_editor);
-    }
+    set_document_to_cxx(main_window.current_document);
   } else if (g_strcmp0(label,_("CSS"))==0){
-    if (main_window.current_editor && GTK_IS_SCINTILLA(main_window.current_editor->scintilla)) {
-      set_editor_to_css(main_window.current_editor);
-    }
+    set_document_to_css(main_window.current_document);
   } else if (g_strcmp0(label,_("PHP/HTML/XML"))==0){
-      if (main_window.current_editor && GTK_IS_SCINTILLA(main_window.current_editor->scintilla)) {
-      set_editor_to_php(main_window.current_editor);
-      }
+    set_document_to_php(main_window.current_document);
   } else if (g_strcmp0(label,_("Perl"))==0){
-    if (main_window.current_editor && GTK_IS_SCINTILLA(main_window.current_editor->scintilla)) {
-      set_editor_to_perl(main_window.current_editor);
-    }
+    set_document_to_perl(main_window.current_document);
   } else if (g_strcmp0(label,_("SQL"))==0){
-    if (main_window.current_editor && GTK_IS_SCINTILLA(main_window.current_editor->scintilla)) {
-      set_editor_to_sql(main_window.current_editor);
-    }
+    set_document_to_sql(main_window.current_document);
   } else if (g_strcmp0(label,_("Python"))==0){
-    if (main_window.current_editor && GTK_IS_SCINTILLA(main_window.current_editor->scintilla)) {
-      set_editor_to_python(main_window.current_editor);
-    }
+    set_document_to_python(main_window.current_document);
   } else {
-    if (GTK_IS_SCINTILLA(main_window.current_editor->scintilla)) {
-    set_editor_to_text_plain (main_window.current_editor);
-    }
+    set_document_to_text_plain(main_window.current_document);
   }
-/* seleccionar el tipo de resaltado de acuerdo a la etiqueta del item */
 }
 
 void set_status_combo_item (GphpeditStatusbar *statusbar,const gchar *label)

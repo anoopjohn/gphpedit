@@ -103,9 +103,8 @@ struct PluginDetails
 					    PluginDetails))
 
 static gpointer parent_class;
-static void               plugin_finalize         (GObject                *object);
-static void               plugin_init             (gpointer                object,
-							       gpointer                klass);
+static void plugin_finalize (GObject *object);
+static void plugin_init (gpointer object, gpointer klass);
 static void  plugin_class_init (PluginClass *klass);
 
 
@@ -337,30 +336,27 @@ const gchar *get_plugin_description(Plugin *plugin){
 /*
 * get_plugin_syntax_type
 * return the file type of the syntax plugin
-* if plugin isn't a syntax plugin return 0
+* if plugin isn't a syntax plugin return -1
 */
 gint get_plugin_syntax_type(Plugin *plugin){
-  g_return_val_if_fail (OBJECT_IS_PLUGIN (plugin), 0); /**/
+  g_return_val_if_fail (OBJECT_IS_PLUGIN (plugin), -1); /**/
   PluginDetails *plugdet;
 	plugdet = PLUGIN_GET_PRIVATE(plugin);
-  if (plugdet->type!=GPHPEDIT_PLUGIN_TYPE_SYNTAX) return 0;
+  if (plugdet->type!=GPHPEDIT_PLUGIN_TYPE_SYNTAX) return -1;
   return plugdet->file_type;
 }
 
-void plugin_run(Plugin *plugin, Editor *editor)
+void plugin_run(Plugin *plugin, Document *document)
 {
   /* initial checks*/
   if (!OBJECT_IS_PLUGIN (plugin)) return;
-  if (!editor) return;
+  if (!document) return;
   PluginDetails *plugdet;
 	plugdet = PLUGIN_GET_PRIVATE(plugin);
 
   gchar *stdout = NULL;
   GString *command_line = NULL;
-  gint wordStart;
-  gint wordEnd;
   gchar *current_selection;
-  gint ac_length;
   gchar *data;
 
   command_line = g_string_new(plugdet->filename);
@@ -368,16 +364,18 @@ void plugin_run(Plugin *plugin, Editor *editor)
   command_line = g_string_append(command_line, "' \"");
 
   if (plugdet->type == GPHPEDIT_PLUGIN_TYPE_SELECTION) {
-    wordStart = gtk_scintilla_get_selection_start(GTK_SCINTILLA(editor->scintilla));
-    wordEnd = gtk_scintilla_get_selection_end(GTK_SCINTILLA(editor->scintilla));
-    current_selection = gtk_scintilla_get_text_range (GTK_SCINTILLA(editor->scintilla), wordStart, wordEnd, &ac_length);
+    if (!document_get_is_empty(document)){
+    current_selection = document_get_current_selected_text(document);
     gchar *escape= g_strescape(current_selection,"");
     command_line = g_string_append(command_line, escape);
     g_free(current_selection);
     g_free(escape);
+    }
   }
   else if (plugdet->type == GPHPEDIT_PLUGIN_TYPE_FILENAME || plugdet->type == GPHPEDIT_PLUGIN_TYPE_SYNTAX) {
-    gchar *temp_path=filename_get_path(editor->filename->str); /* remove escaped chars*/
+    gchar *filename = document_get_filename(document);
+    gchar *temp_path=filename_get_path(filename); /* remove escaped chars*/
+    g_free(filename);
     command_line = g_string_append(command_line, temp_path);
     g_free(temp_path);
   }
@@ -388,15 +386,10 @@ void plugin_run(Plugin *plugin, Editor *editor)
   data = strstr(stdout, "\n");
   data++;
   if (g_str_has_prefix(stdout, "INSERT")){
-      if (data) {
-        gtk_scintilla_insert_text(GTK_SCINTILLA(editor->scintilla), 
-        gtk_scintilla_get_current_pos(GTK_SCINTILLA(editor->scintilla)), data);
-      }
+      document_insert_text(document, data);
     }
     else if (g_str_has_prefix(stdout, "REPLACE")){
-      if (data) {
-        gtk_scintilla_replace_sel(GTK_SCINTILLA(editor->scintilla), data);
-      }
+      document_replace_current_selection(document, data);
     }
     else if (g_str_has_prefix(stdout, "MESSAGE")){
         if (data){
@@ -405,7 +398,7 @@ void plugin_run(Plugin *plugin, Editor *editor)
     }
     else if (g_str_has_prefix(stdout, "SYNTAX")){
         /*TODO: save file before execute plugin?*/
-        syntax_window(main_window.win, GTK_SCINTILLA(editor->scintilla), data);
+        syntax_window(main_window.win, document, data);
     }
     else if (g_str_has_prefix(stdout, "OPEN")){
       if (DEBUG_MODE) { g_print("DEBUG: main_window.c:plugin_exec: Opening file :date: %s\n", data); }

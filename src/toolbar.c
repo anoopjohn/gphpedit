@@ -31,9 +31,8 @@
 #include "main_window.h"
 #include "main_window_callbacks.h"
 
-#include "toolbar.h"
-
 #include <gdk/gdkkeysyms.h>
+#include "toolbar.h"
 
 #define TOOLBAR_GET_PRIVATE(object)(G_TYPE_INSTANCE_GET_PRIVATE ((object), \
 						GOBJECT_TYPE_TOOLBAR,              \
@@ -129,7 +128,7 @@ main_toolbar_init (ToolBar *toolbar)
   ToolBarPrivate *priv = TOOLBAR_GET_PRIVATE(toolbar);
 
   priv->type = 0;
-       
+      
   /* Add the File operations to the Main Toolbar */
   create_toolbar_stock_item(&priv->button_new,toolbar,GTK_STOCK_NEW, _("New File"));
 
@@ -350,7 +349,7 @@ void toolbar_grab_goto_focus(ToolBar *toolbar){
   }
 }
 
-void toolbar_update_controls(ToolBar *toolbar, gboolean is_scintilla, gboolean is_webkit, gboolean isreadonly)
+void toolbar_update_controls(ToolBar *toolbar, gboolean is_scintilla, gboolean isreadonly)
 {
  ToolBarPrivate *priv = TOOLBAR_GET_PRIVATE(toolbar);
   if (is_scintilla){
@@ -374,7 +373,6 @@ void toolbar_update_controls(ToolBar *toolbar, gboolean is_scintilla, gboolean i
       gtk_widget_set_sensitive (priv->goto_entry, TRUE);
     }
   }else{
-    if (is_webkit){
       //deactivate toolbar items
         if (priv->type==0){
           gtk_widget_set_sensitive (priv->button_cut, FALSE);
@@ -390,6 +388,5 @@ void toolbar_update_controls(ToolBar *toolbar, gboolean is_scintilla, gboolean i
           gtk_widget_set_sensitive (priv->search_entry, FALSE);
           gtk_widget_set_sensitive (priv->goto_entry, FALSE);
         }
-      }
   }
 }

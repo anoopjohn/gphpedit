@@ -219,7 +219,7 @@ void add_plugin_to_menu (gpointer data, gpointer user_data)
     * Syntax plugins are automatically incorporate to the syntax check system so don't show that plugins here.
     * TODO: maybe configure this in preferences??
     */
-    if (get_plugin_syntax_type(plugin)==0){ 
+    if (get_plugin_syntax_type(plugin)==-1){ 
     item =  gtk_menu_item_new_with_mnemonic(get_plugin_name(plugin));
     gtk_widget_show(item);
     install_menu_hint(item, (gchar *)get_plugin_description(plugin));
@@ -246,27 +246,27 @@ gtk_plugin_manager_menu_populate (GtkPlugin_Manager_Menu *menu)
 static void plugin_exec (GtkWidget *widget, gpointer user_data)
 {
   Plugin *plugin;
-  if (main_window.current_editor == NULL) {
+  if (main_window.current_document == NULL) {
     return;
   }
   GtkPlugin_Manager_Menu *menu= GTK_PLUGIN_MANAGER_MENU (user_data);
   
   plugin = get_plugin_by_name(menu->priv->plugmg, (gchar *) gtk_menu_item_get_label (GTK_MENU_ITEM(widget)));
   //
-  plugin_run(plugin, main_window.current_editor);
+  plugin_run(plugin, main_window.current_document);
 }
 
 void plugin_exec_with_num(GtkWidget *widget, gint num){
   Plugin *plugin;
  
-  if (main_window.current_editor == NULL) {
+  if (main_window.current_document == NULL) {
     return;
   }
   GtkPlugin_Manager_Menu *menu= GTK_PLUGIN_MANAGER_MENU (widget);
   if (get_plugin_manager_items_count(menu->priv->plugmg) < num) return;   
   plugin = get_plugin_by_num(menu->priv->plugmg, num);
   //
-  plugin_run(plugin, main_window.current_editor);
+  plugin_run(plugin, main_window.current_document);
 }
 /*
  * Public API

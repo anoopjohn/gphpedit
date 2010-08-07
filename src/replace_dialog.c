@@ -67,63 +67,27 @@ REPLACE_DIALOG_class_init (ReplaceDialogClass *klass)
 
 void replace_all_clicked(ReplaceDialogPrivate *priv)
 {
-  static gint last_found = -1;
-  gint search_flags = 0;
+  GString *message;
   const gchar *text;
   const gchar *replace;
-  glong length_of_document;
-  glong current_pos;
-  glong start_found;
-  glong end_found;
-  glong result;
-  gint numfound=0;
-  GString *message;
-  gint start_pos;
-  
-  length_of_document = gtk_scintilla_get_length(GTK_SCINTILLA(main_window.current_editor->scintilla));
   
   text = gtk_combo_box_get_active_text (GTK_COMBO_BOX(priv->findentry));
   gphpedit_history_entry_prepend_text	(GPHPEDIT_HISTORY_ENTRY(priv->findentry), text);
   replace = gtk_combo_box_get_active_text (GTK_COMBO_BOX(priv->replace_entry));
   gphpedit_history_entry_prepend_text	(GPHPEDIT_HISTORY_ENTRY(priv->replace_entry), text);
 
-  start_pos = gtk_scintilla_get_current_pos(GTK_SCINTILLA(main_window.current_editor->scintilla));
-
-  current_pos = 0;
-  gtk_scintilla_goto_pos(GTK_SCINTILLA(main_window.current_editor->scintilla), current_pos);
-
-  if (gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON(priv->checkcase))) {
-    search_flags += SCFIND_MATCHCASE;
+  gboolean checkwholedoc = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON(priv->checkwholedoc));
+  if (checkwholedoc) {
+    document_goto_pos(main_window.current_document, 0);
+    gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON(priv->checkwholedoc), FALSE);
   }
-
-  if (gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON(priv->checkwholeword))) {
-    search_flags += SCFIND_WHOLEWORD;
-  }
-
-  if (gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON(priv->checkregex))) {
-    search_flags += SCFIND_REGEXP;
-  }
-
-  numfound=0;
-  result = gtk_scintilla_find_text (GTK_SCINTILLA(main_window.current_editor->scintilla),
-                                    search_flags, (gchar *)text, current_pos, length_of_document, &start_found, &end_found);
-
-  while (result != -1) {
-    if (start_found == last_found) {
-      break;
-    }
-
-    last_found = start_found;
-    gtk_scintilla_set_selection_start(GTK_SCINTILLA(main_window.current_editor->scintilla), start_found);
-    gtk_scintilla_set_selection_end(GTK_SCINTILLA(main_window.current_editor->scintilla), end_found);
-    gtk_scintilla_replace_sel(GTK_SCINTILLA(main_window.current_editor->scintilla), replace);
-    gtk_scintilla_set_selection_start(GTK_SCINTILLA(main_window.current_editor->scintilla), start_found);
-    gtk_scintilla_set_selection_end(GTK_SCINTILLA(main_window.current_editor->scintilla), start_found + strlen(replace));
+  gboolean checkcase = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON(priv->checkcase));
+  gboolean checkwholeword = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON(priv->checkwholeword));
+  gboolean checkregex = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON(priv->checkregex));
+  gint numfound=0;
+  while (document_search_replace_text(main_window.current_document, text, replace, checkwholedoc, checkcase, checkwholeword, checkregex, FALSE)){
     numfound++;
-    result = gtk_scintilla_find_text (GTK_SCINTILLA(main_window.current_editor->scintilla),
-                                      search_flags, (gchar *)text, current_pos, length_of_document, &start_found, &end_found);
   }
-
   message = g_string_new("");
   if (numfound==0) {
     g_string_printf(message, _("\"%s\" not found, no replacements made."), text);
@@ -135,91 +99,40 @@ void replace_all_clicked(ReplaceDialogPrivate *priv)
     g_string_printf(message, _("\"%d\" occurences of \"%s\" found, all replaced."), numfound, text);
   }
 
-  gphpedit_statusbar_flash_message (GPHPEDIT_STATUSBAR(main_window.appbar),0,"%s",message->str);
-  gtk_scintilla_goto_pos(GTK_SCINTILLA(main_window.current_editor->scintilla), start_pos);
+  gphpedit_statusbar_flash_message (GPHPEDIT_STATUSBAR(main_window.appbar), 0,"%s",message->str);
+  document_goto_pos(main_window.current_document, document_get_current_position(main_window.current_document));
 }
 
 void replace_clicked(GtkDialog *dialog, ReplaceDialogPrivate *priv)
 {
-  static gint last_found = -1;
-  gint search_flags = 0;
+  GString *message;
   const gchar *text;
   const gchar *replace;
-  glong length_of_document;
-  glong current_pos;
-  glong start_found;
-  glong end_found;
-  glong result;
-
-  length_of_document = gtk_scintilla_get_length(GTK_SCINTILLA(main_window.current_editor->scintilla));
-  current_pos = gtk_scintilla_get_current_pos(GTK_SCINTILLA(main_window.current_editor->scintilla));
-
+  
   text = gtk_combo_box_get_active_text (GTK_COMBO_BOX(priv->findentry));
   gphpedit_history_entry_prepend_text	(GPHPEDIT_HISTORY_ENTRY(priv->findentry), text);
   replace = gtk_combo_box_get_active_text (GTK_COMBO_BOX(priv->replace_entry));
   gphpedit_history_entry_prepend_text	(GPHPEDIT_HISTORY_ENTRY(priv->replace_entry), text);
 
-  if (gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON(priv->checkwholedoc))) {
-    current_pos = 0;
-    gtk_scintilla_goto_pos(GTK_SCINTILLA(main_window.current_editor->scintilla), current_pos);
+  gboolean checkwholedoc = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON(priv->checkwholedoc));
+  if (checkwholedoc) {
+    document_goto_pos(main_window.current_document, 0);
     gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON(priv->checkwholedoc), FALSE);
   }
-
-  if (gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON(priv->checkcase))) {
-    search_flags += SCFIND_MATCHCASE;
+  gboolean checkcase = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON(priv->checkcase));
+  gboolean checkwholeword = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON(priv->checkwholeword));
+  gboolean checkregex = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON(priv->checkregex));
+  gboolean ask_replace = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON(priv->checkpromp));
+  gint numfound=0;
+  while (document_search_replace_text(main_window.current_document, text, replace, checkwholedoc, checkcase, checkwholeword, checkregex, ask_replace)){
+    numfound++;
   }
-
-  if (gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON(priv->checkwholeword))) {
-    search_flags += SCFIND_WHOLEWORD;
+  message = g_string_new("");
+  if (numfound==0) {
+    g_string_printf(message, _("\"%s\" not found, no replacements made."), text);
   }
-
-  if (gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON(priv->checkregex))) {
-    search_flags += SCFIND_REGEXP;
-  }
-
-  result = gtk_scintilla_find_text (GTK_SCINTILLA(main_window.current_editor->scintilla),
-                                    search_flags, (gchar *)text, current_pos, length_of_document, &start_found, &end_found);
-
-  if (result == -1) {
-    // Show message saying could not be found.
-    gphpedit_statusbar_flash_message (GPHPEDIT_STATUSBAR(main_window.appbar),0,_("The text \"%s\" was not found."), text);
-  }
-  else {
-    if (start_found == last_found) {
-      return;
-    }
-
-    last_found = start_found;
-    gtk_scintilla_goto_pos(GTK_SCINTILLA(main_window.current_editor->scintilla), start_found);  
-    gtk_scintilla_set_selection_start(GTK_SCINTILLA(main_window.current_editor->scintilla), start_found);
-    gtk_scintilla_set_selection_end(GTK_SCINTILLA(main_window.current_editor->scintilla), end_found);
-    if (gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON(priv->checkpromp))) {
-      // Prompt for replace?
-      GtkWidget *replace_prompt_dialog;
-      replace_prompt_dialog = gtk_message_dialog_new(GTK_WINDOW(dialog),GTK_DIALOG_DESTROY_WITH_PARENT,GTK_MESSAGE_QUESTION,GTK_BUTTONS_YES_NO,
-            _("Do you want to replace this occurence?"));
-      gtk_window_set_title(GTK_WINDOW(replace_prompt_dialog), _("Question"));
-      gtk_window_set_transient_for (GTK_WINDOW(replace_prompt_dialog),GTK_WINDOW(dialog));
-      gint result = gtk_dialog_run (GTK_DIALOG (replace_prompt_dialog));
-      gint selection_start;
-      const gchar *replace;
-      if (result==GTK_RESPONSE_YES) {
-        replace = gtk_combo_box_get_active_text (GTK_COMBO_BOX(priv->replace_entry));
-        gphpedit_history_entry_prepend_text	(GPHPEDIT_HISTORY_ENTRY(priv->replace_entry), text);
-        selection_start = gtk_scintilla_get_selection_start(GTK_SCINTILLA(main_window.current_editor->scintilla));
-        gtk_scintilla_replace_sel(GTK_SCINTILLA(main_window.current_editor->scintilla), replace);
-        gtk_scintilla_set_selection_start(GTK_SCINTILLA(main_window.current_editor->scintilla), selection_start);
-        gtk_scintilla_set_selection_end(GTK_SCINTILLA(main_window.current_editor->scintilla), selection_start + strlen(replace));
-        }
-      gtk_widget_destroy(replace_prompt_dialog);
-      last_found++;
-    } else {
-      gtk_scintilla_replace_sel(GTK_SCINTILLA(main_window.current_editor->scintilla), replace);
-      gtk_scintilla_goto_pos(GTK_SCINTILLA(main_window.current_editor->scintilla), start_found);  
-      gtk_scintilla_set_selection_start(GTK_SCINTILLA(main_window.current_editor->scintilla), start_found);
-      gtk_scintilla_set_selection_end(GTK_SCINTILLA(main_window.current_editor->scintilla), start_found + strlen(replace));
-    }
-  }
+  gphpedit_statusbar_flash_message (GPHPEDIT_STATUSBAR(main_window.appbar), 0,"%s",message->str);
+  document_goto_pos(main_window.current_document, document_get_current_position(main_window.current_document));
 }
 
 
@@ -257,19 +170,11 @@ REPLACE_DIALOG_init (ReplaceDialog *dialog)
   gtk_box_pack_start(GTK_BOX(priv->diagbox), box, FALSE, FALSE, 4);
 
   /* Get selected text (Wendell) */
-  gint wordStart;
-  gint wordEnd;
-  gint length;
   gchar *buffer;
-
-  if (main_window.current_editor->type != TAB_HELP) {
-    wordStart = gtk_scintilla_get_selection_start(GTK_SCINTILLA(main_window.current_editor->scintilla));
-    wordEnd = gtk_scintilla_get_selection_end(GTK_SCINTILLA(main_window.current_editor->scintilla));
-    if (wordStart != wordEnd) {
-      buffer = gtk_scintilla_get_text_range (GTK_SCINTILLA(main_window.current_editor->scintilla), wordStart, wordEnd, &length);
+  buffer = document_get_current_selected_text(main_window.current_document);
+  if (buffer) {
       gphpedit_history_entry_prepend_text	(GPHPEDIT_HISTORY_ENTRY(priv->findentry),buffer);
       gtk_combo_box_set_active (GTK_COMBO_BOX(priv->findentry), 0);
-    }
   }
   /* End get selected text */
 

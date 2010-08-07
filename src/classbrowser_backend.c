@@ -30,6 +30,7 @@
 #include <stdlib.h>
 #include <gtk/gtk.h>
 #include "classbrowser_backend.h"
+#include "classbrowser_parse.h"
 #include "main_window_callbacks.h"
 #include "gvfs_utils.h"
 //#define DEBUGCLASSBROWSER 
@@ -89,7 +90,7 @@ static void classbrowser_backend_dispose (GObject *gobject);
 					    Classbrowser_BackendDetails))
 
 void classbrowser_remove_dead_wood(Classbrowser_Backend *classback);
-void do_parse_file(Classbrowser_Backend *classback, Editor *editor);
+void do_parse_file(Classbrowser_Backend *classback, Document *document);
 void free_function_list_item (gpointer data, gpointer user_data);
 #ifdef HAVE_CTAGS_EXUBERANT
 void call_ctags(Classbrowser_Backend *classback, gchar *filename);
@@ -259,24 +260,23 @@ void list_php_files_open (gpointer data, gpointer user_data){
 * otherwise use CTAGS EXUBERANT if it's avariable.
 * //FIXME: CTAGS EXUBERANT don't support CSS files
 */
-void do_parse_file(Classbrowser_Backend *classback, Editor *editor){
-    if (editor && GTK_IS_SCINTILLA(editor->scintilla)) {
-    if (editor->is_untitled) return;
-      #ifdef CLASSBROWSER
-      g_print("classbrowser found:%s\n",editor->filename->str);
+void do_parse_file(Classbrowser_Backend *classback, Document *document){
+    g_return_if_fail(document);
+    if (document_is_scintilla_based(document) && !document_get_untitled(document)) {
+      #ifdef DEBUGCLASSBROWSER
+      g_print("Parsing:%s\n",document_get_shortfilename(document));
       #endif
     while (gtk_events_pending()) gtk_main_iteration(); /* update ui */
-    #ifdef DEBUGCLASSBROWSER
-      g_print("Parsing %s\n", editor->filename->str);
-    #endif
-      if (is_php_file_from_filename(editor->filename->str)) {
-        classbrowser_parse_file(classback, editor->filename->str); 
+    gchar *filename =document_get_filename(document);;
+      if (is_php_file_from_filename(filename)) {
+        classbrowser_parse_file(classback, filename); 
 #ifdef HAVE_CTAGS_EXUBERANT
       } else {
         /* CTAGS don't support CSS files */
-        if (!is_css_file(editor->filename->str)) call_ctags(classback, editor->filename->str);
+        if (!is_css_file(filename)) call_ctags(classback, filename);
 #endif
       }
+    g_free(filename);
     }  
 }
 
@@ -333,10 +333,7 @@ void classbrowser_backend_update(Classbrowser_Backend *classback, GSList *editor
   
   classbrowser_backend_start_update(classbackdet);
   if (only_current_file){
-    //add only if there is a current editor
-    if (main_window.current_editor) {
-      do_parse_file(classback, main_window.current_editor);
-    }
+      do_parse_file(classback, main_window.current_document);
   } else {
     if (editor_list){
     g_slist_foreach (editor_list, list_php_files_open, classback); 
@@ -476,10 +473,7 @@ gchar *get_ctags_token(gchar *text,gint *advancing){
 }
 //FIXME:: only COBOL support for now
 void call_ctags(Classbrowser_Backend *classback, gchar *filename){
-  if (!filename){
-    g_print("skip\n");
-    return;
-  }
+  if (!filename) return;
   gboolean result;
   gchar *stdout;
   gint exit_status;
@@ -588,22 +582,6 @@ GTree *classbrowser_backend_get_class_list(Classbrowser_Backend *classback){
   return classbackdet->php_class_tree; 
 }
 
-
-
-gboolean classbrowser_file_in_list_find(GSList *list, gchar *file)
-{
-  GSList *list_walk;
-  gchar *data;
-
-  for(list_walk = list; list_walk!= NULL; list_walk = g_slist_next(list_walk)) {
-    data = list_walk->data;
-    if (g_utf8_collate(data, file)==0) {
-      return TRUE;
-    }
-  }
-  return FALSE;
-}
-
 /* FILE label section */
 
 /**
@@ -679,36 +657,6 @@ GString *get_differing_part(GSList *filenames, gchar *file_requested)
   return g_string_new(buffer);
 }
 
-GString *get_differing_part_editor(Editor *editor)
-{
-  gchar *cwd;
-  GSList *list_editors;
-  GSList *list_filenames;
-  Editor *data;
-  gchar *str;
-  GString *result;
-
-  if (editor == NULL) 
-    return NULL;
-  
-  cwd = g_get_current_dir();
-
-  list_filenames = NULL;
-  list_filenames = g_slist_append(list_filenames, cwd);
-
-  for(list_editors = editors; list_editors!= NULL; list_editors = g_slist_next(list_editors)) {
-    data = list_editors->data;
-    if (data->type == TAB_FILE) {
-      str = ((Editor *)data)->filename->str;
-      list_filenames = g_slist_append(list_filenames, str);
-    }
-  }
-
-  result = get_differing_part(list_filenames, editor->filename->str);
-  g_free(cwd);
-  return result;
-}
-
 /*
 * classbrowser_backend_get_selected_label
 * return a new GString with new label text
@@ -731,10 +679,10 @@ GString *classbrowser_backend_get_selected_label(Classbrowser_Backend *classback
     function = function_walk->data;
     if (function) {
       func_filename = function->filename;
-      // g_slist_find and g_slist_index don't seem to work, always return NULL or -1 respec.
-      if (!classbrowser_file_in_list_find(filenames, func_filename)) {
+      if (!g_slist_find_custom (filenames, func_filename, (GCompareFunc) g_utf8_collate)){
         filenames = g_slist_prepend(filenames, func_filename);
       }
+
     }
   }
   if(num_files < 2) {
@@ -753,14 +701,14 @@ static gboolean make_class_completion_string (gpointer key, gpointer value, gpoi
   GString *completion_result= (GString *) data;
   ClassBrowserClass *class;
   class=(ClassBrowserClass *)value;
-        if (!completion_result) {
-        completion_result = g_string_new(g_strchug(class->classname));
-        completion_result = g_string_append(completion_result, "?4"); /* add corresponding image*/
-        } else {
-        completion_result = g_string_append(completion_result, " ");
-        completion_result = g_string_append(completion_result, g_strchug(class->classname));
-        completion_result = g_string_append(completion_result, "?4"); /* add corresponding image*/
-        }
+  if (!completion_result) {
+    completion_result = g_string_new(g_strchug(class->classname));
+    completion_result = g_string_append(completion_result, "?4"); /* add corresponding image*/
+  } else {
+    completion_result = g_string_append(completion_result, " ");
+    completion_result = g_string_append(completion_result, g_strchug(class->classname));
+    completion_result = g_string_append(completion_result, "?4"); /* add corresponding image*/
+  }
   return FALSE;
 }
 
@@ -795,12 +743,10 @@ static gboolean make_completion_string (gpointer key, gpointer value, gpointer d
   return FALSE;
 }
 
-void classbrowser_backend_autocomplete_php_variables(Classbrowser_Backend *classback, GtkWidget *scintilla, gint wordStart, gint wordEnd){
+gchar *classbrowser_backend_autocomplete_php_variables(Classbrowser_Backend *classback, gchar *buffer){
   Classbrowser_BackendDetails *classbackdet;
 	classbackdet = CLASSBROWSER_BACKEND_GET_PRIVATE(classback);
-  gchar *buffer = NULL;
-  gint length;
-  buffer = gtk_scintilla_get_text_range (GTK_SCINTILLA(scintilla), wordStart, wordEnd, &length);
+  gchar *result = NULL;
 #ifdef DEBUGCLASSBROWSER
   g_print("var autoc:%s\n",buffer);
 #endif
@@ -808,31 +754,27 @@ void classbrowser_backend_autocomplete_php_variables(Classbrowser_Backend *class
   search_data->prefix=buffer;
   search_data->completion_result = NULL;
   g_tree_foreach (classbackdet->php_variables_tree, make_completion_string,search_data);
-  g_free(buffer);
   if (search_data->completion_result){
-    gtk_scintilla_autoc_show(GTK_SCINTILLA(scintilla), wordEnd-wordStart, search_data->completion_result->str);
-    g_string_free(search_data->completion_result,TRUE); /*release resources*/
+    result = g_string_free(search_data->completion_result, FALSE); /*release resources*/
   }
   g_slice_free(var_find, search_data);  
+  return result;
 }
 
-GString *get_member_function_completion_list(Classbrowser_BackendDetails *classbackdet, GtkWidget *scintilla, gint wordStart, gint wordEnd)
+GString *get_member_function_completion_list(Classbrowser_BackendDetails *classbackdet, gchar *buffer)
 {
-  gchar *buffer = NULL;
   GSList *li;
   GList *li2;
   ClassBrowserFunction *function;
   GList* member_functions = NULL;
   GList* sorted_member_functions = NULL;
   GString *result = NULL;
-  gint length;
   gchar *function_name;
 
-  buffer = gtk_scintilla_get_text_range (GTK_SCINTILLA(scintilla), wordStart, wordEnd, &length);
   for(li = classbackdet->functionlist; li!= NULL; li = g_slist_next(li)) {
     function = li->data;
     if (function) {
-      if ((g_str_has_prefix(function->functionname, buffer) || (wordStart==wordEnd)) && function->file_type==TAB_PHP ) {
+      if ((g_str_has_prefix(function->functionname, buffer) || strlen(buffer)!=0) && function->file_type==TAB_PHP ) {
         member_functions = g_list_append(member_functions, function->functionname);
       }
     }
@@ -855,23 +797,20 @@ GString *get_member_function_completion_list(Classbrowser_BackendDetails *classb
   }
 
   result = g_string_append(result, " ");
-  g_free(buffer);
   return result;
 }
 
 
-void classbrowser_backend_autocomplete_member_function(Classbrowser_Backend *classback, GtkWidget *scintilla, gint wordStart, gint wordEnd)
+gchar *classbrowser_backend_autocomplete_member_function(Classbrowser_Backend *classback, gchar *prefix)
 {
   Classbrowser_BackendDetails *classbackdet;
 	classbackdet = CLASSBROWSER_BACKEND_GET_PRIVATE(classback);
   GString *list;
-
-  list = get_member_function_completion_list(classbackdet, scintilla, wordStart, wordEnd);
-
+  list = get_member_function_completion_list(classbackdet, prefix);
   if (list) {
-    gtk_scintilla_autoc_show(GTK_SCINTILLA(scintilla), wordEnd-wordStart, list->str);
-    g_string_free(list, FALSE);
+    return g_string_free(list, FALSE);
   }
+  return NULL;
 }
 
 gchar *classbrowser_backend_custom_function_calltip(Classbrowser_Backend *classback, gchar *function_name){
@@ -945,7 +884,7 @@ gchar *classbrowser_backend_add_custom_autocompletion(Classbrowser_Backend *clas
 
 #ifdef HAVE_CTAGS_EXUBERANT
 static inline gboolean is_cobol_banned_word(gchar *word){
-  return (g_strcmp0(word,"AUTHOR")==0 || g_strcmp0(word,"OBJECT-COMPUTER")==0 || g_strcmp0(word,"DATE-WRITTEN")==0 || g_strcmp0(word,"PROGRAM-ID")==0 || g_strcmp0(word,"SOURCE-COMPUTER")==0 || g_strcmp0(word,"SPECIAL-NAMES")==0 || g_strcmp0(word,"END-IF")==0);
+  return (g_strcmp0(word,"AUTHOR")==0 || g_strcmp0(word,"OBJECT-COMPUTER")==0 || g_strcmp0(word,"DATE-WRITTEN")==0 || g_strcmp0(word,"PROGRAM-ID")==0 || g_strcmp0(word,"SOURCE-COMPUTER")==0 || g_strcmp0(word, "END-EVALUATE")==0 || g_strcmp0(word,"FILE-CONTROL")==0 || g_strcmp0(word,"SPECIAL-NAMES")==0 || g_strcmp0(word,"END-IF")==0);
 }
 
 void process_cobol_word(Classbrowser_Backend *classback, gchar *name,gchar *filename,gchar *type,gchar *line){

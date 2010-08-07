@@ -57,8 +57,8 @@ struct _GtkSyntax_Check_WindowClass
 
 GType      gtk_syntax_check_window_get_type         (void) G_GNUC_CONST;
 GtkWidget *gtk_syntax_check_window_new              (void);
-void syntax_window(GtkSyntax_Check_Window *win, GtkScintilla *scintilla, gchar *data);
-void gtk_syntax_check_window_run_check(GtkSyntax_Check_Window *win, Editor *editor);
+void syntax_window(GtkSyntax_Check_Window *win, Document *document, gchar *data);
+void gtk_syntax_check_window_run_check(GtkSyntax_Check_Window *win, Document *document);
 G_END_DECLS
 
 #endif /* ! __GTK_SYNTAX_CHECK_WINDOW_H__ */

@@ -334,7 +334,7 @@ void scintilla_php_set_lexer(GtkScintilla *scintilla)
   gtk_scintilla_colourise(scintilla, 0, -1);
 }
 
-void tab_php_set_lexer(Editor *editor)
+void tab_php_set_lexer(Document *document)
 {
-  scintilla_php_set_lexer(GTK_SCINTILLA(editor->scintilla));
+  scintilla_php_set_lexer(document_get_scintilla(document));
 }

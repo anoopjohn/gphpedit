@@ -57,8 +57,8 @@ GtkWidget	 *gphpedit_classbrowser_new (void);
 void classbrowser_update(gphpeditClassBrowser *classbrowser);
 void classbrowser_force_label_update(gphpeditClassBrowser *classbrowser);
 GString *classbrowser_get_autocomplete_php_classes_string(gphpeditClassBrowser *classbrowser);
-void classbrowser_autocomplete_php_variables(gphpeditClassBrowser *classbrowser, GtkWidget *scintilla, gint wordStart, gint wordEnd);
-void classbrowser_autocomplete_member_function(gphpeditClassBrowser *classbrowser, GtkWidget *scintilla, gint wordStart, gint wordEnd);
+gchar *classbrowser_autocomplete_php_variables(gphpeditClassBrowser *classbrowser, gchar *prefix);
+gchar *classbrowser_autocomplete_member_function(gphpeditClassBrowser *classbrowser, gchar *member);
 gchar *classbrowser_custom_function_calltip(gphpeditClassBrowser *classbrowser, gchar *function_name);
 gchar *classbrowser_add_custom_autocompletion(gphpeditClassBrowser *classbrowser, gchar *prefix, GSList *list);
 G_END_DECLS

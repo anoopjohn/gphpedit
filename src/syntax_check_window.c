@@ -168,19 +168,16 @@ void lint_row_activated (GtkTreeSelection *selection, gpointer data)
 * lines end with \n 
 * if data hasn't got that format it'll be shown be error will not be styled.
 */
-void syntax_window(GtkSyntax_Check_Window *win, GtkScintilla *scintilla, gchar *data){
+void syntax_window(GtkSyntax_Check_Window *win, Document *document, gchar *data){
   GtkSyntax_Check_WindowPrivate *priv = GTK_SYNTAX_CHECK_WINDOW_GET_PRIVATE(win);
-  if (!scintilla) return;
+  if (!document) return;
   if (!data) return;
   gchar *copy;
   gchar *token;
   gchar *line_number=NULL;
   gchar *first_error = NULL;
-  gint line_start;
-  gint line_end;
-  gint indent;
   /* clear document before start any styling action */
-  gtk_scintilla_indicator_clear_range(scintilla, 0, gtk_scintilla_get_text_length(scintilla));
+  document_clear_sintax_style(document);
   gtk_widget_show(GTK_WIDGET(win));
   GtkTreeIter iter;
   if (!priv->lint_store) priv->lint_store = gtk_list_store_new (1, G_TYPE_STRING); /* create a new one */
@@ -188,19 +185,14 @@ void syntax_window(GtkSyntax_Check_Window *win, GtkScintilla *scintilla, gchar *
   gtk_list_store_clear(priv->lint_store);
   copy = data;
 
-  gtk_scintilla_set_indicator_current(scintilla, 20);
-  gtk_scintilla_indic_set_style(scintilla, 20, INDIC_SQUIGGLE);
-  gtk_scintilla_indic_set_fore(scintilla, 20, 0x0000ff);
-
-  gtk_scintilla_annotation_clear_all(scintilla);
-  gtk_scintilla_annotation_set_visible(scintilla, 2);
+  document_set_sintax_indicator(document);
+  document_set_sintax_annotation(document);
   /* lines has form line number space message dot like 
   * 59 invalid operator.\n
   * lines end with \n
   */
 
   while ((token = strtok(copy, "\n"))) {
-    g_print("%s (%d)\n", token, strlen(token));
     gtk_list_store_append (priv->lint_store, &iter);
     gtk_list_store_set (priv->lint_store, &iter, 0, token, -1);
     gchar *anotationtext=g_strdup(token);
@@ -212,23 +204,16 @@ void syntax_window(GtkSyntax_Check_Window *win, GtkScintilla *scintilla, gchar *
       first_error = line_number;
       }
       guint current_line_number=atoi(line_number)-1;
-      indent = gtk_scintilla_get_line_indentation(scintilla, current_line_number);
-  
-      line_start = gtk_scintilla_position_from_line(scintilla, current_line_number);
-      line_start += (indent/get_preferences_manager_indentation_size(main_window.prefmg));
-  
-      line_end = gtk_scintilla_get_line_end_position(scintilla, current_line_number);
-      gtk_scintilla_indicator_fill_range(scintilla, line_start, line_end-line_start);
+      document_set_sintax_line(document, current_line_number);
       token=anotationtext + (int)(line_number-token+1);
       /* if first char is an E then set error style, else if first char is W set warning style */
       if (strncmp(token,"E",1)==0){
-        gtk_scintilla_annotation_set_style(scintilla, current_line_number, STYLE_ANNOTATION_ERROR);
         token+=1;
+        document_add_sintax_annotation(document , current_line_number, token, STYLE_ANNOTATION_ERROR);
       } else if (strncmp(token,"W",1)==0){
-        gtk_scintilla_annotation_set_style(scintilla, current_line_number, STYLE_ANNOTATION_WARNING);
         token+=1;
+        document_add_sintax_annotation(document , current_line_number, token, STYLE_ANNOTATION_WARNING);
       }
-      gtk_scintilla_annotation_set_text(scintilla, current_line_number, token);
     }
     }
     g_free(anotationtext);
@@ -247,21 +232,22 @@ gtk_syntax_check_window_new (void)
   return g_object_new (GTK_TYPE_SYNTAX_CHECK_WINDOW, NULL);
 }
 
-void gtk_syntax_check_window_run_check(GtkSyntax_Check_Window *win, Editor *editor)
+void gtk_syntax_check_window_run_check(GtkSyntax_Check_Window *win, Document *document)
 {
-  if (!win) return;
-  if (!editor){
-   syntax_window(win, GTK_SCINTILLA(editor->scintilla), _("You don't have any files open to check\n"));
+  g_return_if_fail(win);
+  if (!document){
+   syntax_window(win, document, _("You don't have any files open to check\n"));
    return;
   }
-  gchar *res = syntax_check_manager_run(editor,editor->type);
+  gchar *res = syntax_check_manager_run(document);
   if (res){
-     syntax_window(win, GTK_SCINTILLA(editor->scintilla), res);
+     syntax_window(win, document, res);
      g_free(res);
   } else {
       /* try plugins */
-      if (!run_syntax_plugin_by_ftype(get_plugin_manager(GTK_PLUGIN_MANAGER_MENU(menubar_get_menu_plugin(MENUBAR(main_window.menu)))), editor, editor->type)){
+      if (!run_syntax_plugin_by_ftype(get_plugin_manager(GTK_PLUGIN_MANAGER_MENU(menubar_get_menu_plugin(MENUBAR(main_window.menu)))), document)){
 //      g_print("syntax check not implement\n");
       }
   }
+
 }

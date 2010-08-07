@@ -244,47 +244,41 @@ gchar *process_perl_lines(gchar *output)
 * save_as_temp_file (internal)
 * save the content of an editor and return the filename of the temp file or NULL on error.
 */
-GString *save_as_temp_file(Editor *editor)
+GString *save_as_temp_file(Document *document)
 {
-  gchar *write_buffer = NULL;
-  gsize text_length;
-  GString *filename;
-
-  text_length = gtk_scintilla_get_length(GTK_SCINTILLA(editor->scintilla));
-  write_buffer = g_malloc0(text_length+1); // Include terminating null
-
-  if (write_buffer == NULL) {
-      g_warning ("%s", _("Cannot allocate write buffer"));
-     return NULL;
-  }
-    
-  filename = text_save_as_temp_file(write_buffer);
+  gchar *write_buffer = document_get_text(document);
+  GString *filename = text_save_as_temp_file(write_buffer);
   g_free(write_buffer);
   return filename;
 }
 
-gchar *syntax_check_manager_run(Editor *editor, gint ftype)
+gchar *syntax_check_manager_run(Document *document)
 {
   GString *command_line=NULL;
   gchar *output;
   gboolean using_temp;
   GString *filename;
-
-  if (editor->saved==TRUE && filename_is_native(editor->filename->str)) {
-      gchar *local_path=filename_get_scaped_path(editor->filename->str);
+  gint ftype = document_get_document_type(document);
+  gchar *docfilename = document_get_filename(document);
+  if (document_get_saved_status(document) && filename_is_native(docfilename) && document_get_untitled(document)) {
+      gchar *local_path=filename_get_scaped_path(docfilename);
       filename = g_string_new(local_path);
       g_free(local_path);
       using_temp = FALSE;
     }
     else {
-      filename = save_as_temp_file(editor);
+      filename = save_as_temp_file(document);
       using_temp = TRUE;
     }
+    g_free(docfilename);
     if(ftype==TAB_PHP){
-    command_line = g_string_new(get_preferences_manager_php_binary_location(main_window.prefmg));
+    Preferences_Manager *pref = preferences_manager_new ();
+//    command_line = g_string_new(get_preferences_manager_php_binary_location(main_window.prefmg));
+    command_line = g_string_new(get_preferences_manager_php_binary_location(pref));
     command_line = g_string_append(command_line, " -q -l -d html_errors=Off -f '");
     command_line = g_string_append(command_line, filename->str);
     command_line = g_string_append(command_line, "'");
+    g_object_unref(pref);
 //    g_print("eject:%s\n", command_line->str);
     } else if (ftype==TAB_PERL){
     command_line = g_string_new("perl -c ");
