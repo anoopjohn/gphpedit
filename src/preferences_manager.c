@@ -163,6 +163,7 @@ preferences_manager_get_type (void)
     
     return our_type;
 }
+
 /*
 * overide default contructor to make a singleton.
 * see http://blogs.gnome.org/xclaesse/2010/02/11/how-to-make-a-gobject-singleton/

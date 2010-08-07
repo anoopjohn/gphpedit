@@ -282,9 +282,3 @@ gtk_plugin_manager_menu_new (GtkAccelGroup *accel_grup)
   gtk_plugin_manager_menu_populate (menu);
   return GTK_WIDGET(menu);
 }
-
-Plugin_Manager *get_plugin_manager(GtkPlugin_Manager_Menu *menu)
-{
-  GtkPlugin_Manager_MenuPrivate *priv = menu->priv;
-  return priv->plugmg;
-}

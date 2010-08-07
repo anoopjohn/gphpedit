@@ -79,6 +79,29 @@ plugin_manager_get_type (void)
     
     return our_type;
 }
+
+/*
+* overide default contructor to make a singleton.
+* see http://blogs.gnome.org/xclaesse/2010/02/11/how-to-make-a-gobject-singleton/
+*/
+static GObject*
+plugin_manager_constructor (GType type,
+                 guint n_construct_params,
+                 GObjectConstructParam *construct_params)
+{
+  static GObject *self = NULL;
+
+  if (self == NULL)
+    {
+      self = G_OBJECT_CLASS (parent_class)->constructor (
+          type, n_construct_params, construct_params);
+      g_object_add_weak_pointer (self, (gpointer) &self);
+      return self;
+    }
+
+  return g_object_ref (self);
+}
+
 static void
 plugin_manager_class_init (Plugin_ManagerClass *klass)
 {
@@ -87,6 +110,7 @@ plugin_manager_class_init (Plugin_ManagerClass *klass)
 	object_class = G_OBJECT_CLASS (klass);
   parent_class = g_type_class_peek_parent (klass);
 	object_class->finalize = plugin_manager_finalize;
+  object_class->constructor = plugin_manager_constructor;
 	g_type_class_add_private (klass, sizeof (Plugin_Manager_Details));
 }
 

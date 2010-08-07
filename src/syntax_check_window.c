@@ -26,7 +26,7 @@
 #include "syntax_check_window.h"
 #include "main_window_callbacks.h"
 #include "syntax_check_manager.h"
-#include "pluginmenu.h"
+#include "pluginmanager.h"
 #include <stdlib.h>
 struct _GtkSyntax_Check_WindowPrivate
 {
@@ -245,9 +245,10 @@ void gtk_syntax_check_window_run_check(GtkSyntax_Check_Window *win, Document *do
      g_free(res);
   } else {
       /* try plugins */
-      if (!run_syntax_plugin_by_ftype(get_plugin_manager(GTK_PLUGIN_MANAGER_MENU(menubar_get_menu_plugin(MENUBAR(main_window.menu)))), document)){
+      Plugin_Manager *plugmg = plugin_manager_new ();
+      if (!run_syntax_plugin_by_ftype(plugmg, document)){
 //      g_print("syntax check not implement\n");
       }
+    g_object_unref(plugmg);
   }
-
 }
