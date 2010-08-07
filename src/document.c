@@ -386,8 +386,9 @@ void tab_set_general_scintilla_properties(Document *doc)
 
 void tab_set_configured_scintilla_properties(GtkScintilla *scintilla)
 {
-  gtk_scintilla_set_wrap_mode(scintilla, get_preferences_manager_line_wrapping(main_window.prefmg));
-  if (get_preferences_manager_line_wrapping(main_window.prefmg)) {
+  Preferences_Manager *pref = preferences_manager_new ();
+  gtk_scintilla_set_wrap_mode(scintilla, get_preferences_manager_line_wrapping(pref));
+  if (get_preferences_manager_line_wrapping(pref)) {
     gtk_scintilla_set_h_scroll_bar(scintilla, 0);
   }
   else {
@@ -396,35 +397,35 @@ void tab_set_configured_scintilla_properties(GtkScintilla *scintilla)
   gchar *font =NULL;
   gint size, fore, back;
   gboolean italic, bold;
-  get_preferences_manager_style_settings(main_window.prefmg, "line_numbers", &font , &size, &fore, &back, NULL, NULL);
+  get_preferences_manager_style_settings(pref, "line_numbers", &font , &size, &fore, &back, NULL, NULL);
   gtk_scintilla_style_set_font (scintilla, STYLE_LINENUMBER, font);
   gtk_scintilla_style_set_fore (scintilla, STYLE_LINENUMBER, fore);
   gtk_scintilla_style_set_back (scintilla, STYLE_LINENUMBER, back);
   gtk_scintilla_style_set_size (scintilla, STYLE_LINENUMBER, size);
   /* set font quality */
-  gtk_scintilla_set_font_quality(scintilla, get_preferences_manager_font_quality (main_window.prefmg));
+  gtk_scintilla_set_font_quality(scintilla, get_preferences_manager_font_quality (pref));
 
-  gtk_scintilla_set_caret_line_visible(scintilla, get_preferences_manager_higthlight_caret_line (main_window.prefmg));
-  gtk_scintilla_set_caret_line_back(scintilla, get_preferences_manager_higthlight_caret_line_color (main_window.prefmg));
+  gtk_scintilla_set_caret_line_visible(scintilla, get_preferences_manager_higthlight_caret_line (pref));
+  gtk_scintilla_set_caret_line_back(scintilla, get_preferences_manager_higthlight_caret_line_color (pref));
 
-  gtk_scintilla_set_indentation_guides (scintilla, get_preferences_manager_show_indentation_guides (main_window.prefmg));
-  gtk_scintilla_set_edge_mode (scintilla, get_preferences_manager_edge_mode (main_window.prefmg));
-  gtk_scintilla_set_edge_column (scintilla, get_preferences_manager_edge_column (main_window.prefmg));
-  gtk_scintilla_set_edge_colour (scintilla, get_preferences_manager_edge_colour (main_window.prefmg));
+  gtk_scintilla_set_indentation_guides (scintilla, get_preferences_manager_show_indentation_guides (pref));
+  gtk_scintilla_set_edge_mode (scintilla, get_preferences_manager_edge_mode (pref));
+  gtk_scintilla_set_edge_column (scintilla, get_preferences_manager_edge_column (pref));
+  gtk_scintilla_set_edge_colour (scintilla, get_preferences_manager_edge_colour (pref));
 
-  gtk_scintilla_set_sel_back(scintilla, 1, get_preferences_manager_set_sel_back (main_window.prefmg));
+  gtk_scintilla_set_sel_back(scintilla, 1, get_preferences_manager_set_sel_back (pref));
   gtk_scintilla_set_caret_fore (scintilla, 0); /*TODO:: if back color is black this must be white */
   gtk_scintilla_set_caret_width (scintilla, 2);
   gtk_scintilla_set_caret_period (scintilla, 250);
 
   gtk_scintilla_autoc_set_choose_single (scintilla, FALSE);
-  gtk_scintilla_set_use_tabs (scintilla, get_preferences_manager_use_tabs_instead_spaces(main_window.prefmg));
+  gtk_scintilla_set_use_tabs (scintilla, get_preferences_manager_use_tabs_instead_spaces(pref));
   gtk_scintilla_set_tab_indents (scintilla, 1);
   gtk_scintilla_set_backspace_unindents (scintilla, 1);
-  gtk_scintilla_set_tab_width (scintilla, get_preferences_manager_indentation_size (main_window.prefmg));
-  gtk_scintilla_set_indent (scintilla, get_preferences_manager_tab_size(main_window.prefmg));
+  gtk_scintilla_set_tab_width (scintilla, get_preferences_manager_indentation_size (pref));
+  gtk_scintilla_set_indent (scintilla, get_preferences_manager_tab_size(pref));
 
-  get_preferences_manager_style_settings(main_window.prefmg, "default_style", &font , &size, &fore, &back, &italic, &bold);
+  get_preferences_manager_style_settings(pref, "default_style", &font , &size, &fore, &back, &italic, &bold);
   gtk_scintilla_style_set_font (scintilla, STYLE_DEFAULT, font);
   gtk_scintilla_style_set_size (scintilla, STYLE_DEFAULT, size);
   gtk_scintilla_style_set_italic (scintilla, STYLE_DEFAULT, italic);
@@ -446,6 +447,8 @@ void tab_set_configured_scintilla_properties(GtkScintilla *scintilla)
   gtk_scintilla_style_set_bold (scintilla,  STYLE_ANNOTATION_WARNING, FALSE);
   gtk_scintilla_style_set_fore (scintilla,  STYLE_ANNOTATION_WARNING, 2859424);
   gtk_scintilla_style_set_back (scintilla,  STYLE_ANNOTATION_WARNING, 10813438);
+  
+  g_object_unref(pref);
 }
 
 static void save_point_reached(GtkWidget *scintilla, gpointer user_data)
@@ -686,20 +689,20 @@ static void char_added(GtkWidget *scintilla, guint ch, gpointer user_data)
   gint previous_char_buffer_length;
   guint style;
   gint type;
-
   type = docdet->type;
   #ifdef DEBUGTAB
   g_print("DEBUG:::char added:%d\n",ch);
   #endif
   if (type == TAB_HELP || type == TAB_PREVIEW) return;
   if ((type != TAB_PHP) && (ch=='\r'|| ch=='\n' || ch=='\t'))return;
+  Preferences_Manager *pref = preferences_manager_new ();
   current_pos = gtk_scintilla_get_current_pos(GTK_SCINTILLA(scintilla));
   current_line = gtk_scintilla_line_from_position(GTK_SCINTILLA(scintilla), current_pos);
   wordStart = gtk_scintilla_word_start_position(GTK_SCINTILLA(scintilla), current_pos-1, TRUE);
   wordEnd = gtk_scintilla_word_end_position(GTK_SCINTILLA(scintilla), current_pos-1, TRUE);
   current_word_length = wordEnd - wordStart;
   style = gtk_scintilla_get_style_at(GTK_SCINTILLA(scintilla), current_pos);
-  if (get_preferences_manager_auto_complete_braces(main_window.prefmg)){
+  if (get_preferences_manager_auto_complete_braces(pref)){
     if (ch=='{'){
       gtk_scintilla_insert_text(GTK_SCINTILLA(scintilla), current_pos,"}");
       gtk_scintilla_goto_pos(GTK_SCINTILLA(scintilla), current_pos);
@@ -729,7 +732,7 @@ static void char_added(GtkWidget *scintilla, guint ch, gpointer user_data)
         previous_line_end = gtk_scintilla_get_line_end_position(GTK_SCINTILLA(scintilla), previous_line);
         previous_char_buffer = gtk_scintilla_get_text_range (GTK_SCINTILLA(scintilla), previous_line_end-1, previous_line_end, &previous_char_buffer_length);
         if (*previous_char_buffer=='{') {
-            previous_line_indentation+=get_preferences_manager_indentation_size(main_window.prefmg);
+            previous_line_indentation+=get_preferences_manager_indentation_size(pref);
         }
         g_free(previous_char_buffer);
         indent_line(scintilla, current_line, previous_line_indentation);
@@ -737,7 +740,7 @@ static void char_added(GtkWidget *scintilla, guint ch, gpointer user_data)
         g_print("DEBUG: tab.c:char_added:previous_line=%d, previous_indent=%d\n", previous_line, previous_line_indentation);
         #endif
         gint pos;
-        if (get_preferences_manager_use_tabs_instead_spaces(main_window.prefmg)) {
+        if (get_preferences_manager_use_tabs_instead_spaces(pref)) {
         pos= gtk_scintilla_position_from_line(GTK_SCINTILLA(scintilla), current_line)+(previous_line_indentation/gtk_scintilla_get_tab_width(GTK_SCINTILLA(scintilla)));
         }
         else {
@@ -753,7 +756,7 @@ static void char_added(GtkWidget *scintilla, guint ch, gpointer user_data)
           case ('('):
         if ((gtk_scintilla_get_line_state(GTK_SCINTILLA(scintilla), current_line))==274 &&
         (calltip_timer_set==FALSE)) {
-          calltip_timer_id = g_timeout_add(get_preferences_manager_calltip_delay(main_window.prefmg), calltip_callback, GINT_TO_POINTER(current_pos));
+          calltip_timer_id = g_timeout_add(get_preferences_manager_calltip_delay(pref), calltip_callback, GINT_TO_POINTER(current_pos));
           calltip_timer_set=TRUE;
         }
         break;
@@ -766,7 +769,7 @@ static void char_added(GtkWidget *scintilla, guint ch, gpointer user_data)
           gchar *line_text= gtk_scintilla_get_text_range (GTK_SCINTILLA(scintilla), initial_pos, wordStart-1, &line_size);
             if (!check_php_variable_before(line_text)) return;
             if (completion_timer_set==FALSE) {
-              completion_timer_id = g_timeout_add(get_preferences_manager_auto_complete_delay(main_window.prefmg), auto_memberfunc_complete_callback, GINT_TO_POINTER(current_pos));
+              completion_timer_id = g_timeout_add(get_preferences_manager_auto_complete_delay(pref), auto_memberfunc_complete_callback, GINT_TO_POINTER(current_pos));
               completion_timer_set=TRUE;
             }
         }
@@ -795,7 +798,7 @@ static void char_added(GtkWidget *scintilla, guint ch, gpointer user_data)
           }
           g_free(ac_buffer);
         }
-        completion_timer_id = g_timeout_add(get_preferences_manager_auto_complete_delay(main_window.prefmg), auto_complete_callback, GINT_TO_POINTER(current_pos));
+        completion_timer_id = g_timeout_add(get_preferences_manager_auto_complete_delay(pref), auto_complete_callback, GINT_TO_POINTER(current_pos));
         }
         g_free(member_function_buffer);
         }
@@ -810,7 +813,7 @@ static void char_added(GtkWidget *scintilla, guint ch, gpointer user_data)
         break; /*exit nothing to do*/
           case (':'):
         if ((calltip_timer_set==FALSE)) {
-          calltip_timer_id = g_timeout_add(get_preferences_manager_calltip_delay(main_window.prefmg), calltip_callback, GINT_TO_POINTER(current_pos));
+          calltip_timer_id = g_timeout_add(get_preferences_manager_calltip_delay(pref), calltip_callback, GINT_TO_POINTER(current_pos));
           calltip_timer_set=TRUE;
         }
         break;
@@ -818,7 +821,7 @@ static void char_added(GtkWidget *scintilla, guint ch, gpointer user_data)
         member_function_buffer = gtk_scintilla_get_text_range (GTK_SCINTILLA(scintilla), wordStart-2, wordStart, &member_function_length);
         if(current_word_length>=3){
             if (completion_timer_set==FALSE) {
-              completion_timer_id = g_timeout_add(get_preferences_manager_auto_complete_delay(main_window.prefmg), css_auto_complete_callback, GINT_TO_POINTER(current_pos));
+              completion_timer_id = g_timeout_add(get_preferences_manager_auto_complete_delay(pref), css_auto_complete_callback, GINT_TO_POINTER(current_pos));
               completion_timer_set=TRUE;
             }
           }  
@@ -829,7 +832,7 @@ static void char_added(GtkWidget *scintilla, guint ch, gpointer user_data)
         member_function_buffer = gtk_scintilla_get_text_range (GTK_SCINTILLA(scintilla), wordStart-2, wordStart, &member_function_length);
         if(current_word_length>=3){
             if (completion_timer_set==FALSE) {
-              completion_timer_id = g_timeout_add(get_preferences_manager_auto_complete_delay(main_window.prefmg), cobol_auto_complete_callback, GINT_TO_POINTER(current_pos));
+              completion_timer_id = g_timeout_add(get_preferences_manager_auto_complete_delay(pref), cobol_auto_complete_callback, GINT_TO_POINTER(current_pos));
               completion_timer_set=TRUE;
             }
           }  
@@ -839,7 +842,7 @@ static void char_added(GtkWidget *scintilla, guint ch, gpointer user_data)
         member_function_buffer = gtk_scintilla_get_text_range (GTK_SCINTILLA(scintilla), wordStart-2, wordStart, &member_function_length);
         if(current_word_length>=3){
             if (completion_timer_set==FALSE) {
-              completion_timer_id = g_timeout_add(get_preferences_manager_auto_complete_delay(main_window.prefmg), sql_auto_complete_callback, GINT_TO_POINTER(current_pos));
+              completion_timer_id = g_timeout_add(get_preferences_manager_auto_complete_delay(pref), sql_auto_complete_callback, GINT_TO_POINTER(current_pos));
               completion_timer_set=TRUE;
             }
           }  
@@ -858,6 +861,7 @@ static void char_added(GtkWidget *scintilla, guint ch, gpointer user_data)
             g_free(member_function_buffer);
             break;
     }
+  g_object_unref(pref);
 }
 
 static void indent_line(GtkWidget *scintilla, gint line, gint indent)
@@ -1026,9 +1030,11 @@ void margin_clicked (GtkWidget *scintilla, gint modifiers, gint position, gint m
   if(margin!=1){
     gint line;
     line = gtk_scintilla_line_from_position(GTK_SCINTILLA(scintilla), position);
-    if (get_preferences_manager_show_folding(main_window.prefmg) && margin == 2) {
+    Preferences_Manager *pref = preferences_manager_new ();
+    if (get_preferences_manager_show_folding(pref) && margin == 2) {
       fold_clicked(scintilla, line, modifiers);
     }
+    g_object_unref(pref);
   }else{
     gint line;
     line = gtk_scintilla_line_from_position(GTK_SCINTILLA(scintilla), position);
@@ -1150,9 +1156,11 @@ void fold_changed(GtkWidget *scintilla, int line,int levelNow,int levelPrev)
 void handle_modified(GtkWidget *scintilla, gint pos,gint mtype,gchar *text,gint len,
            gint added,gint line,gint foldNow,gint foldPrev)
 {
-  if (get_preferences_manager_show_folding(main_window.prefmg) && (mtype & SC_MOD_CHANGEFOLD)) {
+  Preferences_Manager *pref = preferences_manager_new ();
+  if (get_preferences_manager_show_folding(pref) && (mtype & SC_MOD_CHANGEFOLD)) {
     fold_changed(scintilla, line, foldNow, foldPrev);
   }
+  g_object_unref(pref);
 }
 
 void set_document_to_php(Document *document)
@@ -1958,9 +1966,11 @@ void document_set_sintax_line(Document *doc, guint current_line_number)
     gint line_start;
     gint line_end;
     gint indent;
+    Preferences_Manager *pref = preferences_manager_new ();
     indent = gtk_scintilla_get_line_indentation(GTK_SCINTILLA(docdet->scintilla), current_line_number);
     line_start = gtk_scintilla_position_from_line(GTK_SCINTILLA(docdet->scintilla), current_line_number);
-    line_start += (indent/get_preferences_manager_indentation_size(main_window.prefmg));
+    line_start += (indent/get_preferences_manager_indentation_size(pref));
+    g_object_unref(pref);
     line_end = gtk_scintilla_get_line_end_position(GTK_SCINTILLA(docdet->scintilla), current_line_number);
     gtk_scintilla_indicator_fill_range(GTK_SCINTILLA(docdet->scintilla), line_start, line_end-line_start);  
   }

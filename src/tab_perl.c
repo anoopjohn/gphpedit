@@ -24,10 +24,11 @@
 
 #include "tab_perl.h"
 #include "tab_util.h"
-#include "main_window.h"
+#include "preferences_manager.h"
 
 void scintilla_perl_set_lexer(GtkScintilla *scintilla)
 {
+  Preferences_Manager *prefmg = preferences_manager_new ();
   gtk_scintilla_clear_document_style (scintilla);
   gtk_scintilla_set_lexer(scintilla, SCLEX_PERL);
   gtk_scintilla_set_style_bits(scintilla, 5);
@@ -37,7 +38,7 @@ void scintilla_perl_set_lexer(GtkScintilla *scintilla)
   gint size, fore, back;
   gboolean italic, bold;
 
-  get_preferences_manager_style_settings(main_window.prefmg, "php_default", &font , &size, &fore, &back, &italic, &bold);
+  get_preferences_manager_style_settings(prefmg, "php_default", &font , &size, &fore, &back, &italic, &bold);
 
   gtk_scintilla_style_set_font (scintilla, SCE_PL_DEFAULT, font);
   gtk_scintilla_style_set_fore (scintilla, SCE_PL_DEFAULT, fore);
@@ -48,8 +49,8 @@ void scintilla_perl_set_lexer(GtkScintilla *scintilla)
 
   gtk_scintilla_style_set_font (scintilla, STYLE_BRACELIGHT, font);
   gtk_scintilla_style_set_fore (scintilla, STYLE_BRACELIGHT, 16711680);// Matching bracket
-  if(get_preferences_manager_higthlight_caret_line (main_window.prefmg))
-    gtk_scintilla_style_set_back (scintilla, STYLE_BRACELIGHT, get_preferences_manager_higthlight_caret_line_color(main_window.prefmg));
+  if(get_preferences_manager_higthlight_caret_line (prefmg))
+    gtk_scintilla_style_set_back (scintilla, STYLE_BRACELIGHT, get_preferences_manager_higthlight_caret_line_color(prefmg));
   else
     gtk_scintilla_style_set_back (scintilla, STYLE_BRACELIGHT, back);
   gtk_scintilla_style_set_size (scintilla, STYLE_BRACELIGHT, size);
@@ -57,8 +58,8 @@ void scintilla_perl_set_lexer(GtkScintilla *scintilla)
   gtk_scintilla_style_set_bold (scintilla, STYLE_BRACELIGHT, TRUE);
   gtk_scintilla_style_set_font (scintilla, STYLE_BRACEBAD, font);
   gtk_scintilla_style_set_fore (scintilla, STYLE_BRACEBAD, 255);
-  if(get_preferences_manager_higthlight_caret_line (main_window.prefmg))
-    gtk_scintilla_style_set_back (scintilla, STYLE_BRACEBAD, get_preferences_manager_higthlight_caret_line_color(main_window.prefmg));
+  if(get_preferences_manager_higthlight_caret_line (prefmg))
+    gtk_scintilla_style_set_back (scintilla, STYLE_BRACEBAD, get_preferences_manager_higthlight_caret_line_color(prefmg));
   else
     gtk_scintilla_style_set_back (scintilla, STYLE_BRACEBAD, back);
   gtk_scintilla_style_set_size (scintilla, STYLE_BRACEBAD, size);
@@ -67,7 +68,7 @@ void scintilla_perl_set_lexer(GtkScintilla *scintilla)
 
   gtk_scintilla_set_keywords(scintilla, 0, "NULL __FILE__ __LINE__ __PACKAGE__ __DATA__ __END__ AUTOLOAD BEGIN CORE DESTROY END EQ GE GT INIT LE LT NE CHECK abs accept alarm and atan2 bind binmode bless caller chdir chmod chomp chop chown chr chroot close closedir cmp connect continue cos crypt dbmclose dbmopen defined delete die do dump each else elsif endgrent endhostent endnetent endprotoent endpwent endservent eof eq eval exec exists exit exp fcntl fileno flock for foreach fork format formline ge getc getgrent getgrgid getgrnam gethostbyaddr gethostbyname gethostent getlogin getnetbyaddr getnetbyname getnetent getpeername getpgrp getppid getpriority getprotobyname getprotobynumber getprotoent getpwent getpwnam getpwuid getservbyname getservbyport getservent getsockname getsockopt glob gmtime goto grep gt hex if index int ioctl join keys kill last lc lcfirst le length link listen local localtime lock log lstat lt m map mkdir msgctl msgget msgrcv msgsnd my ne next no not oct open opendir or ord our pack package pipe pop pos print printf prototype push q qq qr quotemeta qu qw qx rand read readdir readline readlink readpipe recv redo ref rename require reset return reverse rewinddir rindex rmdir s scalar seek seekdir select semctl semget semop send setgrent sethostent setnetent setpgrp setpriority setprotoent setpwent setservent setsockopt shift shmctl shmget shmread shmwrite shutdown sin sleep socket socketpair sort splice split sprintf sqrt srand stat study sub substr symlink syscall sysopen sysread sysseek system syswrite tell telldir tie tied time times tr truncate uc ucfirst umask undef unless unlink unpack unshift untie until use utime values vec wait waitpid wantarray warn while write x xor y");
   
-  get_preferences_manager_style_settings(main_window.prefmg, "php_hstring", &font , &size, &fore, &back, &italic, &bold);
+  get_preferences_manager_style_settings(prefmg, "php_hstring", &font , &size, &fore, &back, &italic, &bold);
 
   gtk_scintilla_style_set_fore (scintilla, SCE_PL_STRING_Q, fore);
   gtk_scintilla_style_set_font (scintilla, SCE_PL_STRING_Q, font);
@@ -104,7 +105,7 @@ void scintilla_perl_set_lexer(GtkScintilla *scintilla)
   gtk_scintilla_style_set_italic (scintilla, SCE_PL_STRING_QW, italic);
   gtk_scintilla_style_set_bold (scintilla, SCE_PL_STRING_QW, bold);
 
-  get_preferences_manager_style_settings(main_window.prefmg, "c_string", &font , &size, &fore, &back, &italic, &bold);
+  get_preferences_manager_style_settings(prefmg, "c_string", &font , &size, &fore, &back, &italic, &bold);
 
   gtk_scintilla_style_set_fore (scintilla, SCE_PL_STRING, fore);
   gtk_scintilla_style_set_font (scintilla, SCE_PL_STRING, font);
@@ -113,7 +114,7 @@ void scintilla_perl_set_lexer(GtkScintilla *scintilla)
   gtk_scintilla_style_set_italic (scintilla, SCE_PL_STRING, italic);
   gtk_scintilla_style_set_bold (scintilla, SCE_PL_STRING, bold);
   
-  get_preferences_manager_style_settings(main_window.prefmg, "php_simplestring", &font , &size, &fore, &back, &italic, &bold);
+  get_preferences_manager_style_settings(prefmg, "php_simplestring", &font , &size, &fore, &back, &italic, &bold);
 
   gtk_scintilla_style_set_fore (scintilla, SCE_PL_BACKTICKS, fore);
   gtk_scintilla_style_set_font (scintilla, SCE_PL_BACKTICKS, font);
@@ -122,7 +123,7 @@ void scintilla_perl_set_lexer(GtkScintilla *scintilla)
   gtk_scintilla_style_set_italic (scintilla, SCE_PL_BACKTICKS, italic);
   gtk_scintilla_style_set_bold (scintilla, SCE_PL_BACKTICKS, bold);
 
-  get_preferences_manager_style_settings(main_window.prefmg, "php_word", &font , &size, &fore, &back, &italic, &bold);
+  get_preferences_manager_style_settings(prefmg, "php_word", &font , &size, &fore, &back, &italic, &bold);
 
   gtk_scintilla_style_set_font (scintilla, SCE_PL_WORD, font);
   gtk_scintilla_style_set_fore (scintilla, SCE_PL_WORD, fore);
@@ -131,7 +132,7 @@ void scintilla_perl_set_lexer(GtkScintilla *scintilla)
   gtk_scintilla_style_set_italic (scintilla, SCE_PL_WORD, italic);
   gtk_scintilla_style_set_bold (scintilla, SCE_PL_WORD, bold);
 
-  get_preferences_manager_style_settings(main_window.prefmg, "php_number", &font , &size, &fore, &back, &italic, &bold);
+  get_preferences_manager_style_settings(prefmg, "php_number", &font , &size, &fore, &back, &italic, &bold);
 
   gtk_scintilla_style_set_fore (scintilla, SCE_PL_NUMBER, fore);
   gtk_scintilla_style_set_font (scintilla, SCE_PL_NUMBER, font);
@@ -147,7 +148,7 @@ void scintilla_perl_set_lexer(GtkScintilla *scintilla)
   gtk_scintilla_style_set_italic (scintilla, SCE_PL_SCALAR, italic);
   gtk_scintilla_style_set_bold (scintilla, SCE_PL_SCALAR, bold);
 
-  get_preferences_manager_style_settings(main_window.prefmg, "php_variable", &font , &size, &fore, &back, &italic, &bold);
+  get_preferences_manager_style_settings(prefmg, "php_variable", &font , &size, &fore, &back, &italic, &bold);
 
   gtk_scintilla_style_set_fore (scintilla, SCE_PL_IDENTIFIER, fore);
   gtk_scintilla_style_set_font (scintilla, SCE_PL_IDENTIFIER, font);
@@ -156,7 +157,7 @@ void scintilla_perl_set_lexer(GtkScintilla *scintilla)
   gtk_scintilla_style_set_italic (scintilla, SCE_PL_IDENTIFIER, italic);
   gtk_scintilla_style_set_bold (scintilla, SCE_PL_IDENTIFIER, bold);
 
-  get_preferences_manager_style_settings(main_window.prefmg, "c_character", &font , &size, &fore, &back, &italic, &bold);
+  get_preferences_manager_style_settings(prefmg, "c_character", &font , &size, &fore, &back, &italic, &bold);
 
   gtk_scintilla_style_set_fore (scintilla, SCE_PL_CHARACTER, fore);
   gtk_scintilla_style_set_font (scintilla, SCE_PL_CHARACTER, font);
@@ -165,7 +166,7 @@ void scintilla_perl_set_lexer(GtkScintilla *scintilla)
   gtk_scintilla_style_set_italic (scintilla, SCE_PL_CHARACTER, italic);
   gtk_scintilla_style_set_bold (scintilla, SCE_PL_CHARACTER, bold);
 
-  get_preferences_manager_style_settings(main_window.prefmg, "c_preprocesor", &font , &size, &fore, &back, &italic, &bold);
+  get_preferences_manager_style_settings(prefmg, "c_preprocesor", &font , &size, &fore, &back, &italic, &bold);
 
   gtk_scintilla_style_set_fore (scintilla, SCE_PL_PREPROCESSOR, fore);
   gtk_scintilla_style_set_font (scintilla, SCE_PL_PREPROCESSOR, font);
@@ -174,7 +175,7 @@ void scintilla_perl_set_lexer(GtkScintilla *scintilla)
   gtk_scintilla_style_set_italic (scintilla, SCE_PL_PREPROCESSOR, italic);
   gtk_scintilla_style_set_bold (scintilla, SCE_PL_PREPROCESSOR, bold);
 
-  get_preferences_manager_style_settings(main_window.prefmg, "php_comment_line", &font , &size, &fore, &back, &italic, &bold);
+  get_preferences_manager_style_settings(prefmg, "php_comment_line", &font , &size, &fore, &back, &italic, &bold);
 
   gtk_scintilla_style_set_fore (scintilla, SCE_PL_COMMENTLINE, fore);
   gtk_scintilla_style_set_font (scintilla, SCE_PL_COMMENTLINE, font);
@@ -183,7 +184,7 @@ void scintilla_perl_set_lexer(GtkScintilla *scintilla)
   gtk_scintilla_style_set_italic (scintilla, SCE_PL_COMMENTLINE, italic);
   gtk_scintilla_style_set_bold (scintilla, SCE_PL_COMMENTLINE, bold);
 
-  get_preferences_manager_style_settings(main_window.prefmg, "c_uuid", &font , &size, &fore, &back, &italic, &bold);
+  get_preferences_manager_style_settings(prefmg, "c_uuid", &font , &size, &fore, &back, &italic, &bold);
   gtk_scintilla_style_set_fore (scintilla, SCE_PL_HASH, fore);
   gtk_scintilla_style_set_font (scintilla, SCE_PL_HASH, font);
   gtk_scintilla_style_set_back (scintilla, SCE_PL_HASH, back);
@@ -191,7 +192,7 @@ void scintilla_perl_set_lexer(GtkScintilla *scintilla)
   gtk_scintilla_style_set_italic (scintilla, SCE_PL_HASH, italic);
   gtk_scintilla_style_set_bold (scintilla, SCE_PL_HASH, bold);
 
-  get_preferences_manager_style_settings(main_window.prefmg, "c_operator", &font , &size, &fore, &back, &italic, &bold);
+  get_preferences_manager_style_settings(prefmg, "c_operator", &font , &size, &fore, &back, &italic, &bold);
   gtk_scintilla_style_set_fore (scintilla, SCE_PL_OPERATOR, fore);
   gtk_scintilla_style_set_font (scintilla, SCE_PL_OPERATOR, font);
   gtk_scintilla_style_set_back (scintilla, SCE_PL_OPERATOR, back);
@@ -199,7 +200,7 @@ void scintilla_perl_set_lexer(GtkScintilla *scintilla)
   gtk_scintilla_style_set_italic (scintilla, SCE_PL_OPERATOR, italic);
   gtk_scintilla_style_set_bold (scintilla, SCE_PL_OPERATOR, bold);
 
-  get_preferences_manager_style_settings(main_window.prefmg, "c_regex", &font , &size, &fore, &back, &italic, &bold);
+  get_preferences_manager_style_settings(prefmg, "c_regex", &font , &size, &fore, &back, &italic, &bold);
   gtk_scintilla_style_set_fore (scintilla, SCE_PL_REGEX, fore);
   gtk_scintilla_style_set_font (scintilla, SCE_PL_REGEX, font);
   gtk_scintilla_style_set_back (scintilla, SCE_PL_REGEX, back);
@@ -214,7 +215,7 @@ void scintilla_perl_set_lexer(GtkScintilla *scintilla)
   gtk_scintilla_style_set_italic (scintilla, SCE_PL_REGSUBST, italic);
   gtk_scintilla_style_set_bold (scintilla, SCE_PL_REGSUBST, bold);
 
-  get_preferences_manager_style_settings(main_window.prefmg, "c_verbatim", &font , &size, &fore, &back, &italic, &bold);
+  get_preferences_manager_style_settings(prefmg, "c_verbatim", &font , &size, &fore, &back, &italic, &bold);
   gtk_scintilla_style_set_fore (scintilla, SCE_PL_ARRAY, fore);
   gtk_scintilla_style_set_font (scintilla, SCE_PL_ARRAY, font);
   gtk_scintilla_style_set_back (scintilla, SCE_PL_ARRAY, back);
@@ -222,7 +223,7 @@ void scintilla_perl_set_lexer(GtkScintilla *scintilla)
   gtk_scintilla_style_set_italic (scintilla, SCE_PL_ARRAY, italic);
   gtk_scintilla_style_set_bold (scintilla, SCE_PL_ARRAY, bold);
 
-  get_preferences_manager_style_settings(main_window.prefmg, "css_pseudoclass", &font , &size, &fore, &back, &italic, &bold);
+  get_preferences_manager_style_settings(prefmg, "css_pseudoclass", &font , &size, &fore, &back, &italic, &bold);
   gtk_scintilla_style_set_fore (scintilla, SCE_PL_SUB_PROTOTYPE, fore);
   gtk_scintilla_style_set_font (scintilla, SCE_PL_SUB_PROTOTYPE, font);
   gtk_scintilla_style_set_back (scintilla, SCE_PL_SUB_PROTOTYPE, back);
@@ -230,7 +231,7 @@ void scintilla_perl_set_lexer(GtkScintilla *scintilla)
   gtk_scintilla_style_set_italic (scintilla, SCE_PL_SUB_PROTOTYPE, italic);
   gtk_scintilla_style_set_bold (scintilla, SCE_PL_SUB_PROTOTYPE, bold);
 
-  get_preferences_manager_style_settings(main_window.prefmg, "html_double_string", &font , &size, &fore, &back, &italic, &bold);
+  get_preferences_manager_style_settings(prefmg, "html_double_string", &font , &size, &fore, &back, &italic, &bold);
   gtk_scintilla_style_set_fore (scintilla, SCE_PL_LONGQUOTE, fore);
   gtk_scintilla_style_set_font (scintilla, SCE_PL_LONGQUOTE, font);
   gtk_scintilla_style_set_back (scintilla, SCE_PL_LONGQUOTE, back);
@@ -238,7 +239,7 @@ void scintilla_perl_set_lexer(GtkScintilla *scintilla)
   gtk_scintilla_style_set_italic (scintilla, SCE_PL_LONGQUOTE, italic);
   gtk_scintilla_style_set_bold (scintilla, SCE_PL_LONGQUOTE, bold);
 
-  get_preferences_manager_style_settings(main_window.prefmg, "css_important", &font , &size, &fore, &back, &italic, &bold);
+  get_preferences_manager_style_settings(prefmg, "css_important", &font , &size, &fore, &back, &italic, &bold);
   gtk_scintilla_style_set_fore (scintilla, SCE_PL_ERROR, fore);
   gtk_scintilla_style_set_font (scintilla, SCE_PL_ERROR, font);
   gtk_scintilla_style_set_back (scintilla, SCE_PL_ERROR, back);
@@ -253,6 +254,8 @@ void scintilla_perl_set_lexer(GtkScintilla *scintilla)
   gtk_scintilla_set_property(scintilla, "fold.perl.package", "1");
 
   gtk_scintilla_colourise(scintilla, 0, -1);
+
+  g_object_unref(prefmg);
 }
 
 void tab_perl_set_lexer(Document *document)

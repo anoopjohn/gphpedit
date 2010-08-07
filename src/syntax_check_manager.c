@@ -273,7 +273,6 @@ gchar *syntax_check_manager_run(Document *document)
     g_free(docfilename);
     if(ftype==TAB_PHP){
     Preferences_Manager *pref = preferences_manager_new ();
-//    command_line = g_string_new(get_preferences_manager_php_binary_location(main_window.prefmg));
     command_line = g_string_new(get_preferences_manager_php_binary_location(pref));
     command_line = g_string_append(command_line, " -q -l -d html_errors=Off -f '");
     command_line = g_string_append(command_line, filename->str);

@@ -24,10 +24,11 @@
 
 #include "tab_python.h"
 #include "tab_util.h"
-#include "main_window.h"
+#include "preferences_manager.h"
 
 void scintilla_python_set_lexer(GtkScintilla *scintilla)
 {
+  Preferences_Manager *prefmg = preferences_manager_new ();
   gtk_scintilla_clear_document_style (scintilla);
   // Don't know why - but it doesn't highlight if the next line is SCLEX_PYTHON
   gtk_scintilla_set_lexer(scintilla, SCLEX_PERL);
@@ -37,7 +38,7 @@ void scintilla_python_set_lexer(GtkScintilla *scintilla)
   gint size, fore, back;
   gboolean italic, bold;
 
-  get_preferences_manager_style_settings(main_window.prefmg, "php_default", &font , &size, &fore, &back, &italic, &bold);
+  get_preferences_manager_style_settings(prefmg, "php_default", &font , &size, &fore, &back, &italic, &bold);
 
   gtk_scintilla_style_set_font (scintilla, SCE_P_DEFAULT, font);
   gtk_scintilla_style_set_fore (scintilla, SCE_P_DEFAULT, fore);
@@ -48,8 +49,8 @@ void scintilla_python_set_lexer(GtkScintilla *scintilla)
 
   gtk_scintilla_style_set_font (scintilla, STYLE_BRACELIGHT, font);
   gtk_scintilla_style_set_fore (scintilla, STYLE_BRACELIGHT, 16711680);// Matching bracket
-  if(get_preferences_manager_higthlight_caret_line (main_window.prefmg))
-    gtk_scintilla_style_set_back (scintilla, STYLE_BRACELIGHT, get_preferences_manager_higthlight_caret_line_color(main_window.prefmg));
+  if(get_preferences_manager_higthlight_caret_line (prefmg))
+    gtk_scintilla_style_set_back (scintilla, STYLE_BRACELIGHT, get_preferences_manager_higthlight_caret_line_color(prefmg));
   else
     gtk_scintilla_style_set_back (scintilla, STYLE_BRACELIGHT, back);
   gtk_scintilla_style_set_size (scintilla, STYLE_BRACELIGHT, size);
@@ -57,8 +58,8 @@ void scintilla_python_set_lexer(GtkScintilla *scintilla)
   gtk_scintilla_style_set_bold (scintilla, STYLE_BRACELIGHT, TRUE);
   gtk_scintilla_style_set_font (scintilla, STYLE_BRACEBAD, font);
   gtk_scintilla_style_set_fore (scintilla, STYLE_BRACEBAD, 255);
-  if(get_preferences_manager_higthlight_caret_line (main_window.prefmg))
-    gtk_scintilla_style_set_back (scintilla, STYLE_BRACEBAD, get_preferences_manager_higthlight_caret_line_color(main_window.prefmg));
+  if(get_preferences_manager_higthlight_caret_line (prefmg))
+    gtk_scintilla_style_set_back (scintilla, STYLE_BRACEBAD, get_preferences_manager_higthlight_caret_line_color(prefmg));
   else
     gtk_scintilla_style_set_back (scintilla, STYLE_BRACEBAD, back);
   gtk_scintilla_style_set_size (scintilla, STYLE_BRACEBAD, size);
@@ -68,7 +69,7 @@ void scintilla_python_set_lexer(GtkScintilla *scintilla)
   // Python keywords
   gtk_scintilla_set_keywords(scintilla, 0, "and assert break class continue def del elif else except exec finally for from global if import in is lambda None not or pass print raise return try while yield");
   
-  get_preferences_manager_style_settings(main_window.prefmg, "php_hstring", &font , &size, &fore, &back, &italic, &bold);
+  get_preferences_manager_style_settings(prefmg, "php_hstring", &font , &size, &fore, &back, &italic, &bold);
 
   gtk_scintilla_style_set_fore (scintilla, SCE_P_TRIPLEDOUBLE, fore);
   gtk_scintilla_style_set_font (scintilla, SCE_P_TRIPLEDOUBLE, font);
@@ -83,7 +84,7 @@ void scintilla_python_set_lexer(GtkScintilla *scintilla)
   gtk_scintilla_style_set_italic (scintilla, SCE_P_TRIPLE, italic);
   gtk_scintilla_style_set_bold (scintilla, SCE_P_TRIPLE, bold);
 
-  get_preferences_manager_style_settings(main_window.prefmg, "php_simplestring", &font , &size, &fore, &back, &italic, &bold);
+  get_preferences_manager_style_settings(prefmg, "php_simplestring", &font , &size, &fore, &back, &italic, &bold);
     
   gtk_scintilla_style_set_fore (scintilla, SCE_P_STRING, fore);
   gtk_scintilla_style_set_font (scintilla, SCE_P_STRING, font);
@@ -98,7 +99,7 @@ void scintilla_python_set_lexer(GtkScintilla *scintilla)
   gtk_scintilla_style_set_italic (scintilla, SCE_P_CHARACTER, italic);
   gtk_scintilla_style_set_bold (scintilla, SCE_P_CHARACTER, bold);
   
-  get_preferences_manager_style_settings(main_window.prefmg, "php_word", &font , &size, &fore, &back, &italic, &bold);
+  get_preferences_manager_style_settings(prefmg, "php_word", &font , &size, &fore, &back, &italic, &bold);
 
   gtk_scintilla_style_set_font (scintilla, SCE_P_WORD, font);
   gtk_scintilla_style_set_fore (scintilla, SCE_P_WORD, fore);
@@ -107,7 +108,7 @@ void scintilla_python_set_lexer(GtkScintilla *scintilla)
   gtk_scintilla_style_set_italic (scintilla, SCE_P_WORD, italic);
   gtk_scintilla_style_set_bold (scintilla, SCE_P_WORD, bold);
 
-  get_preferences_manager_style_settings(main_window.prefmg, "php_number", &font , &size, &fore, &back, &italic, &bold);
+  get_preferences_manager_style_settings(prefmg, "php_number", &font , &size, &fore, &back, &italic, &bold);
 
   gtk_scintilla_style_set_fore (scintilla, SCE_P_NUMBER, fore);
   gtk_scintilla_style_set_font (scintilla, SCE_P_NUMBER, font);
@@ -116,7 +117,7 @@ void scintilla_python_set_lexer(GtkScintilla *scintilla)
   gtk_scintilla_style_set_italic (scintilla, SCE_P_NUMBER, italic);
   gtk_scintilla_style_set_bold (scintilla, SCE_P_NUMBER, bold);
 
-  get_preferences_manager_style_settings(main_window.prefmg, "php_default", &font , &size, &fore, &back, &italic, &bold);
+  get_preferences_manager_style_settings(prefmg, "php_default", &font , &size, &fore, &back, &italic, &bold);
 
   gtk_scintilla_style_set_fore (scintilla, SCE_P_IDENTIFIER, fore);
   gtk_scintilla_style_set_font (scintilla, SCE_P_IDENTIFIER, font);
@@ -125,7 +126,7 @@ void scintilla_python_set_lexer(GtkScintilla *scintilla)
   gtk_scintilla_style_set_italic (scintilla, SCE_P_IDENTIFIER, italic);
   gtk_scintilla_style_set_bold (scintilla, SCE_P_IDENTIFIER, bold);
 
-  get_preferences_manager_style_settings(main_window.prefmg, "php_comment_line", &font , &size, &fore, &back, &italic, &bold);
+  get_preferences_manager_style_settings(prefmg, "php_comment_line", &font , &size, &fore, &back, &italic, &bold);
 
   gtk_scintilla_style_set_fore (scintilla, SCE_P_COMMENTLINE, fore);
   gtk_scintilla_style_set_font (scintilla, SCE_P_COMMENTLINE, font);
@@ -136,6 +137,8 @@ void scintilla_python_set_lexer(GtkScintilla *scintilla)
 
   gtk_scintilla_set_property(scintilla, "fold", "1");
   gtk_scintilla_colourise(scintilla, 0, -1);
+
+  g_object_unref(prefmg);
 }
 
 void tab_python_set_lexer(Document *document)

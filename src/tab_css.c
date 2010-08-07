@@ -24,10 +24,12 @@
 
 #include "tab_css.h"
 #include "tab_util.h"
-#include "main_window.h"
+#include "preferences_manager.h"
 
 void tab_css_set_lexer(Document *document)
 {
+
+  Preferences_Manager *prefmg = preferences_manager_new ();
   GtkScintilla *scintilla = document_get_scintilla(document);
   gtk_scintilla_clear_document_style (scintilla);
   gtk_scintilla_set_lexer(scintilla, SCLEX_CSS);
@@ -37,7 +39,7 @@ void tab_css_set_lexer(Document *document)
   gint size, fore, back;
   gboolean italic, bold;
 
-  get_preferences_manager_style_settings(main_window.prefmg, "default_style", &font , &size, &fore, &back, &italic, &bold);
+  get_preferences_manager_style_settings(prefmg, "default_style", &font , &size, &fore, &back, &italic, &bold);
 
   gtk_scintilla_style_set_font (scintilla, SCE_CSS_DEFAULT, font);
   gtk_scintilla_style_set_fore (scintilla, SCE_CSS_DEFAULT, fore);
@@ -46,12 +48,12 @@ void tab_css_set_lexer(Document *document)
   gtk_scintilla_style_set_italic (scintilla, SCE_CSS_DEFAULT, italic);
   gtk_scintilla_style_set_bold (scintilla, SCE_CSS_DEFAULT, bold);
 
-  get_preferences_manager_style_settings(main_window.prefmg, "php_default", &font , &size, &fore, &back, &italic, &bold);
+  get_preferences_manager_style_settings(prefmg, "php_default", &font , &size, &fore, &back, &italic, &bold);
 
   gtk_scintilla_style_set_font (scintilla, STYLE_BRACELIGHT, font);
   gtk_scintilla_style_set_fore (scintilla, STYLE_BRACELIGHT, 16711680);// Matching bracket
-  if(get_preferences_manager_higthlight_caret_line (main_window.prefmg))
-    gtk_scintilla_style_set_back (scintilla, STYLE_BRACELIGHT, get_preferences_manager_higthlight_caret_line_color(main_window.prefmg));
+  if(get_preferences_manager_higthlight_caret_line (prefmg))
+    gtk_scintilla_style_set_back (scintilla, STYLE_BRACELIGHT, get_preferences_manager_higthlight_caret_line_color(prefmg));
   else
     gtk_scintilla_style_set_back (scintilla, STYLE_BRACELIGHT, back);
   gtk_scintilla_style_set_size (scintilla, STYLE_BRACELIGHT, size);
@@ -59,8 +61,8 @@ void tab_css_set_lexer(Document *document)
   gtk_scintilla_style_set_bold (scintilla, STYLE_BRACELIGHT, TRUE);
   gtk_scintilla_style_set_font (scintilla, STYLE_BRACEBAD, font);
   gtk_scintilla_style_set_fore (scintilla, STYLE_BRACEBAD, 255);
-  if(get_preferences_manager_higthlight_caret_line (main_window.prefmg))
-    gtk_scintilla_style_set_back (scintilla, STYLE_BRACEBAD, get_preferences_manager_higthlight_caret_line_color(main_window.prefmg));
+  if(get_preferences_manager_higthlight_caret_line (prefmg))
+    gtk_scintilla_style_set_back (scintilla, STYLE_BRACEBAD, get_preferences_manager_higthlight_caret_line_color(prefmg));
   else
     gtk_scintilla_style_set_back (scintilla, STYLE_BRACEBAD, back);
   gtk_scintilla_style_set_size (scintilla, STYLE_BRACEBAD, size);
@@ -72,7 +74,7 @@ void tab_css_set_lexer(Document *document)
   gtk_scintilla_set_keywords(scintilla, 2, "ActiveBorder ActiveCaption AppWorkspace Background ButtonFace ButtonHighlight ButtonShadow ButtonText CaptionText GrayText Highlight HighlightText InactiveBorder InactiveCaption InactiveCaptionText InfoBackground InfoText Menu MenuText Scrollbar ThreeDDarkShadow ThreeDFace ThreeDHighlight ThreeDLightShadow ThreeDShadow Window WindowFrame WindowText above absolute always armenian ascent avoid azimuth baseline bbox behind below bidi-override border-bottom-color border-bottom-style border-collapse border-color border-left-color border-left-style border-right-color border-right-style border-spacing border-style border-top-color border-top-style bottom cap-height caption caption-side center-left center-right centerline child cjk-ideographic clip close-quote code collapse compact condensed content continous counter-increment counter-reset crop cross crosshair cue cue-after cue-before cursor decimal-leading-zero default definition-src descent digits direction e-resize elevation embed empty-cells expanded extra-condensed extra-expanded far-left far-right fast faster female fixed font-size-adjust font-stretch georgian hebrew help hidden hide high higher hiragana hiragana-iroha icon inherit inline-table katakana katakana-iroha landscape left left-side leftwards level loud low lower lower-greek lower-latin ltr male marker marker-offset marks mathline max-height max-width medium medium menu message-box min-height min-width mix move n-resize narrower ne-resize no-close-quote no-open-quote nw-resize once open-quote orphans outline outline-color outline-style outline-width overflow page page-break-after page-break-before page-break-inside panose-1 pause pause-after pause-before pitch pitch-range play-during pointer portrait position quotes relative richness right right-side rightwards rtl run-in s-resize scroll se-resize semi-condensed semi-expanded separate show silent size slope slow slower small-caption soft speak speak-header speak-numeral speak-punctuation speech-rate spell-out src static status-bar stemh stemv stress sw-resize table table-caption table-cell table-column table-column-group table-footer-group table-header-group table-layout table-row table-row-group text text-shadow top topline ultra-condensed ultra-expanded unicode-bidi unicode-range units-per-em upper-latin visibility visible voice-family volume w-resize wait wider widows widths x-fast x-height x-high x-loud x-low x-slow x-soft z-index");
   gtk_scintilla_set_keywords(scintilla, 4, "@charset @font-face @import @media @page");
 
-  get_preferences_manager_style_settings(main_window.prefmg, "css_tag", &font , &size, &fore, &back, &italic, &bold);
+  get_preferences_manager_style_settings(prefmg, "css_tag", &font , &size, &fore, &back, &italic, &bold);
 
   gtk_scintilla_style_set_back (scintilla, SCE_CSS_TAG, back);
   gtk_scintilla_style_set_font (scintilla, SCE_CSS_TAG, font);
@@ -81,7 +83,7 @@ void tab_css_set_lexer(Document *document)
   gtk_scintilla_style_set_italic (scintilla, SCE_CSS_TAG, italic);
   gtk_scintilla_style_set_bold (scintilla, SCE_CSS_TAG, bold);
 
-  get_preferences_manager_style_settings(main_window.prefmg, "css_class", &font , &size, &fore, &back, &italic, &bold);
+  get_preferences_manager_style_settings(prefmg, "css_class", &font , &size, &fore, &back, &italic, &bold);
 
   gtk_scintilla_style_set_fore (scintilla, SCE_CSS_CLASS, fore);
   gtk_scintilla_style_set_font (scintilla, SCE_CSS_CLASS, font);
@@ -90,7 +92,7 @@ void tab_css_set_lexer(Document *document)
   gtk_scintilla_style_set_italic (scintilla, SCE_CSS_CLASS, italic);
   gtk_scintilla_style_set_bold (scintilla, SCE_CSS_CLASS, bold);
 
-  get_preferences_manager_style_settings(main_window.prefmg, "css_pseudoclass", &font , &size, &fore, &back, &italic, &bold);
+  get_preferences_manager_style_settings(prefmg, "css_pseudoclass", &font , &size, &fore, &back, &italic, &bold);
 
   gtk_scintilla_style_set_back (scintilla, SCE_CSS_PSEUDOCLASS, back);
   gtk_scintilla_style_set_font (scintilla, SCE_CSS_PSEUDOCLASS, font);
@@ -99,7 +101,7 @@ void tab_css_set_lexer(Document *document)
   gtk_scintilla_style_set_italic (scintilla, SCE_CSS_PSEUDOCLASS, italic);
   gtk_scintilla_style_set_bold (scintilla, SCE_CSS_PSEUDOCLASS, bold);
 
-  get_preferences_manager_style_settings(main_window.prefmg, "css_unknown_pseudoclass", &font , &size, &fore, &back, &italic, &bold);
+  get_preferences_manager_style_settings(prefmg, "css_unknown_pseudoclass", &font , &size, &fore, &back, &italic, &bold);
 
   gtk_scintilla_style_set_fore (scintilla, SCE_CSS_UNKNOWN_PSEUDOCLASS, fore);
   gtk_scintilla_style_set_font (scintilla, SCE_CSS_UNKNOWN_PSEUDOCLASS, font);
@@ -108,7 +110,7 @@ void tab_css_set_lexer(Document *document)
   gtk_scintilla_style_set_italic (scintilla, SCE_CSS_UNKNOWN_PSEUDOCLASS, italic);
   gtk_scintilla_style_set_bold (scintilla, SCE_CSS_UNKNOWN_PSEUDOCLASS, bold);
 
-  get_preferences_manager_style_settings(main_window.prefmg, "css_operator", &font , &size, &fore, &back, &italic, &bold);
+  get_preferences_manager_style_settings(prefmg, "css_operator", &font , &size, &fore, &back, &italic, &bold);
 
   gtk_scintilla_style_set_fore (scintilla, SCE_CSS_OPERATOR, fore);
   gtk_scintilla_style_set_font (scintilla, SCE_CSS_OPERATOR, font);
@@ -117,7 +119,7 @@ void tab_css_set_lexer(Document *document)
   gtk_scintilla_style_set_italic (scintilla, SCE_CSS_OPERATOR, italic);
   gtk_scintilla_style_set_bold (scintilla, SCE_CSS_OPERATOR, bold);
 
-  get_preferences_manager_style_settings(main_window.prefmg, "css_identifier", &font , &size, &fore, &back, &italic, &bold);
+  get_preferences_manager_style_settings(prefmg, "css_identifier", &font , &size, &fore, &back, &italic, &bold);
 
   gtk_scintilla_style_set_fore (scintilla, SCE_CSS_IDENTIFIER, fore);
   gtk_scintilla_style_set_font (scintilla, SCE_CSS_IDENTIFIER, font);
@@ -126,7 +128,7 @@ void tab_css_set_lexer(Document *document)
   gtk_scintilla_style_set_italic (scintilla, SCE_CSS_IDENTIFIER, italic);
   gtk_scintilla_style_set_bold (scintilla, SCE_CSS_IDENTIFIER, bold);
 
-  get_preferences_manager_style_settings(main_window.prefmg, "css_unknown_identifier", &font , &size, &fore, &back, &italic, &bold);
+  get_preferences_manager_style_settings(prefmg, "css_unknown_identifier", &font , &size, &fore, &back, &italic, &bold);
 
   gtk_scintilla_style_set_fore (scintilla, SCE_CSS_UNKNOWN_IDENTIFIER, fore);
   gtk_scintilla_style_set_font (scintilla, SCE_CSS_UNKNOWN_IDENTIFIER, font);
@@ -135,7 +137,7 @@ void tab_css_set_lexer(Document *document)
   gtk_scintilla_style_set_italic (scintilla, SCE_CSS_UNKNOWN_IDENTIFIER, italic);
   gtk_scintilla_style_set_bold (scintilla, SCE_CSS_UNKNOWN_IDENTIFIER, bold);
 
-  get_preferences_manager_style_settings(main_window.prefmg, "css_value", &font , &size, &fore, &back, &italic, &bold);
+  get_preferences_manager_style_settings(prefmg, "css_value", &font , &size, &fore, &back, &italic, &bold);
 
   gtk_scintilla_style_set_fore (scintilla, SCE_CSS_VALUE, fore);
   gtk_scintilla_style_set_font (scintilla, SCE_CSS_VALUE, font);
@@ -144,7 +146,7 @@ void tab_css_set_lexer(Document *document)
   gtk_scintilla_style_set_italic (scintilla, SCE_CSS_VALUE, italic);
   gtk_scintilla_style_set_bold (scintilla, SCE_CSS_VALUE, bold);
 
-  get_preferences_manager_style_settings(main_window.prefmg, "css_comment", &font , &size, &fore, &back, &italic, &bold);
+  get_preferences_manager_style_settings(prefmg, "css_comment", &font , &size, &fore, &back, &italic, &bold);
 
   gtk_scintilla_style_set_fore (scintilla, SCE_CSS_COMMENT, fore);
   gtk_scintilla_style_set_font (scintilla, SCE_CSS_COMMENT, font);
@@ -153,7 +155,7 @@ void tab_css_set_lexer(Document *document)
   gtk_scintilla_style_set_italic (scintilla, SCE_CSS_COMMENT, italic);
   gtk_scintilla_style_set_bold (scintilla, SCE_CSS_COMMENT, bold);
 
-  get_preferences_manager_style_settings(main_window.prefmg, "css_id", &font , &size, &fore, &back, &italic, &bold);
+  get_preferences_manager_style_settings(prefmg, "css_id", &font , &size, &fore, &back, &italic, &bold);
 
   gtk_scintilla_style_set_font (scintilla, SCE_CSS_ID, font);
   gtk_scintilla_style_set_fore (scintilla, SCE_CSS_ID, fore);
@@ -162,7 +164,7 @@ void tab_css_set_lexer(Document *document)
   gtk_scintilla_style_set_italic (scintilla, SCE_CSS_ID, italic);
   gtk_scintilla_style_set_bold (scintilla, SCE_CSS_ID, bold);
 
-  get_preferences_manager_style_settings(main_window.prefmg, "css_important", &font , &size, &fore, &back, &italic, &bold);
+  get_preferences_manager_style_settings(prefmg, "css_important", &font , &size, &fore, &back, &italic, &bold);
 
   gtk_scintilla_style_set_font (scintilla, SCE_CSS_IMPORTANT, font);
   gtk_scintilla_style_set_fore (scintilla, SCE_CSS_IMPORTANT, fore);
@@ -179,7 +181,7 @@ void tab_css_set_lexer(Document *document)
   gtk_scintilla_style_set_italic (scintilla, SCE_CSS_MEDIA, italic);
   gtk_scintilla_style_set_bold (scintilla, SCE_CSS_MEDIA, bold);
 
-  get_preferences_manager_style_settings(main_window.prefmg, "css_directive", &font , &size, &fore, &back, &italic, &bold);
+  get_preferences_manager_style_settings(prefmg, "css_directive", &font , &size, &fore, &back, &italic, &bold);
 
   gtk_scintilla_style_set_fore (scintilla, SCE_CSS_DIRECTIVE, fore);
   gtk_scintilla_style_set_font (scintilla, SCE_CSS_DIRECTIVE, font);
@@ -194,4 +196,6 @@ void tab_css_set_lexer(Document *document)
   gtk_scintilla_set_property(scintilla, "fold.comment", "1");
   gtk_scintilla_set_property(scintilla, "fold.css", "1");
   gtk_scintilla_set_property(scintilla, "fold", "1");
+  
+  g_object_unref(prefmg);
 }

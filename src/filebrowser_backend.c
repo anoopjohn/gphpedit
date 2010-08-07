@@ -25,7 +25,8 @@
 #include "main.h"
 
 #include "filebrowser_backend.h"
-#include "main_window.h"
+#include "tab.h"
+#include "preferences_manager.h"
 #include "gvfs_utils.h"
 
 #define MIME_ISDIR(string) (g_strcmp0(string, "inode/directory")==0)
@@ -438,7 +439,9 @@ static inline void change_current_folder(FilebrowserBackend *filebackend, const 
   directory = FILEBROWSER_BACKEND_GET_PRIVATE(filebackend);
   if (!new_folder && *(new_folder)!=0) return;
   directory->current_folder= g_strdup(new_folder);
-  set_preferences_manager_filebrowser_last_folder(main_window.prefmg, directory->current_folder);
+  Preferences_Manager *prefmg = preferences_manager_new ();
+  set_preferences_manager_filebrowser_last_folder(prefmg, directory->current_folder);
+  g_object_unref(prefmg);
   gchar *real_path=filename_get_relative_path((gchar *)new_folder);
   if (!real_path) real_path=g_strdup(DEFAULT_DIR);
   g_signal_emit (G_OBJECT (filebackend), signals[CHANGE_FOLDER], 0, real_path); /* needed to update ui */

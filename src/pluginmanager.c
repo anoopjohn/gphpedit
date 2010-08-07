@@ -27,7 +27,6 @@
 #include <stdlib.h>
 #include <gtk/gtk.h>
 #include "pluginmanager.h"
-#include "main_window.h"
 #include "gvfs_utils.h"
 
 /*
