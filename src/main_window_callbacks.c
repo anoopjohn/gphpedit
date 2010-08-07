@@ -41,7 +41,6 @@
 #include "replace_dialog.h"
 
 gboolean is_app_closing = FALSE;
-gint classbrowser_hidden_position;
 
 // session_save relies on the fact that all tabs can be closed without 
 // prompting, they should already be saved.  Also, the title won't be set
@@ -49,8 +48,8 @@ gint classbrowser_hidden_position;
 void session_save(void)
 {
   GSList *walk;
-  Editor *editor;
-  Editor *current_focus_editor;
+  Document *document;
+  Document *current_focus_editor;
   GString *session_file;
   GString *session_file_contents;
 
@@ -63,26 +62,32 @@ void session_save(void)
 
 
   if (get_preferences_manager_saved_session(main_window.prefmg) && (g_slist_length(editors) > 0)) {
-    current_focus_editor = main_window.current_editor;
+    current_focus_editor = main_window.current_document;
     session_file_contents=g_string_new(NULL);
     for(walk = editors; walk!= NULL; walk = g_slist_next(walk)) {
-      editor = walk->data;
-      if (editor) {
-        if (!editor->is_untitled) {
-          if (editor == current_focus_editor) {
+      document = walk->data;
+      if (document) {
+        if (!document_get_untitled(document)) {
+          if (document == current_focus_editor) {
             session_file_contents = g_string_append(session_file_contents,"*");
           }
-          if (GTK_IS_SCINTILLA(editor->scintilla)) {
-            g_string_append_printf (session_file_contents,"%s\n",editor->filename->str);
+          if (document_is_scintilla_based(document)) {
+            gchar *docfilename = document_get_filename(document);
+            g_string_append_printf (session_file_contents,"%s\n",docfilename);
+            g_free(docfilename);
           } else {
-            if (editor->type==TAB_HELP){
+            if (document_get_document_type(document)==TAB_HELP){
               /* it's a help page */
-            g_string_append_printf (session_file_contents,"phphelp:%s\n",editor->help_function);
-            } else {
+              g_string_append_printf (session_file_contents,"phphelp:%s\n",document_get_help_function(document));
+            } else if (document_get_document_type(document)==TAB_PREVIEW){
               /* it's a preview page */
-              gchar *temp=editor->filename->str;
+              gchar *prevfilename = document_get_filename(document);
+              gchar *temp= prevfilename;
               temp+=9;
               g_string_append_printf (session_file_contents,"preview:%s\n",temp);
+              g_free(prevfilename);
+            } else {
+              g_print("error\n");
             }
           }
         }
@@ -103,7 +108,6 @@ void session_reopen(void)
   char *filename;
   int focus_tab=-1;
   gboolean focus_this_one = FALSE;
-  GString *target;
 
   session_file = g_string_new( g_get_home_dir());
   session_file = g_string_append(session_file, "/.gphpedit/session");
@@ -134,28 +138,19 @@ void session_reopen(void)
         
       if (g_str_has_prefix(filename, "phphelp:")){
         filename += 8;
-        target = g_string_new(filename);
-        tab_create_new(TAB_HELP, target);
-        g_string_free(target, TRUE);
+        add_new_document(TAB_HELP, filename, 0);
           
-        if (focus_this_one && (main_window.current_editor)) {
-          focus_tab = gtk_notebook_page_num(GTK_NOTEBOOK(main_window.notebook_editor),main_window.current_editor->help_scrolled_window);
-        }
-      }else if (g_str_has_prefix(filename, "preview:")){
+      } else if (g_str_has_prefix(filename, "preview:")){
         filename += 8;
-        target = g_string_new(filename);
-        tab_create_new(TAB_PREVIEW, target);
-        g_string_free(target, TRUE);
-        if (focus_this_one && (main_window.current_editor)) {
-          focus_tab = gtk_notebook_page_num(GTK_NOTEBOOK(main_window.notebook_editor),main_window.current_editor->help_scrolled_window);
-        }
+        add_new_document(TAB_PREVIEW, filename, 0);
       } else {
+        if (filename){
         switch_to_file_or_open(filename,0);
-        if (focus_this_one && (main_window.current_editor)) {
-          focus_tab = gtk_notebook_page_num(GTK_NOTEBOOK(main_window.notebook_editor),main_window.current_editor->scintilla);
         }
       }
-        
+      if (focus_this_one && (main_window.current_document)) {
+          focus_tab = gtk_notebook_page_num(GTK_NOTEBOOK(main_window.notebook_editor), document_get_editor_widget(main_window.current_document));
+      }
       focus_this_one=FALSE;
       i++;    
     }
@@ -167,7 +162,7 @@ void session_reopen(void)
   GError *error=NULL;
   if (!g_file_delete (file,NULL,&error)){
       if (error->code!=G_FILE_ERROR_NOENT && error->code!=1){
-        g_print(_("GIO Error deleting file: %s, code %d\n"),error->message,error->code);
+        g_print(_("GIO Error deleting file: %s, code %d\n"), error->message,error->code);
       }
       g_error_free (error);
   }
@@ -202,41 +197,35 @@ void main_window_destroy_event(GtkWidget *widget, gpointer data)
 void close_all_tabs(void)
 {
   GSList *walk;
-  Editor *editor;
+  Document *document;
 
   is_app_closing = TRUE;
   
-  while (g_slist_length(editors)>0) {
-    walk = editors;
-    editor = walk->data;
-    if (editor) {
-      close_page(editor);
-      editors = g_slist_remove(editors, editor);
+  for(walk = editors; walk!= NULL; walk = g_slist_next(walk)) {
+    document = walk->data;
+    if (document) {
+      close_page(document);
+      editors = g_slist_remove(editors, document);
     }
   }
   editors = NULL;
-  main_window.current_editor=NULL;
+  main_window.current_document=NULL;
   is_app_closing = FALSE;
-  return;
 }
-
 
 // Returns true if all tabs are either saved or closed
 gboolean can_all_tabs_be_saved(void)
 {
   GSList *walk;
-  Editor *editor;
+  Document *document;
   gboolean saved;
 
   is_app_closing = TRUE;
   for(walk = editors; walk!= NULL; walk = g_slist_next(walk)) {
-    if (g_slist_length(editors) == 0) {
-      break;
-    }
-    editor = walk->data;
-    if (editor && (editor->scintilla || editor->help_scrolled_window)) {
-      if (!editor->saved && editor->type!=TAB_HELP) {
-        saved = try_save_page(editor, FALSE);
+    document = walk->data;
+    if (document_get_editor_widget(document)) {
+      if (!document_get_saved_status(document) && document_get_can_save(document)) {
+        saved = try_save_page(document, FALSE);
         if (saved==FALSE) {
           is_app_closing = FALSE;
           return FALSE;
@@ -260,24 +249,6 @@ gboolean main_window_delete_event(GtkWidget *widget, GdkEvent *event, gpointer u
   return cancel_quit;
 }
 
-
-void main_window_resize(GtkWidget *widget, GtkAllocation *allocation, gpointer user_data) {
-  if (!get_preferences_manager_window_maximized(main_window.prefmg)) {
-    gint left, width, top, height;
-    gtk_window_get_position(GTK_WINDOW(main_window.window), &left, &top);
-    gtk_window_get_size(GTK_WINDOW(main_window.window), &width, &height);
-    set_preferences_manager_window_height(main_window.prefmg, height);
-    set_preferences_manager_window_width(main_window.prefmg, width);
-    set_preferences_manager_window_left(main_window.prefmg, left);
-    set_preferences_manager_window_top(main_window.prefmg, top);
-  }
-}
-
-void main_window_state_changed(GtkWidget *widget, GdkEventWindowState *event, gpointer user_data)
-{
-  set_preferences_manager_window_maximized(main_window.prefmg, GDK_WINDOW_STATE_MAXIMIZED && event->new_window_state);
-}
-
 gboolean classbrowser_accept_size(GtkPaned *paned, gpointer user_data)
 {
   if (gtk_paned_get_position(GTK_PANED(main_window.main_horizontal_pane)) != 0) {
@@ -288,19 +259,13 @@ gboolean classbrowser_accept_size(GtkPaned *paned, gpointer user_data)
 
 gint main_window_key_press_event(GtkWidget   *widget, GdkEventKey *event,gpointer user_data)
 {
-  guint current_pos;
-  guint current_line;
-  gchar *member_function_buffer;
-  gint member_function_length;
-  gint wordStart;
-  gint wordEnd;
-  
+
   if (main_window.notebook_editor != NULL) {
-    if (main_window.current_editor && main_window.current_editor->scintilla) check_externally_modified();
+    check_externally_modified();
     if (((event->state & (GDK_CONTROL_MASK | GDK_SHIFT_MASK))==(GDK_CONTROL_MASK | GDK_SHIFT_MASK)) && (event->keyval == GDK_ISO_Left_Tab)) {
       // Hack, for some reason when shift is held down keyval comes through as GDK_ISO_Left_Tab not GDK_Tab
       if (gtk_notebook_get_current_page(GTK_NOTEBOOK(main_window.notebook_editor)) == 0) {
-        gtk_notebook_set_current_page(GTK_NOTEBOOK(main_window.notebook_editor),gtk_notebook_get_n_pages(GTK_NOTEBOOK(main_window.notebook_editor))-1);
+        gtk_notebook_set_current_page(GTK_NOTEBOOK(main_window.notebook_editor), gtk_notebook_get_n_pages(GTK_NOTEBOOK(main_window.notebook_editor))-1);
       }
       else {
         gtk_notebook_prev_page(GTK_NOTEBOOK(main_window.notebook_editor));
@@ -321,8 +286,7 @@ gint main_window_key_press_event(GtkWidget   *widget, GdkEventKey *event,gpointe
       return TRUE;
     }
     else if (((event->state & (GDK_CONTROL_MASK | GDK_SHIFT_MASK))==(GDK_CONTROL_MASK | GDK_SHIFT_MASK)) && (event->keyval == GDK_space)) {
-      current_pos = gtk_scintilla_get_current_pos(GTK_SCINTILLA(main_window.current_editor->scintilla));
-      show_call_tip(main_window.current_editor->scintilla,main_window.current_editor->type, current_pos);
+      document_show_calltip_at_current_pos(main_window.current_document);
       return TRUE;
     }
     else if ((event->state & GDK_CONTROL_MASK)==GDK_CONTROL_MASK && ((event->keyval == GDK_j) || (event->keyval == GDK_J)))  {
@@ -330,59 +294,25 @@ gint main_window_key_press_event(GtkWidget   *widget, GdkEventKey *event,gpointe
       return TRUE;
     }
     else if ((event->state & GDK_CONTROL_MASK)==GDK_CONTROL_MASK && ((event->keyval == GDK_F2)))  {
-      ///add a marker
-      //bugfix:segfault if type=TABHELP
-      if (main_window.current_editor && main_window.current_editor->type != TAB_HELP && main_window.current_editor->type != TAB_PREVIEW) {
-      current_pos = gtk_scintilla_get_current_pos(GTK_SCINTILLA(main_window.current_editor->scintilla));
-      current_line = gtk_scintilla_line_from_position(GTK_SCINTILLA(main_window.current_editor->scintilla), current_pos);
-      mod_marker(current_line);
-      }
+         document_modify_current_line_marker(main_window.current_document);
       return TRUE;
     }
     else if ((event->keyval == GDK_F2))  {
-      ///find next marker
-      //bugfix:segfault if type=TABHELP
-      if (main_window.current_editor && main_window.current_editor->type != TAB_HELP && main_window.current_editor->type != TAB_PREVIEW) {
-      current_pos = gtk_scintilla_get_current_pos(GTK_SCINTILLA(main_window.current_editor->scintilla));
-      current_line = gtk_scintilla_line_from_position(GTK_SCINTILLA(main_window.current_editor->scintilla), current_pos);
-      find_next_marker(current_line);
-      }
+        document_find_next_marker(main_window.current_document);
       return TRUE;
     }
-    else if ((event->state & GDK_CONTROL_MASK)==GDK_CONTROL_MASK && (event->keyval == GDK_space) && 
-         (main_window.current_editor->type != TAB_HELP) && (main_window.current_editor->type != TAB_PREVIEW)) {
-      current_pos = gtk_scintilla_get_current_pos(GTK_SCINTILLA(main_window.current_editor->scintilla));
-      current_line = gtk_scintilla_line_from_position(GTK_SCINTILLA(main_window.current_editor->scintilla), current_pos);
-      wordStart = gtk_scintilla_word_start_position(GTK_SCINTILLA(main_window.current_editor->scintilla), current_pos-1, TRUE);
-      wordEnd = gtk_scintilla_word_end_position(GTK_SCINTILLA(main_window.current_editor->scintilla), current_pos-1, TRUE);
-
-      member_function_buffer = gtk_scintilla_get_text_range (GTK_SCINTILLA(main_window.current_editor->scintilla), current_pos-2, current_pos, &member_function_length);
-      if (gtk_scintilla_get_line_state(GTK_SCINTILLA(main_window.current_editor->scintilla), current_line)==274) {
-        if (strcmp(member_function_buffer, "->")==0) {
-          classbrowser_autocomplete_member_function(GPHPEDIT_CLASSBROWSER(main_window.classbrowser), main_window.current_editor->scintilla, wordStart, wordEnd);
-        }
-        else if (main_window.current_editor->type == TAB_PHP) {
-          autocomplete_word(main_window.current_editor->scintilla, wordStart, wordEnd);
-        }
-        else if (main_window.current_editor->type == TAB_CSS) {
-          css_autocomplete_word(main_window.current_editor->scintilla, wordStart, wordEnd);
-        }
-        else if (main_window.current_editor->type == TAB_SQL) {
-          sql_autocomplete_word(main_window.current_editor->scintilla, wordStart, wordEnd);
-        }
-      }
-      g_free(member_function_buffer);
+    else if ((event->state & GDK_CONTROL_MASK)==GDK_CONTROL_MASK && (event->keyval == GDK_space)) { 
+      document_force_autocomplete(main_window.current_document);
       return TRUE;
     }
   }
-
   return FALSE;
 }
 
 void on_new1_activate(GtkWidget *widget)
 {
   // Create a new untitled tab
-  tab_create_new(TAB_FILE, NULL);
+  add_new_document(TAB_FILE, NULL, 0);
 }
 
 void open_file_ok(GtkFileChooser *file_selection)
@@ -400,7 +330,7 @@ void open_file_ok(GtkFileChooser *file_selection)
 }
 
 void reopen_recent(GtkRecentChooser *chooser, gpointer data) {
-  gchar *filename =gtk_recent_chooser_get_current_uri  (chooser);
+  gchar *filename = gtk_recent_chooser_get_current_uri  (chooser);
   if (!filename) return;
   if (DEBUG_MODE) { g_print("DEBUG: main_window_callbacks.c:reopen_recent:filename: %s\n", filename); }
   switch_to_file_or_open(filename, 0);
@@ -410,31 +340,19 @@ void reopen_recent(GtkRecentChooser *chooser, gpointer data) {
 void on_openselected1_activate(GtkWidget *widget)
 {
   GSList *li;
-  Editor *editor;
-
-  gint wordStart;
-  gint wordEnd;
+  Document *document;
   gchar *ac_buffer;
-  gint ac_length;
   gchar *file;
 
-  if (main_window.current_editor == NULL || main_window.current_editor->type == TAB_HELP || main_window.current_editor->type == TAB_PREVIEW) return;
-  
-  wordStart = gtk_scintilla_get_selection_start(GTK_SCINTILLA(main_window.current_editor->scintilla));
-  wordEnd = gtk_scintilla_get_selection_end(GTK_SCINTILLA(main_window.current_editor->scintilla));
-  ac_buffer = gtk_scintilla_get_text_range (GTK_SCINTILLA(main_window.current_editor->scintilla), wordStart, wordEnd, &ac_length);
-  if (wordStart!=wordEnd){
+  ac_buffer = document_get_current_selected_text(main_window.current_document);
+  if (!ac_buffer){
     for(li = editors; li!= NULL; li = g_slist_next(li)) {
-      editor = li->data;
-      if (editor) {
-        if (editor->opened_from) {
-          file = filename_parent_uri(editor->opened_from->str);
-          if (DEBUG_MODE) { g_print("DEBUG: main_window_callbacks.c:on_selected1_activate (opened_from) :file: %s\n", file); }
-        }
-        else {
-          file = filename_parent_uri(editor->filename->str);
-          if (DEBUG_MODE) { g_print("DEBUG: main_window_callbacks.c:on_selected1_activate:file: %s\n", file); }
-        }
+      document = li->data;
+      if (document) {
+         gchar *filename = document_get_filename(document);
+         file = filename_parent_uri(filename);
+         g_free(filename);
+         if (DEBUG_MODE) { g_print("DEBUG: main_window_callbacks.c:on_selected1_activate:file: %s\n", filename); }
 
         if (!strstr(ac_buffer, "://") && file) {
           gchar *filetemp= g_strdup_printf("%s/%s",file, ac_buffer);
@@ -544,6 +462,7 @@ void add_file_filters(GtkFileChooser *chooser){
   gtk_file_filter_add_pattern(filter, "*");
   gtk_file_chooser_add_filter (GTK_FILE_CHOOSER (chooser), filter);
 }
+
 void on_open1_activate(GtkWidget *widget)
 {
   GtkWidget *file_selection_box;
@@ -561,8 +480,9 @@ void on_open1_activate(GtkWidget *widget)
   if (DEBUG_MODE) { g_print("DEBUG: main_window_callbacks.c:on_open1_activate:last_opened_folder: %s\n", last_opened_folder); }
   /* opening of multiple files at once */
   gtk_file_chooser_set_select_multiple(GTK_FILE_CHOOSER(file_selection_box), TRUE);
-  if (main_window.current_editor && !main_window.current_editor->is_untitled) {
-    folder = filename_parent_uri(main_window.current_editor->filename->str);
+  gchar *filename = (gchar *)document_get_filename(main_window.current_document);
+  if (filename && !document_get_untitled(main_window.current_document)) {
+    folder = filename_parent_uri(filename);
     if (DEBUG_MODE) { g_print("DEBUG: main_window_callbacks.c:on_open1_activate:folder: %s\n", folder); }
     gtk_file_chooser_set_current_folder_uri(GTK_FILE_CHOOSER(file_selection_box),  folder);
     g_free(folder);
@@ -579,99 +499,42 @@ void on_open1_activate(GtkWidget *widget)
 
 void save_file_as_ok(GtkFileChooser *file_selection_box)
 {
-  GString *filename;
   gchar *uri=gtk_file_chooser_get_uri(file_selection_box);
-  filename = g_string_new(uri);
+  // Set the filename of the current document to be that
+  document_set_GFile(main_window.current_document, get_gfile_from_filename(uri));
+  document_set_untitled(main_window.current_document, FALSE);
+  gchar *basename = filename_get_basename(uri);
   g_free(uri);
-  // Set the filename of the current editor to be that
-  if (main_window.current_editor->filename) {
-    g_string_free(main_window.current_editor->filename, TRUE);
-  }
-  main_window.current_editor->filename=g_string_new(filename->str);
-  main_window.current_editor->is_untitled=FALSE;
-  main_window.current_editor->short_filename = filename_get_basename(filename->str);
-  tab_check_php_file(main_window.current_editor);
-  tab_check_css_file(main_window.current_editor);
+  document_set_shortfilename(main_window.current_document, basename);
 
   // Call Save method to actually save it now it has a filename
   on_save1_activate(NULL);
-
-  if (main_window.current_editor->opened_from) {
-    g_string_free(main_window.current_editor->opened_from, TRUE);
-    main_window.current_editor->opened_from = NULL;
-  }
-  g_string_free(filename, FALSE);
 }
 
 void on_save1_activate(GtkWidget *widget)
 {
-  gchar *filename = NULL;
-  GFile *file;
-  if (main_window.current_editor) {
-
-    filename = main_window.current_editor->filename->str;
-
-    //if filename is Untitled
-    if (main_window.current_editor->is_untitled) {
+  if (main_window.current_document) {
+    //if document is Untitled
+    if (document_get_untitled(main_window.current_document)) {
       on_save_as1_activate(widget);
     } else {
       /* show status in statusbar */
-      gphpedit_statusbar_flash_message (GPHPEDIT_STATUSBAR(main_window.appbar),0,_("Saving %s"),filename);
-      file=get_gfile_from_filename(filename);
-      tab_file_save_opened(main_window.current_editor,file);
+      gphpedit_statusbar_flash_message (GPHPEDIT_STATUSBAR(main_window.appbar),0,_("Saving %s"), document_get_shortfilename(main_window.current_document));
+      document_save(main_window.current_document);
     }
   }
 }
 
 void on_saveall1_activate(GtkWidget *widget)
 {
-  gchar *write_buffer = NULL;
-  gsize text_length;
-  gchar *filename;
   GSList *li;
-  Editor *editor;
-  gchar *converted_text = NULL;
-  gsize utf8_size; // was guint
-  GError *error = NULL;
-
+  Document *doc;
   for(li = editors; li!= NULL; li = g_slist_next(li)) {
-    editor = li->data;
-    if (editor && editor->type!=TAB_HELP && editor->type!=TAB_PREVIEW && editor->is_untitled!=TRUE) {
-      filename = editor->filename->str;
-        GFile *file;
-        file=get_gfile_from_filename(filename);
-        text_length = gtk_scintilla_get_length(GTK_SCINTILLA(editor->scintilla));
-        write_buffer = g_malloc0(text_length+1); // Include terminating null
-        if (write_buffer == NULL) {
-          g_warning ("%s", _("Cannot allocate write buffer"));
-          break;
-        }
-        gtk_scintilla_get_text(GTK_SCINTILLA(editor->scintilla), text_length+1, write_buffer);
-        // If we converted to UTF-8 when loading, convert back to the locale to save
-        if (editor->converted_to_utf8) {
-          converted_text = g_locale_from_utf8(write_buffer, text_length, NULL, &utf8_size, &error);
-          if (error != NULL) {
-            g_print(_("UTF-8 Error: %s\n"), error->message);
-            g_error_free(error);      
-            } else {
-            #ifdef DEBUGTAB
-            g_print("DEBUG: Converted size: %d\n", utf8_size);
-            #endif
-            g_free(write_buffer);
-            write_buffer = converted_text;
-            text_length = utf8_size;
-            g_free(converted_text);
-            }
-        }
-        if (!g_file_replace_contents (file,write_buffer,text_length,NULL,FALSE,G_FILE_CREATE_NONE,NULL,NULL,&error)){
-          g_object_unref(file);  
-          g_print(_("GIO Error: %s saving file:%s\n"),error->message,editor->filename->str);
-          break;
-        }
-        g_object_unref(file);  
-        g_get_current_time (&editor->file_mtime); /*set current time*/
-        g_free (write_buffer);
-        gtk_scintilla_set_save_point (GTK_SCINTILLA(editor->scintilla));
+    doc = li->data;
+    if (document_get_untitled(doc)){
+      // g_print("Untitled found. Save not implemented\n");
+    } else {
+    document_save(doc);
     }
   }
   classbrowser_update(GPHPEDIT_CLASSBROWSER(main_window.classbrowser));
@@ -684,7 +547,7 @@ void on_save_as1_activate(GtkWidget *widget)
   gchar *filename;
   const gchar *last_opened_folder;
 
-  if (main_window.current_editor) {
+  if (main_window.current_document) {
     // Create the selector widget
     file_selection_box = gtk_file_chooser_dialog_new (_("Please type the filename to save as..."), 
       GTK_WINDOW(main_window.window), GTK_FILE_CHOOSER_ACTION_SAVE, GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
@@ -694,12 +557,10 @@ void on_save_as1_activate(GtkWidget *widget)
     gtk_file_chooser_set_do_overwrite_confirmation (GTK_FILE_CHOOSER(file_selection_box), TRUE);
     gtk_dialog_set_default_response (GTK_DIALOG(file_selection_box), GTK_RESPONSE_ACCEPT);
     
-    if (main_window.current_editor) {
-      filename = main_window.current_editor->filename->str;
-      if (main_window.current_editor->is_untitled == FALSE) {
-          gchar *uri=filename_get_uri(filename);
-          gtk_file_chooser_set_uri(GTK_FILE_CHOOSER(file_selection_box), uri);
-          g_free(uri);
+    if (main_window.current_document) {
+      filename = document_get_filename(main_window.current_document);
+      if (!document_get_untitled(main_window.current_document)) {
+          gtk_file_chooser_set_uri(GTK_FILE_CHOOSER(file_selection_box), filename);
       }
       else {
         last_opened_folder = get_preferences_manager_last_opened_folder(main_window.prefmg);
@@ -709,6 +570,7 @@ void on_save_as1_activate(GtkWidget *widget)
           gtk_file_chooser_set_current_folder_uri(GTK_FILE_CHOOSER(file_selection_box),  last_opened_folder);
         }
       }
+      g_free(filename);
     }
     if (gtk_dialog_run (GTK_DIALOG(file_selection_box)) == GTK_RESPONSE_ACCEPT) {
       save_file_as_ok(GTK_FILE_CHOOSER(file_selection_box));
@@ -718,28 +580,29 @@ void on_save_as1_activate(GtkWidget *widget)
 }
 void on_reload1_activate(GtkWidget *widget)
 {
-  if (main_window.current_editor == NULL || main_window.current_editor->type == TAB_HELP) return;
-  if (main_window.current_editor && (main_window.current_editor->saved == FALSE)) {
+  if (!document_get_saved_status(main_window.current_document)) {
     GtkWidget *file_revert_dialog;
     file_revert_dialog = gtk_message_dialog_new(GTK_WINDOW(main_window.window),GTK_DIALOG_DESTROY_WITH_PARENT,GTK_MESSAGE_QUESTION,GTK_BUTTONS_YES_NO,
             _("Are you sure you wish to reload the current file, losing your changes?"));
     gtk_window_set_title(GTK_WINDOW(file_revert_dialog), "Question");
     gint result = gtk_dialog_run (GTK_DIALOG (file_revert_dialog));
     if (result==GTK_RESPONSE_YES) {
-      gphpedit_statusbar_flash_message (GPHPEDIT_STATUSBAR(main_window.appbar),0,_("Opening %s"),main_window.current_editor->filename->str);
-      tab_load_file(main_window.current_editor);
+      gphpedit_statusbar_flash_message (GPHPEDIT_STATUSBAR(main_window.appbar),0,_("Opening %s"), 
+          document_get_shortfilename(main_window.current_document));
+    document_reload(main_window.current_document);
     }
     gtk_widget_destroy(file_revert_dialog);
-  }
-  else if (main_window.current_editor) {
-    gphpedit_statusbar_flash_message (GPHPEDIT_STATUSBAR(main_window.appbar),0,_("Opening %s"),main_window.current_editor->filename->str);
-    tab_load_file(main_window.current_editor);
+  } else {
+    gphpedit_statusbar_flash_message (GPHPEDIT_STATUSBAR(main_window.appbar),0,_("Opening %s"), 
+        document_get_shortfilename(main_window.current_document));
+    
+    document_reload(main_window.current_document);
   }
 }
 
-void on_tab_close_activate(GtkWidget *widget, Editor *editor)
+void on_tab_close_activate(GtkWidget *widget, Document *document)
 {
-  try_close_page(editor);
+  try_close_page(document);
   classbrowser_update(GPHPEDIT_CLASSBROWSER(main_window.classbrowser));
   update_app_title();
 }
@@ -747,15 +610,17 @@ void on_tab_close_activate(GtkWidget *widget, Editor *editor)
 void rename_file(GString *newfilename)
 {
   gchar *basename=filename_get_basename(newfilename->str);
-
-  if (filename_rename(main_window.current_editor->filename->str, basename)){
-  // set current_editor->filename
-  main_window.current_editor->filename=g_string_new (newfilename->str);
-  main_window.current_editor->short_filename = basename;
-
+  gchar *filename = document_get_filename(main_window.current_document);
+  if (filename_rename(filename, basename)){
+  // Set the filename of the current document to be that
+  document_set_GFile(main_window.current_document, get_gfile_from_filename(newfilename->str));
+  document_set_untitled(main_window.current_document, FALSE);
+  document_set_shortfilename(main_window.current_document, basename);
+  g_free(basename);
   // save as new filename
   on_save1_activate(NULL);
   }
+  g_free(filename);
 }
 
 void rename_file_ok(GtkFileChooser *file_selection)
@@ -783,14 +648,16 @@ void on_rename1_activate(GtkWidget *widget)
 {
   GtkWidget *file_selection_box;
 
-  if (main_window.current_editor) {
+  if (main_window.current_document) {
     // Create the selector widget
     file_selection_box = gtk_file_chooser_dialog_new(_("Please type the filename to rename this file to..."),
       GTK_WINDOW(main_window.window), GTK_FILE_CHOOSER_ACTION_SAVE, GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
       GTK_STOCK_SAVE, GTK_RESPONSE_ACCEPT, NULL);
     
-    if (main_window.current_editor) {
-      gtk_file_chooser_set_filename (GTK_FILE_CHOOSER(file_selection_box), main_window.current_editor->filename->str);
+    if (main_window.current_document) {
+      gchar *filename = document_get_filename(main_window.current_document);
+      gtk_file_chooser_set_filename (GTK_FILE_CHOOSER(file_selection_box), filename);
+      g_free(filename);
     }
 
     if (gtk_dialog_run (GTK_DIALOG(file_selection_box)) == GTK_RESPONSE_ACCEPT) {
@@ -804,33 +671,22 @@ void on_rename1_activate(GtkWidget *widget)
 
 void set_active_tab(page_num)
 {
-  Editor *new_current_editor;
+  Document *new_current_editor;
 
-  new_current_editor = (Editor *)g_slist_nth_data(editors, page_num);
+  new_current_editor = DOCUMENT(g_slist_nth_data(editors, page_num));
 
   if (new_current_editor) {
     //page_num = gtk_notebook_page_num(GTK_NOTEBOOK(main_window.notebook_editor),(new_current_editor->scintilla));
     gtk_notebook_set_current_page(GTK_NOTEBOOK(main_window.notebook_editor), page_num);
   }
 
-  main_window.current_editor = new_current_editor;
+  main_window.current_document = new_current_editor;
 
   update_app_title();
 
 }
 void update_zoom_level(void){
-  if (main_window.current_editor == NULL) return;
-    gint p=0;
-    if (GTK_IS_SCINTILLA(main_window.current_editor->scintilla)){
-      p= gtk_scintilla_get_zoom(GTK_SCINTILLA(main_window.current_editor->scintilla));
-      p= (p*10) + 100;
-    }else{
-      if (WEBKIT_IS_WEB_VIEW(main_window.current_editor->help_view)){
-        gfloat d= webkit_web_view_get_zoom_level (main_window.current_editor->help_view);
-        p=d*100;
-      }
-  }
-    gphpedit_statusbar_set_zoom_level((GphpeditStatusbar *)main_window.appbar,p);
+  gphpedit_statusbar_set_zoom_level((GphpeditStatusbar *)main_window.appbar, document_get_zoom_level(main_window.current_document));
 }
 
 /**
@@ -841,19 +697,13 @@ void update_zoom_level(void){
  * @return void
  */
 
-void close_page(Editor *editor)
+void close_page(Document *document)
 {
   gint page_num;
   gint page_num_closing;
   gint current_active_tab;
 
-  if (GTK_IS_SCINTILLA(editor->scintilla)) {
-    page_num_closing = gtk_notebook_page_num(GTK_NOTEBOOK(main_window.notebook_editor),editor->scintilla);
-    //g_free(editor->short_filename);
-  }
-  else {
-    page_num_closing = gtk_notebook_page_num(GTK_NOTEBOOK(main_window.notebook_editor),editor->help_scrolled_window);
-  }
+  page_num_closing = gtk_notebook_page_num(GTK_NOTEBOOK(main_window.notebook_editor), document_get_editor_widget(document));
   current_active_tab = gtk_notebook_get_current_page(GTK_NOTEBOOK(main_window.notebook_editor));
   
   if (page_num_closing != current_active_tab) {
@@ -869,12 +719,8 @@ void close_page(Editor *editor)
     }  
   }
   set_active_tab(page_num);
-  if (editor->type==TAB_HELP || editor->type==TAB_PREVIEW) g_free(editor->help_function);
-  g_string_free(editor->filename, TRUE);
-  g_free(editor->short_filename);
-  //g_free(editor->contenttype);
-  g_slice_free(Editor,editor);
   gtk_notebook_remove_page(GTK_NOTEBOOK(main_window.notebook_editor), page_num_closing);
+  g_object_unref(document);
 }
 
 /**
@@ -889,14 +735,17 @@ GdkPixbuf *get_window_icon (void){
 }
 
 
-gboolean try_save_page(Editor *editor, gboolean close_if_can)
+gboolean try_save_page(Document *document, gboolean close_if_can)
 {
+
   GtkWidget *confirm_dialog;
   gint ret;
   GString *string;
   string = g_string_new("");
-  confirm_dialog=gtk_message_dialog_new (GTK_WINDOW(main_window.window),GTK_DIALOG_DESTROY_WITH_PARENT,GTK_MESSAGE_WARNING,GTK_BUTTONS_NONE,_("The file '%s' has not been saved since your last changes, are you sure you want to close it and lose these changes?"),editor->short_filename);
-  g_string_printf(string,_("Unsaved changes to '%s'"), editor->filename->str);
+  confirm_dialog=gtk_message_dialog_new (GTK_WINDOW(main_window.window),GTK_DIALOG_DESTROY_WITH_PARENT,GTK_MESSAGE_WARNING,GTK_BUTTONS_NONE,_("The file '%s' has not been saved since your last changes, are you sure you want to close it and lose these changes?"), document_get_shortfilename(document));
+  gchar *filename = document_get_filename(document);
+  g_string_printf(string,_("Unsaved changes to '%s'"), filename);
+  g_free(filename);
   gtk_window_set_title(GTK_WINDOW(confirm_dialog), string->str);
   g_string_free(string,TRUE);
   gtk_dialog_add_button (GTK_DIALOG(confirm_dialog),_("Close and _lose changes"),0);
@@ -907,33 +756,31 @@ gboolean try_save_page(Editor *editor, gboolean close_if_can)
   switch (ret) {
     case 0:
       if (close_if_can) {
-          close_page(editor);
-          editors = g_slist_remove(editors, editor);
-          if (g_slist_length(editors) == 0) {
-            editors = NULL;
-            main_window.current_editor = NULL;
+          close_page(document);
+          editors = g_slist_remove(editors, document);
+          if (!editors) {
+            main_window.current_document = NULL;
           }
       }
       return TRUE;
     case 1:
       on_save1_activate(NULL);
-      // If chose neither of these, dialog either cancelled or closed.  Do nothing.
+      // If chose neither of these, dialog either cancelled or closed. Do nothing.
   }
   return FALSE;
 }
 
 
-gboolean try_close_page(Editor *editor)
+gboolean try_close_page(Document *document)
 {
-  if (!editor->saved && editor->type!=TAB_HELP && !(editor->is_untitled && gtk_scintilla_get_text_length(GTK_SCINTILLA(editor->scintilla))==0)) {
-    return try_save_page(editor, TRUE);
+  if (document_get_can_save(document) && document_get_saved_status(document) && !document_get_is_empty(document)) {
+    return try_save_page(document, TRUE);
   }
   else {
-    close_page(editor);
-    editors = g_slist_remove(editors, editor);
-    if (g_slist_length(editors) == 0) {
-      editors = NULL;
-      main_window.current_editor = NULL;
+    close_page(document);
+    editors = g_slist_remove(editors, document);
+    if (!editors) {
+      main_window.current_document = NULL;
     }
     return TRUE;
   }
@@ -942,15 +789,14 @@ gboolean try_close_page(Editor *editor)
 
 void on_close1_activate(GtkWidget *widget)
 {
-  if (main_window.current_editor != NULL) {
-    try_close_page(main_window.current_editor);
+  if (main_window.current_document != NULL) {
+    try_close_page(main_window.current_document);
     classbrowser_update(GPHPEDIT_CLASSBROWSER(main_window.classbrowser));
     update_app_title();
     update_zoom_level();
     classbrowser_force_label_update(GPHPEDIT_CLASSBROWSER(main_window.classbrowser));
   }
 }
-
 
 void on_quit1_activate(GtkWidget *widget)
 {
@@ -962,140 +808,38 @@ void on_quit1_activate(GtkWidget *widget)
 
 void on_cut1_activate(GtkWidget *widget)
 {
-  gint wordStart;
-  gint wordEnd;
-  gint length;
-  gchar *buffer;
-  
-  if (main_window.current_editor == NULL || main_window.current_editor->type == TAB_HELP)
-    return;
-  
-  wordStart = gtk_scintilla_get_selection_start(GTK_SCINTILLA(main_window.current_editor->scintilla));
-  wordEnd = gtk_scintilla_get_selection_end(GTK_SCINTILLA(main_window.current_editor->scintilla));
-  if (wordStart != wordEnd) {
-    buffer = gtk_scintilla_get_text_range (GTK_SCINTILLA(main_window.current_editor->scintilla), wordStart, wordEnd, &length);
-    gtk_clipboard_set_text(main_window.clipboard,buffer,length);
-    gtk_scintilla_replace_sel(GTK_SCINTILLA(main_window.current_editor->scintilla), "");
-    g_free(buffer);
-  }
-  //gtk_scintilla_cut(GTK_SCINTILLA(main_window.current_editor->scintilla));
+  document_cut(main_window.current_document, main_window.clipboard);
 }
 
 void on_copy1_activate(GtkWidget *widget)
 {
-  gint wordStart;
-  gint wordEnd;
-  gint length;
-  gchar *buffer;
-  
-  if (main_window.current_editor == NULL) return;
-  
-  if (main_window.current_editor->type == TAB_HELP) {
-     webkit_web_view_copy_clipboard (WEBKIT_WEB_VIEW(main_window.current_editor->help_view));
-  }
-  else {
-    wordStart = gtk_scintilla_get_selection_start(GTK_SCINTILLA(main_window.current_editor->scintilla));
-    wordEnd = gtk_scintilla_get_selection_end(GTK_SCINTILLA(main_window.current_editor->scintilla));
-    if (wordStart != wordEnd) {
-      buffer = gtk_scintilla_get_text_range (GTK_SCINTILLA(main_window.current_editor->scintilla), wordStart, wordEnd, &length);
-      gtk_clipboard_set_text(main_window.clipboard,buffer,length);
-      g_free(buffer);
-    }
-  }
-  macro_record (main_window.current_editor->scintilla, 2178, 0, 0); // As copy doesn't change the buffer it doesn't get recorded, so do it manually
-  
-  //gtk_scintilla_copy(GTK_SCINTILLA(main_window.current_editor->scintilla));
+  document_copy(main_window.current_document, main_window.clipboard);
 }
 
-
-void on_paste_got_from_cliboard(GtkClipboard *clipboard, const gchar *text, gpointer data)
-{
-  Editor *editor;
-  editor = editor_find_from_scintilla(data);
-  editor->is_pasting = editor->is_macro_recording;
-  gtk_scintilla_replace_sel(GTK_SCINTILLA(data), text);
-  editor->is_pasting = FALSE;
-  if (editor->type==TAB_FILE){
-  /* if we type <?php then we are in a php file so force php syntax mode */
-  if (strstr(text,"<?php")){
-     set_editor_to_php(editor);
-     update_status_combobox(main_window.current_editor);
-     }
-  }
-  // Possible fix for rendering issues after pasting
-  gtk_scintilla_colourise(GTK_SCINTILLA(main_window.current_editor->scintilla), 0, -1);
-}
 
 void selectiontoupper(void){
-  gint wordStart;
-  gint wordEnd;
-  gint length;
-  gchar *buffer;
-
-  if (main_window.current_editor == NULL)
-    return;
-
-  if (main_window.current_editor->type != TAB_HELP) {
-    wordStart = gtk_scintilla_get_selection_start(GTK_SCINTILLA(main_window.current_editor->scintilla));
-    wordEnd = gtk_scintilla_get_selection_end(GTK_SCINTILLA(main_window.current_editor->scintilla));
-    if (wordStart != wordEnd) {
-      buffer = gtk_scintilla_get_text_range (GTK_SCINTILLA(main_window.current_editor->scintilla), wordStart, wordEnd, &length);
-      /* buffer to upper */
-      gchar *tmpbuffer=g_utf8_strup (buffer,strlen(buffer));
-      g_free(buffer);
-      /* replace sel */
-      gtk_scintilla_replace_sel(GTK_SCINTILLA(main_window.current_editor->scintilla), tmpbuffer);
-      g_free(tmpbuffer);
-    }
-  }
+  document_selection_to_upper(main_window.current_document);
 }
+
 void selectiontolower(void){
-  gint wordStart;
-  gint wordEnd;
-  gint length;
-  gchar *buffer;
-
-  if (main_window.current_editor == NULL) return;
-
-  if (main_window.current_editor->type != TAB_HELP) {
-    wordStart = gtk_scintilla_get_selection_start(GTK_SCINTILLA(main_window.current_editor->scintilla));
-    wordEnd = gtk_scintilla_get_selection_end(GTK_SCINTILLA(main_window.current_editor->scintilla));
-    if (wordStart != wordEnd) {
-      buffer = gtk_scintilla_get_text_range (GTK_SCINTILLA(main_window.current_editor->scintilla), wordStart, wordEnd, &length);
-       /* buffer to lower */
-      gchar *tmpbuffer=g_utf8_strdown (buffer,strlen(buffer));
-      g_free(buffer);
-      /* replace sel */
-      gtk_scintilla_replace_sel(GTK_SCINTILLA(main_window.current_editor->scintilla), tmpbuffer);
-      g_free(tmpbuffer);
-    }
-  }
+  document_selection_to_lower(main_window.current_document);
 }
+
 void on_paste1_activate(GtkWidget *widget)
 {
-  if (main_window.current_editor == NULL || main_window.current_editor->type == TAB_HELP || main_window.current_editor->type == TAB_PREVIEW)
-    return;
-  
-  gtk_clipboard_request_text(main_window.clipboard, on_paste_got_from_cliboard,main_window.current_editor->scintilla);
+  document_paste(main_window.current_document, main_window.clipboard);
 }
 
 
 void on_selectall1_activate(GtkWidget *widget)
 {
-  if (main_window.current_editor == NULL)
-    return;
-  if (main_window.current_editor->type == TAB_HELP){
-  //select text in help tab
-    webkit_web_view_select_all (WEBKIT_WEB_VIEW(main_window.current_editor->help_view));
-  } else {
-    gtk_scintilla_select_all(GTK_SCINTILLA(main_window.current_editor->scintilla));
-  }
+  document_select_all(main_window.current_document);
 }
 
 
 void on_find1_activate(GtkWidget *widget)
 {
-  if (main_window.current_editor && main_window.current_editor->type != TAB_HELP) {
+  if (main_window.current_document) {
     GtkWidget *find_dialog = search_dialog_new (GTK_WINDOW(main_window.window));
     gtk_widget_show(find_dialog);    
   }
@@ -1104,7 +848,7 @@ void on_find1_activate(GtkWidget *widget)
 
 void on_replace1_activate(GtkWidget *widget)
 {
-  if (main_window.current_editor) {
+  if (main_window.current_document) {
     GtkWidget *replace_dialog = replace_dialog_new (GTK_WINDOW(main_window.window));
     gtk_widget_show(replace_dialog);    
   }
@@ -1112,111 +856,24 @@ void on_replace1_activate(GtkWidget *widget)
 
 void on_undo1_activate(GtkWidget *widget)
 {
-  if (main_window.current_editor) {
-    gtk_scintilla_undo(GTK_SCINTILLA(main_window.current_editor->scintilla));
-  }
+  document_undo(main_window.current_document);
 }
 
 
 void on_redo1_activate(GtkWidget *widget)
 {
-  if (main_window.current_editor) {
-    gtk_scintilla_redo(GTK_SCINTILLA(main_window.current_editor->scintilla));
-  }
+  document_redo(main_window.current_document);
 }
 
 
 void keyboard_macro_startstop(GtkWidget *widget)
 {
-  if (main_window.current_editor) {
-    if (main_window.current_editor->is_macro_recording) {
-      gtk_scintilla_stop_record(GTK_SCINTILLA(main_window.current_editor->scintilla));
-      main_window.current_editor->is_macro_recording = FALSE;
-    }
-    else {
-      if (main_window.current_editor->keyboard_macro_list) {
-        keyboard_macro_empty_old(main_window.current_editor);
-      }
-      gtk_scintilla_start_record(GTK_SCINTILLA(main_window.current_editor->scintilla));
-      main_window.current_editor->is_macro_recording = TRUE;
-    }
-  }
+  document_keyboard_macro_startstop(main_window.current_document);
 }
 
 void keyboard_macro_playback(GtkWidget *widget)
 {
-  GSList *current;
-  MacroEvent *event;
-
-  if (main_window.current_editor) {
-    gtk_scintilla_begin_undo_action(GTK_SCINTILLA(main_window.current_editor->scintilla));
-    if (main_window.current_editor->keyboard_macro_list) {
-      for (current = main_window.current_editor->keyboard_macro_list; current; current = g_slist_next(current)) {
-        event = current->data;
-        if (DEBUG_MODE) { g_print("DEBUG: main_window_callbacks.c:keyboard_macro_playback:Message: %d (%s)\n", event->message, macro_message_to_string(event->message)); }
-
-        switch (event->message) {
-          case (2170) : gtk_scintilla_replace_sel(GTK_SCINTILLA(main_window.current_editor->scintilla), (gchar *)event->lparam); break;
-          case (2177) : gtk_scintilla_cut(GTK_SCINTILLA(main_window.current_editor->scintilla)); break;
-          case (2178) : gtk_scintilla_copy(GTK_SCINTILLA(main_window.current_editor->scintilla)); break;
-          case (2179) : gtk_scintilla_paste(GTK_SCINTILLA(main_window.current_editor->scintilla)); break;
-          case (2180) : gtk_scintilla_clear(GTK_SCINTILLA(main_window.current_editor->scintilla)); break;
-          case (2300) : gtk_scintilla_line_down(GTK_SCINTILLA(main_window.current_editor->scintilla)); break;
-          case (2301) : gtk_scintilla_line_down_extend(GTK_SCINTILLA(main_window.current_editor->scintilla)); break;
-          case (2302) : gtk_scintilla_line_up(GTK_SCINTILLA(main_window.current_editor->scintilla)); break;
-          case (2303) : gtk_scintilla_line_up_extend(GTK_SCINTILLA(main_window.current_editor->scintilla)); break;
-          case (2304) : gtk_scintilla_char_left(GTK_SCINTILLA(main_window.current_editor->scintilla)); break;
-          case (2305) : gtk_scintilla_char_left_extend(GTK_SCINTILLA(main_window.current_editor->scintilla)); break;
-          case (2306) : gtk_scintilla_char_right(GTK_SCINTILLA(main_window.current_editor->scintilla)); break;
-          case (2307) : gtk_scintilla_char_right_extend(GTK_SCINTILLA(main_window.current_editor->scintilla)); break;
-          case (2308) : gtk_scintilla_word_left(GTK_SCINTILLA(main_window.current_editor->scintilla)); break;
-          case (2309) : gtk_scintilla_word_left_extend(GTK_SCINTILLA(main_window.current_editor->scintilla)); break;
-          case (2310) : gtk_scintilla_word_right(GTK_SCINTILLA(main_window.current_editor->scintilla)); break;
-          case (2311) : gtk_scintilla_word_right_extend(GTK_SCINTILLA(main_window.current_editor->scintilla)); break;
-          case (2312) : gtk_scintilla_home(GTK_SCINTILLA(main_window.current_editor->scintilla)); break;
-          case (2313) : gtk_scintilla_home_extend(GTK_SCINTILLA(main_window.current_editor->scintilla)); break;
-          case (2314) : gtk_scintilla_line_end(GTK_SCINTILLA(main_window.current_editor->scintilla)); break;
-          case (2315) : gtk_scintilla_line_end_extend(GTK_SCINTILLA(main_window.current_editor->scintilla)); break;
-          case (2316) : gtk_scintilla_document_start(GTK_SCINTILLA(main_window.current_editor->scintilla)); break;
-          case (2317) : gtk_scintilla_document_start_extend(GTK_SCINTILLA(main_window.current_editor->scintilla)); break;
-          case (2318) : gtk_scintilla_document_end(GTK_SCINTILLA(main_window.current_editor->scintilla)); break;
-          case (2319) : gtk_scintilla_document_end_extend(GTK_SCINTILLA(main_window.current_editor->scintilla)); break;
-          case (2320) : gtk_scintilla_page_up(GTK_SCINTILLA(main_window.current_editor->scintilla)); break;
-          case (2321) : gtk_scintilla_page_up_extend(GTK_SCINTILLA(main_window.current_editor->scintilla)); break;
-          case (2322) : gtk_scintilla_page_down(GTK_SCINTILLA(main_window.current_editor->scintilla)); break;
-          case (2323) : gtk_scintilla_page_down_extend(GTK_SCINTILLA(main_window.current_editor->scintilla)); break;
-          case (2324) : gtk_scintilla_edit_toggle_overtype(GTK_SCINTILLA(main_window.current_editor->scintilla)); break;
-          case (2325) : gtk_scintilla_cancel(GTK_SCINTILLA(main_window.current_editor->scintilla)); break;
-          case (2326) : gtk_scintilla_delete_back(GTK_SCINTILLA(main_window.current_editor->scintilla)); break;
-          case (2327) : gtk_scintilla_tab(GTK_SCINTILLA(main_window.current_editor->scintilla)); break;
-          case (2328) : gtk_scintilla_back_tab(GTK_SCINTILLA(main_window.current_editor->scintilla)); break;
-          case (2329) : gtk_scintilla_new_line(GTK_SCINTILLA(main_window.current_editor->scintilla)); break;
-          case (2330) : gtk_scintilla_form_feed(GTK_SCINTILLA(main_window.current_editor->scintilla)); break;
-          case (2331) : gtk_scintilla_v_c_home(GTK_SCINTILLA(main_window.current_editor->scintilla)); break;
-          case (2332) : gtk_scintilla_v_c_home_extend(GTK_SCINTILLA(main_window.current_editor->scintilla)); break;
-          case (2333) : gtk_scintilla_zoom_in(GTK_SCINTILLA(main_window.current_editor->scintilla)); break;
-          case (2334) : gtk_scintilla_zoom_out(GTK_SCINTILLA(main_window.current_editor->scintilla)); break;
-          case (2335) : gtk_scintilla_del_word_left(GTK_SCINTILLA(main_window.current_editor->scintilla)); break;
-          case (2336) : gtk_scintilla_del_word_right(GTK_SCINTILLA(main_window.current_editor->scintilla)); break;
-          case (2337) : gtk_scintilla_line_cut(GTK_SCINTILLA(main_window.current_editor->scintilla)); break;
-          case (2338) : gtk_scintilla_line_delete(GTK_SCINTILLA(main_window.current_editor->scintilla)); break;
-          case (2339) : gtk_scintilla_line_transpose(GTK_SCINTILLA(main_window.current_editor->scintilla)); break;
-          case (2340) : gtk_scintilla_lower_case(GTK_SCINTILLA(main_window.current_editor->scintilla)); break;
-          case (2341) : gtk_scintilla_upper_case(GTK_SCINTILLA(main_window.current_editor->scintilla)); break;
-          case (2342) : gtk_scintilla_line_scroll_down(GTK_SCINTILLA(main_window.current_editor->scintilla)); break;
-          case (2343) : gtk_scintilla_line_scroll_up(GTK_SCINTILLA(main_window.current_editor->scintilla)); break;
-          case (2344) : gtk_scintilla_delete_back_not_line(GTK_SCINTILLA(main_window.current_editor->scintilla)); break;
-          case (2345) : gtk_scintilla_home_display(GTK_SCINTILLA(main_window.current_editor->scintilla)); break;
-          case (2346) : gtk_scintilla_home_display_extend(GTK_SCINTILLA(main_window.current_editor->scintilla)); break;
-          case (2347) : gtk_scintilla_line_end_display(GTK_SCINTILLA(main_window.current_editor->scintilla)); break;
-          case (2348) : gtk_scintilla_line_end_display_extend(GTK_SCINTILLA(main_window.current_editor->scintilla)); break;
-          default:
-            g_print(_("Unhandle keyboard macro function %d, please report\n"), event->message);
-        }
-      }
-    }
-    gtk_scintilla_end_undo_action(GTK_SCINTILLA(main_window.current_editor->scintilla));
-  }
+  document_keyboard_macro_playback(main_window.current_document);
 }
 
 
@@ -1236,24 +893,11 @@ void on_preferences1_activate(GtkWidget *widget)
 void context_help(GtkWidget *widget)
 {
   gchar *buffer = NULL;
-  gint length;
-  GString *function;
-  gint wordStart;
-  gint wordEnd;
-  
-  if (main_window.current_editor && main_window.current_editor->type != TAB_HELP) {
-    wordStart = gtk_scintilla_get_selection_start(GTK_SCINTILLA(main_window.current_editor->scintilla));
-    wordEnd = gtk_scintilla_get_selection_end(GTK_SCINTILLA(main_window.current_editor->scintilla));
-    if (wordStart != wordEnd) {
-      buffer = gtk_scintilla_get_text_range (GTK_SCINTILLA(main_window.current_editor->scintilla), wordStart, wordEnd, &length);
-      //g_print("%s\n", buffer);
-      function = g_string_new(buffer);
-      tab_create_new(TAB_HELP, function);
-      g_string_free(function, TRUE);
-    }
-  }
 
-  g_free(buffer);
+  buffer = document_get_current_selected_text(main_window.current_document);
+  if (buffer){
+    add_new_document(TAB_HELP, buffer, 0);
+  }
 }
 
 /**
@@ -1299,7 +943,7 @@ void on_about1_activate(GtkWidget *widget)
   gtk_about_dialog_set_translator_credits(GTK_ABOUT_DIALOG(dialog),translator_credits);
   gtk_about_dialog_set_documenters (GTK_ABOUT_DIALOG(dialog),(const gchar **) documenters);
   /* 
-     http://library.gnome.org/devel/gtk/unstable/GtkWindow.html#gtk-window-set-transient-for
+     http://library.gnome.org/devel/gtk/stable/GtkWindow.html#gtk-window-set-transient-for
      Dialog windows should be set transient for the main application window they were spawned from. 
      This allows window managers  to e.g. keep the dialog on top of the main window, or center the dialog over the main window.
   */
@@ -1307,9 +951,9 @@ void on_about1_activate(GtkWidget *widget)
   gtk_dialog_run(GTK_DIALOG (dialog));
   gtk_widget_destroy(dialog);
 }
-void update_status_combobox(Editor *editor){
+void update_status_combobox(Document *document){
       /* set statuscombo */
-      switch(editor->type) {
+      switch(document_get_document_type(document)) {
         case(TAB_PHP):   
          set_status_combo_item (GPHPEDIT_STATUSBAR(main_window.appbar),_("PHP/HTML/XML"));          
          break;
@@ -1338,21 +982,14 @@ void update_status_combobox(Editor *editor){
 void on_notebook_switch_page (GtkNotebook *notebook, GtkNotebookPage *page,
                 gint page_num, gpointer user_data)
 {
-  Editor *data;
+  Document *data;
   GtkWidget *child;
   child = gtk_notebook_get_nth_page(GTK_NOTEBOOK(main_window.notebook_editor), page_num);
-  if (GTK_IS_SCINTILLA(child)){
-    data = editor_find_from_scintilla(child);
-    if (GTK_IS_SCINTILLA(data->scintilla)) {
-      // Grab the focus in to the editor
-      gtk_scintilla_grab_focus(GTK_SCINTILLA(data->scintilla));
-    }
-  } else {
-    data = editor_find_from_help((void *)child);
-  }
+  data = document_manager_find_document ((void *) child);
   if (data){
     // Store it in the global main_window.current_editor value
-    main_window.current_editor = data;
+    main_window.current_document = data;
+    document_grab_focus(data);
   } else {
     g_print(_("Unable to get data for page %d\n"), page_num);
   }
@@ -1367,40 +1004,29 @@ void on_notebook_switch_page (GtkNotebook *notebook, GtkNotebookPage *page,
 gboolean on_notebook_focus_tab(GtkNotebook *notebook,
                  GtkNotebookTab arg1, gpointer user_data)
 {
-  gtk_scintilla_grab_focus(GTK_SCINTILLA(main_window.current_editor->scintilla));
+  document_grab_focus(main_window.current_document);
   return TRUE;
 }
 
 void inc_search_typed (GtkEntry *entry, const gchar *text, gint length,
              gint *position, gpointer data)
 {
-  gint found_pos;
-  glong text_min, text_max;
   gchar *current_text;
-
-  //Inc search only if the current tab is not a help tab
-  if (main_window.current_editor && main_window.current_editor->type != TAB_HELP) {
-    current_text = (gchar *)gtk_entry_get_text(entry);
-
-    found_pos = gtk_scintilla_find_text(GTK_SCINTILLA(main_window.current_editor->scintilla), 0, current_text, 0, gtk_scintilla_get_length(GTK_SCINTILLA(main_window.current_editor->scintilla)), &text_min, &text_max);
-    if (found_pos != -1) {
-      gtk_scintilla_set_sel(GTK_SCINTILLA(main_window.current_editor->scintilla), text_min, text_max);
-    }
-  }
+  current_text = (gchar *)gtk_entry_get_text(entry);
+  document_incremental_search(main_window.current_document, current_text, FALSE);
 }
-
 
 gboolean inc_search_key_release_event(GtkWidget *widget,GdkEventKey *event,gpointer user_data)
 {
   //Auto focus editor tab only if it is a scintilla tab
-  if(main_window.current_editor && main_window.current_editor->type != TAB_HELP) {
     if (event->keyval == GDK_Escape) {
-      gtk_scintilla_grab_focus(GTK_SCINTILLA(main_window.current_editor->scintilla));
+        document_grab_focus(main_window.current_document);
       return TRUE;
     }
-  }
+
   return FALSE;
 }
+
 void add_to_search_history(const gchar *current_text){
     /* add text to search history*/
     GSList *walk;
@@ -1418,30 +1044,17 @@ void add_to_search_history(const gchar *current_text){
     toolbar_completion_add_text(TOOLBAR(main_window.toolbar_find), current_text);
 }
 
+
 void inc_search_activate(GtkEntry *entry,gpointer user_data)
 {
-  gint current_pos;
-  gint found_pos;
-  glong text_min, text_max;
   gchar *current_text;
 
   //Inc search only if the current tab is not a help tab
-  if (main_window.current_editor && main_window.current_editor->type != TAB_HELP) {
-    current_pos = gtk_scintilla_get_current_pos(GTK_SCINTILLA(main_window.current_editor->scintilla));
-    current_text = (gchar *)gtk_entry_get_text(entry);
+  current_text = (gchar *)gtk_entry_get_text(entry);
 
-    found_pos = gtk_scintilla_find_text(GTK_SCINTILLA(main_window.current_editor->scintilla), 0, current_text, current_pos+1, gtk_scintilla_get_length(GTK_SCINTILLA(main_window.current_editor->scintilla)), &text_min, &text_max);
-    if (found_pos != -1) {
-      gtk_scintilla_set_sel(GTK_SCINTILLA(main_window.current_editor->scintilla), text_min, text_max);
-    }
-    else {
-      found_pos = gtk_scintilla_find_text(GTK_SCINTILLA(main_window.current_editor->scintilla), 0, current_text, 0, gtk_scintilla_get_length(GTK_SCINTILLA(main_window.current_editor->scintilla)), &text_min, &text_max);
-      if (found_pos != -1) {
-        gtk_scintilla_set_sel(GTK_SCINTILLA(main_window.current_editor->scintilla), text_min, text_max);
-      }
-    }
-    add_to_search_history(current_text);
-  }
+  document_incremental_search(main_window.current_document, current_text, TRUE);
+  add_to_search_history(current_text);
+
 }
 
 /*
@@ -1456,168 +1069,59 @@ gboolean is_valid_digits_only(gchar *text)
   return TRUE;
 }
 */
-void goto_line_int(gint line)
-{
-  //gint current_pos;
-  //bugfix: seg fault if not scintilla
-  if (GTK_IS_SCINTILLA(main_window.current_editor->scintilla)){
-  gtk_scintilla_grab_focus(GTK_SCINTILLA(main_window.current_editor->scintilla));
-  gtk_scintilla_goto_line(GTK_SCINTILLA(main_window.current_editor->scintilla), line + gtk_scintilla_lines_on_screen(GTK_SCINTILLA(main_window.current_editor->scintilla))); //move some lines to center in screen
-  gtk_scintilla_goto_line(GTK_SCINTILLA(main_window.current_editor->scintilla), line-1); // seems to be off by one...
-  }
-}
+
 
 void goto_line(gchar *text)
 {
   gint line;
   line = atoi(text);
-  goto_line_int(line);
+  document_goto_line(main_window.current_document,line);
 }
 
 void goto_line_activate(GtkEntry *entry,gpointer user_data)
 {
-
   gchar *current_text;
-  if (main_window.current_editor) {
+  if (main_window.current_document) {
     current_text = (gchar *)gtk_entry_get_text(entry);
     goto_line(current_text);
   }
 }
 
 
-void move_block(gint indentation_size)
-{
-  gint startline;
-  gint endline;
-  gint line;
-  gint indent;
-
-  if (main_window.current_editor) {
-    gtk_scintilla_begin_undo_action(GTK_SCINTILLA(main_window.current_editor->scintilla));
-
-    startline = gtk_scintilla_line_from_position(GTK_SCINTILLA(main_window.current_editor->scintilla), gtk_scintilla_get_selection_start(GTK_SCINTILLA(main_window.current_editor->scintilla)));
-    endline = gtk_scintilla_line_from_position(GTK_SCINTILLA(main_window.current_editor->scintilla), gtk_scintilla_get_selection_end(GTK_SCINTILLA(main_window.current_editor->scintilla)));
-
-    for (line = startline; line <= endline; line++) {
-      indent = gtk_scintilla_get_line_indentation(GTK_SCINTILLA(main_window.current_editor->scintilla), line);
-      gtk_scintilla_set_line_indentation(GTK_SCINTILLA(main_window.current_editor->scintilla), line, indent+indentation_size);
-    }
-    gtk_scintilla_end_undo_action(GTK_SCINTILLA(main_window.current_editor->scintilla));
-  }
-}
-
-
 void block_indent(GtkWidget *widget)
 {
-//bugfix:segfault if not scintilla
-  if (GTK_IS_SCINTILLA(main_window.current_editor->scintilla)){ 
-    move_block(get_preferences_manager_indentation_size(main_window.prefmg));
-  }
+  document_block_indent(main_window.current_document, get_preferences_manager_indentation_size(main_window.prefmg));
 }
 
 
 void block_unindent(GtkWidget *widget)
 {
-//bugfix:segfault if not scintilla
-  if (GTK_IS_SCINTILLA(main_window.current_editor->scintilla)){ 
-    move_block(0-get_preferences_manager_indentation_size(main_window.prefmg));
-  }
+  document_block_unindent(main_window.current_document, get_preferences_manager_indentation_size(main_window.prefmg));
 }
 
 //zoom in
 void zoom_in(GtkWidget *widget)
 {
-//bugfix:segfault if not scintilla
-  if (GTK_IS_SCINTILLA(main_window.current_editor->scintilla)){ 
-    gtk_scintilla_zoom_in(GTK_SCINTILLA(main_window.current_editor->scintilla));
-  }else{
-    if (WEBKIT_IS_WEB_VIEW(main_window.current_editor->help_view)){
-      webkit_web_view_zoom_in (main_window.current_editor->help_view);
-    }
-  }
+  document_zoom_in(main_window.current_document);
   update_zoom_level();
 }
 
 //zoom out
 void zoom_out(GtkWidget *widget)
 {
-//bugfix:segfault if not scintilla
-  if (GTK_IS_SCINTILLA(main_window.current_editor->scintilla)){
-    gtk_scintilla_zoom_out(GTK_SCINTILLA(main_window.current_editor->scintilla));
-  } else {
-    if (WEBKIT_IS_WEB_VIEW(main_window.current_editor->help_view)){
-      webkit_web_view_zoom_out (main_window.current_editor->help_view);
-    }
-  }
+  document_zoom_out(main_window.current_document);
   update_zoom_level();
 }
 
 void zoom_100(GtkWidget *widget)
 {
-//bugfix:segfault if not scintilla
-if (GTK_IS_SCINTILLA(main_window.current_editor->scintilla)){
-  gtk_scintilla_set_zoom(GTK_SCINTILLA(main_window.current_editor->scintilla), 0);
-} else {
-  if (WEBKIT_IS_WEB_VIEW(main_window.current_editor->help_view)){
-    webkit_web_view_set_zoom_level (main_window.current_editor->help_view, 1);
-  }
-}
-update_zoom_level();
-}
-
-//add marker
-void add_marker(int line)
-{
-gtk_scintilla_marker_define(GTK_SCINTILLA(main_window.current_editor->scintilla), 1, SC_MARK_SHORTARROW);
-gtk_scintilla_marker_set_back(GTK_SCINTILLA(main_window.current_editor->scintilla), 1, 101);
-gtk_scintilla_marker_set_fore(GTK_SCINTILLA(main_window.current_editor->scintilla), 1, 101);
-gtk_scintilla_marker_add(GTK_SCINTILLA(main_window.current_editor->scintilla), line, 1);
-}
-
-//delete marker
-void delete_marker(int line)
-{
-gtk_scintilla_marker_delete(GTK_SCINTILLA(main_window.current_editor->scintilla), line, 1);
-}
-
-//add/delete a marker
-void mod_marker(int line){
-//bugfix:segfault if not scintilla
-  if (GTK_IS_SCINTILLA(main_window.current_editor->scintilla)){
-    if (gtk_scintilla_marker_get(GTK_SCINTILLA(main_window.current_editor->scintilla),line)!=2){
-      add_marker(line);
-    }else{
-      delete_marker(line);
-    }
-  }
-}
-//circle markers
-void find_next_marker(line_start){
-  //bugfix:segfault if not scintilla
-  if (GTK_IS_SCINTILLA(main_window.current_editor->scintilla)){
-    gint line;
-    //skip the current line
-    line= gtk_scintilla_marker_next(GTK_SCINTILLA(main_window.current_editor->scintilla),line_start + 1, 2);
-    if (line==-1){
-      //no markers in that direccion, we should go back to the first line
-      line= gtk_scintilla_marker_next(GTK_SCINTILLA(main_window.current_editor->scintilla),0, 2);
-      if (line!=-1){
-        //go back to the first marker
-        //bugfix the maker is in the next line
-        goto_line_int(line+1);
-      }else{  
-        gphpedit_statusbar_flash_message (GPHPEDIT_STATUSBAR(main_window.appbar),0,"%s",_("No marker found"));
-      }
-    }else{
-      //goto the marker posicion
-      goto_line_int(line+1);
-    }
-  }
+  document_zoom_restore(main_window.current_document);
+  update_zoom_level();
 }
 
 void syntax_check(GtkWidget *widget)
 {
-   gtk_syntax_check_window_run_check(main_window.win, main_window.current_editor);
+   gtk_syntax_check_window_run_check(main_window.win, main_window.current_document);
 }
 
 
@@ -1629,18 +1133,18 @@ void syntax_check_clear(GtkWidget *widget)
 
 void classbrowser_show(void)
 {
-  gtk_paned_set_position(GTK_PANED(main_window.main_horizontal_pane),classbrowser_hidden_position);
-  set_preferences_manager_parse_classbrowser_status(main_window.prefmg, 0);
+//  g_print("class browser show\n");
+  gtk_paned_set_position(GTK_PANED(main_window.main_horizontal_pane), get_preferences_manager_classbrowser_get_size(main_window.prefmg));
+  set_preferences_manager_parse_classbrowser_status(main_window.prefmg, FALSE);
   classbrowser_update(GPHPEDIT_CLASSBROWSER(main_window.classbrowser));
 }
 
 
 void classbrowser_hide(void)
 {
-  classbrowser_hidden_position = get_preferences_manager_classbrowser_get_size(main_window.prefmg);
-  //g_print("Width of class browser is %d\n", classbrowser_hidden_position);
+  //g_print("class browser hide\n");
   gtk_paned_set_position(GTK_PANED(main_window.main_horizontal_pane),0);
-  set_preferences_manager_parse_classbrowser_status(main_window.prefmg,1);
+  set_preferences_manager_parse_classbrowser_status(main_window.prefmg, TRUE);
 }
 
 void classbrowser_show_hide(GtkWidget *widget)
@@ -1655,50 +1159,36 @@ void classbrowser_show_hide(GtkWidget *widget)
 
 void force_php(GtkWidget *widget)
 {
-  if (main_window.current_editor) {
-    set_editor_to_php(main_window.current_editor);
-  }
+    set_document_to_php(main_window.current_document);
 }
 
 void force_css(GtkWidget *widget)
 {
-  if (main_window.current_editor) {
-    set_editor_to_css(main_window.current_editor);
-  }
+    set_document_to_css(main_window.current_document);
 }
 
 void force_sql(GtkWidget *widget)
 {
-  if (main_window.current_editor) {
-    set_editor_to_sql(main_window.current_editor);
-  }
+  set_document_to_sql(main_window.current_document);
 }
 
 void force_cxx(GtkWidget *widget)
 {
-  if (main_window.current_editor) {
-    set_editor_to_cxx(main_window.current_editor);
-  }
+  set_document_to_cxx(main_window.current_document);
 }
 
 void force_perl(GtkWidget *widget)
 {
-  if (main_window.current_editor) {
-    set_editor_to_perl(main_window.current_editor);
-  }
+    set_document_to_perl(main_window.current_document);
 }
 
 void force_cobol(GtkWidget *widget)
 {
-  if (main_window.current_editor) {
-    set_editor_to_cobol(main_window.current_editor);
-  }
+  set_document_to_cobol(main_window.current_document);
 }
 void force_python(GtkWidget *widget)
 {
-  if (main_window.current_editor) {
-    set_editor_to_python(main_window.current_editor);
-  }
+  set_document_to_python(main_window.current_document);
 }
 
 //function to refresh treeview when the current tab changes 
@@ -1706,35 +1196,38 @@ void force_python(GtkWidget *widget)
 gint on_tab_change_update_classbrowser(GtkWidget *widget)
 {
   classbrowser_update(GPHPEDIT_CLASSBROWSER(main_window.classbrowser));
-  return 0;
+  return FALSE;
 }
 
-void process_external (GtkInfoBar *info_bar, gint response_id, Editor *editor){
+void process_external (GtkInfoBar *info_bar, gint response_id, Document *document)
+{
   if (response_id==1){
-   gphpedit_statusbar_flash_message (GPHPEDIT_STATUSBAR(main_window.appbar),0,_("Opening %s"),main_window.current_editor->filename->str);
-   tab_load_file(main_window.current_editor);
+   gchar *filename = document_get_filename(document);
+   gphpedit_statusbar_flash_message (GPHPEDIT_STATUSBAR(main_window.appbar),0,_("Opening %s"), filename); 
+    g_free(filename);
+    document_reload(document);
   } else { 
-    g_get_current_time (&main_window.current_editor->file_mtime); /*set current time*/
+   document_update_modified_mark(document); /*set current time*/
   }
   gtk_widget_hide (GTK_WIDGET(info_bar));  
 }
 
-void check_externally_modified(void){
-  if (!main_window.current_editor) return;
-  if (!main_window.current_editor->is_untitled && GTK_IS_SCINTILLA(main_window.current_editor->scintilla)){
-    /* verify if file has been externally modified */
-    if (get_file_modified(main_window.current_editor->filename->str, &main_window.current_editor->file_mtime, FALSE)){
-      gchar *message=g_strdup_printf(_("The file %s has been externally modified. Do you want reload it?"), main_window.current_editor->filename->str);
+void check_externally_modified(void)
+{
+    if (document_check_externally_modified(main_window.current_document)){
+      gchar *filename = document_get_filename(main_window.current_document);
+      gchar *message=g_strdup_printf(_("The file %s has been externally modified. Do you want reload it?"), filename);
+      g_free(filename);
       gtk_label_set_text (GTK_LABEL (main_window.infolabel), message);
       g_free(message);
       gtk_widget_show (main_window.infobar);
       return;
     }
-  }
   gtk_widget_hide (main_window.infobar);
 }
 
-gboolean main_window_activate_focus (GtkWidget *widget,GdkEventFocus *event,gpointer user_data){
+gboolean main_window_activate_focus (GtkWidget *widget,GdkEventFocus *event,gpointer user_data)
+{
   check_externally_modified();
   return FALSE;
 }

@@ -88,6 +88,10 @@ gphpedit_SOURCES = \
   syntax_check_manager.c \
 	syntax_check_window.h		\
 	syntax_check_window.c		\
+  document.h \
+  document.c \
+  document_loader.h \
+  document_loader.c \
 	tab.c			\
 	tab.h			\
 	tab_cxx.c		\
