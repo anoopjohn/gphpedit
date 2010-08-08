@@ -154,7 +154,7 @@ if (g_str_has_suffix(filename,".sql"))
 
 void register_file_opened(gchar *filename)
 {
-  gphpedit_debug_message(DOC_MANAGER,"filename: %s\n" filename);
+  gphpedit_debug_message(DEBUG_DOC_MANAGER,"filename: %s\n", filename);
   gchar *full_filename=filename_get_uri(filename);
   main_window_add_to_reopen_menu(full_filename);
   g_free(full_filename);
@@ -165,7 +165,7 @@ void register_file_opened(gchar *filename)
 
 gboolean switch_to_file_or_open(gchar *filename, gint line_number)
 {
-  gphpedit_debug(DOC_MANAGER);
+  gphpedit_debug(DEBUG_DOC_MANAGER);
   Document *document;
   GSList *walk;
   GString *tmp_filename;
@@ -213,7 +213,7 @@ void document_save_update_cb (Document *doc, gpointer user_data){
 }
 
 void add_new_document(gint type, const gchar *filename, gint goto_line){
-  gphpedit_debug(DOC_MANAGER);
+  gphpedit_debug(DEBUG_DOC_MANAGER);
   Document *doc = document_new (type, filename, goto_line);
   g_signal_connect(G_OBJECT(doc), "load_complete", G_CALLBACK(document_load_complete_cb), NULL);
   g_signal_connect(G_OBJECT(doc), "save_update", G_CALLBACK(document_save_update_cb), NULL);
@@ -240,7 +240,7 @@ GtkWidget *get_close_tab_widget(Document *document) {
 }
 
 Document *document_manager_find_document (void *widget){
-  gphpedit_debug(DOC_MANAGER);
+  gphpedit_debug(DEBUG_DOC_MANAGER);
   GSList *walk;
   Document *document;
 

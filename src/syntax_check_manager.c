@@ -245,7 +245,7 @@ gchar *process_perl_lines(gchar *output)
 */
 GString *save_as_temp_file(Document *document)
 {
-  gphpedit_debug_message(DEBUG_SYNTAX);
+  gphpedit_debug(DEBUG_SYNTAX);
   gchar *write_buffer = document_get_text(document);
   GString *filename = text_save_as_temp_file(write_buffer);
   g_free(write_buffer);
