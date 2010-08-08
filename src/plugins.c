@@ -346,6 +346,19 @@ gint get_plugin_syntax_type(Plugin *plugin){
   return plugdet->file_type;
 }
 
+/*
+* save_as_temp_file (internal)
+* save the content of an editor and return the filename of the temp file or NULL on error.
+*/
+static GString *save_as_temp_file(Document *document)
+{
+  gchar *write_buffer = document_get_text(document);
+  GString *filename = text_save_as_temp_file(write_buffer);
+  g_free(write_buffer);
+  return filename;
+}
+
+
 void plugin_run(Plugin *plugin, Document *document)
 {
   /* initial checks*/
@@ -358,7 +371,8 @@ void plugin_run(Plugin *plugin, Document *document)
   GString *command_line = NULL;
   gchar *current_selection;
   gchar *data;
-
+  gboolean using_temp = FALSE;
+  GString *temp_name = NULL;
   command_line = g_string_new(plugdet->filename);
   command_line = g_string_prepend(command_line, "'");
   command_line = g_string_append(command_line, "' \"");
@@ -373,11 +387,17 @@ void plugin_run(Plugin *plugin, Document *document)
     }
   }
   else if (plugdet->type == GPHPEDIT_PLUGIN_TYPE_FILENAME || plugdet->type == GPHPEDIT_PLUGIN_TYPE_SYNTAX) {
+    if (document_get_saved_status(document)){
     gchar *filename = document_get_filename(document);
     gchar *temp_path=filename_get_path(filename); /* remove escaped chars*/
     g_free(filename);
     command_line = g_string_append(command_line, temp_path);
     g_free(temp_path);
+    } else {
+      temp_name = save_as_temp_file(document);
+      command_line = g_string_append(command_line, temp_name->str);
+      using_temp = TRUE;
+    }
   }
   command_line = g_string_append(command_line, "\"");
   /* execute command */
@@ -397,7 +417,6 @@ void plugin_run(Plugin *plugin, Document *document)
         }
     }
     else if (g_str_has_prefix(stdout, "SYNTAX")){
-        /*TODO: save file before execute plugin?*/
         syntax_window(main_window.win, document, data);
     }
     else if (g_str_has_prefix(stdout, "OPEN")){
@@ -410,6 +429,11 @@ void plugin_run(Plugin *plugin, Document *document)
     } else {
       g_print("Unexpected command");
     }
+    if (using_temp) {
+      release_temp_file (temp_name->str);
+      g_string_free(temp_name, TRUE);
+    }
+
   g_free(stdout);
   g_string_free (command_line,TRUE);
 }
