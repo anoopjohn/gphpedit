@@ -192,7 +192,9 @@ gboolean switch_to_file_or_open(gchar *filename, gint line_number)
 }
 
 void document_load_complete_cb (Document *doc, gboolean result, gpointer user_data){
+  static gint number=0;
   if (result) {
+    number++;
     editors = g_slist_append(editors, doc);
     GtkWidget *document_tab;
     document_tab = get_close_tab_widget(doc);
@@ -202,9 +204,13 @@ void document_load_complete_cb (Document *doc, gboolean result, gpointer user_da
     gtk_notebook_set_current_page (GTK_NOTEBOOK (main_window.notebook_editor), -1);
     main_window.current_document = doc;
     document_grab_focus(main_window.current_document);
-    update_app_title(); 
-    session_save();
+    update_app_title();
+    if (!document_get_untitled(doc)) session_save();
    classbrowser_update(GPHPEDIT_CLASSBROWSER(main_window.classbrowser));
+  }
+  if (number==2) {
+  close_page(g_slist_nth_data (editors,0));
+  editors = g_slist_remove(editors, g_slist_nth_data (editors,0));
   }
 }
 

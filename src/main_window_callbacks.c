@@ -119,6 +119,7 @@ void session_reopen(void)
     strings = g_strsplit (content,"\n",0);
     int i=0;
     while (strings[i]){
+
       /* strings[i] contains possibly:
         file:///blah\n
         *file:///blah\n
@@ -128,7 +129,6 @@ void session_reopen(void)
         *preview:function\n
 
       */
-
       if (strings[i][0]==0) break;
       filename = strings[i];
       str_replace(filename, 10, 0);
@@ -136,7 +136,6 @@ void session_reopen(void)
         filename++;
         focus_this_one = TRUE;
       }
-        
       if (g_str_has_prefix(filename, "phphelp:")){
         filename += 8;
         add_new_document(TAB_HELP, filename, 0);
@@ -159,6 +158,7 @@ void session_reopen(void)
     g_free(content);
     gtk_notebook_set_current_page( GTK_NOTEBOOK(main_window.notebook_editor), focus_tab);
   }
+
   GFile *file=get_gfile_from_filename(session_file->str);
   GError *error=NULL;
   if (!g_file_delete (file,NULL,&error)){
@@ -169,6 +169,7 @@ void session_reopen(void)
   }
   g_string_free(session_file,TRUE);
   g_object_unref (file);
+
 }
 
 

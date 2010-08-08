@@ -1872,7 +1872,9 @@ void tab_check_sql_file(Document *document)
 gchar *document_get_title(Document *doc)
 {
   if (!doc) return NULL;
+  if (OBJECT_IS_DOCUMENT(doc)) return NULL;
   DocumentDetails *docdet = DOCUMENT_GET_PRIVATE(doc);
+  if (!docdet) return NULL;
   GString *title= NULL;
   gchar *dir;
   if (GTK_IS_SCINTILLA(docdet->scintilla)){
