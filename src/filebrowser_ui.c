@@ -37,11 +37,12 @@ File browser has the following features:
 -Only displays files which could be opened by the editor
 -Drag and drop: if you drop uri into the file browser these files will be copied to current file browser folder
 */
+#include <gdk/gdkkeysyms.h>
+
 #include "filebrowser_ui.h"
 #include "filebrowser_backend.h"
-#include <gdk/gdkkeysyms.h>
 #include "main_window.h"
-
+#include "debug.h"
 /* functions */
 static void gphpedit_file_browser_class_init (gphpeditFileBrowserClass *klass);
 static void gphpedit_filebrowser_init (gphpeditFileBrowser *button);
@@ -307,10 +308,7 @@ gint _filebrowser_sort_func(GtkTreeModel * model, GtkTreeIter * a, GtkTreeIter *
   gtk_tree_model_get(GTK_TREE_MODEL (model), b, FILE_COLUMN, &nameb,MIME_COLUMN, &mimeb,-1);
   isdira = (mimea && MIME_ISDIR(mimea));
   isdirb = (mimeb && MIME_ISDIR(mimeb));
-  #ifdef DEBUGFILEBROWSER
-  g_print("DEBUG::SORTING FILE BROWSER\n");
-  g_print("isdira=%d, mimea=%s, isdirb=%d, mimeb=%s\n",isdira,mimea,isdirb,mimeb);
-  #endif
+  gphpedit_debug_message(DEBUG_FILEBROWSER, "isdira=%d, mimea=%s, isdirb=%d, mimeb=%s\n",isdira,mimea,isdirb,mimeb);
   if (isdira == isdirb) {    /* both files, or both directories */
     if (namea == nameb) {
       retval = 0;      /* both NULL */
@@ -400,9 +398,7 @@ void tree_double_clicked(GtkTreeView *tree_view,GtkTreePath *path,GtkTreeViewCol
   gchar *mime=get_mime_from_tree(tree_view);
   gchar *folderpath= (gchar*)get_filebrowser_backend_current_folder(priv->fbbackend);
   gchar *file_name=get_path_from_tree(tree_view,folderpath);
-  #ifdef DEBUGFILEBROWSER
-  g_print("DEBUG:::DOUBLECLICK\t mime:%s\tname:%s\n",mime,file_name);
-  #endif
+  gphpedit_debug_message(DEBUG_FILEBROWSER,"DOUBLECLICK\t mime:%s\tname:%s\n",mime,file_name);
   if (!MIME_ISDIR(mime)){
       filebrowser_backend_open_file (priv->fbbackend, file_name);
   } else {
@@ -417,9 +413,8 @@ void tree_double_clicked(GtkTreeView *tree_view,GtkTreePath *path,GtkTreeViewCol
 
 gboolean key_press (GtkWidget *widget, GdkEventKey *event, gpointer user_data){
   gphpeditFileBrowserPrivate *priv = (gphpeditFileBrowserPrivate *) user_data;
-  #ifdef DEBUGFILEBROWSER
-  g_print("DEBUG::filebrowser keypress. keyval:%d \n",event->keyval);
-  #endif
+  gphpedit_debug_message(DEBUG_FILEBROWSER, "keyval:%d \n",event->keyval);
+
   if (event->keyval==GDK_Delete || event->keyval==GDK_Return){
     gchar *mime=get_mime_from_tree(GTK_TREE_VIEW(widget));
     gchar *path=(gchar*)get_filebrowser_backend_current_folder(priv->fbbackend);
@@ -681,9 +676,8 @@ gboolean view_onPopupMenu (GtkWidget *treeview, gpointer userdata){
 void print_files (FilebrowserBackend *directory, gpointer user_data){
   if (!directory || !user_data) return ;
   gphpeditFileBrowserPrivate *priv = (gphpeditFileBrowserPrivate *) user_data;
-  #ifdef DEBUGFILEBROWSER
-  g_print("DEBUG::printing files\n");
-  #endif
+  gphpedit_debug(DEBUG_FILEBROWSER);
+
   GSList *l;
   GtkTreeIter iter2;
   GtkTreeIter* iter=NULL;
@@ -692,9 +686,7 @@ void print_files (FilebrowserBackend *directory, gpointer user_data){
   GtkIconTheme *theme= gtk_icon_theme_get_default();
     for (l = get_filebrowser_backend_files(directory); l != NULL; l = g_slist_next (l)) {
       FOLDERFILE *current=(FOLDERFILE *) l->data;
-      #ifdef DEBUGFILEBROWSER
-      g_print("DEBUG:::File added -> name: '%s' \tmime: '%s' (%s)\n",current->display_name,current->mime,current->icon);
-      #endif
+      gphpedit_debug_message(DEBUG_FILEBROWSER,"File added -> name: '%s' \tmime: '%s'\n",current->display_name,current->mime);
       GdkPixbuf *p_file_image = NULL;
       /* get icon of size menu */
       GIcon *icon= g_icon_new_for_string (current->icon,NULL);
@@ -719,7 +711,6 @@ void change_folder_cb (gpointer instance, const gchar *current_folder, gpointer 
 
 void  cancel_filebrowser_process (GtkWidget	 *widget){
  gphpeditFileBrowserPrivate *	priv = FILEBROWSER_BACKEND_GET_PRIVATE(widget);
- //g_print("callback\n");
  filebrowser_backend_cancel (priv->fbbackend);
 }
 
@@ -756,9 +747,7 @@ static void on_cleanicon_press (GtkEntry *entry, GtkEntryIconPosition icon_pos, 
     gtk_entry_set_text (entry,"");
   } else {
     const gchar *find_string=gtk_entry_get_text (entry);
-    #ifdef DEBUGFILEBROWSER
-    g_print("DEBUG::Search for:'%s' in file browser\n",find_string);
-    #endif
+    gphpedit_debug_message(DEBUG_FILEBROWSER, "Search for:'%s'\n",find_string);
     if (find_string && get_filebrowser_backend_number_files(priv->fbbackend)!=0)
       on_search_press (gtk_entry_get_text (entry), priv);
     else
@@ -789,9 +778,7 @@ void fb_file_v_drag_data_received(GtkWidget * widget, GdkDragContext * context, 
     return;
   }
   stringdata = g_strndup((const gchar *) gtk_selection_data_get_data(data), gtk_selection_data_get_length(data));
-  #ifdef DEBUGFILEBROWSER
-  g_print("fb2_file_v_drag_data_received, stringdata='%s', len=%d\n", stringdata, gtk_selection_data_get_length(data));
-  #endif
+  gphpedit_debug_message(DEBUG_FILEBROWSER, "stringdata='%s', len=%d\n", stringdata, gtk_selection_data_get_length(data));
   gtk_drag_finish(context, filebrowser_backend_process_drag_drop(user_data, stringdata), TRUE, time);
   g_free(stringdata);
 }

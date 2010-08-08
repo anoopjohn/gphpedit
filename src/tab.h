@@ -39,7 +39,6 @@ void add_new_document(gint type, const gchar *filename, gint goto_line);
 GtkWidget *get_close_tab_widget(Document *document);
 gboolean switch_to_file_or_open(gchar *filename, gint line_number);
 gboolean auto_memberfunc_complete_callback(gpointer data);
-void debug_dump_editors(void);
 void register_file_opened(gchar *filename);
 void str_replace(char *Str, char ToRp, char WithC);
 void info_dialog (gchar *title, gchar *message);

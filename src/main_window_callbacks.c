@@ -28,6 +28,7 @@
 #include <stdlib.h>
 #include <gdk/gdkkeysyms.h>
 
+#include "debug.h"
 #include "main_window_callbacks.h"
 #include "preferences_dialog.h"
 #include "tab.h"
@@ -87,7 +88,7 @@ void session_save(void)
               g_string_append_printf (session_file_contents,"preview:%s\n",temp);
               g_free(prevfilename);
             } else {
-              g_print("error\n");
+                gphpedit_debug_message(DEBUG_MAIN_WINDOW, "type not found:%d\n", document_get_document_type(document));
             }
           }
         }
@@ -176,7 +177,7 @@ void session_reopen(void)
 void quit_application()
 {
   preferences_manager_save_data(main_window.prefmg);
-  if (DEBUG_MODE) { g_print("DEBUG: main_window_callbacks.c:quit_application:Saved preferences\n"); }
+  gphpedit_debug_message(DEBUG_MAIN_WINDOW,"%s","Saved preferences\n");
   template_db_close();
   session_save();
   close_all_tabs();
@@ -332,7 +333,7 @@ void open_file_ok(GtkFileChooser *file_selection)
 void reopen_recent(GtkRecentChooser *chooser, gpointer data) {
   gchar *filename = gtk_recent_chooser_get_current_uri  (chooser);
   if (!filename) return;
-  if (DEBUG_MODE) { g_print("DEBUG: main_window_callbacks.c:reopen_recent:filename: %s\n", filename); }
+    gphpedit_debug_message(DEBUG_MAIN_WINDOW,"filename: %s\n", filename);
   switch_to_file_or_open(filename, 0);
   g_free(filename);
 }
@@ -352,7 +353,7 @@ void on_openselected1_activate(GtkWidget *widget)
          gchar *filename = document_get_filename(document);
          file = filename_parent_uri(filename);
          g_free(filename);
-         if (DEBUG_MODE) { g_print("DEBUG: main_window_callbacks.c:on_selected1_activate:file: %s\n", filename); }
+           gphpedit_debug_message(DEBUG_MAIN_WINDOW,"file: %s\n", filename);
 
         if (!strstr(ac_buffer, "://") && file) {
           gchar *filetemp= g_strdup_printf("%s/%s",file, ac_buffer);
@@ -477,13 +478,13 @@ void on_open1_activate(GtkWidget *widget)
   //Add filters to the open dialog
   add_file_filters(GTK_FILE_CHOOSER(file_selection_box));
   last_opened_folder = get_preferences_manager_last_opened_folder(main_window.prefmg);
-  if (DEBUG_MODE) { g_print("DEBUG: main_window_callbacks.c:on_open1_activate:last_opened_folder: %s\n", last_opened_folder); }
+    gphpedit_debug_message(DEBUG_MAIN_WINDOW,"last_opened_folder: %s\n", last_opened_folder);
   /* opening of multiple files at once */
   gtk_file_chooser_set_select_multiple(GTK_FILE_CHOOSER(file_selection_box), TRUE);
   gchar *filename = (gchar *)document_get_filename(main_window.current_document);
   if (filename && !document_get_untitled(main_window.current_document)) {
     folder = filename_parent_uri(filename);
-    if (DEBUG_MODE) { g_print("DEBUG: main_window_callbacks.c:on_open1_activate:folder: %s\n", folder); }
+      gphpedit_debug_message(DEBUG_MAIN_WINDOW,"folder: %s\n", folder);
     gtk_file_chooser_set_current_folder_uri(GTK_FILE_CHOOSER(file_selection_box),  folder);
     g_free(folder);
   }
@@ -532,7 +533,7 @@ void on_saveall1_activate(GtkWidget *widget)
   for(li = editors; li!= NULL; li = g_slist_next(li)) {
     doc = li->data;
     if (document_get_untitled(doc)){
-      // g_print("Untitled found. Save not implemented\n");
+        gphpedit_debug_message(DEBUG_MAIN_WINDOW,"%s","Untitled found. Save not implemented\n");
     } else {
     document_save(doc);
     }
@@ -564,9 +565,9 @@ void on_save_as1_activate(GtkWidget *widget)
       }
       else {
         last_opened_folder = get_preferences_manager_last_opened_folder(main_window.prefmg);
-        if (DEBUG_MODE) { g_print("DEBUG: main_window_callbacks.c:on_save_as1_activate:last_opened_folder: %s\n", last_opened_folder); }
+          gphpedit_debug_message(DEBUG_MAIN_WINDOW,"last_opened_folder: %s\n", last_opened_folder);
         if (last_opened_folder){
-          if (DEBUG_MODE) { g_print("DEBUG: main_window_callbacks.c:on_save_as1_activate:Setting current_folder_uri to %s\n", last_opened_folder); }
+            gphpedit_debug_message(DEBUG_MAIN_WINDOW,"Setting current_folder_uri to %s\n", last_opened_folder);
           gtk_file_chooser_set_current_folder_uri(GTK_FILE_CHOOSER(file_selection_box),  last_opened_folder);
         }
       }
@@ -926,7 +927,7 @@ void on_about1_activate(GtkWidget *widget)
   gtk_about_dialog_set_program_name(GTK_ABOUT_DIALOG(dialog), PACKAGE_NAME);
   gtk_about_dialog_set_version(GTK_ABOUT_DIALOG(dialog), VERSION);
   gtk_about_dialog_set_copyright(GTK_ABOUT_DIALOG(dialog),
-      _("Copyright  2003-2006 Andy Jeffries, 2009-2010 Anoop John"));
+      _("Copyright \xc2\xa9 2003-2006 Andy Jeffries, 2009-2010 Anoop John"));
   gtk_about_dialog_set_comments(GTK_ABOUT_DIALOG(dialog),
      _("gPHPEdit is a GNOME2 editor specialised for editing PHP "
                "scripts and related files (HTML/CSS/JS)."));
@@ -991,7 +992,7 @@ void on_notebook_switch_page (GtkNotebook *notebook, GtkNotebookPage *page,
     main_window.current_document = data;
     document_grab_focus(data);
   } else {
-    g_print(_("Unable to get data for page %d\n"), page_num);
+      gphpedit_debug_message(DEBUG_MAIN_WINDOW,_("Unable to get data for page %d\n"), page_num);
   }
   if (!is_app_closing) {
     // Change the title of the main application window to the full filename
@@ -1038,9 +1039,7 @@ void add_to_search_history(const gchar *current_text){
         }
     }
     set_preferences_manager_new_search_history_item(main_window.prefmg, i, current_text);
-    #ifdef DEBUG
-    g_print("added:%s\n",current_text);
-    #endif
+    gphpedit_debug_message(DEBUG_MAIN_WINDOW,"added:%s\n",current_text);
     toolbar_completion_add_text(TOOLBAR(main_window.toolbar_find), current_text);
 }
 
@@ -1133,7 +1132,7 @@ void syntax_check_clear(GtkWidget *widget)
 
 void classbrowser_show(void)
 {
-//  g_print("class browser show\n");
+  gphpedit_debug(DEBUG_MAIN_WINDOW);
   gtk_paned_set_position(GTK_PANED(main_window.main_horizontal_pane), get_preferences_manager_classbrowser_get_size(main_window.prefmg));
   set_preferences_manager_parse_classbrowser_status(main_window.prefmg, FALSE);
   classbrowser_update(GPHPEDIT_CLASSBROWSER(main_window.classbrowser));
@@ -1142,7 +1141,7 @@ void classbrowser_show(void)
 
 void classbrowser_hide(void)
 {
-  //g_print("class browser hide\n");
+  gphpedit_debug(DEBUG_MAIN_WINDOW);
   gtk_paned_set_position(GTK_PANED(main_window.main_horizontal_pane),0);
   set_preferences_manager_parse_classbrowser_status(main_window.prefmg, TRUE);
 }

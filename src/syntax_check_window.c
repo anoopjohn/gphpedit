@@ -23,11 +23,14 @@
    The GNU General Public License is contained in the file COPYING.
 */
 
+#include <stdlib.h>
+
 #include "syntax_check_window.h"
 #include "main_window_callbacks.h"
 #include "syntax_check_manager.h"
 #include "pluginmanager.h"
-#include <stdlib.h>
+#include "debug.h"
+
 struct _GtkSyntax_Check_WindowPrivate
 {
   Syntax_Check_Manager *synmg;  
@@ -247,7 +250,7 @@ void gtk_syntax_check_window_run_check(GtkSyntax_Check_Window *win, Document *do
       /* try plugins */
       Plugin_Manager *plugmg = plugin_manager_new ();
       if (!run_syntax_plugin_by_ftype(plugmg, document)){
-//      g_print("syntax check not implement\n");
+      gphpedit_debug_message(DEBUG_SYNTAX, "syntax check not implement\n");
       }
     g_object_unref(plugmg);
   }

@@ -25,6 +25,8 @@
 * classbrowser widget has two part. UI and backend. the Backend process open files and return a list of classes and functions in files.
 * UI process backend signal and fill the classbrowser Tree.
 */
+#include "debug.h"
+
 #include "classbrowser_ui.h"
 #include "classbrowser_backend.h"
 #include <gdk/gdkkeysyms.h>
@@ -263,8 +265,8 @@ gint classbrowser_compare_function_names(GtkTreeModel *model,
   gtk_tree_model_get(model, a, 0, &aName, -1);
   gtk_tree_model_get(model, b, 0, &bName, -1);
   retVal = g_strcmp0(aName, bName);
-  #ifdef DEBUGCLASSBROWSER
-    g_message("* compare values %s and %s; return %d\n", aName, bName, retVal);
+  #ifdef DEBUG
+    gphpedit_debug_message(DEBUG_CLASSBROWSER, "* compare values %s and %s; return %d\n", aName, bName, retVal);
   #endif
   g_free(aName);
   g_free(bName);
@@ -406,9 +408,8 @@ void classbrowser_function_add (gpointer data, gpointer user_data)
       }
       function_decl = g_string_append(function_decl, ")");
     }
-    #ifdef DEBUGCLASSBROWSER
-      g_print("Filename: %s\n", filename);
-    #endif
+    gphpedit_debug(DEBUG_CLASSBROWSER);
+
     gtk_tree_store_set (store, &iter,
                         NAME_COLUMN, function_decl->str, LINE_NUMBER_COLUMN, function->line_number, FILENAME_COLUMN, function->filename, TYPE_COLUMN, type, ID_COLUMN, function->identifierid,FILE_TYPE, function->file_type,-1);
   g_string_free(function_decl, TRUE);
@@ -447,6 +448,7 @@ gboolean classbrowser_class_find_before_position(GtkTreeModel *model, gchar *cla
 
 gboolean classbrowser_class_add (gpointer key, gpointer value, gpointer data)
 {
+  gphpedit_debug(DEBUG_CLASSBROWSER);
   ClassBrowserClass *class= (ClassBrowserClass *)value;
   gphpeditClassBrowserPrivate *priv= (gphpeditClassBrowserPrivate *) data;
   GtkTreeStore *store;
@@ -530,9 +532,7 @@ void classbrowser_update(gphpeditClassBrowser *classbrowser){
 void classbrowser_update_selected_label(gphpeditClassBrowserPrivate *priv, gchar *filename, gint line)
 {
   GString *new_label= classbrowser_backend_get_selected_label(priv->classbackend, filename, line);
-  #ifdef DEBUGCLASSBROWSER
-    g_print("%d :: %s\n", num_files, new_label->str);  
-  #endif
+
   if (new_label) {
     new_label = g_string_prepend(new_label, _("FILE: "));
     g_string_append_printf(new_label, "(%d)", line);

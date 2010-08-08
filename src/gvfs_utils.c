@@ -213,7 +213,6 @@ gchar *filename_get_display_name(gchar *filename)
   gchar *result = g_strdup((gchar *)g_file_info_get_display_name (info));
   g_object_unref(info);
   g_object_unref(fi);
-  g_print("%s (%s)", filename, result);
   return result;
 }
 

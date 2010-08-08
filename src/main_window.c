@@ -26,6 +26,7 @@
 #endif
 #include <stdlib.h>
 #include "main_window.h"
+#include "debug.h"
 #include "tab.h"
 #include "main_window_callbacks.h"
 #include "templates.h"
@@ -39,7 +40,6 @@
 MainWindow main_window;
 GIOChannel* inter_gphpedit_io;
 guint inter_gphpedit_event_id;
-gboolean DEBUG_MODE = FALSE;
 
 void main_window_state_changed(GtkWidget *widget, GdkEventWindowState *event, gpointer user_data)
 {
@@ -108,7 +108,7 @@ gboolean channel_pass_filename_callback(GIOChannel *source, GIOCondition conditi
   if (g_io_channel_read_chars (inter_gphpedit_io,buf,sizeof(buf), &size,&error)!=G_IO_STATUS_NORMAL){
     g_print("Error reading GIO Chanel. Error:%s\n",error->message);
   }
-  g_print("Passed %s\n", buf);
+  gphpedit_debug_message(DEBUG_IPC, "Passed %s\n", buf);
   add_new_document(TAB_FILE, buf, 0);
   return FALSE;
 }

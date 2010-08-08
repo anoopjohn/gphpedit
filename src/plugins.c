@@ -71,6 +71,7 @@ The general mechanism for interacting with a plugin is as follows:
 
 #include <config.h>
 #include <gtk/gtk.h>
+#include "debug.h"
 #include "plugins.h"
 #include "main_window.h"
 #include "gvfs_utils.h"
@@ -83,7 +84,6 @@ enum {
   GPHPEDIT_PLUGIN_TYPE_SELECTION,
   GPHPEDIT_PLUGIN_TYPE_FILENAME,
   GPHPEDIT_PLUGIN_TYPE_SYNTAX,
-  GPHPEDIT_PLUGIN_TYPE_DEBUG
 };
 
 /*
@@ -180,18 +180,15 @@ static inline gchar *command_spawn(const gchar* command_line)
   GError *error = NULL;
   gint exit_status;
   gchar *ret=NULL;
-  #ifdef DEBUG
-  gint stdout_len;
-  #endif
   if (g_spawn_command_line_sync(command_line,&stdout,NULL, &exit_status,&error)) {
     #ifdef DEBUG
     guint stdout_len = strlen(stdout);
-    g_print("COMMAND: %s\nOUTPUT: %s (%d)\n", command_line, stdout, stdout_len);
+    gphpedit_debug_message(DEBUG_PLUGINS, "COMMAND: %s\nOUTPUT: %s (%d)\n", command_line, stdout, stdout_len);
     #endif
     ret=g_strdup(stdout);
     g_free(stdout);
   } else {
-    g_print("Command %s gave error %s\n", command_line, error->message);
+    gphpedit_debug_message(DEBUG_PLUGINS, "Command %s gave error %s\n", command_line, error->message);
     g_error_free (error);
   }  
   
@@ -210,9 +207,7 @@ gchar *plugin_discover_name(const gchar *filename)
   command_line = g_string_prepend(command_line, "'");
   command_line = g_string_append(command_line, "' -name");
   name = command_spawn(command_line->str);
-  #ifdef DEBUG
-  g_print("plugin name:%s\n",name);
-  #endif
+  gphpedit_debug_message(DEBUG_PLUGINS,"plugin name:%s\n",name);
 
   g_string_free(command_line, TRUE);
   
@@ -228,9 +223,9 @@ gchar *plugin_discover_desc(gchar *filename)
   command_line = g_string_prepend(command_line, "'");
   command_line = g_string_append(command_line, "' -desc");
   desc = command_spawn(command_line->str);
-  #ifdef DEBUG
-  g_print("Plugin description:%s\n",desc);
-  #endif
+
+  gphpedit_debug_message(DEBUG_PLUGINS, "Plugin description:%s\n",desc);
+
   g_string_free(command_line, TRUE);
   
   return desc;
@@ -260,12 +255,8 @@ int plugin_discover_type(gchar *filename)
   else if (g_str_has_prefix(result, "FNAME")){
     type = GPHPEDIT_PLUGIN_TYPE_FILENAME;
   }
-  else if (g_str_has_prefix(result, "DEBUG")){
-    type = GPHPEDIT_PLUGIN_TYPE_DEBUG;
-  }
-  #ifdef DEBUG
-  g_print("Returning Discovered type of %d\n------------------------------------\n", type);
-  #endif
+  gphpedit_debug_message(DEBUG_PLUGINS,"Returning Discovered type of %d\n", type);
+
   g_free(result);
   }
   g_string_free(command_line, TRUE);
@@ -285,9 +276,8 @@ static gint plugin_syntax_discover_type(gchar *filename)
   gchar *result= command_spawn(command_line->str);
   ftype = g_ascii_strup (result, -1);
   g_free(result);
-  #ifdef DEBUG
-  g_print("Plugin syntax File type:%s\n",ftype);
-  #endif
+  gphpedit_debug_message(DEBUG_PLUGINS, "Plugin syntax File type:%s\n",ftype);
+
   g_string_free(command_line, TRUE);
   
   if (g_strcmp0(ftype,"PHP")==0 || g_strcmp0(ftype,"HTML")==0 || g_strcmp0(ftype,"XML")==0) file_type=TAB_PHP;
@@ -316,7 +306,7 @@ Plugin *plugin_new (gchar *filename)
   plugdet->description= plugin_discover_desc(filename);
   plugdet->type= plugin_discover_type(filename);
   if (plugdet->type==GPHPEDIT_PLUGIN_TYPE_SYNTAX) plugdet->file_type = plugin_syntax_discover_type(filename);
-
+  gphpedit_debug_message(DEBUG_PLUGINS,"Name: %s(%d)\n", plugdet->name, plugdet->type);
 	return plug; /* return new object */
 }
 
@@ -420,14 +410,10 @@ void plugin_run(Plugin *plugin, Document *document)
         syntax_window(main_window.win, document, data);
     }
     else if (g_str_has_prefix(stdout, "OPEN")){
-      if (DEBUG_MODE) { g_print("DEBUG: main_window.c:plugin_exec: Opening file :date: %s\n", data); }
+      gphpedit_debug_message(DEBUG_PLUGINS,"Opening file :date: %s\n", data);
       switch_to_file_or_open(data, 0);
-    }
-    else if (g_str_has_prefix(stdout, "DEBUG")){
-      debug_dump_editors();
-      DEBUG_MODE = TRUE;
     } else {
-      g_print("Unexpected command");
+      g_print("Unexpected command\n");
     }
     if (using_temp) {
       release_temp_file (temp_name->str);

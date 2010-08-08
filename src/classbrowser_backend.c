@@ -29,11 +29,11 @@
 
 #include <stdlib.h>
 #include <gtk/gtk.h>
+#include "debug.h"
 #include "classbrowser_backend.h"
 #include "classbrowser_parse.h"
 #include "main_window_callbacks.h"
 #include "gvfs_utils.h"
-//#define DEBUGCLASSBROWSER 
 
 /* object signal enumeration */
 enum {
@@ -239,6 +239,8 @@ void add_global_var(Classbrowser_BackendDetails *classbackdet, const gchar *var_
     var->identifierid = classbackdet->identifierid++;
 
     g_tree_insert (classbackdet->php_variables_tree, g_strdup(var_name), var); /* key = variables name value var struct */
+
+    gphpedit_debug_message(DEBUG_CLASSBROWSER, "%s\n", var_name);
 }
 
 /* release resources used by classbrowser */
@@ -263,9 +265,7 @@ void list_php_files_open (gpointer data, gpointer user_data){
 void do_parse_file(Classbrowser_Backend *classback, Document *document){
     g_return_if_fail(document);
     if (document_is_scintilla_based(document) && !document_get_untitled(document)) {
-      #ifdef DEBUGCLASSBROWSER
-      g_print("Parsing:%s\n",document_get_shortfilename(document));
-      #endif
+    gphpedit_debug_message(DEBUG_CLASSBROWSER, "Parsing: %s\n",document_get_shortfilename(document));
     while (gtk_events_pending()) gtk_main_iteration(); /* update ui */
     gchar *filename =document_get_filename(document);;
       if (is_php_file_from_filename(filename)) {
@@ -303,6 +303,8 @@ void classbrowser_backend_start_update(Classbrowser_BackendDetails *classbackdet
 //when the parse only selected tab is set - Anoop
 void classbrowser_backend_update(Classbrowser_Backend *classback, GSList *editor_list, gboolean only_current_file)
 {
+
+  gphpedit_debug(DEBUG_CLASSBROWSER);
   Classbrowser_BackendDetails *classbackdet;
 	classbackdet = CLASSBROWSER_BACKEND_GET_PRIVATE(classback);
   if (!classbackdet->php_variables_tree){
@@ -422,9 +424,8 @@ void classbrowser_varlist_add(Classbrowser_Backend *classback, gchar *varname, g
     var->identifierid = classbackdet->identifierid++;
 
     g_tree_insert (classbackdet->php_variables_tree, g_strdup(varname), var); /* key =variables name value var struct */
-    #ifdef DEBUGCLASSBROWSER
-      g_print("Filename: %s\n", filename);
-    #endif
+
+    gphpedit_debug_message(DEBUG_CLASSBROWSER, "filename: %s var name: %s\n", filename, varname);
   }
 }
 
@@ -449,6 +450,7 @@ void classbrowser_classlist_add(Classbrowser_Backend *classback, gchar *classnam
     class->identifierid = classbackdet->identifierid++;
     class->file_type=file_type;
     g_tree_insert (classbackdet->php_class_tree,keyname,class);
+    gphpedit_debug_message(DEBUG_CLASSBROWSER,"filename: %s class name: %s\n", filename, classname);
   }
 }
 
@@ -481,6 +483,7 @@ void call_ctags(Classbrowser_Backend *classback, gchar *filename){
   gchar *stdouterr;
   gchar *path=filename_get_path(filename);
   gchar *command_line=g_strdup_printf("ctags -x '%s'",path);
+  gphpedit_debug_message(DEBUG_CLASSBROWSER,"%s", command_line);
   result = g_spawn_command_line_sync (command_line, &stdout, &stdouterr, &exit_status, &error);
   g_free(command_line);
   g_free(path);
@@ -567,6 +570,7 @@ void classbrowser_functionlist_add(Classbrowser_Backend *classback, gchar *class
     }
     g_free(keyname);
     classbackdet->functionlist = g_slist_append(classbackdet->functionlist, function);
+    gphpedit_debug_message(DEBUG_CLASSBROWSER,"filename: %s fucntion: %s\n", filename, funcname);
   }
 }
 
@@ -667,7 +671,7 @@ GString *classbrowser_backend_get_selected_label(Classbrowser_Backend *classback
 	classbackdet = CLASSBROWSER_BACKEND_GET_PRIVATE(classback);
   GSList *filenames;
   GSList *function_walk;
-  GString *new_label;
+  GString *new_label=NULL;
   ClassBrowserFunction *function;
   gchar *func_filename;
   gint num_files;
@@ -694,6 +698,7 @@ GString *classbrowser_backend_get_selected_label(Classbrowser_Backend *classback
     new_label = get_differing_part(filenames, filename);
   }
   g_slist_free(filenames);
+  if (new_label) gphpedit_debug_message(DEBUG_CLASSBROWSER, "classbrowser label:%s\n", new_label->str);
   return new_label;
 }
 
@@ -747,9 +752,7 @@ gchar *classbrowser_backend_autocomplete_php_variables(Classbrowser_Backend *cla
   Classbrowser_BackendDetails *classbackdet;
 	classbackdet = CLASSBROWSER_BACKEND_GET_PRIVATE(classback);
   gchar *result = NULL;
-#ifdef DEBUGCLASSBROWSER
-  g_print("var autoc:%s\n",buffer);
-#endif
+
   var_find *search_data= g_slice_new(var_find);
   search_data->prefix=buffer;
   search_data->completion_result = NULL;
@@ -758,6 +761,7 @@ gchar *classbrowser_backend_autocomplete_php_variables(Classbrowser_Backend *cla
     result = g_string_free(search_data->completion_result, FALSE); /*release resources*/
   }
   g_slice_free(var_find, search_data);  
+  gphpedit_debug_message(DEBUG_CLASSBROWSER,"prefix: %s autocomplete list:%s\n", buffer, result);
   return result;
 }
 
@@ -796,7 +800,10 @@ GString *get_member_function_completion_list(Classbrowser_BackendDetails *classb
     }
   }
 
+  if (result){
   result = g_string_append(result, " ");
+  gphpedit_debug_message(DEBUG_CLASSBROWSER,"prefix: %s autocomplete list:%s\n", buffer, result->str);
+  }
   return result;
 }
 
@@ -808,8 +815,10 @@ gchar *classbrowser_backend_autocomplete_member_function(Classbrowser_Backend *c
   GString *list;
   list = get_member_function_completion_list(classbackdet, prefix);
   if (list) {
+    gphpedit_debug_message(DEBUG_CLASSBROWSER,"prefix: %s autocomplete list:%s\n", prefix, list->str);
     return g_string_free(list, FALSE);
   }
+  gphpedit_debug_message(DEBUG_CLASSBROWSER,"prefix: %s autocomplete list:%s\n", prefix, "null");
   return NULL;
 }
 
@@ -829,6 +838,7 @@ gchar *classbrowser_backend_custom_function_calltip(Classbrowser_Backend *classb
       }
     }
   }
+  gphpedit_debug_message(DEBUG_CLASSBROWSER,"custom calltip: %s\n", calltip);
   return calltip;
 }
 
@@ -876,8 +886,10 @@ gchar *classbrowser_backend_add_custom_autocompletion(Classbrowser_Backend *clas
   }
   if (result){
     result = g_string_append(result, " ");
+    gphpedit_debug_message(DEBUG_CLASSBROWSER, "prefix: %s autocomplete list:%s\n", prefix, result->str);
     return result->str;
   } else {
+    gphpedit_debug_message(DEBUG_CLASSBROWSER, "prefix: %s autocomplete list:%s\n", prefix, "null");
     return NULL;
   }
 }

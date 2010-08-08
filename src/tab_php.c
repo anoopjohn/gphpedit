@@ -29,7 +29,7 @@
 void scintilla_php_set_lexer(GtkScintilla *scintilla)
 {
   Preferences_Manager *prefmg = preferences_manager_new ();
-  //g_print("Re-setting Lexer\n");
+
   gchar *font =NULL;
   gint size, fore, back;
   gboolean italic, bold;

@@ -10,9 +10,9 @@ Installation of gPHPEdit: (UBUNTU AND DEBIAN USERS)
 ===================================================
 0) To install gPHPEdit from source:
 
-    You can download lastest source packages from: http://www.gphpedit.org
+   You can download lastest source packages from: http://www.gphpedit.org
 
-   0.1) installing from git
+   0.a) installing from git
 
    In a terminal write:
    git clone git://github.com/anoopjohn/gphpedit.git ~/gphpedit-git
@@ -33,6 +33,9 @@ Installation of gPHPEdit: (UBUNTU AND DEBIAN USERS)
 	prefix is consistent with the installation environment and the package 
 	will be installed in the correct location.
 
+  --enable-debug=yes 
+  Setting this flag enable the debug support, disabled by default.
+
 2) Dependencies
 
 Compilation needs the following software packages - usually the headers 
@@ -51,6 +54,43 @@ prefix lib, e.g. libgtk2.0-dev)
 	     - php5-cli (optional for php sintax checking)
 	     - php-doc (optional for php help support) *
    * if you don't have php-doc pakage installed gphpedit will search help in PHP online resources.
+
+
+Debug system
+============
+Since 0.9.98 version GPHPEdit has a new debug system.
+To activate it you must first compile GPHPEdit with --enable-debug=yes option.
+Then you must start the editor setting an environment variable with the same name of the chanel to debug.
+For example:
+	$ env GPHPEDIT_DEBUG=1 ./gphpedit
+
+will enable all debug chanels.
+
+This expresion:
+
+	$ env GPHPEDIT_DEBUG_PLUGINS=1 ./gphpedit
+
+will activate only the plugins chanel.
+
+You could activate more than one debug chanel, for example:
+
+	$ env GPHPEDIT_DEBUG_PLUGINS=1 GPHPEDIT_DEBUG_DOCUMENT=1 ./gphpedit
+
+will activate plugins and document chanel.
+
+* The following list contains the avariable debug chanels:
+   - GPHPEDIT_NO_DEBUG (disable debug output)
+   - GPHPEDIT_DEBUG_CALLTIP
+   - GPHPEDIT_DEBUG_CLASSBROWSER
+   - GPHPEDIT_DEBUG_CLASSBROWSER_PARSE
+   - GPHPEDIT_DEBUG_DOCUMENT
+   - GPHPEDIT_DEBUG_PLUGINS
+   - GPHPEDIT_DEBUG_FILEBROWSER
+   - GPHPEDIT_DEBUG_IPC
+   - GPHPEDIT_DEBUG_MAIN_WINDOW
+   - GPHPEDIT_DEBUG_DOC_MANAGER
+   - GPHPEDIT_DEBUG_PREFS
+   - GPHPEDIT_DEBUG_SYNTAX
 
 How to report bugs
 ==================

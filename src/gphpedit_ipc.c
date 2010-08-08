@@ -23,6 +23,7 @@
 */
 
 #include "main.h"
+#include "debug.h"
 #include "gphpedit_ipc.h"
 #include "main_window.h"
 
@@ -96,7 +97,8 @@ gboolean poke_existing_instance (int argc, char **argv){
       /* this is not right, but should not cause real problems */
       pid = strtol (pid_string, NULL, 10);
       filename = g_build_filename (tmp_path, entry, NULL);
-      //g_print ("filename: %s\n", filename);
+
+      gphpedit_debug_message( DEBUG_IPC, "filename: %s\n", filename);
 
       if (!errno && pid > 0 && !kill (pid, 0)){
         int i;
@@ -121,7 +123,7 @@ gboolean poke_existing_instance (int argc, char **argv){
               g_free(s_filename);
             }
             if (to_open) {
-              //g_print("From %s to %s\n", argv[i], to_open);
+              gphpedit_debug_message( DEBUG_IPC,"From %s to %s\n", argv[i], to_open);
               k=write (fd, to_open, strlen (to_open) + 1);
               g_free(to_open);
             }
@@ -152,10 +154,10 @@ static void commit (Input *self) {
 
   if (self->buffer->len <= 1) {
     gtk_window_present(GTK_WINDOW(main_window.window));
-    //g_print("Presenting\n");
+    gphpedit_debug_message( DEBUG_IPC,"%s", "Presenting\n");
   } else {
     switch_to_file_or_open((char*) self->buffer->data, 0);
-    //g_print("Opening %s\n", (char*) self->buffer->data);
+    gphpedit_debug_message( DEBUG_IPC, "Opening %s\n", (char*) self->buffer->data);
   }
 
   if (self->buffer->len > MAX_BUFFER_SIZE){

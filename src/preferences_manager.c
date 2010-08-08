@@ -37,9 +37,10 @@
 #include <stdlib.h>
 #include <string.h>
 #include <gtk/gtk.h>
-#include "preferences_manager.h"
-//#include "main_window.h"
 #include <gconf/gconf-client.h>
+#include "debug.h"
+#include "preferences_manager.h"
+
 
 #define MAXHISTORY 16
 
@@ -271,6 +272,7 @@ Preferences_Manager *preferences_manager_new (void)
 
 void load_default_settings(Preferences_ManagerDetails *prefdet)
 {
+  gphpedit_debug(DEBUG_PREFS);
   prefdet->set_sel_back = get_color("/gPHPEdit/default_style/selection","default_style",11250603);
   prefdet->marker_back = get_color("/gPHPEdit/default_style/bookmark","default_style",15908608);
   prefdet->php_binary_location= get_string("/gPHPEdit/locations/phpbinary","php");
@@ -304,6 +306,7 @@ void load_default_settings(Preferences_ManagerDetails *prefdet)
 
 void load_window_settings(Preferences_ManagerDetails *prefdet)
 {
+  gphpedit_debug(DEBUG_PREFS);
   prefdet->left = get_color("/gPHPEdit/main_window/x","main_window",20);
   prefdet->top = get_color("/gPHPEdit/main_window/y","main_window",20);
   prefdet->width = get_color("/gPHPEdit/main_window/width","main_window",400);
@@ -312,7 +315,7 @@ void load_window_settings(Preferences_ManagerDetails *prefdet)
 }
 
 void load_session_settings(Preferences_ManagerDetails *prefdet){
-
+  gphpedit_debug(DEBUG_PREFS);
   prefdet->last_opened_folder = get_string("/gPHPEdit/general/last_opened_folder", (gchar *)g_get_home_dir());
   prefdet->parseonlycurrentfile = get_size("/gPHPEdit/classbrowser/onlycurrentfile", FALSE);
   prefdet->classbrowser_hidden = get_size("/gPHPEdit/main_window/classbrowser_hidden", FALSE);
@@ -984,7 +987,7 @@ void get_preferences_manager_style_settings(Preferences_Manager *preferences_man
     if (back) back = NULL;
     if (italic) italic = NULL;
     if (bold) bold = NULL;
-//    g_print("not found:%s", stylename);
+    gphpedit_debug_message(DEBUG_PREFS, "not found:%s", stylename);
     return;
   }
   if (font) *font= style->font;
@@ -1039,7 +1042,7 @@ void save_style_settings (gpointer key, gpointer value, gpointer user_data)
   
   set_string(keyfont, style->font);
   set_int (keysize, style->font_size);
-//  g_print("%s %d %d",style->name, style->color_fore, style->color_back);
+  gphpedit_debug_message(DEBUG_PREFS, "%s %d %d",style->name, style->color_fore, style->color_back);
   set_int (keyfore, style->color_fore);
   set_int (keyback, style->color_back);
   set_bool (keyitalic, style->font_italic);
@@ -1061,6 +1064,7 @@ void save_style_settings (gpointer key, gpointer value, gpointer user_data)
 * so we speed up process by not save unchanged data.
 */
 void preferences_manager_save_data(Preferences_Manager *preferences_manager){
+  gphpedit_debug(DEBUG_PREFS);
   Preferences_ManagerDetails *prefdet;
 	prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
   /*store window  settings*/
@@ -1084,6 +1088,7 @@ void preferences_manager_save_data(Preferences_Manager *preferences_manager){
 * update all preferences data in gconf with new internal data
 */
 void preferences_manager_save_data_full(Preferences_Manager *preferences_manager){
+  gphpedit_debug(DEBUG_PREFS);
   Preferences_ManagerDetails *prefdet;
 	prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
   preferences_manager_save_data(preferences_manager);  /* save session data */
@@ -1121,6 +1126,7 @@ void preferences_manager_save_data_full(Preferences_Manager *preferences_manager
 * reload preferences data from gconf and discard internal data.
 */
 void preferences_manager_restore_data(Preferences_Manager *preferences_manager){
+  gphpedit_debug(DEBUG_PREFS);
   Preferences_ManagerDetails *prefdet;
 	prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
   clean_default_settings(prefdet);
@@ -1242,9 +1248,7 @@ static gboolean get_bool(const gchar *key,gboolean default_value){
 static gint get_color(const gchar *key,const gchar *subdir,gint default_color){
   gchar *uri= g_strdup_printf("%s/%s/%s",g_get_home_dir(),".gconf/gPHPEdit",subdir);
   if (!g_file_test (uri,G_FILE_TEST_EXISTS)){
-    #ifdef DEBUG
-    g_print("key %s don't exist. load default value\n",key);
-    #endif
+    gphpedit_debug_message(DEBUG_PREFS, "key %s don't exist. load default value\n",key);
     //load default value
     g_free(uri);
     return default_color;
@@ -1378,7 +1382,7 @@ void load_style(Preferences_ManagerDetails *prefdet, const gchar *style_name, gi
   
   g_hash_table_insert (prefdet->styles_table, style->name, style); /* add style to hash table */
   
-//  g_print("%s %s %d %d %d", style->name, style->font, style->font_size, style->color_back, style->color_fore);
+  gphpedit_debug_message(DEBUG_PREFS,"%s %s %d %d %d", style->name, style->font, style->font_size, style->color_back, style->color_fore);
 }
 
 /* Default values */
@@ -1389,6 +1393,7 @@ void load_style(Preferences_ManagerDetails *prefdet, const gchar *style_name, gi
 */
 void load_styles(Preferences_ManagerDetails *prefdet)
 { 
+  gphpedit_debug(DEBUG_PREFS);
   load_style(prefdet ,"default_style", DEFAULT_BACK_COLOR, 0);
   load_style(prefdet ,"line_numbers", 11053224, 0);
   load_style(prefdet ,"html_tag", DEFAULT_BACK_COLOR, 7553164);

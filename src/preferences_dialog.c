@@ -22,6 +22,7 @@
    The GNU General Public License is contained in the file COPYING.
 */
 #include <stdlib.h>
+#include "debug.h"
 #include "preferences_dialog.h"
 #include "main_window.h"
 #include "tab_php.h"
@@ -29,7 +30,6 @@
 #include "tab_util.h"
 #include "templates.h"
 #include "edit_template.h"
-#include <gtkscintilla.h>
 
 #define IS_FONT_NAME(name1, name2) g_str_has_prefix(name1, name2)
 PreferencesDialog preferences_dialog;
@@ -219,7 +219,7 @@ void set_controls_to_highlight(gchar *setting_name, gchar *fontname, gint fontsi
   gint row;
   
   // Debug print for preferences being set
-//  g_print("Getting %s: %s %d %d %d %d %d\n", setting_name, fontname, fontsize, bold, italic, fore, back);
+  gphpedit_debug_message(DEBUG_PREFS, "Getting %s: %s %d %d %d %d %d\n", setting_name, fontname, fontsize, bold, italic, fore, back);
   
   preferences_dialog.changing_highlight_element=TRUE;
   
@@ -551,7 +551,7 @@ void change_font_global_callback(gint reply, gpointer data)
 {
   gchar *fontname;
 
-  //g_print("change_font_global: %d, YES=%d, NO=%d\n", reply, GTK_RESPONSE_YES, GTK_RESPONSE_NO);
+  gphpedit_debug_message(DEBUG_PREFS, "change_font_global: %d, YES=%d, NO=%d\n", reply, GTK_RESPONSE_YES, GTK_RESPONSE_NO);
   if (reply==GTK_RESPONSE_YES) {
     fontname = g_strdup((gchar *)data); 
     set_preferences_manager_style_settings(main_window.prefmg, "default_style", fontname , NULL, NULL, NULL, NULL, NULL);
@@ -626,7 +626,7 @@ void change_size_global_callback(gint reply,gpointer data)
 {
   gint fontsize;
 
-  //g_print("change_size_global: %d\n", reply);
+  gphpedit_debug_message(DEBUG_PREFS,"change_size_global: %d\n", reply);
   if (reply==GTK_RESPONSE_YES) {
     fontsize =  GPOINTER_TO_INT (data);
     
@@ -742,7 +742,7 @@ void get_control_values_to_highlight(gchar *setting_name)
   gtk_color_button_get_color (GTK_COLOR_BUTTON(preferences_dialog.background_colour),&color);
   back = scintilla_color(color.red >> 8, (color.green >> 8), (color.blue >> 8));
   // Debug print for preferences being set
-  //g_print("Setting %s: %s %d %d %d %d %d\n", setting_name, *fontname, *fontsize, *bold, *italic, *fore, *back);  
+  gphpedit_debug_message(DEBUG_PREFS,"Setting %s: %s %d %d %d %d %d\n", setting_name, fontname, fontsize, bold, italic, fore, back);  
   set_preferences_manager_style_settings(main_window.prefmg, setting_name, tempfontname->str , &newfontsize, &fore, &back, &italic, &bold);
   g_string_free(tempfontname, FALSE);
 }
@@ -1246,7 +1246,6 @@ void template_row_activated(GtkTreeSelection *selection, gpointer data)
   if (current_key) {
     g_free(current_key);
   }
-  //g_print("a\n");
     if (gtk_tree_selection_get_selected (selection, &model, &iter)) {
     gtk_tree_model_get (model, &iter, 0, &current_key, -1);
 
@@ -1682,7 +1681,7 @@ GTK_STOCK_OK, GTK_RESPONSE_ACCEPT, GTK_STOCK_CANCEL, GTK_RESPONSE_REJECT, NULL);
     g_object_set_qdata (G_OBJECT (preferences_dialog.size_combo), g_quark_from_static_string (font_sizes[i]), 
       GINT_TO_POINTER (gtk_tree_model_iter_n_children (gtk_combo_box_get_model (GTK_COMBO_BOX(preferences_dialog.size_combo)), NULL)));
     gtk_combo_box_append_text (GTK_COMBO_BOX (preferences_dialog.size_combo), font_sizes[i]);
-    //g_print("Appending Font Size: %s, %d\n", font_sizes[i], g_quark_from_static_string(font_sizes[i]));
+    gphpedit_debug_message(DEBUG_PREFS, "Appending Font Size: %s, %d\n", font_sizes[i], g_quark_from_static_string(font_sizes[i]));
   }
   g_signal_connect (G_OBJECT (GTK_COMBO_BOX (preferences_dialog.size_combo)), "changed",
                       G_CALLBACK (on_fontsize_entry_changed),

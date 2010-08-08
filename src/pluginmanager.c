@@ -26,6 +26,8 @@
 #include <config.h>
 #include <stdlib.h>
 #include <gtk/gtk.h>
+
+#include "debug.h"
 #include "pluginmanager.h"
 #include "gvfs_utils.h"
 
@@ -163,9 +165,9 @@ static void plugin_discover_available(Plugin_Manager *plugmg)
   
   user_plugin_dir = g_string_new( g_get_home_dir());
   user_plugin_dir = g_string_append(user_plugin_dir, "/.gphpedit/plugins/");
-  #ifdef DEBUG
-  g_print("User plugin directory: %s\n", user_plugin_dir->str);
-  #endif
+
+  gphpedit_debug_message(DEBUG_PLUGINS, "User plugin directory: %s\n", user_plugin_dir->str);
+
   if (g_file_test(user_plugin_dir->str, G_FILE_TEST_IS_DIR)) {
     dir = g_dir_open(user_plugin_dir->str, 0,NULL);
     if (dir) {
@@ -180,22 +182,23 @@ static void plugin_discover_available(Plugin_Manager *plugmg)
   }
   g_string_free(user_plugin_dir, TRUE);
 
-  if (g_file_test("/usr/share/gphpedit/plugins/", G_FILE_TEST_IS_DIR)) { 
-  /* FIXME:: use prefix and not this because prefix will change */
-    dir = g_dir_open("/usr/share/gphpedit/plugins/", 0,NULL);
+  gchar *plugin_dir = NULL;
+  /* use autoconf macro to build plugins path */
+  plugin_dir = g_build_path (G_DIR_SEPARATOR_S, API_DIR, "plugins/", NULL);
+  if (g_file_test(plugin_dir, G_FILE_TEST_IS_DIR)) { 
+    dir = g_dir_open(plugin_dir, 0,NULL);
     if (dir) {
       for (plugin_name = g_dir_read_name(dir); plugin_name != NULL; plugin_name = g_dir_read_name(dir)) {
         filename = g_string_new(plugin_name);
-        filename = g_string_prepend(filename, "/usr/share/gphpedit/plugins/");
+        filename = g_string_prepend(filename, plugin_dir);
         new_plugin(plugmg,filename->str);
         g_string_free (filename,TRUE);
       }
       g_dir_close(dir);      
     }
   }
-  #ifdef DEBUG
-  g_print ("FOUND ALL PLUGINS\n");
-  #endif
+  g_free(plugin_dir);
+  gphpedit_debug_message(DEBUG_PLUGINS,"%s","FOUND ALL PLUGINS\n");
 }
 /*
 *
@@ -247,11 +250,11 @@ gboolean run_syntax_plugin_by_ftype(Plugin_Manager *plugmg, Document *document){
   gint ftype = document_get_document_type(document);
   Plugin *plug=g_hash_table_find (plugmgdet->plugins_table, get_syntax_plugin_by_ftype, GINT_TO_POINTER(ftype));
   if (plug){
-    g_print("Plugin FOUND!!\n");
+    gphpedit_debug_message(DEBUG_PLUGINS,"%s","Plugin FOUND!!\n");
     plugin_run(plug, document);
     return TRUE;
   } else {
-    //g_print("Plugin NOT FOUND!!\n");
+    gphpedit_debug_message(DEBUG_PLUGINS,"%s","Plugin NOT FOUND!!\n");
     return FALSE;
   }
 }

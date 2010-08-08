@@ -2,7 +2,7 @@
 
    Copyright (C) 2003, 2004, 2005 Andy Jeffries <andy at gphpedit.org>
    Copyright (C) 2009 Anoop John <anoop dot john at zyxware.com>
-   Copyright (C) 2009 José Rostagno (for vijona.com.ar) 
+   Copyright (C) 2009, 2010 José Rostagno (for vijona.com.ar) 
 
    For more information or to find the latest release, visit our 
    website at http://www.gphpedit.org/
@@ -30,6 +30,7 @@
 #include <stdlib.h>
 #include <gtk/gtk.h>
 #include <webkit/webkit.h>
+#include "debug.h"
 #include "document.h"
 #include "document_loader.h"
 #include "main_window.h"
@@ -258,9 +259,7 @@ static void document_create_webkit(Document *doc, const gchar *buffer, gboolean 
  
   webkit_web_view_load_string (WEBKIT_WEB_VIEW(docdet->help_view), buffer, "text/html", "UTF-8", filename);
 
-  #ifdef DEBUGTAB
-//  g_print("DEBUG::Help file->filename:%s - caption:->%s\n", long_filename, caption->str);
-  #endif
+  gphpedit_debug_message (DEBUG_DOCUMENT, "WEBKIT FILE: %s\n", caption->str);
 
   g_signal_connect(G_OBJECT(docdet->help_view), "navigation-policy-decision-requested",
        G_CALLBACK(webkit_link_clicked), doc);
@@ -285,6 +284,8 @@ void create_new_document(Document *doc){
 }
 
 void document_done_loading_cb (DocumentLoader *doc, guint result, gpointer user_data){
+  gphpedit_debug (DEBUG_DOCUMENT);
+
   Document *document = document_loader_get_document(doc);
   DocumentDetails *docdet = DOCUMENT_GET_PRIVATE(document);
   if (result!=FALSE){
@@ -321,6 +322,7 @@ void document_done_loading_cb (DocumentLoader *doc, guint result, gpointer user_
 
 static void document_create_new(Document *doc, gint type, gchar *filename, gint goto_line)
 {
+  gphpedit_debug_message (DEBUG_DOCUMENT, "type:%d filename:%s", type, filename?filename:"null");
   DocumentDetails *docdet;
 	docdet = DOCUMENT_GET_PRIVATE(doc);
   docdet->type= type;
@@ -346,6 +348,7 @@ static void document_create_new(Document *doc, gint type, gchar *filename, gint 
   g_signal_connect(G_OBJECT(docdet->load), "done_refresh", G_CALLBACK(document_done_refresh_cb), NULL);
 }
 void document_load(Document *document){
+  gphpedit_debug (DEBUG_DOCUMENT);
   g_return_if_fail(document);
   DocumentDetails *docdet = DOCUMENT_GET_PRIVATE(document);
   document_loader_load_document(docdet->load);
@@ -669,6 +672,7 @@ void process_user_list_selection (GtkWidget *w, gint type, gchar *text){
 
 static void char_added(GtkWidget *scintilla, guint ch, gpointer user_data)
 {
+  gphpedit_debug_message (DEBUG_DOCUMENT, "char added:%d\n",ch);
   Document *doc = DOCUMENT(user_data);
   g_return_if_fail(doc);
   DocumentDetails *docdet = DOCUMENT_GET_PRIVATE(doc);
@@ -690,9 +694,6 @@ static void char_added(GtkWidget *scintilla, guint ch, gpointer user_data)
   guint style;
   gint type;
   type = docdet->type;
-  #ifdef DEBUGTAB
-  g_print("DEBUG:::char added:%d\n",ch);
-  #endif
   if (type == TAB_HELP || type == TAB_PREVIEW) return;
   if ((type != TAB_PHP) && (ch=='\r'|| ch=='\n' || ch=='\t'))return;
   Preferences_Manager *pref = preferences_manager_new ();
@@ -736,9 +737,7 @@ static void char_added(GtkWidget *scintilla, guint ch, gpointer user_data)
         }
         g_free(previous_char_buffer);
         indent_line(scintilla, current_line, previous_line_indentation);
-        #ifdef DEBUGTAB
-        g_print("DEBUG: tab.c:char_added:previous_line=%d, previous_indent=%d\n", previous_line, previous_line_indentation);
-        #endif
+        gphpedit_debug_message (DEBUG_DOCUMENT, "previous_line=%d, previous_indent=%d\n", previous_line, previous_line_indentation);
         gint pos;
         if (get_preferences_manager_use_tabs_instead_spaces(pref)) {
         pos= gtk_scintilla_position_from_line(GTK_SCINTILLA(scintilla), current_line)+(previous_line_indentation/gtk_scintilla_get_tab_width(GTK_SCINTILLA(scintilla)));
@@ -2177,6 +2176,7 @@ void document_file_write (GObject *source_object, GAsyncResult *res, gpointer us
 
 void document_save(Document *doc)
 {
+  gphpedit_debug (DEBUG_DOCUMENT);
   g_return_if_fail(doc);
   DocumentDetails *docdet = DOCUMENT_GET_PRIVATE(doc);
   if (GTK_IS_SCINTILLA(docdet->scintilla)){
@@ -2193,9 +2193,7 @@ void document_save(Document *doc)
       g_print(_("UTF-8 Error: %s\n"), error->message);
       g_error_free(error);      
     } else {
-      #ifdef DEBUGTAB
-      g_print("DEBUG: Converted size: %d\n", utf8_size);
-      #endif
+      gphpedit_debug_message (DEBUG_DOCUMENT,"Converted size: %d\n", utf8_size);
       g_free(docdet->write_buffer);
       docdet->write_buffer = converted_text;
       text_length = utf8_size;
@@ -2270,9 +2268,7 @@ void macro_record (GtkWidget *scintilla, gint message, gulong wparam, glong lpar
     else {
       event->lparam = lparam;
     }
-    #ifdef DEBUGTAB
-    g_print("DEBUG: tab.c:macro_record:Message: %d (%s)\n", event->message, macro_message_to_string(event->message));
-    #endif
+    gphpedit_debug_message (DEBUG_DOCUMENT,"Message: %d (%s)\n", event->message, macro_message_to_string(event->message));
     docdet->keyboard_macro_list = g_slist_append(docdet->keyboard_macro_list, event);
   }
 }
@@ -2325,8 +2321,7 @@ void document_keyboard_macro_playback(Document *document)
     if (docdet->keyboard_macro_list) {
       for (current = docdet->keyboard_macro_list; current; current = g_slist_next(current)) {
         event = current->data;
-        if (DEBUG_MODE) { g_print("DEBUG: keyboard_macro_playback:Message: %d (%s)\n", event->message, macro_message_to_string(event->message)); }
-
+        gphpedit_debug_message (DEBUG_DOCUMENT,"Message: %d (%s)\n", event->message, macro_message_to_string(event->message));
         switch (event->message) {
           case (2170) : gtk_scintilla_replace_sel(GTK_SCINTILLA(docdet->scintilla), (gchar *)event->lparam); break;
           case (2177) : gtk_scintilla_cut(GTK_SCINTILLA(docdet->scintilla)); break;
@@ -2464,6 +2459,7 @@ void document_done_refresh_cb (DocumentLoader *doclod, gboolean result, gpointer
 
 void document_reload(Document *document)
 {
+  gphpedit_debug (DEBUG_DOCUMENT);
   g_return_if_fail(document);
   DocumentDetails *docdet = DOCUMENT_GET_PRIVATE(document);
   if (GTK_IS_SCINTILLA(docdet->scintilla)){
@@ -2515,6 +2511,7 @@ void document_force_autocomplete(Document *document)
 
 void document_insert_template(Document *document, gchar *template)
 {
+  gphpedit_debug_message (DEBUG_DOCUMENT, "%s",template);
   gint current_pos;
   gint wordStart;
   gint wordEnd;

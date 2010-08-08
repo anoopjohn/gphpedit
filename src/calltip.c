@@ -27,12 +27,14 @@
 #include <config.h>
 #endif
 
+#include "debug.h"
+
 #include "calltip.h"
 #include "tab.h"
 #include "images.h"
 #include "main_window.h"
 #include "classbrowser_ui.h"
-//#define DEBUGCALLTIP
+
 GTree *php_api_tree;
 GTree *css_api_tree;
 GString *completion_list_tree;
@@ -82,9 +84,7 @@ void function_list_prepare(void)
   gchar *api_dir = NULL;
   /* use autoconf macro to build api file path */
   api_dir = g_build_path (G_DIR_SEPARATOR_S, API_DIR, "php-gphpedit.api", NULL);
-  #ifdef DEBUGCALLTIP
-    g_print("DEBUG::PHP API PATH:'%s'\n",api_dir);
-  #endif
+  gphpedit_debug_message(DEBUG_CALLTIP, "API PATH:'%s'", api_dir);
   apifile = fopen(api_dir, "r");
   if( apifile != NULL ) {
     php_api_tree=g_tree_new_full((GCompareDataFunc) g_utf8_collate, NULL, g_free, NULL);
@@ -92,15 +92,13 @@ void function_list_prepare(void)
       gchar *line=g_strdup(buffer);
       gchar *token_line = line;
       gchar *function_name = strtok(token_line, "|");
-      #ifdef DEBUGCALLTIP
-        g_print("function name:%s,rest:%s\n",function_name, (line + strlen(function_name)+1));
-      #endif
+      gphpedit_debug_message(DEBUG_CALLTIP, "function name:%s\n",function_name);
       g_tree_insert (php_api_tree, function_name, (line + strlen(function_name)+1));
       //g_free(token_line);
     }
     fclose( apifile );
   } else {
-    g_print(_("WARNING: Could not open php-gphpedit.api file\n"));
+    g_warning(_("Could not open php-gphpedit.api file\n"));
   }
   g_free(api_dir);
 }
@@ -112,9 +110,7 @@ void css_function_list_prepare(void)
   gchar *api_dir = NULL;
   /* use autoconf macro to build api file path */
   api_dir = g_build_path (G_DIR_SEPARATOR_S, API_DIR, "css.api", NULL);
-  #ifdef DEBUGCALLTIP
-    g_print("DEBUG::CSS API PATH:'%s'\n",api_dir);
-  #endif
+  gphpedit_debug_message(DEBUG_CALLTIP, "API PATH:'%s'", api_dir);
   apifile = fopen(api_dir, "r");
   if( apifile != NULL ) {
     css_api_tree=g_tree_new_full((GCompareDataFunc) g_utf8_collate, NULL, g_free, NULL);
@@ -122,15 +118,13 @@ void css_function_list_prepare(void)
       gchar *line=g_strdup(buffer);
       gchar *token_line = line;
       gchar *function_name = strtok(token_line, "|");
-      #ifdef DEBUGCALLTIP
-        g_print("function name:%s,rest:%s\n",function_name, (line + strlen(function_name)+1));
-      #endif
+      gphpedit_debug_message(DEBUG_CALLTIP, "function name:%s\n",function_name);
       g_tree_insert (css_api_tree, function_name, (line + strlen(function_name)+1));
       //g_free(line);
     }
     fclose( apifile );
   } else {
-    g_print(_("WARNING: Could not open php-gphpedit.api file\n"));
+    g_warning(_("Could not open php-gphpedit.api file\n"));
   }
   g_free(api_dir);
 }
@@ -144,9 +138,8 @@ gchar *get_css_api_line(gchar *buffer)
   strncpy(description,"\n",1);
   /* make calltip */
   gchar *callti=g_strdup_printf ("%s %s", buffer,copy);
-  #ifdef DEBUGCALLTIP
-    g_print("CSS::calltip:%s\n",callti);
-  #endif
+
+  gphpedit_debug_message(DEBUG_CALLTIP, "calltip:%s\n",callti);
 
   g_free(copy);	
   return callti;
@@ -199,9 +192,8 @@ static gchar *get_api_line(gchar *buffer)
     description = strtok(NULL, "|");
     /* make calltip */
     gchar *callti=g_strdup_printf ("%s %s %s\n%s",return_value,buffer,params,description);
-    #ifdef DEBUGCALLTIP
-      g_print("CSS::calltip:%s\n",callti);
-    #endif
+
+    gphpedit_debug_message(DEBUG_CALLTIP, "calltip: %s\n",callti);
 
     g_free(copy_line);	
     return callti;
@@ -270,6 +262,7 @@ gchar *autocomplete_word(gchar *buffer)
   }
   clear_list();
   }
+  gphpedit_debug_message(DEBUG_CALLTIP,"Autocomplete list: %s\n", result->str);
   return g_string_free(result,FALSE);
 }
 
@@ -296,9 +289,9 @@ gchar *cobol_autocomplete_word(gchar *buffer)
     completion_list = g_string_append(completion_list, " ");
     result = g_string_free(completion_list, FALSE);
   }
-  #ifdef DEBUGCALLTIP
-    g_print("Cobol completion list :%s\n",result);
-  #endif
+
+  gphpedit_debug_message(DEBUG_CALLTIP,"Autocomplete list: %s\n", result);
+
   return result;
 }
 
@@ -324,13 +317,16 @@ gchar *sql_autocomplete_word(gchar *buffer)
     completion_list = g_string_append(completion_list, " ");
     result = g_string_free(completion_list, FALSE);
   }
+
+  gphpedit_debug_message(DEBUG_CALLTIP,"Autocomplete list: %s\n", result);
+
   return result;
 }
 
 /*
 * function to show the tool tip with a short description about the
 * php function. The current word at the cursor is used to find the
-* corresponding function from the php-gphpedit.api file
+* corresponding function from the api file
 */
 gchar *show_call_tip(gint type, gchar *prefix)
 {
@@ -342,6 +338,9 @@ gchar *show_call_tip(gint type, gchar *prefix)
 }
 
 void cleanup_calltip(void){
+  
+  gphpedit_debug(DEBUG_CALLTIP);
+
   if (php_api_tree){
      g_tree_destroy(php_api_tree);
   }

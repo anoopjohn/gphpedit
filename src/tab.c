@@ -22,6 +22,7 @@
    The GNU General Public License is contained in the file COPYING.
 */
 #include "tab.h"
+#include "debug.h"
 #include "main_window_callbacks.h"
 #include "gvfs_utils.h"
 #include "gphpedit-close-button.h"
@@ -29,38 +30,7 @@
 #include "classbrowser_ui.h"
 #include "classbrowser_parse.h"
 
-//#define DEBUGTAB
-
 GSList *editors;
-
-void debug_dump_editors(void)
-{
-  Document *document;
-  GSList *walk;
-  gint editor_number = 0;
-
-  g_print("--------------------------------------------------------------\n");
-  g_print("gPHPEdit Debug Output\n\n");
-
-  
-  for (walk = editors; walk!=NULL; walk = g_slist_next(walk)) {
-    document = walk->data;
-    editor_number++;
-    
-    g_print("Editor number      :%d\n", editor_number);
-    g_print("Document widget    :%p\n", document_get_editor_widget(document));
-//    g_print("Scintilla lexer    :%d\n", gtk_scintilla_get_lexer(GTK_SCINTILLA(editor->scintilla)));
-    g_print("File shortname     :%s\n", document_get_shortfilename(document));
-    gchar *filename = document_get_filename(document);
-    g_print("File fullname      :%s\n", filename);
-    g_free(filename);
-    g_print("Document type      :%d\n", document_get_document_type(document));
-    g_print("Document read-only :%d\n", document_get_readonly(document));
-    g_print("Saved?             :%d\n", document_get_saved_status(document));
-    g_print("Converted to UTF-8?:%d\n\n", document_get_converted_to_utf8(document));
-  }
-  g_print("--------------------------------------------------------------\n");
-}
 
 /**
 * str_replace
@@ -184,6 +154,7 @@ if (g_str_has_suffix(filename,".sql"))
 
 void register_file_opened(gchar *filename)
 {
+  gphpedit_debug_message(DOC_MANAGER,"filename: %s\n" filename);
   gchar *full_filename=filename_get_uri(filename);
   main_window_add_to_reopen_menu(full_filename);
   g_free(full_filename);
@@ -194,6 +165,7 @@ void register_file_opened(gchar *filename)
 
 gboolean switch_to_file_or_open(gchar *filename, gint line_number)
 {
+  gphpedit_debug(DOC_MANAGER);
   Document *document;
   GSList *walk;
   GString *tmp_filename;
@@ -241,6 +213,7 @@ void document_save_update_cb (Document *doc, gpointer user_data){
 }
 
 void add_new_document(gint type, const gchar *filename, gint goto_line){
+  gphpedit_debug(DOC_MANAGER);
   Document *doc = document_new (type, filename, goto_line);
   g_signal_connect(G_OBJECT(doc), "load_complete", G_CALLBACK(document_load_complete_cb), NULL);
   g_signal_connect(G_OBJECT(doc), "save_update", G_CALLBACK(document_save_update_cb), NULL);
@@ -267,6 +240,7 @@ GtkWidget *get_close_tab_widget(Document *document) {
 }
 
 Document *document_manager_find_document (void *widget){
+  gphpedit_debug(DOC_MANAGER);
   GSList *walk;
   Document *document;
 

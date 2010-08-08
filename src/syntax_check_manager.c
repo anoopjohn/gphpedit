@@ -2,7 +2,7 @@
 
    Copyright (C) 2003, 2004, 2005 Andy Jeffries <andy at gphpedit.org>
    Copyright (C) 2009 Anoop John <anoop dot john at zyxware.com>
-   Copyright (C) 2009 José Rostagno (for vijona.com.ar) 
+   Copyright (C) 2009, 2010 José Rostagno (for vijona.com.ar) 
 
    For more information or to find the latest release, visit our 
    website at http://www.gphpedit.org/
@@ -24,6 +24,7 @@
 */
 
 #include <stdlib.h>
+#include "debug.h"
 #include "syntax_check_manager.h"
 #include "gvfs_utils.h"
 #include "main_window_callbacks.h"
@@ -91,8 +92,6 @@ syntax_check_manager_init (gpointer object, gpointer klass)
 {
 	Syntax_Check_Manager_Details *synmgdet;
 	synmgdet = SYNTAX_CHECK_MANAGER_GET_PRIVATE(object);
-  /* init plugins table*/
-//  synmgdet->plugins_table= g_hash_table_new_full (g_str_hash, g_str_equal,NULL, g_object_unref);
 }
 
 static void
@@ -180,7 +179,7 @@ gchar *process_php_lines(gchar *output)
       }
       copy = NULL;
     }
-//  g_print("res:%s\n", result->str);
+  gphpedit_debug_message(DEBUG_SYNTAX, "result:%s\n", result->str);
   return g_string_free (result,FALSE);
 
 }
@@ -196,7 +195,7 @@ gchar *process_perl_lines(gchar *output)
   copy = output;
   GString *result;
   result = g_string_new (NULL);
-//  g_print("syntax:\n%s\n", output);
+  gphpedit_debug_message(DEBUG_SYNTAX, "syntax:\n%s\n", output);
   gint quote=0;
   gint a=0;
   gchar *cop=copy;
@@ -246,6 +245,7 @@ gchar *process_perl_lines(gchar *output)
 */
 GString *save_as_temp_file(Document *document)
 {
+  gphpedit_debug_message(DEBUG_SYNTAX);
   gchar *write_buffer = document_get_text(document);
   GString *filename = text_save_as_temp_file(write_buffer);
   g_free(write_buffer);
@@ -278,15 +278,14 @@ gchar *syntax_check_manager_run(Document *document)
     command_line = g_string_append(command_line, filename->str);
     command_line = g_string_append(command_line, "'");
     g_object_unref(pref);
-//    g_print("eject:%s\n", command_line->str);
+    gphpedit_debug_message(DEBUG_SYNTAX, "eject:%s\n", command_line->str);
     } else if (ftype==TAB_PERL){
     command_line = g_string_new("perl -c ");
     command_line = g_string_append(command_line, "'");
     command_line = g_string_append(command_line, filename->str);
     command_line = g_string_append(command_line, "'");
-//    g_print("eject:%s\n", command_line->str);
+    gphpedit_debug_message(DEBUG_SYNTAX, "eject:%s\n", command_line->str);
     } else {
-
       g_string_free(filename, TRUE);
       return NULL;
     }

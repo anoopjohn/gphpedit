@@ -171,6 +171,7 @@ do
   lang=`echo "$po_file" | sed "s|.*/po/\(.*\)\.po|\1|g"`
   echo $lang >> $srcdir/po/LINGUAS
 done
+
 IT_PROG_INTLTOOL([0.40.0])
 AC_SUBST([GETTEXT_PACKAGE], [gphpedit])
 AM_GNU_GETTEXT_VERSION([0.17])
@@ -187,6 +188,24 @@ dnl AM_GLIB_GNU_GETTEXT sets $DATADIRNAME
  AC_DEFINE_UNQUOTED(PACKAGE_LOCALE_DIR, "$PACKAGE_LOCALE_DIR",
 	[The directory in which gphpedit's locale data will be stored])
  AC_MSG_RESULT("$PACKAGE_LOCALE_DIR")
+
+dnl ************************
+dnl   Debug
+dnl ************************
+
+AC_ARG_ENABLE(debug,
+	      AS_HELP_STRING([--enable-debug], [enable compilation of debugging messages]),
+	      [case "${enableval}" in
+	      yes) ENABLE_DEBUG=yes ;;
+	      no) ENABLE_DEBUG=no ;;
+	      *) AC_MSG_ERROR([bad value ${enableval} for --enable-debug]) ;;
+	      esac],
+	      [ENABLE_DEBUG=no])
+if test x$ENABLE_DEBUG = xyes; then
+	AC_DEFINE(DEBUG, 1, [enable compilation of debugging messages])
+	CFLAGS+=" -g -O0"
+fi
+
 
 dnl ************************
 dnl   Locations
@@ -237,8 +256,9 @@ dnl   Feedback
 dnl *******************************
 echo
 echo "-------------------------------------------------"
-echo "gPHPEDIT version: $PACKAGE_VERSION"
-echo "gPHPEDIT prefix: $prefix"
+echo "gPHPEDIT version    : $PACKAGE_VERSION"
+echo "gPHPEDIT prefix     : $prefix"
+echo "Debug               : $ENABLE_DEBUG"
 if test "$php_doc_dir" != ""; then
 echo "PHP-DOC help support: yes"
 else

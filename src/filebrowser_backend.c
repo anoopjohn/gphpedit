@@ -24,6 +24,7 @@
 #include <config.h>
 #include "main.h"
 
+#include "debug.h"
 #include "filebrowser_backend.h"
 #include "tab.h"
 #include "preferences_manager.h"
@@ -181,13 +182,11 @@ gboolean init_filebrowser(FilebrowserBackend *filebackend){
   directory = FILEBROWSER_BACKEND_GET_PRIVATE(filebackend);
 
   directory->cancellable = g_cancellable_new ();
-  //g_print("init with :%s\n",directory->current_folder);
+  gphpedit_debug_message(DEBUG_FILEBROWSER, "init with :%s\n",directory->current_folder);
   GFile *file = get_gfile_from_filename (directory->current_folder);
   //file don't exist?
   if (!g_file_query_exists (file,directory->cancellable)){
-    #ifdef DEBUGFILEBROWSER
-      g_print("DEBUG::: file '%s' don't exist?\n",directory->current_folder);
-    #endif
+    gphpedit_debug_message(DEBUG_FILEBROWSER, "file '%s' don't exist?\n",directory->current_folder);
     g_object_unref(file);
     filebrowser_backend_restore(filebackend);
     return FALSE;
@@ -197,27 +196,20 @@ gboolean init_filebrowser(FilebrowserBackend *filebackend){
   if (!info){
     g_print("ERROR initing file browser:%s\n",error->message);
     g_error_free(error);
-    #ifdef DEBUGFILEBROWSER
-      g_print("DEBUG::folder %s\n",directory->current_folder);
-    #endif
+    gphpedit_debug_message(DEBUG_FILEBROWSER, "folder %s\n",directory->current_folder);
     g_object_unref(file);
     filebrowser_backend_restore(filebackend);
     return FALSE;
   }
   if (!g_file_info_get_attribute_boolean (info, G_FILE_ATTRIBUTE_ACCESS_CAN_READ)){
-    g_print("Error Don't have read access for current file browser path.\n");
-    #ifdef DEBUGFILEBROWSER
-      g_print("DEBUG::folder %s\n",filename);
-    #endif
+    gphpedit_debug_message(DEBUG_FILEBROWSER, "Don't have read access for %s.\n", directory->current_folder);
     filebrowser_backend_restore(filebackend);
     return FALSE;
   }
   g_object_unref(info);
   /* clear cache data*/
   clear_filebrowser_backend(directory, FALSE);
-  #ifdef DEBUGFILEBROWSER
-  g_print("DEBUG:: clear tree and cache data\n");
-  #endif
+  gphpedit_debug_message(DEBUG_FILEBROWSER, "%s","clear tree and cache data\n");
   /* enumerate folder files */
   g_object_unref(file);
   if (g_cancellable_is_cancelled (directory->cancellable)) return FALSE;
@@ -309,7 +301,7 @@ void clean_enumerate (gpointer data){
 FilebrowserBackend *filebrowser_backend_new (const gchar *folder)
 {
 	FilebrowserBackend *fbback= g_object_new (FILEBROWSER_TYPE_BACKEND, NULL);
-//	FilebrowserBackendDetails *directory = FILEBROWSER_BACKEND_GET_PRIVATE(fbback);
+
 	if (folder && strlen(folder)!=0){
 	  change_current_folder(fbback, folder);
 	} else {
@@ -337,10 +329,8 @@ GSList *get_filebrowser_backend_files(FilebrowserBackend *fbback){
 }
 
 void filebrowser_backend_update_folder (FilebrowserBackend *fbback, const gchar *newfolder){
-  #ifdef DEBUGFILEBROWSER
-  g_print("DEBUG::UPDATING FILEBROWSER\n");
-  g_print("New path:%s\n",newfolder);
-  #endif
+  gphpedit_debug_message(DEBUG_FILEBROWSER, "New path:%s\n",newfolder);
+
   if (newfolder && !IS_DEFAULT_DIR(newfolder)){
     gchar *real_path=filename_get_path((gchar *)newfolder);
     change_current_folder(fbback, real_path);
@@ -353,10 +343,9 @@ void filebrowser_backend_update_folder (FilebrowserBackend *fbback, const gchar 
 
 void filebrowser_backend_go_folder_up (FilebrowserBackend *fbback){
   FilebrowserBackendDetails *directory = FILEBROWSER_BACKEND_GET_PRIVATE(fbback);
-  #ifdef DEBUGFILEBROWSER
-    g_print("DEBUG:::Up dir:%s\n",fullfolderpath);
-  #endif
+
   gchar *fullfolderpath=filename_parent_uri(directory->current_folder);
+  gphpedit_debug_message(DEBUG_FILEBROWSER, "Up dir:%s\n",fullfolderpath);
   filebrowser_backend_update_folder (fbback,fullfolderpath); /*update with new uri */
   if (fullfolderpath) g_free(fullfolderpath);
 }
@@ -366,9 +355,7 @@ void filebrowser_backend_go_folder_home (FilebrowserBackend *fbback, gchar *file
   gchar *folderpath=NULL;
   if (filename_is_native(filename)){
     folderpath=filename_parent_uri(filename);
-    #ifdef DEBUGFILEBROWSER
-    g_print("DEBUG:::home dir:%s\n",folderpath);
-    #endif
+    gphpedit_debug_message(DEBUG_FILEBROWSER, "HOME dir:%s\n",folderpath);
   }
   filebrowser_backend_update_folder (fbback,folderpath);
   if (folderpath) g_free(folderpath);
@@ -412,9 +399,8 @@ void filebrowser_backend_create_dir(FilebrowserBackend *filebackend, gchar *file
       g_free(parent);
       config=get_gfile_from_filename(filename_int);
   }
-  #ifdef DEBUGFILEBROWSER
-  g_print("DEBUG::New directory:%s",filename_int);
-  #endif
+  gphpedit_debug_message(DEBUG_FILEBROWSER, "New directory:%s",filename_int);
+
   g_free(filename_int);
   if (!g_file_make_directory (config, directory->cancellable, &error)){
      g_print(_("Error creating folder. GIO error:%s\n"), error->message);
@@ -561,7 +547,7 @@ void filebrowser_backend_copy_files_async(FilebrowserBackend *filebackend, GFile
   copy_uris_process_queue(cf);
 }
 
-gboolean  filebrowser_backend_process_drag_drop(FilebrowserBackend *filebackend, gchar *stringdata)
+gboolean filebrowser_backend_process_drag_drop(FilebrowserBackend *filebackend, gchar *stringdata)
 {
   FilebrowserBackendDetails *directory;
   directory = FILEBROWSER_BACKEND_GET_PRIVATE(filebackend);

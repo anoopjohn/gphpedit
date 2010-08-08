@@ -76,7 +76,7 @@ typedef struct
 MainWindow;
 
 extern MainWindow main_window;
-extern gboolean DEBUG_MODE;
+
 void force_config_folder(void);
 void update_controls(void);
 void main_window_create(void);
