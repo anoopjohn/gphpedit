@@ -2123,7 +2123,7 @@ void document_goto_line(Document *doc,gint line)
 
 gboolean document_check_externally_modified(Document *doc)
 {
-  g_return_val_if_fail(doc, FALSE);
+  if (!doc) return FALSE;
   DocumentDetails *docdet = DOCUMENT_GET_PRIVATE(doc);
   if (GTK_IS_SCINTILLA(docdet->scintilla) && !docdet->is_untitled){
     /* verify if file has been externally modified */

@@ -774,7 +774,7 @@ gboolean try_save_page(Document *document, gboolean close_if_can)
 
 gboolean try_close_page(Document *document)
 {
-  if (document_get_can_save(document) && document_get_saved_status(document) && !document_get_is_empty(document)) {
+  if (document_get_can_save(document) && !document_get_saved_status(document) && !document_get_is_empty(document)) {
     return try_save_page(document, TRUE);
   }
   else {
