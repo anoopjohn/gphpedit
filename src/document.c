@@ -77,7 +77,6 @@ struct DocumentDetails
 	GTimeVal file_mtime;
 	gboolean isreadonly;
 	GdkPixbuf *file_icon;
-	gboolean saved;
 	GSList *keyboard_macro_list;
 	gboolean is_macro_recording;
 	gboolean is_pasting;
@@ -461,7 +460,7 @@ static void save_point_reached(GtkWidget *scintilla, gpointer user_data)
   DocumentDetails *docdet = DOCUMENT_GET_PRIVATE(doc);
   if (docdet->short_filename != NULL) {
     gtk_label_set_text(GTK_LABEL (docdet->label), docdet->short_filename);
-    docdet->saved=TRUE;
+
     /*emit save update signal*/
     g_signal_emit (G_OBJECT (doc), signals[SAVE_UPDATE], 0); 
   }
@@ -477,7 +476,7 @@ static void save_point_left(GtkWidget *scintilla, gpointer user_data)
     caption= g_strdup_printf("*%s",docdet->short_filename);
     gtk_label_set_text(GTK_LABEL (docdet->label), caption);
     g_free(caption);
-    docdet->saved=FALSE;
+
     /*emit save update signal*/
     g_signal_emit (G_OBJECT (doc), signals[SAVE_UPDATE], 0); 
   }
@@ -1302,7 +1301,11 @@ gboolean document_get_can_save(Document *doc){
 gboolean document_get_saved_status(Document *doc){
   if (!doc) return TRUE;
   DocumentDetails *docdet = DOCUMENT_GET_PRIVATE(doc);
-  return docdet->saved;
+  if (GTK_IS_SCINTILLA(docdet->scintilla)){
+  /* http://www.scintilla.org/ScintillaDoc.html#SCI_GETMODIFY */
+   return !gtk_scintilla_get_modify(GTK_SCINTILLA(docdet->scintilla));
+  }
+  return TRUE;
 }
 
 const gchar *document_get_shortfilename(Document *doc){
@@ -1872,9 +1875,7 @@ void tab_check_sql_file(Document *document)
 gchar *document_get_title(Document *doc)
 {
   if (!doc) return NULL;
-  if (OBJECT_IS_DOCUMENT(doc)) return NULL;
   DocumentDetails *docdet = DOCUMENT_GET_PRIVATE(doc);
-  if (!docdet) return NULL;
   GString *title= NULL;
   gchar *dir;
   if (GTK_IS_SCINTILLA(docdet->scintilla)){
@@ -1888,7 +1889,7 @@ gchar *document_get_title(Document *doc)
       g_string_printf (title,"%s (%s)", document_get_shortfilename(doc),dir);
       g_free(dir);
       g_string_append(title, _(" - gPHPEdit"));
-      if (!docdet->saved) {
+      if (!document_get_saved_status(doc)){
       //If the content is not saved then add a * to the begining of the title
         g_string_prepend(title, "*");
       }
@@ -1896,11 +1897,8 @@ gchar *document_get_title(Document *doc)
       title = g_string_new(document_get_shortfilename(doc));
       g_string_append(title, _(" - gPHPEdit"));
     }
-  if (title){
-  return g_string_free(title, FALSE);
-  } else {
+  if (title) return g_string_free(title, FALSE);
   return NULL;
-  }
 }
 
 /*
