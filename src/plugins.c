@@ -102,54 +102,24 @@ struct PluginDetails
 					    PLUGIN_TYPE,\
 					    PluginDetails))
 
-static gpointer parent_class;
 static void plugin_finalize (GObject *object);
-static void plugin_init (gpointer object, gpointer klass);
-static void  plugin_class_init (PluginClass *klass);
+static void plugin_class_init (PluginClass *klass);
 
+/* http://library.gnome.org/devel/gobject/unstable/gobject-Type-Information.html#G-DEFINE-TYPE:CAPS */
+G_DEFINE_TYPE(Plugin, plugin, G_TYPE_OBJECT);  
 
-/*
- * plugin_get_type
- * register Plugin type and returns a new GType
-*/
-GType
-plugin_get_type (void)
-{
-    static GType our_type = 0;
-    
-    if (!our_type) {
-        static const GTypeInfo our_info =
-        {
-            sizeof (PluginClass),
-            NULL,               /* base_init */
-            NULL,               /* base_finalize */
-            (GClassInitFunc) plugin_class_init,
-            NULL,               /* class_finalize */
-            NULL,               /* class_data */
-            sizeof (Plugin),
-            0,                  /* n_preallocs */
-            (GInstanceInitFunc) plugin_init,
-        };
-
-        our_type = g_type_register_static (G_TYPE_OBJECT, "Plugin",
-                                           &our_info, 0);
-  }
-    
-    return our_type;
-}
 static void
 plugin_class_init (PluginClass *klass)
 {
 	GObjectClass *object_class;
 
 	object_class = G_OBJECT_CLASS (klass);
-  parent_class = g_type_class_peek_parent (klass);
 	object_class->finalize = plugin_finalize;
 	g_type_class_add_private (klass, sizeof (PluginDetails));
 }
 
 static void
-plugin_init (gpointer object, gpointer klass)
+plugin_init (Plugin *object)
 {
 	PluginDetails *plug;
 	plug = PLUGIN_GET_PRIVATE(object);
@@ -166,7 +136,7 @@ plugin_finalize (GObject *object)
 	if (plugdet->name) g_free(plugdet->name);
 	if (plugdet->description) g_free(plugdet->description);
 
-	G_OBJECT_CLASS (parent_class)->finalize (object);
+	G_OBJECT_CLASS (plugin_parent_class)->finalize (object);
 }
 
 
