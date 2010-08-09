@@ -2,7 +2,7 @@
 
    Copyright (C) 2003, 2004, 2005 Andy Jeffries <andy at gphpedit.org>
    Copyright (C) 2009 Anoop John <anoop dot john at zyxware.com>
-   Copyright (C) 2009 José Rostagno (for vijona.com.ar) 
+   Copyright (C) 2010 José Rostagno (for vijona.com.ar) 
 
    For more information or to find the latest release, visit our 
    website at http://www.gphpedit.org/
@@ -28,7 +28,7 @@
 #include "main_window.h"
 #include <gdk/gdkkeysyms.h>
 
-struct _GtkPlugin_Manager_MenuPrivate
+struct _GtkPluginManagerMenuPrivate
 {
   /* the recent manager object */
   Plugin_Manager *plugmg;
@@ -38,63 +38,30 @@ struct _GtkPlugin_Manager_MenuPrivate
   GtkAccelGroup *accel_group;
 };
 
-#define GTK_PLUGIN_MANAGER_MENU_GET_PRIVATE(obj)	(G_TYPE_INSTANCE_GET_PRIVATE ((obj), GTK_TYPE_PLUGIN_MANAGER_MENU, GtkPlugin_Manager_MenuPrivate))
-static void
-gtk_plugin_manager_menu_class_init (GtkPlugin_Manager_MenuClass *klass);
-static void
-gtk_plugin_manager_menu_init (GtkPlugin_Manager_Menu *menu);
-static void     gtk_plugin_manager_menu_finalize    (GObject                   *object);
-static void     gtk_plugin_manager_menu_dispose     (GObject                   *object);
+#define GTK_PLUGIN_MANAGER_MENU_GET_PRIVATE(obj)	(G_TYPE_INSTANCE_GET_PRIVATE ((obj), GTK_TYPE_PLUGIN_MANAGER_MENU, GtkPluginManagerMenuPrivate))
+static void gtk_plugin_manager_menu_class_init (GtkPluginManagerMenuClass *klass);
+static void gtk_plugin_manager_menu_init (GtkPluginManagerMenu *menu);
+static void gtk_plugin_manager_menu_finalize (GObject *object);
 
-static gpointer gtk_plugin_manager_menu_parent_class;
-static void
-gtk_plugin_manager_menu_populate (GtkPlugin_Manager_Menu *menu);
+static void gtk_plugin_manager_menu_populate (GtkPluginManagerMenu *menu);
 static void plugin_exec (GtkWidget *widget, gpointer user_data);
-/*
- * plugin_get_type
- * register Plugin type and returns a new GType
-*/
-GType
-gtk_plugin_manager_menu_get_type (void)
-{
-    static GType our_type = 0;
-    
-    if (!our_type) {
-        static const GTypeInfo our_info =
-        {
-            sizeof (GtkPlugin_Manager_MenuClass),
-            NULL,               /* base_init */
-            NULL,               /* base_finalize */
-            (GClassInitFunc) gtk_plugin_manager_menu_class_init,
-            NULL,               /* class_finalize */
-            NULL,               /* class_data */
-            sizeof (GtkPlugin_Manager_Menu),
-            0,                  /* n_preallocs */
-            (GInstanceInitFunc) gtk_plugin_manager_menu_init,
-        };
 
-        our_type = g_type_register_static (GTK_TYPE_MENU, "GtkPlugin_Manager_Menu",
-                                           &our_info, 0);
-  }
-    
-    return our_type;
-}
+/* http://library.gnome.org/devel/gobject/unstable/gobject-Type-Information.html#G-DEFINE-TYPE:CAPS */
+G_DEFINE_TYPE(GtkPluginManagerMenu, gtk_plugin_manager_menu, GTK_TYPE_MENU);  
 
 static void
-gtk_plugin_manager_menu_class_init (GtkPlugin_Manager_MenuClass *klass)
+gtk_plugin_manager_menu_class_init (GtkPluginManagerMenuClass *klass)
 {
   GObjectClass *gobject_class = G_OBJECT_CLASS (klass);
 
-  gobject_class->dispose = gtk_plugin_manager_menu_dispose;
   gobject_class->finalize = gtk_plugin_manager_menu_finalize;
-  gtk_plugin_manager_menu_parent_class = g_type_class_peek_parent (klass);
-  g_type_class_add_private (klass, sizeof (GtkPlugin_Manager_MenuPrivate));
+  g_type_class_add_private (klass, sizeof (GtkPluginManagerMenuPrivate));
 }
 
 static void
-gtk_plugin_manager_menu_init (GtkPlugin_Manager_Menu *menu)
+gtk_plugin_manager_menu_init (GtkPluginManagerMenu *menu)
 {
-  GtkPlugin_Manager_MenuPrivate *priv;
+  GtkPluginManagerMenuPrivate *priv;
   
   priv = GTK_PLUGIN_MANAGER_MENU_GET_PRIVATE (menu);
   
@@ -126,23 +93,12 @@ gtk_plugin_manager_menu_init (GtkPlugin_Manager_Menu *menu)
 static void
 gtk_plugin_manager_menu_finalize (GObject *object)
 {
-  GtkPlugin_Manager_Menu *menu = GTK_PLUGIN_MANAGER_MENU (object);
-  GtkPlugin_Manager_MenuPrivate *priv = menu->priv;
+  GtkPluginManagerMenu *menu = GTK_PLUGIN_MANAGER_MENU (object);
+  GtkPluginManagerMenuPrivate *priv = menu->priv;
   
   if (priv->plugmg) priv->plugmg=NULL;  
   
   G_OBJECT_CLASS (gtk_plugin_manager_menu_parent_class)->finalize (object);
-}
-
-static void
-gtk_plugin_manager_menu_dispose (GObject *object)
-{
-//  GtkPlugin_Manager_Menu *menu = GTK_PLUGIN_MANAGER_MENU (object);
-//  GtkPlugin_Manager_MenuPrivate *priv = menu->priv;
-
-//  if (G_IS_OBJECT(priv->plugmg)) g_object_unref(priv->plugmg);
-
-  G_OBJECT_CLASS (gtk_plugin_manager_menu_parent_class)->dispose (object);
 }
 
 /*
@@ -176,7 +132,7 @@ static gint parse_shortcut(gint accel_number){
 
 /* removes the items we own from the menu */
 static void
-gtk_plugin_manager_menu_dispose_items (GtkPlugin_Manager_Menu *menu)
+gtk_plugin_manager_menu_dispose_items (GtkPluginManagerMenu *menu)
 {
   GList *children, *l;
  
@@ -211,7 +167,7 @@ gtk_plugin_manager_menu_dispose_items (GtkPlugin_Manager_Menu *menu)
 void add_plugin_to_menu (gpointer data, gpointer user_data)
 {
     static int i=1;
-    GtkPlugin_Manager_Menu *menu=(GtkPlugin_Manager_Menu *) user_data;
+    GtkPluginManagerMenu *menu=(GtkPluginManagerMenu *) user_data;
     GtkWidget *item;
     Plugin *plugin;
     plugin = PLUGIN(data);
@@ -231,9 +187,9 @@ void add_plugin_to_menu (gpointer data, gpointer user_data)
 }
 
 static void
-gtk_plugin_manager_menu_populate (GtkPlugin_Manager_Menu *menu)
+gtk_plugin_manager_menu_populate (GtkPluginManagerMenu *menu)
 {
-  GtkPlugin_Manager_MenuPrivate *priv = menu->priv;
+  GtkPluginManagerMenuPrivate *priv = menu->priv;
   gtk_plugin_manager_menu_dispose_items (menu);
 
   guint plug_count= get_plugin_manager_items_count(priv->plugmg);
@@ -249,10 +205,9 @@ static void plugin_exec (GtkWidget *widget, gpointer user_data)
   if (main_window.current_document == NULL) {
     return;
   }
-  GtkPlugin_Manager_Menu *menu= GTK_PLUGIN_MANAGER_MENU (user_data);
+  GtkPluginManagerMenu *menu= GTK_PLUGIN_MANAGER_MENU (user_data);
   
   plugin = get_plugin_by_name(menu->priv->plugmg, (gchar *) gtk_menu_item_get_label (GTK_MENU_ITEM(widget)));
-  //
   plugin_run(plugin, main_window.current_document);
 }
 
@@ -262,10 +217,9 @@ void plugin_exec_with_num(GtkWidget *widget, gint num){
   if (main_window.current_document == NULL) {
     return;
   }
-  GtkPlugin_Manager_Menu *menu= GTK_PLUGIN_MANAGER_MENU (widget);
+  GtkPluginManagerMenu *menu= GTK_PLUGIN_MANAGER_MENU (widget);
   if (get_plugin_manager_items_count(menu->priv->plugmg) < num) return;   
   plugin = get_plugin_by_num(menu->priv->plugmg, num);
-  //
   plugin_run(plugin, main_window.current_document);
 }
 /*
@@ -275,9 +229,9 @@ void plugin_exec_with_num(GtkWidget *widget, gint num){
 GtkWidget *
 gtk_plugin_manager_menu_new (GtkAccelGroup *accel_grup)
 {
-  GtkPlugin_Manager_Menu *menu = g_object_new (GTK_TYPE_PLUGIN_MANAGER_MENU, NULL);
+  GtkPluginManagerMenu *menu = g_object_new (GTK_TYPE_PLUGIN_MANAGER_MENU, NULL);
   /* (re)populate the menu */
-  GtkPlugin_Manager_MenuPrivate *priv = menu->priv;
+  GtkPluginManagerMenuPrivate *priv = menu->priv;
   priv->accel_group= accel_grup;
   gtk_plugin_manager_menu_populate (menu);
   return GTK_WIDGET(menu);

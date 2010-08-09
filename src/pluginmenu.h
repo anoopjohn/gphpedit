@@ -2,7 +2,7 @@
 
    Copyright (C) 2003, 2004, 2005 Andy Jeffries <andy at gphpedit.org>
    Copyright (C) 2009 Anoop John <anoop dot john at zyxware.com>
-   Copyright (C) 2009 José Rostagno (for vijona.com.ar) 
+   Copyright (C) 2010 José Rostagno (for vijona.com.ar) 
 
    For more information or to find the latest release, visit our 
    website at http://www.gphpedit.org/
@@ -31,31 +31,31 @@
 G_BEGIN_DECLS
 
 #define GTK_TYPE_PLUGIN_MANAGER_MENU		(gtk_plugin_manager_menu_get_type ())
-#define GTK_PLUGIN_MANAGER_MENU(obj)		(G_TYPE_CHECK_INSTANCE_CAST ((obj), GTK_TYPE_PLUGIN_MANAGER_MENU, GtkPlugin_Manager_Menu))
+#define GTK_PLUGIN_MANAGER_MENU(obj)		(G_TYPE_CHECK_INSTANCE_CAST ((obj), GTK_TYPE_PLUGIN_MANAGER_MENU, GtkPluginManagerMenu))
 #define GTK_IS_PLUGIN_MANAGER_MENU(obj)		(G_TYPE_CHECK_INSTANCE_TYPE ((obj), GTK_TYPE_PLUGIN_MANAGER_MENU))
-#define GTK_PLUGIN_MANAGER_MENU_CLASS(klass)	(G_TYPE_CHECK_CLASS_CAST ((klass), GTK_TYPE_PLUGIN_MANAGER_MENU, GtkPlugin_Manager_MenuClass))
+#define GTK_PLUGIN_MANAGER_MENU_CLASS(klass)	(G_TYPE_CHECK_CLASS_CAST ((klass), GTK_TYPE_PLUGIN_MANAGER_MENU, GtkPluginManagerMenuClass))
 #define GTK_IS_PLUGIN_MANAGER_MENU_CLASS(klass)	(G_TYPE_CHECK_CLASS_TYPE ((klass), GTK_TYPE_PLUGIN_MANAGER_MENU))
-#define GTK_PLUGIN_MANAGER_MENU_GET_CLASS(obj)	(G_TYPE_INSTANCE_GET_CLASS ((obj), GTK_TYPE_PLUGIN_MANAGER_MENU, GtkPlugin_Manager_MenuClass))
+#define GTK_PLUGIN_MANAGER_MENU_GET_CLASS(obj)	(G_TYPE_INSTANCE_GET_CLASS ((obj), GTK_TYPE_PLUGIN_MANAGER_MENU, GtkPluginManagerMenuClass))
 
-typedef struct _GtkPlugin_Manager_Menu		GtkPlugin_Manager_Menu;
-typedef struct _GtkPlugin_Manager_MenuClass	GtkPlugin_Manager_MenuClass;
-typedef struct _GtkPlugin_Manager_MenuPrivate	GtkPlugin_Manager_MenuPrivate;
+typedef struct _GtkPluginManagerMenu		GtkPluginManagerMenu;
+typedef struct _GtkPluginManagerMenuClass	GtkPluginManagerMenuClass;
+typedef struct _GtkPluginManagerMenuPrivate	GtkPluginManagerMenuPrivate;
 
-struct _GtkPlugin_Manager_Menu
+struct _GtkPluginManagerMenu
 {
   /*< private >*/
   GtkMenu parent_instance;
 
-  GtkPlugin_Manager_MenuPrivate *GSEAL (priv);
+  GtkPluginManagerMenuPrivate *GSEAL (priv);
 };
 
-struct _GtkPlugin_Manager_MenuClass
+struct _GtkPluginManagerMenuClass
 {
   GtkMenuClass parent_class;
 
 };
 
-GType      gtk_plugin_manager_menu_get_type         (void) G_GNUC_CONST;
+GType gtk_plugin_manager_menu_get_type         (void) G_GNUC_CONST;
 GtkWidget *gtk_plugin_manager_menu_new (GtkAccelGroup *accel_grup);
 void plugin_exec_with_num(GtkWidget *widget, gint num);
 G_END_DECLS
