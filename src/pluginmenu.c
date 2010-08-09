@@ -164,6 +164,17 @@ gtk_plugin_manager_menu_dispose_items (GtkPluginManagerMenu *menu)
   g_list_free (children);
 }
 
+/* Creates a new GtkImageMenuItem with a stock image and a custom label.*/
+GtkWidget *gtk_menu_item_new_image_item(const gchar *stock_id, const gchar *label)
+{
+	GtkWidget *item = gtk_image_menu_item_new_with_mnemonic(label);
+	GtkWidget *image = gtk_image_new_from_stock(stock_id, GTK_ICON_SIZE_MENU);
+
+	gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(item), image);
+	gtk_widget_show(image);
+	return item;
+}
+
 void add_plugin_to_menu (gpointer data, gpointer user_data)
 {
     static int i=1;
@@ -176,7 +187,7 @@ void add_plugin_to_menu (gpointer data, gpointer user_data)
     * TODO: maybe configure this in preferences??
     */
     if (get_plugin_syntax_type(plugin)==-1){ 
-    item =  gtk_menu_item_new_with_mnemonic(get_plugin_name(plugin));
+    item =  gtk_menu_item_new_image_item(GTK_STOCK_EXECUTE, get_plugin_name(plugin));
     gtk_widget_show(item);
     install_menu_hint(item, (gchar *)get_plugin_description(plugin));
     g_signal_connect(G_OBJECT(item), "activate", G_CALLBACK(plugin_exec), (gpointer) menu);
