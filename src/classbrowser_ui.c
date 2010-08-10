@@ -519,6 +519,7 @@ gint treeview_click_release(GtkWidget *widget, GdkEventButton *event, gpointer f
 * start update process
 */
 void classbrowser_update(gphpeditClassBrowser *classbrowser){
+  if (!classbrowser) return ;
 	gphpeditClassBrowserPrivate *priv;
 	priv = CLASSBROWSER_BACKEND_GET_PRIVATE(classbrowser);
   if (editors){
