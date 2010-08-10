@@ -34,7 +34,7 @@
 /*
 * plugin_manager private struct
 */
-struct Plugin_Manager_Details
+struct PluginManagerDetails
 {
   GHashTable *plugins_table;
 };
@@ -44,43 +44,15 @@ struct Plugin_Manager_Details
 
 #define PLUGIN_MANAGER_GET_PRIVATE(object)(G_TYPE_INSTANCE_GET_PRIVATE ((object),\
 					    PLUGIN_MANAGER_TYPE,\
-					    Plugin_Manager_Details))
+					    PluginManagerDetails))
 
 static gpointer parent_class;
-static void               plugin_manager_finalize         (GObject                *object);
-static void               plugin_manager_init             (gpointer                object,
-							       gpointer                klass);
-static void  plugin_manager_class_init (Plugin_ManagerClass *klass);
-static void plugin_discover_available(Plugin_Manager *plugmg);
-/*
- * plugin_manager_get_type
- * register Plugin_Manager type and returns a new GType
-*/
-GType
-plugin_manager_get_type (void)
-{
-    static GType our_type = 0;
-    
-    if (!our_type) {
-        static const GTypeInfo our_info =
-        {
-            sizeof (Plugin_ManagerClass),
-            NULL,               /* base_init */
-            NULL,               /* base_finalize */
-            (GClassInitFunc) plugin_manager_class_init,
-            NULL,               /* class_finalize */
-            NULL,               /* class_data */
-            sizeof (Plugin_Manager),
-            0,                  /* n_preallocs */
-            (GInstanceInitFunc) plugin_manager_init,
-        };
+static void plugin_manager_finalize (GObject  *object);
+static void  plugin_manager_class_init (PluginManagerClass *klass);
+static void plugin_discover_available(PluginManager *plugmg);
 
-        our_type = g_type_register_static (G_TYPE_OBJECT, "Plugin_Manager",
-                                           &our_info, 0);
-  }
-    
-    return our_type;
-}
+/* http://library.gnome.org/devel/gobject/unstable/gobject-Type-Information.html#G-DEFINE-TYPE:CAPS */
+G_DEFINE_TYPE(PluginManager, plugin_manager, G_TYPE_OBJECT);  
 
 /*
 * overide default contructor to make a singleton.
@@ -105,7 +77,7 @@ plugin_manager_constructor (GType type,
 }
 
 static void
-plugin_manager_class_init (Plugin_ManagerClass *klass)
+plugin_manager_class_init (PluginManagerClass *klass)
 {
 	GObjectClass *object_class;
 
@@ -113,13 +85,13 @@ plugin_manager_class_init (Plugin_ManagerClass *klass)
   parent_class = g_type_class_peek_parent (klass);
 	object_class->finalize = plugin_manager_finalize;
   object_class->constructor = plugin_manager_constructor;
-	g_type_class_add_private (klass, sizeof (Plugin_Manager_Details));
+	g_type_class_add_private (klass, sizeof (PluginManagerDetails));
 }
 
 static void
-plugin_manager_init (gpointer object, gpointer klass)
+plugin_manager_init (PluginManager  *object)
 {
-	Plugin_Manager_Details *plugmgdet;
+	PluginManagerDetails *plugmgdet;
 	plugmgdet = PLUGIN_MANAGER_GET_PRIVATE(object);
   /* init plugins table*/
   plugmgdet->plugins_table = g_hash_table_new_full (g_str_hash, g_str_equal,NULL, g_object_unref);
@@ -143,8 +115,8 @@ plugin_manager_init (gpointer object, gpointer klass)
 static void
 plugin_manager_finalize (GObject *object)
 {
-  Plugin_Manager *plugmg = PLUGIN_MANAGER(object);
-  Plugin_Manager_Details *plugmgdet;
+  PluginManager *plugmg = PLUGIN_MANAGER(object);
+  PluginManagerDetails *plugmgdet;
 	plugmgdet = PLUGIN_MANAGER_GET_PRIVATE(plugmg);
   /* free object resources*/
   g_hash_table_destroy(plugmgdet->plugins_table);
@@ -152,9 +124,9 @@ plugin_manager_finalize (GObject *object)
 }
 
 
-Plugin_Manager *plugin_manager_new (void)
+PluginManager *plugin_manager_new (void)
 {
-	Plugin_Manager *plugmg;
+	PluginManager *plugmg;
   plugmg = g_object_new (PLUGIN_MANAGER_TYPE, NULL);
   
   plugin_discover_available(plugmg); /* fill plugin table */
@@ -162,16 +134,16 @@ Plugin_Manager *plugin_manager_new (void)
 	return plugmg; /* return new object */
 }
 
-static void new_plugin(Plugin_Manager *plugmg,gchar *filename){
+static void new_plugin(PluginManager *plugmg,gchar *filename){
     Plugin *plugin;
     plugin=plugin_new (filename);
-    Plugin_Manager_Details *plugmgdet;
+    PluginManagerDetails *plugmgdet;
     plugmgdet = PLUGIN_MANAGER_GET_PRIVATE(plugmg);
 /* insert new plugin in the plugin table */
     g_hash_table_insert (plugmgdet->plugins_table, (gchar *)get_plugin_name(plugin), plugin); 
 }
 /* internal function */
-static void plugin_discover_available(Plugin_Manager *plugmg)
+static void plugin_discover_available(PluginManager *plugmg)
 {
   GDir *dir;
   const gchar *plugin_name;
@@ -200,6 +172,7 @@ static void plugin_discover_available(Plugin_Manager *plugmg)
   gchar *plugin_dir = NULL;
   /* use autoconf macro to build plugins path */
   plugin_dir = g_build_path (G_DIR_SEPARATOR_S, API_DIR, "plugins/", NULL);
+
   if (g_file_test(plugin_dir, G_FILE_TEST_IS_DIR)) { 
     dir = g_dir_open(plugin_dir, 0,NULL);
     if (dir) {
@@ -218,19 +191,19 @@ static void plugin_discover_available(Plugin_Manager *plugmg)
 /*
 *
 */
-Plugin *get_plugin_by_name(Plugin_Manager *plugmg, gchar *name){
+Plugin *get_plugin_by_name(PluginManager *plugmg, gchar *name){
   g_return_val_if_fail (name, NULL);
   g_return_val_if_fail (OBJECT_IS_PLUGIN_MANAGER(plugmg), NULL);
-  Plugin_Manager_Details *plugmgdet;
+  PluginManagerDetails *plugmgdet;
 	plugmgdet = PLUGIN_MANAGER_GET_PRIVATE(plugmg);
   Plugin *plug= g_hash_table_lookup (plugmgdet->plugins_table,name);
   return plug;
 }
 
-Plugin *get_plugin_by_num(Plugin_Manager *plugmg, gint num){
+Plugin *get_plugin_by_num(PluginManager *plugmg, gint num){
   g_return_val_if_fail (num<10, NULL);
   g_return_val_if_fail (OBJECT_IS_PLUGIN_MANAGER(plugmg), NULL);
-  Plugin_Manager_Details *plugmgdet;
+  PluginManagerDetails *plugmgdet;
 	plugmgdet = PLUGIN_MANAGER_GET_PRIVATE(plugmg);
   GList *pluglist = g_hash_table_get_values (plugmgdet->plugins_table);
   Plugin *plug= g_list_nth_data (pluglist,num);
@@ -238,16 +211,16 @@ Plugin *get_plugin_by_num(Plugin_Manager *plugmg, gint num){
   return plug;
 }
 
-guint get_plugin_manager_items_count(Plugin_Manager *plugmg){
+guint get_plugin_manager_items_count(PluginManager *plugmg){
   g_return_val_if_fail (OBJECT_IS_PLUGIN_MANAGER(plugmg), 0);
-  Plugin_Manager_Details *plugmgdet;
+  PluginManagerDetails *plugmgdet;
 	plugmgdet = PLUGIN_MANAGER_GET_PRIVATE(plugmg);
   return MIN(g_hash_table_size (plugmgdet->plugins_table),NUM_PLUGINS_MAX);
 }
 
-GList *get_plugin_manager_items(Plugin_Manager *plugmg){
+GList *get_plugin_manager_items(PluginManager *plugmg){
   g_return_val_if_fail (OBJECT_IS_PLUGIN_MANAGER(plugmg), NULL);
-  Plugin_Manager_Details *plugmgdet;
+  PluginManagerDetails *plugmgdet;
 	plugmgdet = PLUGIN_MANAGER_GET_PRIVATE(plugmg);
   return g_hash_table_get_values (plugmgdet->plugins_table);
 }
@@ -258,9 +231,9 @@ gboolean get_syntax_plugin_by_ftype (gpointer key, gpointer value, gpointer user
   return FALSE;
 }
 
-gboolean run_syntax_plugin_by_ftype(Plugin_Manager *plugmg, Document *document){
+gboolean run_syntax_plugin_by_ftype(PluginManager *plugmg, Document *document){
   g_return_val_if_fail (OBJECT_IS_PLUGIN_MANAGER(plugmg), FALSE);
-  Plugin_Manager_Details *plugmgdet;
+  PluginManagerDetails *plugmgdet;
 	plugmgdet = PLUGIN_MANAGER_GET_PRIVATE(plugmg);
   gint ftype = document_get_document_type(document);
   Plugin *plug=g_hash_table_find (plugmgdet->plugins_table, get_syntax_plugin_by_ftype, GINT_TO_POINTER(ftype));

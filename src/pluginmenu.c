@@ -31,7 +31,7 @@
 struct _GtkPluginManagerMenuPrivate
 {
   /* the recent manager object */
-  Plugin_Manager *plugmg;
+  PluginManager *plugmg;
   
   GtkWidget *placeholder;
 

@@ -248,7 +248,7 @@ void gtk_syntax_check_window_run_check(GtkSyntax_Check_Window *win, Document *do
      g_free(res);
   } else {
       /* try plugins */
-      Plugin_Manager *plugmg = plugin_manager_new ();
+      PluginManager *plugmg = plugin_manager_new ();
       if (!run_syntax_plugin_by_ftype(plugmg, document)){
       gphpedit_debug_message(DEBUG_SYNTAX, "syntax check not implement\n");
       }

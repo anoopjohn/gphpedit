@@ -31,37 +31,37 @@
 
 #define PLUGIN_MANAGER_TYPE plugin_manager_get_type()
 #define PLUGIN_MANAGER(obj) \
-  (G_TYPE_CHECK_INSTANCE_CAST ((obj), PLUGIN_MANAGER_TYPE, Plugin_Manager))
+  (G_TYPE_CHECK_INSTANCE_CAST ((obj), PLUGIN_MANAGER_TYPE, PluginManager))
 #define PLUGIN_MANAGER_CLASS(klass) \
-  (G_TYPE_CHECK_CLASS_CAST ((klass), PLUGIN_MANAGER_TYPE, Plugin_ManagerClass))
+  (G_TYPE_CHECK_CLASS_CAST ((klass), PLUGIN_MANAGER_TYPE, PluginManagerClass))
 #define OBJECT_IS_PLUGIN_MANAGER(obj) \
   (G_TYPE_CHECK_INSTANCE_TYPE ((obj), PLUGIN_MANAGER_TYPE))
 #define OBJECT_IS_PLUGIN_MANAGER_CLASS(klass) \
   (G_TYPE_CHECK_CLASS_TYPE ((klass), PLUGIN_MANAGER_TYPE))
 #define PLUGIN_MANAGER_GET_CLASS(obj) \
-  (G_TYPE_INSTANCE_GET_CLASS ((obj), PLUGIN_MANAGER_TYPE, Plugin_ManagerClass))
+  (G_TYPE_INSTANCE_GET_CLASS ((obj), PLUGIN_MANAGER_TYPE, PluginManagerClass))
 
-typedef struct Plugin_Manager_Details Plugin_Manager_Details;
+typedef struct PluginManagerDetails PluginManagerDetails;
 
 typedef struct
 {
 	GObject object;
-	Plugin_Manager_Details *details;
-} Plugin_Manager;
+	PluginManagerDetails *details;
+} PluginManager;
 
 typedef struct
 {
 	GObjectClass parent_class;
 
-} Plugin_ManagerClass;
+} PluginManagerClass;
 
 /* Basic GObject requirements. */
 GType plugin_manager_get_type (void) G_GNUC_CONST;
-Plugin_Manager *plugin_manager_new (void);
-Plugin *get_plugin_by_name(Plugin_Manager *plugmg, gchar *name);
-guint get_plugin_manager_items_count(Plugin_Manager *plugmg);
-GList *get_plugin_manager_items(Plugin_Manager *plugmg);
-Plugin *get_plugin_by_num(Plugin_Manager *plugmg, gint num);
-gboolean run_syntax_plugin_by_ftype(Plugin_Manager *plugmg, Document *document);
+PluginManager *plugin_manager_new (void);
+Plugin *get_plugin_by_name(PluginManager *plugmg, gchar *name);
+guint get_plugin_manager_items_count(PluginManager *plugmg);
+GList *get_plugin_manager_items(PluginManager *plugmg);
+Plugin *get_plugin_by_num(PluginManager *plugmg, gint num);
+gboolean run_syntax_plugin_by_ftype(PluginManager *plugmg, Document *document);
 #endif /* PLUGIN_MANAGER_MANAGER_H */
 
