@@ -96,8 +96,6 @@ void classbrowser_hide(void);
 void classbrowser_show_hide(GtkWidget *widget);
 void run_plugin(GtkWidget *widget, gpointer data);
 void close_all_tabs(void);
-void session_reopen(void);
-void session_save(void);
 gint on_tab_change_update_classbrowser(GtkWidget *widget);
 void on_tab_close_activate(GtkWidget *widget, Document *document);
 void process_external (GtkInfoBar *info_bar, gint response_id, Document *document);

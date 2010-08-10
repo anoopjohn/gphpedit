@@ -43,136 +43,6 @@
 
 gboolean is_app_closing = FALSE;
 
-// session_save relies on the fact that all tabs can be closed without 
-// prompting, they should already be saved.  Also, the title won't be set
-// afterwards.
-void session_save(void)
-{
-  GSList *walk;
-  Document *document;
-  Document *current_focus_editor;
-  GString *session_file;
-  GString *session_file_contents;
-
-  session_file = g_string_new(g_get_home_dir());
-  session_file = g_string_append(session_file, "/.gphpedit/session");
-  
-  GFile *file=get_gfile_from_filename(session_file->str);
-  g_string_free(session_file,TRUE);
-  GError *error=NULL;
-
-
-  if (get_preferences_manager_saved_session(main_window.prefmg) && (g_slist_length(editors) > 0)) {
-    current_focus_editor = main_window.current_document;
-    session_file_contents=g_string_new(NULL);
-    for(walk = editors; walk!= NULL; walk = g_slist_next(walk)) {
-      document = walk->data;
-      if (document) {
-        if (!document_get_untitled(document)) {
-          if (document == current_focus_editor) {
-            session_file_contents = g_string_append(session_file_contents,"*");
-          }
-          if (document_is_scintilla_based(document)) {
-            gchar *docfilename = document_get_filename(document);
-            g_string_append_printf (session_file_contents,"%s\n",docfilename);
-            g_free(docfilename);
-          } else {
-            if (document_get_document_type(document)==TAB_HELP){
-              /* it's a help page */
-              g_string_append_printf (session_file_contents,"phphelp:%s\n",document_get_help_function(document));
-            } else if (document_get_document_type(document)==TAB_PREVIEW){
-              /* it's a preview page */
-              gchar *prevfilename = document_get_filename(document);
-              gchar *temp= prevfilename;
-              temp+=9;
-              g_string_append_printf (session_file_contents,"preview:%s\n",temp);
-              g_free(prevfilename);
-            } else {
-                gphpedit_debug_message(DEBUG_MAIN_WINDOW, "type not found:%d\n", document_get_document_type(document));
-            }
-          }
-        }
-      }
-    }
-    if(!g_file_replace_contents (file,session_file_contents->str,session_file_contents->len,NULL,FALSE,G_FILE_CREATE_NONE,NULL,NULL,&error)){
-      g_print(_("Error Saving session file: %s\n"),error->message);
-      g_error_free (error);
-    }
-  if (session_file_contents) g_string_free(session_file_contents,TRUE);
-  }
-   g_object_unref(file);
-}
-
-void session_reopen(void)
-{
-  GString *session_file;
-  char *filename;
-  int focus_tab=-1;
-  gboolean focus_this_one = FALSE;
-
-  session_file = g_string_new( g_get_home_dir());
-  session_file = g_string_append(session_file, "/.gphpedit/session");
-
-  if (filename_file_exist(session_file->str)){
-    gchar *content=read_text_file_sync(session_file->str);
-    gchar **strings;
-    strings = g_strsplit (content,"\n",0);
-    int i=0;
-    while (strings[i]){
-
-      /* strings[i] contains possibly:
-        file:///blah\n
-        *file:///blah\n
-        phphelp:function\n
-        *phphelp:function\n
-        preview:function\n
-        *preview:function\n
-
-      */
-      if (strings[i][0]==0) break;
-      filename = strings[i];
-      str_replace(filename, 10, 0);
-      if (strings[i][0]=='*') {
-        filename++;
-        focus_this_one = TRUE;
-      }
-      if (g_str_has_prefix(filename, "phphelp:")){
-        filename += 8;
-        add_new_document(TAB_HELP, filename, 0);
-          
-      } else if (g_str_has_prefix(filename, "preview:")){
-        filename += 8;
-        add_new_document(TAB_PREVIEW, filename, 0);
-      } else {
-        if (filename){
-        switch_to_file_or_open(filename,0);
-        }
-      }
-      if (focus_this_one && (main_window.current_document)) {
-          focus_tab = gtk_notebook_page_num(GTK_NOTEBOOK(main_window.notebook_editor), document_get_editor_widget(main_window.current_document));
-      }
-      focus_this_one=FALSE;
-      i++;    
-    }
-    g_strfreev (strings);
-    g_free(content);
-    gtk_notebook_set_current_page( GTK_NOTEBOOK(main_window.notebook_editor), focus_tab);
-  }
-
-  GFile *file=get_gfile_from_filename(session_file->str);
-  GError *error=NULL;
-  if (!g_file_delete (file,NULL,&error)){
-      if (error->code!=G_FILE_ERROR_NOENT && error->code!=1){
-        g_print(_("GIO Error deleting file: %s, code %d\n"), error->message,error->code);
-      }
-      g_error_free (error);
-  }
-  g_string_free(session_file,TRUE);
-  g_object_unref (file);
-
-}
-
-
 /* Actual action functions */
 
 void quit_application()
@@ -191,7 +61,6 @@ void main_window_destroy_event(GtkWidget *widget, gpointer data)
   cleanup_calltip();
   gtk_main_quit();
 }
-
 
 // This procedure relies on the fact that all tabs will be closed without prompting
 // for whether they need saving beforehand.  If in doubt, call can_all_tabs_be_saved
@@ -334,7 +203,7 @@ void open_file_ok(GtkFileChooser *file_selection)
 void reopen_recent(GtkRecentChooser *chooser, gpointer data) {
   gchar *filename = gtk_recent_chooser_get_current_uri  (chooser);
   if (!filename) return;
-    gphpedit_debug_message(DEBUG_MAIN_WINDOW,"filename: %s\n", filename);
+  gphpedit_debug_message(DEBUG_MAIN_WINDOW,"filename: %s\n", filename);
   switch_to_file_or_open(filename, 0);
   g_free(filename);
 }
@@ -479,7 +348,7 @@ void on_open1_activate(GtkWidget *widget)
   //Add filters to the open dialog
   add_file_filters(GTK_FILE_CHOOSER(file_selection_box));
   last_opened_folder = get_preferences_manager_last_opened_folder(main_window.prefmg);
-    gphpedit_debug_message(DEBUG_MAIN_WINDOW,"last_opened_folder: %s\n", last_opened_folder);
+  gphpedit_debug_message(DEBUG_MAIN_WINDOW,"last_opened_folder: %s\n", last_opened_folder);
   /* opening of multiple files at once */
   gtk_file_chooser_set_select_multiple(GTK_FILE_CHOOSER(file_selection_box), TRUE);
   gchar *filename = (gchar *)document_get_filename(main_window.current_document);
@@ -1226,7 +1095,7 @@ void check_externally_modified(void)
   gtk_widget_hide (main_window.infobar);
 }
 
-gboolean main_window_activate_focus (GtkWidget *widget,GdkEventFocus *event,gpointer user_data)
+gboolean main_window_activate_focus (GtkWidget *widget,GdkEventFocus *event, gpointer user_data)
 {
   check_externally_modified();
   return FALSE;
