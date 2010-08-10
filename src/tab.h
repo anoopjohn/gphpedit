@@ -51,6 +51,7 @@ gboolean is_cxx_file(const gchar *filename);
 gboolean is_sql_file(const gchar *filename);
 gboolean is_php_file_from_filename(const gchar *filename);
 gchar *trunc_on_char(gchar * string, gchar which_char);
+void create_untitled_if_empty(void);
 void session_reopen(void);
 void session_save(void);
 #endif

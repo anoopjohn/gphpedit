@@ -85,7 +85,6 @@ void update_app_title(void);
 void main_window_pass_command_line_files(char **argv);
 gboolean channel_pass_filename_callback(GIOChannel *source, GIOCondition condition, gpointer data );
 void main_window_add_to_reopen_menu(gchar *full_filename);
-void create_untitled_if_empty(void);
 extern GIOChannel* inter_gphpedit_io;
 extern guint inter_gphpedit_event_id;
 extern guint idle_id;

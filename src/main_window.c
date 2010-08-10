@@ -58,14 +58,6 @@ void main_window_resize(GtkWidget *widget, GtkAllocation *allocation, gpointer u
   }
 }
 
-void create_untitled_if_empty(void)
-{
-  if (!editors) {
-    add_new_document(TAB_FILE, NULL, 0);
-  }
-}
-
-
 void main_window_open_command_line_files(char **argv, gint argc)
 {
   guint i;
@@ -91,7 +83,7 @@ void main_window_pass_command_line_files(char **argv)
   if (argv) {
     i = 1;
     while (argv[i] != NULL) {
-      //g_print("%s:%d\n", argv[i], strlen(argv[i]));
+      gphpedit_debug_message(DEBUG_IPC, "%s:%d\n", argv[i], strlen(argv[i]));
       g_io_channel_write_chars(inter_gphpedit_io, argv[i], strlen(argv[i]),
                    &bytes_written, &error);
       ++i;

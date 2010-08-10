@@ -414,3 +414,9 @@ void session_save(void)
   g_object_unref(file);
 }
 
+void create_untitled_if_empty(void)
+{
+  if (!editors) {
+    add_new_document(TAB_FILE, NULL, 0);
+  }
+}
