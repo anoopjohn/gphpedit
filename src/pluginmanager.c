@@ -86,7 +86,7 @@ plugin_manager_get_type (void)
 * overide default contructor to make a singleton.
 * see http://blogs.gnome.org/xclaesse/2010/02/11/how-to-make-a-gobject-singleton/
 */
-static GObject*
+static GObject* 
 plugin_manager_constructor (GType type,
                  guint n_construct_params,
                  GObjectConstructParam *construct_params)
@@ -122,7 +122,22 @@ plugin_manager_init (gpointer object, gpointer klass)
 	Plugin_Manager_Details *plugmgdet;
 	plugmgdet = PLUGIN_MANAGER_GET_PRIVATE(object);
   /* init plugins table*/
-  plugmgdet->plugins_table= g_hash_table_new_full (g_str_hash, g_str_equal,NULL, g_object_unref);
+  plugmgdet->plugins_table = g_hash_table_new_full (g_str_hash, g_str_equal,NULL, g_object_unref);
+  /* check for plugins directory, if doesn't exist create it */
+  GError *error=NULL;
+  gchar *uri;
+  uri = g_strdup_printf("%s/%s/%s",g_get_home_dir(),".gphpedit","plugins");
+  if (!filename_file_exist(uri)){
+    GFile *plugin=get_gfile_from_filename (uri);
+    if (!g_file_make_directory_with_parents (plugin, NULL, &error)){
+      if (error->code !=G_IO_ERROR_EXISTS){
+        g_print(_("Unable to create ~/.gphpedit/ (%d) %s"), error->code,error->message);
+      }
+      g_error_free(error);
+    }
+    g_object_unref(plugin);
+  }
+  g_free(uri);
 }
 
 static void

@@ -113,7 +113,7 @@ void force_config_folder(void)
   if (!filename_file_exist(uri)){
     config=get_gfile_from_filename (uri);
     if (!g_file_make_directory (config, NULL, &error)){
-      if (error->code !=2){
+      if (error->code !=G_IO_ERROR_EXISTS){
         g_print(_("Unable to create ~/.gphpedit/ (%d) %s"), error->code,error->message);
         exit(-1);
         }
@@ -123,20 +123,6 @@ void force_config_folder(void)
     error=NULL;
   }
   g_free(uri);
-  gchar *plu=g_strdup_printf("%s/%s/%s",g_get_home_dir(),".gphpedit","plugins");
-  if (!filename_file_exist(plu)){
-    GFile *plugin=get_gfile_from_filename (plu);
-    if (!g_file_make_directory (plugin, NULL, &error)){
-      //if error code = 2 dir already exist
-      if (error->code !=2){
-        g_print(_("Unable to create ~/.gphpedit/ (%d) %s"), error->code,error->message);
-        exit(-1);
-      }
-      g_error_free(error);
-    }
-    g_object_unref(plugin);
-  }
-  g_free(plu);
 }
 
 static void main_window_create_appbar(void)
