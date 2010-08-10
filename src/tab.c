@@ -409,11 +409,20 @@ void session_save(void)
         }
       }
     }
-    if(!g_file_replace_contents (file,session_file_contents->str,session_file_contents->len,NULL,FALSE,G_FILE_CREATE_NONE,NULL,NULL,&error)){
-      g_print(_("Error Saving session file: %s\n"),error->message);
-      g_error_free (error);
-    }
-    if (session_file_contents) g_string_free(session_file_contents,TRUE);
+      if(!g_file_replace_contents (file,session_file_contents->str,session_file_contents->len,NULL,FALSE,G_FILE_CREATE_NONE,NULL,NULL,&error)){
+        g_print(_("Error Saving session file: %s\n"),error->message);
+        g_error_free (error);
+      }
+     if (session_file_contents) g_string_free(session_file_contents,TRUE);
+  } else {
+      if (get_preferences_manager_saved_session(main_window.prefmg)){
+        if (!g_file_delete (file,NULL,&error)){
+          if (error->code!=G_FILE_ERROR_NOENT && error->code!=1){
+            g_print(_("GIO Error deleting file: %s, code %d\n"), error->message,error->code);
+          }
+          g_error_free (error);
+        }
+      }
   }
   g_object_unref(file);
 }
