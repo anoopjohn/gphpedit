@@ -263,7 +263,6 @@ void classbrowser_parse_file(Classbrowser_Backend *classback, gchar *filename)
   c = o;
 
   while (*c) {
-    while (gtk_events_pending()) gtk_main_iteration(); /* update ui */
     if (!within_php) {
       if (check_previous(o, c, "<?")) {
         within_php=TRUE;

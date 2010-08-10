@@ -413,7 +413,6 @@ void classbrowser_function_add (gpointer data, gpointer user_data)
     gtk_tree_store_set (store, &iter,
                         NAME_COLUMN, function_decl->str, LINE_NUMBER_COLUMN, function->line_number, FILENAME_COLUMN, function->filename, TYPE_COLUMN, type, ID_COLUMN, function->identifierid,FILE_TYPE, function->file_type,-1);
   g_string_free(function_decl, TRUE);
-  while (gtk_events_pending()) gtk_main_iteration(); /* update ui */
 }
 
 gboolean classbrowser_class_find_before_position(GtkTreeModel *model, gchar *classname, GtkTreeIter *iter)
@@ -469,7 +468,6 @@ gboolean classbrowser_class_add (gpointer key, gpointer value, gpointer data)
   gtk_tree_store_set (GTK_TREE_STORE(store), &iter,
                    NAME_COLUMN, (class->classname), FILENAME_COLUMN, (class->filename),
                    LINE_NUMBER_COLUMN, class->line_number, TYPE_COLUMN, CB_ITEM_TYPE_CLASS, ID_COLUMN, (class->identifierid), FILE_TYPE, class->file_type,-1);
-  while (gtk_events_pending()) gtk_main_iteration(); /* update ui */
   return FALSE;
 }
 

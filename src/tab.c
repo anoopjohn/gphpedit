@@ -192,9 +192,7 @@ gboolean switch_to_file_or_open(gchar *filename, gint line_number)
 }
 
 void document_load_complete_cb (Document *doc, gboolean result, gpointer user_data){
-  static gint number=0;
   if (result) {
-    number++;
     editors = g_slist_append(editors, doc);
     GtkWidget *document_tab;
     document_tab = get_close_tab_widget(doc);
@@ -207,10 +205,6 @@ void document_load_complete_cb (Document *doc, gboolean result, gpointer user_da
     update_app_title();
     if (!document_get_untitled(doc)) session_save();
    classbrowser_update(GPHPEDIT_CLASSBROWSER(main_window.classbrowser));
-  }
-  if (number==2) {
-  close_page(g_slist_nth_data (editors,0));
-  editors = g_slist_remove(editors, g_slist_nth_data (editors,0));
   }
 }
 
@@ -296,49 +290,59 @@ void session_reopen(void)
   session_file = g_string_append(session_file, "/.gphpedit/session");
 
   if (filename_file_exist(session_file->str)){
+    int number =0;
     gchar *content=read_text_file_sync(session_file->str);
     gchar **strings;
     strings = g_strsplit (content,"\n",0);
-    int i=0;
-    while (strings[i]){
+      int i=0;
+      while (strings[i]){
 
-      /* strings[i] contains possibly:
-        file:///blah\n
-        *file:///blah\n
-        phphelp:function\n
-        *phphelp:function\n
-        preview:function\n
-        *preview:function\n
+        /* strings[i] contains possibly:
+          file:///blah\n
+          *file:///blah\n
+          phphelp:function\n
+          *phphelp:function\n
+          preview:function\n
+          *preview:function\n
 
-      */
-      if (strings[i][0]==0) break;
-      filename = strings[i];
-      str_replace(filename, 10, 0);
-      if (strings[i][0]=='*') {
-        filename++;
-        focus_this_one = TRUE;
-      }
-      if (g_str_has_prefix(filename, "phphelp:")){
-        filename += 8;
-        add_new_document(TAB_HELP, filename, 0);
-          
-      } else if (g_str_has_prefix(filename, "preview:")){
-        filename += 8;
-        add_new_document(TAB_PREVIEW, filename, 0);
-      } else {
-        if (filename){
-        switch_to_file_or_open(filename,0);
+        */
+        if (strings[i][0]==0) break;
+        number++;
+        filename = strings[i];
+        str_replace(filename, 10, 0);
+        if (strings[i][0]=='*') {
+          filename++;
+          focus_this_one = TRUE;
         }
+        if (g_str_has_prefix(filename, "phphelp:")){
+          filename += 8;
+          add_new_document(TAB_HELP, filename, 0);
+            
+        } else if (g_str_has_prefix(filename, "preview:")){
+          filename += 8;
+          add_new_document(TAB_PREVIEW, filename, 0);
+        } else {
+          if (filename){
+          switch_to_file_or_open(filename,0);
+          }
+        }
+        if (focus_this_one && (main_window.current_document)) {
+            focus_tab = gtk_notebook_page_num(GTK_NOTEBOOK(main_window.notebook_editor), document_get_editor_widget(main_window.current_document));
+        }
+        focus_this_one=FALSE;
+        i++;    
       }
-      if (focus_this_one && (main_window.current_document)) {
-          focus_tab = gtk_notebook_page_num(GTK_NOTEBOOK(main_window.notebook_editor), document_get_editor_widget(main_window.current_document));
-      }
-      focus_this_one=FALSE;
-      i++;    
+      g_strfreev (strings);
+    if (number==0){ 
+      //session file exists but is empty
+      //add a new untitled
+      add_new_document(TAB_FILE, NULL, 0);
     }
-    g_strfreev (strings);
     g_free(content);
     gtk_notebook_set_current_page( GTK_NOTEBOOK(main_window.notebook_editor), focus_tab);
+  } else {
+    //add a new untitled
+    add_new_document(TAB_FILE, NULL, 0);
   }
 
   GFile *file=get_gfile_from_filename(session_file->str);
@@ -412,11 +416,4 @@ void session_save(void)
     if (session_file_contents) g_string_free(session_file_contents,TRUE);
   }
   g_object_unref(file);
-}
-
-void create_untitled_if_empty(void)
-{
-  if (!editors) {
-    add_new_document(TAB_FILE, NULL, 0);
-  }
 }

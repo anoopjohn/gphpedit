@@ -266,7 +266,6 @@ void do_parse_file(Classbrowser_Backend *classback, Document *document){
     g_return_if_fail(document);
     if (document_is_scintilla_based(document) && !document_get_untitled(document)) {
     gphpedit_debug_message(DEBUG_CLASSBROWSER, "Parsing: %s\n",document_get_shortfilename(document));
-    while (gtk_events_pending()) gtk_main_iteration(); /* update ui */
     gchar *filename =document_get_filename(document);;
       if (is_php_file_from_filename(filename)) {
         classbrowser_parse_file(classback, filename); 

@@ -71,7 +71,6 @@ void main_window_open_command_line_files(char **argv, gint argc)
   }
 }
 
-
 void main_window_pass_command_line_files(char **argv)
 {
   guint i;
@@ -178,7 +177,7 @@ static void create_side_panel(void){
   
   main_window.notebook_manager= gtk_notebook_new ();
   gtk_notebook_set_tab_pos (GTK_NOTEBOOK (main_window.notebook_manager), GTK_POS_BOTTOM);
-  gtk_widget_set_size_request (main_window.notebook_manager, 200,400);
+  gtk_widget_set_size_request (main_window.notebook_manager, 300,400);
   gtk_widget_show (main_window.notebook_manager);
   /* add a notebook */
   gtk_box_pack_start(GTK_BOX(prin_sidebox), main_window.notebook_manager, TRUE, TRUE, 2);
@@ -278,11 +277,13 @@ static void create_infobar(void){
   gtk_box_pack_start(GTK_BOX(main_window.prin_hbox), main_window.infobar, FALSE, FALSE, 0);
 }
 
-static void create_app_main_window(const gchar *title, gint height, gint width){
+static void create_app_main_window(const gchar *title){
   main_window.window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
   gtk_window_set_title(GTK_WINDOW(main_window.window), title);
-  gtk_window_set_default_size(GTK_WINDOW(main_window.window), height, width);
-  gtk_window_move(GTK_WINDOW(main_window.window), get_preferences_manager_window_left(main_window.prefmg), get_preferences_manager_window_top(main_window.prefmg));
+  gtk_window_set_default_size(GTK_WINDOW(main_window.window), get_preferences_manager_window_height(main_window.prefmg),
+         get_preferences_manager_window_width(main_window.prefmg));
+  gtk_window_move(GTK_WINDOW(main_window.window), get_preferences_manager_window_left(main_window.prefmg), 
+         get_preferences_manager_window_top(main_window.prefmg));
   if (get_preferences_manager_window_maximized(main_window.prefmg)) {
  		gtk_window_maximize(GTK_WINDOW(main_window.window));
 	}
@@ -294,7 +295,7 @@ static void create_app_main_window(const gchar *title, gint height, gint width){
 
 void main_window_create(void){
 
-  create_app_main_window(_("gPHPEdit"), get_preferences_manager_window_height(main_window.prefmg), get_preferences_manager_window_width(main_window.prefmg));
+  create_app_main_window(_("gPHPEdit"));
   main_window_create_prinbox();
 
   /* add menu bar to main window */

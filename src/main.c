@@ -68,7 +68,6 @@ int main (int argc, char **argv)
   if (main_window.current_document == NULL) {
     session_reopen();
   }
-  create_untitled_if_empty();
   g_signal_connect (G_OBJECT (main_window.notebook_editor), "switch_page", G_CALLBACK (on_notebook_switch_page), NULL);
   update_app_title();
   classbrowser_update(GPHPEDIT_CLASSBROWSER(main_window.classbrowser));
