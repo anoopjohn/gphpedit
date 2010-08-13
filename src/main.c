@@ -25,7 +25,6 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <gio/gio.h>
-#include <gconf/gconf-client.h>
 #include "main.h"
 #include "main_window.h"
 #include "main_window_callbacks.h"
@@ -47,11 +46,13 @@ int main (int argc, char **argv)
   bind_textdomain_codeset (GETTEXT_PACKAGE, "UTF-8");
   textdomain (GETTEXT_PACKAGE);
 #endif /* ENABLE_NLS */
-  if (!g_thread_supported())
-    g_thread_init(NULL);
 
   gtk_init(&argc, &argv);
-  gconf_init(argc, argv, NULL);
+#if GLIB_CHECK_VERSION (2, 24, 0)
+  g_type_init();
+#else 
+  if (!g_thread_supported()) g_thread_init(NULL);
+#endif
 
   gphpedit_debug_init ();
         
@@ -62,7 +63,6 @@ int main (int argc, char **argv)
     return 0;
 
   main_window_create();
-  force_config_folder();
   template_db_open();
   main_window.docmg = document_manager_new_full(argv, argc);
   update_app_title(document_manager_get_current_document(main_window.docmg));

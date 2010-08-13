@@ -38,8 +38,11 @@
 #include <string.h>
 #include <gtk/gtk.h>
 #include <gconf/gconf-client.h>
+#include <glib/gi18n.h>
+
 #include "debug.h"
 #include "preferences_manager.h"
+#include "gvfs_utils.h"
 
 
 #define MAXHISTORY 16
@@ -219,11 +222,37 @@ void clean_default_settings(Preferences_ManagerDetails *prefdet){
   if (prefdet->shared_source_location) g_free(prefdet->shared_source_location);
   if (prefdet->php_file_extensions) g_free(prefdet->php_file_extensions);
 }
+
+static void force_config_folder(void)
+{
+  GError *error=NULL;
+  GFile *config;
+  gchar *uri=g_strdup_printf("%s/%s",g_get_home_dir(),".gphpedit");
+  if (!filename_file_exist(uri)){
+    config=get_gfile_from_filename (uri);
+    if (!g_file_make_directory (config, NULL, &error)){
+      if (error->code !=G_IO_ERROR_EXISTS){
+        g_print(_("Unable to create ~/.gphpedit/ (%d) %s"), error->code, error->message);
+        }
+        g_error_free(error);
+      }
+    g_object_unref(config);
+  }
+  g_free(uri);
+}
+
 static void
 preferences_manager_init (gpointer object, gpointer klass)
 {
 	Preferences_ManagerDetails *prefdet;
 	prefdet = PREFERENCES_MANAGER_GET_PRIVATE(object);
+  /* create config folder if doesn't exist */
+#if !GLIB_CHECK_VERSION (2, 24, 0)
+  /* init gconf system */
+  gconf_init(0, NULL, NULL);
+#endif
+
+  force_config_folder();
   /* init styles table*/
   prefdet->styles_table= g_hash_table_new_full (g_str_hash, g_str_equal,NULL, clean_style);
   load_default_settings(prefdet);
