@@ -92,13 +92,13 @@ void function_list_prepare(void)
       gchar *line=g_strdup(buffer);
       gchar *token_line = line;
       gchar *function_name = strtok(token_line, "|");
-      gphpedit_debug_message(DEBUG_CALLTIP, "function name:%s\n",function_name);
+      gphpedit_debug_message(DEBUG_CALLTIP, "function name:%s",function_name);
       g_tree_insert (php_api_tree, function_name, (line + strlen(function_name)+1));
       //g_free(token_line);
     }
     fclose( apifile );
   } else {
-    g_warning(_("Could not open php-gphpedit.api file\n"));
+    g_warning(_("Could not open php-gphpedit.api file"));
   }
   g_free(api_dir);
 }
@@ -118,13 +118,13 @@ void css_function_list_prepare(void)
       gchar *line=g_strdup(buffer);
       gchar *token_line = line;
       gchar *function_name = strtok(token_line, "|");
-      gphpedit_debug_message(DEBUG_CALLTIP, "function name:%s\n",function_name);
+      gphpedit_debug_message(DEBUG_CALLTIP, "function name:%s",function_name);
       g_tree_insert (css_api_tree, function_name, (line + strlen(function_name)+1));
       //g_free(line);
     }
     fclose( apifile );
   } else {
-    g_warning(_("Could not open php-gphpedit.api file\n"));
+    g_warning(_("Could not open php-gphpedit.api file"));
   }
   g_free(api_dir);
 }

@@ -48,12 +48,12 @@ gboolean is_app_closing = FALSE;
 
 void quit_application()
 {
-  preferences_manager_save_data(main_window.prefmg);
-  gphpedit_debug_message(DEBUG_MAIN_WINDOW,"%s","Saved preferences");
+  gphpedit_debug(DEBUG_MAIN_WINDOW);
   template_db_close();
   is_app_closing = TRUE;
   g_object_unref(main_window.docmg);
   is_app_closing = FALSE;
+  g_object_unref(main_window.prefmg);
 }
 
 

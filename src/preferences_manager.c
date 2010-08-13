@@ -237,11 +237,12 @@ preferences_manager_init (gpointer object, gpointer klass)
 */
 static void preferences_manager_dispose (GObject *object)
 {
+  gphpedit_debug(DEBUG_PREFS);
   Preferences_Manager *pref = PREFERENCES_MANAGER(object);
   Preferences_ManagerDetails *prefdet;
 	prefdet = PREFERENCES_MANAGER_GET_PRIVATE(pref);
   /* free object resources*/
-  clean_default_settings(prefdet);
+  preferences_manager_save_data(pref);
   /* Chain up to the parent class */
   G_OBJECT_CLASS (parent_class)->dispose (object);
 }
