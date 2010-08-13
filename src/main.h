@@ -30,7 +30,6 @@
 
 #include <glib.h>
 #include <gtk/gtk.h>
-#include <gtkscintilla.h>
 
 #ifdef ENABLE_NLS
 #include <glib/gi18n.h>
