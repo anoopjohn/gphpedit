@@ -58,19 +58,6 @@ void main_window_resize(GtkWidget *widget, GtkAllocation *allocation, gpointer u
   }
 }
 
-void main_window_open_command_line_files(char **argv, gint argc)
-{
-  guint i;
-
-  if (argc>1) {
-    i = 1;
-    while (argv[i] != NULL) {
-      switch_to_file_or_open(argv[i],0);
-      ++i;
-    }
-  }
-}
-
 void main_window_pass_command_line_files(char **argv)
 {
   guint i;
@@ -100,7 +87,7 @@ gboolean channel_pass_filename_callback(GIOChannel *source, GIOCondition conditi
     g_print("Error reading GIO Chanel. Error:%s\n",error->message);
   }
   gphpedit_debug_message(DEBUG_IPC, "Passed %s\n", buf);
-  add_new_document(TAB_FILE, buf, 0);
+  document_manager_add_new_document(main_window.docmg, TAB_FILE, buf, 0);
   return FALSE;
 }
 
@@ -230,10 +217,11 @@ static void main_window_fill_panes(void)
  * Update the application title when switching tabs, closing or opening
  * or opening new tabs or opening new files.
  */
-void update_app_title(void)
+void update_app_title(Document *document)
 {
-  gchar *title = document_get_title(main_window.current_document);
-  update_status_combobox(main_window.current_document);
+  gphpedit_debug(DEBUG_MAIN_WINDOW);
+  gchar *title = document_get_title(document);
+  update_status_combobox(document);
   update_zoom_level();
   update_controls();
   //If there is no file opened set the name as gPHPEdit
@@ -273,7 +261,7 @@ static void create_infobar(void){
   gtk_box_set_spacing(GTK_BOX (content_area), 0);
   gtk_box_pack_start(GTK_BOX (content_area), main_window.infolabel, FALSE, FALSE, 0);
   gtk_widget_show(main_window.infolabel);
-  g_signal_connect(main_window.infobar, "response", G_CALLBACK (process_external), main_window.current_document);
+  g_signal_connect(main_window.infobar, "response", G_CALLBACK (process_external), document_manager_get_current_document(main_window.docmg));
   gtk_box_pack_start(GTK_BOX(main_window.prin_hbox), main_window.infobar, FALSE, FALSE, 0);
 }
 
@@ -331,11 +319,13 @@ void main_window_create(void){
 
   gtk_widget_show(main_window.window);
   
-  update_app_title();
+  update_app_title(document_manager_get_current_document(main_window.docmg));
 }
 
 void update_controls(void){
-  menubar_update_controls(MENUBAR(main_window.menu), document_is_scintilla_based(main_window.current_document), document_get_can_preview(main_window.current_document), document_get_readonly(main_window.current_document));
-  toolbar_update_controls(TOOLBAR(main_window.toolbar_main), document_is_scintilla_based(main_window.current_document), document_get_readonly(main_window.current_document));
-  toolbar_update_controls(TOOLBAR(main_window.toolbar_find), document_is_scintilla_based(main_window.current_document), document_get_readonly(main_window.current_document));
+  menubar_update_controls(MENUBAR(main_window.menu), document_is_scintilla_based(document_manager_get_current_document(main_window.docmg)),
+ document_get_can_preview(document_manager_get_current_document(main_window.docmg)), document_get_readonly(document_manager_get_current_document(main_window.docmg)));
+
+  toolbar_update_controls(TOOLBAR(main_window.toolbar_main), document_is_scintilla_based(document_manager_get_current_document(main_window.docmg)), document_get_readonly(document_manager_get_current_document(main_window.docmg)));
+  toolbar_update_controls(TOOLBAR(main_window.toolbar_find), document_is_scintilla_based(document_manager_get_current_document(main_window.docmg)), document_get_readonly(document_manager_get_current_document(main_window.docmg)));
 }

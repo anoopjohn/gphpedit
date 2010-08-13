@@ -300,7 +300,7 @@ void classbrowser_backend_start_update(Classbrowser_BackendDetails *classbackdet
 
 //FIXME: this function can be optimized by not requesting to reparse files on tab change
 //when the parse only selected tab is set - Anoop
-void classbrowser_backend_update(Classbrowser_Backend *classback, GSList *editor_list, gboolean only_current_file)
+void classbrowser_backend_update(Classbrowser_Backend *classback, gboolean only_current_file)
 {
 
   gphpedit_debug(DEBUG_CLASSBROWSER);
@@ -333,13 +333,13 @@ void classbrowser_backend_update(Classbrowser_Backend *classback, GSList *editor
   }
   
   classbrowser_backend_start_update(classbackdet);
+  DocumentManager *docmg = document_manager_new();
   if (only_current_file){
-      do_parse_file(classback, main_window.current_document);
+      do_parse_file(classback, document_manager_get_current_document(docmg));
   } else {
-    if (editor_list){
-    g_slist_foreach (editor_list, list_php_files_open, classback); 
-    }
+    g_slist_foreach (document_manager_get_document_list(docmg), list_php_files_open, classback); 
   }
+  g_object_unref(docmg);
   classbrowser_remove_dead_wood(classback);
   g_signal_emit (G_OBJECT (classback), signals[DONE_REFRESH], 0, TRUE); /* emit process and update UI */
 }

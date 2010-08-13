@@ -224,10 +224,10 @@ void template_find_and_insert()
   gchar *buffer = NULL;
   gchar *template = NULL;
  
-  buffer = document_get_current_word(main_window.current_document);
+  buffer = document_get_current_word(document_manager_get_current_document(main_window.docmg));
   template = template_find(buffer);
   if (template) {
-    document_insert_template(main_window.current_document, template);
+    document_insert_template(document_manager_get_current_document(main_window.docmg), template);
   }
   g_free(buffer);
 }

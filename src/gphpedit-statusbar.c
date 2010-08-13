@@ -31,7 +31,7 @@
 #include "status-combo-box.h"
 #include "tab.h"
 #include "document.h"
-#include "main_window.h"
+#include "document_manager.h"
 
 #define GPHPEDIT_STATUSBAR_GET_PRIVATE(object)(G_TYPE_INSTANCE_GET_PRIVATE ((object),\
 					    GPHPEDIT_TYPE_STATUSBAR,\
@@ -129,23 +129,25 @@ set_statusbar_width_chars (GtkWidget *statusbar,
 
 void set_higthlight (GphpeditStatusComboBox *combo, GtkMenuItem *item){
   const gchar *label =gtk_menu_item_get_label (item);
+  DocumentManager *docmg = document_manager_new ();
   if (g_strcmp0(label,_("Cobol"))==0){
-    set_document_to_cobol(main_window.current_document);
+    set_document_to_cobol(document_manager_get_current_document(docmg));
   } else if (g_strcmp0(label,_("C/C++"))==0){
-    set_document_to_cxx(main_window.current_document);
+    set_document_to_cxx(document_manager_get_current_document(docmg));
   } else if (g_strcmp0(label,_("CSS"))==0){
-    set_document_to_css(main_window.current_document);
+    set_document_to_css(document_manager_get_current_document(docmg));
   } else if (g_strcmp0(label,_("PHP/HTML/XML"))==0){
-    set_document_to_php(main_window.current_document);
+    set_document_to_php(document_manager_get_current_document(docmg));
   } else if (g_strcmp0(label,_("Perl"))==0){
-    set_document_to_perl(main_window.current_document);
+    set_document_to_perl(document_manager_get_current_document(docmg));
   } else if (g_strcmp0(label,_("SQL"))==0){
-    set_document_to_sql(main_window.current_document);
+    set_document_to_sql(document_manager_get_current_document(docmg));
   } else if (g_strcmp0(label,_("Python"))==0){
-    set_document_to_python(main_window.current_document);
+    set_document_to_python(document_manager_get_current_document(docmg));
   } else {
-    set_document_to_text_plain(main_window.current_document);
+    set_document_to_text_plain(document_manager_get_current_document(docmg));
   }
+  g_object_unref(docmg);
 }
 
 void set_status_combo_item (GphpeditStatusbar *statusbar,const gchar *label)

@@ -42,8 +42,6 @@ void on_save_as1_activate(GtkWidget *widget);
 void on_saveall1_activate(GtkWidget *widget);
 void on_rename1_activate(GtkWidget *widget);
 void close_page(Document *document);
-gboolean try_save_page(Document *document, gboolean close_if_can);
-gboolean try_close_page(Document *document);
 void on_close1_activate(GtkWidget *widget);
 void on_quit1_activate(GtkWidget *widget);
 void on_cut1_activate(GtkWidget *widget);

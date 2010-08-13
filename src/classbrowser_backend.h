@@ -84,7 +84,7 @@ ClassBrowserClass;
 /* Basic GObject requirements. */
 GType classbrowser_backend_get_type (void);
 Classbrowser_Backend *classbrowser_backend_new (void);
-void classbrowser_backend_update(Classbrowser_Backend *classback, GSList *editor_list, gboolean only_current_file);
+void classbrowser_backend_update(Classbrowser_Backend *classback, gboolean only_current_file);
 GSList *classbrowser_backend_get_function_list(Classbrowser_Backend *classback);
 GTree *classbrowser_backend_get_class_list(Classbrowser_Backend *classback);
 void classbrowser_functionlist_add(Classbrowser_Backend *classback, gchar *classname, gchar *funcname, gchar *filename, gint file_type, guint line_number, gchar *param_list);

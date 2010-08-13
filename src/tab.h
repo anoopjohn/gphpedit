@@ -32,13 +32,6 @@
 #define STYLE_ANNOTATION_ERROR 200
 #define STYLE_ANNOTATION_WARNING 201
 
-extern GSList *editors;
-
-Document *document_manager_find_document (void *widget);
-void add_new_document(gint type, const gchar *filename, gint goto_line);
-GtkWidget *get_close_tab_widget(Document *document);
-gboolean switch_to_file_or_open(gchar *filename, gint line_number);
-gboolean auto_memberfunc_complete_callback(gpointer data);
 void register_file_opened(gchar *filename);
 void str_replace(char *Str, char ToRp, char WithC);
 void info_dialog (gchar *title, gchar *message);
@@ -51,6 +44,4 @@ gboolean is_cxx_file(const gchar *filename);
 gboolean is_sql_file(const gchar *filename);
 gboolean is_php_file_from_filename(const gchar *filename);
 gchar *trunc_on_char(gchar * string, gchar which_char);
-void session_reopen(void);
-void session_save(void);
 #endif

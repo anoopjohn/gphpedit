@@ -133,7 +133,7 @@ void fold_expand(GtkWidget *scintilla, gint line, gboolean doExpand, gboolean fo
 void fold_changed(GtkWidget *scintilla, int line,int levelNow,int levelPrev);
 void handle_modified(GtkWidget *scintilla, gint pos,gint mtype,gchar *text,gint len, gint added,gint line,gint foldNow,gint foldPrev);
 void macro_record (GtkWidget *scintilla, gint message, gulong wparam, glong lparam, gpointer user_data);
-void process_user_list_selection (GtkWidget *w, gint type, gchar *text);
+void process_user_list_selection (GtkWidget *w, gint type, gchar *text, gpointer user_data);
 void document_done_refresh_cb (DocumentLoader *doclod, gboolean result, gpointer user_data);
 /*
  * register Document type and returns a new GType
@@ -222,7 +222,7 @@ static void tab_set_event_handlers(Document *doc)
   g_signal_connect (G_OBJECT (docdet->scintilla), "char_added", G_CALLBACK (char_added), doc);
   g_signal_connect (G_OBJECT (docdet->scintilla), "update_ui", G_CALLBACK (update_ui), NULL);
   g_signal_connect (G_OBJECT (docdet->scintilla), "uri_dropped", G_CALLBACK (process_drag_uri), NULL);
-  g_signal_connect (G_OBJECT (docdet->scintilla), "user_list_selection", G_CALLBACK (process_user_list_selection), NULL);
+  g_signal_connect (G_OBJECT (docdet->scintilla), "user_list_selection", G_CALLBACK (process_user_list_selection), doc);
 }
 
 void tab_reset_scintilla_after_open(GtkScintilla *scintilla, guint current_line)
@@ -556,11 +556,11 @@ void update_ui(GtkWidget *scintilla)
 
 gboolean auto_memberfunc_complete_callback(gpointer data)
 {
-  DocumentDetails *docdet = DOCUMENT_GET_PRIVATE(main_window.current_document);
+  DocumentDetails *docdet = DOCUMENT_GET_PRIVATE(document_manager_get_current_document(main_window.docmg));
   gint current_pos;
-  current_pos = document_get_current_position(main_window.current_document);
+  current_pos = document_get_current_position(document_manager_get_current_document(main_window.docmg));
   if (current_pos == GPOINTER_TO_INT(data)) {
-    gchar *prefix = document_get_current_word(main_window.current_document);
+    gchar *prefix = document_get_current_word(document_manager_get_current_document(main_window.docmg));
     gchar *calltip = classbrowser_autocomplete_member_function(GPHPEDIT_CLASSBROWSER(main_window.classbrowser), prefix);
     if (calltip && strlen(calltip)!=0) gtk_scintilla_user_list_show(GTK_SCINTILLA(docdet->scintilla), 1, calltip);
     // gtk_scintilla_autoc_show(GTK_SCINTILLA(docdet->scintilla), current_pos, calltip);
@@ -572,11 +572,11 @@ gboolean auto_memberfunc_complete_callback(gpointer data)
 
 gboolean auto_complete_callback(gpointer data)
 {
-  DocumentDetails *docdet = DOCUMENT_GET_PRIVATE(main_window.current_document);
+  DocumentDetails *docdet = DOCUMENT_GET_PRIVATE(document_manager_get_current_document(main_window.docmg));
   gint current_pos;
-  current_pos = document_get_current_position(main_window.current_document);
+  current_pos = document_get_current_position(document_manager_get_current_document(main_window.docmg));
   if (current_pos == GPOINTER_TO_INT(data)) {
-    gchar *prefix = document_get_current_word(main_window.current_document);
+    gchar *prefix = document_get_current_word(document_manager_get_current_document(main_window.docmg));
     gchar *calltip = autocomplete_word(prefix);
     if (calltip && strlen(calltip)!=0) 
           gtk_scintilla_user_list_show(GTK_SCINTILLA(docdet->scintilla), 1, calltip);
@@ -589,11 +589,11 @@ gboolean auto_complete_callback(gpointer data)
 
 gboolean calltip_callback(gpointer data)
 {
-  DocumentDetails *docdet = DOCUMENT_GET_PRIVATE(main_window.current_document);
+  DocumentDetails *docdet = DOCUMENT_GET_PRIVATE(document_manager_get_current_document(main_window.docmg));
   gint current_pos;
-  current_pos = document_get_current_position(main_window.current_document);
+  current_pos = document_get_current_position(document_manager_get_current_document(main_window.docmg));
   if (current_pos == GPOINTER_TO_INT(data)) {
-    gchar *prefix = document_get_current_word(main_window.current_document);
+    gchar *prefix = document_get_current_word(document_manager_get_current_document(main_window.docmg));
     gchar *calltip = show_call_tip(docdet->type, prefix);
     if (calltip){
       gtk_scintilla_call_tip_show(GTK_SCINTILLA(docdet->scintilla), current_pos, calltip);
@@ -616,11 +616,11 @@ void document_show_calltip_at_current_pos(Document *document)
 
 gboolean sql_auto_complete_callback(gpointer data)
 {
-  DocumentDetails *docdet = DOCUMENT_GET_PRIVATE(main_window.current_document);
+  DocumentDetails *docdet = DOCUMENT_GET_PRIVATE(document_manager_get_current_document(main_window.docmg));
   gint current_pos;
-  current_pos = document_get_current_position(main_window.current_document);
+  current_pos = document_get_current_position(document_manager_get_current_document(main_window.docmg));
   if (current_pos == GPOINTER_TO_INT(data)) {
-    gchar *prefix = document_get_current_word(main_window.current_document);
+    gchar *prefix = document_get_current_word(document_manager_get_current_document(main_window.docmg));
     gchar *calltip = sql_autocomplete_word(prefix);
     if (calltip && strlen(calltip)!=0) gtk_scintilla_user_list_show(GTK_SCINTILLA(docdet->scintilla), 1, calltip);
     g_free(prefix);
@@ -631,11 +631,11 @@ gboolean sql_auto_complete_callback(gpointer data)
 
 gboolean css_auto_complete_callback(gpointer data)
 {
-  DocumentDetails *docdet = DOCUMENT_GET_PRIVATE(main_window.current_document);
+  DocumentDetails *docdet = DOCUMENT_GET_PRIVATE(document_manager_get_current_document(main_window.docmg));
   gint current_pos;
-  current_pos = document_get_current_position(main_window.current_document);
+  current_pos = document_get_current_position(document_manager_get_current_document(main_window.docmg));
   if (current_pos == GPOINTER_TO_INT(data)) {
-    gchar *prefix = document_get_current_word(main_window.current_document);
+    gchar *prefix = document_get_current_word(document_manager_get_current_document(main_window.docmg));
     gchar *calltip = css_autocomplete_word(prefix);
     if (calltip && strlen(calltip)!=0) gtk_scintilla_user_list_show(GTK_SCINTILLA(docdet->scintilla), 1, calltip);
     g_free(prefix);
@@ -646,11 +646,11 @@ gboolean css_auto_complete_callback(gpointer data)
 
 gboolean cobol_auto_complete_callback(gpointer data)
 {
-  DocumentDetails *docdet = DOCUMENT_GET_PRIVATE(main_window.current_document);
+  DocumentDetails *docdet = DOCUMENT_GET_PRIVATE(document_manager_get_current_document(main_window.docmg));
   gint current_pos;
-  current_pos = document_get_current_position(main_window.current_document);
+  current_pos = document_get_current_position(document_manager_get_current_document(main_window.docmg));
   if (current_pos == GPOINTER_TO_INT(data)) {
-    gchar *prefix = document_get_current_word(main_window.current_document);
+    gchar *prefix = document_get_current_word(document_manager_get_current_document(main_window.docmg));
     gchar *calltip = cobol_autocomplete_word(prefix);
     if (calltip && strlen(calltip)!=0) gtk_scintilla_user_list_show(GTK_SCINTILLA(docdet->scintilla), 1, calltip);
     g_free(prefix);
@@ -661,8 +661,9 @@ gboolean cobol_auto_complete_callback(gpointer data)
 /*
 * autocomplete current word
 */
-void process_user_list_selection (GtkWidget *w, gint type, gchar *text){
-  gchar *current = document_get_current_word(main_window.current_document);
+void process_user_list_selection (GtkWidget *w, gint type, gchar *text, gpointer user_data){
+  Document *doc = DOCUMENT(user_data);
+  gchar *current = document_get_current_word(doc);
   gint current_pos = gtk_scintilla_get_current_pos(GTK_SCINTILLA(w));
   gtk_scintilla_insert_text(GTK_SCINTILLA(w), current_pos, text + strlen (current));
   gtk_scintilla_goto_pos(GTK_SCINTILLA(w), current_pos + strlen (text) - strlen (current));
@@ -852,8 +853,8 @@ static void char_added(GtkWidget *scintilla, guint ch, gpointer user_data)
             member_function_buffer = gtk_scintilla_get_text_range (GTK_SCINTILLA(scintilla), wordStart-2, wordEnd, &member_function_length);
             /* if we type <?php then we are in a php file so force php syntax mode */
             if (g_strcmp0(member_function_buffer,"<?php")==0){
-                set_document_to_php(main_window.current_document);
-                update_status_combobox(main_window.current_document);
+                set_document_to_php(doc);
+                update_status_combobox(doc);
                }
 //          g_print("buffer:%s",member_function_buffer);
             g_free(member_function_buffer);
@@ -919,7 +920,7 @@ void process_drag_uri(GtkWidget *scintilla, gpointer data){
           gchar *uri=g_malloc(k);
           strncpy(uri,uris[i],k); /* skip \n */
           uri[k-1]=0;
-          switch_to_file_or_open(uri, 0);
+          document_manager_switch_to_file_or_open(main_window.docmg, uri, 0);
           g_free(uri);
         }
       i++;
@@ -1874,6 +1875,7 @@ void tab_check_sql_file(Document *document)
 
 gchar *document_get_title(Document *doc)
 {
+  gphpedit_debug (DEBUG_DOCUMENT);
   if (!doc) return NULL;
   DocumentDetails *docdet = DOCUMENT_GET_PRIVATE(doc);
   GString *title= NULL;
@@ -2489,16 +2491,16 @@ void document_force_autocomplete(Document *document)
         if (g_strcmp0(member_function_buffer, "->")==0) {
             auto_memberfunc_complete_callback(GINT_TO_POINTER(document_get_current_position(document)));
         }
-        else if (document_get_document_type(main_window.current_document) == TAB_PHP) {
+        else if (document_get_document_type(document) == TAB_PHP) {
           auto_complete_callback(GINT_TO_POINTER(document_get_current_position(document)));
         }
-        else if (document_get_document_type(main_window.current_document) == TAB_CSS) {
+        else if (document_get_document_type(document) == TAB_CSS) {
           css_auto_complete_callback(GINT_TO_POINTER(document_get_current_position(document)));
         }
-        else if (document_get_document_type(main_window.current_document) == TAB_SQL) {
+        else if (document_get_document_type(document) == TAB_SQL) {
           sql_auto_complete_callback(GINT_TO_POINTER(document_get_current_position(document)));
         }
-        else if (document_get_document_type(main_window.current_document) == TAB_COBOL) {
+        else if (document_get_document_type(document) == TAB_COBOL) {
           cobol_auto_complete_callback(GINT_TO_POINTER(document_get_current_position(document)));
         }
       g_free(member_function_buffer);
@@ -2592,7 +2594,7 @@ void document_incremental_search(Document *document, gchar *current_text, gboole
       gtk_scintilla_set_sel(GTK_SCINTILLA(docdet->scintilla), text_min, text_max);
     } else {
       if (advancing) {
-      document_incremental_search(main_window.current_document, current_text, FALSE);
+      document_incremental_search(document, current_text, FALSE);
       }
     }
   }

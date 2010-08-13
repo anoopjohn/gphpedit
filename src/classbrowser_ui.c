@@ -248,8 +248,8 @@ gphpedit_classbrowser_new (void)
 */
 gint on_parse_current_click (GtkWidget *widget, gpointer user_data)
 {
-  set_preferences_manager_parse_only_current_file(main_window.prefmg, gtk_toggle_button_get_active((GtkToggleButton *)widget));
-  classbrowser_backend_update(user_data, editors, gtk_toggle_button_get_active((GtkToggleButton *)widget));
+  set_preferences_manager_parse_only_current_file(main_window.prefmg, gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget)));
+  classbrowser_backend_update(user_data, gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget)));
   return 0;
 }
 
@@ -294,10 +294,10 @@ void classbrowser_set_sortable(GtkTreeStore *classtreestore)
 
 static gboolean visible_func (GtkTreeModel *model, GtkTreeIter  *iter, gpointer data) {
   /* Visible if row is non-empty and name column contain filename as prefix */
-  g_return_val_if_fail(main_window.current_document, FALSE);
+  g_return_val_if_fail(document_manager_get_current_document(main_window.docmg), FALSE);
   guint file_type;
   gboolean visible = FALSE;
-  guint data_type= document_get_document_type(main_window.current_document);
+  guint data_type= document_get_document_type(document_manager_get_current_document(main_window.docmg));
   gtk_tree_model_get (model, iter, FILE_TYPE, &file_type, -1);
   if (data_type==file_type) visible = TRUE;
  // g_print("%d -> %d (%s)\n",data_type,file_type,main_window.current_editor->filename->str);
@@ -336,7 +336,7 @@ void classbrowser_update_cb (Classbrowser_Backend *classback, gboolean result, g
   GSList *func_list = classbrowser_backend_get_function_list(classback);
   g_slist_foreach (func_list, classbrowser_function_add, user_data);
 
-  if (main_window.current_document) {
+  if (document_manager_get_current_document(main_window.docmg)) {
   if (priv->front==0){
     priv->new_model= gtk_tree_model_filter_new (GTK_TREE_MODEL(priv->classtreestore),NULL);
   } else {
@@ -487,7 +487,7 @@ gint treeview_double_click(GtkWidget *widget, GdkEventButton *event, gpointer fu
       if (gtk_tree_selection_get_selected (priv->classtreeselect, NULL, &iter)) {
           gtk_tree_model_get (GTK_TREE_MODEL(priv->new_model), &iter, FILENAME_COLUMN, &filename, LINE_NUMBER_COLUMN, &line_number, -1);
         if (filename) {
-          switch_to_file_or_open(filename, line_number);
+          document_manager_switch_to_file_or_open(main_window.docmg, filename, line_number);
           g_free (filename);
         }
       }
@@ -510,7 +510,7 @@ gint treeview_click_release(GtkWidget *widget, GdkEventButton *event, gpointer f
     }
   }
   /* go to position */
-  document_scroll_to_current_pos(main_window.current_document);
+  document_scroll_to_current_pos(document_manager_get_current_document(main_window.docmg));
  
   return FALSE;
 }
@@ -522,8 +522,8 @@ void classbrowser_update(gphpeditClassBrowser *classbrowser){
   if (!classbrowser) return ;
 	gphpeditClassBrowserPrivate *priv;
 	priv = CLASSBROWSER_BACKEND_GET_PRIVATE(classbrowser);
-  if (editors){
-    classbrowser_backend_update(priv->classbackend, editors, get_preferences_manager_parse_only_current_file(main_window.prefmg));
+  if (document_manager_get_document_count (main_window.docmg)){
+    classbrowser_backend_update(priv->classbackend, get_preferences_manager_parse_only_current_file(main_window.prefmg));
   }
 }
 

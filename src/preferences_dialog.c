@@ -519,19 +519,7 @@ void on_element_entry_changed(GtkComboBox *widget, gpointer     user_data)
 
 void apply_preferences(GtkButton *button, gpointer data)
 {
-  GSList *walk;
-
-  for (walk = editors; walk!=NULL; walk = g_slist_next(walk)) {
-    Document *document = walk->data;
-    document_refresh_properties(document);
-    tab_check_php_file(document);
-    tab_check_css_file(document);
-    tab_check_cxx_file(document);
-    tab_check_perl_file(document);
-    tab_check_cobol_file(document);
-    tab_check_python_file(document);
-    tab_check_sql_file(document);
-  }
+  document_manager_refresh_properties_all(main_window.docmg);
 }
 
 void response_preferences (GtkDialog *dialog, gint response_id, gpointer   user_data)

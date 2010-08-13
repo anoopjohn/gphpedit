@@ -40,6 +40,7 @@
 #include "classbrowser_ui.h"
 #include "find_dialog.h"
 #include "replace_dialog.h"
+#include "document_manager.h"
 
 gboolean is_app_closing = FALSE;
 
@@ -48,10 +49,11 @@ gboolean is_app_closing = FALSE;
 void quit_application()
 {
   preferences_manager_save_data(main_window.prefmg);
-  gphpedit_debug_message(DEBUG_MAIN_WINDOW,"%s","Saved preferences\n");
+  gphpedit_debug_message(DEBUG_MAIN_WINDOW,"%s","Saved preferences");
   template_db_close();
-  session_save();
-  close_all_tabs();
+  is_app_closing = TRUE;
+  g_object_unref(main_window.docmg);
+  is_app_closing = FALSE;
 }
 
 
@@ -62,60 +64,14 @@ void main_window_destroy_event(GtkWidget *widget, gpointer data)
   gtk_main_quit();
 }
 
-// This procedure relies on the fact that all tabs will be closed without prompting
-// for whether they need saving beforehand.  If in doubt, call can_all_tabs_be_saved
-// and pay attention to the return value.
-void close_all_tabs(void)
-{
-  GSList *walk;
-  Document *document;
-
-  is_app_closing = TRUE;
-  
-  for(walk = editors; walk!= NULL; walk = g_slist_next(walk)) {
-    document = walk->data;
-    if (document) {
-      close_page(document);
-      editors = g_slist_remove(editors, document);
-    }
-  }
-  editors = NULL;
-  main_window.current_document=NULL;
-  is_app_closing = FALSE;
-}
-
-// Returns true if all tabs are either saved or closed
-gboolean can_all_tabs_be_saved(void)
-{
-  GSList *walk;
-  Document *document;
-  gboolean saved;
-
-  is_app_closing = TRUE;
-  for(walk = editors; walk!= NULL; walk = g_slist_next(walk)) {
-    document = walk->data;
-    if (document_get_editor_widget(document)) {
-      if (!document_get_saved_status(document) && document_get_can_save(document)) {
-        saved = try_save_page(document, FALSE);
-        if (saved==FALSE) {
-          is_app_closing = FALSE;
-          return FALSE;
-        }
-      }
-    }
-  }
-  is_app_closing = FALSE;
-  return TRUE;
-}
-
-
 gboolean main_window_delete_event(GtkWidget *widget, GdkEvent *event, gpointer user_data){
   gboolean cancel_quit = FALSE;
-
-  cancel_quit = !can_all_tabs_be_saved();
+  is_app_closing = TRUE;
+  cancel_quit = !document_manager_can_all_tabs_be_saved(main_window.docmg);
+  is_app_closing = FALSE;
 
   if (cancel_quit) {
-    update_app_title();
+    update_app_title(document_manager_get_current_document(main_window.docmg));
   }
   return cancel_quit;
 }
@@ -157,7 +113,7 @@ gint main_window_key_press_event(GtkWidget   *widget, GdkEventKey *event,gpointe
       return TRUE;
     }
     else if (((event->state & (GDK_CONTROL_MASK | GDK_SHIFT_MASK))==(GDK_CONTROL_MASK | GDK_SHIFT_MASK)) && (event->keyval == GDK_space)) {
-      document_show_calltip_at_current_pos(main_window.current_document);
+      document_show_calltip_at_current_pos(document_manager_get_current_document(main_window.docmg));
       return TRUE;
     }
     else if ((event->state & GDK_CONTROL_MASK)==GDK_CONTROL_MASK && ((event->keyval == GDK_j) || (event->keyval == GDK_J)))  {
@@ -165,15 +121,15 @@ gint main_window_key_press_event(GtkWidget   *widget, GdkEventKey *event,gpointe
       return TRUE;
     }
     else if ((event->state & GDK_CONTROL_MASK)==GDK_CONTROL_MASK && ((event->keyval == GDK_F2)))  {
-         document_modify_current_line_marker(main_window.current_document);
+         document_modify_current_line_marker(document_manager_get_current_document(main_window.docmg));
       return TRUE;
     }
     else if ((event->keyval == GDK_F2))  {
-        document_find_next_marker(main_window.current_document);
+        document_find_next_marker(document_manager_get_current_document(main_window.docmg));
       return TRUE;
     }
     else if ((event->state & GDK_CONTROL_MASK)==GDK_CONTROL_MASK && (event->keyval == GDK_space)) { 
-      document_force_autocomplete(main_window.current_document);
+      document_force_autocomplete(document_manager_get_current_document(main_window.docmg));
       return TRUE;
     }
   }
@@ -183,7 +139,7 @@ gint main_window_key_press_event(GtkWidget   *widget, GdkEventKey *event,gpointe
 void on_new1_activate(GtkWidget *widget)
 {
   // Create a new untitled tab
-  add_new_document(TAB_FILE, NULL, 0);
+  document_manager_add_new_document(main_window.docmg, TAB_FILE, NULL, 0);
 }
 
 void open_file_ok(GtkFileChooser *file_selection)
@@ -195,7 +151,7 @@ void open_file_ok(GtkFileChooser *file_selection)
   filenames = gtk_file_chooser_get_uris(file_selection);
   
   for(walk = filenames; walk!= NULL; walk = g_slist_next(walk)) {
-    switch_to_file_or_open(walk->data, 0);
+    document_manager_switch_to_file_or_open(main_window.docmg, walk->data, 0);
   }
   g_slist_free(filenames);
 }
@@ -203,46 +159,14 @@ void open_file_ok(GtkFileChooser *file_selection)
 void reopen_recent(GtkRecentChooser *chooser, gpointer data) {
   gchar *filename = gtk_recent_chooser_get_current_uri  (chooser);
   if (!filename) return;
-  gphpedit_debug_message(DEBUG_MAIN_WINDOW,"filename: %s\n", filename);
-  switch_to_file_or_open(filename, 0);
+  gphpedit_debug_message(DEBUG_MAIN_WINDOW,"filename: %s", filename);
+  document_manager_switch_to_file_or_open(main_window.docmg, filename, 0);
   g_free(filename);
 }
 
 void on_openselected1_activate(GtkWidget *widget)
 {
-  GSList *li;
-  Document *document;
-  gchar *ac_buffer;
-  gchar *file;
-
-  ac_buffer = document_get_current_selected_text(main_window.current_document);
-  if (!ac_buffer){
-    for(li = editors; li!= NULL; li = g_slist_next(li)) {
-      document = li->data;
-      if (document) {
-         gchar *filename = document_get_filename(document);
-         file = filename_parent_uri(filename);
-         g_free(filename);
-           gphpedit_debug_message(DEBUG_MAIN_WINDOW,"file: %s\n", filename);
-
-        if (!strstr(ac_buffer, "://") && file) {
-          gchar *filetemp= g_strdup_printf("%s/%s",file, ac_buffer);
-          g_free(file);
-          file=g_strdup(filetemp);
-          g_free(filetemp);
-        }
-        else if (strstr(ac_buffer, "://")) {
-            if (file) g_free(file);
-            file = g_strdup(ac_buffer);
-        }
-        if(filename_file_exist(file)) switch_to_file_or_open(file,0);
-        if (file) {
-          g_free(file);
-        }
-      }
-    }
-  }
-  g_free(ac_buffer);
+  document_manager_open_selected(main_window.docmg);
 }
 void add_file_filters(GtkFileChooser *chooser){
   //store file filter
@@ -348,13 +272,13 @@ void on_open1_activate(GtkWidget *widget)
   //Add filters to the open dialog
   add_file_filters(GTK_FILE_CHOOSER(file_selection_box));
   last_opened_folder = get_preferences_manager_last_opened_folder(main_window.prefmg);
-  gphpedit_debug_message(DEBUG_MAIN_WINDOW,"last_opened_folder: %s\n", last_opened_folder);
+  gphpedit_debug_message(DEBUG_MAIN_WINDOW,"last_opened_folder: %s", last_opened_folder);
   /* opening of multiple files at once */
   gtk_file_chooser_set_select_multiple(GTK_FILE_CHOOSER(file_selection_box), TRUE);
-  gchar *filename = (gchar *)document_get_filename(main_window.current_document);
-  if (filename && !document_get_untitled(main_window.current_document)) {
+  gchar *filename = (gchar *)document_get_filename(document_manager_get_current_document(main_window.docmg));
+  if (filename && !document_get_untitled(document_manager_get_current_document(main_window.docmg))) {
     folder = filename_parent_uri(filename);
-      gphpedit_debug_message(DEBUG_MAIN_WINDOW,"folder: %s\n", folder);
+      gphpedit_debug_message(DEBUG_MAIN_WINDOW,"folder: %s", folder);
     gtk_file_chooser_set_current_folder_uri(GTK_FILE_CHOOSER(file_selection_box),  folder);
     g_free(folder);
   }
@@ -372,11 +296,11 @@ void save_file_as_ok(GtkFileChooser *file_selection_box)
 {
   gchar *uri=gtk_file_chooser_get_uri(file_selection_box);
   // Set the filename of the current document to be that
-  document_set_GFile(main_window.current_document, get_gfile_from_filename(uri));
-  document_set_untitled(main_window.current_document, FALSE);
+  document_set_GFile(document_manager_get_current_document(main_window.docmg), gtk_file_chooser_get_file(file_selection_box));
+  document_set_untitled(document_manager_get_current_document(main_window.docmg), FALSE);
   gchar *basename = filename_get_basename(uri);
   g_free(uri);
-  document_set_shortfilename(main_window.current_document, basename);
+  document_set_shortfilename(document_manager_get_current_document(main_window.docmg), basename);
 
   // Call Save method to actually save it now it has a filename
   on_save1_activate(NULL);
@@ -384,31 +308,21 @@ void save_file_as_ok(GtkFileChooser *file_selection_box)
 
 void on_save1_activate(GtkWidget *widget)
 {
-  if (main_window.current_document) {
+  if (document_manager_get_current_document(main_window.docmg)) {
     //if document is Untitled
-    if (document_get_untitled(main_window.current_document)) {
+    if (document_get_untitled(document_manager_get_current_document(main_window.docmg))) {
       on_save_as1_activate(widget);
     } else {
       /* show status in statusbar */
-      gphpedit_statusbar_flash_message (GPHPEDIT_STATUSBAR(main_window.appbar),0,_("Saving %s"), document_get_shortfilename(main_window.current_document));
-      document_save(main_window.current_document);
+      gphpedit_statusbar_flash_message (GPHPEDIT_STATUSBAR(main_window.appbar),0,_("Saving %s"), document_get_shortfilename(document_manager_get_current_document(main_window.docmg)));
+      document_save(document_manager_get_current_document(main_window.docmg));
     }
   }
 }
 
 void on_saveall1_activate(GtkWidget *widget)
 {
-  GSList *li;
-  Document *doc;
-  for(li = editors; li!= NULL; li = g_slist_next(li)) {
-    doc = li->data;
-    if (document_get_untitled(doc)){
-        gphpedit_debug_message(DEBUG_MAIN_WINDOW,"%s","Untitled found. Save not implemented\n");
-    } else {
-    document_save(doc);
-    }
-  }
-  classbrowser_update(GPHPEDIT_CLASSBROWSER(main_window.classbrowser));
+  document_manager_save_all(main_window.docmg);
 }
 
 
@@ -418,7 +332,7 @@ void on_save_as1_activate(GtkWidget *widget)
   gchar *filename;
   const gchar *last_opened_folder;
 
-  if (main_window.current_document) {
+  if (document_manager_get_current_document(main_window.docmg)) {
     // Create the selector widget
     file_selection_box = gtk_file_chooser_dialog_new (_("Please type the filename to save as..."), 
       GTK_WINDOW(main_window.window), GTK_FILE_CHOOSER_ACTION_SAVE, GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
@@ -428,16 +342,16 @@ void on_save_as1_activate(GtkWidget *widget)
     gtk_file_chooser_set_do_overwrite_confirmation (GTK_FILE_CHOOSER(file_selection_box), TRUE);
     gtk_dialog_set_default_response (GTK_DIALOG(file_selection_box), GTK_RESPONSE_ACCEPT);
     
-    if (main_window.current_document) {
-      filename = document_get_filename(main_window.current_document);
-      if (!document_get_untitled(main_window.current_document)) {
+    if (document_manager_get_current_document(main_window.docmg)) { //FIXME: rework this code
+      filename = document_get_filename(document_manager_get_current_document(main_window.docmg));
+      if (!document_get_untitled(document_manager_get_current_document(main_window.docmg))) {
           gtk_file_chooser_set_uri(GTK_FILE_CHOOSER(file_selection_box), filename);
       }
       else {
         last_opened_folder = get_preferences_manager_last_opened_folder(main_window.prefmg);
-          gphpedit_debug_message(DEBUG_MAIN_WINDOW,"last_opened_folder: %s\n", last_opened_folder);
+          gphpedit_debug_message(DEBUG_MAIN_WINDOW,"last_opened_folder: %s", last_opened_folder);
         if (last_opened_folder){
-            gphpedit_debug_message(DEBUG_MAIN_WINDOW,"Setting current_folder_uri to %s\n", last_opened_folder);
+            gphpedit_debug_message(DEBUG_MAIN_WINDOW,"Setting current_folder_uri to %s", last_opened_folder);
           gtk_file_chooser_set_current_folder_uri(GTK_FILE_CHOOSER(file_selection_box),  last_opened_folder);
         }
       }
@@ -451,7 +365,7 @@ void on_save_as1_activate(GtkWidget *widget)
 }
 void on_reload1_activate(GtkWidget *widget)
 {
-  if (!document_get_saved_status(main_window.current_document)) {
+  if (!document_get_saved_status(document_manager_get_current_document(main_window.docmg))) {
     GtkWidget *file_revert_dialog;
     file_revert_dialog = gtk_message_dialog_new(GTK_WINDOW(main_window.window),GTK_DIALOG_DESTROY_WITH_PARENT,GTK_MESSAGE_QUESTION,GTK_BUTTONS_YES_NO,
             _("Are you sure you wish to reload the current file, losing your changes?"));
@@ -459,34 +373,35 @@ void on_reload1_activate(GtkWidget *widget)
     gint result = gtk_dialog_run (GTK_DIALOG (file_revert_dialog));
     if (result==GTK_RESPONSE_YES) {
       gphpedit_statusbar_flash_message (GPHPEDIT_STATUSBAR(main_window.appbar),0,_("Opening %s"), 
-          document_get_shortfilename(main_window.current_document));
-    document_reload(main_window.current_document);
+          document_get_shortfilename(document_manager_get_current_document(main_window.docmg)));
+    document_reload(document_manager_get_current_document(main_window.docmg));
     }
     gtk_widget_destroy(file_revert_dialog);
   } else {
     gphpedit_statusbar_flash_message (GPHPEDIT_STATUSBAR(main_window.appbar),0,_("Opening %s"), 
-        document_get_shortfilename(main_window.current_document));
+        document_get_shortfilename(document_manager_get_current_document(main_window.docmg)));
     
-    document_reload(main_window.current_document);
+    document_reload(document_manager_get_current_document(main_window.docmg));
   }
 }
 
 void on_tab_close_activate(GtkWidget *widget, Document *document)
 {
-  try_close_page(document);
+  gphpedit_debug(DEBUG_MAIN_WINDOW);
+  document_manager_try_close_document(main_window.docmg, document);
   classbrowser_update(GPHPEDIT_CLASSBROWSER(main_window.classbrowser));
-  update_app_title();
+  update_app_title(document_manager_get_current_document(main_window.docmg));
 }
 
 void rename_file(GString *newfilename)
 {
   gchar *basename=filename_get_basename(newfilename->str);
-  gchar *filename = document_get_filename(main_window.current_document);
+  gchar *filename = document_get_filename(document_manager_get_current_document(main_window.docmg));
   if (filename_rename(filename, basename)){
   // Set the filename of the current document to be that
-  document_set_GFile(main_window.current_document, get_gfile_from_filename(newfilename->str));
-  document_set_untitled(main_window.current_document, FALSE);
-  document_set_shortfilename(main_window.current_document, basename);
+  document_set_GFile(document_manager_get_current_document(main_window.docmg), get_gfile_from_filename(newfilename->str));
+  document_set_untitled(document_manager_get_current_document(main_window.docmg), FALSE);
+  document_set_shortfilename(document_manager_get_current_document(main_window.docmg), basename);
   g_free(basename);
   // save as new filename
   on_save1_activate(NULL);
@@ -519,14 +434,14 @@ void on_rename1_activate(GtkWidget *widget)
 {
   GtkWidget *file_selection_box;
 
-  if (main_window.current_document) {
+  if (document_manager_get_current_document(main_window.docmg)) {
     // Create the selector widget
     file_selection_box = gtk_file_chooser_dialog_new(_("Please type the filename to rename this file to..."),
       GTK_WINDOW(main_window.window), GTK_FILE_CHOOSER_ACTION_SAVE, GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
       GTK_STOCK_SAVE, GTK_RESPONSE_ACCEPT, NULL);
     
-    if (main_window.current_document) {
-      gchar *filename = document_get_filename(main_window.current_document);
+    if (document_manager_get_current_document(main_window.docmg)) {
+      gchar *filename = document_get_filename(document_manager_get_current_document(main_window.docmg));
       gtk_file_chooser_set_filename (GTK_FILE_CHOOSER(file_selection_box), filename);
       g_free(filename);
     }
@@ -534,7 +449,6 @@ void on_rename1_activate(GtkWidget *widget)
     if (gtk_dialog_run (GTK_DIALOG(file_selection_box)) == GTK_RESPONSE_ACCEPT) {
       rename_file_ok(GTK_FILE_CHOOSER(file_selection_box));
     }
-
     gtk_widget_destroy(file_selection_box);
   }
 }
@@ -542,26 +456,20 @@ void on_rename1_activate(GtkWidget *widget)
 
 void set_active_tab(page_num)
 {
-  Document *new_current_editor;
-
-  new_current_editor = DOCUMENT(g_slist_nth_data(editors, page_num));
-
-  if (new_current_editor) {
-    //page_num = gtk_notebook_page_num(GTK_NOTEBOOK(main_window.notebook_editor),(new_current_editor->scintilla));
+  gphpedit_debug(DEBUG_MAIN_WINDOW);
+  if(document_manager_set_current_document_from_position(main_window.docmg, page_num)) {
     gtk_notebook_set_current_page(GTK_NOTEBOOK(main_window.notebook_editor), page_num);
   }
-
-  main_window.current_document = new_current_editor;
-
-  update_app_title();
-
+  update_app_title(document_manager_get_current_document(main_window.docmg));
 }
+
 void update_zoom_level(void){
-  gphpedit_statusbar_set_zoom_level((GphpeditStatusbar *)main_window.appbar, document_get_zoom_level(main_window.current_document));
+  gphpedit_debug(DEBUG_MAIN_WINDOW);
+  gphpedit_statusbar_set_zoom_level((GphpeditStatusbar *)main_window.appbar, document_get_zoom_level(document_manager_get_current_document(main_window.docmg)));
 }
 
 /**
- * Close a tab in the Editor. Removes the notebook page, frees the editor object,
+ * Close a tab in the Editor. Removes the notebook page,
  * and sets the active tab correcty
  * 
  * @param editor - The editor object corresponding to the tab that is going to be closed.
@@ -570,6 +478,7 @@ void update_zoom_level(void){
 
 void close_page(Document *document)
 {
+  gphpedit_debug(DEBUG_MAIN_WINDOW);
   gint page_num;
   gint page_num_closing;
   gint current_active_tab;
@@ -591,7 +500,6 @@ void close_page(Document *document)
   }
   set_active_tab(page_num);
   gtk_notebook_remove_page(GTK_NOTEBOOK(main_window.notebook_editor), page_num_closing);
-  g_object_unref(document);
 }
 
 /**
@@ -605,65 +513,12 @@ GdkPixbuf *get_window_icon (void){
   return pixbuf;
 }
 
-
-gboolean try_save_page(Document *document, gboolean close_if_can)
-{
-
-  GtkWidget *confirm_dialog;
-  gint ret;
-  GString *string;
-  string = g_string_new("");
-  confirm_dialog=gtk_message_dialog_new (GTK_WINDOW(main_window.window),GTK_DIALOG_DESTROY_WITH_PARENT,GTK_MESSAGE_WARNING,GTK_BUTTONS_NONE,_("The file '%s' has not been saved since your last changes, are you sure you want to close it and lose these changes?"), document_get_shortfilename(document));
-  gchar *filename = document_get_filename(document);
-  g_string_printf(string,_("Unsaved changes to '%s'"), filename);
-  g_free(filename);
-  gtk_window_set_title(GTK_WINDOW(confirm_dialog), string->str);
-  g_string_free(string,TRUE);
-  gtk_dialog_add_button (GTK_DIALOG(confirm_dialog),_("Close and _lose changes"),0);
-  gtk_dialog_add_button (GTK_DIALOG(confirm_dialog),_("_Save file"),1);
-  gtk_dialog_add_button (GTK_DIALOG(confirm_dialog),_("_Cancel closing"),2);
-  ret = gtk_dialog_run (GTK_DIALOG (confirm_dialog));
-  gtk_widget_destroy(confirm_dialog);
-  switch (ret) {
-    case 0:
-      if (close_if_can) {
-          close_page(document);
-          editors = g_slist_remove(editors, document);
-          if (!editors) {
-            main_window.current_document = NULL;
-          }
-      }
-      return TRUE;
-    case 1:
-      on_save1_activate(NULL);
-      // If chose neither of these, dialog either cancelled or closed. Do nothing.
-  }
-  return FALSE;
-}
-
-
-gboolean try_close_page(Document *document)
-{
-  if (document_get_can_save(document) && !document_get_saved_status(document) && !document_get_is_empty(document)) {
-    return try_save_page(document, TRUE);
-  }
-  else {
-    close_page(document);
-    editors = g_slist_remove(editors, document);
-    if (!editors) {
-      main_window.current_document = NULL;
-    }
-    return TRUE;
-  }
-}
-
-
 void on_close1_activate(GtkWidget *widget)
 {
-  if (main_window.current_document != NULL) {
-    try_close_page(main_window.current_document);
+  document_manager_try_close_current_document(main_window.docmg);
+    if(document_manager_get_document_count(main_window.docmg)!=0){
     classbrowser_update(GPHPEDIT_CLASSBROWSER(main_window.classbrowser));
-    update_app_title();
+    update_app_title(document_manager_get_current_document(main_window.docmg));
     update_zoom_level();
     classbrowser_force_label_update(GPHPEDIT_CLASSBROWSER(main_window.classbrowser));
   }
@@ -679,38 +534,38 @@ void on_quit1_activate(GtkWidget *widget)
 
 void on_cut1_activate(GtkWidget *widget)
 {
-  document_cut(main_window.current_document, main_window.clipboard);
+  document_cut(document_manager_get_current_document(main_window.docmg), main_window.clipboard);
 }
 
 void on_copy1_activate(GtkWidget *widget)
 {
-  document_copy(main_window.current_document, main_window.clipboard);
+  document_copy(document_manager_get_current_document(main_window.docmg), main_window.clipboard);
 }
 
 
 void selectiontoupper(void){
-  document_selection_to_upper(main_window.current_document);
+  document_selection_to_upper(document_manager_get_current_document(main_window.docmg));
 }
 
 void selectiontolower(void){
-  document_selection_to_lower(main_window.current_document);
+  document_selection_to_lower(document_manager_get_current_document(main_window.docmg));
 }
 
 void on_paste1_activate(GtkWidget *widget)
 {
-  document_paste(main_window.current_document, main_window.clipboard);
+  document_paste(document_manager_get_current_document(main_window.docmg), main_window.clipboard);
 }
 
 
 void on_selectall1_activate(GtkWidget *widget)
 {
-  document_select_all(main_window.current_document);
+  document_select_all(document_manager_get_current_document(main_window.docmg));
 }
 
 
 void on_find1_activate(GtkWidget *widget)
 {
-  if (main_window.current_document) {
+  if (document_manager_get_current_document(main_window.docmg)) {
     GtkWidget *find_dialog = search_dialog_new (GTK_WINDOW(main_window.window));
     gtk_widget_show(find_dialog);    
   }
@@ -719,7 +574,7 @@ void on_find1_activate(GtkWidget *widget)
 
 void on_replace1_activate(GtkWidget *widget)
 {
-  if (main_window.current_document) {
+  if (document_manager_get_current_document(main_window.docmg)) {
     GtkWidget *replace_dialog = replace_dialog_new (GTK_WINDOW(main_window.window));
     gtk_widget_show(replace_dialog);    
   }
@@ -727,24 +582,24 @@ void on_replace1_activate(GtkWidget *widget)
 
 void on_undo1_activate(GtkWidget *widget)
 {
-  document_undo(main_window.current_document);
+  document_undo(document_manager_get_current_document(main_window.docmg));
 }
 
 
 void on_redo1_activate(GtkWidget *widget)
 {
-  document_redo(main_window.current_document);
+  document_redo(document_manager_get_current_document(main_window.docmg));
 }
 
 
 void keyboard_macro_startstop(GtkWidget *widget)
 {
-  document_keyboard_macro_startstop(main_window.current_document);
+  document_keyboard_macro_startstop(document_manager_get_current_document(main_window.docmg));
 }
 
 void keyboard_macro_playback(GtkWidget *widget)
 {
-  document_keyboard_macro_playback(main_window.current_document);
+  document_keyboard_macro_playback(document_manager_get_current_document(main_window.docmg));
 }
 
 
@@ -763,12 +618,7 @@ void on_preferences1_activate(GtkWidget *widget)
 
 void context_help(GtkWidget *widget)
 {
-  gchar *buffer = NULL;
-
-  buffer = document_get_current_selected_text(main_window.current_document);
-  if (buffer){
-    add_new_document(TAB_HELP, buffer, 0);
-  }
+  document_manager_get_context_help(main_window.docmg);
 }
 
 /**
@@ -823,6 +673,7 @@ void on_about1_activate(GtkWidget *widget)
   gtk_widget_destroy(dialog);
 }
 void update_status_combobox(Document *document){
+      if (is_app_closing) return ;
       /* set statuscombo */
       switch(document_get_document_type(document)) {
         case(TAB_PHP):   
@@ -853,20 +704,14 @@ void update_status_combobox(Document *document){
 void on_notebook_switch_page (GtkNotebook *notebook, GtkNotebookPage *page,
                 gint page_num, gpointer user_data)
 {
-  Document *data;
   GtkWidget *child;
   child = gtk_notebook_get_nth_page(GTK_NOTEBOOK(main_window.notebook_editor), page_num);
-  data = document_manager_find_document ((void *) child);
-  if (data){
-    // Store it in the global main_window.current_editor value
-    main_window.current_document = data;
-    document_grab_focus(data);
-  } else {
-      gphpedit_debug_message(DEBUG_MAIN_WINDOW,_("Unable to get data for page %d\n"), page_num);
+  if(!document_manager_set_current_document_from_widget (main_window.docmg, child)){
+    gphpedit_debug_message(DEBUG_MAIN_WINDOW,_("Unable to get data for page %d"), page_num);
   }
   if (!is_app_closing) {
     // Change the title of the main application window to the full filename
-    update_app_title();
+    update_app_title(document_manager_get_current_document(main_window.docmg));
     on_tab_change_update_classbrowser(main_window.notebook_editor);
   }
   check_externally_modified();
@@ -875,7 +720,7 @@ void on_notebook_switch_page (GtkNotebook *notebook, GtkNotebookPage *page,
 gboolean on_notebook_focus_tab(GtkNotebook *notebook,
                  GtkNotebookTab arg1, gpointer user_data)
 {
-  document_grab_focus(main_window.current_document);
+  document_grab_focus(document_manager_get_current_document(main_window.docmg));
   return TRUE;
 }
 
@@ -884,14 +729,14 @@ void inc_search_typed (GtkEntry *entry, const gchar *text, gint length,
 {
   gchar *current_text;
   current_text = (gchar *)gtk_entry_get_text(entry);
-  document_incremental_search(main_window.current_document, current_text, FALSE);
+  document_incremental_search(document_manager_get_current_document(main_window.docmg), current_text, FALSE);
 }
 
 gboolean inc_search_key_release_event(GtkWidget *widget,GdkEventKey *event,gpointer user_data)
 {
   //Auto focus editor tab only if it is a scintilla tab
     if (event->keyval == GDK_Escape) {
-        document_grab_focus(main_window.current_document);
+        document_grab_focus(document_manager_get_current_document(main_window.docmg));
       return TRUE;
     }
 
@@ -909,7 +754,7 @@ void add_to_search_history(const gchar *current_text){
         }
     }
     set_preferences_manager_new_search_history_item(main_window.prefmg, i, current_text);
-    gphpedit_debug_message(DEBUG_MAIN_WINDOW,"added:%s\n",current_text);
+    gphpedit_debug_message(DEBUG_MAIN_WINDOW,"added:%s",current_text);
     toolbar_completion_add_text(TOOLBAR(main_window.toolbar_find), current_text);
 }
 
@@ -921,7 +766,7 @@ void inc_search_activate(GtkEntry *entry,gpointer user_data)
   //Inc search only if the current tab is not a help tab
   current_text = (gchar *)gtk_entry_get_text(entry);
 
-  document_incremental_search(main_window.current_document, current_text, TRUE);
+  document_incremental_search(document_manager_get_current_document(main_window.docmg), current_text, TRUE);
   add_to_search_history(current_text);
 
 }
@@ -944,13 +789,13 @@ void goto_line(gchar *text)
 {
   gint line;
   line = atoi(text);
-  document_goto_line(main_window.current_document,line);
+  document_goto_line(document_manager_get_current_document(main_window.docmg),line);
 }
 
 void goto_line_activate(GtkEntry *entry,gpointer user_data)
 {
   gchar *current_text;
-  if (main_window.current_document) {
+  if (document_manager_get_current_document(main_window.docmg)) {
     current_text = (gchar *)gtk_entry_get_text(entry);
     goto_line(current_text);
   }
@@ -959,38 +804,38 @@ void goto_line_activate(GtkEntry *entry,gpointer user_data)
 
 void block_indent(GtkWidget *widget)
 {
-  document_block_indent(main_window.current_document, get_preferences_manager_indentation_size(main_window.prefmg));
+  document_block_indent(document_manager_get_current_document(main_window.docmg), get_preferences_manager_indentation_size(main_window.prefmg));
 }
 
 
 void block_unindent(GtkWidget *widget)
 {
-  document_block_unindent(main_window.current_document, get_preferences_manager_indentation_size(main_window.prefmg));
+  document_block_unindent(document_manager_get_current_document(main_window.docmg), get_preferences_manager_indentation_size(main_window.prefmg));
 }
 
 //zoom in
 void zoom_in(GtkWidget *widget)
 {
-  document_zoom_in(main_window.current_document);
+  document_zoom_in(document_manager_get_current_document(main_window.docmg));
   update_zoom_level();
 }
 
 //zoom out
 void zoom_out(GtkWidget *widget)
 {
-  document_zoom_out(main_window.current_document);
+  document_zoom_out(document_manager_get_current_document(main_window.docmg));
   update_zoom_level();
 }
 
 void zoom_100(GtkWidget *widget)
 {
-  document_zoom_restore(main_window.current_document);
+  document_zoom_restore(document_manager_get_current_document(main_window.docmg));
   update_zoom_level();
 }
 
 void syntax_check(GtkWidget *widget)
 {
-   gtk_syntax_check_window_run_check(main_window.win, main_window.current_document);
+   gtk_syntax_check_window_run_check(main_window.win, document_manager_get_current_document(main_window.docmg));
 }
 
 
@@ -1028,36 +873,36 @@ void classbrowser_show_hide(GtkWidget *widget)
 
 void force_php(GtkWidget *widget)
 {
-    set_document_to_php(main_window.current_document);
+    set_document_to_php(document_manager_get_current_document(main_window.docmg));
 }
 
 void force_css(GtkWidget *widget)
 {
-    set_document_to_css(main_window.current_document);
+    set_document_to_css(document_manager_get_current_document(main_window.docmg));
 }
 
 void force_sql(GtkWidget *widget)
 {
-  set_document_to_sql(main_window.current_document);
+  set_document_to_sql(document_manager_get_current_document(main_window.docmg));
 }
 
 void force_cxx(GtkWidget *widget)
 {
-  set_document_to_cxx(main_window.current_document);
+  set_document_to_cxx(document_manager_get_current_document(main_window.docmg));
 }
 
 void force_perl(GtkWidget *widget)
 {
-    set_document_to_perl(main_window.current_document);
+    set_document_to_perl(document_manager_get_current_document(main_window.docmg));
 }
 
 void force_cobol(GtkWidget *widget)
 {
-  set_document_to_cobol(main_window.current_document);
+  set_document_to_cobol(document_manager_get_current_document(main_window.docmg));
 }
 void force_python(GtkWidget *widget)
 {
-  set_document_to_python(main_window.current_document);
+  set_document_to_python(document_manager_get_current_document(main_window.docmg));
 }
 
 //function to refresh treeview when the current tab changes 
@@ -1083,8 +928,8 @@ void process_external (GtkInfoBar *info_bar, gint response_id, Document *documen
 
 void check_externally_modified(void)
 {
-    if (document_check_externally_modified(main_window.current_document)){
-      gchar *filename = document_get_filename(main_window.current_document);
+    if (document_check_externally_modified(document_manager_get_current_document(main_window.docmg))){
+      gchar *filename = document_get_filename(document_manager_get_current_document(main_window.docmg));
       gchar *message=g_strdup_printf(_("The file %s has been externally modified. Do you want reload it?"), filename);
       g_free(filename);
       gtk_label_set_text (GTK_LABEL (main_window.infolabel), message);

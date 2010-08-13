@@ -208,9 +208,7 @@ static void tog_fullscreen(GtkWidget *widget, gpointer user_data)
 */
 static void showpreview (GtkWidget *widget, gpointer user_data)
 {
-  gchar *filename = document_get_filename(main_window.current_document);
-  add_new_document(TAB_PREVIEW, filename, 0);
-  g_free(filename);
+  document_manager_get_document_preview(main_window.docmg);
 }
 /*
  *size_change

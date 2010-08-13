@@ -27,25 +27,16 @@
 #include "tab.h"
 #include "classbrowser_parse.h"
 #include "gvfs_utils.h"
-
+#include "document_manager.h"
 static gchar *read_text_file(gchar *filename){
 
   gchar *buffer=NULL;
 
-  GSList *walk;
   Document *document;
-
-  for (walk = editors; walk != NULL; walk = g_slist_next (walk)) {
-    document = walk->data;
-    gchar *doc_filename = document_get_filename(document);
-    if (g_strcmp0(doc_filename,filename)==0) {
-          buffer = document_get_text(document);
-          gphpedit_debug_message(DEBUG_CLASSBROWSER,"%s", "Using document text\n");
-          g_free(doc_filename);
-          break;
-    }
-    g_free(doc_filename);
-  }
+  gphpedit_debug(DEBUG_CLASSBROWSER);
+  DocumentManager *docmg = document_manager_new();
+  document = document_manager_find_document_from_filename (docmg, filename);  
+  g_object_unref(docmg);
   if (!buffer){
     buffer = read_text_file_sync(filename);
   }
@@ -180,7 +171,7 @@ gint str_sec_print(gchar *label, gchar *pstart, gchar *pend, guint line_number) 
   teststring = g_malloc(length + 1);
   strncpy(teststring, pstart, length);
   teststring[length]='\0';
-  gphpedit_debug_message(DEBUG_CLASSBROWSER_PARSE, "%5d:%s: %s\n", line_number, label, teststring);
+  gphpedit_debug_message(DEBUG_CLASSBROWSER_PARSE, "%5d:%s: %s", line_number, label, teststring);
   g_free(teststring);
   return 0;
 }
@@ -299,7 +290,7 @@ void classbrowser_parse_file(Classbrowser_Backend *classback, gchar *filename)
       ///heredocs have custom closing tags. check it from the opening tag
       else if (within_heredoc && !looking_for_heredocident && *c=='\n' && (check_previous(o, c-1, heredoc_closingtag) || (*(c-1) == ';' && check_previous(o, c-2, heredoc_closingtag)))) {
       #ifdef DEBUG
-        gphpedit_debug_message(DEBUG_CLASSBROWSER_PARSE, "%s(%d): End Heredoc\n", filename, line_number);
+        gphpedit_debug_message(DEBUG_CLASSBROWSER_PARSE, "%s(%d): End Heredoc", filename, line_number);
         str_sec_print("HDS", hss, c, line_number);
       #endif
         g_free(heredoc_closingtag);
@@ -323,7 +314,7 @@ void classbrowser_parse_file(Classbrowser_Backend *classback, gchar *filename)
           strncpy(heredoc_closingtag, heredoc_tag_start, heredoctag_length);
           heredoc_closingtag[heredoctag_length]='\0';
           #ifdef DEBUG
-          gphpedit_debug_message(DEBUG_CLASSBROWSER_PARSE, "Expecting Heredoc closing tag: %s\n", heredoc_closingtag);
+          gphpedit_debug_message(DEBUG_CLASSBROWSER_PARSE, "Expecting Heredoc closing tag: %s", heredoc_closingtag);
           #endif
         }
         looking_for_heredocident = FALSE;
@@ -340,7 +331,7 @@ void classbrowser_parse_file(Classbrowser_Backend *classback, gchar *filename)
           within_single_string=TRUE;
           #ifdef DEBUG
           sss = c;
-          gphpedit_debug_message(DEBUG_CLASSBROWSER_PARSE,"Found Single Quoted String: %d\n", line_number);
+          gphpedit_debug_message(DEBUG_CLASSBROWSER_PARSE,"Found Single Quoted String: %d", line_number);
           #endif
         }
         //when does the second condition happen?
@@ -348,14 +339,14 @@ void classbrowser_parse_file(Classbrowser_Backend *classback, gchar *filename)
           within_double_string=TRUE;
           #ifdef DEBUG
           dss = c;
-          gphpedit_debug_message(DEBUG_CLASSBROWSER_PARSE, "Found Double Quoted String: %d\n", line_number);
+          gphpedit_debug_message(DEBUG_CLASSBROWSER_PARSE, "Found Double Quoted String: %d", line_number);
           #endif
         }
         //more efficient to call function only when needed hence the first check
         else if (*c == '<' && check_previous(o, c, "<<<")) {
           #ifdef DEBUG
           hss = c-2;
-          gphpedit_debug_message(DEBUG_CLASSBROWSER_PARSE, "%s(%d): Found Heredoc\n", filename, line_number);
+          gphpedit_debug_message(DEBUG_CLASSBROWSER_PARSE, "%s(%d): Found Heredoc", filename, line_number);
           #endif
           within_heredoc=TRUE;
           heredoc_tag_start = c+1;
@@ -365,7 +356,7 @@ void classbrowser_parse_file(Classbrowser_Backend *classback, gchar *filename)
         else if (*c == '/' && check_previous(o, c, "//")) {
           #ifdef DEBUG
           scs = c-1;
-          gphpedit_debug_message(DEBUG_CLASSBROWSER_PARSE, "%s(%d): Found Single Line Comment\n", filename, line_number);
+          gphpedit_debug_message(DEBUG_CLASSBROWSER_PARSE, "%s(%d): Found Single Line Comment", filename, line_number);
           #endif
           within_single_line_comment = TRUE;
         }
@@ -373,14 +364,14 @@ void classbrowser_parse_file(Classbrowser_Backend *classback, gchar *filename)
         else if (*c == '*' && check_previous(o, c, "/*")) {
           #ifdef DEBUG
           mcs = c-1;
-          gphpedit_debug_message(DEBUG_CLASSBROWSER_PARSE, "%s(%d): Found Multi Line Comment\n", filename, line_number);
+          gphpedit_debug_message(DEBUG_CLASSBROWSER_PARSE, "%s(%d): Found Multi Line Comment", filename, line_number);
           #endif
           within_multi_line_comment = TRUE;
         }
         else {
           if (check_previous(o, c, "class ") && non_letter_before(o, c, "class ")) {
             #ifdef DEBUG
-            gphpedit_debug_message(DEBUG_CLASSBROWSER_PARSE, "%s(%d): Found Class\n", filename, line_number);
+            gphpedit_debug_message(DEBUG_CLASSBROWSER_PARSE, "%s(%d): Found Class", filename, line_number);
             #endif
             looking_for_class_name = TRUE;
           }
@@ -398,20 +389,20 @@ void classbrowser_parse_file(Classbrowser_Backend *classback, gchar *filename)
             strncpy(within_class, start_class_name, class_length);
             within_class[class_length]='\0';
             #ifdef DEBUG
-              gphpedit_debug_message(DEBUG_CLASSBROWSER_PARSE, "%s(%d): Class '%s'\n", filename, line_number, within_class);
+              gphpedit_debug_message(DEBUG_CLASSBROWSER_PARSE, "%s(%d): Class '%s'", filename, line_number, within_class);
             #endif
             classbrowser_classlist_add(classback, within_class, filename, line_number,TAB_PHP);
             within_class_name = FALSE;
           }
           else if (check_previous(o, c, "function ") && non_letter_before(o, c, "function ")) {
             #ifdef DEBUG
-              gphpedit_debug_message(DEBUG_CLASSBROWSER_PARSE,"%s","Looking for function name\n");
+              gphpedit_debug_message(DEBUG_CLASSBROWSER_PARSE,"%s","Looking for function name");
             #endif
             looking_for_function_name = TRUE;
           }
           if (is_identifier_char(*c) && looking_for_function_name && !within_function_name) {
             #ifdef DEBUG
-              gphpedit_debug_message(DEBUG_CLASSBROWSER_PARSE,"%s", "Storing function name\n");
+              gphpedit_debug_message(DEBUG_CLASSBROWSER_PARSE,"%s", "Storing function name");
             #endif
             start_function_name = c;
             function_length = 0;
@@ -420,7 +411,7 @@ void classbrowser_parse_file(Classbrowser_Backend *classback, gchar *filename)
           }
           if ( (is_whitespace(*c) || is_opening_brace(*c) || is_opening_parenthesis(*c)) && within_function_name && function_length==0) {
             #ifdef DEBUG
-              gphpedit_debug_message(DEBUG_CLASSBROWSER_PARSE,"%s", "Found function\n");
+              gphpedit_debug_message(DEBUG_CLASSBROWSER_PARSE,"%s", "Found function");
             #endif
             function_length = (c - start_function_name);
             if (within_function) {
@@ -438,13 +429,13 @@ void classbrowser_parse_file(Classbrowser_Backend *classback, gchar *filename)
             if (within_class) {
               classbrowser_functionlist_add(classback,within_class, within_function, filename, TAB_PHP, line_number, NULL);
               #ifdef DEBUG
-                gphpedit_debug_message(DEBUG_CLASSBROWSER_PARSE, "%s(%d): Class method %s::%s\n", filename, line_number, within_class, within_function);
+                gphpedit_debug_message(DEBUG_CLASSBROWSER_PARSE, "%s(%d): Class method %s::%s", filename, line_number, within_class, within_function);
               #endif
             }
             else {
               classbrowser_functionlist_add(classback,NULL, within_function, filename, TAB_PHP, line_number, NULL);
               #ifdef DEBUG
-                gphpedit_debug_message(DEBUG_CLASSBROWSER_PARSE, "%s(%d): Function %s\n", filename, line_number, within_function);
+                gphpedit_debug_message(DEBUG_CLASSBROWSER_PARSE, "%s(%d): Function %s", filename, line_number, within_function);
               #endif
             }
           }
@@ -461,17 +452,16 @@ void classbrowser_parse_file(Classbrowser_Backend *classback, gchar *filename)
             param_list = g_malloc(param_list_length+1);
             strncpy(param_list, start_param_list, param_list_length);
             param_list[param_list_length]='\0';
-            //TODO: condense_param_list(&param_list);
             if (within_class) {
               classbrowser_functionlist_add(classback, within_class, within_function, filename, TAB_PHP, line_number, param_list);
               #ifdef DEBUG
-                gphpedit_debug_message(DEBUG_CLASSBROWSER_PARSE, "%s(%d): Class method %s::%s(%s)\n", filename, line_number, within_class, within_function, param_list);
+                gphpedit_debug_message(DEBUG_CLASSBROWSER_PARSE, "%s(%d): Class method %s::%s(%s)", filename, line_number, within_class, within_function, param_list);
               #endif
             }
             else {
               classbrowser_functionlist_add(classback, NULL, within_function, filename, TAB_PHP,line_number, param_list);
               #ifdef DEBUG
-                gphpedit_debug_message(DEBUG_CLASSBROWSER_PARSE, "%s(%d): Function %s(%s)\n", filename, line_number, within_function, param_list);
+                gphpedit_debug_message(DEBUG_CLASSBROWSER_PARSE, "%s(%d): Function %s(%s)", filename, line_number, within_function, param_list);
               #endif
             }
             within_function_param_list = FALSE;
@@ -491,11 +481,11 @@ void classbrowser_parse_file(Classbrowser_Backend *classback, gchar *filename)
                 } else {
                   if (strcmp(beforevarname,varname)==0){
                     #ifdef DEBUG
-                    gphpedit_debug_message(DEBUG_CLASSBROWSER_PARSE, "Duplicate variable: %s\n",varname);
+                    gphpedit_debug_message(DEBUG_CLASSBROWSER_PARSE, "Duplicate variable: %s",varname);
                     #endif
                   } else {
                     #ifdef DEBUG
-                    gphpedit_debug_message(DEBUG_CLASSBROWSER_PARSE, "Classbrowser var added:%s\n",varname);
+                    gphpedit_debug_message(DEBUG_CLASSBROWSER_PARSE, "Classbrowser var added:%s",varname);
                     #endif
                     classbrowser_varlist_add(classback, varname, within_function, filename);
                     g_free(beforevarname);
@@ -513,18 +503,18 @@ void classbrowser_parse_file(Classbrowser_Backend *classback, gchar *filename)
           if (is_opening_brace(*c)) {
             brace_count++;
             #ifdef DEBUG
-              gphpedit_debug_message(DEBUG_CLASSBROWSER_PARSE,"Brace count %d:%c\n", brace_count, *c);
+              gphpedit_debug_message(DEBUG_CLASSBROWSER_PARSE,"Brace count %d:%c", brace_count, *c);
             #endif
           }
           else if (is_closing_brace(*c)) {
             brace_count--;
             #ifdef DEBUG
-              gphpedit_debug_message(DEBUG_CLASSBROWSER_PARSE,"Brace count %d:%c\n", brace_count, *c);
+              gphpedit_debug_message(DEBUG_CLASSBROWSER_PARSE,"Brace count %d:%c", brace_count, *c);
             #endif
             if (brace_count == 0) {
               if (within_class) {
                 #ifdef DEBUG
-                  gphpedit_debug_message(DEBUG_CLASSBROWSER_PARSE, "Freeing class %s\n", within_class);
+                  gphpedit_debug_message(DEBUG_CLASSBROWSER_PARSE, "Freeing class %s", within_class);
                 #endif
                 g_free(within_class);
                 within_class = NULL;

@@ -28,6 +28,7 @@
 #include "filebrowser_backend.h"
 #include "tab.h"
 #include "preferences_manager.h"
+#include "document_manager.h"
 #include "gvfs_utils.h"
 
 #define MIME_ISDIR(string) (g_strcmp0(string, "inode/directory")==0)
@@ -366,7 +367,9 @@ void filebrowser_backend_refresh_folder (FilebrowserBackend *fbback){
 }
 
 void filebrowser_backend_open_file (FilebrowserBackend *fbback, gchar *filename){
-  switch_to_file_or_open(filename, 0);
+  DocumentManager *docmg = document_manager_new();
+  document_manager_switch_to_file_or_open(docmg,filename, 0);
+  g_object_unref(docmg);
 }
 
 void filebrowser_backend_delete_file(FilebrowserBackend *filebackend, gchar *filename){

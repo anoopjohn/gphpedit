@@ -156,7 +156,7 @@ static void commit (Input *self) {
     gtk_window_present(GTK_WINDOW(main_window.window));
     gphpedit_debug_message( DEBUG_IPC,"%s", "Presenting\n");
   } else {
-    switch_to_file_or_open((char*) self->buffer->data, 0);
+    document_manager_switch_to_file_or_open(main_window.docmg, (char*) self->buffer->data, 0);
     gphpedit_debug_message( DEBUG_IPC, "Opening %s\n", (char*) self->buffer->data);
   }
 

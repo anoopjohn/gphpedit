@@ -381,7 +381,7 @@ void plugin_run(Plugin *plugin, Document *document)
     }
     else if (g_str_has_prefix(stdout, "OPEN")){
       gphpedit_debug_message(DEBUG_PLUGINS,"Opening file :date: %s\n", data);
-      switch_to_file_or_open(data, 0);
+      document_manager_switch_to_file_or_open(main_window.docmg, data, 0);
     } else {
       g_print("Unexpected command\n");
     }

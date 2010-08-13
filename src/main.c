@@ -24,13 +24,13 @@
 
 #include <stdlib.h>
 #include <stdarg.h>
-#include "main.h"
 #include <gio/gio.h>
+#include <gconf/gconf-client.h>
+#include "main.h"
 #include "main_window.h"
 #include "main_window_callbacks.h"
 #include "gphpedit_ipc.h"
 #include "templates.h"
-#include <gconf/gconf-client.h>
 #include "classbrowser_ui.h"
 
 #include "debug.h"
@@ -64,11 +64,8 @@ int main (int argc, char **argv)
   main_window_create();
   force_config_folder();
   template_db_open();
-  main_window_open_command_line_files(argv, argc);
-  if (main_window.current_document == NULL) {
-    session_reopen();
-  }
-  update_app_title();
+  main_window.docmg = document_manager_new_full(argv, argc);
+  update_app_title(document_manager_get_current_document(main_window.docmg));
   classbrowser_update(GPHPEDIT_CLASSBROWSER(main_window.classbrowser));
   check_externally_modified();
   gtk_main();

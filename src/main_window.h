@@ -27,6 +27,7 @@
 
 #include "main.h"
 #include "document.h"
+#include "document_manager.h"
 #include "calltip.h"
 #include "tab.h"
 #include "menubar.h"
@@ -61,7 +62,7 @@ typedef struct
   /* syntax check widget */
   GtkSyntax_Check_Window *win;
 
-  Document *current_document;
+  DocumentManager *docmg;
 
   //widget for close side bar button
   GtkWidget *close_sidebar_button;
@@ -80,8 +81,7 @@ extern MainWindow main_window;
 void force_config_folder(void);
 void update_controls(void);
 void main_window_create(void);
-void main_window_open_command_line_files(char **argv, gint argc);
-void update_app_title(void);
+void update_app_title(Document *document);
 void main_window_pass_command_line_files(char **argv);
 gboolean channel_pass_filename_callback(GIOChannel *source, GIOCondition condition, gpointer data );
 void main_window_add_to_reopen_menu(gchar *full_filename);
