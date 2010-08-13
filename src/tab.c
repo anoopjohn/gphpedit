@@ -426,7 +426,7 @@ void tab_file_opened (GObject *source_object, GAsyncResult *res, gpointer user_d
   editor->contenttype=g_strdup(contenttype);
   GIcon *icon= g_file_info_get_icon (info); /* get Gicon for mimetype*/
   gchar *iconname=icon_name_from_icon(icon);
-  editor->file_icon=gtk_icon_theme_load_icon (gtk_icon_theme_get_default (), iconname, GTK_ICON_SIZE_MENU, 0, NULL); // get icon of size menu
+  editor->file_icon=gtk_icon_theme_load_icon (gtk_icon_theme_get_default (), iconname, 16, 0, NULL); // get icon of size menu
   g_free(iconname);
   g_file_info_get_modification_time (info,&editor->file_mtime);
   g_object_unref(info);
@@ -489,7 +489,7 @@ void tab_help_load_file(Editor *editor, GString *filename)
 #endif
   GIcon *icon= g_file_info_get_icon (info); /* get Gicon for mimetype*/
   gchar *iconname=icon_name_from_icon(icon);
-  editor->file_icon=gtk_icon_theme_load_icon (gtk_icon_theme_get_default (), iconname, GTK_ICON_SIZE_MENU, 0, NULL); // get icon of size menu
+  editor->file_icon=gtk_icon_theme_load_icon (gtk_icon_theme_get_default (), iconname, 16, 0, NULL); // get icon of size menu
   g_free(iconname);
   g_object_unref(info);
   if (!g_file_load_contents (file,NULL,&buffer, &nchars,NULL,&error)){
@@ -1140,7 +1140,7 @@ gboolean tab_create_new(gint type, GString *filename)
       }
       editor->is_untitled=TRUE;
       /* set default text icon */
-      editor->file_icon= gtk_icon_theme_load_icon (gtk_icon_theme_get_default (), "text-plain", GTK_ICON_SIZE_MENU, 0, NULL); // get icon of size menu
+      editor->file_icon= gtk_icon_theme_load_icon (gtk_icon_theme_get_default (), "text-plain", 16, 0, NULL); // get icon of size menu
     }
     // Hmmm, I had the same error as the following comment.  A reshuffle here and upgrading GtkScintilla2 to 0.1.0 seems to have fixed it
     if (!gtk_widget_get_visible(editor->scintilla)) gtk_widget_show (editor->scintilla);

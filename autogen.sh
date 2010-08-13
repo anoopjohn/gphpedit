@@ -30,6 +30,19 @@ find -type f \( -name missing -o -name install-sh -o -name mkinstalldirs \
 
 echo Running autoreconf...
 autoreconf -v -i -f
+echo Running intltoolize
+intltoolize --copy --force --automake
 
+# run ./autogen.sh --rebuild-po-files
+# to update po files with lastest strings from source code
+if [ $1 = "--rebuild-po-files" ]
+then
+echo Running configure
+./configure
+cd "po"
+make check
+make update-po
+else
 echo Running configure with arguments "$@"
 ./configure $@
+fi

@@ -20,6 +20,12 @@ dnl 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
 dnl
 AC_PREREQ([2.59])
 AC_INIT([gPHPEdit],[0.9.98],[https://savannah.nongnu.org/support/?group=gphpedit],[gphpedit],[http://www.gphpedit.org])
+
+dnl autoconf versions before 2.64 don't have AC_PACKAGE_URL
+m4_ifdef([AC_PACKAGE_URL],,
+  [AC_DEFINE([PACKAGE_URL], ["http://www.gphpedit.org"], [Define to the home page for this package.])
+   AC_SUBST([PACKAGE_URL], ["http://www.gphpedit.org"])])
+
 # give autoconf the name of a file whose existence is a hint that
 # autoconf has been started from the right directory.
 AC_CONFIG_SRCDIR([src/main.c])
@@ -49,9 +55,10 @@ AC_PROG_CPP
 AC_PROG_INSTALL
 AC_PROG_LN_S
 AC_PROG_MAKE_SET
-AC_LIBTOOL_DLOPEN
-AC_PROG_LIBTOOL
-AC_PROG_INTLTOOL
+
+# Initialize libtool
+LT_PREREQ([2.2.6])
+LT_INIT(disable-static)
 
 # Checks for libraries.
 
@@ -74,7 +81,6 @@ dnl  --------------
 # Checks for libraries.
 dnl Checking for the required libraries.
 GTK_REQUIRED_VERSION=2.20.0
-dnl LIBGNOMEUI_REQUIRED_VERSION=2.0.0
 GCONF_REQUIRED_VERSION=2.0.0
 
 PKG_CHECK_MODULES(GTK, gtk+-2.0 >= $GTK_REQUIRED_VERSION)
@@ -148,17 +154,11 @@ dnl  ------------------
 dnl ================================================================
 dnl Gettext stuff.
 dnl ================================================================
-
-GETTEXT_PACKAGE=gphpedit
-AC_SUBST(GETTEXT_PACKAGE)
-AC_DEFINE_UNQUOTED(GETTEXT_PACKAGE,"$GETTEXT_PACKAGE", [Gettext package])
-
+IT_PROG_INTLTOOL([0.40.0])
+AC_SUBST([GETTEXT_PACKAGE], [gphpedit])
+AM_GNU_GETTEXT_VERSION([0.17])
 AM_GLIB_GNU_GETTEXT
-
-dnl Please keep this in alphabetical order
-ALL_LINGUAS="de es ja"
-
-dnl AM_GNU_GETTEXT
+AC_DEFINE(GETTEXT_PACKAGE,[PACKAGE_TARNAME], [Gettext package])
 
 dnl AM_GLIB_GNU_GETTEXT sets $DATADIRNAME
  AC_MSG_CHECKING(locale directory)

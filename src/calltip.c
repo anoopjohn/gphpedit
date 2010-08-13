@@ -84,7 +84,7 @@ void function_list_prepare(void)
   #endif
   apifile = fopen(api_dir, "r");
   if( apifile != NULL ) {
-    php_api_tree=g_tree_new_full((GCompareDataFunc) strcmp, NULL, g_free, NULL);
+    php_api_tree=g_tree_new_full((GCompareDataFunc) g_utf8_collate, NULL, g_free, NULL);
     while( fgets( buffer, MAX_API_LINE_LENGTH, apifile ) != NULL ) {
       gchar *line=g_strdup(buffer);
       gchar *token_line = line;
@@ -114,7 +114,7 @@ void css_function_list_prepare(void)
   #endif
   apifile = fopen(api_dir, "r");
   if( apifile != NULL ) {
-    css_api_tree=g_tree_new_full((GCompareDataFunc) strcmp, NULL, g_free, NULL);
+    css_api_tree=g_tree_new_full((GCompareDataFunc) g_utf8_collate, NULL, g_free, NULL);
     while( fgets( buffer, MAX_API_LINE_LENGTH, apifile ) != NULL ) {
       gchar *line=g_strdup(buffer);
       gchar *token_line = line;
@@ -335,7 +335,6 @@ GString *get_cobol_completion_list(GtkWidget *scintilla, gint wordStart, gint wo
   #endif
   return completion_list;
 }
-
 
 GString *get_sql_completion_list(GtkWidget *scintilla, gint wordStart, gint wordEnd)
 {
