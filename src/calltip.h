@@ -27,7 +27,6 @@
 
 #include "main.h"
 
-void register_autoc_images(GtkScintilla *sci);
 gchar *show_call_tip(gint type, gchar *prefix);
 gchar *autocomplete_word(gchar *prefix);
 void function_list_prepare(void);

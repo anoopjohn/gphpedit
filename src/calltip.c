@@ -22,16 +22,15 @@
    The GNU General Public License is contained in the file COPYING.
 */
 
-#include <stdio.h>
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
 
+#include <stdio.h>
 #include "debug.h"
-
 #include "calltip.h"
 #include "tab.h"
-#include "images.h"
+//#include "images.h"
 #include "main_window.h"
 #include "classbrowser_ui.h"
 
@@ -69,13 +68,6 @@ gchar *sql_keywords[] = {"ADD", "ALL", "ALTER", "ANALYZE", "AND", "AS", "ASC", "
   "UNLOCK", "UNSIGNED", "UNTIL", "UPDATE", "USAGE", "USE", "USER_RESOURCES", 
   "USING", "VALUES", "VARBINARY", "VARCHAR", "VARCHARACTER", "VARYING", "WARNINGS", 
   "WHEN", "WHERE", "WHILE", "WITH", "WRITE", "XOR", "YEAR_MONTH", "ZEROFILL", NULL};
-
-void register_autoc_images(GtkScintilla *sci){
-  gtk_scintilla_register_image(sci, 1, (const gchar *) function_xpm);
-  gtk_scintilla_register_image(sci, 2, (const gchar *) bullet_blue_xpm);
-  gtk_scintilla_register_image(sci, 3, (const gchar *) variable_xpm);
-  gtk_scintilla_register_image(sci, 4, (const gchar *) class_xpm);
-}
 
 void function_list_prepare(void)
 {

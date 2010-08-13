@@ -39,7 +39,7 @@
 #include "gphpedit-statusbar.h"
 #include "classbrowser_ui.h"
 #include "classbrowser_parse.h"
-
+#include "images.h"
 /* lexer headers */
 #include "tab_cobol.h"
 #include "tab_css.h"
@@ -191,7 +191,6 @@ static void document_dispose (GObject *object)
 	if (docdet->file) g_object_unref(docdet->file);
 	if (docdet->file_icon) g_object_unref(docdet->file_icon);
   if (docdet->contenttype) g_free(docdet->contenttype);
-//	GSList *keyboard_macro_list;
   /* Chain up to the parent class */
   G_OBJECT_CLASS (document_parent_class)->dispose (object);
 }
@@ -352,6 +351,14 @@ void document_load(Document *document){
   DocumentDetails *docdet = DOCUMENT_GET_PRIVATE(document);
   document_loader_load_document(docdet->load);
 }
+
+static void register_autoc_images(GtkScintilla *sci){
+  gtk_scintilla_register_image(sci, 1, (const gchar *) function_xpm);
+  gtk_scintilla_register_image(sci, 2, (const gchar *) bullet_blue_xpm);
+  gtk_scintilla_register_image(sci, 3, (const gchar *) variable_xpm);
+  gtk_scintilla_register_image(sci, 4, (const gchar *) class_xpm);
+}
+
 void tab_set_general_scintilla_properties(Document *doc) 
 {
   DocumentDetails *docdet;
@@ -381,7 +388,7 @@ void tab_set_general_scintilla_properties(Document *doc)
   gtk_scintilla_set_margin_width_n (GTK_SCINTILLA(docdet->scintilla), 1, 14);
   gtk_scintilla_set_margin_sensitive_n(GTK_SCINTILLA(docdet->scintilla), 1, 1);
   g_signal_connect (G_OBJECT (docdet->scintilla), "margin_click", G_CALLBACK (margin_clicked), doc);
-
+  
   tab_set_configured_scintilla_properties(GTK_SCINTILLA(docdet->scintilla));
   gtk_widget_show (docdet->scintilla);
 }
