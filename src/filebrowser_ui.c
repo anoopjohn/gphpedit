@@ -308,7 +308,7 @@ gint _filebrowser_sort_func(GtkTreeModel * model, GtkTreeIter * a, GtkTreeIter *
   gtk_tree_model_get(GTK_TREE_MODEL (model), b, FILE_COLUMN, &nameb,MIME_COLUMN, &mimeb,-1);
   isdira = (mimea && MIME_ISDIR(mimea));
   isdirb = (mimeb && MIME_ISDIR(mimeb));
-  gphpedit_debug_message(DEBUG_FILEBROWSER, "isdira=%d, mimea=%s, isdirb=%d, mimeb=%s\n",isdira,mimea,isdirb,mimeb);
+  gphpedit_debug_message(DEBUG_FILEBROWSER, "isdira=%d, mimea=%s, isdirb=%d, mimeb=%s",isdira,mimea,isdirb,mimeb);
   if (isdira == isdirb) {    /* both files, or both directories */
     if (namea == nameb) {
       retval = 0;      /* both NULL */
@@ -684,7 +684,7 @@ void print_files (FilebrowserBackend *directory, gpointer user_data){
   GtkIconTheme *theme= gtk_icon_theme_get_default();
     for (l = get_filebrowser_backend_files(directory); l != NULL; l = g_slist_next (l)) {
       FOLDERFILE *current=(FOLDERFILE *) l->data;
-      gphpedit_debug_message(DEBUG_FILEBROWSER,"File added -> name: '%s' \tmime: '%s'\n",current->display_name,current->mime);
+      gphpedit_debug_message(DEBUG_FILEBROWSER,"File added -> name: '%s' \tmime: '%s'",current->display_name,current->mime);
       GdkPixbuf *p_file_image = NULL;
       /* get icon of size menu */
       GIcon *icon= g_icon_new_for_string (current->icon,NULL);

@@ -87,6 +87,12 @@ struct DocumentDetails
   gchar *contenttype;
 
   gchar *write_buffer; /*needed for save buffer*/  
+
+  /* external modified check widget */
+  GtkWidget *container;
+  GtkWidget *infobar;
+  GtkWidget *infolabel;
+
 };
 
 typedef struct
@@ -268,9 +274,91 @@ static void document_create_webkit(Document *doc, const gchar *buffer, gboolean 
   g_string_free(caption,TRUE);
 }
 
+void process_external (GtkInfoBar *info_bar, gint response_id, Document *document)
+{
+  if (response_id!=GTK_RESPONSE_CANCEL){
+    gchar *filename = document_get_filename(document);
+    gphpedit_statusbar_flash_message (GPHPEDIT_STATUSBAR(main_window.appbar),0,_("Opening %s"), filename); 
+    g_free(filename);
+    document_reload(document);
+  } else { 
+    document_update_modified_mark(document); /*set current time*/
+  }
+  gtk_widget_hide (GTK_WIDGET(info_bar));  
+}
+
+void check_externally_modified(Document *doc)
+{
+  if(!doc) return ;
+  DocumentDetails *docdet = DOCUMENT_GET_PRIVATE(doc);
+  if (!GTK_IS_SCINTILLA(docdet->scintilla)) return ;
+  if (document_check_externally_modified(doc)){
+    gchar *filename = document_get_filename(doc);
+    gchar *path = filename_get_relative_path(filename);
+    gchar *message= g_strdup_printf(_("<b>The file \"%s\" has been externally modified.</b>"), path);
+    g_free(filename);
+    g_free(path);
+    gtk_label_set_markup (GTK_LABEL (docdet->infolabel), message);
+    g_free(message);
+    gtk_widget_show (docdet->infobar);
+    return;
+  }
+  gtk_widget_hide (docdet->infobar);
+}
+
+
+static void create_infobar(Document *doc){
+  DocumentDetails *docdet = DOCUMENT_GET_PRIVATE(doc);
+	GtkWidget *image;
+	GtkWidget *vbox;
+	gchar *primary_markup;
+	gchar *secondary_markup;
+	GtkWidget *secondary_label; 
+
+  /* set up info bar */
+  docdet->infobar= gtk_info_bar_new_with_buttons(GTK_STOCK_REFRESH, 1, GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL, NULL);
+  gtk_info_bar_set_message_type (GTK_INFO_BAR(docdet->infobar), GTK_MESSAGE_WARNING);
+  GtkWidget *content_area = gtk_info_bar_get_content_area(GTK_INFO_BAR (docdet->infobar));
+  gtk_box_set_spacing(GTK_BOX (content_area), 0);
+
+  image = gtk_image_new_from_stock ("gtk-dialog-warning", GTK_ICON_SIZE_DIALOG);
+  gtk_box_pack_start (GTK_BOX (content_area), image, FALSE, FALSE, 0);
+  gtk_misc_set_alignment (GTK_MISC (image), 0.5, 0);
+  
+  vbox = gtk_vbox_new (FALSE, 6);
+  gtk_box_pack_start (GTK_BOX (content_area), vbox, TRUE, TRUE, 0);
+	
+  primary_markup = g_strdup_printf (_("<b>The file \"%s\" has been externally modified.</b>"),".");
+  docdet->infolabel = gtk_label_new (primary_markup);
+  g_free (primary_markup);
+  gtk_box_pack_start (GTK_BOX (vbox), docdet->infolabel, TRUE, TRUE, 0);
+  gtk_label_set_use_markup (GTK_LABEL (docdet->infolabel), TRUE);
+  gtk_label_set_line_wrap (GTK_LABEL (docdet->infolabel), TRUE);
+  gtk_misc_set_alignment (GTK_MISC (docdet->infolabel), 0, 0.5);
+  gtk_label_set_selectable (GTK_LABEL (docdet->infolabel), TRUE);
+
+  secondary_markup = g_strdup_printf ("<small>%s</small>", _("Do you want reload it?"));
+  secondary_label = gtk_label_new (secondary_markup);
+  g_free (secondary_markup);
+  gtk_box_pack_start (GTK_BOX (vbox), secondary_label, TRUE, TRUE, 0);
+  GTK_WIDGET_SET_FLAGS (secondary_label, GTK_CAN_FOCUS);
+  gtk_label_set_use_markup (GTK_LABEL (secondary_label), TRUE);
+  gtk_label_set_line_wrap (GTK_LABEL (secondary_label), TRUE);
+  gtk_label_set_selectable (GTK_LABEL (secondary_label), TRUE);
+  gtk_misc_set_alignment (GTK_MISC (secondary_label), 0, 0.5);
+  gtk_widget_show_all (content_area);
+
+  gtk_widget_show(docdet->infolabel);
+  g_signal_connect(docdet->infobar, "response", G_CALLBACK (process_external), doc);
+  gtk_box_pack_start(GTK_BOX(docdet->container), docdet->infobar, FALSE, FALSE, 0);
+}
+
 void create_new_document(Document *doc){
   DocumentDetails *docdet = DOCUMENT_GET_PRIVATE(doc);
+  docdet->container = gtk_vbox_new (FALSE, 0);
+  create_infobar(doc);
   docdet->scintilla = gtk_scintilla_new();
+  gtk_box_pack_end(GTK_BOX(docdet->container), docdet->scintilla, TRUE, TRUE, 0);
   tab_set_general_scintilla_properties(doc);
   docdet->label = gtk_label_new (_("Untitled"));
   gtk_widget_show (docdet->label);
@@ -279,6 +367,7 @@ void create_new_document(Document *doc){
   } else {
   docdet->short_filename = g_file_get_basename (docdet->file);
   }
+  gtk_widget_show (docdet->scintilla);
 }
 
 void document_done_loading_cb (DocumentLoader *doc, guint result, gpointer user_data){
@@ -305,7 +394,7 @@ void document_done_loading_cb (DocumentLoader *doc, guint result, gpointer user_
     tab_check_cobol_file(document); 
     tab_check_python_file(document); 
     tab_check_sql_file(document); 
-    gtk_widget_show (docdet->scintilla);
+    gtk_widget_show (docdet->container);
     gtk_scintilla_set_save_point(GTK_SCINTILLA(docdet->scintilla));
     tab_set_event_handlers(document);
     gtk_scintilla_goto_pos(GTK_SCINTILLA(docdet->scintilla), 0);
@@ -1422,7 +1511,7 @@ GtkWidget *document_get_editor_widget(Document *doc){
   if (!doc) return FALSE;
   DocumentDetails *docdet = DOCUMENT_GET_PRIVATE(doc);
   if (GTK_IS_SCINTILLA(docdet->scintilla)){
-    return docdet->scintilla;
+    return docdet->container;
   } else if (WEBKIT_IS_WEB_VIEW(docdet->help_view)){
     return docdet->help_scrolled_window;
   } else {

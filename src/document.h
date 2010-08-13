@@ -164,5 +164,6 @@ void document_add_text(Document *document, const gchar *text);
 void document_force_autocomplete(Document *document);
 void document_insert_template(Document *document, gchar *template);
 void document_incremental_search(Document *document, gchar *current_text, gboolean advancing);
+void check_externally_modified(Document *doc);
 #endif /* DOCUMENT_H */
 

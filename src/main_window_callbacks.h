@@ -96,7 +96,5 @@ void run_plugin(GtkWidget *widget, gpointer data);
 void close_all_tabs(void);
 gint on_tab_change_update_classbrowser(GtkWidget *widget);
 void on_tab_close_activate(GtkWidget *widget, Document *document);
-void process_external (GtkInfoBar *info_bar, gint response_id, Document *document);
-void check_externally_modified(void);
 gboolean main_window_activate_focus (GtkWidget *widget,GdkEventFocus *event,gpointer       user_data);
 #endif

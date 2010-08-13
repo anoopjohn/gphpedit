@@ -97,8 +97,6 @@ document_manager_class_init (DocumentManagerClass *klass)
 static void
 document_manager_init (DocumentManager * object)
 {
-//	DocumentManagerDetails *docdet;
-//	docdet = DOCUMENT_MANAGER_GET_PRIVATE(object);
 }
 
 /*
@@ -122,7 +120,6 @@ document_manager_finalize (GObject *object)
   DocumentManagerDetails *docdet;
 	docdet = DOCUMENT_MANAGER_GET_PRIVATE(doc);
   /* save current session */
-  g_print("count:%d\n", document_manager_get_document_count(doc));
   document_manager_session_save(DOCUMENT_MANAGER(object));
   document_manager_close_all_tabs(doc);  
   //free class data
@@ -378,7 +375,6 @@ void document_manager_session_reopen(DocumentManager *docmg)
   char *filename;
   int focus_tab=-1;
   gboolean focus_this_one = FALSE;
-
   session_file = g_string_new( g_get_home_dir());
   session_file = g_string_append(session_file, "/.gphpedit/session");
 
@@ -389,7 +385,6 @@ void document_manager_session_reopen(DocumentManager *docmg)
     strings = g_strsplit (content,"\n",0);
       int i=0;
       while (strings[i]){
-
         /* strings[i] contains possibly:
           file:///blah\n
           *file:///blah\n

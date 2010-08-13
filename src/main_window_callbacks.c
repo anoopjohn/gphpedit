@@ -88,7 +88,7 @@ gint main_window_key_press_event(GtkWidget   *widget, GdkEventKey *event,gpointe
 {
 
   if (main_window.notebook_editor != NULL) {
-    check_externally_modified();
+    check_externally_modified(document_manager_get_current_document(main_window.docmg));
     if (((event->state & (GDK_CONTROL_MASK | GDK_SHIFT_MASK))==(GDK_CONTROL_MASK | GDK_SHIFT_MASK)) && (event->keyval == GDK_ISO_Left_Tab)) {
       // Hack, for some reason when shift is held down keyval comes through as GDK_ISO_Left_Tab not GDK_Tab
       if (gtk_notebook_get_current_page(GTK_NOTEBOOK(main_window.notebook_editor)) == 0) {
@@ -714,7 +714,7 @@ void on_notebook_switch_page (GtkNotebook *notebook, GtkNotebookPage *page,
     update_app_title(document_manager_get_current_document(main_window.docmg));
     on_tab_change_update_classbrowser(main_window.notebook_editor);
   }
-  check_externally_modified();
+  check_externally_modified(document_manager_get_current_document(main_window.docmg));
 }
 
 gboolean on_notebook_focus_tab(GtkNotebook *notebook,
@@ -913,35 +913,8 @@ gint on_tab_change_update_classbrowser(GtkWidget *widget)
   return FALSE;
 }
 
-void process_external (GtkInfoBar *info_bar, gint response_id, Document *document)
-{
-  if (response_id==1){
-   gchar *filename = document_get_filename(document);
-   gphpedit_statusbar_flash_message (GPHPEDIT_STATUSBAR(main_window.appbar),0,_("Opening %s"), filename); 
-    g_free(filename);
-    document_reload(document);
-  } else { 
-   document_update_modified_mark(document); /*set current time*/
-  }
-  gtk_widget_hide (GTK_WIDGET(info_bar));  
-}
-
-void check_externally_modified(void)
-{
-    if (document_check_externally_modified(document_manager_get_current_document(main_window.docmg))){
-      gchar *filename = document_get_filename(document_manager_get_current_document(main_window.docmg));
-      gchar *message=g_strdup_printf(_("The file %s has been externally modified. Do you want reload it?"), filename);
-      g_free(filename);
-      gtk_label_set_text (GTK_LABEL (main_window.infolabel), message);
-      g_free(message);
-      gtk_widget_show (main_window.infobar);
-      return;
-    }
-  gtk_widget_hide (main_window.infobar);
-}
-
 gboolean main_window_activate_focus (GtkWidget *widget,GdkEventFocus *event, gpointer user_data)
 {
-  check_externally_modified();
+  check_externally_modified(document_manager_get_current_document(main_window.docmg));
   return FALSE;
 }

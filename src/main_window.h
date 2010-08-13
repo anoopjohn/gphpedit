@@ -43,8 +43,6 @@ typedef struct
   GtkWidget *window;
   GtkWidget *prinbox;
   GtkWidget *prin_hbox;
-  GtkWidget *infobar;
-  GtkWidget *infolabel;
   /* menu */
   GtkWidget *menu;
   /* toolbars */
@@ -78,7 +76,6 @@ MainWindow;
 
 extern MainWindow main_window;
 
-void force_config_folder(void);
 void update_controls(void);
 void main_window_create(void);
 void update_app_title(Document *document);

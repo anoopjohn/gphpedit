@@ -91,26 +91,6 @@ gboolean channel_pass_filename_callback(GIOChannel *source, GIOCondition conditi
   return FALSE;
 }
 
-void force_config_folder(void)
-{
-  GError *error=NULL;
-  GFile *config;
-  gchar *uri=g_strdup_printf("%s/%s",g_get_home_dir(),".gphpedit");
-  if (!filename_file_exist(uri)){
-    config=get_gfile_from_filename (uri);
-    if (!g_file_make_directory (config, NULL, &error)){
-      if (error->code !=G_IO_ERROR_EXISTS){
-        g_print(_("Unable to create ~/.gphpedit/ (%d) %s"), error->code,error->message);
-        exit(-1);
-        }
-        g_error_free(error);
-      }
-    g_object_unref(config);
-    error=NULL;
-  }
-  g_free(uri);
-}
-
 static void main_window_create_appbar(void)
 {
   main_window.appbar = gphpedit_statusbar_new ();
@@ -243,26 +223,13 @@ static void main_window_create_prinbox(void){
   gtk_container_add (GTK_CONTAINER (main_window.window), main_window.prinbox);
   gtk_widget_show (main_window.prinbox);
 }
+
 static void set_colormap(GtkWidget *window){
   /*Set RGBA colormap*/
   GdkScreen *screen= gtk_widget_get_screen (window);
   GdkColormap *colormap= gdk_screen_get_rgba_colormap (screen);
   if (colormap && gdk_screen_is_composited (screen)) gtk_widget_set_default_colormap (colormap);
   /*End set RGBA colormap*/
-}
-static void create_infobar(void){
-  /* set up info bar */
-  main_window.infobar= gtk_info_bar_new_with_buttons(_("Reload"), 1, _("Cancel"), 2, NULL);
-  gtk_info_bar_set_message_type (GTK_INFO_BAR(main_window.infobar), GTK_MESSAGE_WARNING);
-  main_window.infolabel = gtk_label_new("");
-  gtk_label_set_line_wrap(GTK_LABEL (main_window.infolabel), TRUE);
-  gtk_label_set_justify(GTK_LABEL (main_window.infolabel), GTK_JUSTIFY_FILL);
-  GtkWidget *content_area = gtk_info_bar_get_content_area(GTK_INFO_BAR (main_window.infobar));
-  gtk_box_set_spacing(GTK_BOX (content_area), 0);
-  gtk_box_pack_start(GTK_BOX (content_area), main_window.infolabel, FALSE, FALSE, 0);
-  gtk_widget_show(main_window.infolabel);
-  g_signal_connect(main_window.infobar, "response", G_CALLBACK (process_external), document_manager_get_current_document(main_window.docmg));
-  gtk_box_pack_start(GTK_BOX(main_window.prin_hbox), main_window.infobar, FALSE, FALSE, 0);
 }
 
 static void create_app_main_window(const gchar *title){
@@ -301,7 +268,6 @@ void main_window_create(void){
 
 
   main_window_create_panes();
-  create_infobar();
   main_window_fill_panes();
   main_window_create_appbar();
   

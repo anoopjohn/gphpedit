@@ -65,9 +65,6 @@ int main (int argc, char **argv)
   main_window_create();
   template_db_open();
   main_window.docmg = document_manager_new_full(argv, argc);
-  update_app_title(document_manager_get_current_document(main_window.docmg));
-  classbrowser_update(GPHPEDIT_CLASSBROWSER(main_window.classbrowser));
-  check_externally_modified();
   gtk_main();
         
   /* it makes sense to install sigterm handler that would call this too */
