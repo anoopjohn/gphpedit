@@ -1160,6 +1160,9 @@ void preferences_manager_restore_data(Preferences_Manager *preferences_manager){
   Preferences_ManagerDetails *prefdet;
 	prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
   clean_default_settings(prefdet);
+  prefdet->last_opened_folder = get_string("/gPHPEdit/general/last_opened_folder", (gchar *)g_get_home_dir());
+  prefdet->filebrowser_last_folder=get_string("/gPHPEdit/main_window/folderbrowser/folder", (gchar *)g_get_home_dir());
+
   load_default_settings(prefdet);
   g_hash_table_destroy (prefdet->styles_table); /* clean styles data */
   prefdet->styles_table= g_hash_table_new_full (g_str_hash, g_str_equal,NULL, clean_style);

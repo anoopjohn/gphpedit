@@ -397,6 +397,7 @@ void document_load_file_helper(DocumentLoader *doclod, gint action)
   g_file_info_get_modification_time (info,&file_mtime);
   document_set_mtime(docloddet->document, file_mtime);
   g_object_unref(info);
+  gtk_icon_info_free(ificon);
   /* Open file*/
   /*it's all ok, read file*/
   g_file_load_contents_async (docloddet->file, NULL, tab_file_opened, doclod); //FIXME:: cancellable???

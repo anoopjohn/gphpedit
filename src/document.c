@@ -427,6 +427,7 @@ static void document_create_new(Document *doc, gint type, gchar *filename, gint 
       abs_path = g_strdup(filename);
     }
   docdet->file= get_gfile_from_filename(abs_path);
+  g_free(abs_path);
   }
   if (type==TAB_HELP) docdet->help_function= g_strdup(filename);
   docdet->load = document_loader_new (doc, GTK_WINDOW(main_window.window));
@@ -1853,7 +1854,9 @@ void document_set_scintilla(Document *document, GtkWidget *scintilla)
   
   DocumentDetails *docdet = DOCUMENT_GET_PRIVATE(document);
   if (GTK_IS_SCINTILLA(scintilla)){
+  docdet->container = gtk_vbox_new (FALSE, 0);
   docdet->scintilla = scintilla;
+  gtk_box_pack_end(GTK_BOX(docdet->container), docdet->scintilla, TRUE, TRUE, 0);
   }
 }
 

@@ -527,14 +527,15 @@ void response_preferences (GtkDialog *dialog, gint response_id, gpointer   user_
   if (response_id == GTK_RESPONSE_DELETE_EVENT){
     preferences_manager_restore_data(main_window.prefmg);
   } else if (response_id == GTK_RESPONSE_ACCEPT){
-      apply_preferences(NULL, NULL);      
-      // Save the preferences definitely
-      preferences_manager_save_data_full(main_window.prefmg);
+    document_manager_refresh_properties_all(main_window.docmg);
+    // Save the preferences definitely
+    preferences_manager_save_data_full(main_window.prefmg);
   } else { //GTK_RESPONSE_REJECT
     preferences_manager_restore_data(main_window.prefmg);  
-    apply_preferences(NULL, NULL);
+    document_manager_refresh_properties_all(main_window.docmg);
   }
 }
+
 void change_font_global_callback(gint reply, gpointer data)
 {
   gchar *fontname;
@@ -1376,14 +1377,34 @@ GTK_STOCK_OK, GTK_RESPONSE_ACCEPT, GTK_STOCK_CANCEL, GTK_RESPONSE_REJECT, NULL);
   gtk_widget_show (preferences_dialog.autocomp);
   gtk_box_pack_start (GTK_BOX (preferences_dialog.prinbox), preferences_dialog.autocomp, FALSE, FALSE, 0);
 
+  GtkWidget *compbox = gtk_vbox_new (FALSE, 8);
+  gtk_widget_show (compbox);
+  gtk_container_add (GTK_CONTAINER (preferences_dialog.autocomp), compbox);
+
+
   preferences_dialog.autobrace = gtk_check_button_new_with_mnemonic (_("Auto-Completion of Brackets and Quotes"));
   /* set tooltip */
   gtk_widget_set_tooltip_text (preferences_dialog.autobrace,_("Auto-complete the closing brackets/quotes"));
   gtk_widget_show (preferences_dialog.autobrace);
-  gtk_container_add (GTK_CONTAINER (preferences_dialog.autocomp), preferences_dialog.autobrace);
+  gtk_container_add (GTK_CONTAINER (compbox), preferences_dialog.autobrace);
   gtk_container_set_border_width (GTK_CONTAINER (preferences_dialog.autobrace), 8);
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(preferences_dialog.autobrace), get_preferences_manager_auto_complete_braces(main_window.prefmg));
   g_signal_connect(G_OBJECT(GTK_CHECK_BUTTON(preferences_dialog.autobrace)), "toggled", G_CALLBACK(on_save_autobrace_toggle), NULL);
+
+  preferences_dialog.hbox19 = gtk_hbox_new (FALSE, 0);
+  gtk_widget_show (preferences_dialog.hbox19);
+  gtk_container_add (GTK_CONTAINER (compbox), preferences_dialog.hbox19);
+
+  preferences_dialog.label37 = gtk_label_new (_("Delay (calltip/function list):"));
+  gtk_widget_show (preferences_dialog.label37);
+  gtk_box_pack_start (GTK_BOX (preferences_dialog.hbox19), preferences_dialog.label37, FALSE, FALSE, 8);
+          
+  preferences_dialog.delay = gtk_hscale_new (GTK_ADJUSTMENT (gtk_adjustment_new (get_preferences_manager_calltip_delay(main_window.prefmg), 0, 2500, 0, 0, 0)));
+  gtk_widget_show (preferences_dialog.delay);
+  gtk_box_pack_start (GTK_BOX (preferences_dialog.hbox19), preferences_dialog.delay, TRUE, TRUE, 0);
+  g_signal_connect (G_OBJECT (GTK_HSCALE (preferences_dialog.delay)), "value_changed",
+                    G_CALLBACK (on_calltip_delay_changed), NULL);
+
 
 /*end autocompletion part*/
 
@@ -1627,7 +1648,7 @@ GTK_STOCK_OK, GTK_RESPONSE_ACCEPT, GTK_STOCK_CANCEL, GTK_RESPONSE_REJECT, NULL);
   document_set_readonly(preferences_dialog.highlighting_document, TRUE, TRUE);
   set_document_to_php(preferences_dialog.highlighting_document);
 
-  preferences_dialog.code_sample = document_get_editor_widget(preferences_dialog.highlighting_document);
+  preferences_dialog.code_sample = document_get_editor_widget (preferences_dialog.highlighting_document);
   gtk_widget_set_size_request (preferences_dialog.code_sample, 200, 200);
   gtk_widget_show (preferences_dialog.code_sample);
   gtk_box_pack_end (GTK_BOX (preferences_dialog.vbox10), preferences_dialog.code_sample, TRUE, TRUE, 0);
@@ -1759,24 +1780,10 @@ GTK_STOCK_OK, GTK_RESPONSE_ACCEPT, GTK_STOCK_CANCEL, GTK_RESPONSE_REJECT, NULL);
   g_signal_connect(G_OBJECT(preferences_dialog.shared_source),
                    "changed", G_CALLBACK(on_shared_source_changed),NULL);
 
-  preferences_dialog.hbox19 = gtk_hbox_new (FALSE, 0);
-  gtk_widget_show (preferences_dialog.hbox19);
-  gtk_box_pack_start (GTK_BOX (preferences_dialog.vbox7), preferences_dialog.hbox19, FALSE, TRUE, 8);
-  
-  preferences_dialog.label37 = gtk_label_new (_("Delay (calltip/function list):"));
-  gtk_widget_show (preferences_dialog.label37);
-  gtk_box_pack_start (GTK_BOX (preferences_dialog.hbox19), preferences_dialog.label37, FALSE, FALSE, 8);
-          
-  preferences_dialog.delay = gtk_hscale_new (GTK_ADJUSTMENT (gtk_adjustment_new (get_preferences_manager_calltip_delay(main_window.prefmg), 0, 2500, 0, 0, 0)));
-  gtk_widget_show (preferences_dialog.delay);
-  gtk_box_pack_start (GTK_BOX (preferences_dialog.hbox19), preferences_dialog.delay, TRUE, TRUE, 0);
-  g_signal_connect (G_OBJECT (GTK_HSCALE (preferences_dialog.delay)), "value_changed",
-                    G_CALLBACK (on_calltip_delay_changed), NULL);
-  
   preferences_dialog.hbox20 = gtk_hbox_new (FALSE, 0);
   gtk_widget_show (preferences_dialog.hbox20);
   gtk_box_pack_start (GTK_BOX (preferences_dialog.vbox7), preferences_dialog.hbox20, TRUE, TRUE, 8);
-  
+
   preferences_dialog.label38 = gtk_label_new (_("Templates:"));
   gtk_widget_show (preferences_dialog.label38);
   gtk_box_pack_start (GTK_BOX (preferences_dialog.hbox20), preferences_dialog.label38, FALSE, FALSE, 8);
@@ -1847,7 +1854,7 @@ GTK_STOCK_OK, GTK_RESPONSE_ACCEPT, GTK_STOCK_CANCEL, GTK_RESPONSE_REJECT, NULL);
 
   gtk_notebook_append_page (GTK_NOTEBOOK (preferences_dialog.notebook1),preferences_dialog.vbox7, preferences_dialog.label31);
  
-  preferences_dialog.apply_button = gtk_button_new_with_mnemonic (_("Apply"));
+  preferences_dialog.apply_button = gtk_button_new_from_stock(GTK_STOCK_APPLY);
   gtk_widget_show (preferences_dialog.apply_button);
   gtk_container_add (GTK_CONTAINER (gtk_dialog_get_action_area(GTK_DIALOG(preferences_dialog.window))),preferences_dialog.apply_button);
   g_signal_connect (G_OBJECT (preferences_dialog.apply_button),
