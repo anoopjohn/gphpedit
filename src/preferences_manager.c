@@ -50,12 +50,12 @@
 typedef struct
 {
   gchar *name; /* useful value */
-	gint color_back;
-	gchar *font;
-	gint color_fore;
-	gint font_size;
-	gboolean font_bold;
-	gboolean font_italic;
+  gint color_back;
+  gchar *font;
+  gint color_fore;
+  gint font_size;
+  gboolean font_bold;
+  gboolean font_italic;
 } Scintilla_Style;
 
 /*
@@ -64,14 +64,14 @@ typedef struct
 struct Preferences_ManagerDetails
 {
   /* important value */
-	gboolean save_session;
+  gboolean save_session;
 
-	/* Window session settings */
-	gint width;
-	gint height;
-	gint left;
-	gint top;
-	gboolean maximized;
+  /* Window session settings */
+  gint width;
+  gint height;
+  gint left;
+  gint top;
+  gboolean maximized;
 
   /* session settings*/
   gchar *last_opened_folder;
@@ -79,35 +79,35 @@ struct Preferences_ManagerDetails
   guint classbrowser_hidden:1;
   gint classbrowser_size;
   gchar *filebrowser_last_folder;
-	gboolean showfilebrowser;
+  gboolean showfilebrowser;
   guint showstatusbar:1;
   guint showmaintoolbar:1;
   guint showfindtoolbar:1;
-	// Default settings
-	gint set_sel_back;
-	gint marker_back;
-	gint indentation_size;
-	gint tab_size;
-	guint show_indentation_guides:1;
-	guint show_folding:1;
-	gint edge_mode;
-	gint edge_column;
-	gint edge_colour;
-	gchar *php_binary_location;
-	gchar *shared_source_location;
-	gchar *php_file_extensions;
+  // Default settings
+  gint set_sel_back;
+  gint marker_back;
+  gint indentation_size;
+  gint tab_size;
+  guint show_indentation_guides:1;
+  guint show_folding:1;
+  gint edge_mode;
+  gint edge_column;
+  gint edge_colour;
+  gchar *php_binary_location;
+  gchar *shared_source_location;
+  gchar *php_file_extensions;
 
-	guint auto_complete_braces:1;
-	guint higthlightcaretline:1;
-	gint higthlightcaretline_color;
-	//gint auto_indent_after_brace;
-	gint auto_complete_delay;
-	gint calltip_delay;
-	guint line_wrapping:1;
-	guint use_tabs_instead_spaces:1;
-	guint single_instance_only:1;
-	gint font_quality;	
-	GSList *search_history; /* for incremental search history */
+  guint auto_complete_braces:1;
+  guint higthlightcaretline:1;
+  gint higthlightcaretline_color;
+  //gint auto_indent_after_brace;
+  gint auto_complete_delay;
+  gint calltip_delay;
+  guint line_wrapping:1;
+  guint use_tabs_instead_spaces:1;
+  guint single_instance_only:1;
+  gint font_quality;  
+  GSList *search_history; /* for incremental search history */
   /* style_table:
   * has a list with styles of the diferent lexers.
   */
@@ -115,13 +115,13 @@ struct Preferences_ManagerDetails
 };
 
 #define PREFERENCES_MANAGER_GET_PRIVATE(object)(G_TYPE_INSTANCE_GET_PRIVATE ((object),\
-					    PREFERENCES_MANAGER_TYPE,\
-					    Preferences_ManagerDetails))
+              PREFERENCES_MANAGER_TYPE,\
+              Preferences_ManagerDetails))
 
 static gpointer parent_class;
 static void               preferences_manager_finalize         (GObject                *object);
 static void               preferences_manager_init             (gpointer                object,
-							       gpointer                klass);
+                     gpointer                klass);
 static void  preferences_manager_class_init (Preferences_ManagerClass *klass);
 static void preferences_manager_dispose (GObject *gobject);
 void load_default_settings(Preferences_ManagerDetails *prefdet);
@@ -193,14 +193,14 @@ preferences_manager_constructor (GType type,
 static void
 preferences_manager_class_init (Preferences_ManagerClass *klass)
 {
-	GObjectClass *object_class;
+  GObjectClass *object_class;
 
-	object_class = G_OBJECT_CLASS (klass);
+  object_class = G_OBJECT_CLASS (klass);
   parent_class = g_type_class_peek_parent (klass);
-	object_class->finalize = preferences_manager_finalize;
+  object_class->finalize = preferences_manager_finalize;
   object_class->dispose = preferences_manager_dispose;
   object_class->constructor = preferences_manager_constructor;
-	g_type_class_add_private (klass, sizeof (Preferences_ManagerDetails));
+  g_type_class_add_private (klass, sizeof (Preferences_ManagerDetails));
 }
 /*
 * clean_style (internal)
@@ -244,8 +244,8 @@ static void force_config_folder(void)
 static void
 preferences_manager_init (gpointer object, gpointer klass)
 {
-	Preferences_ManagerDetails *prefdet;
-	prefdet = PREFERENCES_MANAGER_GET_PRIVATE(object);
+  Preferences_ManagerDetails *prefdet;
+  prefdet = PREFERENCES_MANAGER_GET_PRIVATE(object);
   /* create config folder if doesn't exist */
 #if !GLIB_CHECK_VERSION (2, 24, 0)
   /* init gconf system */
@@ -269,7 +269,7 @@ static void preferences_manager_dispose (GObject *object)
   gphpedit_debug(DEBUG_PREFS);
   Preferences_Manager *pref = PREFERENCES_MANAGER(object);
   Preferences_ManagerDetails *prefdet;
-	prefdet = PREFERENCES_MANAGER_GET_PRIVATE(pref);
+  prefdet = PREFERENCES_MANAGER_GET_PRIVATE(pref);
   /* free object resources*/
   preferences_manager_save_data(pref);
   /* Chain up to the parent class */
@@ -281,20 +281,20 @@ preferences_manager_finalize (GObject *object)
 {
   Preferences_Manager *pref = PREFERENCES_MANAGER(object);
   Preferences_ManagerDetails *prefdet;
-	prefdet = PREFERENCES_MANAGER_GET_PRIVATE(pref);
+  prefdet = PREFERENCES_MANAGER_GET_PRIVATE(pref);
   clean_default_settings(prefdet);
   g_hash_table_destroy (prefdet->styles_table); /* clean data */
 
-	G_OBJECT_CLASS (parent_class)->finalize (object);
+  G_OBJECT_CLASS (parent_class)->finalize (object);
 }
 
 Preferences_Manager *preferences_manager_new (void)
 {
-	Preferences_Manager *pref;
+  Preferences_Manager *pref;
   pref = g_object_new (PREFERENCES_MANAGER_TYPE, NULL);
   Preferences_ManagerDetails *prefdet;
-	prefdet = PREFERENCES_MANAGER_GET_PRIVATE(pref);
-	return pref; /* return new object */
+  prefdet = PREFERENCES_MANAGER_GET_PRIVATE(pref);
+  return pref; /* return new object */
 }
 
 /*
@@ -320,7 +320,12 @@ gint preferences_manager_parse_font_quality(void){
   return SC_EFF_QUALITY_DEFAULT;
 }
 
-#define DEFAULT_DELAY 500
+gint get_default_delay(void){
+  gint delay;
+  g_object_get(G_OBJECT(gtk_settings_get_default()), "gtk-tooltip-timeout", &delay, NULL);
+  return delay;
+}
+
 #define DEFAULT_PHP_EXTENSIONS "php,inc,phtml,php3,xml,htm,html"
 
 void load_default_settings(Preferences_ManagerDetails *prefdet)
@@ -332,29 +337,30 @@ void load_default_settings(Preferences_ManagerDetails *prefdet)
   prefdet->shared_source_location = get_string("/gPHPEdit/locations/shared_source","");
 
   prefdet->indentation_size = get_size("/gPHPEdit/defaults/indentationsize",4); 
-	prefdet->tab_size = get_size("/gPHPEdit/defaults/tabsize",4); 
-	prefdet->auto_complete_delay = get_size("/gPHPEdit/defaults/auto_complete_delay", DEFAULT_DELAY);
-	prefdet->calltip_delay = get_size("/gPHPEdit/defaults/calltip_delay", DEFAULT_DELAY);
-	prefdet->show_indentation_guides = get_bool ("/gPHPEdit/defaults/showindentationguides",FALSE);
-	prefdet->show_folding = TRUE;//gconf_client_get_bool (config,"/gPHPEdit/defaults/showfolding",NULL);
-	prefdet->edge_mode = get_bool ("/gPHPEdit/defaults/edgemode",FALSE);
-	prefdet->edge_column = get_size("/gPHPEdit/defaults/edgecolumn", 80);
-	prefdet->edge_colour = get_color("/gPHPEdit/defaults/edgecolour","defaults",8355712);
-	prefdet->line_wrapping = get_color("/gPHPEdit/defaults/linewrapping","defaults", TRUE);
-	/* font quality */
-	prefdet->font_quality = preferences_manager_parse_font_quality();
-	prefdet->auto_complete_braces= get_bool("/gPHPEdit/defaults/autocompletebraces", FALSE);
-	prefdet->higthlightcaretline= get_bool("/gPHPEdit/defaults/higthlightcaretline", FALSE);
-	prefdet->higthlightcaretline_color= get_color("/gPHPEdit/defaults/higthlightcaretline_color","higthlightcaretline_color",13684944);
-	prefdet->save_session = get_color("/gPHPEdit/defaults/save_session","defaults", TRUE);
-	prefdet->use_tabs_instead_spaces = get_color("/gPHPEdit/defaults/use_tabs_instead_spaces","defaults", TRUE);
+  prefdet->tab_size = get_size("/gPHPEdit/defaults/tabsize",4); 
+  prefdet->auto_complete_delay = get_size("/gPHPEdit/defaults/auto_complete_delay", get_default_delay());
+  prefdet->calltip_delay = get_size("/gPHPEdit/defaults/calltip_delay", get_default_delay());
+
+  prefdet->show_indentation_guides = get_bool ("/gPHPEdit/defaults/showindentationguides",FALSE);
+  prefdet->show_folding = TRUE;//gconf_client_get_bool (config,"/gPHPEdit/defaults/showfolding",NULL);
+  prefdet->edge_mode = get_bool ("/gPHPEdit/defaults/edgemode",FALSE);
+  prefdet->edge_column = get_size("/gPHPEdit/defaults/edgecolumn", 80);
+  prefdet->edge_colour = get_color("/gPHPEdit/defaults/edgecolour","defaults",8355712);
+  prefdet->line_wrapping = get_color("/gPHPEdit/defaults/linewrapping","defaults", TRUE);
+  /* font quality */
+  prefdet->font_quality = preferences_manager_parse_font_quality();
+  prefdet->auto_complete_braces= get_bool("/gPHPEdit/defaults/autocompletebraces", FALSE);
+  prefdet->higthlightcaretline= get_bool("/gPHPEdit/defaults/higthlightcaretline", FALSE);
+  prefdet->higthlightcaretline_color= get_color("/gPHPEdit/defaults/higthlightcaretline_color","higthlightcaretline_color",13684944);
+  prefdet->save_session = get_color("/gPHPEdit/defaults/save_session","defaults", TRUE);
+  prefdet->use_tabs_instead_spaces = get_color("/gPHPEdit/defaults/use_tabs_instead_spaces","defaults", TRUE);
   prefdet->single_instance_only = get_color("/gPHPEdit/defaults/single_instance_only","defaults", TRUE);
   prefdet->php_file_extensions = get_string("/gPHPEdit/defaults/php_file_extensions",DEFAULT_PHP_EXTENSIONS);
-	prefdet->search_history= get_string_list("/gPHPEdit/search_history");
-	prefdet->showfilebrowser = get_color("/gPHPEdit/defaults/showfolderbrowser", "defaults",TRUE);
-	prefdet->showstatusbar = get_color("/gPHPEdit/defaults/showstatusbar", "defaults",TRUE);
-	prefdet->showmaintoolbar = get_color("/gPHPEdit/defaults/showmaintoolbar", "defaults",TRUE);
-	prefdet->showfindtoolbar = get_color("/gPHPEdit/defaults/showfindtoolbar", "defaults",TRUE);
+  prefdet->search_history= get_string_list("/gPHPEdit/search_history");
+  prefdet->showfilebrowser = get_color("/gPHPEdit/defaults/showfolderbrowser", "defaults",TRUE);
+  prefdet->showstatusbar = get_color("/gPHPEdit/defaults/showstatusbar", "defaults",TRUE);
+  prefdet->showmaintoolbar = get_color("/gPHPEdit/defaults/showmaintoolbar", "defaults",TRUE);
+  prefdet->showfindtoolbar = get_color("/gPHPEdit/defaults/showfindtoolbar", "defaults",TRUE);
 }
 
 void load_window_settings(Preferences_ManagerDetails *prefdet)
@@ -364,7 +370,7 @@ void load_window_settings(Preferences_ManagerDetails *prefdet)
   prefdet->top = get_color("/gPHPEdit/main_window/y","main_window",20);
   prefdet->width = get_color("/gPHPEdit/main_window/width","main_window",400);
   prefdet->height = get_color("/gPHPEdit/main_window/height","main_window",400);
-	prefdet->maximized = get_size("/gPHPEdit/main_window/maximized",0);
+  prefdet->maximized = get_size("/gPHPEdit/main_window/maximized",0);
 }
 
 void load_session_settings(Preferences_ManagerDetails *prefdet){
@@ -388,7 +394,7 @@ GSList *get_preferences_manager_search_history(Preferences_Manager *preferences_
 {
   g_return_val_if_fail (OBJECT_IS_PREFERENCES_MANAGER (preferences_manager), 0); /**/
   Preferences_ManagerDetails *prefdet;
-	prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
+  prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
   return prefdet->search_history;
 }
 /*
@@ -400,14 +406,14 @@ gboolean get_preferences_manager_classbrowser_status(Preferences_Manager *prefer
 {
   g_return_val_if_fail (OBJECT_IS_PREFERENCES_MANAGER (preferences_manager), 0); /**/
   Preferences_ManagerDetails *prefdet;
-	prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
+  prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
   return prefdet->classbrowser_hidden;
 }
 
 void set_preferences_manager_parse_classbrowser_status(Preferences_Manager *preferences_manager, gint new_status){
   if (!OBJECT_IS_PREFERENCES_MANAGER (preferences_manager)) return ;
   Preferences_ManagerDetails *prefdet;
-	prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
+  prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
   prefdet->classbrowser_hidden=new_status;
   set_int("/gPHPEdit/main_window/classbrowser_hidden",new_status);
 }
@@ -420,14 +426,14 @@ void set_preferences_manager_parse_classbrowser_status(Preferences_Manager *pref
 gint get_preferences_manager_classbrowser_get_size(Preferences_Manager *preferences_manager){
   g_return_val_if_fail (OBJECT_IS_PREFERENCES_MANAGER (preferences_manager), 0); /**/
   Preferences_ManagerDetails *prefdet;
-	prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
+  prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
   return prefdet->classbrowser_size;
 }
 
 void set_preferences_manager_classbrowser_size(Preferences_Manager *preferences_manager, gint new_size){
   if (!OBJECT_IS_PREFERENCES_MANAGER (preferences_manager)) return ;
   Preferences_ManagerDetails *prefdet;
-	prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
+  prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
   prefdet->classbrowser_size=new_size;
   set_int("/gPHPEdit/main_window/classbrowser_size",new_size);
 }
@@ -438,14 +444,14 @@ void set_preferences_manager_classbrowser_size(Preferences_Manager *preferences_
 gint get_preferences_manager_parse_only_current_file(Preferences_Manager *preferences_manager){
   g_return_val_if_fail (OBJECT_IS_PREFERENCES_MANAGER (preferences_manager), 0); /**/
   Preferences_ManagerDetails *prefdet;
-	prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
+  prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
   return prefdet->parseonlycurrentfile;
 }
 
 void set_preferences_manager_parse_only_current_file(Preferences_Manager *preferences_manager, gint new_status){
   if (!OBJECT_IS_PREFERENCES_MANAGER (preferences_manager)) return ;
   Preferences_ManagerDetails *prefdet;
-	prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
+  prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
   prefdet->parseonlycurrentfile=new_status;
   set_int("/gPHPEdit/classbrowser/onlycurrentfile",new_status);
 }
@@ -457,7 +463,7 @@ void set_preferences_manager_parse_only_current_file(Preferences_Manager *prefer
 const gchar *get_preferences_manager_last_opened_folder(Preferences_Manager *preferences_manager){
   g_return_val_if_fail (OBJECT_IS_PREFERENCES_MANAGER (preferences_manager), 0); /**/
   Preferences_ManagerDetails *prefdet;
-	prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
+  prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
   return prefdet->last_opened_folder;
 }
 /*
@@ -467,7 +473,7 @@ void set_preferences_manager_last_opened_folder(Preferences_Manager *preferences
   if (!OBJECT_IS_PREFERENCES_MANAGER (preferences_manager)) return ;
   if (!new_last_folder) return ;
   Preferences_ManagerDetails *prefdet;
-	prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
+  prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
   if (prefdet->last_opened_folder) g_free(prefdet->last_opened_folder);
   prefdet->last_opened_folder= g_strdup(new_last_folder);
   set_string ("/gPHPEdit/general/last_opened_folder", new_last_folder);
@@ -479,7 +485,7 @@ void set_preferences_manager_last_opened_folder(Preferences_Manager *preferences
 const gchar *get_preferences_manager_filebrowser_last_folder(Preferences_Manager *preferences_manager){
   g_return_val_if_fail (OBJECT_IS_PREFERENCES_MANAGER (preferences_manager), 0); /**/
   Preferences_ManagerDetails *prefdet;
-	prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
+  prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
   return prefdet->filebrowser_last_folder;
 }
 /*
@@ -488,7 +494,7 @@ const gchar *get_preferences_manager_filebrowser_last_folder(Preferences_Manager
 void set_preferences_manager_filebrowser_last_folder(Preferences_Manager *preferences_manager, const gchar *new_last_folder){
   if (!OBJECT_IS_PREFERENCES_MANAGER (preferences_manager)) return ;
   Preferences_ManagerDetails *prefdet;
-	prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
+  prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
   if (prefdet->filebrowser_last_folder) g_free(prefdet->filebrowser_last_folder);
   prefdet->filebrowser_last_folder= g_strdup(new_last_folder);
   set_string ("/gPHPEdit/main_window/folderbrowser/folder", new_last_folder);
@@ -498,7 +504,7 @@ gboolean get_preferences_manager_show_filebrowser(Preferences_Manager *preferenc
 {
   g_return_val_if_fail (OBJECT_IS_PREFERENCES_MANAGER (preferences_manager), 0); /**/
   Preferences_ManagerDetails *prefdet;
-	prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
+  prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
   return prefdet->showfilebrowser;
 }
 
@@ -506,7 +512,7 @@ void set_preferences_manager_show_filebrowser(Preferences_Manager *preferences_m
 {
   if (!OBJECT_IS_PREFERENCES_MANAGER (preferences_manager)) return ;
   Preferences_ManagerDetails *prefdet;
-	prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
+  prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
   prefdet->showfilebrowser = newstate; 
 
 }
@@ -515,7 +521,7 @@ gboolean get_preferences_manager_show_statusbar(Preferences_Manager *preferences
 {
   g_return_val_if_fail (OBJECT_IS_PREFERENCES_MANAGER (preferences_manager), 0); /**/
   Preferences_ManagerDetails *prefdet;
-	prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
+  prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
   return prefdet->showstatusbar;
 }
 
@@ -523,7 +529,7 @@ void set_preferences_manager_show_statusbar(Preferences_Manager *preferences_man
 {
   if (!OBJECT_IS_PREFERENCES_MANAGER (preferences_manager)) return ;
   Preferences_ManagerDetails *prefdet;
-	prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
+  prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
   prefdet->showstatusbar = newstate; 
 }
 
@@ -531,7 +537,7 @@ gboolean get_preferences_manager_show_findtoolbar(Preferences_Manager *preferenc
 {
   g_return_val_if_fail (OBJECT_IS_PREFERENCES_MANAGER (preferences_manager), 0); /**/
   Preferences_ManagerDetails *prefdet;
-	prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
+  prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
   return prefdet->showfindtoolbar;
 }
 
@@ -539,7 +545,7 @@ void set_preferences_manager_show_findtoolbar(Preferences_Manager *preferences_m
 {
   if (!OBJECT_IS_PREFERENCES_MANAGER (preferences_manager)) return ;
   Preferences_ManagerDetails *prefdet;
-	prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
+  prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
   prefdet->showfindtoolbar = newstate; 
 }
 
@@ -547,7 +553,7 @@ gboolean get_preferences_manager_show_maintoolbar(Preferences_Manager *preferenc
 {
   g_return_val_if_fail (OBJECT_IS_PREFERENCES_MANAGER (preferences_manager), 0); /**/
   Preferences_ManagerDetails *prefdet;
-	prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
+  prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
   return prefdet->showmaintoolbar;
 }
 
@@ -555,7 +561,7 @@ void set_preferences_manager_show_maintoolbar(Preferences_Manager *preferences_m
 {
   if (!OBJECT_IS_PREFERENCES_MANAGER (preferences_manager)) return ;
   Preferences_ManagerDetails *prefdet;
-	prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
+  prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
   prefdet->showmaintoolbar = newstate; 
 }
 
@@ -564,7 +570,7 @@ gint get_preferences_manager_window_height(Preferences_Manager *preferences_mana
 {
   g_return_val_if_fail (OBJECT_IS_PREFERENCES_MANAGER (preferences_manager), 0); /**/
   Preferences_ManagerDetails *prefdet;
-	prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
+  prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
   return prefdet->height;
 }
 
@@ -572,7 +578,7 @@ void set_preferences_manager_window_height(Preferences_Manager *preferences_mana
 {
   if (!OBJECT_IS_PREFERENCES_MANAGER (preferences_manager)) return ;
   Preferences_ManagerDetails *prefdet;
-	prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
+  prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
   prefdet->height = newstate; 
 
 }
@@ -581,7 +587,7 @@ gint get_preferences_manager_window_width(Preferences_Manager *preferences_manag
 {
   g_return_val_if_fail (OBJECT_IS_PREFERENCES_MANAGER (preferences_manager), 0); /**/
   Preferences_ManagerDetails *prefdet;
-	prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
+  prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
   return prefdet->width;
 }
 
@@ -589,7 +595,7 @@ void set_preferences_manager_window_width(Preferences_Manager *preferences_manag
 {
   if (!OBJECT_IS_PREFERENCES_MANAGER (preferences_manager)) return ;
   Preferences_ManagerDetails *prefdet;
-	prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
+  prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
   prefdet->width = newstate; 
 
 }
@@ -598,7 +604,7 @@ gint get_preferences_manager_window_left(Preferences_Manager *preferences_manage
 {
   g_return_val_if_fail (OBJECT_IS_PREFERENCES_MANAGER (preferences_manager), 0); /**/
   Preferences_ManagerDetails *prefdet;
-	prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
+  prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
   return prefdet->left;
 }
 
@@ -606,7 +612,7 @@ void set_preferences_manager_window_left(Preferences_Manager *preferences_manage
 {
   if (!OBJECT_IS_PREFERENCES_MANAGER (preferences_manager)) return ;
   Preferences_ManagerDetails *prefdet;
-	prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
+  prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
   prefdet->left = newstate; 
 
 }
@@ -615,7 +621,7 @@ gint get_preferences_manager_window_top(Preferences_Manager *preferences_manager
 {
   g_return_val_if_fail (OBJECT_IS_PREFERENCES_MANAGER (preferences_manager), 0); /**/
   Preferences_ManagerDetails *prefdet;
-	prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
+  prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
   return prefdet->top;
 }
 
@@ -623,7 +629,7 @@ void set_preferences_manager_window_top(Preferences_Manager *preferences_manager
 {
   if (!OBJECT_IS_PREFERENCES_MANAGER (preferences_manager)) return ;
   Preferences_ManagerDetails *prefdet;
-	prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
+  prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
   prefdet->top = newstate; 
 
 }
@@ -632,7 +638,7 @@ gboolean get_preferences_manager_window_maximized(Preferences_Manager *preferenc
 {
   g_return_val_if_fail (OBJECT_IS_PREFERENCES_MANAGER (preferences_manager), 0); /**/
   Preferences_ManagerDetails *prefdet;
-	prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
+  prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
   return prefdet->maximized;
 }
 
@@ -640,7 +646,7 @@ void set_preferences_manager_window_maximized(Preferences_Manager *preferences_m
 {
   if (!OBJECT_IS_PREFERENCES_MANAGER (preferences_manager)) return ;
   Preferences_ManagerDetails *prefdet;
-	prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
+  prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
   prefdet->maximized = newstate; 
 
 }
@@ -648,7 +654,7 @@ gint get_preferences_manager_indentation_size(Preferences_Manager *preferences_m
 {
   g_return_val_if_fail (OBJECT_IS_PREFERENCES_MANAGER (preferences_manager), 0); /**/
   Preferences_ManagerDetails *prefdet;
-	prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
+  prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
   return prefdet->indentation_size;
 }
 
@@ -656,7 +662,7 @@ void set_preferences_manager_indentation_size(Preferences_Manager *preferences_m
 {
   if (!OBJECT_IS_PREFERENCES_MANAGER (preferences_manager)) return ;
   Preferences_ManagerDetails *prefdet;
-	prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
+  prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
   prefdet->indentation_size = newstate; 
 
 }
@@ -665,7 +671,7 @@ const gchar *get_preferences_manager_php_binary_location(Preferences_Manager *pr
 {
   g_return_val_if_fail (OBJECT_IS_PREFERENCES_MANAGER (preferences_manager), 0); /**/
   Preferences_ManagerDetails *prefdet;
-	prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
+  prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
   return prefdet->php_binary_location;
 }
 
@@ -673,7 +679,7 @@ void set_preferences_manager_php_binary_location(Preferences_Manager *preference
 {
   if (!OBJECT_IS_PREFERENCES_MANAGER (preferences_manager)) return ;
   Preferences_ManagerDetails *prefdet;
-	prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
+  prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
   prefdet->php_binary_location = newstate; 
 
 }
@@ -682,7 +688,7 @@ gboolean get_preferences_manager_saved_session(Preferences_Manager *preferences_
 {
   g_return_val_if_fail (OBJECT_IS_PREFERENCES_MANAGER (preferences_manager), 0); /**/
   Preferences_ManagerDetails *prefdet;
-	prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
+  prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
   return prefdet->save_session;
 }
 
@@ -690,7 +696,7 @@ void set_preferences_manager_saved_session(Preferences_Manager *preferences_mana
 {
   if (!OBJECT_IS_PREFERENCES_MANAGER (preferences_manager)) return ;
   Preferences_ManagerDetails *prefdet;
-	prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
+  prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
   prefdet->save_session = newstate; 
 
 }
@@ -699,7 +705,7 @@ gint get_preferences_manager_font_quality(Preferences_Manager *preferences_manag
 {
   g_return_val_if_fail (OBJECT_IS_PREFERENCES_MANAGER (preferences_manager), 0); /**/
   Preferences_ManagerDetails *prefdet;
-	prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
+  prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
   return prefdet->font_quality;
 }
 
@@ -707,7 +713,7 @@ gboolean get_preferences_manager_line_wrapping(Preferences_Manager *preferences_
 {
   g_return_val_if_fail (OBJECT_IS_PREFERENCES_MANAGER (preferences_manager), 0); /**/
   Preferences_ManagerDetails *prefdet;
-	prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
+  prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
   return prefdet->line_wrapping;
 }
 
@@ -715,7 +721,7 @@ void set_preferences_manager_line_wrapping(Preferences_Manager *preferences_mana
 {
   if (!OBJECT_IS_PREFERENCES_MANAGER (preferences_manager)) return ;
   Preferences_ManagerDetails *prefdet;
-	prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
+  prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
   prefdet->line_wrapping = newstate; 
 
 }
@@ -724,7 +730,7 @@ gint get_preferences_manager_calltip_delay(Preferences_Manager *preferences_mana
 {
   g_return_val_if_fail (OBJECT_IS_PREFERENCES_MANAGER (preferences_manager), 0); /**/
   Preferences_ManagerDetails *prefdet;
-	prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
+  prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
   return prefdet->calltip_delay;
 }
 
@@ -732,7 +738,7 @@ void set_preferences_manager_calltip_delay(Preferences_Manager *preferences_mana
 {
   if (!OBJECT_IS_PREFERENCES_MANAGER (preferences_manager)) return ;
   Preferences_ManagerDetails *prefdet;
-	prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
+  prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
   prefdet->calltip_delay = newstate; 
 
 }
@@ -741,7 +747,7 @@ gint get_preferences_manager_auto_complete_delay(Preferences_Manager *preference
 {
   g_return_val_if_fail (OBJECT_IS_PREFERENCES_MANAGER (preferences_manager), 0); /**/
   Preferences_ManagerDetails *prefdet;
-	prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
+  prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
   return prefdet->auto_complete_delay;
 }
 
@@ -749,7 +755,7 @@ void set_preferences_manager_auto_complete_delay(Preferences_Manager *preference
 {
   if (!OBJECT_IS_PREFERENCES_MANAGER (preferences_manager)) return ;
   Preferences_ManagerDetails *prefdet;
-	prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
+  prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
   prefdet->auto_complete_delay = newstate; 
 
 }
@@ -758,7 +764,7 @@ gboolean get_preferences_manager_use_tabs_instead_spaces(Preferences_Manager *pr
 {
   g_return_val_if_fail (OBJECT_IS_PREFERENCES_MANAGER (preferences_manager), 0); /**/
   Preferences_ManagerDetails *prefdet;
-	prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
+  prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
   return prefdet->use_tabs_instead_spaces;
 }
 
@@ -766,7 +772,7 @@ void set_preferences_manager_use_tabs_instead_spaces(Preferences_Manager *prefer
 {
   if (!OBJECT_IS_PREFERENCES_MANAGER (preferences_manager)) return ;
   Preferences_ManagerDetails *prefdet;
-	prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
+  prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
   prefdet->use_tabs_instead_spaces = newstate; 
 
 }
@@ -776,7 +782,7 @@ gboolean get_preferences_manager_auto_complete_braces(Preferences_Manager *prefe
 {
   g_return_val_if_fail (OBJECT_IS_PREFERENCES_MANAGER (preferences_manager), 0); /**/
   Preferences_ManagerDetails *prefdet;
-	prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
+  prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
   return prefdet->auto_complete_braces;
 }
 
@@ -784,7 +790,7 @@ void set_preferences_manager_auto_complete_braces(Preferences_Manager *preferenc
 {
   if (!OBJECT_IS_PREFERENCES_MANAGER (preferences_manager)) return ;
   Preferences_ManagerDetails *prefdet;
-	prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
+  prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
   prefdet->auto_complete_braces = newstate; 
 
 }
@@ -793,7 +799,7 @@ gboolean get_preferences_manager_show_folding(Preferences_Manager *preferences_m
 {
   g_return_val_if_fail (OBJECT_IS_PREFERENCES_MANAGER (preferences_manager), 0); /**/
   Preferences_ManagerDetails *prefdet;
-	prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
+  prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
   return prefdet->show_folding;
 }
 
@@ -801,7 +807,7 @@ gboolean get_preferences_manager_single_instance_only(Preferences_Manager *prefe
 {
   g_return_val_if_fail (OBJECT_IS_PREFERENCES_MANAGER (preferences_manager), 0); /**/
   Preferences_ManagerDetails *prefdet;
-	prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
+  prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
   return prefdet->single_instance_only;
 }
 
@@ -809,7 +815,7 @@ void set_preferences_manager_single_instance_only(Preferences_Manager *preferenc
 {
   if (!OBJECT_IS_PREFERENCES_MANAGER (preferences_manager)) return ;
   Preferences_ManagerDetails *prefdet;
-	prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
+  prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
   prefdet->single_instance_only = newstate; 
 
 }
@@ -819,7 +825,7 @@ gboolean get_preferences_manager_higthlight_caret_line(Preferences_Manager *pref
 {
   g_return_val_if_fail (OBJECT_IS_PREFERENCES_MANAGER (preferences_manager), 0); /**/
   Preferences_ManagerDetails *prefdet;
-	prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
+  prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
   return prefdet->higthlightcaretline;
 }
 
@@ -827,7 +833,7 @@ void set_preferences_manager_higthlight_caret_line(Preferences_Manager *preferen
 {
   if (!OBJECT_IS_PREFERENCES_MANAGER (preferences_manager)) return ;
   Preferences_ManagerDetails *prefdet;
-	prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
+  prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
   prefdet->higthlightcaretline = newstate; 
 
 }
@@ -836,7 +842,7 @@ gboolean get_preferences_manager_higthlight_caret_line_color(Preferences_Manager
 {
   g_return_val_if_fail (OBJECT_IS_PREFERENCES_MANAGER (preferences_manager), 0); /**/
   Preferences_ManagerDetails *prefdet;
-	prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
+  prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
   return prefdet->higthlightcaretline_color;
 }
 
@@ -844,7 +850,7 @@ void set_preferences_manager_higthlight_caret_line_color(Preferences_Manager *pr
 {
   if (!OBJECT_IS_PREFERENCES_MANAGER (preferences_manager)) return ;
   Preferences_ManagerDetails *prefdet;
-	prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
+  prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
   prefdet->higthlightcaretline_color = newstate; 
 
 }
@@ -853,7 +859,7 @@ gboolean get_preferences_manager_show_indentation_guides(Preferences_Manager *pr
 {
   g_return_val_if_fail (OBJECT_IS_PREFERENCES_MANAGER (preferences_manager), 0); /**/
   Preferences_ManagerDetails *prefdet;
-	prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
+  prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
   return prefdet->show_indentation_guides;
 }
 
@@ -861,7 +867,7 @@ void set_preferences_manager_show_indentation_guides(Preferences_Manager *prefer
 {
   if (!OBJECT_IS_PREFERENCES_MANAGER (preferences_manager)) return ;
   Preferences_ManagerDetails *prefdet;
-	prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
+  prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
   prefdet->show_indentation_guides = newstate; 
 
 }
@@ -870,7 +876,7 @@ gboolean get_preferences_manager_edge_mode(Preferences_Manager *preferences_mana
 {
   g_return_val_if_fail (OBJECT_IS_PREFERENCES_MANAGER (preferences_manager), 0); /**/
   Preferences_ManagerDetails *prefdet;
-	prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
+  prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
   return prefdet->edge_mode;
 }
 
@@ -878,7 +884,7 @@ void set_preferences_manager_edge_mode(Preferences_Manager *preferences_manager,
 {
   if (!OBJECT_IS_PREFERENCES_MANAGER (preferences_manager)) return ;
   Preferences_ManagerDetails *prefdet;
-	prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
+  prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
   prefdet->edge_mode = newstate; 
 
 }
@@ -887,7 +893,7 @@ gint get_preferences_manager_edge_column(Preferences_Manager *preferences_manage
 {
   g_return_val_if_fail (OBJECT_IS_PREFERENCES_MANAGER (preferences_manager), 0); /**/
   Preferences_ManagerDetails *prefdet;
-	prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
+  prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
   return prefdet->edge_column;
 }
 
@@ -895,7 +901,7 @@ void set_preferences_manager_edge_column(Preferences_Manager *preferences_manage
 {
   if (!OBJECT_IS_PREFERENCES_MANAGER (preferences_manager)) return ;
   Preferences_ManagerDetails *prefdet;
-	prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
+  prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
   prefdet->edge_column = newstate; 
 
 }
@@ -904,7 +910,7 @@ gint get_preferences_manager_edge_colour(Preferences_Manager *preferences_manage
 {
   g_return_val_if_fail (OBJECT_IS_PREFERENCES_MANAGER (preferences_manager), 0); /**/
   Preferences_ManagerDetails *prefdet;
-	prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
+  prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
   return prefdet->edge_colour;
 }
 
@@ -912,7 +918,7 @@ void set_preferences_manager_edge_colour(Preferences_Manager *preferences_manage
 {
   if (!OBJECT_IS_PREFERENCES_MANAGER (preferences_manager)) return ;
   Preferences_ManagerDetails *prefdet;
-	prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
+  prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
   prefdet->edge_colour = newstate; 
 
 }
@@ -921,7 +927,7 @@ gint get_preferences_manager_set_sel_back(Preferences_Manager *preferences_manag
 {
   g_return_val_if_fail (OBJECT_IS_PREFERENCES_MANAGER (preferences_manager), 0); /**/
   Preferences_ManagerDetails *prefdet;
-	prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
+  prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
   return prefdet->set_sel_back;
 }
 
@@ -929,7 +935,7 @@ void set_preferences_manager_set_sel_back(Preferences_Manager *preferences_manag
 {
   if (!OBJECT_IS_PREFERENCES_MANAGER (preferences_manager)) return ;
   Preferences_ManagerDetails *prefdet;
-	prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
+  prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
   prefdet->set_sel_back = newstate; 
 
 }
@@ -938,7 +944,7 @@ gint get_preferences_manager_tab_size(Preferences_Manager *preferences_manager)
 {
   g_return_val_if_fail (OBJECT_IS_PREFERENCES_MANAGER (preferences_manager), 0); /**/
   Preferences_ManagerDetails *prefdet;
-	prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
+  prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
   return prefdet->tab_size;
 }
 
@@ -946,7 +952,7 @@ void set_preferences_manager_tab_size(Preferences_Manager *preferences_manager, 
 {
   if (!OBJECT_IS_PREFERENCES_MANAGER (preferences_manager)) return ;
   Preferences_ManagerDetails *prefdet;
-	prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
+  prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
   prefdet->tab_size = newstate; 
 
 }
@@ -955,7 +961,7 @@ gchar *get_preferences_manager_php_file_extensions(Preferences_Manager *preferen
 {
   g_return_val_if_fail (OBJECT_IS_PREFERENCES_MANAGER (preferences_manager), 0); /**/
   Preferences_ManagerDetails *prefdet;
-	prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
+  prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
   return prefdet->php_file_extensions;
 }
 
@@ -964,7 +970,7 @@ void set_preferences_manager_php_file_extensions(Preferences_Manager *preference
   if (!OBJECT_IS_PREFERENCES_MANAGER (preferences_manager)) return ;
   if (!newstate) return;
   Preferences_ManagerDetails *prefdet;
-	prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
+  prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
   prefdet->php_file_extensions = newstate; 
 
 }
@@ -973,14 +979,14 @@ gchar *get_preferences_manager_shared_source_location(Preferences_Manager *prefe
 {
   g_return_val_if_fail (OBJECT_IS_PREFERENCES_MANAGER (preferences_manager), 0); /**/
   Preferences_ManagerDetails *prefdet;
-	prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
+  prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
   return prefdet->shared_source_location;
 }
 void set_preferences_manager_shared_source_location(Preferences_Manager *preferences_manager, gchar *newstate)
 {
   if (!OBJECT_IS_PREFERENCES_MANAGER (preferences_manager)) return ;
   Preferences_ManagerDetails *prefdet;
-	prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
+  prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
   prefdet->shared_source_location = newstate; 
 }
 
@@ -988,7 +994,7 @@ GSList *get_preferences_manager_php_search_history(Preferences_Manager *preferen
 {
   g_return_val_if_fail (OBJECT_IS_PREFERENCES_MANAGER (preferences_manager), 0); /**/
   Preferences_ManagerDetails *prefdet;
-	prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
+  prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
   return prefdet->search_history;
 }
 
@@ -996,7 +1002,7 @@ void set_preferences_manager_new_search_history_item(Preferences_Manager *prefer
 {
   if (!OBJECT_IS_PREFERENCES_MANAGER (preferences_manager)) return ;
   Preferences_ManagerDetails *prefdet;
-	prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
+  prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
   prefdet->search_history = g_slist_prepend (prefdet->search_history, g_strdup(new_text));
 
     if (pos == MAXHISTORY){
@@ -1021,7 +1027,7 @@ void set_preferences_manager_new_search_history_item(Preferences_Manager *prefer
 void get_preferences_manager_style_settings(Preferences_Manager *preferences_manager, gchar *stylename, gchar **font , gint *size, gint *fore, gint *back, gboolean *italic, gboolean *bold)
 {
   Preferences_ManagerDetails *prefdet;
-	prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
+  prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
   Scintilla_Style *style = g_hash_table_lookup (prefdet->styles_table,stylename);
   if (!style) /*style not found set info to NULL to avoid crash */ {
     if (font) *font = NULL;
@@ -1057,7 +1063,7 @@ void get_preferences_manager_style_settings(Preferences_Manager *preferences_man
 void set_preferences_manager_style_settings(Preferences_Manager *preferences_manager, gchar *stylename, gchar *font , gint *size, gint *fore, gint *back, gboolean *italic, gboolean *bold)
 {
   Preferences_ManagerDetails *prefdet;
-	prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
+  prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
   Scintilla_Style *style = g_hash_table_lookup (prefdet->styles_table,stylename);
   if (!style) return;
   if (font) style->font = g_strdup(font);
@@ -1110,7 +1116,7 @@ void save_style_settings (gpointer key, gpointer value, gpointer user_data)
 void preferences_manager_save_data(Preferences_Manager *preferences_manager){
   gphpedit_debug(DEBUG_PREFS);
   Preferences_ManagerDetails *prefdet;
-	prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
+  prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
   /*store window  settings*/
   if (!prefdet->maximized) {
   set_int ("/gPHPEdit/main_window/x", prefdet->left);
@@ -1134,7 +1140,7 @@ void preferences_manager_save_data(Preferences_Manager *preferences_manager){
 void preferences_manager_save_data_full(Preferences_Manager *preferences_manager){
   gphpedit_debug(DEBUG_PREFS);
   Preferences_ManagerDetails *prefdet;
-	prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
+  prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
   preferences_manager_save_data(preferences_manager);  /* save session data */
   /* store style settings */
   g_hash_table_foreach (prefdet->styles_table, save_style_settings, NULL);
@@ -1145,22 +1151,22 @@ void preferences_manager_save_data_full(Preferences_Manager *preferences_manager
   set_string ("/gPHPEdit/locations/phpbinary", prefdet->php_binary_location);
   set_string ("/gPHPEdit/locations/shared_source", prefdet->shared_source_location);
   set_int ("/gPHPEdit/defaults/indentationsize", prefdet->indentation_size); 
-	set_int ("/gPHPEdit/defaults/tabsize", prefdet->tab_size); 
-	set_int ("/gPHPEdit/defaults/auto_complete_delay", prefdet->auto_complete_delay);
-	set_int ("/gPHPEdit/defaults/calltip_delay", prefdet->calltip_delay);
-	set_bool ("/gPHPEdit/defaults/showindentationguides", prefdet->show_indentation_guides);
-	prefdet->show_folding = TRUE;
-	set_bool ("/gPHPEdit/defaults/edgemode", prefdet->edge_mode);
-	set_int ("/gPHPEdit/defaults/edgecolumn", prefdet->edge_column);
-	set_int ("/gPHPEdit/defaults/edgecolour", prefdet->edge_colour);
-	set_bool ("/gPHPEdit/defaults/linewrapping", prefdet->line_wrapping);
-	/* font quality */
-	set_int ("/gPHPEdit/defaults/fontquality", prefdet->font_quality);
-	set_bool("/gPHPEdit/defaults/autocompletebraces", prefdet->auto_complete_braces);
-	set_bool ("/gPHPEdit/defaults/higthlightcaretline", prefdet->higthlightcaretline);
-	set_int ("/gPHPEdit/defaults/higthlightcaretline_color", prefdet->higthlightcaretline_color);
-	set_bool ("/gPHPEdit/defaults/save_session", prefdet->save_session);
-	set_bool ("/gPHPEdit/defaults/use_tabs_instead_spaces", prefdet->use_tabs_instead_spaces);
+  set_int ("/gPHPEdit/defaults/tabsize", prefdet->tab_size); 
+  set_int ("/gPHPEdit/defaults/auto_complete_delay", prefdet->auto_complete_delay);
+  set_int ("/gPHPEdit/defaults/calltip_delay", prefdet->calltip_delay);
+  set_bool ("/gPHPEdit/defaults/showindentationguides", prefdet->show_indentation_guides);
+  prefdet->show_folding = TRUE;
+  set_bool ("/gPHPEdit/defaults/edgemode", prefdet->edge_mode);
+  set_int ("/gPHPEdit/defaults/edgecolumn", prefdet->edge_column);
+  set_int ("/gPHPEdit/defaults/edgecolour", prefdet->edge_colour);
+  set_bool ("/gPHPEdit/defaults/linewrapping", prefdet->line_wrapping);
+  /* font quality */
+  set_int ("/gPHPEdit/defaults/fontquality", prefdet->font_quality);
+  set_bool("/gPHPEdit/defaults/autocompletebraces", prefdet->auto_complete_braces);
+  set_bool ("/gPHPEdit/defaults/higthlightcaretline", prefdet->higthlightcaretline);
+  set_int ("/gPHPEdit/defaults/higthlightcaretline_color", prefdet->higthlightcaretline_color);
+  set_bool ("/gPHPEdit/defaults/save_session", prefdet->save_session);
+  set_bool ("/gPHPEdit/defaults/use_tabs_instead_spaces", prefdet->use_tabs_instead_spaces);
   set_bool ("/gPHPEdit/defaults/single_instance_only", prefdet->single_instance_only);
   set_string ("/gPHPEdit/defaults/php_file_extensions", prefdet->php_file_extensions);
 }
@@ -1172,7 +1178,7 @@ void preferences_manager_save_data_full(Preferences_Manager *preferences_manager
 void preferences_manager_restore_data(Preferences_Manager *preferences_manager){
   gphpedit_debug(DEBUG_PREFS);
   Preferences_ManagerDetails *prefdet;
-	prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
+  prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
   clean_default_settings(prefdet);
   prefdet->last_opened_folder = get_string("/gPHPEdit/general/last_opened_folder", (gchar *)g_get_home_dir());
   prefdet->filebrowser_last_folder=get_string("/gPHPEdit/main_window/folderbrowser/folder", (gchar *)g_get_home_dir());
@@ -1216,7 +1222,7 @@ static void set_bool (const gchar *key, gboolean value)
 {
   GConfClient *config;
   config = gconf_client_get_default ();
-	gconf_client_set_bool (config,key, value, NULL);
+  gconf_client_set_bool (config,key, value, NULL);
   g_object_unref (G_OBJECT (config));
 }
 
@@ -1228,7 +1234,7 @@ static void set_string_list (const gchar *key, GSList *value)
 {
   GConfClient *config;
   config = gconf_client_get_default ();
-	gconf_client_set_list (config, key, GCONF_VALUE_STRING, value, NULL);
+  gconf_client_set_list (config, key, GCONF_VALUE_STRING, value, NULL);
   g_object_unref (G_OBJECT (config));
 }
 
@@ -1248,7 +1254,7 @@ static gchar *get_string(const gchar *key,gchar *default_string){
     if (error) g_error_free (error);
     return g_strdup(default_string);
   }
-	return temp;
+  return temp;
 }
 /*
 * get_size (internal)
@@ -1389,7 +1395,7 @@ gint load_style_size (const gchar *style_name){
 gboolean load_style_bold (const gchar *style_name){
   GConfClient *config = gconf_client_get_default ();
   gchar *key = g_strdup_printf("/gPHPEdit/%s/bold",style_name);
- 	gboolean result = gconf_client_get_bool(config, key, NULL);
+   gboolean result = gconf_client_get_bool(config, key, NULL);
   g_free(key);
   g_object_unref (G_OBJECT (config));
   return result;
@@ -1404,7 +1410,7 @@ gboolean load_style_bold (const gchar *style_name){
 gboolean load_style_italic (const gchar *style_name){
   GConfClient *config = gconf_client_get_default ();
   gchar *key = g_strdup_printf("/gPHPEdit/%s/italic",style_name);
- 	gboolean result = gconf_client_get_bool(config, key, NULL);
+   gboolean result = gconf_client_get_bool(config, key, NULL);
   g_free(key);
   g_object_unref (G_OBJECT (config));
   return result;
@@ -1421,11 +1427,11 @@ void load_style(Preferences_ManagerDetails *prefdet, const gchar *style_name, gi
   Scintilla_Style *style= g_slice_new(Scintilla_Style);  /* create new style */
   style->name = g_strdup(style_name);
   style->font = load_style_font_string(style_name);
-	style->color_fore = load_style_color_fore(style_name, default_fore);
-	style->color_back = load_style_color_back(style_name, default_back);
-	style->font_size = load_style_size(style_name);
-	style->font_bold = load_style_bold(style_name);
-	style->font_italic = load_style_italic(style_name);
+  style->color_fore = load_style_color_fore(style_name, default_fore);
+  style->color_back = load_style_color_back(style_name, default_back);
+  style->font_size = load_style_size(style_name);
+  style->font_bold = load_style_bold(style_name);
+  style->font_italic = load_style_italic(style_name);
   
   g_hash_table_insert (prefdet->styles_table, style->name, style); /* add style to hash table */
   
@@ -1495,7 +1501,7 @@ void load_styles(Preferences_ManagerDetails *prefdet)
   load_style(prefdet ,"c_word", DEFAULT_BACK_COLOR, 16746496);
   load_style(prefdet ,"c_commentline", DEFAULT_BACK_COLOR, 8421504);
   load_style(prefdet ,"c_number", DEFAULT_BACK_COLOR, 9204544);
-	load_style(prefdet ,"c_identifier", DEFAULT_BACK_COLOR, 1052688);
+  load_style(prefdet ,"c_identifier", DEFAULT_BACK_COLOR, 1052688);
   load_style(prefdet ,"c_comment", DEFAULT_BACK_COLOR, 8421594);
   load_style(prefdet ,"c_preprocesor", DEFAULT_BACK_COLOR, 7553165);
   load_style(prefdet ,"c_operator", DEFAULT_BACK_COLOR, 128);
