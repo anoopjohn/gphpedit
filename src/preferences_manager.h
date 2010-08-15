@@ -96,7 +96,6 @@ void set_preferences_manager_php_binary_location(Preferences_Manager *preference
 gboolean get_preferences_manager_saved_session(Preferences_Manager *preferences_manager);
 void set_preferences_manager_saved_session(Preferences_Manager *preferences_manager, gboolean newstate);
 gint get_preferences_manager_font_quality(Preferences_Manager *preferences_manager);
-void set_preferences_manager_font_quality(Preferences_Manager *preferences_manager, gint newstate);
 gboolean get_preferences_manager_line_wrapping(Preferences_Manager *preferences_manager);
 void set_preferences_manager_line_wrapping(Preferences_Manager *preferences_manager, gboolean newstate);
 gint get_preferences_manager_calltip_delay(Preferences_Manager *preferences_manager);

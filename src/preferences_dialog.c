@@ -69,22 +69,6 @@ static const gchar *font_sizes[CANT_SIZES] = {
   "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "20", "22", "24", "26", "28",
   "32", "36", "40", "48", "56", "64", "72"};
 
-static GList *get_font_qualities()
-{
-  GList *qualities = NULL;
-  
-/*
-+#define SC_EFF_QUALITY_DEFAULT 0
-+#define SC_EFF_QUALITY_NON_ANTIALIASED 1
-+#define SC_EFF_QUALITY_ANTIALIASED 2
-+#define SC_EFF_QUALITY_LCD_OPTIMIZED 3
-
-*/  
-  qualities = g_list_prepend(qualities, "Non Antialiased");
-  qualities = g_list_prepend(qualities, "LCD Optimized");  
-  qualities = g_list_prepend(qualities, "Default");
-  return qualities;
-}
 gchar sample_text[]= "<?php\n\n/* A class to implement a car\n   by Mr Somebody */\n\nclass Car extends Vehicle\n  implements EAccident\n{\n  private $PetrolTankFull = true;\n  protected $Name = \"betty\";\n  public $YearMade = 1999;\n\n  function __construct()\n  {\n    parent::__construct();\n    print \"Made $Name!\";\n  }\n  \n  private function go()\n  {\n    // Just go for it!\n    print 'Go!!!';\n  }\n}\n\n?>\n\n<html>\n <head>\n  <title>My test page</title>\n </head>\n\n <body>\n  <h1 class='winter'>Test</h1>\n </body>\n</html>  \n";
 #if 0
 GString *create_sample_text()
@@ -976,21 +960,6 @@ void on_edge_colour_changed(GtkColorButton *widget, gpointer user_data)
   set_preferences_manager_edge_colour(main_window.prefmg, scintilla_color(color.red >> 8, (color.green >> 8), (color.blue >> 8)));
 }
 
-void on_fontqualities_entry_changed(GtkEntry *Entry, gpointer data)
-{
-  gchar *texttemp=gtk_combo_box_get_active_text(GTK_COMBO_BOX(preferences_dialog.fontstyle));
-
-  if(g_strcmp0(texttemp,"Non Antialiased")==0){
-    set_preferences_manager_font_quality(main_window.prefmg, SC_EFF_QUALITY_NON_ANTIALIASED);    
-  } else if(g_strcmp0(texttemp,"LCD Optimized")==0){
-    set_preferences_manager_font_quality(main_window.prefmg, SC_EFF_QUALITY_LCD_OPTIMIZED);
-  } else {
-    /* set default */
-    set_preferences_manager_font_quality(main_window.prefmg, SC_EFF_QUALITY_DEFAULT);
-  }
-  g_free(texttemp);
-}
-
 /**
  * Callback registered for setting the selection background color from 
  * preferences dialog.
@@ -1531,36 +1500,6 @@ GTK_STOCK_OK, GTK_RESPONSE_ACCEPT, GTK_STOCK_CANCEL, GTK_RESPONSE_REJECT, NULL);
   gtk_widget_show (preferences_dialog.caretline_color);
   gtk_box_pack_start (GTK_BOX (preferences_dialog.colcaret), preferences_dialog.caretline_color, FALSE, FALSE, 0);
   g_signal_connect(G_OBJECT(GTK_COLOR_BUTTON(preferences_dialog.caretline_color)), "color-set", G_CALLBACK(on_caretline_back_changed), NULL);
-
-  /*  font quality */
-
-  preferences_dialog.hboxfs = gtk_frame_new (NULL);
-  gtk_widget_show (preferences_dialog.hboxfs);
-  gtk_box_pack_start (GTK_BOX (preferences_dialog.prinboxed), preferences_dialog.hboxfs, FALSE, FALSE, 0);
-
-  preferences_dialog.fontlabel = gtk_label_new (_("Font Quality"));
-  gtk_widget_show (preferences_dialog.fontlabel);
-  gtk_frame_set_label_widget (GTK_FRAME (preferences_dialog.hboxfs), preferences_dialog.fontlabel);
-
-  preferences_dialog.fontstyle = gtk_combo_box_entry_new_text ();
-  gtk_widget_show (preferences_dialog.fontstyle);
-  gtk_container_add (GTK_CONTAINER (preferences_dialog.hboxfs), preferences_dialog.fontstyle);
-  gtk_container_set_border_width (GTK_CONTAINER (preferences_dialog.fontstyle), 8);
-  
-  comboitems = get_font_qualities();
-  for (items = g_list_first(comboitems); items != NULL; items = g_list_next(items)) {
-    // Suggested by__tim in #Gtk+/Freenode to be able to find the item again from set_control_to_highlight
-    g_object_set_qdata (G_OBJECT (preferences_dialog.fontstyle), g_quark_from_string (items->data), 
-      GINT_TO_POINTER (gtk_tree_model_iter_n_children (gtk_combo_box_get_model (GTK_COMBO_BOX(preferences_dialog.fontstyle)), NULL)));
-    gtk_combo_box_append_text (GTK_COMBO_BOX (preferences_dialog.fontstyle), items->data);
-  }
-  g_signal_connect (G_OBJECT (GTK_COMBO_BOX (preferences_dialog.fontstyle)), "changed",
-                      G_CALLBACK (on_fontqualities_entry_changed),
-                      NULL);
-
-  g_list_free (comboitems);
-  /* set actual quality */
-  gtk_combo_box_set_active (GTK_COMBO_BOX(preferences_dialog.fontstyle), (get_preferences_manager_font_quality(main_window.prefmg)!=0)?get_preferences_manager_font_quality(main_window.prefmg) -1 :0);
 
 /*end editor page */
   preferences_dialog.lbled = gtk_label_new (_("Editor"));

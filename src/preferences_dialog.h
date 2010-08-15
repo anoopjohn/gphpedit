@@ -62,11 +62,6 @@ typedef struct
   GtkWidget *tab_size;
   GtkWidget *tabs_not_spaces;
 
-  GtkWidget *hboxfs;
-  GtkWidget *fontstyle;
-  GtkWidget *fontlabel;
-  GtkWidget *combostyleentry;
-
   /*Edge color*/
   GtkWidget *hbox15;
   GtkWidget *label33;

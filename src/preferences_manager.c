@@ -43,7 +43,7 @@
 #include "debug.h"
 #include "preferences_manager.h"
 #include "gvfs_utils.h"
-
+#include "document.h"
 
 #define MAXHISTORY 16
 
@@ -297,6 +297,29 @@ Preferences_Manager *preferences_manager_new (void)
 	return pref; /* return new object */
 }
 
+/*
+* preferences_manager_parse_font_quality
+* reads font quality from gnome gconf key or from GtkSettings 
+* and return corresponding scintilla font quality
+*/
+gint preferences_manager_parse_font_quality(void){
+  gchar *antialiasing = get_string("/desktop/gnome/font_rendering/antialiasing","default");
+  
+  if (g_strcmp0(antialiasing,"none")==0){
+      return SC_EFF_QUALITY_NON_ANTIALIASED;
+  } else if (g_strcmp0(antialiasing,"grayscale")==0){
+    return SC_EFF_QUALITY_ANTIALIASED;
+  } else if (g_strcmp0(antialiasing,"rgba")==0){
+    return SC_EFF_QUALITY_LCD_OPTIMIZED;
+  }
+  /* gconf key not found, try GtkSettings value */
+  gint x;
+  g_object_get(G_OBJECT(gtk_settings_get_default()), "gtk-xft-antialias", &x, NULL);
+  if (x == 0) return SC_EFF_QUALITY_NON_ANTIALIASED;
+  if (x == 1) return SC_EFF_QUALITY_ANTIALIASED;
+  return SC_EFF_QUALITY_DEFAULT;
+}
+
 #define DEFAULT_DELAY 500
 #define DEFAULT_PHP_EXTENSIONS "php,inc,phtml,php3,xml,htm,html"
 
@@ -319,7 +342,7 @@ void load_default_settings(Preferences_ManagerDetails *prefdet)
 	prefdet->edge_colour = get_color("/gPHPEdit/defaults/edgecolour","defaults",8355712);
 	prefdet->line_wrapping = get_color("/gPHPEdit/defaults/linewrapping","defaults", TRUE);
 	/* font quality */
-	prefdet->font_quality = get_size("/gPHPEdit/defaults/fontquality", 0);
+	prefdet->font_quality = preferences_manager_parse_font_quality();
 	prefdet->auto_complete_braces= get_bool("/gPHPEdit/defaults/autocompletebraces", FALSE);
 	prefdet->higthlightcaretline= get_bool("/gPHPEdit/defaults/higthlightcaretline", FALSE);
 	prefdet->higthlightcaretline_color= get_color("/gPHPEdit/defaults/higthlightcaretline_color","higthlightcaretline_color",13684944);
@@ -678,15 +701,6 @@ gint get_preferences_manager_font_quality(Preferences_Manager *preferences_manag
   Preferences_ManagerDetails *prefdet;
 	prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
   return prefdet->font_quality;
-}
-
-void set_preferences_manager_font_quality(Preferences_Manager *preferences_manager, gint newstate)
-{
-  if (!OBJECT_IS_PREFERENCES_MANAGER (preferences_manager)) return ;
-  Preferences_ManagerDetails *prefdet;
-	prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
-  prefdet->font_quality = newstate; 
-
 }
 
 gboolean get_preferences_manager_line_wrapping(Preferences_Manager *preferences_manager)
