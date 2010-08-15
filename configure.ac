@@ -149,11 +149,9 @@ if test "$php_doc_dir" != ""; then
  AC_DEFINE_UNQUOTED(PHP_DOC_DIR, "$php_doc_dir",
 	[php-doc directory])
 fi
-dnl define default font and font size
-AC_DEFINE_UNQUOTED(DEFAULT_FONT, "!Sans",[default font])
-AC_DEFINE_UNQUOTED(DEFAULT_FONT_SIZE, 12,[default font size])
+
 dnl define default translate url
-AC_DEFINE_UNQUOTED(TRANSLATE_URL, "https://www.transifex.net/projects/p/gphpedit/c/main/",[default tranlate url])
+AC_DEFINE_UNQUOTED(TRANSLATE_URL, "https://www.transifex.net/projects/p/gphpedit/c/main/",[default translate url])
 
 dnl  ------------------
 dnl | language support |-------------------------------------------------------
