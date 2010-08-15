@@ -63,6 +63,9 @@ typedef struct
 */
 struct Preferences_ManagerDetails
 {
+  gchar *default_font;
+  gint default_size;
+
   /* important value */
   gboolean save_session;
 
@@ -285,6 +288,7 @@ preferences_manager_finalize (GObject *object)
   clean_default_settings(prefdet);
   g_hash_table_destroy (prefdet->styles_table); /* clean data */
 
+  g_free(prefdet->default_font);
   G_OBJECT_CLASS (parent_class)->finalize (object);
 }
 
@@ -1335,17 +1339,32 @@ static GSList *get_string_list(const gchar *key){
 }
 
   /**internal styles functions **/
+/*
+* init_default_font_settings
+* read default font and default font size from GtkSettings
+*/
+void init_default_font_settings(Preferences_ManagerDetails *prefdet){
+gchar *string=NULL;
+
+g_object_get(G_OBJECT(gtk_settings_get_default()), "gtk-font-name", &string, NULL);
+
+PangoFontDescription *desc = pango_font_description_from_string (string);
+prefdet->default_size = PANGO_PIXELS(pango_font_description_get_size (desc));
+/* add ! needed by scintilla for pango render */
+prefdet->default_font = g_strdup_printf("!%s",pango_font_description_get_family (desc));
+pango_font_description_free (desc);
+}
 
 /*
 * load_style_font_string (internal)
 * @style_name: the name of the style
 * return a new allocated string. must be freed with g_free when no longer needed
-* if font isn't found return DEFAULT font
-* DEFAULT_FONT is defined by configure.ac, change value there. default value is "!sans"
+* if font isn't found return default_font
+* default_font is read from GtkSettings.
 */
-gchar *load_style_font_string(const gchar *style_name){
+gchar *load_style_font_string(const gchar *style_name, gchar *default_font){
   gchar *key = g_strdup_printf("/gPHPEdit/%s/font",style_name);
-  gchar *result = get_string(key, DEFAULT_FONT);
+  gchar *result = get_string(key, default_font);
   g_free(key);
   return result;
 }
@@ -1377,12 +1396,12 @@ gint load_style_color_fore(const gchar *style_name, gint default_fore){
 * load_style_font_size (internal)
 * @style_name: the name of the style
 * return the font size for the requested style.
-* if size isn't found return DEFAULT_FONT_SIZE
-* DEFAULT_FONT_SIZE is defined by configure.ac, change value there. default value is "12"
+* if size isn't found return default_font_size
+* default_font_size is read from GtkSettings
 */
-gint load_style_size (const gchar *style_name){
+gint load_style_size (const gchar *style_name, gint default_font_size){
   gchar *key = g_strdup_printf("/gPHPEdit/%s/size",style_name);
-  gint result = get_size(key, DEFAULT_FONT_SIZE);
+  gint result = get_size(key, default_font_size);
   g_free(key);
   return result;
 }
@@ -1426,10 +1445,10 @@ void load_style(Preferences_ManagerDetails *prefdet, const gchar *style_name, gi
 
   Scintilla_Style *style= g_slice_new(Scintilla_Style);  /* create new style */
   style->name = g_strdup(style_name);
-  style->font = load_style_font_string(style_name);
+  style->font = load_style_font_string(style_name, prefdet->default_font);
   style->color_fore = load_style_color_fore(style_name, default_fore);
   style->color_back = load_style_color_back(style_name, default_back);
-  style->font_size = load_style_size(style_name);
+  style->font_size = load_style_size(style_name, prefdet->default_size);
   style->font_bold = load_style_bold(style_name);
   style->font_italic = load_style_italic(style_name);
   
@@ -1447,6 +1466,8 @@ void load_style(Preferences_ManagerDetails *prefdet, const gchar *style_name, gi
 void load_styles(Preferences_ManagerDetails *prefdet)
 { 
   gphpedit_debug(DEBUG_PREFS);
+  init_default_font_settings(prefdet);
+
   load_style(prefdet ,"default_style", DEFAULT_BACK_COLOR, 0);
   load_style(prefdet ,"line_numbers", 11053224, 0);
   load_style(prefdet ,"html_tag", DEFAULT_BACK_COLOR, 7553164);
