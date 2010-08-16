@@ -605,14 +605,8 @@ void keyboard_macro_playback(GtkWidget *widget)
 
 void on_preferences1_activate(GtkWidget *widget)
 {
-  preferences_dialog_create();
-
-  if (gtk_dialog_run(GTK_DIALOG(preferences_dialog.window)) == GTK_RESPONSE_ACCEPT) {
-    apply_preferences(NULL, NULL);
-  }  
-  // destroy/null dialog
-  gtk_widget_destroy(preferences_dialog.window);
-  preferences_dialog.window = NULL;
+  GtkWidget *preferences_dialog = preferences_dialog_new (GTK_WINDOW(main_window.window));
+  gtk_widget_show(preferences_dialog);
 }
 
 

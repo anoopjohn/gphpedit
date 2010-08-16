@@ -1078,6 +1078,49 @@ void set_preferences_manager_style_settings(Preferences_Manager *preferences_man
   if (bold) style->font_bold = *bold;
 }
 
+void modify_style_font (gpointer key, gpointer value, gpointer user_data)
+{
+  Scintilla_Style *style = (Scintilla_Style *) value;
+  if (style->font) g_free(style->font);
+  style->font = g_strdup(user_data);
+}
+
+/*
+ * set_preferences_manager_style_settings_font_to_all
+ * set font to be the new font for all the styles.
+ * @font: name of the new font or NULL to keep actual font.
+ * this function store new values internally, you need to call "preferences_manager_save_data" in order to update gconf values.
+*/
+
+void set_preferences_manager_style_settings_font_to_all (Preferences_Manager *preferences_manager, gchar *font)
+{
+  if (!font || !preferences_manager) return ;
+  Preferences_ManagerDetails *prefdet;
+  prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
+  g_hash_table_foreach (prefdet->styles_table, modify_style_font, font);
+}
+
+void modify_style_size (gpointer key, gpointer value, gpointer user_data)
+{
+  Scintilla_Style *style = (Scintilla_Style *) value;
+  style->font_size = GPOINTER_TO_INT(user_data);
+}
+
+/*
+ * set_preferences_manager_style_settings_size_to_all
+ * set size to be the new size for all the styles.
+ * @size: the new size.
+ * this function store new values internally, you need to call "preferences_manager_save_data" in order to update gconf values.
+*/
+
+void set_preferences_manager_style_settings_size_to_all (Preferences_Manager *preferences_manager, gint size)
+{
+  if (!preferences_manager) return ;
+  Preferences_ManagerDetails *prefdet;
+  prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
+  g_hash_table_foreach (prefdet->styles_table, modify_style_size, GINT_TO_POINTER(size));
+}
+
 /*
 * save_style_settings
 * save actual style data of each style in the hash table

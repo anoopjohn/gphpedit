@@ -134,6 +134,8 @@ void set_preferences_manager_new_search_history_item(Preferences_Manager *prefer
 /*styles */
 void get_preferences_manager_style_settings(Preferences_Manager *preferences_manager, gchar *stylename, gchar **font , gint *size, gint *fore, gint *back, gboolean *italic, gboolean *bold);
 void set_preferences_manager_style_settings(Preferences_Manager *preferences_manager, gchar *stylename, gchar *font , gint *size, gint *fore, gint *back, gboolean *italic, gboolean *bold);
+void set_preferences_manager_style_settings_font_to_all (Preferences_Manager *preferences_manager, gchar *font);
+void set_preferences_manager_style_settings_size_to_all (Preferences_Manager *preferences_manager, gint size);
 void preferences_manager_save_data(Preferences_Manager *preferences_manager);
 void preferences_manager_save_data_full(Preferences_Manager *preferences_manager);
 void preferences_manager_restore_data(Preferences_Manager *preferences_manager);
