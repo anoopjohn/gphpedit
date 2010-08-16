@@ -37,6 +37,8 @@
 #include "filebrowser_ui.h"
 #include "classbrowser_ui.h"
 
+void update_controls(Document *document);
+
 MainWindow main_window;
 GIOChannel* inter_gphpedit_io;
 guint inter_gphpedit_event_id;
@@ -203,7 +205,7 @@ void update_app_title(Document *document)
   gchar *title = document_get_title(document);
   update_status_combobox(document);
   update_zoom_level();
-  update_controls();
+  update_controls(document);
   //If there is no file opened set the name as gPHPEdit
   if (!title) title = g_strdup(_("gPHPEdit"));
   gtk_window_set_title(GTK_WINDOW(main_window.window), title);
@@ -288,10 +290,9 @@ void main_window_create(void){
   update_app_title(document_manager_get_current_document(main_window.docmg));
 }
 
-void update_controls(void){
-  menubar_update_controls(MENUBAR(main_window.menu), document_is_scintilla_based(document_manager_get_current_document(main_window.docmg)),
- document_get_can_preview(document_manager_get_current_document(main_window.docmg)), document_get_readonly(document_manager_get_current_document(main_window.docmg)));
-
-  toolbar_update_controls(TOOLBAR(main_window.toolbar_main), document_is_scintilla_based(document_manager_get_current_document(main_window.docmg)), document_get_readonly(document_manager_get_current_document(main_window.docmg)));
-  toolbar_update_controls(TOOLBAR(main_window.toolbar_find), document_is_scintilla_based(document_manager_get_current_document(main_window.docmg)), document_get_readonly(document_manager_get_current_document(main_window.docmg)));
+void update_controls(Document *document){
+  gphpedit_debug(DEBUG_MAIN_WINDOW);
+  menubar_update_controls(MENUBAR(main_window.menu), document_is_scintilla_based(document), document_get_can_preview(document), document_get_readonly(document));
+  toolbar_update_controls(TOOLBAR(main_window.toolbar_main), document_is_scintilla_based(document), document_get_readonly(document));
+  toolbar_update_controls(TOOLBAR(main_window.toolbar_find), document_is_scintilla_based(document), document_get_readonly(document));
 }

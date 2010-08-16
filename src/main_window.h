@@ -76,7 +76,6 @@ MainWindow;
 
 extern MainWindow main_window;
 
-void update_controls(void);
 void main_window_create(void);
 void update_app_title(Document *document);
 void main_window_pass_command_line_files(char **argv);
