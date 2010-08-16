@@ -44,6 +44,7 @@ struct _PreferencesDialogPrivate
 {
   GList *highlighting_elements;
   gboolean changing_highlight_element;
+  gchar *current_key;
 
   GtkWidget *diagbox;
   GtkWidget *save_session;
@@ -112,8 +113,6 @@ void preferences_dialog_process_response (GtkDialog *dialog, gint response_id, g
   preferences_manager_save_data_full(main_window.prefmg);
  }
 }
-
-gchar *current_key = NULL;
 
 void get_current_preferences(PreferencesDialogPrivate *priv)
 {
@@ -227,15 +226,15 @@ void template_row_activated(GtkTreeSelection *selection, gpointer data)
   GtkTreeModel *model;
   gchar *content, *template;
   GtkTreeIter iter;
-
-  if (current_key) {
-    g_free(current_key);
+  PreferencesDialogPrivate *priv = (PreferencesDialogPrivate *) data;
+  if (priv->current_key) {
+    g_free(priv->current_key);
   }
     if (gtk_tree_selection_get_selected (selection, &model, &iter)) {
-    gtk_tree_model_get (model, &iter, 0, &current_key, -1);
+    gtk_tree_model_get (model, &iter, 0, &priv->current_key, -1);
 
     // display template content
-    template = template_find(current_key);
+    template = template_find(priv->current_key);
     if (template) {
       content = template_convert_to_display(template);
       update_template_display(data, content);
@@ -280,7 +279,7 @@ void add_template_clicked(GtkButton *button, gpointer data)
 
     // add to templates
     name = (gchar *)gtk_entry_get_text (GTK_ENTRY(edit_template_dialog.entry1));
-    template_delete(current_key); // Just in case you accidentally type the name of an existing template
+    template_delete(priv->current_key); // Just in case you accidentally type the name of an existing template
     template_replace(name, template);
     
     // add to treeview
@@ -307,7 +306,7 @@ void edit_template_clicked(GtkButton *button, gpointer data)
   create_edit_template_dialog();
 
   // fill in existing content
-  gtk_entry_set_text(GTK_ENTRY(edit_template_dialog.entry1), current_key);
+  gtk_entry_set_text(GTK_ENTRY(edit_template_dialog.entry1), priv->current_key);
   buffer = gtk_text_view_get_buffer (GTK_TEXT_VIEW (priv->template_sample));
   gtk_text_buffer_get_start_iter (buffer, &begin);
   gtk_text_buffer_get_end_iter (buffer, &end);
@@ -327,7 +326,7 @@ void edit_template_clicked(GtkButton *button, gpointer data)
 
     // add to templates
     name = (gchar *)gtk_entry_get_text (GTK_ENTRY(edit_template_dialog.entry1));
-    template_delete(current_key);
+    template_delete(priv->current_key);
     template_replace(name, template);
     
     // replace in treeview
@@ -348,16 +347,16 @@ void delete_template_clicked(GtkButton *button, gpointer data)
   GtkTreeIter iter;
   PreferencesDialogPrivate *priv = (PreferencesDialogPrivate *) data;
 
-  gchar *message = g_strdup_printf(_("Are you sure you want to delete template %s?"),current_key);
+  gchar *message = g_strdup_printf(_("Are you sure you want to delete template %s?"),priv->current_key);
   // confirm deletion with dialog
   if (yes_no_dialog (_("gPHPEdit"), message) == GTK_RESPONSE_YES) {
     // delete from templates
-    template_delete(current_key);
+    template_delete(priv->current_key);
 
     // delete from treeview
     gtk_tree_selection_get_selected (priv->template_selection, NULL, &iter);
     gtk_list_store_remove (priv->template_store, &iter);
-    current_key = NULL;
+    priv->current_key = NULL;
   }
    g_free(message);
 }
@@ -1094,7 +1093,7 @@ PREFERENCES_DIALOG_init (PreferencesDialog *dialog)
   PreferencesDialogPrivate *priv = PREFERENCES_DIALOG_GET_PRIVATE(dialog);
   priv->diagbox = gtk_dialog_get_content_area (GTK_DIALOG(dialog));
   gtk_box_set_spacing (GTK_BOX(priv->diagbox), 5);
-
+  priv->current_key=NULL;
   get_current_preferences(priv);
 
   GtkWidget *notebook = gtk_notebook_new ();
