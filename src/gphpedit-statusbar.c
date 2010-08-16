@@ -39,6 +39,7 @@
 
 struct _GphpeditStatusbarPrivate
 {
+	GtkWidget     *cursor_position_statusbar;
 	GtkWidget     *zoom_level;
   GtkWidget     *filetype_menu;
 
@@ -200,11 +201,20 @@ gphpedit_statusbar_init (GphpeditStatusbar *statusbar)
 
 	gtk_statusbar_set_has_resize_grip (GTK_STATUSBAR (statusbar), FALSE);
 
+	statusbar->priv->cursor_position_statusbar = gtk_statusbar_new ();
+	gtk_widget_show (statusbar->priv->cursor_position_statusbar);
+	gtk_statusbar_set_has_resize_grip (GTK_STATUSBAR (statusbar->priv->cursor_position_statusbar),
+					   FALSE);
+	set_statusbar_width_chars (statusbar->priv->cursor_position_statusbar, 15, FALSE);
+	gtk_box_pack_end (GTK_BOX (statusbar),
+			  statusbar->priv->cursor_position_statusbar,
+			  FALSE, TRUE, 0);
+
 	statusbar->priv->zoom_level = gtk_statusbar_new ();
 	gtk_widget_show (statusbar->priv->zoom_level);
 	gtk_statusbar_set_has_resize_grip (GTK_STATUSBAR (statusbar->priv->zoom_level),
 					   FALSE);
-	set_statusbar_width_chars (statusbar->priv->zoom_level, 18, FALSE);
+	set_statusbar_width_chars (statusbar->priv->zoom_level, 12, FALSE);
 	gtk_box_pack_end (GTK_BOX (statusbar),
 			  statusbar->priv->zoom_level,
 			  FALSE, TRUE, 0);
@@ -338,3 +348,35 @@ gphpedit_statusbar_flash_message (GphpeditStatusbar *statusbar,
 
 	g_free (msg);
 }
+
+/**
+ * gphpedit_statusbar_cursor_position:
+ * @statusbar: an #GeditStatusbar
+ * @line: line position
+ * @col: column position
+ *
+ * Sets the cursor position on the statusbar.
+ **/
+void
+gphpedit_statusbar_set_cursor_position (GphpeditStatusbar *statusbar,
+				     gint            line,
+				     gint            col)
+{
+	gchar *msg;
+
+	g_return_if_fail (GPHPEDIT_IS_STATUSBAR (statusbar));
+
+	gtk_statusbar_pop (GTK_STATUSBAR (statusbar->priv->cursor_position_statusbar), 0);
+
+	if ((line == -1) && (col == -1))
+		return;
+
+	/* Translators: "Ln" is an abbreviation for "Line", Col is an abbreviation for "Column". Please,
+	use abbreviations if possible to avoid space problems. */
+	msg = g_strdup_printf (_("  Ln %d, Col %d"), line, col);
+
+	gtk_statusbar_push (GTK_STATUSBAR (statusbar->priv->cursor_position_statusbar), 0, msg);
+
+      	g_free (msg);
+}
+

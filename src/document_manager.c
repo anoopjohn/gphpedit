@@ -191,8 +191,8 @@ void document_load_complete_cb (Document *doc, gboolean result, gpointer user_da
     document_grab_focus(doc);
     update_app_title(docmgdet->current_document);
     if (!document_get_untitled(doc)) document_manager_session_save(docmg);
-   classbrowser_update(GPHPEDIT_CLASSBROWSER(main_window.classbrowser));
-  }
+    classbrowser_update(GPHPEDIT_CLASSBROWSER(main_window.classbrowser));
+    }
 }
 
 /* internal */

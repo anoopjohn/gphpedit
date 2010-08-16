@@ -141,6 +141,7 @@ void handle_modified(GtkWidget *scintilla, gint pos,gint mtype,gchar *text,gint 
 void macro_record (GtkWidget *scintilla, gint message, gulong wparam, glong lparam, gpointer user_data);
 void process_user_list_selection (GtkWidget *w, gint type, gchar *text, gpointer user_data);
 void document_done_refresh_cb (DocumentLoader *doclod, gboolean result, gpointer user_data);
+void scintilla_modified (GtkWidget *w);
 /*
  * register Document type and returns a new GType
 */
@@ -228,6 +229,7 @@ static void tab_set_event_handlers(Document *doc)
   g_signal_connect (G_OBJECT (docdet->scintilla), "update_ui", G_CALLBACK (update_ui), NULL);
   g_signal_connect (G_OBJECT (docdet->scintilla), "uri_dropped", G_CALLBACK (process_drag_uri), NULL);
   g_signal_connect (G_OBJECT (docdet->scintilla), "user_list_selection", G_CALLBACK (process_user_list_selection), doc);
+  g_signal_connect (G_OBJECT (docdet->scintilla), "painted", G_CALLBACK (scintilla_modified), NULL);
 }
 
 void tab_reset_scintilla_after_open(GtkScintilla *scintilla, guint current_line)
@@ -578,8 +580,12 @@ static void save_point_left(GtkWidget *scintilla, gpointer user_data)
     g_signal_emit (G_OBJECT (doc), signals[SAVE_UPDATE], 0); 
   }
 }
-
-
+void scintilla_modified (GtkWidget *scintilla){
+  gint current_pos = gtk_scintilla_get_current_pos(GTK_SCINTILLA(scintilla));
+  gphpedit_statusbar_set_cursor_position (GPHPEDIT_STATUSBAR(main_window.appbar), 
+    gtk_scintilla_line_from_position(GTK_SCINTILLA(scintilla), current_pos), 
+    gtk_scintilla_get_column(GTK_SCINTILLA(scintilla), current_pos));
+}
 void update_ui(GtkWidget *scintilla)
 {
   // ----------------------------------------------------
@@ -648,7 +654,6 @@ void update_ui(GtkWidget *scintilla)
     
     gtk_scintilla_set_highlight_guide(GTK_SCINTILLA(scintilla), MIN(current_brace_column, matching_brace_pos));
   }
-  
 }
 
 gboolean auto_memberfunc_complete_callback(gpointer data)
@@ -1432,9 +1437,10 @@ gboolean document_get_readonly(Document *doc){
   if (!doc) return FALSE;
   DocumentDetails *docdet = DOCUMENT_GET_PRIVATE(doc);
   if (docdet->type==TAB_HELP || docdet->type==TAB_PREVIEW) return TRUE; /* always read only*/
-
+  if (document_get_untitled(doc)) return FALSE;
   return docdet->isreadonly;
 }
+
 /*
 * document_set_readonly
 * set read only state to the document.
