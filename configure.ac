@@ -141,8 +141,9 @@ AC_CHECK_DIR([php_doc_dir],[index.html],
         [/usr/doc/php-docs-200403/html \
  	/usr/share/doc/php-docs-20050822/html \
 	 /usr/share/doc/php-docs-20050822/html \
-	 /usr/doc/php-docs-4.2.3/html//usr/lib \
+	 /usr/doc/php-docs-4.2.3/html \
 	/usr/share/doc/php-manual/en/html \
+  /usr/share/doc/php/html \
 	/usr/share/doc/php-doc/html ])
  AC_ASK_DIR([php_doc_dir],[index.html])
 if test "$php_doc_dir" != ""; then
