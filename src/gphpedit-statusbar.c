@@ -39,6 +39,7 @@
 
 struct _GphpeditStatusbarPrivate
 {
+	GtkWidget     *overwrite_mode_statusbar;
 	GtkWidget     *cursor_position_statusbar;
 	GtkWidget     *zoom_level;
   GtkWidget     *filetype_menu;
@@ -192,6 +193,20 @@ static void fill_combo_box(GphpeditStatusComboBox 	*combo)
   
   g_signal_connect (combo, "changed", G_CALLBACK (set_higthlight), NULL);
 }
+
+static gchar *
+get_overwrite_mode_string (gboolean overwrite)
+{
+	return g_strconcat ("  ", overwrite ? _("OVR") :  _("INS"), NULL);
+}
+
+static gint
+get_overwrite_mode_length (void)
+{
+	return 2 + MAX (g_utf8_strlen (_("OVR"), -1), g_utf8_strlen (_("INS"), -1));
+}
+
+
 static void
 gphpedit_statusbar_init (GphpeditStatusbar *statusbar)
 {
@@ -200,6 +215,17 @@ gphpedit_statusbar_init (GphpeditStatusbar *statusbar)
 	statusbar->priv = GPHPEDIT_STATUSBAR_GET_PRIVATE (statusbar);
 
 	gtk_statusbar_set_has_resize_grip (GTK_STATUSBAR (statusbar), FALSE);
+
+	statusbar->priv->overwrite_mode_statusbar = gtk_statusbar_new ();
+	gtk_widget_show (statusbar->priv->overwrite_mode_statusbar);
+	gtk_statusbar_set_has_resize_grip (GTK_STATUSBAR (statusbar->priv->overwrite_mode_statusbar),
+					   FALSE);
+	set_statusbar_width_chars (statusbar->priv->overwrite_mode_statusbar,
+				   get_overwrite_mode_length (),
+				   TRUE);
+	gtk_box_pack_end (GTK_BOX (statusbar),
+			  statusbar->priv->overwrite_mode_statusbar,
+			  FALSE, TRUE, 0);
 
 	statusbar->priv->cursor_position_statusbar = gtk_statusbar_new ();
 	gtk_widget_show (statusbar->priv->cursor_position_statusbar);
@@ -347,6 +373,38 @@ gphpedit_statusbar_flash_message (GphpeditStatusbar *statusbar,
 							statusbar);
 
 	g_free (msg);
+}
+
+/**
+ * gedit_statusbar_set_overwrite:
+ * @statusbar: a #GeditStatusbar
+ * @overwrite: if the overwrite mode is set
+ *
+ * Sets the overwrite mode on the statusbar.
+ **/
+void
+gphpedit_statusbar_set_overwrite (GphpeditStatusbar *statusbar,
+                               gboolean        overwrite)
+{
+	gchar *msg;
+
+	g_return_if_fail (GPHPEDIT_IS_STATUSBAR (statusbar));
+
+	gtk_statusbar_pop (GTK_STATUSBAR (statusbar->priv->overwrite_mode_statusbar), 0);
+
+	msg = get_overwrite_mode_string (overwrite);
+
+	gtk_statusbar_push (GTK_STATUSBAR (statusbar->priv->overwrite_mode_statusbar), 0, msg);
+
+  g_free (msg);
+}
+
+void
+gphpedit_statusbar_clear_overwrite (GphpeditStatusbar *statusbar)
+{
+	g_return_if_fail (GPHPEDIT_IS_STATUSBAR (statusbar));
+
+	gtk_statusbar_pop (GTK_STATUSBAR (statusbar->priv->overwrite_mode_statusbar), 0);
 }
 
 /**

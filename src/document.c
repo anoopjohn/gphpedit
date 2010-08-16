@@ -585,6 +585,7 @@ void scintilla_modified (GtkWidget *scintilla){
   gphpedit_statusbar_set_cursor_position (GPHPEDIT_STATUSBAR(main_window.appbar), 
     gtk_scintilla_line_from_position(GTK_SCINTILLA(scintilla), current_pos), 
     gtk_scintilla_get_column(GTK_SCINTILLA(scintilla), current_pos));
+  gphpedit_statusbar_set_overwrite (GPHPEDIT_STATUSBAR(main_window.appbar), gtk_scintilla_get_overtype(GTK_SCINTILLA(scintilla)));
 }
 void update_ui(GtkWidget *scintilla)
 {
