@@ -36,8 +36,14 @@ How it works
 The general mechanism for interacting with a plugin is as follows:
 
 * gPHPEdit runs your script/plugin with a command line parameter of -type
-* gPHPEdit will ask for plugin name with a command line parameter of -name and a description with -desc
-  ** name will be show in plugin menu and description in the statusbar
+* gPHPEdit will ask for plugin information with the following command line parameters
+** -name : return plugin name.
+** -desc : return plugin description
+** -icon : return plugin icon name
+** -copyright : return plugin copyright info.
+** -website : return plugin website.
+** -version : return plugin version.
+** -authors : return plugin authors. must be a null terminated string with names using ',' as separator.
 * Your plugin must print one of the following types to STDOUT:
   o SELECTION - your plugin requires the current selection of text or nothing if none is selected
   o NO-INPUT - your plugin doesn't require anything
@@ -96,6 +102,13 @@ struct PluginDetails
   gchar *filename;
   gchar *name;
   gchar *description;
+	gchar *icon_name;
+	gchar **authors;
+	gchar *copyright;
+	gchar *website;
+	gchar *version;
+
+  gint active :1; /* plugin status */
 };
 
 #define PLUGIN_GET_PRIVATE(object)(G_TYPE_INSTANCE_GET_PRIVATE ((object),\
@@ -135,6 +148,10 @@ plugin_finalize (GObject *object)
 	if (plugdet->filename) g_free(plugdet->filename);
 	if (plugdet->name) g_free(plugdet->name);
 	if (plugdet->description) g_free(plugdet->description);
+	if (plugdet->copyright) g_free(plugdet->copyright);
+	if (plugdet->website) g_free(plugdet->website);
+	if (plugdet->version) g_free(plugdet->version);
+	if (plugdet->icon_name) g_free(plugdet->icon_name);
 
 	G_OBJECT_CLASS (plugin_parent_class)->finalize (object);
 }
@@ -164,6 +181,27 @@ static inline gchar *command_spawn(const gchar* command_line)
   
   return ret;
 }
+
+gboolean is_internal_command(gchar *command){
+  if (g_str_has_prefix(command, "INSERT")){
+      return TRUE;
+    }
+    else if (g_str_has_prefix(command, "REPLACE")){
+      return TRUE;
+    }
+    else if (g_str_has_prefix(command, "MESSAGE")){
+      return TRUE;
+    }
+    else if (g_str_has_prefix(command, "SYNTAX")){
+      return TRUE;
+    }
+    else if (g_str_has_prefix(command, "OPEN")){
+      return TRUE;
+    }
+  return FALSE;
+}
+
+
 /*
 * plugin_discover_name
 * return the plugin name. must be freed with g_free
@@ -198,6 +236,12 @@ gchar *plugin_discover_desc(gchar *filename)
 
   g_string_free(command_line, TRUE);
   
+  /* plugin doesn't support this command */
+  if (is_internal_command(desc)){
+     g_free(desc);
+     return NULL;
+  }
+
   return desc;
 }
 
@@ -264,6 +308,128 @@ static gint plugin_syntax_discover_type(gchar *filename)
   return file_type;
 }
 
+/*
+* plugin_discover_copyright
+* return the plugin copyright. must be freed with g_free
+*/
+gchar *plugin_discover_copyright(const gchar *filename)
+{
+  GString *command_line;
+  gchar *name=NULL;
+  
+  command_line = g_string_new(filename);
+  command_line = g_string_prepend(command_line, "'");
+  command_line = g_string_append(command_line, "' -copyright");
+  name = command_spawn(command_line->str);
+  gphpedit_debug_message(DEBUG_PLUGINS,"plugin copyright:%s\n",name);
+
+  g_string_free(command_line, TRUE);
+  /* plugin doesn't support this command */
+  if (is_internal_command(name)){
+     g_free(name);
+     return NULL;
+  }
+  return name;
+}
+
+/*
+* plugin_discover_website
+* return the plugin website. must be freed with g_free
+*/
+gchar *plugin_discover_website(const gchar *filename)
+{
+  GString *command_line;
+  gchar *name=NULL;
+  
+  command_line = g_string_new(filename);
+  command_line = g_string_prepend(command_line, "'");
+  command_line = g_string_append(command_line, "' -website");
+  name = command_spawn(command_line->str);
+  gphpedit_debug_message(DEBUG_PLUGINS,"plugin website:%s\n",name);
+
+  g_string_free(command_line, TRUE);
+  /* plugin doesn't support this command */
+  if (is_internal_command(name)){
+     g_free(name);
+     return NULL;
+  }
+  return name;
+}
+
+/*
+* plugin_discover_version
+* return the plugin version. must be freed with g_free
+*/
+gchar *plugin_discover_version(const gchar *filename)
+{
+  GString *command_line;
+  gchar *name=NULL;
+  
+  command_line = g_string_new(filename);
+  command_line = g_string_prepend(command_line, "'");
+  command_line = g_string_append(command_line, "' -version");
+  name = command_spawn(command_line->str);
+  gphpedit_debug_message(DEBUG_PLUGINS,"plugin version: %s\n",name);
+
+  g_string_free(command_line, TRUE);
+  /* plugin doesn't support this command */
+  if (is_internal_command(name)){
+     g_free(name);
+     return NULL;
+  }
+  return name;
+}
+
+/*
+* plugin_discover_icon
+* return the plugin icon name. must be freed with g_free
+*/
+gchar *plugin_discover_icon(const gchar *filename)
+{
+  GString *command_line;
+  gchar *name=NULL;
+  
+  command_line = g_string_new(filename);
+  command_line = g_string_prepend(command_line, "'");
+  command_line = g_string_append(command_line, "' -icon");
+  name = command_spawn(command_line->str);
+  gphpedit_debug_message(DEBUG_PLUGINS,"plugin icon name: %s\n",name);
+
+  g_string_free(command_line, TRUE);
+  /* plugin doesn't support this command */
+  if (is_internal_command(name)){
+     g_free(name);
+     return NULL;
+  }
+  return name;
+}
+
+/*
+* plugin_discover_authors
+* return the plugin authors. must be freed with g_free
+*/
+gchar **plugin_discover_authors(const gchar *filename)
+{
+  GString *command_line;
+  gchar *name=NULL;
+  
+  command_line = g_string_new(filename);
+  command_line = g_string_prepend(command_line, "'");
+  command_line = g_string_append(command_line, "' -authors");
+  name = command_spawn(command_line->str);
+  gphpedit_debug_message(DEBUG_PLUGINS,"plugin authors: %s\n",name);
+
+  g_string_free(command_line, TRUE);
+  /* plugin doesn't support this command */
+  if (is_internal_command(name)){
+     g_free(name);
+     return (gchar **) NULL;
+  }
+  gchar **authors = g_strsplit (name,",",-1);
+  g_free(name);
+  return authors;
+}
+             
 Plugin *plugin_new (gchar *filename)
 {
 	Plugin *plug;
@@ -276,11 +442,22 @@ Plugin *plugin_new (gchar *filename)
   plugdet->description= plugin_discover_desc(filename);
   plugdet->type= plugin_discover_type(filename);
   if (plugdet->type==GPHPEDIT_PLUGIN_TYPE_SYNTAX) plugdet->file_type = plugin_syntax_discover_type(filename);
+	plugdet->authors = plugin_discover_authors(filename);
+	plugdet->copyright = plugin_discover_copyright(filename);
+	plugdet->website = plugin_discover_website(filename);
+	plugdet->version = plugin_discover_version(filename);
+	plugdet->icon_name = plugin_discover_icon(filename);
+
+  /* get active status, default value TRUE */
+  /* Note:: multiple plugins with the same name share the same status */
+  plugdet->active = get_plugin_is_active(main_window.prefmg, plugdet->name);
+
   gphpedit_debug_message(DEBUG_PLUGINS,"Name: %s(%d)\n", plugdet->name, plugdet->type);
 	return plug; /* return new object */
 }
 
 const gchar *get_plugin_name(Plugin *plugin){
+  gphpedit_debug(DEBUG_PLUGINS);
   g_return_val_if_fail (OBJECT_IS_PLUGIN (plugin), NULL);
   PluginDetails *plugdet;
 	plugdet = PLUGIN_GET_PRIVATE(plugin);
@@ -288,17 +465,93 @@ const gchar *get_plugin_name(Plugin *plugin){
 }
 
 const gchar *get_plugin_description(Plugin *plugin){
+  gphpedit_debug(DEBUG_PLUGINS);
   g_return_val_if_fail (OBJECT_IS_PLUGIN (plugin), NULL);
   PluginDetails *plugdet;
 	plugdet = PLUGIN_GET_PRIVATE(plugin);
   return plugdet->description;
 }
+
+const gchar *get_plugin_icon_name(Plugin *plugin){
+  gphpedit_debug(DEBUG_PLUGINS);
+  g_return_val_if_fail (OBJECT_IS_PLUGIN (plugin), NULL);
+  PluginDetails *plugdet;
+	plugdet = PLUGIN_GET_PRIVATE(plugin);
+  return plugdet->icon_name;
+}
+
+gboolean get_plugin_active (Plugin *plugin)
+{
+  gphpedit_debug(DEBUG_PLUGINS);
+	g_return_val_if_fail (plugin != NULL, FALSE);
+
+  PluginDetails *plugdet = PLUGIN_GET_PRIVATE(plugin);
+
+	return plugdet->active;
+}
+
+void set_plugin_active (Plugin *plugin, gboolean status)
+{
+  gphpedit_debug(DEBUG_PLUGINS);
+	g_return_if_fail (plugin != NULL);
+
+  PluginDetails *plugdet = PLUGIN_GET_PRIVATE(plugin);
+
+  set_plugin_is_active(main_window.prefmg, plugdet->name, status);
+
+	plugdet->active = status;
+}
+const gchar **
+get_plugin_authors (Plugin *plugin)
+{
+  gphpedit_debug(DEBUG_PLUGINS);
+	g_return_val_if_fail (plugin != NULL, (const gchar **)NULL);
+
+  PluginDetails *plugdet = PLUGIN_GET_PRIVATE(plugin);
+
+	return (const gchar **) plugdet->authors;
+}
+
+const gchar *
+get_plugin_website (Plugin *plugin)
+{
+  gphpedit_debug(DEBUG_PLUGINS);
+	g_return_val_if_fail (plugin != NULL, NULL);
+
+  PluginDetails *plugdet = PLUGIN_GET_PRIVATE(plugin);
+
+	return plugdet->website;
+}
+
+const gchar *
+get_plugin_copyright (Plugin *plugin)
+{
+  gphpedit_debug(DEBUG_PLUGINS);
+	g_return_val_if_fail (plugin != NULL, NULL);
+
+  PluginDetails *plugdet = PLUGIN_GET_PRIVATE(plugin);
+
+	return plugdet->copyright;
+}
+
+const gchar *
+get_plugin_version (Plugin *plugin)
+{
+  gphpedit_debug(DEBUG_PLUGINS);
+	g_return_val_if_fail (plugin != NULL, NULL);
+
+  PluginDetails *plugdet = PLUGIN_GET_PRIVATE(plugin);
+
+	return plugdet->version;
+}
+
 /*
 * get_plugin_syntax_type
 * return the file type of the syntax plugin
 * if plugin isn't a syntax plugin return -1
 */
 gint get_plugin_syntax_type(Plugin *plugin){
+  gphpedit_debug(DEBUG_PLUGINS);
   g_return_val_if_fail (OBJECT_IS_PLUGIN (plugin), -1); /**/
   PluginDetails *plugdet;
 	plugdet = PLUGIN_GET_PRIVATE(plugin);
@@ -321,11 +574,17 @@ static GString *save_as_temp_file(Document *document)
 
 void plugin_run(Plugin *plugin, Document *document)
 {
+  gphpedit_debug(DEBUG_PLUGINS);
   /* initial checks*/
   if (!OBJECT_IS_PLUGIN (plugin)) return;
   if (!document) return;
   PluginDetails *plugdet;
 	plugdet = PLUGIN_GET_PRIVATE(plugin);
+  
+  if(!plugdet->active){
+    gphpedit_debug_message(DEBUG_PLUGINS, "Plugin %s is not active\n", plugdet->name);
+    return ;
+  }
 
   gchar *stdout = NULL;
   GString *command_line = NULL;

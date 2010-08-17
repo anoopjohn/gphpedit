@@ -59,6 +59,13 @@ GType plugin_get_type (void);
 Plugin *plugin_new (gchar *filename);
 const gchar *get_plugin_name(Plugin *plugin);
 const gchar *get_plugin_description(Plugin *plugin);
+gboolean get_plugin_active (Plugin *plugin);
+void set_plugin_active (Plugin *plugin, gboolean status);
+const gchar *get_plugin_icon_name (Plugin *plugin);
+const gchar **get_plugin_authors (Plugin *plugin);
+const gchar *get_plugin_website (Plugin *plugin);
+const gchar *get_plugin_copyright (Plugin *plugin);
+const gchar *get_plugin_version (Plugin *plugin);
 void plugin_run(Plugin *plugin, Document *document);
 gint get_plugin_syntax_type(Plugin *plugin);
 #endif /* PLUGINS_H */

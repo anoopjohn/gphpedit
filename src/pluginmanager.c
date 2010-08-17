@@ -110,6 +110,8 @@ plugin_manager_init (PluginManager  *object)
     g_object_unref(plugin);
   }
   g_free(uri);
+
+  plugin_discover_available(object); /* fill plugin table */
 }
 
 static void
@@ -129,12 +131,10 @@ PluginManager *plugin_manager_new (void)
 	PluginManager *plugmg;
   plugmg = g_object_new (PLUGIN_MANAGER_TYPE, NULL);
   
-  plugin_discover_available(plugmg); /* fill plugin table */
-
 	return plugmg; /* return new object */
 }
 
-static void new_plugin(PluginManager *plugmg,gchar *filename){
+static void new_plugin(PluginManager *plugmg, gchar *filename){
     Plugin *plugin;
     plugin=plugin_new (filename);
     PluginManagerDetails *plugmgdet;

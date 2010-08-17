@@ -33,6 +33,7 @@
 #include "debug.h"
 #include "templates.h"
 #include "edit_template.h"
+#include "plugindialog.h"
 
 #include "preferences_dialog.h"
 
@@ -82,6 +83,8 @@ struct _PreferencesDialogPrivate
   GtkTreeSelection *template_selection;
   GtkWidget *Templates;
 
+  GtkWidget *plugindialog;
+
   GtkWidget *close_button;
   GtkWidget *accept_button;
   GtkWidget *apply_button;
@@ -111,6 +114,7 @@ void preferences_dialog_process_response (GtkDialog *dialog, gint response_id, g
   document_manager_refresh_properties_all(main_window.docmg);
   // Save the preferences definitely
   preferences_manager_save_data_full(main_window.prefmg);
+  gtk_widget_destroy(GTK_WIDGET(dialog));
  }
 }
 
@@ -1647,6 +1651,19 @@ PREFERENCES_DIALOG_init (PreferencesDialog *dialog)
   gtk_widget_show (label36);
   gtk_notebook_append_page (GTK_NOTEBOOK (notebook), princod, label36);
 
+/**/
+/*plugins tab */
+  GtkWidget *prinplug = gtk_vbox_new (FALSE, 8);
+  gtk_widget_show (prinplug);
+  gtk_container_set_border_width (GTK_CONTAINER (prinplug), 8);
+
+/*  */
+  priv->plugindialog = plugin_dialog_new();
+  gtk_box_pack_start (GTK_BOX (prinplug), priv->plugindialog, TRUE, TRUE, 0);
+
+  label36 = gtk_label_new (_("Plugin"));
+  gtk_widget_show (label36);
+  gtk_notebook_append_page (GTK_NOTEBOOK (notebook), prinplug, label36);
 /**/
   gtk_widget_show_all (priv->diagbox);
 

@@ -1235,6 +1235,36 @@ void preferences_manager_restore_data(Preferences_Manager *preferences_manager){
   prefdet->styles_table= g_hash_table_new_full (g_str_hash, g_str_equal,NULL, clean_style);
   load_styles(prefdet); /* load lexer styles */
 }
+
+/* plugin preferences functions */
+
+gboolean get_plugin_is_active(Preferences_Manager *preferences_manager, const gchar *name)
+{
+  gphpedit_debug(DEBUG_PREFS);
+  Preferences_ManagerDetails *prefdet;
+  prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
+  
+  gchar *key = g_strdup_printf("/gPHPEdit/plugins/%s/active", name);
+  gchar *subdir = g_strdup_printf("plugins/%s", name);
+  gboolean result = get_color(key, subdir, TRUE);
+  g_free(subdir);
+  g_free(key);
+  return result;
+}
+
+void set_plugin_is_active(Preferences_Manager *preferences_manager, const gchar *name, gboolean status)
+{
+  if(!preferences_manager || !name) return ;
+  gphpedit_debug(DEBUG_PREFS);
+  Preferences_ManagerDetails *prefdet;
+  prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
+  
+  gchar *key = g_strdup_printf("/gPHPEdit/plugins/%s/active", name);
+  set_int (key, status);
+  g_free(key);
+}
+
+/**/
 /* internal functions to store values in gconf */
 
 /*
@@ -1308,14 +1338,14 @@ static gchar *get_string(const gchar *key,gchar *default_string){
 * load a size value from gconf
 * if value isn't found return default_size
 */
-static gint get_size(const gchar *key,gint default_size){
+static gint get_size(const gchar *key, gint default_size){
   GConfClient *config = gconf_client_get_default ();
   GError *error=NULL;
   gint temp= gconf_client_get_int (config,key,&error);
   g_object_unref (G_OBJECT (config));
   if (temp==0){
     if (error){
-     g_print("%s",error->message);
+     gphpedit_debug_message(DEBUG_PREFS, "%s", error->message);
      g_error_free (error);
     }
     return default_size; 

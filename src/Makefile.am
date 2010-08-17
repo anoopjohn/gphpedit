@@ -76,6 +76,8 @@ gphpedit_SOURCES = \
   main_window_callbacks.h \
   menubar.c \
   menubar.h \
+  plugindialog.c \
+  plugindialog.h \
   pluginmanager.c \
   pluginmanager.h \
   pluginmenu.c \

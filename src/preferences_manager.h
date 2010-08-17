@@ -131,6 +131,9 @@ gchar *get_preferences_manager_php_file_extensions(Preferences_Manager *preferen
 void set_preferences_manager_php_file_extensions(Preferences_Manager *preferences_manager, gchar *newstate);
 GSList *get_preferences_manager_php_search_history(Preferences_Manager *preferences_manager);
 void set_preferences_manager_new_search_history_item(Preferences_Manager *preferences_manager, gint pos, const gchar *newtext);
+/*plugins */
+gboolean get_plugin_is_active(Preferences_Manager *preferences_manager, const gchar *name);
+void set_plugin_is_active(Preferences_Manager *preferences_manager, const gchar *name, gboolean status);
 /*styles */
 void get_preferences_manager_style_settings(Preferences_Manager *preferences_manager, gchar *stylename, gchar **font , gint *size, gint *fore, gint *back, gboolean *italic, gboolean *bold);
 void set_preferences_manager_style_settings(Preferences_Manager *preferences_manager, gchar *stylename, gchar *font , gint *size, gint *fore, gint *back, gboolean *italic, gboolean *bold);
