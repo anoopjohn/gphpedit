@@ -357,12 +357,13 @@ static void fill_menu_file(MenuBarPrivate *priv){
   gtk_recent_chooser_add_filter (GTK_RECENT_CHOOSER(priv->menureciente), filter);
   g_signal_connect(G_OBJECT(priv->menureciente), "item-activated", G_CALLBACK(reopen_recent), NULL);
 
-  create_mnemonic_menu_item(&priv->reload ,priv->menunew,_("_Reload current file"), _("Reload the file currently selected in the editor"),priv->accel_group, GDK_r, GDK_SHIFT_MASK | GDK_CONTROL_MASK);
+
+  create_stock_menu_item(&priv->reload, priv->menunew, GTK_STOCK_REVERT_TO_SAVED, _("Save the file currently selected in the editor"),priv->accel_group, GDK_r, GDK_SHIFT_MASK | GDK_CONTROL_MASK);
   g_signal_connect(G_OBJECT(priv->reload), "activate", G_CALLBACK(on_reload1_activate), NULL);
   /* separator */
   _create_separator_item(priv->menunew);
 
-  create_stock_menu_item(&priv->save,priv->menunew,GTK_STOCK_SAVE, _("Save the file currently selected in the editor"),priv->accel_group, GDK_s, GDK_CONTROL_MASK);
+  create_stock_menu_item(&priv->save,priv->menunew, GTK_STOCK_SAVE, _("Save the file currently selected in the editor"),priv->accel_group, GDK_s, GDK_CONTROL_MASK);
   g_signal_connect(G_OBJECT(priv->save), "activate", G_CALLBACK(on_save1_activate), NULL);
   create_stock_menu_item(&priv->saveas,priv->menunew,GTK_STOCK_SAVE_AS, _("Save the file currently selected in the editor"),priv->accel_group, GDK_s, GDK_SHIFT_MASK | GDK_CONTROL_MASK);
   g_signal_connect(G_OBJECT(priv->saveas), "activate", G_CALLBACK(on_save_as1_activate), NULL);
