@@ -387,7 +387,9 @@ static void fill_menu_file(MenuBarPrivate *priv){
 */
 static void fill_help_menu(MenuBarPrivate *priv){
   /* help menu */
-  create_mnemonic_menu_item(&priv->phphelp,priv->menuhelp,_("_PHP Help"), _("Look for help on the currently selected function"),priv->accel_group, GDK_F1, 0);
+  create_stock_menu_item(&priv->phphelp,priv->menuhelp, GTK_STOCK_HELP, _("Look for help on the currently selected function"),priv->accel_group, GDK_F1, 0);
+  /* set custom label */
+  gtk_menu_item_set_label (GTK_MENU_ITEM(priv->phphelp), _("_PHP Help"));
   g_signal_connect(G_OBJECT(priv->phphelp), "activate", G_CALLBACK(context_help), NULL);
   #ifdef PACKAGE_BUGREPORT
   create_mnemonic_menu_item(&priv->bugreport,priv->menuhelp,_("_Report a bug in gPHPEdit"), _("Go to bug report page to report a bug"),priv->accel_group, 0, 0);
@@ -519,16 +521,25 @@ static void fill_menu_view(MenuBarPrivate *priv)
 */
 static void fill_menu_code (MenuBarPrivate *priv)
 {
-  create_mnemonic_menu_item(&priv->syntax,priv->menucode,_("_Syntax check"), _("Check the syntax using the PHP command line binary"),priv->accel_group, GDK_F9, 0);
+  create_stock_menu_item(&priv->syntax,priv->menucode, GTK_STOCK_SPELL_CHECK, _("Check the syntax using the PHP command line binary"),priv->accel_group, GDK_F9, 0);
+  /* set custom label */
+  gtk_menu_item_set_label (GTK_MENU_ITEM(priv->syntax), _("_Syntax check"));
   g_signal_connect(G_OBJECT(priv->syntax), "activate", G_CALLBACK(syntax_check), NULL);
-  create_mnemonic_menu_item(&priv->clearsyntax,priv->menucode,_("_Clear Syntax check"), _("Remove the syntax check window"),priv->accel_group, GDK_F9, GDK_CONTROL_MASK);
+  create_stock_menu_item(&priv->clearsyntax,priv->menucode, GTK_STOCK_CLEAR, _("Remove the syntax check window"),priv->accel_group, GDK_F9, GDK_CONTROL_MASK);
+  /* set custom label */
+  gtk_menu_item_set_label (GTK_MENU_ITEM(priv->clearsyntax), _("_Clear Syntax check"));
   g_signal_connect(G_OBJECT(priv->clearsyntax), "activate", G_CALLBACK(syntax_check_clear), NULL);
   /* separator */
   _create_separator_item(priv->menucode);
 
-  create_mnemonic_menu_item(&priv->record,priv->menucode,_("_Record keyboard macro start/stop"), _("Record keyboard actions"),priv->accel_group, GDK_k, GDK_MOD1_MASK);
+  create_stock_menu_item(&priv->record,priv->menucode, GTK_STOCK_MEDIA_RECORD, _("Record keyboard actions"),priv->accel_group, GDK_k, GDK_MOD1_MASK);
+  /* set custom label */
+  gtk_menu_item_set_label (GTK_MENU_ITEM(priv->record), _("_Record keyboard macro start/stop"));
   g_signal_connect(G_OBJECT(priv->record), "activate", G_CALLBACK(keyboard_macro_startstop), NULL);
-  create_mnemonic_menu_item(&priv->playback,priv->menucode,_("_Playback keyboard macro"), _("Playback the stored keyboard macro"),priv->accel_group, GDK_k, GDK_CONTROL_MASK);
+
+  create_stock_menu_item(&priv->playback,priv->menucode, GTK_STOCK_MEDIA_PLAY, _("Playback the stored keyboard macro"),priv->accel_group, GDK_k, GDK_CONTROL_MASK);
+  /* set custom label */
+  gtk_menu_item_set_label (GTK_MENU_ITEM(priv->playback), _("_Playback keyboard macro"));
   g_signal_connect(G_OBJECT(priv->playback), "activate", G_CALLBACK(keyboard_macro_playback), NULL);
 
   priv->force = gtk_menu_item_new_with_mnemonic(_("_Force"));

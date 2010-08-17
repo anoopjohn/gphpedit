@@ -164,7 +164,7 @@ static void create_side_panel(void){
   if (get_preferences_manager_show_filebrowser(main_window.prefmg)){
   main_window.folder= gphpedit_filebrowser_new();
   gtk_widget_show(main_window.folder);
-  GtkWidget *label= gtk_image_new_from_file (PIXMAP_DIR "/folderbrowser.png");
+  GtkWidget *label= gtk_image_new_from_icon_name ("file-manager", GTK_ICON_SIZE_SMALL_TOOLBAR);
   gtk_widget_show(label);
   gtk_notebook_insert_page (GTK_NOTEBOOK(main_window.notebook_manager), main_window.folder, label, 1);
   }
