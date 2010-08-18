@@ -15,8 +15,9 @@ New Features and Fixes
 - Added PHP class members autocompletion
 - Improve Classbrowser parse performance
 - Improve autocompletion performance
-- Fix sintaxcheck when file contains %xx scapes chars
+- Fix syntax check when file contains %xx scapes chars
 - New japanese translation. Thanks to Tadashi Jokagi <elf@elf.no-ip.org>
+- Added new debug option.
 - Misc bugfixes and code cleanups
 
 ============================

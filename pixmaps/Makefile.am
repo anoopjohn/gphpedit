@@ -20,8 +20,8 @@
 
 pixmaps_DATA = \
 	gphpedit.png\
-	folderbrowser.png\
-	classbrowser.png
+	classbrowser.png\
+	gedit-plugin.png
 pixmapsdir = \
 	$(datadir)/pixmaps
 

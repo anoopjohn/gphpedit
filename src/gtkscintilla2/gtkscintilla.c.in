@@ -47,8 +47,6 @@ enum {
 };
 static void gtk_scintilla_finalize (GObject *gobject);
 static void gtk_scintilla_dispose (GObject *gobject);
-static void gtk_scintilla_class_init (GtkScintillaClass *klass);
-static void gtk_scintilla_init       (GtkScintilla      *sci);
 static void notify_cb                (GtkWidget         *w,
                                       gint               param,
                                       gpointer           notif,
@@ -59,35 +57,9 @@ static void pass_throug_key          (GtkScintilla      *sci,
 
 static gpointer parent_class;
 static guint signals[LAST_SIGNAL] = { 0 };
-/*
- * gtk_scintilla_get_type
- * register GtkScintilla type and returns a new GType
-*/
-GType
-gtk_scintilla_get_type (void)
-{
-    static GType our_type = 0;
-    
-    if (!our_type) {
-        static const GTypeInfo our_info =
-        {
-            sizeof (GtkScintillaClass),
-            NULL,               /* base_init */
-            NULL,               /* base_finalize */
-            (GClassInitFunc) gtk_scintilla_class_init,
-            NULL,               /* class_finalize */
-            NULL,               /* class_data */
-            sizeof (GtkScintilla),
-            0,                  /* n_preallocs */
-            (GInstanceInitFunc) gtk_scintilla_init,
-        };
 
-        our_type = g_type_register_static (GTK_TYPE_FRAME, "GtkScintilla",
-                                           &our_info, 0);
-  }
-    
-    return our_type;
-}
+/* http://library.gnome.org/devel/gobject/unstable/gobject-Type-Information.html#G-DEFINE-TYPE:CAPS */
+G_DEFINE_TYPE(GtkScintilla, gtk_scintilla, GTK_TYPE_FRAME);  
 
 /*
  *  gtk_scintilla_class_init
@@ -100,7 +72,6 @@ gtk_scintilla_class_init (GtkScintillaClass *klass)
   GObjectClass *object_class = G_OBJECT_CLASS (klass);	
   object_class->dispose = gtk_scintilla_dispose;
   object_class->finalize = gtk_scintilla_finalize;
-  parent_class = g_type_class_peek_parent (klass);
 
     signals[STYLE_NEEDED] =
         g_signal_new ("style_needed",
@@ -234,7 +205,7 @@ gtk_scintilla_class_init (GtkScintillaClass *klass)
                       G_SIGNAL_RUN_FIRST,
                       G_STRUCT_OFFSET (GtkScintillaClass, user_list_selection),
                       NULL, NULL,
-                      g_cclosure_marshal_VOID__VOID,
+                      scintilla_marshal_VOID__INT_STRING,
                       G_TYPE_NONE, 2,
                       G_TYPE_INT, G_TYPE_STRING);
 
@@ -302,10 +273,10 @@ static void gtk_scintilla_dispose (GObject *gobject)
   g_return_if_fail (gobject != NULL);
   g_return_if_fail (GTK_IS_SCINTILLA (gobject));
 
-  GtkScintilla *self = GTK_SCINTILLA (gobject);
+//  GtkScintilla *self = GTK_SCINTILLA (gobject);
 
   /* Chain up to the parent class */
-  G_OBJECT_CLASS (parent_class)->dispose (gobject);
+  G_OBJECT_CLASS (gtk_scintilla_parent_class)->dispose (gobject);
 }
 /*
 * gtk_scintilla_finalize
@@ -318,8 +289,9 @@ static void gtk_scintilla_finalize (GObject *gobject)
   //GtkScintilla *self = GTK_SCINTILLA (gobject);
 
   /* Chain up to the parent class */
-  G_OBJECT_CLASS (parent_class)->finalize (gobject);
+  G_OBJECT_CLASS (gtk_scintilla_parent_class)->finalize (gobject);
 }
+
 /*
 * gtk_scintilla_new
 * Creates a new instance of GtkScintilla object and returns a GtkWidget

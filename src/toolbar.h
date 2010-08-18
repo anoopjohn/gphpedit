@@ -22,49 +22,63 @@
 
    The GNU General Public License is contained in the file COPYING.
 */
-#ifndef TOOLBAR_H
-#define TOOLBAR_H
+
+
+#ifndef __TOOLBAR_H__
+#define __TOOLBAR_H__
+
 #include <gtk/gtk.h>
 
-typedef struct
-{
-  GtkWidget *toolbar;
-  GtkWidget *button_new;
-  GtkWidget *button_open;
-  GtkWidget *button_save;
-  GtkWidget *button_save_as;
-  GtkWidget *button_close;
-  GtkWidget *button_undo;
-  GtkWidget *button_redo;
-  GtkWidget *button_cut;
-  GtkWidget *button_copy;
-  GtkWidget *button_paste;
-  GtkWidget *button_find;
-  GtkWidget *button_replace;
-  GtkToolItem *toolbar_separator;
-  GtkWidget *button_indent;
-  GtkWidget *button_unindent;
-  GtkWidget *button_zoom_in;
-  GtkWidget *button_zoom_out;
-  GtkWidget *button_zoom_100;
-}
-Maintoolbar;
-typedef struct
-{
-  GtkWidget *toolbar;
-  GtkToolItem *toolbar_separator;
-  GtkWidget *toolbar_find;
-  GtkWidget *search_label;
-  GtkWidget *search_entry;
-  GtkWidget *goto_label;
-  GtkWidget *goto_entry;
-  GtkWidget *cleanimg;
-  GtkEntryCompletion *completion;
-  GtkTreeModel *completion_model;
-}
-Findtoolbar;
+G_BEGIN_DECLS
 
-void main_window_create_maintoolbar(void);
-void main_window_create_findtoolbar(void);
-GtkTreeModel *create_completion_model (void);
-#endif /*TOOLBAR_H*/
+/*
+ * Type checking and casting macros
+ */
+#define GOBJECT_TYPE_TOOLBAR              (TOOLBAR_get_type())
+#define TOOLBAR(obj)              (G_TYPE_CHECK_INSTANCE_CAST((obj), GOBJECT_TYPE_TOOLBAR, ToolBar))
+#define TOOLBAR_CLASS(klass)      (G_TYPE_CHECK_CLASS_CAST((klass), GOBJECT_TYPE_TOOLBAR, ToolBarClass))
+#define OBJECT_IS_TOOLBAR(obj)           (G_TYPE_CHECK_INSTANCE_TYPE((obj), GOBJECT_TYPE_TOOLBAR))
+#define OBJECT_IS_TOOLBAR_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), GOBJECT_TYPE_TOOLBAR))
+#define TOOLBAR_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS((obj), GOBJECT_TYPE_TOOLBAR, ToolBarClass))
+
+/* Private structure type */
+typedef struct _ToolBarPrivate ToolBarPrivate;
+
+/*
+ * Main object structure
+ */
+typedef struct _ToolBar ToolBar;
+
+struct _ToolBar 
+{
+	GtkToolbar dialog;
+
+	/*< private > */
+	ToolBarPrivate *priv;
+};
+
+/*
+ * Class definition
+ */
+typedef struct _ToolBarClass ToolBarClass;
+
+struct _ToolBarClass 
+{
+	GtkToolbarClass parent_class;
+	
+};
+
+/*
+ * Public methods
+ */
+GType 		 TOOLBAR_get_type 		(void) G_GNUC_CONST;
+
+GtkWidget *toolbar_new (gboolean type, GtkAccelGroup *accel_group);
+gboolean toolbar_is_visible(ToolBar *toolbar);
+void toolbar_set_search_text(ToolBar *toolbar, gchar *text);
+void toolbar_grab_goto_focus(ToolBar *toolbar);
+void toolbar_completion_add_text(ToolBar *toolbar,const gchar *text);
+void toolbar_update_controls(ToolBar *toolbar, gboolean is_scintilla, gboolean isreadonly);
+G_END_DECLS
+
+#endif  /* __TOOLBAR_H__  */

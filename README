@@ -10,9 +10,9 @@ Installation of gPHPEdit: (UBUNTU AND DEBIAN USERS)
 ===================================================
 0) To install gPHPEdit from source:
 
-    You can download lastest source packages from: http://www.gphpedit.org
+   You can download lastest source packages from: http://www.gphpedit.org
 
-   0.1) installing from git
+   0.a) installing from git
 
    In a terminal write:
    git clone git://github.com/anoopjohn/gphpedit.git ~/gphpedit-git
@@ -33,6 +33,9 @@ Installation of gPHPEdit: (UBUNTU AND DEBIAN USERS)
 	prefix is consistent with the installation environment and the package 
 	will be installed in the correct location.
 
+  --enable-debug=yes 
+  Setting this flag enable the debug support, disabled by default.
+
 2) Dependencies
 
 Compilation needs the following software packages - usually the headers 
@@ -51,6 +54,42 @@ prefix lib, e.g. libgtk2.0-dev)
 	     - php5-cli (optional for php sintax checking)
 	     - php-doc (optional for php help support) *
    * if you don't have php-doc pakage installed gphpedit will search help in PHP online resources.
+
+Debug system
+============
+Since 0.9.98 version GPHPEdit has a new debug system.
+To activate it you must first compile GPHPEdit with --enable-debug=yes option.
+Then you must start the editor setting an environment variable with the same name of the chanel to debug.
+For example:
+	$ env GPHPEDIT_DEBUG=1 ./gphpedit
+
+will enable all debug chanels.
+
+This expresion:
+
+	$ env GPHPEDIT_DEBUG_PLUGINS=1 ./gphpedit
+
+will activate only the plugins chanel.
+
+You could activate more than one debug chanel, for example:
+
+	$ env GPHPEDIT_DEBUG_PLUGINS=1 GPHPEDIT_DEBUG_DOCUMENT=1 ./gphpedit
+
+will activate plugins and document chanel.
+
+* The following list contains the avariable debug chanels:
+   - GPHPEDIT_NO_DEBUG (disable debug output)
+   - GPHPEDIT_DEBUG_CALLTIP
+   - GPHPEDIT_DEBUG_CLASSBROWSER
+   - GPHPEDIT_DEBUG_CLASSBROWSER_PARSE
+   - GPHPEDIT_DEBUG_DOCUMENT
+   - GPHPEDIT_DEBUG_PLUGINS
+   - GPHPEDIT_DEBUG_FILEBROWSER
+   - GPHPEDIT_DEBUG_IPC
+   - GPHPEDIT_DEBUG_MAIN_WINDOW
+   - GPHPEDIT_DEBUG_DOC_MANAGER
+   - GPHPEDIT_DEBUG_PREFS
+   - GPHPEDIT_DEBUG_SYNTAX
 
 How to report bugs
 ==================
@@ -199,5 +238,28 @@ The following list all gphpedit’s shortcut keys.
  7) Autocompletion:
     * Insert template (Ctrl + j)
 
+=======
+Find and Replace
+================
+
+Regular expressions
+--------------------
+
+GPHPEdit support regular expression search.
+In a regular expression, special characters interpreted are:
+. 	Matches any character
+\( 	This marks the start of a region for tagging a match.
+\) 	This marks the end of a tagged region.
+\n 	Where n is 1 through 9 refers to the first through ninth tagged region when replacing. For example, if the search string was Fred\([1-9]\)XXX and the replace string was Sam\1YYY, when applied to Fred2XXX this would generate Sam2YYY.
+\< 	This matches the start of a word using Scintilla's definitions of words.
+\> 	This matches the end of a word using Scintilla's definition of words.
+\x 	This allows you to use a character x that would otherwise have a special meaning. For example, \[ would be interpreted as [ and not as the start of a character set.
+[...] 	This indicates a set of characters, for example, [abc] means any of the characters a, b or c. You can also use ranges, for example [a-z] for any lower case character.
+[^...] 	The complement of the characters in the set. For example, [^A-Za-z] means any character except an alphabetic character.
+^ 	This matches the start of a line (unless used inside a set, see above).
+$ 	This matches the end of a line.
+* 	This matches 0 or more times. For example, Sa*m matches Sm, Sam, Saam, Saaam and so on.
++ 	This matches 1 or more times. For example, Sa+m matches Sam, Saam, Saaam and so on.
+
 	The gphpedit team.
-	
+

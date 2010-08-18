@@ -27,8 +27,11 @@
 
 #include <string.h>
 #include <glib/gi18n.h>
-
 #include "gphpedit-statusbar.h"
+#include "status-combo-box.h"
+#include "tab.h"
+#include "document.h"
+#include "main_window.h"
 
 #define GPHPEDIT_STATUSBAR_GET_PRIVATE(object)(G_TYPE_INSTANCE_GET_PRIVATE ((object),\
 					    GPHPEDIT_TYPE_STATUSBAR,\
@@ -36,7 +39,10 @@
 
 struct _GphpeditStatusbarPrivate
 {
+	GtkWidget     *overwrite_mode_statusbar;
+	GtkWidget     *cursor_position_statusbar;
 	GtkWidget     *zoom_level;
+  GtkWidget     *filetype_menu;
 
 	GtkWidget     *error_frame;
 	GtkWidget     *error_event_box;
@@ -123,6 +129,84 @@ set_statusbar_width_chars (GtkWidget *statusbar,
 	gtk_widget_set_size_request (statusbar, width, -1);
 }
 
+void set_higthlight (GphpeditStatusComboBox *combo, GtkMenuItem *item){
+  const gchar *label =gtk_menu_item_get_label (item);
+  if (g_strcmp0(label,_("Cobol"))==0){
+    set_document_to_cobol(document_manager_get_current_document(main_window.docmg));
+  } else if (g_strcmp0(label,_("C/C++"))==0){
+    set_document_to_cxx(document_manager_get_current_document(main_window.docmg));
+  } else if (g_strcmp0(label,_("CSS"))==0){
+    set_document_to_css(document_manager_get_current_document(main_window.docmg));
+  } else if (g_strcmp0(label,_("PHP/HTML/XML"))==0){
+    set_document_to_php(document_manager_get_current_document(main_window.docmg));
+  } else if (g_strcmp0(label,_("Perl"))==0){
+    set_document_to_perl(document_manager_get_current_document(main_window.docmg));
+  } else if (g_strcmp0(label,_("SQL"))==0){
+    set_document_to_sql(document_manager_get_current_document(main_window.docmg));
+  } else if (g_strcmp0(label,_("Python"))==0){
+    set_document_to_python(document_manager_get_current_document(main_window.docmg));
+  } else {
+    set_document_to_text_plain(document_manager_get_current_document(main_window.docmg));
+  }
+}
+
+void set_status_combo_item (GphpeditStatusbar *statusbar,const gchar *label)
+{
+  GList *items = gphpedit_status_combo_box_get_items (GPHPEDIT_STATUS_COMBO_BOX(statusbar->priv->filetype_menu));
+  GList *walk;
+  for (walk = items; walk != NULL; walk = g_list_next (walk)) {
+    const gchar *lbl = gphpedit_status_combo_box_get_item_text 	(GPHPEDIT_STATUS_COMBO_BOX(statusbar->priv->filetype_menu), (GtkMenuItem *)walk->data);
+    if (g_strcmp0(label,lbl)==0) {
+        gphpedit_status_combo_box_set_item (GPHPEDIT_STATUS_COMBO_BOX(statusbar->priv->filetype_menu),(GtkMenuItem *)walk->data);
+        break;
+    }
+  }
+  g_list_free (items);
+}
+static void fill_combo_box(GphpeditStatusComboBox 	*combo)
+{
+  GtkMenuItem *item;
+  item = GTK_MENU_ITEM(gtk_menu_item_new_with_mnemonic(_("Cobol")));
+  gtk_widget_show (GTK_WIDGET(item));
+  gphpedit_status_combo_box_add_item (combo, item, _("Cobol"));
+  item = GTK_MENU_ITEM(gtk_menu_item_new_with_mnemonic(_("C/C++")));
+  gtk_widget_show (GTK_WIDGET(item));
+  gphpedit_status_combo_box_add_item (combo, item, _("C/C++"));
+  item = GTK_MENU_ITEM(gtk_menu_item_new_with_mnemonic(_("CSS")));
+  gtk_widget_show (GTK_WIDGET(item));
+  gphpedit_status_combo_box_add_item (combo, item, _("CSS"));
+  item = GTK_MENU_ITEM(gtk_menu_item_new_with_mnemonic(_("PHP/HTML/XML")));
+  gtk_widget_show (GTK_WIDGET(item));
+  gphpedit_status_combo_box_add_item (combo, item, _("PHP/HTML/XML"));
+  item = GTK_MENU_ITEM(gtk_menu_item_new_with_mnemonic(_("Perl")));
+  gtk_widget_show (GTK_WIDGET(item));
+  gphpedit_status_combo_box_add_item (combo, item, _("Perl"));
+  item = GTK_MENU_ITEM(gtk_menu_item_new_with_mnemonic(_("Python")));
+  gtk_widget_show (GTK_WIDGET(item));
+  gphpedit_status_combo_box_add_item (combo, item, _("Python"));
+  item = GTK_MENU_ITEM(gtk_menu_item_new_with_mnemonic(_("SQL")));
+  gtk_widget_show (GTK_WIDGET(item));
+  gphpedit_status_combo_box_add_item (combo, item, _("SQL"));
+  item = GTK_MENU_ITEM(gtk_menu_item_new_with_mnemonic(_("Text-Plain")));
+  gtk_widget_show (GTK_WIDGET(item));
+  gphpedit_status_combo_box_add_item (combo, item, _("Text-Plain"));
+  
+  g_signal_connect (combo, "changed", G_CALLBACK (set_higthlight), NULL);
+}
+
+static gchar *
+get_overwrite_mode_string (gboolean overwrite)
+{
+	return g_strconcat ("  ", overwrite ? _("OVR") :  _("INS"), NULL);
+}
+
+static gint
+get_overwrite_mode_length (void)
+{
+	return 2 + MAX (g_utf8_strlen (_("OVR"), -1), g_utf8_strlen (_("INS"), -1));
+}
+
+
 static void
 gphpedit_statusbar_init (GphpeditStatusbar *statusbar)
 {
@@ -132,14 +216,39 @@ gphpedit_statusbar_init (GphpeditStatusbar *statusbar)
 
 	gtk_statusbar_set_has_resize_grip (GTK_STATUSBAR (statusbar), FALSE);
 
+	statusbar->priv->overwrite_mode_statusbar = gtk_statusbar_new ();
+	gtk_widget_show (statusbar->priv->overwrite_mode_statusbar);
+	gtk_statusbar_set_has_resize_grip (GTK_STATUSBAR (statusbar->priv->overwrite_mode_statusbar),
+					   FALSE);
+	set_statusbar_width_chars (statusbar->priv->overwrite_mode_statusbar,
+				   get_overwrite_mode_length (),
+				   TRUE);
+	gtk_box_pack_end (GTK_BOX (statusbar),
+			  statusbar->priv->overwrite_mode_statusbar,
+			  FALSE, TRUE, 0);
+
+	statusbar->priv->cursor_position_statusbar = gtk_statusbar_new ();
+	gtk_widget_show (statusbar->priv->cursor_position_statusbar);
+	gtk_statusbar_set_has_resize_grip (GTK_STATUSBAR (statusbar->priv->cursor_position_statusbar),
+					   FALSE);
+	set_statusbar_width_chars (statusbar->priv->cursor_position_statusbar, 15, FALSE);
+	gtk_box_pack_end (GTK_BOX (statusbar),
+			  statusbar->priv->cursor_position_statusbar,
+			  FALSE, TRUE, 0);
+
 	statusbar->priv->zoom_level = gtk_statusbar_new ();
 	gtk_widget_show (statusbar->priv->zoom_level);
 	gtk_statusbar_set_has_resize_grip (GTK_STATUSBAR (statusbar->priv->zoom_level),
 					   FALSE);
-	set_statusbar_width_chars (statusbar->priv->zoom_level, 18, FALSE);
+	set_statusbar_width_chars (statusbar->priv->zoom_level, 12, FALSE);
 	gtk_box_pack_end (GTK_BOX (statusbar),
 			  statusbar->priv->zoom_level,
 			  FALSE, TRUE, 0);
+
+  statusbar->priv->filetype_menu= gphpedit_status_combo_box_new ("");
+  gtk_widget_show (statusbar->priv->filetype_menu);
+  gtk_box_pack_end (GTK_BOX (statusbar), statusbar->priv->filetype_menu, FALSE, TRUE, 0);
+  fill_combo_box(GPHPEDIT_STATUS_COMBO_BOX(statusbar->priv->filetype_menu));
 
 	statusbar->priv->error_frame = gtk_frame_new (NULL);
 	gtk_frame_set_shadow_type (GTK_FRAME (statusbar->priv->error_frame), GTK_SHADOW_IN);
@@ -265,3 +374,67 @@ gphpedit_statusbar_flash_message (GphpeditStatusbar *statusbar,
 
 	g_free (msg);
 }
+
+/**
+ * gedit_statusbar_set_overwrite:
+ * @statusbar: a #GeditStatusbar
+ * @overwrite: if the overwrite mode is set
+ *
+ * Sets the overwrite mode on the statusbar.
+ **/
+void
+gphpedit_statusbar_set_overwrite (GphpeditStatusbar *statusbar,
+                               gboolean        overwrite)
+{
+	gchar *msg;
+
+	g_return_if_fail (GPHPEDIT_IS_STATUSBAR (statusbar));
+
+	gtk_statusbar_pop (GTK_STATUSBAR (statusbar->priv->overwrite_mode_statusbar), 0);
+
+	msg = get_overwrite_mode_string (overwrite);
+
+	gtk_statusbar_push (GTK_STATUSBAR (statusbar->priv->overwrite_mode_statusbar), 0, msg);
+
+  g_free (msg);
+}
+
+void
+gphpedit_statusbar_clear_overwrite (GphpeditStatusbar *statusbar)
+{
+	g_return_if_fail (GPHPEDIT_IS_STATUSBAR (statusbar));
+
+	gtk_statusbar_pop (GTK_STATUSBAR (statusbar->priv->overwrite_mode_statusbar), 0);
+}
+
+/**
+ * gphpedit_statusbar_cursor_position:
+ * @statusbar: an #GeditStatusbar
+ * @line: line position
+ * @col: column position
+ *
+ * Sets the cursor position on the statusbar.
+ **/
+void
+gphpedit_statusbar_set_cursor_position (GphpeditStatusbar *statusbar,
+				     gint            line,
+				     gint            col)
+{
+	gchar *msg;
+
+	g_return_if_fail (GPHPEDIT_IS_STATUSBAR (statusbar));
+
+	gtk_statusbar_pop (GTK_STATUSBAR (statusbar->priv->cursor_position_statusbar), 0);
+
+	if ((line == -1) && (col == -1))
+		return;
+
+	/* Translators: "Ln" is an abbreviation for "Line", Col is an abbreviation for "Column". Please,
+	use abbreviations if possible to avoid space problems. */
+	msg = g_strdup_printf (_("  Ln %d, Col %d"), line, col);
+
+	gtk_statusbar_push (GTK_STATUSBAR (statusbar->priv->cursor_position_statusbar), 0, msg);
+
+      	g_free (msg);
+}
+

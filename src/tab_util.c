@@ -23,7 +23,6 @@
 */
 
 #include "tab_util.h"
-#include "preferences.h"
 
 gint scintilla_color(gint red, gint green, gint blue)
 {

@@ -7,28 +7,219 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2010-06-09 01:08+0000\n"
+"POT-Creation-Date: 2010-08-16 15:53-0300\n"
 "PO-Revision-Date: 2010-06-15 16:59+0200\n"
 "Last-Translator: Tefa <muu_posti@hotmail.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=utf-8\n"
+"Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: ../src/calltip.c:100
-#: ../src/calltip.c:130
-#, c-format
-msgid "WARNING: Could not open php-gphpedit.api file\n"
+#: ../src/calltip.c:93 ../src/calltip.c:119
+#, fuzzy
+msgid "Could not open php-gphpedit.api file"
 msgstr "VAROITUS: php-gphpedit.api-tiedostoa ei voitu avata\n"
 
-#: ../src/classbrowser.c:797
-#: ../src/main_window.c:243
+#: ../src/classbrowser_ui.c:184
+msgid "Parse only current file"
+msgstr "Jäsennä vain nykyinen tiedosto"
+
+#: ../src/classbrowser_ui.c:200 ../src/classbrowser_ui.c:536
 msgid "FILE: "
 msgstr "TIEDOSTO:"
 
-#: ../src/classbrowser_parse.c:44
-msgid "Classbrowser::Cannot allocate buffer"
+#: ../src/classbrowser_ui.c:224
+msgid "Name"
+msgstr "Nimi"
+
+#: ../src/classbrowser_ui.c:549
+msgid "FILE:"
+msgstr "TIEDOSTO:"
+
+#: ../src/document.c:250 ../src/document.c:1036 ../src/document.c:1055
+msgid "Help: "
+msgstr "Ohje:"
+
+#: ../src/document.c:253 ../src/document.c:1038 ../src/document.c:1057
+msgid "Preview: "
+msgstr "Esikatselu:"
+
+#: ../src/document.c:281 ../src/main_window_callbacks.c:375
+#: ../src/main_window_callbacks.c:381
+#, c-format
+msgid "Opening %s"
 msgstr ""
+
+#: ../src/document.c:298 ../src/document.c:331
+#, fuzzy, c-format
+msgid "<b>The file \"%s\" has been externally modified.</b>"
+msgstr "Tiedostoa %s on ulkoisesti muokattu. Haluatko ladata sen uudelleen?"
+
+#: ../src/document.c:340
+#, fuzzy
+msgid "Do you want reload it?"
+msgstr "Haluatko korvata tämän esiintymän?"
+
+#: ../src/document.c:363 ../src/document.c:366 ../src/document.c:1426
+#: ../src/document.c:1427
+msgid "Untitled"
+msgstr "Nimetön"
+
+#: ../src/document.c:1816
+msgid "No marker found"
+msgstr ""
+
+#: ../src/document.c:1992 ../src/document.c:1999
+msgid " - gPHPEdit"
+msgstr " - gPHPEdit"
+
+#: ../src/document.c:2020
+msgid "Cannot allocate write buffer"
+msgstr ""
+
+#: ../src/document.c:2188
+msgid "Do you want to replace this occurence?"
+msgstr "Haluatko korvata tämän esiintymän?"
+
+#: ../src/document.c:2189 ../src/filebrowser_backend.c:380
+msgid "Question"
+msgstr ""
+
+#: ../src/document.c:2249
+#, c-format
+msgid "GIO Error: %s saving file:%s\n"
+msgstr ""
+
+#: ../src/document.c:2259
+#, c-format
+msgid ""
+"Could not get the file modification time for file: '%s'. GIO error: %s \n"
+msgstr ""
+
+#: ../src/document.c:2294
+#, c-format
+msgid "UTF-8 Error: %s\n"
+msgstr "UTF-8 Virhe: %s\n"
+
+#: ../src/document.c:2482
+#, c-format
+msgid "Unhandle keyboard macro function %d, please report\n"
+msgstr ""
+
+#: ../src/document_loader.c:189
+#, c-format
+msgid "Error mounting volume. GIO error:%s\n"
+msgstr ""
+
+#: ../src/document_loader.c:203
+msgid ""
+"Error filesystem not mounted. Mounting filesystem, this will take a few "
+"seconds..."
+msgstr ""
+
+#: ../src/document_loader.c:209
+#, c-format
+msgid ""
+"Error opening file GIO error:%s\n"
+"file:%s"
+msgstr ""
+
+#: ../src/document_loader.c:225
+#, c-format
+msgid ""
+"The file %s was not found.\n"
+"\n"
+"Would you like to create it as an empty document?"
+msgstr ""
+"Tiedostoa %s ei löytynyt.\n"
+"\n"
+"Haluaisitko luoda sen uutena dokumenttina?"
+
+#: ../src/document_loader.c:226
+msgid "File not found"
+msgstr "Tiedostoa ei löydy"
+
+#: ../src/document_loader.c:240 ../src/document_loader.c:382
+#, c-format
+msgid "Could not get the file info. GIO error: %s \n"
+msgstr ""
+
+#. If there is no file opened set the name as gPHPEdit
+#. confirm deletion with dialog
+#: ../src/document_loader.c:247 ../src/main_window.c:208
+#: ../src/main_window.c:253 ../src/main_window_callbacks.c:421
+#: ../src/preferences_dialog.c:353 ../src/preferences_dialog.c:717
+#: ../src/preferences_dialog.c:730 ../gphpedit.desktop.in.h:3
+msgid "gPHPEdit"
+msgstr "gPHPEdit"
+
+#: ../src/document_loader.c:247
+msgid "Sorry, I can open this kind of file.\n"
+msgstr ""
+
+#: ../src/document_loader.c:326
+#, c-format
+msgid "gPHPEdit UTF-8 Error: %s\n"
+msgstr "gPHPEdit UTF-8 -virhe: %s\n"
+
+#: ../src/document_loader.c:331
+#, c-format
+msgid "Converted to UTF-8 size: %u\n"
+msgstr ""
+
+#: ../src/document_loader.c:450
+#, c-format
+msgid "Could not get file info for file %s. GIO error: %s \n"
+msgstr ""
+
+#: ../src/document_loader.c:528 ../src/document_loader.c:540
+#, c-format
+msgid "Help for function not found: %s\n"
+msgstr ""
+
+#: ../src/document_loader.c:552 ../src/document_loader.c:587
+msgid "Could not find the required command in the online help"
+msgstr ""
+
+#: ../src/document_manager.c:162
+msgid "Close Tab"
+msgstr ""
+
+#: ../src/document_manager.c:352
+#, c-format
+msgid "Error Saving session file: %s\n"
+msgstr "Virhe Tallennettaessa istuntotiedostoa: %s\n"
+
+#: ../src/document_manager.c:360 ../src/document_manager.c:439
+#, c-format
+msgid "GIO Error deleting file: %s, code %d\n"
+msgstr ""
+
+#: ../src/document_manager.c:598
+#, c-format
+msgid ""
+"The file '%s' has not been saved since your last changes, are you sure you "
+"want to close it and lose these changes?"
+msgstr ""
+"Tiedostoa '%s' ei ole tallennettu viimeisten muutoksiesi jälkeen, oletko "
+"varma, että haluat sulkea sen ja hylätä nämä muutokset?"
+
+#: ../src/document_manager.c:602
+#, c-format
+msgid "Unsaved changes to '%s'"
+msgstr ""
+
+#: ../src/document_manager.c:606
+msgid "Close and _lose changes"
+msgstr "Sulje ja _hylkää muutokset"
+
+#: ../src/document_manager.c:607
+msgid "_Save file"
+msgstr "_Tallenna tiedosto"
+
+#: ../src/document_manager.c:608
+msgid "_Cancel closing"
+msgstr "_Peruuta sulkeminen"
 
 #: ../src/edit_template.c:34
 msgid "Add/Edit Template"
@@ -42,839 +233,983 @@ msgstr "Nimi/Pikanäppäin:"
 msgid "Code:"
 msgstr "Koodi:"
 
-#: ../src/find_replace.c:85
-#: ../src/find_replace.c:342
+#: ../src/filebrowser_backend.c:38
+msgid "Workspace's directory"
+msgstr ""
+
+#: ../src/filebrowser_backend.c:229
+#, c-format
+msgid "Error getting file browser files. GIO Error:%s\t"
+msgstr ""
+
+#: ../src/filebrowser_backend.c:281
+#, c-format
+msgid "Error::%s"
+msgstr ""
+
+#: ../src/filebrowser_backend.c:380
+msgid "Are you sure you wish to delete this file?"
+msgstr "Oletko varma, että haluat poistaa tämän tiedoston?"
+
+#: ../src/filebrowser_backend.c:412
+#, c-format
+msgid "Error creating folder. GIO error:%s\n"
+msgstr ""
+
+#: ../src/filebrowser_backend.c:471
+#, c-format
+msgid "%s cannot be copied, it already exists, overwrite?"
+msgstr ""
+
+#: ../src/filebrowser_backend.c:472
+msgid "Overwrite file?"
+msgstr ""
+
+#: ../src/filebrowser_ui.c:228
+msgid "File"
+msgstr ""
+
+#: ../src/filebrowser_ui.c:231
+msgid "Mime"
+msgstr ""
+
+#. home button
+#: ../src/filebrowser_ui.c:243
+msgid "Go Home Dir"
+msgstr ""
+
+#. up button
+#: ../src/filebrowser_ui.c:249
+msgid "Go Up one level"
+msgstr ""
+
+#. refresh button
+#: ../src/filebrowser_ui.c:255
+msgid "Refresh Filebrowser"
+msgstr ""
+
+#: ../src/filebrowser_ui.c:262
+msgid "Search Files in Folder Browser"
+msgstr ""
+
+#: ../src/filebrowser_ui.c:535 ../src/filebrowser_ui.c:610
+msgid "Rename File"
+msgstr "Nimeä tiedosto uudelleen"
+
+#: ../src/filebrowser_ui.c:542
+msgid "New Filename"
+msgstr "Uusi Tiedostonimi"
+
+#: ../src/filebrowser_ui.c:563
+msgid "New Dir"
+msgstr "Uusi Kansio"
+
+#: ../src/filebrowser_ui.c:570
+msgid "Directory Name"
+msgstr "Kansion Nimi"
+
+#: ../src/filebrowser_ui.c:602
+msgid "Open file"
+msgstr "Avaa tiedosto"
+
+#: ../src/filebrowser_ui.c:614
+msgid "Delete file"
+msgstr "Poista tiedosto"
+
+#: ../src/filebrowser_ui.c:621
+msgid "Create New Directory"
+msgstr "Luo uusi kansio"
+
+#. Show message saying could not be found.
+#: ../src/find_dialog.c:82
 #, c-format
 msgid "The text \"%s\" was not found."
 msgstr "Tekstiä \"%s\" ei löytynyt"
 
-#: ../src/find_replace.c:125
+#: ../src/find_dialog.c:103 ../src/find_dialog.c:186
+#: ../src/replace_dialog.c:159 ../src/replace_dialog.c:268
 msgid "Find"
 msgstr "Etsi"
 
-#. End get selected text
-#: ../src/find_replace.c:162
-#: ../src/find_replace.c:526
-msgid "RegExp/String to search"
-msgstr "Etsittävä RegExp/Merkkijono"
+#: ../src/find_dialog.c:130 ../src/replace_dialog.c:200
+msgid "_Match case"
+msgstr ""
 
-#: ../src/find_replace.c:187
-#: ../src/find_replace.c:569
+#: ../src/find_dialog.c:139 ../src/replace_dialog.c:209
+msgid "Match _entire word only"
+msgstr ""
+
+#: ../src/find_dialog.c:148 ../src/replace_dialog.c:218
 msgid "Whole document"
 msgstr "Koko dokumentti"
 
-#: ../src/find_replace.c:195
-#: ../src/find_replace.c:576
-msgid "From cursor"
-msgstr "Kursorista"
-
-#: ../src/find_replace.c:203
-#: ../src/find_replace.c:584
-msgid "Search"
-msgstr "Etsi"
-
-#: ../src/find_replace.c:216
-#: ../src/find_replace.c:597
+#: ../src/find_dialog.c:157 ../src/replace_dialog.c:227
 msgid "RegExp"
 msgstr "RegExp"
 
-#: ../src/find_replace.c:223
-#: ../src/find_replace.c:604
-msgid "String"
-msgstr "Merkkijono"
-
-#: ../src/find_replace.c:231
-#: ../src/find_replace.c:612
-msgid "Type"
-msgstr "Tyyppi"
-
-#: ../src/find_replace.c:240
-#: ../src/find_replace.c:621
-msgid "Whole word"
-msgstr "Koko sana"
-
-#: ../src/find_replace.c:244
-#: ../src/find_replace.c:625
-msgid "Ignore case while searching"
-msgstr "Jätä etsiessä kirjainkoko huomiotta"
-
-#: ../src/find_replace.c:249
-#: ../src/find_replace.c:635
-msgid "Options"
-msgstr "Valinnat"
-
-#: ../src/find_replace.c:360
-msgid "Do you want to replace this occurence?"
-msgstr "Haluatko korvata tämän esiintymän?"
-
-#: ../src/find_replace.c:446
-#, c-format
-msgid "%s not found, no replacements made."
-msgstr "%s ei löytynyt, ei tehty korvauksia"
-
-#: ../src/find_replace.c:449
-#, c-format
-msgid "1 occurence of %s found, replaced."
-msgstr "1 esiintymä tekstiä %s löytynyt, korvattu."
-
-#: ../src/find_replace.c:452
-#, c-format
-msgid "%d occurences of %s found, all replaced."
-msgstr "%d esiintymää tekstiä %s löytynyt, kaikki korvattu"
-
-#: ../src/find_replace.c:490
-msgid "Find and Replace"
-msgstr "Etsi ja Korvaa"
-
-#: ../src/find_replace.c:544
-msgid "String to Replace"
-msgstr "Korvattava merkkijono"
-
-#: ../src/find_replace.c:630
-msgid "Prompt before Replace"
-msgstr "Kehote ennen Korvaamista"
-
-#: ../src/find_replace.c:656
-msgid "Replace _all"
-msgstr "Korvaa _kaikki"
-
-#: ../src/plugin.c:363
-#, c-format
-msgid "Plugin is null!\n"
+#: ../src/gphpedit-statusbar.c:132 ../src/gphpedit-statusbar.c:167
+#: ../src/gphpedit-statusbar.c:169 ../src/main_window_callbacks.c:683
+msgid "Cobol"
 msgstr ""
 
-#: ../src/plugin.c:431
-#, c-format
-msgid "Spawning %s gave error %s\n"
+#: ../src/gphpedit-statusbar.c:134 ../src/gphpedit-statusbar.c:170
+#: ../src/gphpedit-statusbar.c:172 ../src/main_window_callbacks.c:680
+msgid "C/C++"
 msgstr ""
 
-#: ../src/main_window.c:107
-#: ../src/main_window.c:122
-#, c-format
-msgid "Unable to create ~/.gphpedit/ (%d) %s"
+#: ../src/gphpedit-statusbar.c:136 ../src/gphpedit-statusbar.c:173
+#: ../src/gphpedit-statusbar.c:175 ../src/main_window_callbacks.c:677
+msgid "CSS"
 msgstr ""
 
-#: ../src/main_window.c:139
-msgid "Zoom:100%"
-msgstr "Suurennus:100%"
+#: ../src/gphpedit-statusbar.c:138 ../src/gphpedit-statusbar.c:176
+#: ../src/gphpedit-statusbar.c:178 ../src/main_window_callbacks.c:674
+msgid "PHP/HTML/XML"
+msgstr ""
 
-#: ../src/main_window.c:188
+#: ../src/gphpedit-statusbar.c:140 ../src/gphpedit-statusbar.c:179
+#: ../src/gphpedit-statusbar.c:181 ../src/main_window_callbacks.c:689
+msgid "Perl"
+msgstr ""
+
+#: ../src/gphpedit-statusbar.c:142 ../src/gphpedit-statusbar.c:185
+#: ../src/gphpedit-statusbar.c:187 ../src/main_window_callbacks.c:686
+msgid "SQL"
+msgstr ""
+
+#: ../src/gphpedit-statusbar.c:144 ../src/gphpedit-statusbar.c:182
+#: ../src/gphpedit-statusbar.c:184 ../src/main_window_callbacks.c:692
+msgid "Python"
+msgstr ""
+
+#: ../src/gphpedit-statusbar.c:188 ../src/gphpedit-statusbar.c:190
+#: ../src/main_window_callbacks.c:695
+msgid "Text-Plain"
+msgstr ""
+
+#: ../src/gphpedit-statusbar.c:276
+#, fuzzy, c-format
+msgid "Zoom: %d%s"
+msgstr "Suurenna:"
+
+#: ../src/gvfs_utils.c:121
+#, c-format
+msgid "Error reading file sync '%s'. GIO error:%s\n"
+msgstr ""
+
+#: ../src/gvfs_utils.c:209 ../src/gvfs_utils.c:227
+#, c-format
+msgid "Error renaming file. GIO Error:%s\n"
+msgstr ""
+
+#: ../src/gvfs_utils.c:243 ../src/gvfs_utils.c:248
+#, c-format
+msgid "GIO Error deleting file: %s\n"
+msgstr ""
+
+#: ../src/gvfs_utils.c:369
+#, c-format
+msgid "Error saving temp file: '%s'. GIO Error:%s"
+msgstr ""
+
+#: ../src/main_window.c:136
 msgid "Close side panel"
 msgstr "Sulje sivupaneeli"
 
 #. set tooltip
-#: ../src/main_window.c:215
+#: ../src/main_window.c:158
 msgid "Class Browser"
 msgstr ""
 
-#: ../src/main_window.c:226
-msgid "Parse only current file"
-msgstr "Jäsennä vain nykyinen tiedosto"
-
-#: ../src/main_window.c:260
-msgid "Name"
-msgstr "Nimi"
-
-#: ../src/main_window.c:292
-msgid "Syntax Check Output"
-msgstr ""
-
-#. debug("Title - %s, Short name - %s", title->str, main_window.current_editor->short_filename);
-#: ../src/main_window.c:427
-msgid " - gPHPEdit"
-msgstr " - gPHPEdit"
-
-#. TODO: These strings are not being freed. The app crashes when the free
-#. is uncommented stating that there were duplicate free calls.
-#. g_free(editor->short_filename);
-#. g_free(editor->help_function);
-#: ../src/main_window.c:436
-#: ../src/tab.c:615
-#: ../src/tab.c:621
-#: ../src/tab.c:639
-#: ../src/tab.c:660
-msgid "Help: "
-msgstr "Ohje:"
-
-#: ../src/main_window.c:442
-#: ../src/tab.c:623
-#: ../src/tab.c:624
-#: ../src/tab.c:641
-#: ../src/tab.c:707
-msgid "Preview: "
-msgstr "Esikatselu:"
-
-#: ../src/main_window.c:449
-#: ../src/main_window.c:454
-#: ../src/main_window.c:561
-#: ../src/main_window_callbacks.c:849
-#: ../src/tab.c:418
-msgid "gPHPEdit"
-msgstr "gPHPEdit"
-
-#. set up info bar
-#: ../src/main_window.c:535
-msgid "Reload"
-msgstr "Lataa uudelleen"
-
-#: ../src/main_window.c:535
-msgid "Cancel"
-msgstr "Peruuta"
-
-#: ../src/main_window_callbacks.c:88
-#, c-format
-msgid "Error Saving session file: %s\n"
-msgstr "Virhe Tallennettaessa istuntotiedostoa: %s\n"
-
-#: ../src/main_window_callbacks.c:166
-#, c-format
-msgid "GIO Error deleting file: %s, code %d\n"
-msgstr ""
-
-#: ../src/main_window_callbacks.c:522
+#: ../src/main_window_callbacks.c:179
 msgid "PHP files ("
 msgstr "PHP tiedostot ("
 
-#: ../src/main_window_callbacks.c:544
+#: ../src/main_window_callbacks.c:201
 msgid "HTML files (*.html *.htm *.xhtml *tpl)"
 msgstr "HTML tiedostot (*.html *.htm *.xhtml *tpl)"
 
-#: ../src/main_window_callbacks.c:551
+#: ../src/main_window_callbacks.c:208
 msgid "XML files (*.xml)"
 msgstr "XML tiedostot (*.xml)"
 
-#: ../src/main_window_callbacks.c:555
+#: ../src/main_window_callbacks.c:212
 msgid "Stylesheet files (*.css)"
 msgstr ""
 
-#: ../src/main_window_callbacks.c:559
+#: ../src/main_window_callbacks.c:216
 msgid "SQL files (*.sql)"
 msgstr "SQL tiedostot (*.sql)"
 
-#: ../src/main_window_callbacks.c:563
+#: ../src/main_window_callbacks.c:220
 msgid "Javascript files (*.js)"
 msgstr ""
 
-#: ../src/main_window_callbacks.c:567
+#: ../src/main_window_callbacks.c:224
 msgid "C/C++ files (*.c *.h *.cpp *.hh *.cc)"
 msgstr ""
 
-#: ../src/main_window_callbacks.c:577
+#: ../src/main_window_callbacks.c:234
 msgid "Perl Files (*.pl *.ph *.pm)"
 msgstr ""
 
-#: ../src/main_window_callbacks.c:585
+#: ../src/main_window_callbacks.c:242
 msgid "Cobol Files (*.cbl)"
 msgstr ""
 
-#: ../src/main_window_callbacks.c:591
+#: ../src/main_window_callbacks.c:248
 msgid "Python Files (*.py *.pyd *.pyw)"
 msgstr ""
 
-#: ../src/main_window_callbacks.c:599
+#: ../src/main_window_callbacks.c:256
 msgid "All files"
 msgstr "Kaikki tiedostot"
 
-#: ../src/main_window_callbacks.c:703
-#: ../src/syntax_check.c:123
-#: ../src/tab.c:269
-msgid "Cannot allocate write buffer"
-msgstr ""
-
-#: ../src/main_window_callbacks.c:711
-#: ../src/tab.c:278
+#. show status in statusbar
+#: ../src/main_window_callbacks.c:317
 #, c-format
-msgid "UTF-8 Error: %s\n"
-msgstr "UTF-8 Virhe: %s\n"
-
-#: ../src/main_window_callbacks.c:725
-#: ../src/tab.c:237
-#, c-format
-msgid "GIO Error: %s saving file:%s\n"
+msgid "Saving %s"
 msgstr ""
 
 #. Create the selector widget
-#: ../src/main_window_callbacks.c:746
+#: ../src/main_window_callbacks.c:337
 msgid "Please type the filename to save as..."
 msgstr "Kirjoita tiedostonimi tallentaaksesi nimellä..."
 
-#: ../src/main_window_callbacks.c:786
+#: ../src/main_window_callbacks.c:371
 msgid "Are you sure you wish to reload the current file, losing your changes?"
-msgstr "Oletko varma, että haluat ladata nykyisen tiedoston uudelleen menettäen tehdyt muutokset?"
+msgstr ""
+"Oletko varma, että haluat ladata nykyisen tiedoston uudelleen menettäen "
+"tehdyt muutokset?"
 
-#: ../src/main_window_callbacks.c:848
+#: ../src/main_window_callbacks.c:421
 msgid "This file already exists, are you sure you want to overwrite it?"
 msgstr "Kyseinen tiedosto on jo olemassa, haluatko varmasti ylikirjoittaa sen?"
 
 #. Create the selector widget
-#: ../src/main_window_callbacks.c:869
+#: ../src/main_window_callbacks.c:439
 msgid "Please type the filename to rename this file to..."
 msgstr "Kirjoita tiedostonimi nimetäksesi tämän tiedoston uudelleen..."
 
-#: ../src/main_window_callbacks.c:914
-msgid "Zoom:"
-msgstr "Suurenna:"
-
-#: ../src/main_window_callbacks.c:980
-#: ../src/main_window_callbacks.c:981
-#, c-format
-msgid "The file '%s' has not been saved since your last changes, are you sure you want to close it and lose these changes?"
-msgstr "Tiedostoa '%s' ei ole tallennettu viimeisten muutoksiesi jälkeen, oletko varma, että haluat sulkea sen ja hylätä nämä muutokset?"
-
-#: ../src/main_window_callbacks.c:982
-#, c-format
-msgid "Unsaved changes to '%s'"
-msgstr ""
-
-#: ../src/main_window_callbacks.c:984
-msgid "Close and _lose changes"
-msgstr "Sulje ja _hylkää muutokset"
-
-#: ../src/main_window_callbacks.c:985
-msgid "_Save file"
-msgstr "_Tallenna tiedosto"
-
-#: ../src/main_window_callbacks.c:986
-msgid "_Cancel closing"
-msgstr "_Peruuta sulkeminen"
-
-#: ../src/main_window_callbacks.c:1035
-msgid "FILE:"
-msgstr "TIEDOSTO:"
-
-#: ../src/main_window_callbacks.c:1298
-#, c-format
-msgid "Unhandle keyboard macro function %d, please report\n"
-msgstr ""
-
-#: ../src/main_window_callbacks.c:1362
+#: ../src/main_window_callbacks.c:637
 msgid "translator_credits"
 msgstr ""
 
-#: ../src/main_window_callbacks.c:1369
-msgid "Copyright  2003-2006 Andy Jeffries, 2009-2010 Anoop John"
+#: ../src/main_window_callbacks.c:644
+msgid "Copyright © 2003-2006 Andy Jeffries, 2009-2010 Anoop John"
 msgstr ""
 
-#: ../src/main_window_callbacks.c:1371
-msgid "gPHPEdit is a GNOME2 editor specialised for editing PHP scripts and related files (HTML/CSS/JS)."
+#: ../src/main_window_callbacks.c:646
+msgid ""
+"gPHPEdit is a GNOME2 editor specialised for editing PHP scripts and related "
+"files (HTML/CSS/JS)."
 msgstr ""
 
-#: ../src/main_window_callbacks.c:1415
+#: ../src/main_window_callbacks.c:704
 #, c-format
-msgid "Unable to get data for page %d\n"
+msgid "Unable to get data for page %d"
 msgstr ""
 
-#: ../src/main_window_callbacks.c:1927
+#: ../src/menubar.c:341
+msgid "Creates a new file"
+msgstr ""
+
+#: ../src/menubar.c:343
+msgid "Open a file"
+msgstr "Avaa tiedosto"
+
+#: ../src/menubar.c:345
+msgid "_Open selected file"
+msgstr "_Avaa valittu tiedosto"
+
+#: ../src/menubar.c:345
+msgid "Open a file with the name currently selected in the editor"
+msgstr ""
+
+#. recent menu setup
+#: ../src/menubar.c:349
+msgid "_Recent Files"
+msgstr "_Viimeksi käytetyt tiedostot"
+
+#: ../src/menubar.c:360
+msgid "_Reload current file"
+msgstr "_Lataa nykyinen tiedosto uudelleen"
+
+#: ../src/menubar.c:360
+msgid "Reload the file currently selected in the editor"
+msgstr ""
+
+#: ../src/menubar.c:365 ../src/menubar.c:367
+msgid "Save the file currently selected in the editor"
+msgstr ""
+
+#: ../src/menubar.c:369
+msgid "Save A_ll"
+msgstr "Tallenna K_aikki"
+
+#: ../src/menubar.c:369
+msgid "Save all open unsaved files"
+msgstr ""
+
+#: ../src/menubar.c:371
+msgid "_Rename"
+msgstr "_Nimeä uudelleen"
+
+#: ../src/menubar.c:371
+msgid "Rename the current file 'on-the-fly'"
+msgstr "Nimeä nykyinen tiedosto uudelleen 'lennossa'"
+
+#: ../src/menubar.c:373
+msgid "Close the current file"
+msgstr "Sulje nykyinen tiedosto"
+
+#: ../src/menubar.c:379
+msgid "Quit the application"
+msgstr "Sulje sovellus"
+
+#. help menu
+#: ../src/menubar.c:389
+msgid "_PHP Help"
+msgstr "_PHP Ohje"
+
+#: ../src/menubar.c:389
+msgid "Look for help on the currently selected function"
+msgstr ""
+
+#: ../src/menubar.c:392
+msgid "_Report a bug in gPHPEdit"
+msgstr "_Ilmoita virheestä ohjelmassa gPHPEdit"
+
+#: ../src/menubar.c:392
+msgid "Go to bug report page to report a bug"
+msgstr "Siirry virheen ilmoitussivulle ilmoittaaksesi virheestä"
+
+#: ../src/menubar.c:396
+msgid "_Translate this application"
+msgstr "_Käännä tämä ohjelma"
+
+#: ../src/menubar.c:396
+msgid "Start translating this application"
+msgstr "Aloita tämän ohjelman kääntäminen"
+
+#: ../src/menubar.c:399
+msgid "Shows info about gPHPEdit"
+msgstr ""
+
+#: ../src/menubar.c:409
+msgid "Undo last action"
+msgstr "Kumoa"
+
+#: ../src/menubar.c:411
+msgid "Redo last action"
+msgstr "Tee uudelleen"
+
+#: ../src/menubar.c:417
+msgid "Cut Selected Text"
+msgstr "Leikkaa Valittu Teksti"
+
+#: ../src/menubar.c:419
+msgid "Copy Selected Text"
+msgstr "Kopioi Valittu Teksti"
+
+#: ../src/menubar.c:421
+msgid "Paste Text from clipboard"
+msgstr "Liitä Teksti Leikepöydältä"
+
+#: ../src/menubar.c:423
+msgid "Select all Text in current file"
+msgstr "Valitse koko Teksti nykyisessä tiedostossa"
+
+#: ../src/menubar.c:429
+msgid "Find text in current file"
+msgstr "Etsi tekstiä tiedostosta"
+
+#: ../src/menubar.c:431
+msgid "Find and replace text in current file"
+msgstr "Etsi ja Korvaa tekstiä"
+
+#: ../src/menubar.c:437
+msgid "Indent the currently selected block"
+msgstr ""
+
+#: ../src/menubar.c:439
+msgid "Unindent the currently selected block"
+msgstr ""
+
+#: ../src/menubar.c:445
+msgid "_ToUpper"
+msgstr ""
+
+#: ../src/menubar.c:445
+msgid "Convert the current selection text to upper case"
+msgstr ""
+
+#: ../src/menubar.c:447
+msgid "_ToLower"
+msgstr ""
+
+#: ../src/menubar.c:447
+msgid "Convert the current selection text to lower case"
+msgstr ""
+
+#: ../src/menubar.c:458
+msgid "Statusbar"
+msgstr "Tilarivi"
+
+#: ../src/menubar.c:458
+msgid "Show/Hide Application Statusbar"
+msgstr ""
+
+#: ../src/menubar.c:461
+msgid "Main Toolbar"
+msgstr ""
+
+#: ../src/menubar.c:461
+msgid "Show/Hide Application Main Toolbar"
+msgstr ""
+
+#: ../src/menubar.c:464
+msgid "Find Toolbar"
+msgstr "Etsi Työkalupalkki"
+
+#: ../src/menubar.c:464
+msgid "Show/Hide Application Find Toolbar"
+msgstr ""
+
+#: ../src/menubar.c:470
+msgid "Show Side Panel"
+msgstr "Näytä Sivupaneeli"
+
+#: ../src/menubar.c:470
+msgid "Show/Hide Application Side Panel"
+msgstr ""
+
+#: ../src/menubar.c:473
+msgid "Fullscreen"
+msgstr "Koko näyttö"
+
+#: ../src/menubar.c:473
+msgid "Enable/Disable Fullscreen mode"
+msgstr "Salli/Estä Kokoruututila"
+
+#: ../src/menubar.c:478
+msgid "Increases zoom in 10%"
+msgstr "Suurenna 10%"
+
+#: ../src/menubar.c:480
+msgid "Decreases zoom in 10%"
+msgstr "Pienennä 10%"
+
+#: ../src/menubar.c:482
+msgid "Restores normal zoom level"
+msgstr "Palauta normaali suurennustaso"
+
+#. toolbar icon size menu
+#: ../src/menubar.c:488
+msgid "_Toolbar Icon Size"
+msgstr "_Työkalupalkin Kuvakkeiden Koko"
+
+#: ../src/menubar.c:496
+msgid "Big Icons"
+msgstr "Suuret Kuvakkeet"
+
+#: ../src/menubar.c:500
+msgid "Small Icons"
+msgstr "Pienet Kuvakkeet"
+
+#: ../src/menubar.c:506
+msgid "_Show Preview"
+msgstr "_Näytä Esikatselu"
+
+#: ../src/menubar.c:506
+msgid "Preview the Document"
+msgstr "Esikatsele Dokumenttia"
+
+#: ../src/menubar.c:511
+msgid "Application Config"
+msgstr ""
+
+#: ../src/menubar.c:521
+msgid "_Syntax check"
+msgstr ""
+
+#: ../src/menubar.c:521
+msgid "Check the syntax using the PHP command line binary"
+msgstr ""
+
+#: ../src/menubar.c:523
+msgid "_Clear Syntax check"
+msgstr ""
+
+#: ../src/menubar.c:523
+msgid "Remove the syntax check window"
+msgstr ""
+
+#: ../src/menubar.c:528
+msgid "_Record keyboard macro start/stop"
+msgstr ""
+
+#: ../src/menubar.c:528
+msgid "Record keyboard actions"
+msgstr ""
+
+#: ../src/menubar.c:530
+msgid "_Playback keyboard macro"
+msgstr ""
+
+#: ../src/menubar.c:530
+msgid "Playback the stored keyboard macro"
+msgstr ""
+
+#: ../src/menubar.c:533
+msgid "_Force"
+msgstr ""
+
+#: ../src/menubar.c:538
+msgid "_PHP/HTML/XML"
+msgstr ""
+
+#: ../src/menubar.c:538
+msgid "Force syntax highlighting to PHP/HTML/XML mode"
+msgstr ""
+
+#: ../src/menubar.c:540
+msgid "_CSS"
+msgstr ""
+
+#: ../src/menubar.c:540
+msgid "Force syntax highlighting to CSS mode"
+msgstr ""
+
+#: ../src/menubar.c:542
+msgid "C/C_++"
+msgstr ""
+
+#: ../src/menubar.c:542
+msgid "Force syntax highlighting to C/C++ mode"
+msgstr ""
+
+#: ../src/menubar.c:544
+msgid "_SQL"
+msgstr ""
+
+#: ../src/menubar.c:544
+msgid "Force syntax highlighting to SQL mode"
+msgstr ""
+
+#: ../src/menubar.c:546
+msgid "_Perl"
+msgstr ""
+
+#: ../src/menubar.c:546
+msgid "Force syntax highlighting to Perl mode"
+msgstr ""
+
+#: ../src/menubar.c:548
+msgid "_Cobol"
+msgstr ""
+
+#: ../src/menubar.c:548
+msgid "Force syntax highlighting to Cobol mode"
+msgstr ""
+
+#: ../src/menubar.c:550
+msgid "P_ython"
+msgstr ""
+
+#: ../src/menubar.c:550
+msgid "Force syntax highlighting to Python mode"
+msgstr ""
+
+#. create menus
+#. Menu file
+#: ../src/menubar.c:564
+msgid "_File"
+msgstr ""
+
+#. Menu edit
+#: ../src/menubar.c:567
+msgid "_Edit"
+msgstr ""
+
+#. view menu
+#: ../src/menubar.c:570
+msgid "_View"
+msgstr ""
+
+#: ../src/menubar.c:574
+msgid "_Code"
+msgstr ""
+
+#: ../src/menubar.c:582
+msgid "_Plugin"
+msgstr ""
+
+#. help menu
+#: ../src/menubar.c:587
+msgid "_Help"
+msgstr ""
+
+#: ../src/pluginmanager.c:106 ../src/preferences_manager.c:238
 #, c-format
-msgid "The file %s has been externally modified. Do you want reload it?"
-msgstr "Tiedostoa %s on ulkoisesti muokattu. Haluatko ladata sen uudelleen?"
+msgid "Unable to create ~/.gphpedit/ (%d) %s"
+msgstr ""
+
+#. we create a placeholder menuitem, to be used in case
+#. * the menu is empty. this placeholder will stay around
+#. * for the entire lifetime of the menu, and we just hide it
+#. * when it's not used. we have to do this, and do it here,
+#. * because we need a marker for the beginning of the recent
+#. * items list, so that we can insert the new items at the
+#. * right place when idly populating the menu in case the
+#. * user appended or prepended custom menu items to the
+#. * recent chooser menu widget.
+#.
+#: ../src/pluginmenu.c:82
+msgid "No items found"
+msgstr ""
 
 #. Font drop down elements : General
-#: ../src/preferences_dialog.c:141
-#: ../src/preferences_dialog.c:272
-#: ../src/preferences_dialog.c:273
-#: ../src/preferences_dialog.c:822
-#: ../src/preferences_dialog.c:823
+#: ../src/preferences_dialog.c:123 ../src/preferences_dialog.c:440
+#: ../src/preferences_dialog.c:442 ../src/preferences_dialog.c:756
 msgid "Default"
 msgstr "Oletus"
 
-#: ../src/preferences_dialog.c:142
-#: ../src/preferences_dialog.c:277
-#: ../src/preferences_dialog.c:278
-#: ../src/preferences_dialog.c:827
-#: ../src/preferences_dialog.c:828
+#: ../src/preferences_dialog.c:124 ../src/preferences_dialog.c:444
+#: ../src/preferences_dialog.c:446 ../src/preferences_dialog.c:759
 msgid "Line Number (margin)"
 msgstr "Rivinumero (marginaali)"
 
 #. Font drop down elements : HTML
-#: ../src/preferences_dialog.c:145
-#: ../src/preferences_dialog.c:282
-#: ../src/preferences_dialog.c:283
-#: ../src/preferences_dialog.c:832
-#: ../src/preferences_dialog.c:833
+#: ../src/preferences_dialog.c:127 ../src/preferences_dialog.c:448
+#: ../src/preferences_dialog.c:450 ../src/preferences_dialog.c:762
 msgid "HTML Tag"
 msgstr ""
 
-#: ../src/preferences_dialog.c:146
-#: ../src/preferences_dialog.c:287
-#: ../src/preferences_dialog.c:288
-#: ../src/preferences_dialog.c:837
-#: ../src/preferences_dialog.c:838
+#: ../src/preferences_dialog.c:128 ../src/preferences_dialog.c:452
+#: ../src/preferences_dialog.c:454 ../src/preferences_dialog.c:765
 msgid "HTML Unknown Tag"
 msgstr ""
 
-#: ../src/preferences_dialog.c:147
-#: ../src/preferences_dialog.c:292
-#: ../src/preferences_dialog.c:293
-#: ../src/preferences_dialog.c:842
-#: ../src/preferences_dialog.c:843
+#: ../src/preferences_dialog.c:129 ../src/preferences_dialog.c:456
+#: ../src/preferences_dialog.c:458 ../src/preferences_dialog.c:768
 msgid "HTML Attribute"
 msgstr ""
 
-#: ../src/preferences_dialog.c:148
-#: ../src/preferences_dialog.c:297
-#: ../src/preferences_dialog.c:298
-#: ../src/preferences_dialog.c:847
-#: ../src/preferences_dialog.c:848
+#: ../src/preferences_dialog.c:130 ../src/preferences_dialog.c:460
+#: ../src/preferences_dialog.c:462 ../src/preferences_dialog.c:771
 msgid "HTML Unknown Attribute"
 msgstr ""
 
-#: ../src/preferences_dialog.c:149
-#: ../src/preferences_dialog.c:302
-#: ../src/preferences_dialog.c:303
-#: ../src/preferences_dialog.c:852
-#: ../src/preferences_dialog.c:853
+#: ../src/preferences_dialog.c:131 ../src/preferences_dialog.c:464
+#: ../src/preferences_dialog.c:466 ../src/preferences_dialog.c:774
 msgid "HTML Number"
 msgstr ""
 
-#: ../src/preferences_dialog.c:150
-#: ../src/preferences_dialog.c:307
-#: ../src/preferences_dialog.c:308
-#: ../src/preferences_dialog.c:857
-#: ../src/preferences_dialog.c:858
+#: ../src/preferences_dialog.c:132 ../src/preferences_dialog.c:468
+#: ../src/preferences_dialog.c:470 ../src/preferences_dialog.c:777
 msgid "HTML Single-quoted String"
 msgstr ""
 
-#: ../src/preferences_dialog.c:151
-#: ../src/preferences_dialog.c:312
-#: ../src/preferences_dialog.c:313
-#: ../src/preferences_dialog.c:862
-#: ../src/preferences_dialog.c:863
+#: ../src/preferences_dialog.c:133 ../src/preferences_dialog.c:472
+#: ../src/preferences_dialog.c:474 ../src/preferences_dialog.c:780
 msgid "HTML Double-quoted String"
 msgstr ""
 
-#: ../src/preferences_dialog.c:152
-#: ../src/preferences_dialog.c:317
-#: ../src/preferences_dialog.c:318
-#: ../src/preferences_dialog.c:867
-#: ../src/preferences_dialog.c:868
+#: ../src/preferences_dialog.c:134 ../src/preferences_dialog.c:476
+#: ../src/preferences_dialog.c:478 ../src/preferences_dialog.c:783
 msgid "HTML Comment"
 msgstr ""
 
-#: ../src/preferences_dialog.c:153
-#: ../src/preferences_dialog.c:322
-#: ../src/preferences_dialog.c:323
-#: ../src/preferences_dialog.c:872
-#: ../src/preferences_dialog.c:873
+#: ../src/preferences_dialog.c:135 ../src/preferences_dialog.c:480
+#: ../src/preferences_dialog.c:482 ../src/preferences_dialog.c:786
 msgid "HTML Entity"
 msgstr ""
 
-#: ../src/preferences_dialog.c:154
-#: ../src/preferences_dialog.c:327
-#: ../src/preferences_dialog.c:328
-#: ../src/preferences_dialog.c:877
-#: ../src/preferences_dialog.c:878
+#: ../src/preferences_dialog.c:136 ../src/preferences_dialog.c:484
+#: ../src/preferences_dialog.c:486 ../src/preferences_dialog.c:789
 msgid "HTML Script"
 msgstr ""
 
-#: ../src/preferences_dialog.c:155
-#: ../src/preferences_dialog.c:332
-#: ../src/preferences_dialog.c:333
-#: ../src/preferences_dialog.c:882
-#: ../src/preferences_dialog.c:883
+#: ../src/preferences_dialog.c:137 ../src/preferences_dialog.c:488
+#: ../src/preferences_dialog.c:490 ../src/preferences_dialog.c:792
 msgid "HTML Question"
 msgstr ""
 
-#: ../src/preferences_dialog.c:156
-#: ../src/preferences_dialog.c:337
-#: ../src/preferences_dialog.c:338
-#: ../src/preferences_dialog.c:887
-#: ../src/preferences_dialog.c:888
+#: ../src/preferences_dialog.c:138 ../src/preferences_dialog.c:492
+#: ../src/preferences_dialog.c:494 ../src/preferences_dialog.c:795
 msgid "HTML Value"
 msgstr ""
 
 #. Font drop down elements : JavaScript
-#: ../src/preferences_dialog.c:159
-#: ../src/preferences_dialog.c:342
-#: ../src/preferences_dialog.c:343
-#: ../src/preferences_dialog.c:892
-#: ../src/preferences_dialog.c:893
+#: ../src/preferences_dialog.c:141 ../src/preferences_dialog.c:496
+#: ../src/preferences_dialog.c:498 ../src/preferences_dialog.c:798
 msgid "JavaScript Multiple-line Comment"
 msgstr ""
 
-#: ../src/preferences_dialog.c:160
-#: ../src/preferences_dialog.c:347
-#: ../src/preferences_dialog.c:348
-#: ../src/preferences_dialog.c:897
-#: ../src/preferences_dialog.c:898
+#: ../src/preferences_dialog.c:142 ../src/preferences_dialog.c:500
+#: ../src/preferences_dialog.c:502 ../src/preferences_dialog.c:801
 msgid "JavaScript Single-line Comment"
 msgstr ""
 
-#: ../src/preferences_dialog.c:161
-#: ../src/preferences_dialog.c:352
-#: ../src/preferences_dialog.c:353
-#: ../src/preferences_dialog.c:902
-#: ../src/preferences_dialog.c:903
+#: ../src/preferences_dialog.c:143 ../src/preferences_dialog.c:504
+#: ../src/preferences_dialog.c:506 ../src/preferences_dialog.c:804
 msgid "JavaScript Document Comment"
 msgstr ""
 
-#: ../src/preferences_dialog.c:162
-#: ../src/preferences_dialog.c:357
-#: ../src/preferences_dialog.c:358
-#: ../src/preferences_dialog.c:907
-#: ../src/preferences_dialog.c:908
+#: ../src/preferences_dialog.c:144 ../src/preferences_dialog.c:508
+#: ../src/preferences_dialog.c:510 ../src/preferences_dialog.c:807
 msgid "JavaScript Word"
 msgstr ""
 
-#: ../src/preferences_dialog.c:163
-#: ../src/preferences_dialog.c:362
-#: ../src/preferences_dialog.c:363
-#: ../src/preferences_dialog.c:912
-#: ../src/preferences_dialog.c:913
+#: ../src/preferences_dialog.c:145 ../src/preferences_dialog.c:512
+#: ../src/preferences_dialog.c:514 ../src/preferences_dialog.c:810
 msgid "JavaScript Keyword"
 msgstr ""
 
-#: ../src/preferences_dialog.c:164
-#: ../src/preferences_dialog.c:367
-#: ../src/preferences_dialog.c:368
-#: ../src/preferences_dialog.c:917
-#: ../src/preferences_dialog.c:918
+#: ../src/preferences_dialog.c:146 ../src/preferences_dialog.c:516
+#: ../src/preferences_dialog.c:518 ../src/preferences_dialog.c:813
 msgid "JavaScript Single-quoted String"
 msgstr ""
 
-#: ../src/preferences_dialog.c:165
-#: ../src/preferences_dialog.c:372
-#: ../src/preferences_dialog.c:373
-#: ../src/preferences_dialog.c:922
-#: ../src/preferences_dialog.c:923
+#: ../src/preferences_dialog.c:147 ../src/preferences_dialog.c:520
+#: ../src/preferences_dialog.c:522 ../src/preferences_dialog.c:816
 msgid "JavaScript Double-quoted String"
 msgstr ""
 
-#: ../src/preferences_dialog.c:166
-#: ../src/preferences_dialog.c:377
-#: ../src/preferences_dialog.c:378
-#: ../src/preferences_dialog.c:927
-#: ../src/preferences_dialog.c:928
+#: ../src/preferences_dialog.c:148 ../src/preferences_dialog.c:524
+#: ../src/preferences_dialog.c:526 ../src/preferences_dialog.c:819
 msgid "JavaScript Symbol"
 msgstr ""
 
 #. Font drop down elements : PHP
-#: ../src/preferences_dialog.c:169
-#: ../src/preferences_dialog.c:382
-#: ../src/preferences_dialog.c:383
-#: ../src/preferences_dialog.c:932
-#: ../src/preferences_dialog.c:933
+#: ../src/preferences_dialog.c:151 ../src/preferences_dialog.c:528
+#: ../src/preferences_dialog.c:530 ../src/preferences_dialog.c:822
 msgid "PHP Default"
 msgstr ""
 
-#: ../src/preferences_dialog.c:170
-#: ../src/preferences_dialog.c:387
-#: ../src/preferences_dialog.c:388
-#: ../src/preferences_dialog.c:937
-#: ../src/preferences_dialog.c:938
+#: ../src/preferences_dialog.c:152 ../src/preferences_dialog.c:532
+#: ../src/preferences_dialog.c:534 ../src/preferences_dialog.c:825
 msgid "PHP 'HString'"
 msgstr ""
 
-#: ../src/preferences_dialog.c:171
-#: ../src/preferences_dialog.c:392
-#: ../src/preferences_dialog.c:393
-#: ../src/preferences_dialog.c:942
-#: ../src/preferences_dialog.c:943
+#: ../src/preferences_dialog.c:153 ../src/preferences_dialog.c:536
+#: ../src/preferences_dialog.c:538 ../src/preferences_dialog.c:828
 msgid "PHP Simple String"
 msgstr ""
 
-#: ../src/preferences_dialog.c:172
-#: ../src/preferences_dialog.c:397
-#: ../src/preferences_dialog.c:398
-#: ../src/preferences_dialog.c:947
-#: ../src/preferences_dialog.c:948
+#: ../src/preferences_dialog.c:154 ../src/preferences_dialog.c:540
+#: ../src/preferences_dialog.c:542 ../src/preferences_dialog.c:831
 msgid "PHP Word"
 msgstr ""
 
-#: ../src/preferences_dialog.c:173
-#: ../src/preferences_dialog.c:402
-#: ../src/preferences_dialog.c:403
-#: ../src/preferences_dialog.c:952
-#: ../src/preferences_dialog.c:953
+#: ../src/preferences_dialog.c:155 ../src/preferences_dialog.c:544
+#: ../src/preferences_dialog.c:546 ../src/preferences_dialog.c:834
 msgid "PHP Number"
 msgstr ""
 
-#: ../src/preferences_dialog.c:174
-#: ../src/preferences_dialog.c:407
-#: ../src/preferences_dialog.c:408
-#: ../src/preferences_dialog.c:957
-#: ../src/preferences_dialog.c:958
+#: ../src/preferences_dialog.c:156 ../src/preferences_dialog.c:548
+#: ../src/preferences_dialog.c:550 ../src/preferences_dialog.c:837
 msgid "PHP Variable"
 msgstr ""
 
-#: ../src/preferences_dialog.c:175
-#: ../src/preferences_dialog.c:412
-#: ../src/preferences_dialog.c:413
-#: ../src/preferences_dialog.c:962
-#: ../src/preferences_dialog.c:963
+#: ../src/preferences_dialog.c:157 ../src/preferences_dialog.c:552
+#: ../src/preferences_dialog.c:554 ../src/preferences_dialog.c:840
 msgid "PHP Single-line Comment"
 msgstr ""
 
-#: ../src/preferences_dialog.c:176
-#: ../src/preferences_dialog.c:417
-#: ../src/preferences_dialog.c:418
-#: ../src/preferences_dialog.c:967
-#: ../src/preferences_dialog.c:968
+#: ../src/preferences_dialog.c:158 ../src/preferences_dialog.c:556
+#: ../src/preferences_dialog.c:558 ../src/preferences_dialog.c:843
 msgid "PHP Multiple-line Comment"
 msgstr ""
 
 #. Font drop down elements : CSS
-#: ../src/preferences_dialog.c:179
-#: ../src/preferences_dialog.c:422
-#: ../src/preferences_dialog.c:423
-#: ../src/preferences_dialog.c:972
-#: ../src/preferences_dialog.c:973
+#: ../src/preferences_dialog.c:161 ../src/preferences_dialog.c:560
+#: ../src/preferences_dialog.c:846
 msgid "CSS Tag"
 msgstr ""
 
-#: ../src/preferences_dialog.c:180
-#: ../src/preferences_dialog.c:427
-#: ../src/preferences_dialog.c:428
-#: ../src/preferences_dialog.c:977
-#: ../src/preferences_dialog.c:978
+#: ../src/preferences_dialog.c:162 ../src/preferences_dialog.c:564
+#: ../src/preferences_dialog.c:566 ../src/preferences_dialog.c:849
 msgid "CSS Class"
 msgstr ""
 
-#: ../src/preferences_dialog.c:181
-#: ../src/preferences_dialog.c:432
-#: ../src/preferences_dialog.c:433
-#: ../src/preferences_dialog.c:982
-#: ../src/preferences_dialog.c:983
+#: ../src/preferences_dialog.c:163 ../src/preferences_dialog.c:852
 msgid "CSS Psuedoclass"
 msgstr ""
 
-#: ../src/preferences_dialog.c:182
-#: ../src/preferences_dialog.c:437
-#: ../src/preferences_dialog.c:438
-#: ../src/preferences_dialog.c:987
-#: ../src/preferences_dialog.c:988
+#: ../src/preferences_dialog.c:164 ../src/preferences_dialog.c:572
+#: ../src/preferences_dialog.c:574 ../src/preferences_dialog.c:855
 msgid "CSS Unknown Pseudoclass"
 msgstr ""
 
-#: ../src/preferences_dialog.c:183
-#: ../src/preferences_dialog.c:442
-#: ../src/preferences_dialog.c:443
-#: ../src/preferences_dialog.c:992
-#: ../src/preferences_dialog.c:993
+#: ../src/preferences_dialog.c:165 ../src/preferences_dialog.c:576
+#: ../src/preferences_dialog.c:578 ../src/preferences_dialog.c:858
 msgid "CSS Operator"
 msgstr ""
 
-#: ../src/preferences_dialog.c:184
-#: ../src/preferences_dialog.c:447
-#: ../src/preferences_dialog.c:448
-#: ../src/preferences_dialog.c:997
-#: ../src/preferences_dialog.c:998
+#: ../src/preferences_dialog.c:166 ../src/preferences_dialog.c:580
+#: ../src/preferences_dialog.c:582 ../src/preferences_dialog.c:861
 msgid "CSS Identifier"
 msgstr ""
 
-#: ../src/preferences_dialog.c:185
-#: ../src/preferences_dialog.c:452
-#: ../src/preferences_dialog.c:453
-#: ../src/preferences_dialog.c:1002
-#: ../src/preferences_dialog.c:1003
+#: ../src/preferences_dialog.c:167 ../src/preferences_dialog.c:584
+#: ../src/preferences_dialog.c:586 ../src/preferences_dialog.c:864
 msgid "CSS Unknown Identifier"
 msgstr ""
 
-#: ../src/preferences_dialog.c:186
-#: ../src/preferences_dialog.c:457
-#: ../src/preferences_dialog.c:458
-#: ../src/preferences_dialog.c:1007
-#: ../src/preferences_dialog.c:1008
+#: ../src/preferences_dialog.c:168 ../src/preferences_dialog.c:588
+#: ../src/preferences_dialog.c:590 ../src/preferences_dialog.c:867
 msgid "CSS Value"
 msgstr ""
 
-#: ../src/preferences_dialog.c:187
-#: ../src/preferences_dialog.c:462
-#: ../src/preferences_dialog.c:463
-#: ../src/preferences_dialog.c:1012
-#: ../src/preferences_dialog.c:1013
+#: ../src/preferences_dialog.c:169 ../src/preferences_dialog.c:592
+#: ../src/preferences_dialog.c:594 ../src/preferences_dialog.c:870
 msgid "CSS Comment"
 msgstr ""
 
-#: ../src/preferences_dialog.c:188
-#: ../src/preferences_dialog.c:467
-#: ../src/preferences_dialog.c:468
-#: ../src/preferences_dialog.c:1017
-#: ../src/preferences_dialog.c:1018
+#: ../src/preferences_dialog.c:170 ../src/preferences_dialog.c:596
+#: ../src/preferences_dialog.c:873
 msgid "CSS ID"
 msgstr ""
 
-#: ../src/preferences_dialog.c:189
-#: ../src/preferences_dialog.c:472
-#: ../src/preferences_dialog.c:473
-#: ../src/preferences_dialog.c:1022
-#: ../src/preferences_dialog.c:1023
+#: ../src/preferences_dialog.c:171 ../src/preferences_dialog.c:600
+#: ../src/preferences_dialog.c:602 ../src/preferences_dialog.c:876
 msgid "CSS Important"
 msgstr ""
 
-#: ../src/preferences_dialog.c:190
-#: ../src/preferences_dialog.c:477
-#: ../src/preferences_dialog.c:478
-#: ../src/preferences_dialog.c:1027
-#: ../src/preferences_dialog.c:1028
+#: ../src/preferences_dialog.c:172 ../src/preferences_dialog.c:604
+#: ../src/preferences_dialog.c:606 ../src/preferences_dialog.c:879
 msgid "CSS Directive"
 msgstr ""
 
 #. Font drop down elements : SQL
-#: ../src/preferences_dialog.c:193
-#: ../src/preferences_dialog.c:482
-#: ../src/preferences_dialog.c:483
-#: ../src/preferences_dialog.c:1032
-#: ../src/preferences_dialog.c:1033
+#: ../src/preferences_dialog.c:175 ../src/preferences_dialog.c:608
+#: ../src/preferences_dialog.c:610 ../src/preferences_dialog.c:882
 msgid "SQL Word"
 msgstr ""
 
-#: ../src/preferences_dialog.c:194
-#: ../src/preferences_dialog.c:487
-#: ../src/preferences_dialog.c:488
-#: ../src/preferences_dialog.c:1037
-#: ../src/preferences_dialog.c:1038
+#: ../src/preferences_dialog.c:176 ../src/preferences_dialog.c:612
+#: ../src/preferences_dialog.c:614 ../src/preferences_dialog.c:885
 msgid "SQL Identifier"
 msgstr ""
 
-#: ../src/preferences_dialog.c:195
-#: ../src/preferences_dialog.c:492
-#: ../src/preferences_dialog.c:493
-#: ../src/preferences_dialog.c:1042
-#: ../src/preferences_dialog.c:1043
+#: ../src/preferences_dialog.c:177 ../src/preferences_dialog.c:616
+#: ../src/preferences_dialog.c:618 ../src/preferences_dialog.c:888
 msgid "SQL Number"
 msgstr ""
 
-#: ../src/preferences_dialog.c:196
-#: ../src/preferences_dialog.c:497
-#: ../src/preferences_dialog.c:498
-#: ../src/preferences_dialog.c:1047
-#: ../src/preferences_dialog.c:1048
+#: ../src/preferences_dialog.c:178 ../src/preferences_dialog.c:620
+#: ../src/preferences_dialog.c:622 ../src/preferences_dialog.c:891
 msgid "SQL String"
 msgstr ""
 
-#: ../src/preferences_dialog.c:197
-#: ../src/preferences_dialog.c:502
-#: ../src/preferences_dialog.c:503
-#: ../src/preferences_dialog.c:1052
-#: ../src/preferences_dialog.c:1053
+#: ../src/preferences_dialog.c:179 ../src/preferences_dialog.c:624
+#: ../src/preferences_dialog.c:626 ../src/preferences_dialog.c:894
 msgid "SQL Operator"
 msgstr ""
 
-#: ../src/preferences_dialog.c:198
-#: ../src/preferences_dialog.c:507
-#: ../src/preferences_dialog.c:508
-#: ../src/preferences_dialog.c:1057
-#: ../src/preferences_dialog.c:1058
+#: ../src/preferences_dialog.c:180 ../src/preferences_dialog.c:628
+#: ../src/preferences_dialog.c:630 ../src/preferences_dialog.c:897
 msgid "SQL Comment"
 msgstr ""
 
-#: ../src/preferences_dialog.c:200
-#: ../src/preferences_dialog.c:512
-#: ../src/preferences_dialog.c:513
-#: ../src/preferences_dialog.c:1062
-#: ../src/preferences_dialog.c:1063
+#: ../src/preferences_dialog.c:182 ../src/preferences_dialog.c:632
+#: ../src/preferences_dialog.c:634 ../src/preferences_dialog.c:900
 msgid "C Default"
 msgstr ""
 
-#: ../src/preferences_dialog.c:201
-#: ../src/preferences_dialog.c:517
-#: ../src/preferences_dialog.c:518
-#: ../src/preferences_dialog.c:1067
-#: ../src/preferences_dialog.c:1068
+#: ../src/preferences_dialog.c:183 ../src/preferences_dialog.c:636
+#: ../src/preferences_dialog.c:638 ../src/preferences_dialog.c:903
 msgid "C String"
 msgstr ""
 
-#: ../src/preferences_dialog.c:202
-#: ../src/preferences_dialog.c:522
-#: ../src/preferences_dialog.c:523
-#: ../src/preferences_dialog.c:1072
-#: ../src/preferences_dialog.c:1073
+#: ../src/preferences_dialog.c:184 ../src/preferences_dialog.c:640
+#: ../src/preferences_dialog.c:642 ../src/preferences_dialog.c:906
 msgid "C Character"
 msgstr ""
 
-#: ../src/preferences_dialog.c:203
-#: ../src/preferences_dialog.c:527
-#: ../src/preferences_dialog.c:528
-#: ../src/preferences_dialog.c:1077
-#: ../src/preferences_dialog.c:1078
+#: ../src/preferences_dialog.c:185 ../src/preferences_dialog.c:644
+#: ../src/preferences_dialog.c:646 ../src/preferences_dialog.c:909
 msgid "C Word"
 msgstr ""
 
-#: ../src/preferences_dialog.c:204
-#: ../src/preferences_dialog.c:532
-#: ../src/preferences_dialog.c:533
-#: ../src/preferences_dialog.c:1082
-#: ../src/preferences_dialog.c:1083
+#: ../src/preferences_dialog.c:186 ../src/preferences_dialog.c:648
+#: ../src/preferences_dialog.c:650 ../src/preferences_dialog.c:912
 msgid "C Number"
 msgstr ""
 
-#: ../src/preferences_dialog.c:205
-#: ../src/preferences_dialog.c:537
-#: ../src/preferences_dialog.c:538
-#: ../src/preferences_dialog.c:1087
-#: ../src/preferences_dialog.c:1088
+#: ../src/preferences_dialog.c:187 ../src/preferences_dialog.c:652
+#: ../src/preferences_dialog.c:654 ../src/preferences_dialog.c:915
 msgid "C Identifier"
 msgstr ""
 
-#: ../src/preferences_dialog.c:206
-#: ../src/preferences_dialog.c:542
-#: ../src/preferences_dialog.c:543
-#: ../src/preferences_dialog.c:1092
-#: ../src/preferences_dialog.c:1093
+#: ../src/preferences_dialog.c:188 ../src/preferences_dialog.c:656
+#: ../src/preferences_dialog.c:658 ../src/preferences_dialog.c:918
 msgid "C Comment"
 msgstr ""
 
-#: ../src/preferences_dialog.c:207
-#: ../src/preferences_dialog.c:547
-#: ../src/preferences_dialog.c:548
-#: ../src/preferences_dialog.c:1097
-#: ../src/preferences_dialog.c:1098
+#: ../src/preferences_dialog.c:189 ../src/preferences_dialog.c:660
+#: ../src/preferences_dialog.c:662 ../src/preferences_dialog.c:921
 msgid "C Commentline"
 msgstr ""
 
-#: ../src/preferences_dialog.c:208
+#: ../src/preferences_dialog.c:190
 msgid "C Preprocessor"
 msgstr ""
 
-#: ../src/preferences_dialog.c:209
-#: ../src/preferences_dialog.c:557
-#: ../src/preferences_dialog.c:558
-#: ../src/preferences_dialog.c:1107
-#: ../src/preferences_dialog.c:1108
+#: ../src/preferences_dialog.c:191 ../src/preferences_dialog.c:668
+#: ../src/preferences_dialog.c:670 ../src/preferences_dialog.c:927
 msgid "C Operator"
 msgstr ""
 
-#: ../src/preferences_dialog.c:210
-#: ../src/preferences_dialog.c:562
-#: ../src/preferences_dialog.c:563
-#: ../src/preferences_dialog.c:1112
-#: ../src/preferences_dialog.c:1113
+#: ../src/preferences_dialog.c:192 ../src/preferences_dialog.c:672
+#: ../src/preferences_dialog.c:674 ../src/preferences_dialog.c:930
 msgid "C Regex"
 msgstr ""
 
-#: ../src/preferences_dialog.c:211
-#: ../src/preferences_dialog.c:567
-#: ../src/preferences_dialog.c:568
-#: ../src/preferences_dialog.c:1117
-#: ../src/preferences_dialog.c:1118
+#: ../src/preferences_dialog.c:193 ../src/preferences_dialog.c:676
+#: ../src/preferences_dialog.c:678 ../src/preferences_dialog.c:933
 msgid "C UUID"
 msgstr ""
 
-#: ../src/preferences_dialog.c:212
-#: ../src/preferences_dialog.c:572
-#: ../src/preferences_dialog.c:573
-#: ../src/preferences_dialog.c:1122
-#: ../src/preferences_dialog.c:1123
+#: ../src/preferences_dialog.c:194 ../src/preferences_dialog.c:680
+#: ../src/preferences_dialog.c:682 ../src/preferences_dialog.c:936
 msgid "C Verbatim"
 msgstr ""
 
-#: ../src/preferences_dialog.c:213
-#: ../src/preferences_dialog.c:577
-#: ../src/preferences_dialog.c:578
-#: ../src/preferences_dialog.c:1127
-#: ../src/preferences_dialog.c:1128
+#: ../src/preferences_dialog.c:195 ../src/preferences_dialog.c:684
+#: ../src/preferences_dialog.c:686 ../src/preferences_dialog.c:939
 msgid "C Globalclass"
 msgstr ""
 
-#: ../src/preferences_dialog.c:552
-#: ../src/preferences_dialog.c:553
-#: ../src/preferences_dialog.c:1102
-#: ../src/preferences_dialog.c:1103
+#: ../src/preferences_dialog.c:254
+msgid "Name/Shortcut"
+msgstr "Nimi/Pikanäppäin"
+
+#: ../src/preferences_dialog.c:351
+#, c-format
+msgid "Are you sure you want to delete template %s?"
+msgstr ""
+
+#: ../src/preferences_dialog.c:562
+msgid "CSS_Tag"
+msgstr ""
+
+#: ../src/preferences_dialog.c:568 ../src/preferences_dialog.c:570
+msgid "CSS Pseudoclass"
+msgstr ""
+
+#: ../src/preferences_dialog.c:598
+msgid "CSS Id"
+msgstr ""
+
+#: ../src/preferences_dialog.c:664 ../src/preferences_dialog.c:666
+#: ../src/preferences_dialog.c:924
 msgid "C Preprocesor"
 msgstr ""
 
-#: ../src/preferences_dialog.c:784
+#: ../src/preferences_dialog.c:716
 #, c-format
 msgid ""
 "You have just changed the font to %s\n"
@@ -882,7 +1217,7 @@ msgid ""
 "Would you like to use this font as the default for every element?"
 msgstr ""
 
-#: ../src/preferences_dialog.c:799
+#: ../src/preferences_dialog.c:729
 #, c-format
 msgid ""
 "You have just changed the font size to %dpt\n"
@@ -890,870 +1225,400 @@ msgid ""
 "Would you like to use this font size as the default for every element?"
 msgstr ""
 
-#: ../src/preferences_dialog.c:1407
-#, c-format
-msgid "Are you sure you want to delete template %s?"
-msgstr ""
-
-#: ../src/preferences_dialog.c:1463
-msgid "Name/Shortcut"
-msgstr "Nimi/Pikanäppäin"
-
-#: ../src/preferences_dialog.c:1477
-msgid "Preferences"
-msgstr "Asetukset"
-
-#. current session
-#: ../src/preferences_dialog.c:1489
-msgid "Session:"
+#: ../src/preferences_dialog.c:1112
+#, fuzzy
+msgid "<b>Session:</b>"
 msgstr "Istunto:"
 
-#: ../src/preferences_dialog.c:1497
+#: ../src/preferences_dialog.c:1118
 msgid "Save session (including open files) on exit"
 msgstr "Tallenna istunto (mukaanlukien avoimet tiedostot) suljettaessa"
 
-#: ../src/preferences_dialog.c:1504
+#: ../src/preferences_dialog.c:1125
 msgid "Only ever run 1 copy of gPHPEdit at a time"
 msgstr ""
 
-#. end session
-#. edge part
-#: ../src/preferences_dialog.c:1514
-msgid "Hand edge guide:"
+#: ../src/preferences_dialog.c:1136
+msgid "<b>Hand edge guide:</b>"
 msgstr ""
 
-#: ../src/preferences_dialog.c:1522
+#: ../src/preferences_dialog.c:1142
 msgid "Show right hand edge guide"
 msgstr ""
 
-#: ../src/preferences_dialog.c:1534
+#: ../src/preferences_dialog.c:1154
 msgid "Right hand edge colour:"
 msgstr ""
 
-#: ../src/preferences_dialog.c:1554
+#: ../src/preferences_dialog.c:1176
 msgid "Right hand edge column"
 msgstr ""
 
-#. end edge part
-#: ../src/preferences_dialog.c:1567
-msgid "Side Panel:"
+#: ../src/preferences_dialog.c:1191
+#, fuzzy
+msgid "<b>Side Panel:</b>"
 msgstr "Sivupaneeli:"
 
-#: ../src/preferences_dialog.c:1571
-msgid "Show folderbrowser (need restart)"
+#: ../src/preferences_dialog.c:1197
+msgid "Show file browser (need restart)"
 msgstr ""
 
 #. set tooltip
-#: ../src/preferences_dialog.c:1573
+#: ../src/preferences_dialog.c:1199
 msgid "Show/Hide side-panel Folder Browser"
 msgstr ""
 
-#. end side panel part
-#. autocompletion part
-#: ../src/preferences_dialog.c:1582
-msgid "Auto-completion:"
+#: ../src/preferences_dialog.c:1211
+msgid "<b>Auto-completion:</b>"
 msgstr ""
 
-#: ../src/preferences_dialog.c:1586
+#: ../src/preferences_dialog.c:1217
 msgid "Auto-Completion of Brackets and Quotes"
 msgstr ""
 
 #. set tooltip
-#: ../src/preferences_dialog.c:1588
+#: ../src/preferences_dialog.c:1219
 msgid "Auto-complete the closing brackets/quotes"
 msgstr ""
 
+#: ../src/preferences_dialog.c:1230
+msgid "Delay (calltip/function list):"
+msgstr ""
+
 #. end autocompletion part
-#: ../src/preferences_dialog.c:1597
+#: ../src/preferences_dialog.c:1240
 msgid "General"
 msgstr ""
 
-#. tabs part
-#: ../src/preferences_dialog.c:1608
-msgid "Tabs:"
-msgstr "Välilehdet:"
+#: ../src/preferences_dialog.c:1258
+msgid "<b>Tabs:</b>"
+msgstr ""
 
-#: ../src/preferences_dialog.c:1620
+#: ../src/preferences_dialog.c:1268
 msgid "Tab size:"
 msgstr ""
 
-#: ../src/preferences_dialog.c:1631
+#: ../src/preferences_dialog.c:1278
 msgid "Use tabs instead of spaces for indentation"
 msgstr ""
 
-#: ../src/preferences_dialog.c:1638
+#: ../src/preferences_dialog.c:1285
 msgid "Show indentation guides"
 msgstr ""
 
-#: ../src/preferences_dialog.c:1645
-msgid "Text wrap:"
+#: ../src/preferences_dialog.c:1295
+msgid "<b>Line Properties:</b>"
 msgstr ""
 
-#: ../src/preferences_dialog.c:1649
+#: ../src/preferences_dialog.c:1305
 msgid "Wrap long lines"
 msgstr ""
 
-#: ../src/preferences_dialog.c:1657
-msgid "Selection:"
+#: ../src/preferences_dialog.c:1312
+msgid "Highlight Caret Line"
+msgstr ""
+
+#: ../src/preferences_dialog.c:1324
+msgid "Highlight Caret Line colour:"
+msgstr ""
+
+#: ../src/preferences_dialog.c:1341
+#, fuzzy
+msgid "<b>Selection:</b>"
 msgstr "Valinta:"
 
-#: ../src/preferences_dialog.c:1670
+#. Begin: Selection Color
+#: ../src/preferences_dialog.c:1352
 msgid "Selection colour:"
 msgstr ""
 
 #. End: Selection Color
-#: ../src/preferences_dialog.c:1686
-msgid "Current line:"
-msgstr "Nykyinen rivi:"
-
-#: ../src/preferences_dialog.c:1694
-msgid "Highlight Caret Line"
-msgstr ""
-
-#: ../src/preferences_dialog.c:1706
-msgid "Highlight Caret Line colour:"
-msgstr ""
-
-#: ../src/preferences_dialog.c:1727
-msgid "Font Quality"
-msgstr "Fontin Laatu"
-
 #. end editor page
-#: ../src/preferences_dialog.c:1752
+#: ../src/preferences_dialog.c:1370
 msgid "Editor"
 msgstr ""
 
-#: ../src/preferences_dialog.c:1774
-msgid "Bold"
-msgstr "Lihavointi"
+#: ../src/preferences_dialog.c:1380
+#, fuzzy
+msgid "Element:"
+msgstr "Elementti"
 
-#: ../src/preferences_dialog.c:1780
-msgid "Italic"
-msgstr "Kursivointi"
+#: ../src/preferences_dialog.c:1403
+#, fuzzy
+msgid "Font:"
+msgstr "Fontti"
 
-#: ../src/preferences_dialog.c:1786
+#: ../src/preferences_dialog.c:1457
 msgid "Attributes"
 msgstr "Ominaisuudet"
 
-#: ../src/preferences_dialog.c:1803
-msgid "Foreground:"
-msgstr ""
+#: ../src/preferences_dialog.c:1466
+msgid "Bold"
+msgstr "Lihavointi"
 
-#: ../src/preferences_dialog.c:1816
-msgid "Background:"
-msgstr "Tausta:"
+#: ../src/preferences_dialog.c:1471
+msgid "Italic"
+msgstr "Kursivointi"
 
-#: ../src/preferences_dialog.c:1826
+#: ../src/preferences_dialog.c:1476
 msgid "Colours"
 msgstr "Värit"
 
-#: ../src/preferences_dialog.c:1884
-msgid "Font"
-msgstr "Fontti"
+#: ../src/preferences_dialog.c:1489
+msgid "Foreground:"
+msgstr ""
 
-#: ../src/preferences_dialog.c:1909
-msgid "Element"
-msgstr "Elementti"
+#: ../src/preferences_dialog.c:1503
+msgid "Background:"
+msgstr "Tausta:"
 
-#: ../src/preferences_dialog.c:1913
+#: ../src/preferences_dialog.c:1513
 msgid "Colour"
 msgstr "Väri"
 
-#: ../src/preferences_dialog.c:1926
+#: ../src/preferences_dialog.c:1531
+#, fuzzy
+msgid "<b>PHP Coding:</b>"
+msgstr "PHP-koodaus"
+
+#: ../src/preferences_dialog.c:1541
 msgid "Syntax check program:"
 msgstr ""
 
-#: ../src/preferences_dialog.c:1943
+#: ../src/preferences_dialog.c:1555
 msgid "Recognised PHP file extensions:"
 msgstr ""
 
-#: ../src/preferences_dialog.c:1958
+#: ../src/preferences_dialog.c:1569
 msgid "Shared library path(s):"
 msgstr ""
 
-#: ../src/preferences_dialog.c:1973
-msgid "Delay (calltip/function list):"
-msgstr ""
-
-#: ../src/preferences_dialog.c:1987
+#: ../src/preferences_dialog.c:1583
 msgid "Templates:"
 msgstr "Mallit:"
 
-#: ../src/preferences_dialog.c:2025
+#: ../src/preferences_dialog.c:1620
 msgid "Add..."
 msgstr "Lisää..."
 
-#: ../src/preferences_dialog.c:2031
+#: ../src/preferences_dialog.c:1626
 msgid "Edit..."
 msgstr "Muokkaa..."
 
-#: ../src/preferences_dialog.c:2037
+#: ../src/preferences_dialog.c:1632
 msgid "Delete"
 msgstr "Poista"
 
-#: ../src/preferences_dialog.c:2052
-msgid "PHP Coding"
+#.
+#: ../src/preferences_dialog.c:1647
+#, fuzzy
+msgid "Coding"
 msgstr "PHP-koodaus"
 
-#: ../src/preferences_dialog.c:2057
-msgid "Apply"
+#: ../src/preferences_dialog.c:1682
+msgid "Preferences"
+msgstr "Asetukset"
+
+#: ../src/replace_dialog.c:93 ../src/replace_dialog.c:132
+#, fuzzy, c-format
+msgid "\"%s\" not found, no replacements made."
+msgstr "%s ei löytynyt, ei tehty korvauksia"
+
+#: ../src/replace_dialog.c:96
+#, fuzzy, c-format
+msgid "1 occurence of \"%s\" found, replaced."
+msgstr "1 esiintymä tekstiä %s löytynyt, korvattu."
+
+#: ../src/replace_dialog.c:99
+#, fuzzy, c-format
+msgid "\"%d\" occurences of \"%s\" found, all replaced."
+msgstr "%d esiintymää tekstiä %s löytynyt, kaikki korvattu"
+
+#: ../src/replace_dialog.c:183
+#, fuzzy
+msgid "Replace with: "
+msgstr "Korvaa tekstiä"
+
+#: ../src/replace_dialog.c:237
+msgid "Prompt before Replace"
+msgstr "Kehote ennen Korvaamista"
+
+#: ../src/replace_dialog.c:243
+msgid "Replace _all"
+msgstr "Korvaa _kaikki"
+
+#: ../src/syntax_check_manager.c:303
+msgid ""
+"Error calling PHP CLI (is PHP command line binary installed? If so, check if "
+"it's in your path or set php_binary in Preferences)\n"
 msgstr ""
 
-#: ../src/syntax_check.c:131
-#, c-format
-msgid "Error saving temp file: '%s'. GIO Error:%s"
+#: ../src/syntax_check_window.c:112
+msgid "Syntax Check Output"
 msgstr ""
 
-#: ../src/syntax_check.c:257
-msgid "Error calling PHP CLI (is PHP command line binary installed? If so, check if it's in your path or set php_binary in Preferences)\n"
-msgstr ""
-
-#: ../src/syntax_check.c:270
+#: ../src/syntax_check_window.c:242
 msgid "You don't have any files open to check\n"
 msgstr ""
 
-#: ../src/tab.c:247
-#, c-format
-msgid "Could not get the file modification time for file: '%s'. GIO error: %s \n"
-msgstr ""
-
-#: ../src/tab.c:313
-#, c-format
-msgid "gPHPEdit UTF-8 Error: %s\n"
-msgstr "gPHPEdit UTF-8 -virhe: %s\n"
-
-#: ../src/tab.c:319
-#, c-format
-msgid "Converted to UTF-8 size: %d\n"
-msgstr ""
-
-#: ../src/tab.c:412
-#, c-format
-msgid "Could not get the file info. GIO error: %s \n"
-msgstr ""
-
-#: ../src/tab.c:418
-msgid "Sorry, I can open this kind of file.\n"
-msgstr ""
-
-#: ../src/tab.c:420
-#: ../src/tab.c:1117
-#: ../src/tab.c:1134
-msgid "Untitled"
-msgstr "Nimetön"
-
-#: ../src/tab.c:484
-#, c-format
-msgid "Could not get file info for file %s. GIO error: %s \n"
-msgstr ""
-
-#: ../src/tab.c:496
-#, c-format
-msgid "Error reading file. GIO error:%s\n"
-msgstr ""
-
-#: ../src/tab.c:502
-msgid "File size and loaded size not matching"
-msgstr ""
-
-#: ../src/tab.c:571
-#: ../src/tab.c:583
-#, c-format
-msgid "Help for function not found: %s\n"
-msgstr ""
-
-#: ../src/tab.c:665
-msgid "Could not find the required command in the online help"
-msgstr ""
-
-#: ../src/tab.c:1030
-#, c-format
-msgid "Error mounting volume. GIO error:%s\n"
-msgstr ""
-
-#: ../src/tab.c:1064
-#, c-format
-msgid ""
-"Error filesystem not mounted.\n"
-"Mounting filesystem, this will take a few seconds...\n"
-msgstr ""
-
-#: ../src/tab.c:1073
-#, c-format
-msgid ""
-"Error opening file GIO error:%s\n"
-"file:%s"
-msgstr ""
-
-#: ../src/tab.c:1080
-#, c-format
-msgid ""
-"The file %s was not found.\n"
-"\n"
-"Would you like to create it as an empty document?"
-msgstr ""
-"Tiedostoa %s ei löytynyt.\n"
-"\n"
-"Haluaisitko luoda sen uutena dokumenttina?"
-
-#: ../src/tab.c:1081
-msgid "File not found"
-msgstr "Tiedostoa ei löydy"
-
-#: ../src/templates.c:84
+#: ../src/templates.c:83
 #, c-format
 msgid "CANNOT Create templates file: %s\n"
 msgstr ""
 
-#: ../src/templates.c:148
+#: ../src/templates.c:147
 #, c-format
 msgid "CANNOT Create templates file:: %s\n"
 msgstr ""
 
-#. help menu
-#: ../src/menu.c:236
-msgid "_PHP Help"
-msgstr "_PHP Ohje"
-
-#: ../src/menu.c:236
-msgid "Look for help on the currently selected function"
-msgstr ""
-
-#: ../src/menu.c:239
-msgid "_Report a bug in gPHPEdit"
-msgstr "_Ilmoita virheestä ohjelmassa gPHPEdit"
-
-#: ../src/menu.c:239
-msgid "Go to bug report page to report a bug"
-msgstr "Siirry virheen ilmoitussivulle ilmoittaaksesi virheestä"
-
-#: ../src/menu.c:243
-msgid "_Translate this application"
-msgstr "_Käännä tämä ohjelma"
-
-#: ../src/menu.c:243
-msgid "Start translating this application"
-msgstr "Aloita tämän ohjelman kääntäminen"
-
-#: ../src/menu.c:246
-msgid "Shows info about gPHPEdit"
-msgstr ""
-
-#: ../src/menu.c:256
-msgid "Undo last action"
-msgstr "Kumoa"
-
-#: ../src/menu.c:258
-msgid "Redo last action"
-msgstr "Tee uudelleen"
-
-#: ../src/menu.c:264
-msgid "Cut Selected Text"
-msgstr "Leikkaa Valittu Teksti"
-
-#: ../src/menu.c:266
-msgid "Copy Selected Text"
-msgstr "Kopioi Valittu Teksti"
-
-#: ../src/menu.c:268
-msgid "Paste Text from clipboard"
-msgstr "Liitä Teksti Leikepöydältä"
-
-#: ../src/menu.c:270
-msgid "Select all Text in current file"
-msgstr "Valitse koko Teksti nykyisessä tiedostossa"
-
-#: ../src/menu.c:276
-msgid "Find text in current file"
-msgstr "Etsi tekstiä tiedostosta"
-
-#: ../src/menu.c:278
-msgid "Find and replace text in current file"
-msgstr "Etsi ja Korvaa tekstiä"
-
-#: ../src/menu.c:284
-msgid "Indent the currently selected block"
-msgstr ""
-
-#: ../src/menu.c:286
-msgid "Unindent the currently selected block"
-msgstr ""
-
-#: ../src/menu.c:292
-msgid "_ToUpper"
-msgstr ""
-
-#: ../src/menu.c:292
-msgid "Convert the current selection text to upper case"
-msgstr ""
-
-#: ../src/menu.c:294
-msgid "_ToLower"
-msgstr ""
-
-#: ../src/menu.c:294
-msgid "Convert the current selection text to lower case"
-msgstr ""
-
-#: ../src/menu.c:305
-msgid "Creates a new file"
-msgstr ""
-
-#: ../src/menu.c:307
-msgid "Open a file"
-msgstr "Avaa tiedosto"
-
-#: ../src/menu.c:309
-msgid "_Open selected file"
-msgstr "_Avaa valittu tiedosto"
-
-#: ../src/menu.c:309
-msgid "Open a file with the name currently selected in the editor"
-msgstr ""
-
-#: ../src/menu.c:312
-msgid "_Recent Files"
-msgstr "_Viimeksi käytetyt tiedostot"
-
-#: ../src/menu.c:319
-msgid "_Recent"
-msgstr ""
-
-#: ../src/menu.c:324
-msgid "_Reload current file"
-msgstr "_Lataa nykyinen tiedosto uudelleen"
-
-#: ../src/menu.c:324
-msgid "Reload the file currently selected in the editor"
-msgstr ""
-
-#: ../src/menu.c:329
-#: ../src/menu.c:331
-msgid "Save the file currently selected in the editor"
-msgstr ""
-
-#: ../src/menu.c:333
-msgid "Save A_ll"
-msgstr "Tallenna K_aikki"
-
-#: ../src/menu.c:333
-msgid "Save all open unsaved files"
-msgstr ""
-
-#: ../src/menu.c:335
-msgid "_Rename"
-msgstr "_Nimeä uudelleen"
-
-#: ../src/menu.c:335
-msgid "Rename the current file 'on-the-fly'"
-msgstr "Nimeä nykyinen tiedosto uudelleen 'lennossa'"
-
-#: ../src/menu.c:337
-msgid "Close the current file"
-msgstr "Sulje nykyinen tiedosto"
-
-#: ../src/menu.c:343
-msgid "Quit the application"
-msgstr "Sulje sovellus"
-
-#: ../src/menu.c:351
-msgid "Statusbar"
-msgstr "Tilarivi"
-
-#: ../src/menu.c:351
-msgid "Show/Hide Application Statusbar"
-msgstr ""
-
-#: ../src/menu.c:353
-msgid "Main Toolbar"
-msgstr ""
-
-#: ../src/menu.c:353
-msgid "Show/Hide Application Main Toolbar"
-msgstr ""
-
-#: ../src/menu.c:355
-msgid "Find Toolbar"
-msgstr "Etsi Työkalupalkki"
-
-#: ../src/menu.c:355
-msgid "Show/Hide Application Find Toolbar"
-msgstr ""
-
-#: ../src/menu.c:362
-#: ../src/menu.c:364
-msgid "Show Side Panel"
-msgstr "Näytä Sivupaneeli"
-
-#: ../src/menu.c:362
-#: ../src/menu.c:364
-msgid "Show/Hide Application Side Panel"
-msgstr ""
-
-#: ../src/menu.c:368
-msgid "Fullscreen"
-msgstr "Koko näyttö"
-
-#: ../src/menu.c:368
-msgid "Enable/Disable Fullscreen mode"
-msgstr "Salli/Estä Kokoruututila"
-
-#: ../src/menu.c:373
-msgid "Increases zoom in 10%"
-msgstr "Suurenna 10%"
-
-#: ../src/menu.c:375
-msgid "Decreases zoom in 10%"
-msgstr "Pienennä 10%"
-
-#: ../src/menu.c:377
-msgid "Restores normal zoom level"
-msgstr "Palauta normaali suurennustaso"
-
-#. toolbar icon size menu
-#: ../src/menu.c:383
-msgid "_Toolbar Icon Size"
-msgstr "_Työkalupalkin Kuvakkeiden Koko"
-
-#: ../src/menu.c:391
-msgid "Big Icons"
-msgstr "Suuret Kuvakkeet"
-
-#: ../src/menu.c:395
-msgid "Small Icons"
-msgstr "Pienet Kuvakkeet"
-
-#: ../src/menu.c:401
-msgid "_Show Preview"
-msgstr "_Näytä Esikatselu"
-
-#: ../src/menu.c:401
-msgid "Preview the Document"
-msgstr "Esikatsele Dokumenttia"
-
-#: ../src/menu.c:406
-msgid "Application Config"
-msgstr ""
-
-#: ../src/menu.c:415
-msgid "_Syntax check"
-msgstr ""
-
-#: ../src/menu.c:415
-msgid "Check the syntax using the PHP command line binary"
-msgstr ""
-
-#: ../src/menu.c:417
-msgid "_Clear Syntax check"
-msgstr ""
-
-#: ../src/menu.c:417
-msgid "Remove the syntax check window"
-msgstr ""
-
-#: ../src/menu.c:422
-msgid "_Record keyboard macro start/stop"
-msgstr ""
-
-#: ../src/menu.c:422
-msgid "Record keyboard actions"
-msgstr ""
-
-#: ../src/menu.c:424
-msgid "_Playback keyboard macro"
-msgstr ""
-
-#: ../src/menu.c:424
-msgid "Playback the stored keyboard macro"
-msgstr ""
-
-#: ../src/menu.c:427
-msgid "_Force"
-msgstr ""
-
-#: ../src/menu.c:432
-msgid "_PHP/HTML/XML"
-msgstr ""
-
-#: ../src/menu.c:432
-msgid "Force syntax highlighting to PHP/HTML/XML mode"
-msgstr ""
-
-#: ../src/menu.c:434
-msgid "_CSS"
-msgstr ""
-
-#: ../src/menu.c:434
-msgid "Force syntax highlighting to CSS mode"
-msgstr ""
-
-#: ../src/menu.c:436
-msgid "C/C_++"
-msgstr ""
-
-#: ../src/menu.c:436
-msgid "Force syntax highlighting to C/C++ mode"
-msgstr ""
-
-#: ../src/menu.c:438
-msgid "_SQL"
-msgstr ""
-
-#: ../src/menu.c:438
-msgid "Force syntax highlighting to SQL mode"
-msgstr ""
-
-#: ../src/menu.c:440
-msgid "_Perl"
-msgstr ""
-
-#: ../src/menu.c:440
-msgid "Force syntax highlighting to Perl mode"
-msgstr ""
-
-#: ../src/menu.c:442
-msgid "_Cobol"
-msgstr ""
-
-#: ../src/menu.c:442
-msgid "Force syntax highlighting to Cobol mode"
-msgstr ""
-
-#: ../src/menu.c:444
-msgid "P_ython"
-msgstr ""
-
-#: ../src/menu.c:444
-msgid "Force syntax highlighting to Python mode"
-msgstr ""
-
-#. create menus
-#. Menu file
-#: ../src/menu.c:461
-msgid "_File"
-msgstr ""
-
-#. Menu edit
-#: ../src/menu.c:464
-msgid "_Edit"
-msgstr ""
-
-#. view menu
-#: ../src/menu.c:467
-msgid "_View"
-msgstr ""
-
-#. menu code
-#: ../src/menu.c:470
-msgid "_Code"
-msgstr ""
-
-#. plugin menu
-#: ../src/menu.c:473
-#: ../src/menu.c:476
-msgid "_Plugin"
-msgstr ""
-
-#. help menu
-#: ../src/menu.c:483
-msgid "_Help"
-msgstr ""
-
-#: ../src/folderbrowser.c:300
-#, c-format
-msgid "Error getting folderbrowser files. GIO Error:%s\t"
-msgstr ""
-
-#: ../src/folderbrowser.c:317
-#, c-format
-msgid "Error::%s"
-msgstr ""
-
-#: ../src/folderbrowser.c:550
-msgid "Are you sure you wish to delete this file?"
-msgstr "Oletko varma, että haluat poistaa tämän tiedoston?"
-
-#: ../src/folderbrowser.c:551
-msgid "Question"
-msgstr ""
-
-#: ../src/folderbrowser.c:561
-#: ../src/folderbrowser.c:565
-#, c-format
-msgid "GIO Error deleting file: %s\n"
-msgstr ""
-
-#: ../src/folderbrowser.c:579
-#, c-format
-msgid "Error renaming file. GIO Error:%s\n"
-msgstr ""
-
-#: ../src/folderbrowser.c:584
-#: ../src/folderbrowser.c:680
-msgid "Rename File"
-msgstr "Nimeä tiedosto uudelleen"
-
-#: ../src/folderbrowser.c:591
-msgid "New Filename"
-msgstr "Uusi Tiedostonimi"
-
-#: ../src/folderbrowser.c:613
-msgid "New Dir"
-msgstr "Uusi Kansio"
-
-#: ../src/folderbrowser.c:620
-msgid "Directory Name"
-msgstr "Kansion Nimi"
-
-#: ../src/folderbrowser.c:649
-#, c-format
-msgid "Error creating folder. GIO error:%s\n"
-msgstr ""
-
-#: ../src/folderbrowser.c:672
-msgid "Open file"
-msgstr "Avaa tiedosto"
-
-#: ../src/folderbrowser.c:684
-msgid "Delete file"
-msgstr "Poista tiedosto"
-
-#: ../src/folderbrowser.c:691
-msgid "Create New Directory"
-msgstr "Luo uusi kansio"
-
-#: ../src/folderbrowser.c:805
-msgid "File"
-msgstr ""
-
-#: ../src/folderbrowser.c:811
-msgid "Mime"
-msgstr ""
-
-#. set tooltip
-#: ../src/folderbrowser.c:819
-msgid "Folder Browser"
-msgstr ""
-
-#: ../src/folderbrowser.c:846
-msgid "Go Home Dir"
-msgstr ""
-
-#: ../src/folderbrowser.c:856
-msgid "Go Up one level"
-msgstr ""
-
-#: ../src/folderbrowser.c:865
-msgid "Refresh folderbrowser"
-msgstr ""
-
-#: ../src/folderbrowser.c:870
-msgid "Search Files in Folder Browser"
-msgstr ""
-
-#: ../src/folderbrowser.c:1019
-#, c-format
-msgid "%s cannot be copied, it already exists, overwrite?"
-msgstr ""
-
-#: ../src/folderbrowser.c:1020
-msgid "Overwrite file?"
-msgstr ""
-
 #. Add the File operations to the Main Toolbar
-#: ../src/toolbar.c:108
+#: ../src/toolbar.c:133
 msgid "New File"
 msgstr "Uusi"
 
-#: ../src/toolbar.c:110
+#: ../src/toolbar.c:135
 msgid "Open File"
 msgstr "Avaa"
 
-#: ../src/toolbar.c:112
+#: ../src/toolbar.c:137
 msgid "Save current File"
 msgstr "Tallenna"
 
-#: ../src/toolbar.c:114
+#: ../src/toolbar.c:139
 msgid "Save File As..."
 msgstr "Tallenna nimellä..."
 
-#: ../src/toolbar.c:116
-msgid "Close Current File"
-msgstr "Sulje"
-
 #. Add the Undo operations to the Main Toolbar
-#: ../src/toolbar.c:127
+#: ../src/toolbar.c:150
 msgid "Undo last change"
 msgstr "Kumoa"
 
-#: ../src/toolbar.c:129
+#: ../src/toolbar.c:151
 msgid "Redo last change"
 msgstr "Tee uudelleen"
 
 #. Add the Clipboard operations to the Main Toolbar
-#: ../src/toolbar.c:138
+#: ../src/toolbar.c:160
 msgid "Cut Current Selection"
 msgstr "Leikkaa Valinta"
 
-#: ../src/toolbar.c:141
+#: ../src/toolbar.c:163
 msgid "Copy Current Selection"
 msgstr "Kopioi Valinta"
 
-#: ../src/toolbar.c:144
+#: ../src/toolbar.c:166
 msgid "Paste text from clipboard"
 msgstr "Liitä teksti leikepöydältä"
 
 #. Add the Search operations to the Main Toolbar
-#: ../src/toolbar.c:151
+#: ../src/toolbar.c:173
 msgid "Find text"
 msgstr "Etsi tekstiä"
 
-#: ../src/toolbar.c:154
+#: ../src/toolbar.c:176
 msgid "Replace Text"
 msgstr "Korvaa tekstiä"
 
 #. Add the indent/unindent operations to the Main Toolbar
 #. indent block
-#: ../src/toolbar.c:163
+#: ../src/toolbar.c:185
 msgid "Indent Selected Text"
 msgstr ""
 
 #. unindent block
-#: ../src/toolbar.c:166
+#: ../src/toolbar.c:188
 msgid "Unindent Selected Text"
 msgstr ""
 
 #. Add Zoom operations to the main Toolbar
 #. zoom in
-#: ../src/toolbar.c:174
+#: ../src/toolbar.c:196
 msgid "Increases Zoom level"
 msgstr ""
 
 #. zoom out
-#: ../src/toolbar.c:177
+#: ../src/toolbar.c:199
 msgid "Decreases Zoom level"
 msgstr ""
 
 #. zoom 100%
-#: ../src/toolbar.c:180
+#: ../src/toolbar.c:202
 msgid "Zoom 100%"
 msgstr "Suurennus 100%"
 
-#: ../src/toolbar.c:208
+#: ../src/toolbar.c:261
 msgid "Search for: "
 msgstr "Etsi:"
 
-#: ../src/toolbar.c:212
+#: ../src/toolbar.c:265
 msgid "Incremental search"
 msgstr ""
 
 #. goto widgets
-#: ../src/toolbar.c:247
+#: ../src/toolbar.c:301
 msgid "Go to line: "
 msgstr "Siirry riville:"
 
 #. create goto entry
-#: ../src/toolbar.c:251
+#: ../src/toolbar.c:305
 msgid "Go to line"
 msgstr "Siirry riville"
 
+#: ../gphpedit.desktop.in.h:1
+msgid "Edit PHP source files"
+msgstr ""
+
+#: ../gphpedit.desktop.in.h:2
+msgid "PHP/HTML/CSS editor"
+msgstr ""
+
+#~ msgid "RegExp/String to search"
+#~ msgstr "Etsittävä RegExp/Merkkijono"
+
+#~ msgid "From cursor"
+#~ msgstr "Kursorista"
+
+#~ msgid "Search"
+#~ msgstr "Etsi"
+
+#~ msgid "String"
+#~ msgstr "Merkkijono"
+
+#~ msgid "Type"
+#~ msgstr "Tyyppi"
+
+#~ msgid "Whole word"
+#~ msgstr "Koko sana"
+
+#~ msgid "Ignore case while searching"
+#~ msgstr "Jätä etsiessä kirjainkoko huomiotta"
+
+#~ msgid "Options"
+#~ msgstr "Valinnat"
+
+#~ msgid "Find and Replace"
+#~ msgstr "Etsi ja Korvaa"
+
+#~ msgid "String to Replace"
+#~ msgstr "Korvattava merkkijono"
+
+#~ msgid "Zoom:100%"
+#~ msgstr "Suurennus:100%"
+
+#~ msgid "Reload"
+#~ msgstr "Lataa uudelleen"
+
+#~ msgid "Cancel"
+#~ msgstr "Peruuta"
+
+#~ msgid "Tabs:"
+#~ msgstr "Välilehdet:"
+
+#~ msgid "Current line:"
+#~ msgstr "Nykyinen rivi:"
+
+#~ msgid "Font Quality"
+#~ msgstr "Fontin Laatu"
+
+#~ msgid "Close Current File"
+#~ msgstr "Sulje"

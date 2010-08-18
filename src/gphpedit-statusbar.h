@@ -59,6 +59,17 @@ GtkWidget	*gphpedit_statusbar_new			(void);
 void    gphpedit_statusbar_set_zoom_level (GphpeditStatusbar *statusbar,
 				     gint            level);
 
+void		 gphpedit_statusbar_set_overwrite		(GphpeditStatusbar   *statusbar,
+							 gboolean          overwrite);
+
+void		 gphpedit_statusbar_clear_overwrite 	(GphpeditStatusbar   *statusbar);
+
+void		 gphpedit_statusbar_set_cursor_position	(GphpeditStatusbar   *statusbar,
+							 gint              line,
+							 gint              col);
+
+void set_status_combo_item (GphpeditStatusbar *statusbar,const gchar *label);
+
 void		 gphpedit_statusbar_flash_message		(GphpeditStatusbar   *statusbar,
 							 guint             context_id,
 							 const gchar      *format,

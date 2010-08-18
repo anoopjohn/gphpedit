@@ -29,7 +29,6 @@
 
 #include "tab.h"
 #include "main_window_callbacks.h"
-#include "plugin.h"
 #include "templates.h"
 #include "gvfs_utils.h"
 
@@ -222,70 +221,15 @@ void template_delete(gchar *key)
 
 void template_find_and_insert()
 {
-  gint current_pos;
-  gint wordStart;
-  gint wordEnd;
   gchar *buffer = NULL;
-  gint length;
   gchar *template = NULL;
-  char buf[16384];
-  gint indentation;
-  gint current_line;
-  gint new_cursor_pos = 0;
-  gint buffer_pos;
-  
-  current_pos = gtk_scintilla_get_current_pos(GTK_SCINTILLA(main_window.current_editor->scintilla));
-  wordStart = gtk_scintilla_word_start_position(GTK_SCINTILLA(main_window.current_editor->scintilla), current_pos-1, TRUE);
-  wordEnd = gtk_scintilla_word_end_position(GTK_SCINTILLA(main_window.current_editor->scintilla), current_pos-1, TRUE);
-
-  buffer = gtk_scintilla_get_text_range (GTK_SCINTILLA(main_window.current_editor->scintilla), wordStart, wordEnd, &length);
+ 
+  buffer = document_get_current_word(document_manager_get_current_document(main_window.docmg));
   template = template_find(buffer);
   if (template) {
-    strncpy(buf, template, 16383);
-    gtk_scintilla_begin_undo_action(GTK_SCINTILLA(main_window.current_editor->scintilla));
-    
-    // Remove template-key
-    gtk_scintilla_set_selection_start(GTK_SCINTILLA(main_window.current_editor->scintilla), wordStart);
-    gtk_scintilla_set_selection_end(GTK_SCINTILLA(main_window.current_editor->scintilla), wordEnd);
-    gtk_scintilla_replace_sel(GTK_SCINTILLA(main_window.current_editor->scintilla), "");
-    
-    // Get current indentation level
-    current_line = gtk_scintilla_line_from_position(GTK_SCINTILLA(main_window.current_editor->scintilla), current_pos);
-    indentation = gtk_scintilla_get_line_indentation(GTK_SCINTILLA(main_window.current_editor->scintilla), current_line);
-    
-    // Insert template, line by line, taking in to account indentation
-    buffer_pos = 0;
-    while (buf[buffer_pos] && buffer_pos<16380) {// 16384 - a few to account for lookaheads
-      if (buf[buffer_pos] == BACKSLASH && buf[buffer_pos+1] == 'n') { 
-        gtk_scintilla_add_text(GTK_SCINTILLA(main_window.current_editor->scintilla), 1, "\n");      
-        current_pos = gtk_scintilla_get_current_pos(GTK_SCINTILLA(main_window.current_editor->scintilla));
-        current_line = gtk_scintilla_line_from_position(GTK_SCINTILLA(main_window.current_editor->scintilla), current_pos);
-        gtk_scintilla_set_line_indentation(GTK_SCINTILLA(main_window.current_editor->scintilla), current_line, indentation);
-        gtk_scintilla_set_current_pos(GTK_SCINTILLA(main_window.current_editor->scintilla), gtk_scintilla_get_line_end_position(GTK_SCINTILLA(main_window.current_editor->scintilla), current_line));
-        buffer_pos++; buffer_pos++;
-      }
-      else if (buf[buffer_pos] == '|') { // Current choice of cursor pos character
-        new_cursor_pos = gtk_scintilla_get_current_pos(GTK_SCINTILLA(main_window.current_editor->scintilla));
-        buffer_pos++;
-      }
-      else if (buf[buffer_pos] == BACKSLASH && buf[buffer_pos+1] == 't') { 
-        gtk_scintilla_add_text(GTK_SCINTILLA(main_window.current_editor->scintilla), 1, "\t");      
-        buffer_pos++; buffer_pos++;
-      }
-      else {
-        gtk_scintilla_add_text(GTK_SCINTILLA(main_window.current_editor->scintilla), 1, &buf[buffer_pos]);      
-        buffer_pos++;
-      }
-    }
-    
-    // If there was a cursor pos character in there, put the cursor there
-    if (new_cursor_pos) {
-      gtk_scintilla_set_current_pos(GTK_SCINTILLA(main_window.current_editor->scintilla), new_cursor_pos);
-      gtk_scintilla_set_selection_start(GTK_SCINTILLA(main_window.current_editor->scintilla), new_cursor_pos);
-      gtk_scintilla_set_selection_end(GTK_SCINTILLA(main_window.current_editor->scintilla), new_cursor_pos);
-    }
-    gtk_scintilla_end_undo_action(GTK_SCINTILLA(main_window.current_editor->scintilla));
+    document_insert_template(document_manager_get_current_document(main_window.docmg), template);
   }
+  g_free(buffer);
 }
 
 

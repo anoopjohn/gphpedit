@@ -30,7 +30,6 @@
 
 #include <glib.h>
 #include <gtk/gtk.h>
-#include <gtkscintilla.h>
 
 #ifdef ENABLE_NLS
 #include <glib/gi18n.h>
@@ -41,5 +40,5 @@
 
 #define GPHPEDIT_PIXMAP_ICON "gphpedit.png"
 #define GPHPEDIT_PIXMAP_FULL_PATH (PIXMAP_DIR "/" GPHPEDIT_PIXMAP_ICON)
-gint debug(gchar *strMsg, ...);
+
 #endif

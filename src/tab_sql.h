@@ -25,8 +25,8 @@
 #ifndef TAB_SQL_H
 #define TAB_SQL_H
 
-#include "tab.h"
+#include "document.h"
 
-void tab_sql_set_lexer(Editor *editor);
+void tab_sql_set_lexer(Document *document);
 
 #endif

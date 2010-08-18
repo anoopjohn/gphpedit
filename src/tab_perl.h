@@ -25,8 +25,8 @@
 #ifndef TAB_PERL_H
 #define TAB_PERL_H
 
-#include "tab.h"
+#include "document.h"
 
-void tab_perl_set_lexer(Editor *editor);
+void tab_perl_set_lexer(Document *document);
 
 #endif
