@@ -31,9 +31,8 @@
 #include "main_window.h"
 #include "tab_util.h"
 #include "debug.h"
-#include "templates.h"
-#include "edit_template.h"
 #include "plugindialog.h"
+#include "templates_editor.h"
 
 #include "preferences_dialog.h"
 
@@ -45,7 +44,6 @@ struct _PreferencesDialogPrivate
 {
   GList *highlighting_elements;
   gboolean changing_highlight_element;
-  gchar *current_key;
 
   GtkWidget *diagbox;
   GtkWidget *save_session;
@@ -75,14 +73,8 @@ struct _PreferencesDialogPrivate
   GtkWidget *shared_source;
   GtkWidget *file_extensions;
   GtkWidget *php_file_entry;
-  GtkWidget *add_template_button;
-  GtkWidget *edit_template_button;
-  GtkWidget *delete_template_button;
-  GtkWidget *template_sample;
-  GtkListStore *template_store;
-  GtkTreeSelection *template_selection;
-  GtkWidget *Templates;
 
+  GtkWidget *templates_editor;
   GtkWidget *plugindialog;
 
   GtkWidget *close_button;
@@ -200,169 +192,6 @@ void get_current_preferences(PreferencesDialogPrivate *priv)
   highlighting_list= g_list_reverse (highlighting_list);  
 
   priv->highlighting_elements = highlighting_list;
-}
-
-static void add_to_template_list(gpointer key, gpointer value, gpointer user_data)
-{
-  GtkTreeIter iter;
-  PreferencesDialogPrivate *priv = (PreferencesDialogPrivate *) user_data;
-
-  gtk_list_store_append (priv->template_store, &iter);
-  gtk_list_store_set (priv->template_store, &iter,0, (gchar *)key, -1);
-}
-
-void add_templates_to_store(PreferencesDialogPrivate *priv)
-{
-  g_hash_table_foreach(templates, add_to_template_list, priv);
-}
-
-void update_template_display(PreferencesDialogPrivate *priv, gchar *template)
-{
-  GtkTextBuffer *buffer;
-
-  buffer = gtk_text_view_get_buffer (GTK_TEXT_VIEW (priv->template_sample));
-
-  gtk_text_buffer_set_text (buffer, template, -1);  
-}
-
-void template_row_activated(GtkTreeSelection *selection, gpointer data)
-{
-  GtkTreeModel *model;
-  gchar *content, *template;
-  GtkTreeIter iter;
-  PreferencesDialogPrivate *priv = (PreferencesDialogPrivate *) data;
-  if (priv->current_key) {
-    g_free(priv->current_key);
-  }
-    if (gtk_tree_selection_get_selected (selection, &model, &iter)) {
-    gtk_tree_model_get (model, &iter, 0, &priv->current_key, -1);
-
-    // display template content
-    template = template_find(priv->current_key);
-    if (template) {
-      content = template_convert_to_display(template);
-      update_template_display(data, content);
-      g_free(content);
-    }
-  }
-}
-
-static void templates_treeview_add_column(PreferencesDialogPrivate *priv)
-{  
-  GtkCellRenderer *renderer;
-  GtkTreeViewColumn *column;
-
-  /* column for description */
-  renderer = gtk_cell_renderer_text_new ();
-  column = gtk_tree_view_column_new_with_attributes (_("Name/Shortcut"), renderer, "text", 0, NULL);
-  gtk_tree_view_column_set_sort_column_id (column, 0);
-  gtk_tree_view_append_column (GTK_TREE_VIEW(priv->Templates), column);
-}
-
-void add_template_clicked(GtkButton *button, gpointer data)
-{
-  gchar *name;
-  gchar *template;
-  GtkTreeIter iter;
-  GtkTextBuffer *buffer;
-  GtkTextIter begin, end;
-  gchar *content;
-  PreferencesDialogPrivate *priv = (PreferencesDialogPrivate *) data;
-  // create dialog
-  create_edit_template_dialog();
-
-  // Run and wait for OK
-  if (gtk_dialog_run(GTK_DIALOG(edit_template_dialog.window1)) == GTK_RESPONSE_ACCEPT) {
-    // convert content to template format
-    buffer = gtk_text_view_get_buffer (GTK_TEXT_VIEW (edit_template_dialog.textview1));
-    gtk_text_buffer_get_start_iter (buffer, &begin);
-    gtk_text_buffer_get_end_iter (buffer, &end);
-    content = gtk_text_buffer_get_text(buffer, &begin, &end, TRUE);
-    
-    template = template_convert_to_template(content);
-
-    // add to templates
-    name = (gchar *)gtk_entry_get_text (GTK_ENTRY(edit_template_dialog.entry1));
-    template_delete(priv->current_key); // Just in case you accidentally type the name of an existing template
-    template_replace(name, template);
-    
-    // add to treeview
-    gtk_list_store_append (priv->template_store, &iter);
-    gtk_list_store_set (priv->template_store, &iter,0, (gchar *)name, -1);
-  }
-  
-  // destroy/null dialog
-  gtk_widget_destroy(edit_template_dialog.window1);
-  edit_template_dialog.window1 = NULL;
-}
-
-void edit_template_clicked(GtkButton *button, gpointer data)
-{
-  gchar *name;
-  gchar *template;
-  GtkTextBuffer *buffer;
-  GtkTextIter begin, end;
-  gchar *content;
-  GtkTreeIter iter;
-  PreferencesDialogPrivate *priv = (PreferencesDialogPrivate *) data;
-
-  // create dialog
-  create_edit_template_dialog();
-
-  // fill in existing content
-  gtk_entry_set_text(GTK_ENTRY(edit_template_dialog.entry1), priv->current_key);
-  buffer = gtk_text_view_get_buffer (GTK_TEXT_VIEW (priv->template_sample));
-  gtk_text_buffer_get_start_iter (buffer, &begin);
-  gtk_text_buffer_get_end_iter (buffer, &end);
-  content = gtk_text_buffer_get_text(buffer, &begin, &end, TRUE);
-  buffer = gtk_text_view_get_buffer (GTK_TEXT_VIEW (edit_template_dialog.textview1));
-  gtk_text_buffer_set_text(buffer, content, -1);  
-  
-  // Run and wait for OK
-  if (gtk_dialog_run(GTK_DIALOG(edit_template_dialog.window1)) == GTK_RESPONSE_ACCEPT) {
-    // convert content to template format
-    buffer = gtk_text_view_get_buffer (GTK_TEXT_VIEW (edit_template_dialog.textview1));
-    gtk_text_buffer_get_start_iter (buffer, &begin);
-    gtk_text_buffer_get_end_iter (buffer, &end);
-    content = gtk_text_buffer_get_text(buffer, &begin, &end, TRUE);
-    
-    template = template_convert_to_template(content);
-
-    // add to templates
-    name = (gchar *)gtk_entry_get_text (GTK_ENTRY(edit_template_dialog.entry1));
-    template_delete(priv->current_key);
-    template_replace(name, template);
-    
-    // replace in treeview
-    gtk_tree_selection_get_selected (priv->template_selection, NULL, &iter);
-    gtk_list_store_set (priv->template_store, &iter,0, (gchar *)name, -1);
-    
-    // replace in display
-    update_template_display(priv, content);
-  }
-  
-  // destroy/null dialog
-  gtk_widget_destroy(edit_template_dialog.window1);
-  edit_template_dialog.window1 = NULL;
-}
-
-void delete_template_clicked(GtkButton *button, gpointer data)
-{
-  GtkTreeIter iter;
-  PreferencesDialogPrivate *priv = (PreferencesDialogPrivate *) data;
-
-  gchar *message = g_strdup_printf(_("Are you sure you want to delete template %s?"),priv->current_key);
-  // confirm deletion with dialog
-  if (yes_no_dialog (_("gPHPEdit"), message) == GTK_RESPONSE_YES) {
-    // delete from templates
-    template_delete(priv->current_key);
-
-    // delete from treeview
-    gtk_tree_selection_get_selected (priv->template_selection, NULL, &iter);
-    gtk_list_store_remove (priv->template_store, &iter);
-    priv->current_key = NULL;
-  }
-   g_free(message);
 }
 
 static gint cmp_families (gconstpointer a, gconstpointer b, gpointer user_data)
@@ -1097,7 +926,7 @@ PREFERENCES_DIALOG_init (PreferencesDialog *dialog)
   PreferencesDialogPrivate *priv = PREFERENCES_DIALOG_GET_PRIVATE(dialog);
   priv->diagbox = gtk_dialog_get_content_area (GTK_DIALOG(dialog));
   gtk_box_set_spacing (GTK_BOX(priv->diagbox), 5);
-  priv->current_key=NULL;
+
   get_current_preferences(priv);
 
   GtkWidget *notebook = gtk_notebook_new ();
@@ -1579,73 +1408,9 @@ PREFERENCES_DIALOG_init (PreferencesDialog *dialog)
   gtk_entry_set_text(GTK_ENTRY(priv->shared_source), get_preferences_manager_shared_source_location(main_window.prefmg));
   g_signal_connect(G_OBJECT(priv->shared_source), "changed", G_CALLBACK(on_shared_source_changed), NULL);
 
-  GtkWidget *hbox20 = gtk_hbox_new (FALSE, 0);
-  gtk_widget_show (hbox20);
-  gtk_box_pack_start (GTK_BOX (princod), hbox20, TRUE, TRUE, 8);
-
-  GtkWidget *label50 = gtk_label_new (_("Templates:"));
-  gtk_widget_show (label50);
-  gtk_box_pack_start (GTK_BOX (hbox20), label50, FALSE, FALSE, 8);
-  
-  GtkWidget *vbox8 = gtk_vbox_new (TRUE, 0);
-  gtk_widget_show (vbox8);
-  gtk_box_pack_start (GTK_BOX (hbox20), vbox8, TRUE, TRUE, 0);
-  
-  GtkWidget *hbox21 = gtk_hbox_new (FALSE, 0);
-  gtk_widget_show (hbox21);
-  gtk_box_pack_start (GTK_BOX (vbox8), hbox21, TRUE, TRUE, 0);
-  
-  GtkWidget *scrolledwindow1 = gtk_scrolled_window_new (NULL, NULL);
-  gtk_widget_show (scrolledwindow1);
-  gtk_box_pack_start (GTK_BOX (hbox21), scrolledwindow1, TRUE, TRUE, 0);
-  
-  priv->template_store = gtk_list_store_new (1, G_TYPE_STRING);
-  add_templates_to_store(priv);
-  
-  priv->Templates = gtk_tree_view_new_with_model (GTK_TREE_MODEL(priv->template_store));
-  // g_object_unref (preferences_dialog.template_store);
-  // Can't unref it because I need to add to it later....
-  templates_treeview_add_column(priv);
-  
-  gtk_tree_view_set_search_column (GTK_TREE_VIEW (priv->Templates),0);
-  gtk_widget_show (priv->Templates);
-  gtk_container_add (GTK_CONTAINER (scrolledwindow1), priv->Templates);
-
-  priv->template_selection = gtk_tree_view_get_selection (GTK_TREE_VIEW (priv->Templates));
-  gtk_tree_selection_set_mode (priv->template_selection, GTK_SELECTION_SINGLE);
-  g_signal_connect (G_OBJECT (priv->template_selection), "changed", G_CALLBACK (template_row_activated), priv);
-
-  GtkWidget *vbox9 = gtk_vbox_new (TRUE, 0);
-  gtk_widget_show (vbox9);
-  gtk_box_pack_start (GTK_BOX (hbox21), vbox9, FALSE, TRUE, 8);
-  gtk_container_set_border_width (GTK_CONTAINER (vbox9), 8);
-  
-  priv->add_template_button = gtk_button_new_with_mnemonic (_("Add..."));
-  gtk_widget_show (priv->add_template_button);
-  gtk_box_pack_start (GTK_BOX (vbox9), priv->add_template_button, FALSE, FALSE, 0);
-  gtk_container_set_border_width (GTK_CONTAINER (priv->add_template_button), 2);
-  g_signal_connect (G_OBJECT (priv->add_template_button), "clicked", G_CALLBACK (add_template_clicked), priv);
-  
-  priv->edit_template_button = gtk_button_new_with_mnemonic (_("Edit..."));
-  gtk_widget_show (priv->edit_template_button);
-  gtk_box_pack_start (GTK_BOX (vbox9), priv->edit_template_button, FALSE, FALSE, 0);
-  gtk_container_set_border_width (GTK_CONTAINER (priv->edit_template_button), 2);
-  g_signal_connect (G_OBJECT (priv->edit_template_button), "clicked", G_CALLBACK (edit_template_clicked), priv);
-  
-  priv->delete_template_button = gtk_button_new_with_mnemonic (_("Delete"));
-  gtk_widget_show (priv->delete_template_button);
-  gtk_box_pack_start (GTK_BOX (vbox9), priv->delete_template_button, FALSE, FALSE, 0);
-  gtk_container_set_border_width (GTK_CONTAINER (priv->delete_template_button), 2);
-  g_signal_connect (G_OBJECT (priv->delete_template_button), "clicked", G_CALLBACK (delete_template_clicked), priv);
-  
-  GtkWidget *template_sample_scrolled = gtk_scrolled_window_new (NULL, NULL);
-  gtk_widget_show (template_sample_scrolled);
-  gtk_box_pack_start (GTK_BOX (vbox8), template_sample_scrolled, FALSE, TRUE, 0);
-  
-  priv->template_sample = gtk_text_view_new ();
-  gtk_widget_show (priv->template_sample);
-  gtk_container_add (GTK_CONTAINER (template_sample_scrolled), priv->template_sample);
-  gtk_text_view_set_editable (GTK_TEXT_VIEW(priv->template_sample), FALSE);
+  priv->templates_editor = templates_editor_new ();
+  gtk_widget_show (priv->templates_editor);
+  gtk_box_pack_start (GTK_BOX (princod), priv->templates_editor, TRUE, TRUE, 8);
 /**/
   GtkWidget *label36 = gtk_label_new (_("Coding"));
   gtk_widget_show (label36);
