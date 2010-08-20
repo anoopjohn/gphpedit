@@ -45,6 +45,7 @@
 struct _TemplatesEditorPrivate
 {
   gchar *current_key;
+  TemplatesManager *tempmg;
 
   GtkWidget *add_template_button;
   GtkWidget *edit_template_button;
@@ -71,18 +72,19 @@ templates_editor_class_init (TemplatesEditorClass *klass)
 }
 
 
-static void add_to_template_list(gpointer key, gpointer value, gpointer user_data)
+static void add_to_template_list(gpointer data, gpointer user_data)
 {
   GtkTreeIter iter;
   TemplatesEditorPrivate *priv = (TemplatesEditorPrivate *) user_data;
 
   gtk_list_store_append (priv->template_store, &iter);
-  gtk_list_store_set (priv->template_store, &iter,0, (gchar *)key, -1);
+  gtk_list_store_set (priv->template_store, &iter,0, (gchar *)data, -1);
 }
 
 static void add_templates_to_store(TemplatesEditorPrivate *priv)
 {
-  g_hash_table_foreach(templates, add_to_template_list, priv);
+  GList *keylist = get_templates_manager_templates_names(priv->tempmg);
+  g_list_foreach (keylist, add_to_template_list, priv);
 }
 
 static void update_template_display(TemplatesEditorPrivate *priv, gchar *template)
@@ -107,7 +109,7 @@ static void template_row_activated(GtkTreeSelection *selection, gpointer data)
     gtk_tree_model_get (model, &iter, 0, &priv->current_key, -1);
 
     // display template content
-    template = template_find(priv->current_key);
+    template = template_find(priv->tempmg, priv->current_key);
     if (template) {
       content = template_convert_to_display(template);
       update_template_display(data, content);
@@ -152,8 +154,8 @@ static void add_template_clicked(GtkButton *button, gpointer data)
 
     // add to templates
     name = (gchar *)gtk_entry_get_text (GTK_ENTRY(edit_template_dialog.entry1));
-    template_delete(priv->current_key); // Just in case you accidentally type the name of an existing template
-    template_replace(name, template);
+    template_delete(priv->tempmg, priv->current_key); // Just in case you accidentally type the name of an existing template
+    template_replace(priv->tempmg, name, template);
     
     // add to treeview
     gtk_list_store_append (priv->template_store, &iter);
@@ -199,8 +201,8 @@ static void edit_template_clicked(GtkButton *button, gpointer data)
 
     // add to templates
     name = (gchar *)gtk_entry_get_text (GTK_ENTRY(edit_template_dialog.entry1));
-    template_delete(priv->current_key);
-    template_replace(name, template);
+    template_delete(priv->tempmg, priv->current_key);
+    template_replace(priv->tempmg, name, template);
     
     // replace in treeview
     gtk_tree_selection_get_selected (priv->template_selection, NULL, &iter);
@@ -224,7 +226,7 @@ static void delete_template_clicked(GtkButton *button, gpointer data)
   // confirm deletion with dialog
   if (yes_no_dialog (_("gPHPEdit"), message) == GTK_RESPONSE_YES) {
     // delete from templates
-    template_delete(priv->current_key);
+    template_delete(priv->tempmg, priv->current_key);
 
     // delete from treeview
     gtk_tree_selection_get_selected (priv->template_selection, NULL, &iter);
@@ -242,11 +244,13 @@ templates_editor_init (TemplatesEditor *te)
 
   priv->current_key=NULL;
 
+  priv->tempmg = templates_manager_new();
+ 
   GtkWidget *hbox20 = gtk_hbox_new (FALSE, 0);
   gtk_widget_show (hbox20);
   gtk_box_pack_start (GTK_BOX (te), hbox20, TRUE, TRUE, 8);
 
-  GtkWidget *label50 = gtk_label_new (_("Templates:")); //FIXME: usar macro??
+  GtkWidget *label50 = gtk_label_new (_("Templates:"));
   gtk_widget_show (label50);
   gtk_box_pack_start (GTK_BOX (hbox20), label50, FALSE, FALSE, 8);
   
@@ -315,8 +319,10 @@ templates_editor_init (TemplatesEditor *te)
 static void
 templates_editor_finalize (GObject *object)
 {
-//	TemplatesEditor *te = TEMPLATES_EDITOR (object);
-  
+	TemplatesEditor *te = TEMPLATES_EDITOR (object);
+  TemplatesEditorPrivate *priv = TEMPLATES_EDITOR_GET_PRIVATE(te);
+
+  if(priv->tempmg) g_object_unref(priv->tempmg);
 
 	G_OBJECT_CLASS (templates_editor_parent_class)->finalize (object);
 

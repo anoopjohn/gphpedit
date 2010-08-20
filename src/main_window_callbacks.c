@@ -49,7 +49,7 @@ gboolean is_app_closing = FALSE;
 void quit_application()
 {
   gphpedit_debug(DEBUG_MAIN_WINDOW);
-  template_db_close();
+  g_object_unref(main_window.tempmg);
   is_app_closing = TRUE;
   g_object_unref(main_window.docmg);
   is_app_closing = FALSE;
@@ -117,7 +117,7 @@ gint main_window_key_press_event(GtkWidget   *widget, GdkEventKey *event,gpointe
       return TRUE;
     }
     else if ((event->state & GDK_CONTROL_MASK)==GDK_CONTROL_MASK && ((event->keyval == GDK_j) || (event->keyval == GDK_J)))  {
-      template_find_and_insert();
+      template_find_and_insert(main_window.tempmg);
       return TRUE;
     }
     else if ((event->state & GDK_CONTROL_MASK)==GDK_CONTROL_MASK && ((event->keyval == GDK_F2)))  {
