@@ -26,6 +26,7 @@
 #define TEMPLATES_MANAGER_H
 
 #include <gtk/gtk.h>
+#include "document.h"
 
 #define TEMPLATES_MANAGER_TYPE templates_manager_get_type()
 #define TEMPLATES_MANAGER(obj) \
@@ -57,7 +58,7 @@ typedef struct
 GType templates_manager_get_type (void) G_GNUC_CONST;
 TemplatesManager *templates_manager_new (void);
 gchar *template_find(TemplatesManager *tempmg, gchar *key);
-void template_find_and_insert(TemplatesManager *tempmg);
+void template_find_and_insert(TemplatesManager *tempmg, Document *doc);
 gchar *template_convert_to_display(gchar *content);
 gchar *template_convert_to_template(gchar *content);
 GList *get_templates_manager_templates_names(TemplatesManager *tempmg);

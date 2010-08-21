@@ -30,7 +30,6 @@
 
 #include "debug.h"
 #include "templates.h"
-#include "main_window_callbacks.h"
 #include "gvfs_utils.h"
 
 /*
@@ -269,15 +268,15 @@ gchar *template_find(TemplatesManager *tempmg, gchar *key)
   return g_hash_table_lookup(tempmgdet->templates, key);
 }
 
-void template_find_and_insert(TemplatesManager *tempmg)
+void template_find_and_insert(TemplatesManager *tempmg, Document *doc)
 {
   gchar *buffer = NULL;
   gchar *template = NULL;
  
-  buffer = document_get_current_word(document_manager_get_current_document(main_window.docmg));
+  buffer = document_get_current_word(doc);
   template = template_find(tempmg, buffer);
   if (template) {
-    document_insert_template(document_manager_get_current_document(main_window.docmg), template);
+    document_insert_template(doc, template);
   }
   g_free(buffer);
 }

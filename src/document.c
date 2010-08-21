@@ -30,6 +30,8 @@
 #include <stdlib.h>
 #include <gtk/gtk.h>
 #include <webkit/webkit.h>
+#include <gdk/gdkkeysyms.h>
+
 #include "debug.h"
 #include "document.h"
 #include "document_loader.h"
@@ -221,6 +223,30 @@ Document *document_new (gint type, const gchar *filename, gint goto_line)
 	return doc; /* return new object */
 }
 
+gboolean scintilla_key_press (GtkWidget *widget, GdkEventKey *event, gpointer user_data) {
+  if ((event->state & GDK_CONTROL_MASK)==GDK_CONTROL_MASK && ((event->keyval == GDK_F2)))  {
+    document_modify_current_line_marker(user_data);
+    return TRUE;
+  }
+  else if ((event->keyval == GDK_F2))  {
+      document_find_next_marker(user_data);
+      return TRUE;
+  }  
+  else if (((event->state & (GDK_CONTROL_MASK | GDK_SHIFT_MASK))==(GDK_CONTROL_MASK | GDK_SHIFT_MASK)) && (event->keyval == GDK_space)) {
+    document_show_calltip_at_current_pos(user_data);
+    return TRUE;
+  }
+  else if ((event->state & GDK_CONTROL_MASK)==GDK_CONTROL_MASK && ((event->keyval == GDK_j) || (event->keyval == GDK_J)))  {
+    template_find_and_insert(main_window.tempmg, user_data);
+    return TRUE;
+  }
+  else if ((event->state & GDK_CONTROL_MASK)==GDK_CONTROL_MASK && (event->keyval == GDK_space)) { 
+      document_force_autocomplete(user_data);
+      return TRUE;
+ }
+
+  return FALSE;
+}
 static void tab_set_event_handlers(Document *doc)
 {
   g_return_if_fail(doc);
@@ -230,6 +256,7 @@ static void tab_set_event_handlers(Document *doc)
   g_signal_connect (G_OBJECT (docdet->scintilla), "uri_dropped", G_CALLBACK (process_drag_uri), NULL);
   g_signal_connect (G_OBJECT (docdet->scintilla), "user_list_selection", G_CALLBACK (process_user_list_selection), doc);
   g_signal_connect (G_OBJECT (docdet->scintilla), "painted", G_CALLBACK (scintilla_modified), NULL);
+  g_signal_connect (G_OBJECT (docdet->scintilla), "key-press-event", G_CALLBACK (scintilla_key_press), doc);
 }
 
 void tab_reset_scintilla_after_open(GtkScintilla *scintilla, guint current_line)
