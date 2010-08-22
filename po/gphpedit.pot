@@ -5,8 +5,7 @@
 #
 #, fuzzy
 msgid ""
-msgstr ""
-"Project-Id-Version: PACKAGE VERSION\n"
+msgstr "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2010-08-21 20:28-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
@@ -108,8 +107,7 @@ msgstr ""
 
 #: ../src/document.c:2266
 #, c-format
-msgid ""
-"Could not get the file modification time for file: '%s'. GIO error: %s \n"
+msgid "Could not get the file modification time for file: '%s'. GIO error: %s \n"
 msgstr ""
 
 #: ../src/document.c:2301
@@ -128,22 +126,19 @@ msgid "Error mounting volume. GIO error:%s\n"
 msgstr ""
 
 #: ../src/document_loader.c:203
-msgid ""
-"Error filesystem not mounted. Mounting filesystem, this will take a few "
+msgid "Error filesystem not mounted. Mounting filesystem, this will take a few "
 "seconds..."
 msgstr ""
 
 #: ../src/document_loader.c:209
 #, c-format
-msgid ""
-"Error opening file GIO error:%s\n"
+msgid "Error opening file GIO error:%s\n"
 "file:%s"
 msgstr ""
 
 #: ../src/document_loader.c:225
 #, c-format
-msgid ""
-"The file %s was not found.\n"
+msgid "The file %s was not found.\n"
 "\n"
 "Would you like to create it as an empty document?"
 msgstr ""
@@ -201,8 +196,7 @@ msgstr ""
 
 #: ../src/document_manager.c:598
 #, c-format
-msgid ""
-"The file '%s' has not been saved since your last changes, are you sure you "
+msgid "The file '%s' has not been saved since your last changes, are you sure you "
 "want to close it and lose these changes?"
 msgstr ""
 
@@ -515,8 +509,7 @@ msgid "Copyright © 2003-2006 Andy Jeffries, 2009-2010 Anoop John"
 msgstr ""
 
 #: ../src/main_window_callbacks.c:646
-msgid ""
-"gPHPEdit is a GNOME2 editor specialised for editing PHP scripts and related "
+msgid "gPHPEdit is a GNOME2 editor specialised for editing PHP scripts and related "
 "files (HTML/CSS/JS)."
 msgstr ""
 
@@ -1255,16 +1248,14 @@ msgstr ""
 
 #: ../src/preferences_dialog.c:719
 #, c-format
-msgid ""
-"You have just changed the font to %s\n"
+msgid "You have just changed the font to %s\n"
 "\n"
 "Would you like to use this font as the default for every element?"
 msgstr ""
 
 #: ../src/preferences_dialog.c:732
 #, c-format
-msgid ""
-"You have just changed the font size to %dpt\n"
+msgid "You have just changed the font size to %dpt\n"
 "\n"
 "Would you like to use this font size as the default for every element?"
 msgstr ""
@@ -1484,8 +1475,7 @@ msgid "Replace _all"
 msgstr ""
 
 #: ../src/syntax_check_manager.c:303
-msgid ""
-"Error calling PHP CLI (is PHP command line binary installed? If so, check if "
+msgid "Error calling PHP CLI (is PHP command line binary installed? If so, check if "
 "it's in your path or set php_binary in Preferences)\n"
 msgstr ""
 
