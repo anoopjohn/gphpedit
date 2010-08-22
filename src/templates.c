@@ -144,7 +144,7 @@ void template_db_save(void)
     GFile *file=get_gfile_from_filename(template_filename->str);
     GError *error=NULL;
     if(!g_file_replace_contents (file,file_contents->str,file_contents->len,NULL,FALSE,G_FILE_CREATE_NONE,NULL,NULL,&error)){
-      g_print(_("CANNOT Create templates file:: %s\n"),error->message);
+      g_print(_("CANNOT Create templates file: %s\n"),error->message);
       g_error_free (error);
     }
     g_string_free(file_contents,TRUE);
