@@ -111,11 +111,8 @@ msgstr "Error GIO: %s guardando archivo:%s\n"
 
 #: ../src/document.c:2266
 #, c-format
-msgid ""
-"Could not get the file modification time for file: '%s'. GIO error: %s \n"
-msgstr ""
-"No se pudo obtener la fecha de modificación del archivo: '%s'. Error GIO: %"
-"s \n"
+msgid "Could not get the file modification time for file: '%s'. GIO error: %s \n"
+msgstr "No se pudo obtener la fecha de modificación del archivo: '%s'. Error GIO: %s \n"
 
 #: ../src/document.c:2301
 #, c-format
@@ -134,9 +131,7 @@ msgstr "Error montando volumen. Error GIO:%s\n"
 
 #: ../src/document_loader.c:203
 #, fuzzy
-msgid ""
-"Error filesystem not mounted. Mounting filesystem, this will take a few "
-"seconds..."
+msgid "Error filesystem not mounted. Mounting filesystem, this will take a few seconds..."
 msgstr ""
 "Error el sistema de archivos no esta montado.\n"
 "Montando sistema de archivos, esto tardara unos segundos...\n"
@@ -214,12 +209,8 @@ msgstr "Error GIO borrando archivo: %s\n"
 
 #: ../src/document_manager.c:598
 #, c-format
-msgid ""
-"The file '%s' has not been saved since your last changes, are you sure you "
-"want to close it and lose these changes?"
-msgstr ""
-"El archivo '%s' no ha sido guardado desde el ultimo cambio, ¿esta seguro que "
-"desea cerrarlo y perder los cambios?"
+msgid "The file '%s' has not been saved since your last changes, are you sure you want to close it and lose these changes?"
+msgstr "El archivo '%s' no ha sido guardado desde el ultimo cambio, ¿esta seguro que desea cerrarlo y perder los cambios?"
 
 #: ../src/document_manager.c:602
 #, c-format
@@ -424,7 +415,8 @@ msgstr ""
 msgid "Zoom: %d%s"
 msgstr "Zoom: 100%"
 
-#. Translators: "Ln" is an abbreviation for "Line", Col is an abbreviation for "Column". Please,
+#. Translators: "Ln" is an abbreviation for "Line", Col is an abbreviation for
+#. "Column". Please,
 #. use abbreviations if possible to avoid space problems.
 #: ../src/gphpedit-statusbar.c:434
 #, c-format
@@ -517,9 +509,7 @@ msgstr "Por favor, escriba el nombre de archivo para guardar como ..."
 
 #: ../src/main_window_callbacks.c:371
 msgid "Are you sure you wish to reload the current file, losing your changes?"
-msgstr ""
-"¿Estás seguro de que desea volver a cargar el archivo actual, perdiendo los "
-"cambios?"
+msgstr "¿Estás seguro de que desea volver a cargar el archivo actual, perdiendo los cambios?"
 
 #: ../src/main_window_callbacks.c:421
 msgid "This file already exists, are you sure you want to overwrite it?"
@@ -540,12 +530,8 @@ msgid "Copyright © 2003-2006 Andy Jeffries, 2009-2010 Anoop John"
 msgstr "Copyright  2003-2006 Andy Jeffries, 2009-2010 Anoop John"
 
 #: ../src/main_window_callbacks.c:646
-msgid ""
-"gPHPEdit is a GNOME2 editor specialised for editing PHP scripts and related "
-"files (HTML/CSS/JS)."
-msgstr ""
-"gPHPEdit es un editor de GNOME2 especializado en editar specialised for "
-"editing PHP scripts and related files (HTML/CSS/JS)."
+msgid "gPHPEdit is a GNOME2 editor specialised for editing PHP scripts and related files (HTML/CSS/JS)."
+msgstr "gPHPEdit es un editor de GNOME2 especializado en editar specialised for editing PHP scripts and related files (HTML/CSS/JS)."
 
 #: ../src/main_window_callbacks.c:704
 #, fuzzy, c-format
@@ -938,7 +924,7 @@ msgstr "Imposible crear ~/.gphpedit/ (%d) %s"
 #. * right place when idly populating the menu in case the
 #. * user appended or prepended custom menu items to the
 #. * recent chooser menu widget.
-#.
+#. 
 #: ../src/pluginmenu.c:82
 #, fuzzy
 msgid "No items found"
@@ -1495,7 +1481,6 @@ msgstr "Editar..."
 msgid "Delete"
 msgstr "Borrar"
 
-#.
 #: ../src/preferences_dialog.c:1650
 #, fuzzy
 msgid "Coding"
@@ -1534,9 +1519,7 @@ msgid "Replace _all"
 msgstr "Reemplazar _Todos"
 
 #: ../src/syntax_check_manager.c:303
-msgid ""
-"Error calling PHP CLI (is PHP command line binary installed? If so, check if "
-"it's in your path or set php_binary in Preferences)\n"
+msgid "Error calling PHP CLI (is PHP command line binary installed? If so, check if it's in your path or set php_binary in Preferences)\n"
 msgstr ""
 
 #: ../src/syntax_check_window.c:112
@@ -1650,7 +1633,6 @@ msgstr "Ir a linea:"
 msgid "Go to line"
 msgstr "Ir a linea"
 
-#, fuzzy
 #~ msgid "Classbrowser::Cannot allocate buffer"
 #~ msgstr "No se pudo alojar buffer de escritura"
 
@@ -1705,7 +1687,6 @@ msgstr "Ir a linea"
 #~ msgid "Apply"
 #~ msgstr "Aplicar"
 
-#, fuzzy
 #~ msgid "Error reading file. GIO error:%s\n"
 #~ msgstr "Error re-nombrando archivo. Error GIO:%s\n"
 
@@ -1718,9 +1699,8 @@ msgstr "Ir a linea"
 #~ msgid "Reload the file currently selected in the editor"
 #~ msgstr "Recarga el archivo actualmente seleccionado en el editor"
 
-#, fuzzy
 #~ msgid "Folder Browser"
-#~ msgstr "Visor de Clases"
+#~ msgstr "Visor de archivos"
 
 #~ msgid "Close Current File"
 #~ msgstr "Cerrar archivo actual"
