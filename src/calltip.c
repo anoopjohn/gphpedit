@@ -22,14 +22,18 @@
    The GNU General Public License is contained in the file COPYING.
 */
 
-#include <stdio.h>
-#include "calltip.h"
-#include "tab.h"
-#include "images.h"
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-//#define DEBUGCALLTIP
+
+#include <stdio.h>
+#include "debug.h"
+#include "calltip.h"
+#include "tab.h"
+//#include "images.h"
+#include "main_window.h"
+#include "classbrowser_ui.h"
+
 GTree *php_api_tree;
 GTree *css_api_tree;
 GString *completion_list_tree;
@@ -65,13 +69,6 @@ gchar *sql_keywords[] = {"ADD", "ALL", "ALTER", "ANALYZE", "AND", "AS", "ASC", "
   "USING", "VALUES", "VARBINARY", "VARCHAR", "VARCHARACTER", "VARYING", "WARNINGS", 
   "WHEN", "WHERE", "WHILE", "WITH", "WRITE", "XOR", "YEAR_MONTH", "ZEROFILL", NULL};
 
-void register_autoc_images(GtkScintilla *sci){
-  gtk_scintilla_register_image(sci, 1, (const gchar *) function_xpm);
-  gtk_scintilla_register_image(sci, 2, (const gchar *) bullet_blue_xpm);
-  gtk_scintilla_register_image(sci, 3, (const gchar *) variable_xpm);
-  gtk_scintilla_register_image(sci, 4, (const gchar *) class_xpm);
-}
-
 void function_list_prepare(void)
 {
   FILE *apifile;
@@ -79,9 +76,7 @@ void function_list_prepare(void)
   gchar *api_dir = NULL;
   /* use autoconf macro to build api file path */
   api_dir = g_build_path (G_DIR_SEPARATOR_S, API_DIR, "php-gphpedit.api", NULL);
-  #ifdef DEBUGCALLTIP
-    g_print("DEBUG::PHP API PATH:'%s'\n",api_dir);
-  #endif
+  gphpedit_debug_message(DEBUG_CALLTIP, "API PATH:'%s'", api_dir);
   apifile = fopen(api_dir, "r");
   if( apifile != NULL ) {
     php_api_tree=g_tree_new_full((GCompareDataFunc) g_utf8_collate, NULL, g_free, NULL);
@@ -89,15 +84,13 @@ void function_list_prepare(void)
       gchar *line=g_strdup(buffer);
       gchar *token_line = line;
       gchar *function_name = strtok(token_line, "|");
-      #ifdef DEBUGCALLTIP
-        g_print("function name:%s,rest:%s\n",function_name, (line + strlen(function_name)+1));
-      #endif
+      gphpedit_debug_message(DEBUG_CALLTIP, "function name:%s",function_name);
       g_tree_insert (php_api_tree, function_name, (line + strlen(function_name)+1));
       //g_free(token_line);
     }
     fclose( apifile );
   } else {
-    g_print(_("WARNING: Could not open php-gphpedit.api file\n"));
+    g_warning(_("Could not open php-gphpedit.api file"));
   }
   g_free(api_dir);
 }
@@ -109,9 +102,7 @@ void css_function_list_prepare(void)
   gchar *api_dir = NULL;
   /* use autoconf macro to build api file path */
   api_dir = g_build_path (G_DIR_SEPARATOR_S, API_DIR, "css.api", NULL);
-  #ifdef DEBUGCALLTIP
-    g_print("DEBUG::CSS API PATH:'%s'\n",api_dir);
-  #endif
+  gphpedit_debug_message(DEBUG_CALLTIP, "API PATH:'%s'", api_dir);
   apifile = fopen(api_dir, "r");
   if( apifile != NULL ) {
     css_api_tree=g_tree_new_full((GCompareDataFunc) g_utf8_collate, NULL, g_free, NULL);
@@ -119,24 +110,18 @@ void css_function_list_prepare(void)
       gchar *line=g_strdup(buffer);
       gchar *token_line = line;
       gchar *function_name = strtok(token_line, "|");
-      #ifdef DEBUGCALLTIP
-        g_print("function name:%s,rest:%s\n",function_name, (line + strlen(function_name)+1));
-      #endif
+      gphpedit_debug_message(DEBUG_CALLTIP, "function name:%s",function_name);
       g_tree_insert (css_api_tree, function_name, (line + strlen(function_name)+1));
       //g_free(line);
     }
     fclose( apifile );
   } else {
-    g_print(_("WARNING: Could not open php-gphpedit.api file\n"));
+    g_warning(_("Could not open php-gphpedit.api file"));
   }
   g_free(api_dir);
 }
-static void get_css_api_line(GtkWidget *scintilla, gint wordStart, gint wordEnd)
+gchar *get_css_api_line(gchar *buffer)
 {
-  gchar *buffer = NULL;
-  gint length;
-
-  buffer = gtk_scintilla_get_text_range (GTK_SCINTILLA(scintilla), wordStart, wordEnd, &length);
   gchar *value=g_tree_lookup (css_api_tree, buffer);
   if (value){
   gchar *copy=g_strdup (value);
@@ -145,16 +130,13 @@ static void get_css_api_line(GtkWidget *scintilla, gint wordStart, gint wordEnd)
   strncpy(description,"\n",1);
   /* make calltip */
   gchar *callti=g_strdup_printf ("%s %s", buffer,copy);
-  #ifdef DEBUGCALLTIP
-    g_print("CSS::calltip:%s\n",callti);
-  #endif
 
-  /* show calltip */
-  gtk_scintilla_call_tip_show(GTK_SCINTILLA(scintilla), wordStart, callti);
-  g_free(callti);
+  gphpedit_debug_message(DEBUG_CALLTIP, "calltip:%s\n",callti);
+
   g_free(copy);	
+  return callti;
   }
-  g_free (buffer);
+  return NULL;
 }
 
 gboolean make_completion_string (gpointer key, gpointer value, gpointer data){
@@ -174,39 +156,25 @@ gboolean make_completion_string (gpointer key, gpointer value, gpointer data){
   return FALSE;
 }
 
-GString *get_css_completion_list(GtkWidget *scintilla, gint wordStart, gint wordEnd)
+gchar *css_autocomplete_word(gchar *buffer)
 {
-  GString *completion_list;
-  gchar *buffer = NULL;
-  gint length;
+  gchar *result = NULL;
 
-  buffer = gtk_scintilla_get_text_range (GTK_SCINTILLA(scintilla), wordStart, wordEnd, &length);
   g_tree_foreach (css_api_tree, make_completion_string, buffer);
   if (completion_list_tree != NULL) {
-    completion_list = g_string_new(completion_list_tree->str);
-    g_string_free (completion_list_tree,TRUE);
+    result = g_string_free (completion_list_tree, FALSE);
     completion_list_tree=NULL;
-    g_free (buffer);
-    return completion_list;
   }
-  g_free(buffer);
-  return NULL;
+  return result;
 }
-/*
-void autocomplete_php_variables(GtkWidget *scintilla, gint wordStart, gint wordEnd){
-  autocomplete_vars(scintilla,wordStart, wordEnd);
-}
-*/
-static void get_api_line(GtkWidget *scintilla, gint wordStart, gint wordEnd)
+
+static gchar *get_api_line(gchar *buffer)
 {
-  gchar *buffer = NULL;
   gchar *return_value;
   gchar *params;
   gchar *description;
-  gint length;
   gchar *token_line, *copy_line;
 
-  buffer = gtk_scintilla_get_text_range (GTK_SCINTILLA(scintilla), wordStart, wordEnd, &length);
   gchar *value=g_tree_lookup (php_api_tree, buffer);
   if (value){
     token_line = g_strdup (value);
@@ -216,23 +184,17 @@ static void get_api_line(GtkWidget *scintilla, gint wordStart, gint wordEnd)
     description = strtok(NULL, "|");
     /* make calltip */
     gchar *callti=g_strdup_printf ("%s %s %s\n%s",return_value,buffer,params,description);
-    #ifdef DEBUGCALLTIP
-      g_print("CSS::calltip:%s\n",callti);
-    #endif
 
-    /* show calltip */
-    gtk_scintilla_call_tip_show(GTK_SCINTILLA(scintilla), wordStart, callti);
-    g_free(callti);
+    gphpedit_debug_message(DEBUG_CALLTIP, "calltip: %s\n",callti);
+
     g_free(copy_line);	
+    return callti;
   } else {
   /*maybe a custom function*/
-    gchar *result=classbrowser_custom_function_calltip(buffer);
-    if (result){
-      gtk_scintilla_call_tip_show(GTK_SCINTILLA(scintilla), wordStart, result);
-      g_free(result);
-    }
+    gchar *result= classbrowser_custom_function_calltip(GPHPEDIT_CLASSBROWSER(main_window.classbrowser), buffer);
+    return result;
   }
-  g_free (buffer);
+  return NULL;
 }
 
 GSList *list = NULL;
@@ -253,12 +215,11 @@ list=NULL;
 }
 char cache_str[200]={'1'}; /*is this enougth?*/
 gchar *cache_completion;
-static void get_completion_list(GtkWidget *scintilla, gint wordStart, gint wordEnd)
-{
-  gchar *buffer = NULL;
-  gint length;
 
-  buffer = gtk_scintilla_get_text_range (GTK_SCINTILLA(scintilla), wordStart, wordEnd, &length);
+gchar *autocomplete_word(gchar *buffer)
+{
+  GString *result=NULL;
+
   /*  Autocompletion optimization:
   *   we store last text typed and we compare with actual text. If current text typed
   *   refine last search we take that search and remove words that don't match new text
@@ -268,7 +229,6 @@ static void get_completion_list(GtkWidget *scintilla, gint wordStart, gint wordE
     gchar **strings;
     strings = g_strsplit (cache_completion," ",0);
     int i=0;
-    GString *result=NULL;
     result = g_string_new(NULL);
     while (strings[i]!=0){
       if (g_str_has_prefix(strings[i],buffer)){
@@ -278,17 +238,15 @@ static void get_completion_list(GtkWidget *scintilla, gint wordStart, gint wordE
       i++;    
     }
     g_strfreev (strings);
-    gtk_scintilla_autoc_show(GTK_SCINTILLA(scintilla), wordEnd-wordStart, result->str);
     g_free(cache_completion);
     cache_completion=g_strdup(result->str);
-    g_string_free(result,TRUE);
     strncpy(cache_str,buffer,MIN(strlen(buffer),200));
   }else{ 
   g_tree_foreach (php_api_tree, make_completion_list, buffer);
   /* add custom php functions */
-  gchar *custom= classbrowser_add_custom_autocompletion(buffer,list);
+  gchar *custom= classbrowser_add_custom_autocompletion(GPHPEDIT_CLASSBROWSER(main_window.classbrowser), buffer,list);
+  result = g_string_new(custom);
   if (custom){
-    gtk_scintilla_autoc_show(GTK_SCINTILLA(scintilla), wordEnd-wordStart, custom);
     if (cache_completion) g_free(cache_completion);
     cache_completion=g_strdup(custom);
     g_free(custom);
@@ -296,22 +254,15 @@ static void get_completion_list(GtkWidget *scintilla, gint wordStart, gint wordE
   }
   clear_list();
   }
-  g_free(buffer);
+  gphpedit_debug_message(DEBUG_CALLTIP,"Autocomplete list: %s\n", result->str);
+  return g_string_free(result,FALSE);
 }
 
-void autocomplete_word(GtkWidget *scintilla, gint wordStart, gint wordEnd)
-{
-  get_completion_list(scintilla, wordStart, wordEnd);
-}
-
-GString *get_cobol_completion_list(GtkWidget *scintilla, gint wordStart, gint wordEnd)
+gchar *cobol_autocomplete_word(gchar *buffer)
 {
   GString *completion_list;
-  gchar *buffer = NULL;
-  gint length;
+  gchar *result = NULL;
   guint n;
-
-  buffer = gtk_scintilla_get_text_range (GTK_SCINTILLA(scintilla), wordStart, wordEnd, &length);
 
   completion_list=NULL;
 
@@ -328,23 +279,19 @@ GString *get_cobol_completion_list(GtkWidget *scintilla, gint wordStart, gint wo
 
   if (completion_list != NULL) {
     completion_list = g_string_append(completion_list, " ");
+    result = g_string_free(completion_list, FALSE);
   }
-  g_free (buffer);
-  #ifdef DEBUGCALLTIP
-    g_print("Cobol completion list :%s\n",completion_list->str);
-  #endif
-  return completion_list;
+
+  gphpedit_debug_message(DEBUG_CALLTIP,"Autocomplete list: %s\n", result);
+
+  return result;
 }
 
-GString *get_sql_completion_list(GtkWidget *scintilla, gint wordStart, gint wordEnd)
+gchar *sql_autocomplete_word(gchar *buffer)
 {
   GString *completion_list;
-  gchar *buffer = NULL;
-  gint length;
   guint n;
-
-  buffer = gtk_scintilla_get_text_range (GTK_SCINTILLA(scintilla), wordStart, wordEnd, &length);
-
+  gchar *result = NULL;
   completion_list=NULL;
 
   for (n = 0; sql_keywords[n]!=NULL; n++) {
@@ -360,69 +307,32 @@ GString *get_sql_completion_list(GtkWidget *scintilla, gint wordStart, gint word
 
   if (completion_list != NULL) {
     completion_list = g_string_append(completion_list, " ");
+    result = g_string_free(completion_list, FALSE);
   }
-  g_free (buffer);
-  return completion_list;
+
+  gphpedit_debug_message(DEBUG_CALLTIP,"Autocomplete list: %s\n", result);
+
+  return result;
 }
 
-
-
-void css_autocomplete_word(GtkWidget *scintilla, gint wordStart, gint wordEnd)
+/*
+* function to show the tool tip with a short description about the
+* php function. The current word at the cursor is used to find the
+* corresponding function from the api file
+*/
+gchar *show_call_tip(gint type, gchar *prefix)
 {
-  GString *list;
-
-  list = get_css_completion_list(scintilla, wordStart, wordEnd);
-	
-  if (list) {
-    gtk_scintilla_autoc_show(GTK_SCINTILLA(scintilla), wordEnd-wordStart, list->str);
-    g_string_free(list, TRUE);
-  }
-}
-
-void cobol_autocomplete_word(GtkWidget *scintilla, gint wordStart, gint wordEnd)
-{
-  GString *list;
-
-  list = get_cobol_completion_list(scintilla, wordStart, wordEnd);
-
-  if (list) {
-    gtk_scintilla_autoc_show(GTK_SCINTILLA(scintilla), wordEnd-wordStart, list->str);
-    g_string_free(list, TRUE);
-  }
-}
-
-
-void sql_autocomplete_word(GtkWidget *scintilla, gint wordStart, gint wordEnd)
-{
-  GString *list;
-
-  list = get_sql_completion_list(scintilla, wordStart, wordEnd);
-
-  if (list) {
-    gtk_scintilla_autoc_show(GTK_SCINTILLA(scintilla), wordEnd-wordStart, list->str);
-    g_string_free(list, FALSE);
-  }
-}
-
-//function to show the tool tip with a short description about the
-//php function. The current word at the cursor is used to find the
-//corresponding function from the php-gphpedit.api file
-void show_call_tip(GtkWidget *scintilla,gint type, gint pos)
-{
-  gint wordStart;
-  gint wordEnd;
-
-  wordStart = gtk_scintilla_word_start_position(GTK_SCINTILLA(scintilla), pos-1, TRUE);
-  wordEnd = gtk_scintilla_word_end_position(GTK_SCINTILLA(scintilla), pos-1, TRUE);
-
   if (type==TAB_PHP){
-    get_api_line(scintilla, wordStart, wordEnd);
+    return get_api_line(prefix);
   } else {
-    get_css_api_line(scintilla, wordStart, wordEnd);
+    return get_css_api_line(prefix);
   }
 }
 
 void cleanup_calltip(void){
+  
+  gphpedit_debug(DEBUG_CALLTIP);
+
   if (php_api_tree){
      g_tree_destroy(php_api_tree);
   }

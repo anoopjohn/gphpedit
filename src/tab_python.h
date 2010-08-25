@@ -25,8 +25,8 @@
 #ifndef TAB_PYTHON_H
 #define TAB_PYTHON_H
 
-#include "tab.h"
+#include "document.h"
 
-void tab_python_set_lexer(Editor *editor);
+void tab_python_set_lexer(Document *document);
 
 #endif

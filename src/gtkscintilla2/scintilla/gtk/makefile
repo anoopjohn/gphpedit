@@ -7,8 +7,13 @@
 # Also works with ming32-make on Windows.
 
 .SUFFIXES: .cxx .c .o .h .a
+ifdef CLANG
+CC = clang
+CCOMP = clang
+else
 CC = g++
 CCOMP = gcc
+endif
 AR = ar
 RANLIB = touch
 
@@ -24,7 +29,7 @@ vpath %.h ../src ../include
 vpath %.cxx ../src
 
 INCLUDEDIRS=-I ../include -I ../src
-CXXBASEFLAGS=-Wall -Wno-missing-braces -Wno-char-subscripts -pedantic -Os -DGTK -DSCI_LEXER $(INCLUDEDIRS)
+CXXBASEFLAGS=-Wall -Wno-missing-braces -Wno-char-subscripts -pedantic -DGTK -DSCI_LEXER $(INCLUDEDIRS)
 
 ifdef NOTHREADS
 THREADFLAGS=-DG_THREADS_IMPL_NONE

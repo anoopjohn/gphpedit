@@ -94,6 +94,13 @@ AC_SUBST(GCONF_LIBS)
 AC_SUBST(WEBKIT_CFLAGS)
 AC_SUBST(WEBKIT_LIBS)
 
+AC_PATH_PROG([CTAGS_EXUBERANT], [ctags-exuberant], [/usr/bin/ctags-exuberant],
+                   [$PATH$PATH_SEPARATOR/usr/bin$PATH_SEPARATOR]dnl
+     [/usr/sbin$PATH_SEPARATOR/usr/etc$PATH_SEPARATOR/etc])
+if test "$CTAGS_EXUBERANT" != ""; then
+ AC_DEFINE_UNQUOTED(HAVE_CTAGS_EXUBERANT, $ctags-exuberant,	[ctags-exuberant])
+fi
+
 dnl **********************
 dnl  function declaration
 dnl **********************
@@ -134,19 +141,18 @@ AC_CHECK_DIR([php_doc_dir],[index.html],
         [/usr/doc/php-docs-200403/html \
  	/usr/share/doc/php-docs-20050822/html \
 	 /usr/share/doc/php-docs-20050822/html \
-	 /usr/doc/php-docs-4.2.3/html//usr/lib \
+	 /usr/doc/php-docs-4.2.3/html \
 	/usr/share/doc/php-manual/en/html \
+  /usr/share/doc/php/html \
 	/usr/share/doc/php-doc/html ])
  AC_ASK_DIR([php_doc_dir],[index.html])
 if test "$php_doc_dir" != ""; then
  AC_DEFINE_UNQUOTED(PHP_DOC_DIR, "$php_doc_dir",
 	[php-doc directory])
 fi
-dnl define default font and font size
-AC_DEFINE_UNQUOTED(DEFAULT_FONT, "!Sans",[default font])
-AC_DEFINE_UNQUOTED(DEFAULT_FONT_SIZE, 12,[default font size])
+
 dnl define default translate url
-AC_DEFINE_UNQUOTED(TRANSLATE_URL, "https://www.transifex.net/projects/p/gphpedit/c/main/",[default tranlate url])
+AC_DEFINE_UNQUOTED(TRANSLATE_URL, "https://www.transifex.net/projects/p/gphpedit/c/main/",[default translate url])
 
 dnl  ------------------
 dnl | language support |-------------------------------------------------------
@@ -154,6 +160,17 @@ dnl  ------------------
 dnl ================================================================
 dnl Gettext stuff.
 dnl ================================================================
+
+# Generate po/LINGUAS on the fly rather than relying on translators
+# to maintain it manually. This also overcome the problem that Transifex
+# cannot add a language to po/LINGUAS if a new po file is submitted.
+rm -f $srcdir/po/LINGUAS
+for po_file in `ls $srcdir/po/*.po | sort`;
+do
+  lang=`echo "$po_file" | sed "s|.*/po/\(.*\)\.po|\1|g"`
+  echo $lang >> $srcdir/po/LINGUAS
+done
+
 IT_PROG_INTLTOOL([0.40.0])
 AC_SUBST([GETTEXT_PACKAGE], [gphpedit])
 AM_GNU_GETTEXT_VERSION([0.17])
@@ -170,6 +187,24 @@ dnl AM_GLIB_GNU_GETTEXT sets $DATADIRNAME
  AC_DEFINE_UNQUOTED(PACKAGE_LOCALE_DIR, "$PACKAGE_LOCALE_DIR",
 	[The directory in which gphpedit's locale data will be stored])
  AC_MSG_RESULT("$PACKAGE_LOCALE_DIR")
+
+dnl ************************
+dnl   Debug
+dnl ************************
+
+AC_ARG_ENABLE(debug,
+	      AS_HELP_STRING([--enable-debug], [enable compilation of debugging messages]),
+	      [case "${enableval}" in
+	      yes) ENABLE_DEBUG=yes ;;
+	      no) ENABLE_DEBUG=no ;;
+	      *) AC_MSG_ERROR([bad value ${enableval} for --enable-debug]) ;;
+	      esac],
+	      [ENABLE_DEBUG=no])
+if test x$ENABLE_DEBUG = xyes; then
+	AC_DEFINE(DEBUG, 1, [enable compilation of debugging messages])
+	CFLAGS+=" -g -O0"
+fi
+
 
 dnl ************************
 dnl   Locations
@@ -220,8 +255,9 @@ dnl   Feedback
 dnl *******************************
 echo
 echo "-------------------------------------------------"
-echo "gPHPEDIT version: $PACKAGE_VERSION"
-echo "gPHPEDIT prefix: $prefix"
+echo "gPHPEDIT version    : $PACKAGE_VERSION"
+echo "gPHPEDIT prefix     : $prefix"
+echo "Debug               : $ENABLE_DEBUG"
 if test "$php_doc_dir" != ""; then
 echo "PHP-DOC help support: yes"
 else

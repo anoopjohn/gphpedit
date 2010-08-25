@@ -25,10 +25,7 @@
 #ifndef EDIT_TEMPLATE_H
 #define EDIT_TEMPLATE_H
 
-#include "main.h"
-#include "tab_php.h"
-#include "tab_css.h"
-#include "tab_sql.h"
+#include <gtk/gtk.h>
 
 typedef struct
 {

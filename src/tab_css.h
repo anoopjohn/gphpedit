@@ -25,8 +25,8 @@
 #ifndef TAB_CSS_H
 #define TAB_CSS_H
 
-#include "tab.h"
+#include "document.h"
 
-void tab_css_set_lexer(Editor *editor);
+void tab_css_set_lexer(Document *document);
 
 #endif

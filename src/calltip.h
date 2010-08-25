@@ -26,13 +26,13 @@
 #define CALLTIP_H
 
 #include "main.h"
-void register_autoc_images(GtkScintilla *sci);
-void show_call_tip(GtkWidget *scintilla,gint type, gint pos);
-void autocomplete_word(GtkWidget *scintilla, gint wordStart, gint wordEnd);
+
+gchar *show_call_tip(gint type, gchar *prefix);
+gchar *autocomplete_word(gchar *prefix);
 void function_list_prepare(void);
 void css_function_list_prepare(void);
-void css_autocomplete_word(GtkWidget *scintilla, gint wordStart, gint wordEnd);
-void cobol_autocomplete_word(GtkWidget *scintilla, gint wordStart, gint wordEnd);
-void sql_autocomplete_word(GtkWidget *scintilla, gint wordStart, gint wordEnd);
+gchar *css_autocomplete_word(gchar *buffer);
+gchar *cobol_autocomplete_word(gchar *buffer);
+gchar *sql_autocomplete_word(gchar *prefix);
 void cleanup_calltip(void);
 #endif

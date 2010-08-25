@@ -202,10 +202,8 @@ LexerManager *LexerManager::GetInstance() {
 
 /// Delete any LexerManager instance...
 void LexerManager::DeleteInstance() {
-	if (theInstance) {
-		delete theInstance;
-		theInstance = NULL;
-	}
+	delete theInstance;
+	theInstance = NULL;
 }
 
 /// protected constructor - this is a singleton...
@@ -223,6 +221,10 @@ void LexerManager::Load(const char *path) {
 }
 
 void LexerManager::LoadLexerLibrary(const char *module) {
+	for (LexerLibrary *ll = first; ll; ll= ll->next) {
+		if (strcmp(ll->m_sModuleName.c_str(), module) == 0)
+			return;
+	}
 	LexerLibrary *lib = new LexerLibrary(module);
 	if (NULL != first) {
 		last->next = lib;

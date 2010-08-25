@@ -24,43 +24,46 @@
 
 #include "tab_php.h"
 #include "tab_util.h"
-#include "preferences.h"
+#include "preferences_manager.h"
 
-void scintilla_php_set_lexer(GtkScintilla *scintilla, Preferences prefs)
+void scintilla_php_set_lexer(GtkScintilla *scintilla)
 {
-  //g_print("Re-setting Lexer\n");
+  Preferences_Manager *prefmg = preferences_manager_new ();
+
+  gchar *font =NULL;
+  gint size, fore, back;
+  gboolean italic, bold;
+
   gtk_scintilla_clear_document_style (scintilla);
   gtk_scintilla_set_lexer(scintilla, SCLEX_HTML);
   gtk_scintilla_set_style_bits(scintilla, 7);
 
-  gtk_scintilla_style_set_font (scintilla, SCE_HPHP_DEFAULT, prefs.php_default_font);
-  gtk_scintilla_style_set_fore (scintilla, SCE_HPHP_DEFAULT, prefs.php_default_fore);
-  gtk_scintilla_style_set_back (scintilla, SCE_HPHP_DEFAULT, prefs.php_default_back);
-  gtk_scintilla_style_set_size (scintilla, SCE_HPHP_DEFAULT, prefs.php_default_size);
-  gtk_scintilla_style_set_italic (scintilla, SCE_HPHP_DEFAULT, prefs.php_default_italic);
-  gtk_scintilla_style_set_bold (scintilla, SCE_HPHP_DEFAULT, prefs.php_default_bold);
+  get_preferences_manager_style_settings(prefmg, "php_default", &font , &size, &fore, &back, &italic, &bold);
 
-  //gtk_scintilla_set_sel_back (GTK_SCINTILLA(editor->scintilla), TRUE, prefs.set_sel_back);
-  //gtk_scintilla_marker_set_back (GTK_SCINTILLA(editor->scintilla), TRUE, prefs.marker_back);
+  gtk_scintilla_style_set_font (scintilla, SCE_HPHP_DEFAULT, font);
+  gtk_scintilla_style_set_fore (scintilla, SCE_HPHP_DEFAULT, fore);
+  gtk_scintilla_style_set_back (scintilla, SCE_HPHP_DEFAULT, back);
+  gtk_scintilla_style_set_size (scintilla, SCE_HPHP_DEFAULT, size);
+  gtk_scintilla_style_set_italic (scintilla, SCE_HPHP_DEFAULT, italic);
+  gtk_scintilla_style_set_bold (scintilla, SCE_HPHP_DEFAULT, bold);
 
-  gtk_scintilla_style_set_font (scintilla, STYLE_BRACELIGHT, prefs.php_default_font);
+  gtk_scintilla_style_set_font (scintilla, STYLE_BRACELIGHT, font);
   gtk_scintilla_style_set_fore (scintilla, STYLE_BRACELIGHT, 16711680);// Matching bracket
-  if(prefs.higthlightcaretline)
-    gtk_scintilla_style_set_back (scintilla, STYLE_BRACELIGHT, prefs.higthlightcaretline_color);
+  if(get_preferences_manager_higthlight_caret_line (prefmg))
+    gtk_scintilla_style_set_back (scintilla, STYLE_BRACELIGHT, get_preferences_manager_higthlight_caret_line_color(prefmg));
   else
-    gtk_scintilla_style_set_back (scintilla, STYLE_BRACELIGHT, prefs.php_default_back);
-
-  gtk_scintilla_style_set_size (scintilla, STYLE_BRACELIGHT, prefs.php_default_size);
-  gtk_scintilla_style_set_italic (scintilla, STYLE_BRACELIGHT, prefs.php_default_italic);
+    gtk_scintilla_style_set_back (scintilla, STYLE_BRACELIGHT, back);
+  gtk_scintilla_style_set_size (scintilla, STYLE_BRACELIGHT, size);
+  gtk_scintilla_style_set_italic (scintilla, STYLE_BRACELIGHT, italic);
   gtk_scintilla_style_set_bold (scintilla, STYLE_BRACELIGHT, TRUE);
-  gtk_scintilla_style_set_font (scintilla, STYLE_BRACEBAD, prefs.php_default_font);
+  gtk_scintilla_style_set_font (scintilla, STYLE_BRACEBAD, font);
   gtk_scintilla_style_set_fore (scintilla, STYLE_BRACEBAD, 255);
-  if(prefs.higthlightcaretline)
-    gtk_scintilla_style_set_back (scintilla, STYLE_BRACEBAD, prefs.higthlightcaretline_color);
+  if(get_preferences_manager_higthlight_caret_line (prefmg))
+    gtk_scintilla_style_set_back (scintilla, STYLE_BRACEBAD, get_preferences_manager_higthlight_caret_line_color(prefmg));
   else
-    gtk_scintilla_style_set_back (scintilla, STYLE_BRACEBAD, prefs.php_default_back);
-  gtk_scintilla_style_set_size (scintilla, STYLE_BRACEBAD, prefs.php_default_size);
-  gtk_scintilla_style_set_italic (scintilla, STYLE_BRACEBAD, prefs.php_default_italic);
+    gtk_scintilla_style_set_back (scintilla, STYLE_BRACEBAD, back);
+  gtk_scintilla_style_set_size (scintilla, STYLE_BRACEBAD, size);
+  gtk_scintilla_style_set_italic (scintilla, STYLE_BRACEBAD, italic);
   gtk_scintilla_style_set_bold (scintilla, STYLE_BRACEBAD, TRUE);
   
   gtk_scintilla_set_keywords(scintilla, 0, "__construct __destruct a abbr acronym address applet area b base basefont bdo big blockquote body br button caption center cite code col colgroup dd del dfn dir div dl dt em fieldset font form frame frameset h1 h2 h3 h4 h5 h6 head hr html i iframe img input ins isindex kbd label legend li link map menu meta noframes noscript object ol optgroup option p param pre q s samp script select small span strike strong style sub sup table tbody td textarea tfoot th thead title tr tt u ul var xml xmlns abbr accept-charset accept accesskey action align alink alt archive axis background bgcolor border cellpadding cellspacing char charoff charset checked cite class classid clear codebase codetype color cols colspan compact content coords data datafld dataformatas datapagesize datasrc datetime declare defer dir disabled enctype event face for frame frameborder headers height href hreflang hspace http-equiv id ismap label lang language leftmargin link longdesc marginwidth marginheight maxlength media method multiple name nohref noresize noshade nowrap object onblur onchange onclick ondblclick onfocus onkeydown onkeypress onkeyup onload onmousedown onmousemove onmouseover onmouseout onmouseup onreset onselect onsubmit onunload profile prompt readonly rel rev rows rowspan rules scheme scope selected shape size span src standby start style summary tabindex target text title topmargin type usemap valign value valuetype version vlink vspace width text password checkbox radio submit reset file hidden image public !doctype article aside calendar canvas card command commandset datagrid datatree footer gauge header m menubar menulabel nav progress section switch tabbox");
@@ -72,207 +75,269 @@ void scintilla_php_set_lexer(GtkScintilla *scintilla, Preferences prefs)
       <rule type="0" expr="*.htm*"/>
       <rule type="0" expr="*.php*"/>
     </rules>*/
-  gtk_scintilla_style_set_back (scintilla, SCE_H_TAG, prefs.html_tag_back);
-  gtk_scintilla_style_set_font (scintilla, SCE_H_TAG, prefs.html_tag_font);
-  gtk_scintilla_style_set_fore (scintilla, SCE_H_TAG, prefs.html_tag_fore);
-  gtk_scintilla_style_set_size (scintilla, SCE_H_TAG, prefs.html_tag_size);
 
-  gtk_scintilla_style_set_italic (scintilla, SCE_H_TAG, prefs.html_tag_italic);
-  gtk_scintilla_style_set_bold (scintilla, SCE_H_TAG, prefs.html_tag_bold);
+  get_preferences_manager_style_settings(prefmg, "html_tag", &font , &size, &fore, &back, &italic, &bold);
+  gtk_scintilla_style_set_back (scintilla, SCE_H_TAG, back);
+  gtk_scintilla_style_set_font (scintilla, SCE_H_TAG, font);
+  gtk_scintilla_style_set_fore (scintilla, SCE_H_TAG, fore);
+  gtk_scintilla_style_set_size (scintilla, SCE_H_TAG, size);
+  gtk_scintilla_style_set_italic (scintilla, SCE_H_TAG, italic);
+  gtk_scintilla_style_set_bold (scintilla, SCE_H_TAG, bold);
   
-  gtk_scintilla_style_set_fore (scintilla, SCE_H_TAGUNKNOWN, prefs.html_tag_unknown_fore);
-  gtk_scintilla_style_set_font (scintilla, SCE_H_TAGUNKNOWN, prefs.html_tag_unknown_font);
-  gtk_scintilla_style_set_back (scintilla, SCE_H_TAGUNKNOWN, prefs.html_tag_unknown_back);
-  gtk_scintilla_style_set_size (scintilla, SCE_H_TAGUNKNOWN, prefs.html_tag_unknown_size);
-  gtk_scintilla_style_set_italic (scintilla, SCE_H_TAGUNKNOWN, prefs.html_tag_unknown_italic);
-  gtk_scintilla_style_set_bold (scintilla, SCE_H_TAGUNKNOWN, prefs.html_tag_unknown_bold);
+  get_preferences_manager_style_settings(prefmg, "html_tag_unknown", &font , &size, &fore, &back, &italic, &bold);
+
+  gtk_scintilla_style_set_fore (scintilla, SCE_H_TAGUNKNOWN, fore);
+  gtk_scintilla_style_set_font (scintilla, SCE_H_TAGUNKNOWN, font);
+  gtk_scintilla_style_set_back (scintilla, SCE_H_TAGUNKNOWN, back);
+  gtk_scintilla_style_set_size (scintilla, SCE_H_TAGUNKNOWN, size);
+  gtk_scintilla_style_set_italic (scintilla, SCE_H_TAGUNKNOWN, italic);
+  gtk_scintilla_style_set_bold (scintilla, SCE_H_TAGUNKNOWN, bold);
   
-  gtk_scintilla_style_set_back (scintilla, SCE_H_ATTRIBUTE, prefs.html_attribute_back);
-  gtk_scintilla_style_set_font (scintilla, SCE_H_ATTRIBUTE, prefs.html_attribute_font);
-  gtk_scintilla_style_set_fore (scintilla, SCE_H_ATTRIBUTE, prefs.html_attribute_fore);
-  gtk_scintilla_style_set_size (scintilla, SCE_H_ATTRIBUTE, prefs.html_attribute_size);
-  gtk_scintilla_style_set_italic (scintilla, SCE_H_ATTRIBUTE, prefs.html_attribute_italic);
-  gtk_scintilla_style_set_bold (scintilla, SCE_H_ATTRIBUTE, prefs.html_attribute_bold);
+  get_preferences_manager_style_settings(prefmg, "html_attribute", &font , &size, &fore, &back, &italic, &bold);
 
-  gtk_scintilla_style_set_fore (scintilla, SCE_H_ATTRIBUTEUNKNOWN, prefs.html_attribute_unknown_fore);
-  gtk_scintilla_style_set_font (scintilla, SCE_H_ATTRIBUTEUNKNOWN, prefs.html_attribute_unknown_font);
-  gtk_scintilla_style_set_back (scintilla, SCE_H_ATTRIBUTEUNKNOWN, prefs.html_attribute_unknown_back);
-  gtk_scintilla_style_set_size (scintilla, SCE_H_ATTRIBUTEUNKNOWN, prefs.html_attribute_unknown_size);
-  gtk_scintilla_style_set_italic (scintilla, SCE_H_ATTRIBUTEUNKNOWN, prefs.html_attribute_unknown_italic);
-  gtk_scintilla_style_set_bold (scintilla, SCE_H_ATTRIBUTEUNKNOWN, prefs.html_attribute_unknown_bold);
+  gtk_scintilla_style_set_back (scintilla, SCE_H_ATTRIBUTE, back);
+  gtk_scintilla_style_set_font (scintilla, SCE_H_ATTRIBUTE, font);
+  gtk_scintilla_style_set_fore (scintilla, SCE_H_ATTRIBUTE, fore);
+  gtk_scintilla_style_set_size (scintilla, SCE_H_ATTRIBUTE, size);
+  gtk_scintilla_style_set_italic (scintilla, SCE_H_ATTRIBUTE, italic);
+  gtk_scintilla_style_set_bold (scintilla, SCE_H_ATTRIBUTE, bold);
 
-  gtk_scintilla_style_set_fore (scintilla, SCE_H_NUMBER, prefs.html_number_fore);
-  gtk_scintilla_style_set_font (scintilla, SCE_H_NUMBER, prefs.html_number_font);
-  gtk_scintilla_style_set_back (scintilla, SCE_H_NUMBER, prefs.html_number_back);
-  gtk_scintilla_style_set_size (scintilla, SCE_H_NUMBER, prefs.html_number_size);
-  gtk_scintilla_style_set_italic (scintilla, SCE_H_NUMBER, prefs.html_number_italic);
-  gtk_scintilla_style_set_bold (scintilla, SCE_H_NUMBER, prefs.html_number_bold);
+  get_preferences_manager_style_settings(prefmg, "html_attribute_unknown", &font , &size, &fore, &back, &italic, &bold);
 
-  gtk_scintilla_style_set_fore (scintilla, SCE_H_DOUBLESTRING, prefs.html_double_string_fore);
-  gtk_scintilla_style_set_font (scintilla, SCE_H_DOUBLESTRING, prefs.html_double_string_font);
-  gtk_scintilla_style_set_back (scintilla, SCE_H_DOUBLESTRING, prefs.html_double_string_back);
-  gtk_scintilla_style_set_size (scintilla, SCE_H_DOUBLESTRING, prefs.html_double_string_size);
-  gtk_scintilla_style_set_italic (scintilla, SCE_H_DOUBLESTRING, prefs.html_double_string_italic);
-  gtk_scintilla_style_set_bold (scintilla, SCE_H_DOUBLESTRING, prefs.html_double_string_bold);
+  gtk_scintilla_style_set_fore (scintilla, SCE_H_ATTRIBUTEUNKNOWN, fore);
+  gtk_scintilla_style_set_font (scintilla, SCE_H_ATTRIBUTEUNKNOWN, font);
+  gtk_scintilla_style_set_back (scintilla, SCE_H_ATTRIBUTEUNKNOWN, back);
+  gtk_scintilla_style_set_size (scintilla, SCE_H_ATTRIBUTEUNKNOWN, size);
+  gtk_scintilla_style_set_italic (scintilla, SCE_H_ATTRIBUTEUNKNOWN, italic);
+  gtk_scintilla_style_set_bold (scintilla, SCE_H_ATTRIBUTEUNKNOWN, bold);
 
-  gtk_scintilla_style_set_fore (scintilla, SCE_H_SINGLESTRING, prefs.html_single_string_fore);
-  gtk_scintilla_style_set_font (scintilla, SCE_H_SINGLESTRING, prefs.html_single_string_font);
-  gtk_scintilla_style_set_back (scintilla, SCE_H_SINGLESTRING, prefs.html_single_string_back);
-  gtk_scintilla_style_set_size (scintilla, SCE_H_SINGLESTRING, prefs.html_single_string_size);
-  gtk_scintilla_style_set_italic (scintilla, SCE_H_SINGLESTRING, prefs.html_single_string_italic);
-  gtk_scintilla_style_set_bold (scintilla, SCE_H_SINGLESTRING, prefs.html_single_string_bold);
+  get_preferences_manager_style_settings(prefmg, "html_number", &font , &size, &fore, &back, &italic, &bold);
 
-  gtk_scintilla_style_set_fore (scintilla, SCE_H_COMMENT, prefs.html_comment_fore);
-  gtk_scintilla_style_set_font (scintilla, SCE_H_COMMENT, prefs.html_comment_font);
-  gtk_scintilla_style_set_back (scintilla, SCE_H_COMMENT, prefs.html_comment_back);
-  gtk_scintilla_style_set_size (scintilla, SCE_H_COMMENT, prefs.html_comment_size);
-  gtk_scintilla_style_set_italic (scintilla, SCE_H_COMMENT, prefs.html_comment_italic);
-  gtk_scintilla_style_set_bold (scintilla, SCE_H_COMMENT, prefs.html_comment_bold);
+  gtk_scintilla_style_set_fore (scintilla, SCE_H_NUMBER, fore);
+  gtk_scintilla_style_set_font (scintilla, SCE_H_NUMBER, font);
+  gtk_scintilla_style_set_back (scintilla, SCE_H_NUMBER, back);
+  gtk_scintilla_style_set_size (scintilla, SCE_H_NUMBER, size);
+  gtk_scintilla_style_set_italic (scintilla, SCE_H_NUMBER, italic);
+  gtk_scintilla_style_set_bold (scintilla, SCE_H_NUMBER, bold);
 
-  gtk_scintilla_style_set_fore (scintilla, SCE_H_ENTITY, prefs.html_entity_fore);
-  gtk_scintilla_style_set_font (scintilla, SCE_H_ENTITY, prefs.html_entity_font);
-  gtk_scintilla_style_set_back (scintilla, SCE_H_ENTITY, prefs.html_entity_back);
-  gtk_scintilla_style_set_size (scintilla, SCE_H_ENTITY, prefs.html_entity_size);
-  gtk_scintilla_style_set_italic (scintilla, SCE_H_ENTITY, prefs.html_entity_italic);
-  gtk_scintilla_style_set_bold (scintilla, SCE_H_ENTITY, prefs.html_entity_bold);
+  get_preferences_manager_style_settings(prefmg, "html_double_string", &font , &size, &fore, &back, &italic, &bold);
 
-  gtk_scintilla_style_set_font (scintilla, SCE_H_SCRIPT, prefs.html_script_font);
-  gtk_scintilla_style_set_fore (scintilla, SCE_H_SCRIPT, prefs.html_script_fore);
-  gtk_scintilla_style_set_back (scintilla, SCE_H_SCRIPT, prefs.html_script_back);
-  gtk_scintilla_style_set_size (scintilla, SCE_H_SCRIPT, prefs.html_script_size);
-  gtk_scintilla_style_set_italic (scintilla, SCE_H_SCRIPT, prefs.html_script_italic);
-  gtk_scintilla_style_set_bold (scintilla, SCE_H_SCRIPT, prefs.html_script_bold);
+  gtk_scintilla_style_set_fore (scintilla, SCE_H_DOUBLESTRING, fore);
+  gtk_scintilla_style_set_font (scintilla, SCE_H_DOUBLESTRING, font);
+  gtk_scintilla_style_set_back (scintilla, SCE_H_DOUBLESTRING, back);
+  gtk_scintilla_style_set_size (scintilla, SCE_H_DOUBLESTRING, size);
+  gtk_scintilla_style_set_italic (scintilla, SCE_H_DOUBLESTRING, italic);
+  gtk_scintilla_style_set_bold (scintilla, SCE_H_DOUBLESTRING, bold);
 
-  gtk_scintilla_style_set_font (scintilla, SCE_H_QUESTION, prefs.html_question_font);
-  gtk_scintilla_style_set_fore (scintilla, SCE_H_QUESTION, prefs.html_question_fore);
-  gtk_scintilla_style_set_back (scintilla, SCE_H_QUESTION, prefs.html_question_back);
-  gtk_scintilla_style_set_size (scintilla, SCE_H_QUESTION, prefs.html_question_size);
-  gtk_scintilla_style_set_italic (scintilla, SCE_H_QUESTION, prefs.html_question_italic);
-  gtk_scintilla_style_set_bold (scintilla, SCE_H_QUESTION, prefs.html_question_bold);
+  get_preferences_manager_style_settings(prefmg, "html_single_string", &font , &size, &fore, &back, &italic, &bold);
 
-  gtk_scintilla_style_set_fore (scintilla, SCE_H_VALUE, prefs.html_value_fore);
-  gtk_scintilla_style_set_font (scintilla, SCE_H_VALUE, prefs.html_value_font);
-  gtk_scintilla_style_set_back (scintilla, SCE_H_VALUE, prefs.html_value_back);
-  gtk_scintilla_style_set_size (scintilla, SCE_H_VALUE, prefs.html_value_size);
-  gtk_scintilla_style_set_italic (scintilla, SCE_H_VALUE, prefs.html_value_italic);
-  gtk_scintilla_style_set_bold (scintilla, SCE_H_VALUE, prefs.html_value_bold);
+  gtk_scintilla_style_set_fore (scintilla, SCE_H_SINGLESTRING, fore);
+  gtk_scintilla_style_set_font (scintilla, SCE_H_SINGLESTRING, font);
+  gtk_scintilla_style_set_back (scintilla, SCE_H_SINGLESTRING, back);
+  gtk_scintilla_style_set_size (scintilla, SCE_H_SINGLESTRING, size);
+  gtk_scintilla_style_set_italic (scintilla, SCE_H_SINGLESTRING, italic);
+  gtk_scintilla_style_set_bold (scintilla, SCE_H_SINGLESTRING, bold);
+
+  get_preferences_manager_style_settings(prefmg, "html_comment", &font , &size, &fore, &back, &italic, &bold);
+
+  gtk_scintilla_style_set_fore (scintilla, SCE_H_COMMENT, fore);
+  gtk_scintilla_style_set_font (scintilla, SCE_H_COMMENT, font);
+  gtk_scintilla_style_set_back (scintilla, SCE_H_COMMENT, back);
+  gtk_scintilla_style_set_size (scintilla, SCE_H_COMMENT, size);
+  gtk_scintilla_style_set_italic (scintilla, SCE_H_COMMENT, italic);
+  gtk_scintilla_style_set_bold (scintilla, SCE_H_COMMENT, bold);
+
+  get_preferences_manager_style_settings(prefmg, "html_entity", &font , &size, &fore, &back, &italic, &bold);
+
+  gtk_scintilla_style_set_fore (scintilla, SCE_H_ENTITY, fore);
+  gtk_scintilla_style_set_font (scintilla, SCE_H_ENTITY, font);
+  gtk_scintilla_style_set_back (scintilla, SCE_H_ENTITY, back);
+  gtk_scintilla_style_set_size (scintilla, SCE_H_ENTITY, size);
+  gtk_scintilla_style_set_italic (scintilla, SCE_H_ENTITY, italic);
+  gtk_scintilla_style_set_bold (scintilla, SCE_H_ENTITY, bold);
+
+  get_preferences_manager_style_settings(prefmg, "html_script", &font , &size, &fore, &back, &italic, &bold);
+
+  gtk_scintilla_style_set_font (scintilla, SCE_H_SCRIPT, font);
+  gtk_scintilla_style_set_fore (scintilla, SCE_H_SCRIPT, fore);
+  gtk_scintilla_style_set_back (scintilla, SCE_H_SCRIPT, back);
+  gtk_scintilla_style_set_size (scintilla, SCE_H_SCRIPT, size);
+  gtk_scintilla_style_set_italic (scintilla, SCE_H_SCRIPT, italic);
+  gtk_scintilla_style_set_bold (scintilla, SCE_H_SCRIPT, bold);
+
+  get_preferences_manager_style_settings(prefmg, "html_question", &font , &size, &fore, &back, &italic, &bold);
+
+  gtk_scintilla_style_set_font (scintilla, SCE_H_QUESTION, font);
+  gtk_scintilla_style_set_fore (scintilla, SCE_H_QUESTION, fore);
+  gtk_scintilla_style_set_back (scintilla, SCE_H_QUESTION, back);
+  gtk_scintilla_style_set_size (scintilla, SCE_H_QUESTION, size);
+  gtk_scintilla_style_set_italic (scintilla, SCE_H_QUESTION, italic);
+  gtk_scintilla_style_set_bold (scintilla, SCE_H_QUESTION, bold);
+
+  get_preferences_manager_style_settings(prefmg, "html_value", &font , &size, &fore, &back, &italic, &bold);
+
+  gtk_scintilla_style_set_fore (scintilla, SCE_H_VALUE, fore);
+  gtk_scintilla_style_set_font (scintilla, SCE_H_VALUE, font);
+  gtk_scintilla_style_set_back (scintilla, SCE_H_VALUE, back);
+  gtk_scintilla_style_set_size (scintilla, SCE_H_VALUE, size);
+  gtk_scintilla_style_set_italic (scintilla, SCE_H_VALUE, italic);
+  gtk_scintilla_style_set_bold (scintilla, SCE_H_VALUE, bold);
   
-  gtk_scintilla_style_set_fore (scintilla, SCE_HJ_COMMENT, prefs.javascript_comment_fore);
-  gtk_scintilla_style_set_font (scintilla, SCE_HJ_COMMENT, prefs.javascript_comment_font);
-  gtk_scintilla_style_set_back (scintilla, SCE_HJ_COMMENT, prefs.javascript_comment_back);
-  gtk_scintilla_style_set_size (scintilla, SCE_HJ_COMMENT, prefs.javascript_comment_size);
-  gtk_scintilla_style_set_italic (scintilla, SCE_HJ_COMMENT, prefs.javascript_comment_italic);
-  gtk_scintilla_style_set_bold (scintilla, SCE_HJ_COMMENT, prefs.javascript_comment_bold);
-  
-  gtk_scintilla_style_set_fore (scintilla, SCE_HJ_COMMENTLINE, prefs.javascript_comment_line_fore);
-  gtk_scintilla_style_set_font (scintilla, SCE_HJ_COMMENTLINE, prefs.javascript_comment_line_font);
-  gtk_scintilla_style_set_back (scintilla, SCE_HJ_COMMENTLINE, prefs.javascript_comment_line_back);
-  gtk_scintilla_style_set_size (scintilla, SCE_HJ_COMMENTLINE, prefs.javascript_comment_line_size);
-  gtk_scintilla_style_set_italic (scintilla, SCE_HJ_COMMENTLINE, prefs.javascript_comment_line_italic);
-  gtk_scintilla_style_set_bold (scintilla, SCE_HJ_COMMENTLINE, prefs.javascript_comment_line_bold);
-  
-  gtk_scintilla_style_set_fore (scintilla, SCE_HJ_COMMENTDOC, prefs.javascript_comment_doc_fore);
-  gtk_scintilla_style_set_font (scintilla, SCE_HJ_COMMENTDOC, prefs.javascript_comment_doc_font);
-  gtk_scintilla_style_set_back (scintilla, SCE_HJ_COMMENTDOC, prefs.javascript_comment_doc_back);
-  gtk_scintilla_style_set_size (scintilla, SCE_HJ_COMMENTDOC, prefs.javascript_comment_doc_size);
-  gtk_scintilla_style_set_italic (scintilla, SCE_HJ_COMMENTDOC, prefs.javascript_comment_doc_italic);
-  gtk_scintilla_style_set_bold (scintilla, SCE_HJ_COMMENTDOC, prefs.javascript_comment_doc_bold);
-  
-  gtk_scintilla_style_set_fore (scintilla, SCE_HJ_WORD, prefs.javascript_word_fore);
-  gtk_scintilla_style_set_font (scintilla, SCE_HJ_WORD, prefs.javascript_word_font);
-  gtk_scintilla_style_set_back (scintilla, SCE_HJ_WORD, prefs.javascript_word_back);
-  gtk_scintilla_style_set_size (scintilla, SCE_HJ_WORD, prefs.javascript_word_size);
-  gtk_scintilla_style_set_italic (scintilla, SCE_HJ_WORD, prefs.javascript_word_italic);
-  gtk_scintilla_style_set_bold (scintilla, SCE_HJ_WORD, prefs.javascript_word_bold);
-  
-  gtk_scintilla_style_set_font (scintilla, SCE_HJ_KEYWORD, prefs.javascript_keyword_font);
-  gtk_scintilla_style_set_fore (scintilla, SCE_HJ_KEYWORD, prefs.javascript_keyword_fore);
-  gtk_scintilla_style_set_back (scintilla, SCE_HJ_KEYWORD, prefs.javascript_keyword_back);
-  gtk_scintilla_style_set_size (scintilla, SCE_HJ_KEYWORD, prefs.javascript_keyword_size);
-  gtk_scintilla_style_set_italic (scintilla, SCE_HJ_KEYWORD, prefs.javascript_keyword_italic);
-  gtk_scintilla_style_set_bold (scintilla, SCE_HJ_KEYWORD, prefs.javascript_keyword_bold);
-  
-  gtk_scintilla_style_set_fore (scintilla, SCE_HJ_DOUBLESTRING, prefs.javascript_doublestring_fore);
-  gtk_scintilla_style_set_font (scintilla, SCE_HJ_DOUBLESTRING, prefs.javascript_doublestring_font);
-  gtk_scintilla_style_set_back (scintilla, SCE_HJ_DOUBLESTRING, prefs.javascript_doublestring_back);
-  gtk_scintilla_style_set_size (scintilla, SCE_HJ_DOUBLESTRING, prefs.javascript_doublestring_size);
-  gtk_scintilla_style_set_italic (scintilla, SCE_HJ_DOUBLESTRING, prefs.javascript_doublestring_italic);
-  gtk_scintilla_style_set_bold (scintilla, SCE_HJ_DOUBLESTRING, prefs.javascript_doublestring_bold);
-  
-  gtk_scintilla_style_set_fore (scintilla, SCE_HJ_SINGLESTRING, prefs.javascript_singlestring_fore);
-  gtk_scintilla_style_set_font (scintilla, SCE_HJ_SINGLESTRING, prefs.javascript_singlestring_font);
-  gtk_scintilla_style_set_back (scintilla, SCE_HJ_SINGLESTRING, prefs.javascript_singlestring_back);
-  gtk_scintilla_style_set_size (scintilla, SCE_HJ_SINGLESTRING, prefs.javascript_singlestring_size);
-  gtk_scintilla_style_set_italic (scintilla, SCE_HJ_SINGLESTRING, prefs.javascript_singlestring_italic);
-  gtk_scintilla_style_set_bold (scintilla, SCE_HJ_SINGLESTRING, prefs.javascript_singlestring_bold);
-  
-  gtk_scintilla_style_set_font (scintilla, SCE_HJ_SYMBOLS, prefs.javascript_symbols_font);
-  gtk_scintilla_style_set_fore (scintilla, SCE_HJ_SYMBOLS, prefs.javascript_symbols_fore);
-  gtk_scintilla_style_set_back (scintilla, SCE_HJ_SYMBOLS, prefs.javascript_symbols_back);
-  gtk_scintilla_style_set_size (scintilla, SCE_HJ_SYMBOLS, prefs.javascript_symbols_size);
-  gtk_scintilla_style_set_italic (scintilla, SCE_HJ_SYMBOLS, prefs.javascript_symbols_italic);
-  gtk_scintilla_style_set_bold (scintilla, SCE_HJ_SYMBOLS, prefs.javascript_symbols_bold);
-  
-  
-  gtk_scintilla_style_set_fore (scintilla, SCE_HPHP_HSTRING, prefs.php_hstring_fore);
-  gtk_scintilla_style_set_font (scintilla, SCE_HPHP_HSTRING, prefs.php_hstring_font);
-  gtk_scintilla_style_set_back (scintilla, SCE_HPHP_HSTRING, prefs.php_hstring_back);
-  gtk_scintilla_style_set_size (scintilla, SCE_HPHP_HSTRING, prefs.php_hstring_size);
-  gtk_scintilla_style_set_italic (scintilla, SCE_HPHP_HSTRING, prefs.php_hstring_italic);
-  gtk_scintilla_style_set_bold (scintilla, SCE_HPHP_HSTRING, prefs.php_hstring_bold);
-  
-  gtk_scintilla_style_set_fore (scintilla, SCE_HPHP_SIMPLESTRING, prefs.php_simplestring_fore);
-  gtk_scintilla_style_set_font (scintilla, SCE_HPHP_SIMPLESTRING, prefs.php_simplestring_font);
-  gtk_scintilla_style_set_back (scintilla, SCE_HPHP_SIMPLESTRING, prefs.php_simplestring_back);
-  gtk_scintilla_style_set_size (scintilla, SCE_HPHP_SIMPLESTRING, prefs.php_simplestring_size);
-  gtk_scintilla_style_set_italic (scintilla, SCE_HPHP_SIMPLESTRING, prefs.php_simplestring_italic);
-  gtk_scintilla_style_set_bold (scintilla, SCE_HPHP_SIMPLESTRING, prefs.php_simplestring_bold);
+  get_preferences_manager_style_settings(prefmg, "javascript_comment", &font , &size, &fore, &back, &italic, &bold);
 
-  gtk_scintilla_style_set_font (scintilla, SCE_HPHP_WORD, prefs.php_word_font);
-  gtk_scintilla_style_set_fore (scintilla, SCE_HPHP_WORD, prefs.php_word_fore);
-  gtk_scintilla_style_set_back (scintilla, SCE_HPHP_WORD, prefs.php_word_back);
-  gtk_scintilla_style_set_size (scintilla, SCE_HPHP_WORD, prefs.php_word_size);
-  gtk_scintilla_style_set_italic (scintilla, SCE_HPHP_WORD, prefs.php_word_italic);
-  gtk_scintilla_style_set_bold (scintilla, SCE_HPHP_WORD, prefs.php_word_bold);
+  gtk_scintilla_style_set_fore (scintilla, SCE_HJ_COMMENT, fore);
+  gtk_scintilla_style_set_font (scintilla, SCE_HJ_COMMENT, font);
+  gtk_scintilla_style_set_back (scintilla, SCE_HJ_COMMENT, back);
+  gtk_scintilla_style_set_size (scintilla, SCE_HJ_COMMENT, size);
+  gtk_scintilla_style_set_italic (scintilla, SCE_HJ_COMMENT, italic);
+  gtk_scintilla_style_set_bold (scintilla, SCE_HJ_COMMENT, bold);
+  
+  get_preferences_manager_style_settings(prefmg, "javascript_comment_line", &font , &size, &fore, &back, &italic, &bold);
 
-  gtk_scintilla_style_set_fore (scintilla, SCE_HPHP_NUMBER, prefs.php_number_fore);
-  gtk_scintilla_style_set_font (scintilla, SCE_HPHP_NUMBER, prefs.php_number_font);
-  gtk_scintilla_style_set_back (scintilla, SCE_HPHP_NUMBER, prefs.php_number_back);
-  gtk_scintilla_style_set_size (scintilla, SCE_HPHP_NUMBER, prefs.php_number_size);
-  gtk_scintilla_style_set_italic (scintilla, SCE_HPHP_NUMBER, prefs.php_number_italic);
-  gtk_scintilla_style_set_bold (scintilla, SCE_HPHP_NUMBER, prefs.php_number_bold);
+  gtk_scintilla_style_set_fore (scintilla, SCE_HJ_COMMENTLINE, fore);
+  gtk_scintilla_style_set_font (scintilla, SCE_HJ_COMMENTLINE, font);
+  gtk_scintilla_style_set_back (scintilla, SCE_HJ_COMMENTLINE, back);
+  gtk_scintilla_style_set_size (scintilla, SCE_HJ_COMMENTLINE, size);
+  gtk_scintilla_style_set_italic (scintilla, SCE_HJ_COMMENTLINE, italic);
+  gtk_scintilla_style_set_bold (scintilla, SCE_HJ_COMMENTLINE, bold);
+  
+  get_preferences_manager_style_settings(prefmg, "javascript_comment_doc", &font , &size, &fore, &back, &italic, &bold);
 
-  gtk_scintilla_style_set_fore (scintilla, SCE_HPHP_VARIABLE, prefs.php_variable_fore);
-  gtk_scintilla_style_set_font (scintilla, SCE_HPHP_VARIABLE, prefs.php_variable_font);
-  gtk_scintilla_style_set_back (scintilla, SCE_HPHP_VARIABLE, prefs.php_variable_back);
-  gtk_scintilla_style_set_size (scintilla, SCE_HPHP_VARIABLE, prefs.php_variable_size);
-  gtk_scintilla_style_set_italic (scintilla, SCE_HPHP_VARIABLE, prefs.php_variable_italic);
-  gtk_scintilla_style_set_bold (scintilla, SCE_HPHP_VARIABLE, prefs.php_variable_bold);
+  gtk_scintilla_style_set_fore (scintilla, SCE_HJ_COMMENTDOC, fore);
+  gtk_scintilla_style_set_font (scintilla, SCE_HJ_COMMENTDOC, font);
+  gtk_scintilla_style_set_back (scintilla, SCE_HJ_COMMENTDOC, back);
+  gtk_scintilla_style_set_size (scintilla, SCE_HJ_COMMENTDOC, size);
+  gtk_scintilla_style_set_italic (scintilla, SCE_HJ_COMMENTDOC, italic);
+  gtk_scintilla_style_set_bold (scintilla, SCE_HJ_COMMENTDOC, bold);
+  
+  get_preferences_manager_style_settings(prefmg, "javascript_word", &font , &size, &fore, &back, &italic, &bold);
 
-  gtk_scintilla_style_set_fore (scintilla, SCE_HPHP_COMMENT, prefs.php_comment_fore);
-  gtk_scintilla_style_set_font (scintilla, SCE_HPHP_COMMENT, prefs.php_comment_font);
-  gtk_scintilla_style_set_back (scintilla, SCE_HPHP_COMMENT, prefs.php_comment_back);
-  gtk_scintilla_style_set_size (scintilla, SCE_HPHP_COMMENT, prefs.php_comment_size);
-  gtk_scintilla_style_set_italic (scintilla, SCE_HPHP_COMMENT, prefs.php_comment_italic);
-  gtk_scintilla_style_set_bold (scintilla, SCE_HPHP_COMMENT, prefs.php_comment_bold);
+  gtk_scintilla_style_set_fore (scintilla, SCE_HJ_WORD, fore);
+  gtk_scintilla_style_set_font (scintilla, SCE_HJ_WORD, font);
+  gtk_scintilla_style_set_back (scintilla, SCE_HJ_WORD, back);
+  gtk_scintilla_style_set_size (scintilla, SCE_HJ_WORD, size);
+  gtk_scintilla_style_set_italic (scintilla, SCE_HJ_WORD, italic);
+  gtk_scintilla_style_set_bold (scintilla, SCE_HJ_WORD, bold);
+  
+  get_preferences_manager_style_settings(prefmg, "javascript_keyword", &font , &size, &fore, &back, &italic, &bold);
 
-  gtk_scintilla_style_set_fore (scintilla, SCE_HPHP_COMMENTLINE, prefs.php_comment_line_fore);
-  gtk_scintilla_style_set_font (scintilla, SCE_HPHP_COMMENTLINE, prefs.php_comment_line_font);
-  gtk_scintilla_style_set_back (scintilla, SCE_HPHP_COMMENTLINE, prefs.php_comment_line_back);
-  gtk_scintilla_style_set_size (scintilla, SCE_HPHP_COMMENTLINE, prefs.php_comment_line_size);
-  gtk_scintilla_style_set_italic (scintilla, SCE_HPHP_COMMENTLINE, prefs.php_comment_line_italic);
-  gtk_scintilla_style_set_bold (scintilla, SCE_HPHP_COMMENTLINE, prefs.php_comment_line_bold);
+  gtk_scintilla_style_set_font (scintilla, SCE_HJ_KEYWORD, font);
+  gtk_scintilla_style_set_fore (scintilla, SCE_HJ_KEYWORD, fore);
+  gtk_scintilla_style_set_back (scintilla, SCE_HJ_KEYWORD, back);
+  gtk_scintilla_style_set_size (scintilla, SCE_HJ_KEYWORD, size);
+  gtk_scintilla_style_set_italic (scintilla, SCE_HJ_KEYWORD, italic);
+  gtk_scintilla_style_set_bold (scintilla, SCE_HJ_KEYWORD, bold);
+  
+  get_preferences_manager_style_settings(prefmg, "javascript_doublestring", &font , &size, &fore, &back, &italic, &bold);
 
+  gtk_scintilla_style_set_fore (scintilla, SCE_HJ_DOUBLESTRING, fore);
+  gtk_scintilla_style_set_font (scintilla, SCE_HJ_DOUBLESTRING, font);
+  gtk_scintilla_style_set_back (scintilla, SCE_HJ_DOUBLESTRING, back);
+  gtk_scintilla_style_set_size (scintilla, SCE_HJ_DOUBLESTRING, size);
+  gtk_scintilla_style_set_italic (scintilla, SCE_HJ_DOUBLESTRING, italic);
+  gtk_scintilla_style_set_bold (scintilla, SCE_HJ_DOUBLESTRING, bold);
+  
+  get_preferences_manager_style_settings(prefmg, "javascript_singlestring", &font , &size, &fore, &back, &italic, &bold);
+
+  gtk_scintilla_style_set_fore (scintilla, SCE_HJ_SINGLESTRING, fore);
+  gtk_scintilla_style_set_font (scintilla, SCE_HJ_SINGLESTRING, font);
+  gtk_scintilla_style_set_back (scintilla, SCE_HJ_SINGLESTRING, back);
+  gtk_scintilla_style_set_size (scintilla, SCE_HJ_SINGLESTRING, size);
+  gtk_scintilla_style_set_italic (scintilla, SCE_HJ_SINGLESTRING, italic);
+  gtk_scintilla_style_set_bold (scintilla, SCE_HJ_SINGLESTRING, bold);
+  
+  get_preferences_manager_style_settings(prefmg, "javascript_symbols", &font , &size, &fore, &back, &italic, &bold);
+
+  gtk_scintilla_style_set_font (scintilla, SCE_HJ_SYMBOLS, font);
+  gtk_scintilla_style_set_fore (scintilla, SCE_HJ_SYMBOLS, fore);
+  gtk_scintilla_style_set_back (scintilla, SCE_HJ_SYMBOLS, back);
+  gtk_scintilla_style_set_size (scintilla, SCE_HJ_SYMBOLS, size);
+  gtk_scintilla_style_set_italic (scintilla, SCE_HJ_SYMBOLS, italic);
+  gtk_scintilla_style_set_bold (scintilla, SCE_HJ_SYMBOLS, bold);
+  
+  get_preferences_manager_style_settings(prefmg, "php_hstring", &font , &size, &fore, &back, &italic, &bold);
+
+  gtk_scintilla_style_set_fore (scintilla, SCE_HPHP_HSTRING, fore);
+  gtk_scintilla_style_set_font (scintilla, SCE_HPHP_HSTRING, font);
+  gtk_scintilla_style_set_back (scintilla, SCE_HPHP_HSTRING, back);
+  gtk_scintilla_style_set_size (scintilla, SCE_HPHP_HSTRING, size);
+  gtk_scintilla_style_set_italic (scintilla, SCE_HPHP_HSTRING, italic);
+  gtk_scintilla_style_set_bold (scintilla, SCE_HPHP_HSTRING, bold);
+  
+  get_preferences_manager_style_settings(prefmg, "php_simplestring", &font , &size, &fore, &back, &italic, &bold);
+
+  gtk_scintilla_style_set_fore (scintilla, SCE_HPHP_SIMPLESTRING, fore);
+  gtk_scintilla_style_set_font (scintilla, SCE_HPHP_SIMPLESTRING, font);
+  gtk_scintilla_style_set_back (scintilla, SCE_HPHP_SIMPLESTRING, back);
+  gtk_scintilla_style_set_size (scintilla, SCE_HPHP_SIMPLESTRING, size);
+  gtk_scintilla_style_set_italic (scintilla, SCE_HPHP_SIMPLESTRING, italic);
+  gtk_scintilla_style_set_bold (scintilla, SCE_HPHP_SIMPLESTRING, bold);
+
+  get_preferences_manager_style_settings(prefmg, "php_word", &font , &size, &fore, &back, &italic, &bold);
+
+  gtk_scintilla_style_set_font (scintilla, SCE_HPHP_WORD, font);
+  gtk_scintilla_style_set_fore (scintilla, SCE_HPHP_WORD, fore);
+  gtk_scintilla_style_set_back (scintilla, SCE_HPHP_WORD, back);
+  gtk_scintilla_style_set_size (scintilla, SCE_HPHP_WORD, size);
+  gtk_scintilla_style_set_italic (scintilla, SCE_HPHP_WORD, italic);
+  gtk_scintilla_style_set_bold (scintilla, SCE_HPHP_WORD, bold);
+
+  get_preferences_manager_style_settings(prefmg, "php_number", &font , &size, &fore, &back, &italic, &bold);
+
+  gtk_scintilla_style_set_fore (scintilla, SCE_HPHP_NUMBER, fore);
+  gtk_scintilla_style_set_font (scintilla, SCE_HPHP_NUMBER, font);
+  gtk_scintilla_style_set_back (scintilla, SCE_HPHP_NUMBER, back);
+  gtk_scintilla_style_set_size (scintilla, SCE_HPHP_NUMBER, size);
+  gtk_scintilla_style_set_italic (scintilla, SCE_HPHP_NUMBER, italic);
+  gtk_scintilla_style_set_bold (scintilla, SCE_HPHP_NUMBER, bold);
+
+  get_preferences_manager_style_settings(prefmg, "php_variable", &font , &size, &fore, &back, &italic, &bold);
+
+  gtk_scintilla_style_set_fore (scintilla, SCE_HPHP_VARIABLE, fore);
+  gtk_scintilla_style_set_font (scintilla, SCE_HPHP_VARIABLE, font);
+  gtk_scintilla_style_set_back (scintilla, SCE_HPHP_VARIABLE, back);
+  gtk_scintilla_style_set_size (scintilla, SCE_HPHP_VARIABLE, size);
+  gtk_scintilla_style_set_italic (scintilla, SCE_HPHP_VARIABLE, italic);
+  gtk_scintilla_style_set_bold (scintilla, SCE_HPHP_VARIABLE, bold);
+
+  get_preferences_manager_style_settings(prefmg, "php_comment", &font , &size, &fore, &back, &italic, &bold);
+
+  gtk_scintilla_style_set_fore (scintilla, SCE_HPHP_COMMENT, fore);
+  gtk_scintilla_style_set_font (scintilla, SCE_HPHP_COMMENT, font);
+  gtk_scintilla_style_set_back (scintilla, SCE_HPHP_COMMENT, back);
+  gtk_scintilla_style_set_size (scintilla, SCE_HPHP_COMMENT, size);
+  gtk_scintilla_style_set_italic (scintilla, SCE_HPHP_COMMENT, italic);
+  gtk_scintilla_style_set_bold (scintilla, SCE_HPHP_COMMENT, bold);
+
+  get_preferences_manager_style_settings(prefmg, "php_comment_line", &font , &size, &fore, &back, &italic, &bold);
+
+  gtk_scintilla_style_set_fore (scintilla, SCE_HPHP_COMMENTLINE, fore);
+  gtk_scintilla_style_set_font (scintilla, SCE_HPHP_COMMENTLINE, font);
+  gtk_scintilla_style_set_back (scintilla, SCE_HPHP_COMMENTLINE, back);
+  gtk_scintilla_style_set_size (scintilla, SCE_HPHP_COMMENTLINE, size);
+  gtk_scintilla_style_set_italic (scintilla, SCE_HPHP_COMMENTLINE, italic);
+  gtk_scintilla_style_set_bold (scintilla, SCE_HPHP_COMMENTLINE, bold);
+
+  get_preferences_manager_style_settings(prefmg, "c_operator", NULL , NULL, &fore, &back, NULL, NULL);
+  gtk_scintilla_style_set_fore (scintilla, SCE_HPHP_OPERATOR, fore);
+  gtk_scintilla_style_set_back (scintilla, SCE_HPHP_OPERATOR, back);
 
   gtk_scintilla_indic_set_style(scintilla, 0, INDIC_SQUIGGLE);
   gtk_scintilla_indic_set_fore(scintilla, 0, scintilla_color(255,0,0));
 
   gtk_scintilla_set_property(scintilla, "fold.html", "1");
   gtk_scintilla_set_property(scintilla, "fold", "1");
+  gtk_scintilla_set_property(scintilla, "fold.hypertext.comment", "1");
+  gtk_scintilla_set_property(scintilla, "fold.hypertext.heredoc", "1");
+  gtk_scintilla_set_property(scintilla, "lexer.html.mako", "1");
+  gtk_scintilla_set_property(scintilla, "lexer.html.django", "1");
+
   gtk_scintilla_colourise(scintilla, 0, -1);
+
+  g_object_unref(prefmg);
 }
 
-void tab_php_set_lexer(Editor *editor)
+void tab_php_set_lexer(Document *document)
 {
-  scintilla_php_set_lexer(GTK_SCINTILLA(editor->scintilla), preferences);
+  scintilla_php_set_lexer(document_get_scintilla(document));
 }

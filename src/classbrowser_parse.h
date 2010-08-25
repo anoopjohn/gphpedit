@@ -24,8 +24,9 @@
 
 #ifndef CLASSBROWSER_PARSE_H
 #define CLASSBROWSER_PARSE_H
-#include "classbrowser.h"
+#include <gtk/gtk.h>
+#include "classbrowser_backend.h"
 
-void classbrowser_parse_file(gchar *filename);
+void classbrowser_parse_file(Classbrowser_Backend *classback, gchar *filename);
 gboolean check_php_variable_before(const gchar *line_text);
 #endif

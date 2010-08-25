@@ -26,7 +26,8 @@
 #define TAB_COBOL_H
 
 #include "tab.h"
+#include "document.h"
 
-void tab_cobol_set_lexer(Editor *editor);
+void tab_cobol_set_lexer(Document *document);
 
 #endif

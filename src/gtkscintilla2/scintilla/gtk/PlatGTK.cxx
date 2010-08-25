@@ -347,7 +347,7 @@ static void GenerateFontSpecStrings(const char *fontName, int characterSet,
 		d2 = strchr(d1 + 1, '-');
 		if (d2)
 			d3 = strchr(d2 + 1, '-');
-		if (d3) {
+		if (d3 && d2) {
 			// foundary-fontface-isoxxx-x
 			*d2 = '\0';
 			foundary[0] = '-';
@@ -667,11 +667,9 @@ void Font::Release() {
 
 // Required on OS X
 #ifdef SCI_NAMESPACE
-class Scintilla::SurfaceImpl : public Surface
-#else
-class SurfaceImpl : public Surface
+namespace Scintilla {
 #endif
-{
+class SurfaceImpl : public Surface {
 	encodingType et;
 	GdkDrawable *drawable;
 	GdkGC *gc;
@@ -731,6 +729,9 @@ public:
 	void SetUnicodeMode(bool unicodeMode_);
 	void SetDBCSMode(int codePage);
 };
+#ifdef SCI_NAMESPACE
+}
+#endif
 
 const char *CharacterSetID(int characterSet) {
 	switch (characterSet) {
@@ -953,7 +954,7 @@ void SurfaceImpl::FillRectangle(PRectangle rc, Surface &surfacePattern) {
 			int widthx = (xTile + widthPat > rc.right) ? rc.right - xTile : widthPat;
 			for (int yTile = rc.top; yTile < rc.bottom; yTile += heightPat) {
 				int heighty = (yTile + heightPat > rc.bottom) ? rc.bottom - yTile : heightPat;
-				gdk_draw_drawable(drawable,
+				gdk_draw_drawable (drawable,
 				                gc,
 				                static_cast<SurfaceImpl &>(surfacePattern).drawable,
 				                0, 0,
@@ -1079,7 +1080,7 @@ void SurfaceImpl::Ellipse(PRectangle rc, ColourAllocated fore, ColourAllocated b
 
 void SurfaceImpl::Copy(PRectangle rc, Point from, Surface &surfaceSource) {
 	if (static_cast<SurfaceImpl &>(surfaceSource).drawable) {
-		gdk_draw_drawable(drawable,
+		gdk_draw_drawable (drawable,
 		                gc,
 		                static_cast<SurfaceImpl &>(surfaceSource).drawable,
 		                from.x, from.y,
@@ -1143,7 +1144,6 @@ static size_t MultiByteLenFromIconv(const Converter &conv, const char *s, size_t
 		char *pout = wcForm;
 		size_t outLeft = 2;
 		size_t conversions = conv.Convert(&pin, &inLeft, &pout, &outLeft);
-
 		if (conversions != ((size_t)(-1))) {
 			return lenMB;
 		}
@@ -1704,11 +1704,7 @@ void Window::Destroy() {
 }
 
 bool Window::HasFocus() {
-#if GTK_CHECK_VERSION(2,20,0)
-	return gtk_widget_has_focus (GTK_WIDGET(wid));
-#else
-	return GTK_WIDGET_HAS_FOCUS(wid);
-#endif
+	return gtk_widget_has_focus(GTK_WIDGET(wid));
 }
 
 PRectangle Window::GetPosition() {
@@ -1758,11 +1754,8 @@ void Window::SetPositionRelative(PRectangle rc, Window relativeTo) {
 		oy = screenHeight - sizey;
 
 	gtk_window_move(GTK_WINDOW(PWidget(wid)), ox, oy);
-#if GTK_CHECK_VERSION(2,2,0)
+
 	gtk_widget_set_size_request(PWidget(wid), sizex, sizey);
-#else
-	gtk_widget_set_usize(PWidget(wid), sizex, sizey);
-#endif
 }
 
 PRectangle Window::GetClientPosition() {
@@ -1828,7 +1821,7 @@ void Window::SetCursor(Cursor curs) {
 
 	if (PWidget(wid)->window)
 		gdk_window_set_cursor(PWidget(wid)->window, gdkCurs);
-	gdk_cursor_unref(gdkCurs);
+	gdk_cursor_destroy(gdkCurs);
 }
 
 void Window::SetTitle(const char *s) {
@@ -1871,7 +1864,6 @@ struct ListImage {
 static void list_image_free(gpointer, gpointer value, gpointer) {
 	ListImage *list_image = (ListImage *) value;
 	if (list_image->pixbuf)
-//		gdk_pixbuf_unref (list_image->pixbuf);
 		g_object_unref (list_image->pixbuf);
 	g_free(list_image);
 }
@@ -2078,21 +2070,14 @@ PRectangle ListBoxX::GetDesiredRect() {
 		height = (rows * row_height
 		          + 2 * (ythickness
 		                 + GTK_CONTAINER(PWidget(list))->border_width + 1));
-		#if GTK_CHECK_VERSION(2,2,0)
-			gtk_widget_set_size_request(GTK_WIDGET(PWidget(list)), -1, height);
-		#else
-			gtk_widget_set_usize(GTK_WIDGET(PWidget(list)), -1, height);
-		#endif
+		gtk_widget_set_size_request(GTK_WIDGET(PWidget(list)), -1, height);
 
 		// Get the size of the scroller because we set usize on the window
 		gtk_widget_size_request(GTK_WIDGET(scroller), &req);
 		rc.right = req.width;
 		rc.bottom = req.height;
-		#if GTK_CHECK_VERSION(2,2,0)
-			gtk_widget_set_size_request(GTK_WIDGET(list), -1, -1);
-		#else
-			gtk_widget_set_usize(GTK_WIDGET(list), -1, -1);
-		#endif
+
+		gtk_widget_set_size_request(GTK_WIDGET(list), -1, -1);
 		int width = maxItemCharacters;
 		if (width < 12)
 			width = 12;
@@ -2132,7 +2117,6 @@ static void init_pixmap(ListImage *list_image) {
 
 	// Drop any existing pixmap/bitmap as data may have changed
 	if (list_image->pixbuf)
-//		gdk_pixbuf_unref(list_image->pixbuf);
 		g_object_unref(list_image->pixbuf);
 	list_image->pixbuf =
 		gdk_pixbuf_new_from_xpm_data((const gchar**)xpm_lineform);
@@ -2261,8 +2245,10 @@ int ListBoxX::Find(const char *prefix) {
 		gchar *s;
 		gtk_tree_model_get(model, &iter, TEXT_COLUMN, &s, -1);
 		if (s && (0 == strncmp(prefix, s, strlen(prefix)))) {
+			g_free(s);
 			return i;
 		}
+		g_free(s);
 		valid = gtk_tree_model_iter_next(model, &iter) != FALSE;
 		i++;
 	}
@@ -2283,7 +2269,7 @@ void ListBoxX::GetValue(int n, char *value, int len) {
 	} else {
 		value[0] = '\0';
 	}
-  g_free(text);
+	g_free(text);
 }
 
 // g_return_if_fail causes unnecessary compiler warning in release compile.
@@ -2307,7 +2293,6 @@ void ListBoxX::RegisterImage(int type, const char *xpm_data) {
 	if (list_image) {
 		// Drop icon already registered
 		if (list_image->pixbuf)
-//			gdk_pixbuf_unref(list_image->pixbuf);
 			g_object_unref(list_image->pixbuf);
 		list_image->pixbuf = NULL;
 		list_image->xpm_data = xpm_data;
@@ -2381,7 +2366,7 @@ void Menu::Show(Point pt, Window &) {
 		pt.y = screenHeight - requisition.height;
 	}
 	gtk_item_factory_popup(factory, pt.x - 4, pt.y - 4, 3,
-		gtk_get_current_event_time());
+	gtk_get_current_event_time());
 }
 
 ElapsedTime::ElapsedTime() {
@@ -2530,7 +2515,6 @@ int Platform::DBCSCharMaxLength() {
 }
 
 // These are utility functions not really tied to a platform
-
 
 int Platform::Minimum(int a, int b) {
 	if (a < b)
