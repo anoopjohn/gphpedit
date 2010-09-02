@@ -1379,9 +1379,10 @@ void set_document_to_text_plain(Document *document)
   if (!document) return ;
   DocumentDetails *docdet = DOCUMENT_GET_PRIVATE(document);
   if (GTK_IS_SCINTILLA(docdet->scintilla)){
-  gtk_scintilla_clear_document_style (GTK_SCINTILLA(docdet->scintilla));
   /* SCLEX_NULL to select no lexing action */
   gtk_scintilla_set_lexer(GTK_SCINTILLA (docdet->scintilla), SCLEX_NULL); 
+  tab_set_configured_scintilla_properties(GTK_SCINTILLA (docdet->scintilla));
+  gtk_scintilla_colourise(GTK_SCINTILLA (docdet->scintilla), 0, -1);
   docdet->type = TAB_FILE;
   }
 }
