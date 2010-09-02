@@ -35,13 +35,15 @@
 #include "syntax_check_window.h"
 #include "preferences_manager.h"
 #include "templates.h"
+#include "gtksourcestyleschememanager.h"
 
 typedef struct
 {
   /* preferences manager */
   Preferences_Manager *prefmg;
-
   TemplatesManager *tempmg;
+
+  GtkSourceStyleSchemeManager *stylemg;
 
   GtkWidget *window;
   GtkWidget *prinbox;

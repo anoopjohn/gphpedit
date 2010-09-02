@@ -54,6 +54,7 @@ void quit_application()
   g_object_unref(main_window.docmg);
   is_app_closing = FALSE;
   g_object_unref(main_window.prefmg);
+  g_object_unref(main_window.stylemg);
 }
 
 

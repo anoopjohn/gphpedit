@@ -288,6 +288,8 @@ void main_window_create(void){
   gtk_widget_show(main_window.window);
   
   update_app_title(document_manager_get_current_document(main_window.docmg));
+
+  main_window.stylemg = gtk_source_style_scheme_manager_new ();
 }
 
 void update_controls(Document *document){
