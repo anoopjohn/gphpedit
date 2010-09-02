@@ -117,7 +117,7 @@ gboolean is_css_file(const gchar *filename)
 
 gboolean is_perl_file(const gchar *filename)
 {
-  if (g_str_has_suffix(filename,".pl") || g_str_has_suffix(filename,".pm"))
+  if (g_str_has_suffix(filename,".pl") || g_str_has_suffix(filename,".pm") || g_str_has_suffix(filename,".al") || g_str_has_suffix(filename,".perl"))
       return TRUE;
   return FALSE;
 }
@@ -138,7 +138,8 @@ gboolean is_python_file(const gchar *filename)
 
 gboolean is_cxx_file(const gchar *filename)
 {
-  if (g_str_has_suffix(filename,".cxx") || g_str_has_suffix(filename,".c") || g_str_has_suffix(filename,".h"))
+  if (g_str_has_suffix(filename,".cxx") || g_str_has_suffix(filename,".c") || g_str_has_suffix(filename,".h")
+  || g_str_has_suffix(filename,".cpp") || g_str_has_suffix(filename,".cc") || g_str_has_suffix(filename,".c++"))
       return TRUE;
   return FALSE;
 }

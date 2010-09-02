@@ -28,3 +28,8 @@ gint scintilla_color(gint red, gint green, gint blue)
 {
 	return red | (green << 8) | (blue << 16);
 }
+
+gint GdkColor_to_Int(GdkColor color)
+{
+	return color.red >> 8 | ((color.green >> 8) << 8) | ((color.blue >> 8) << 16);
+}
