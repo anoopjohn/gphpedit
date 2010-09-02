@@ -49,7 +49,7 @@ gboolean is_app_closing = FALSE;
 void quit_application()
 {
   gphpedit_debug(DEBUG_MAIN_WINDOW);
-  template_db_close();
+  g_object_unref(main_window.tempmg);
   is_app_closing = TRUE;
   g_object_unref(main_window.docmg);
   is_app_closing = FALSE;
@@ -110,26 +110,6 @@ gint main_window_key_press_event(GtkWidget   *widget, GdkEventKey *event,gpointe
     }
     else if ((event->state & GDK_MOD1_MASK)==GDK_MOD1_MASK && ((event->keyval >= GDK_0) && (event->keyval <= GDK_9))) {
       gtk_notebook_set_current_page(GTK_NOTEBOOK(main_window.notebook_editor),event->keyval - ((event->keyval == GDK_0) ? (GDK_0 - 9) : (GDK_0 + 1)));
-      return TRUE;
-    }
-    else if (((event->state & (GDK_CONTROL_MASK | GDK_SHIFT_MASK))==(GDK_CONTROL_MASK | GDK_SHIFT_MASK)) && (event->keyval == GDK_space)) {
-      document_show_calltip_at_current_pos(document_manager_get_current_document(main_window.docmg));
-      return TRUE;
-    }
-    else if ((event->state & GDK_CONTROL_MASK)==GDK_CONTROL_MASK && ((event->keyval == GDK_j) || (event->keyval == GDK_J)))  {
-      template_find_and_insert();
-      return TRUE;
-    }
-    else if ((event->state & GDK_CONTROL_MASK)==GDK_CONTROL_MASK && ((event->keyval == GDK_F2)))  {
-         document_modify_current_line_marker(document_manager_get_current_document(main_window.docmg));
-      return TRUE;
-    }
-    else if ((event->keyval == GDK_F2))  {
-        document_find_next_marker(document_manager_get_current_document(main_window.docmg));
-      return TRUE;
-    }
-    else if ((event->state & GDK_CONTROL_MASK)==GDK_CONTROL_MASK && (event->keyval == GDK_space)) { 
-      document_force_autocomplete(document_manager_get_current_document(main_window.docmg));
       return TRUE;
     }
   }

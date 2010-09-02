@@ -63,7 +63,7 @@ int main (int argc, char **argv)
     return 0;
 
   main_window_create();
-  template_db_open();
+  main_window.tempmg = templates_manager_new();
   main_window.docmg = document_manager_new_full(argv, argc);
   gtk_main();
         

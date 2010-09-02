@@ -34,11 +34,14 @@
 #include "toolbar.h"
 #include "syntax_check_window.h"
 #include "preferences_manager.h"
+#include "templates.h"
 
 typedef struct
 {
   /* preferences manager */
   Preferences_Manager *prefmg;
+
+  TemplatesManager *tempmg;
 
   GtkWidget *window;
   GtkWidget *prinbox;
