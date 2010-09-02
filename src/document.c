@@ -408,21 +408,22 @@ void document_done_loading_cb (DocumentLoader *doc, guint result, gpointer user_
     if (docdet->type==TAB_FILE){
       if (document_loader_get_file_content_lenght (doc)==0){
       create_new_document(document);
+      set_document_to_text_plain(document);
       } else {
       create_new_document(document);
       // Clear scintilla buffer
       gtk_scintilla_clear_all(GTK_SCINTILLA (docdet->scintilla));
       gtk_scintilla_add_text(GTK_SCINTILLA (docdet->scintilla), document_loader_get_file_content_lenght (doc), document_loader_get_file_contents (doc));
+      tab_reset_scintilla_after_open(GTK_SCINTILLA (docdet->scintilla), docdet->current_line);
+      tab_check_php_file(document);
+      tab_check_css_file(document);
+      tab_check_cxx_file(document);
+      tab_check_perl_file(document);
+      tab_check_cobol_file(document);
+      tab_check_python_file(document);
+      tab_check_sql_file(document);
       }
     docdet->converted_to_utf8 = document_loader_get_UTF8_converted(doc);
-    tab_reset_scintilla_after_open(GTK_SCINTILLA (docdet->scintilla), docdet->current_line);
-    tab_check_php_file(document); 
-    tab_check_css_file(document); 
-    tab_check_cxx_file(document); 
-    tab_check_perl_file(document); 
-    tab_check_cobol_file(document); 
-    tab_check_python_file(document); 
-    tab_check_sql_file(document); 
     gtk_widget_show (docdet->container);
     gtk_scintilla_set_save_point(GTK_SCINTILLA(docdet->scintilla));
     tab_set_event_handlers(document);
