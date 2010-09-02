@@ -408,21 +408,22 @@ void document_done_loading_cb (DocumentLoader *doc, guint result, gpointer user_
     if (docdet->type==TAB_FILE){
       if (document_loader_get_file_content_lenght (doc)==0){
       create_new_document(document);
+      set_document_to_text_plain(document);
       } else {
       create_new_document(document);
       // Clear scintilla buffer
       gtk_scintilla_clear_all(GTK_SCINTILLA (docdet->scintilla));
       gtk_scintilla_add_text(GTK_SCINTILLA (docdet->scintilla), document_loader_get_file_content_lenght (doc), document_loader_get_file_contents (doc));
+      tab_reset_scintilla_after_open(GTK_SCINTILLA (docdet->scintilla), docdet->current_line);
+      tab_check_php_file(document); 
+      tab_check_css_file(document); 
+      tab_check_cxx_file(document); 
+      tab_check_perl_file(document); 
+      tab_check_cobol_file(document); 
+      tab_check_python_file(document); 
+      tab_check_sql_file(document); 
       }
     docdet->converted_to_utf8 = document_loader_get_UTF8_converted(doc);
-    tab_reset_scintilla_after_open(GTK_SCINTILLA (docdet->scintilla), docdet->current_line);
-    tab_check_php_file(document); 
-    tab_check_css_file(document); 
-    tab_check_cxx_file(document); 
-    tab_check_perl_file(document); 
-    tab_check_cobol_file(document); 
-    tab_check_python_file(document); 
-    tab_check_sql_file(document); 
     gtk_widget_show (docdet->container);
     gtk_scintilla_set_save_point(GTK_SCINTILLA(docdet->scintilla));
     tab_set_event_handlers(document);
@@ -490,10 +491,6 @@ void tab_set_general_scintilla_properties(Document *doc)
   gtk_scintilla_set_scroll_width_tracking(GTK_SCINTILLA (docdet->scintilla), TRUE);
   gtk_scintilla_set_code_page(GTK_SCINTILLA(docdet->scintilla), 65001); // Unicode code page
 
-  gtk_scintilla_set_caret_fore (GTK_SCINTILLA(docdet->scintilla), 0);
-  gtk_scintilla_set_caret_width (GTK_SCINTILLA(docdet->scintilla), 2);
-  gtk_scintilla_set_caret_period (GTK_SCINTILLA(docdet->scintilla), 250);
-
   g_signal_connect (G_OBJECT (docdet->scintilla), "save_point_reached", G_CALLBACK (save_point_reached), doc);
   g_signal_connect (G_OBJECT (docdet->scintilla), "save_point_left", G_CALLBACK (save_point_left), doc);
   g_signal_connect (G_OBJECT (docdet->scintilla), "macro_record", G_CALLBACK (macro_record), doc);
@@ -522,27 +519,22 @@ void tab_set_configured_scintilla_properties(GtkScintilla *scintilla)
   else {
     gtk_scintilla_set_h_scroll_bar(scintilla, 1);
   }
-  gchar *font =NULL;
-  gint size, fore, back;
-  gboolean italic, bold;
-  get_preferences_manager_style_settings(pref, "line_numbers", &font , &size, &fore, &back, NULL, NULL);
-  gtk_scintilla_style_set_font (scintilla, STYLE_LINENUMBER, font);
-  gtk_scintilla_style_set_fore (scintilla, STYLE_LINENUMBER, fore);
-  gtk_scintilla_style_set_back (scintilla, STYLE_LINENUMBER, back);
-  gtk_scintilla_style_set_size (scintilla, STYLE_LINENUMBER, size);
+  /* reset styles */
+  gtk_scintilla_style_clear_all(scintilla);
+
+  const gchar *font = get_preferences_manager_style_font(pref);
+  guint size = get_preferences_manager_style_size(pref);
+
+  GtkSourceStyleScheme	*scheme = gtk_source_style_scheme_manager_get_scheme (main_window.stylemg, get_preferences_manager_style_name(pref));
+  gtk_source_style_scheme_apply (scheme, GTK_WIDGET(scintilla), font, size);
   /* set font quality */
   gtk_scintilla_set_font_quality(scintilla, get_preferences_manager_font_quality (pref));
-
   gtk_scintilla_set_caret_line_visible(scintilla, get_preferences_manager_higthlight_caret_line (pref));
-  gtk_scintilla_set_caret_line_back(scintilla, get_preferences_manager_higthlight_caret_line_color (pref));
 
   gtk_scintilla_set_indentation_guides (scintilla, get_preferences_manager_show_indentation_guides (pref));
   gtk_scintilla_set_edge_mode (scintilla, get_preferences_manager_edge_mode (pref));
   gtk_scintilla_set_edge_column (scintilla, get_preferences_manager_edge_column (pref));
-  gtk_scintilla_set_edge_colour (scintilla, get_preferences_manager_edge_colour (pref));
 
-  gtk_scintilla_set_sel_back(scintilla, 1, get_preferences_manager_set_sel_back (pref));
-  gtk_scintilla_set_caret_fore (scintilla, 0); /*TODO:: if back color is black this must be white */
   gtk_scintilla_set_caret_width (scintilla, 2);
   gtk_scintilla_set_caret_period (scintilla, 250);
 
@@ -553,23 +545,13 @@ void tab_set_configured_scintilla_properties(GtkScintilla *scintilla)
   gtk_scintilla_set_tab_width (scintilla, get_preferences_manager_indentation_size (pref));
   gtk_scintilla_set_indent (scintilla, get_preferences_manager_tab_size(pref));
 
-  get_preferences_manager_style_settings(pref, "default_style", &font , &size, &fore, &back, &italic, &bold);
-  gtk_scintilla_style_set_font (scintilla, STYLE_DEFAULT, font);
-  gtk_scintilla_style_set_size (scintilla, STYLE_DEFAULT, size);
-  gtk_scintilla_style_set_italic (scintilla, STYLE_DEFAULT, italic);
-  gtk_scintilla_style_set_bold (scintilla, STYLE_DEFAULT, bold);
-  gtk_scintilla_style_set_fore (scintilla, STYLE_DEFAULT, fore);
-  gtk_scintilla_style_set_back (scintilla, STYLE_DEFAULT, back);
-
   //annotation styles
-  gtk_scintilla_style_set_font (scintilla, STYLE_ANNOTATION_ERROR,  font);
   gtk_scintilla_style_set_size (scintilla,  STYLE_ANNOTATION_ERROR, 8);
   gtk_scintilla_style_set_italic (scintilla,  STYLE_ANNOTATION_ERROR, FALSE);
   gtk_scintilla_style_set_bold (scintilla,  STYLE_ANNOTATION_ERROR, FALSE);
   gtk_scintilla_style_set_fore (scintilla,  STYLE_ANNOTATION_ERROR, 3946645);
   gtk_scintilla_style_set_back (scintilla,  STYLE_ANNOTATION_ERROR, 13355513);
 
-  gtk_scintilla_style_set_font (scintilla, STYLE_ANNOTATION_WARNING,  font);
   gtk_scintilla_style_set_size (scintilla,  STYLE_ANNOTATION_WARNING, 8);
   gtk_scintilla_style_set_italic (scintilla,  STYLE_ANNOTATION_WARNING, FALSE);
   gtk_scintilla_style_set_bold (scintilla,  STYLE_ANNOTATION_WARNING, FALSE);
@@ -1378,9 +1360,10 @@ void set_document_to_text_plain(Document *document)
   if (!document) return ;
   DocumentDetails *docdet = DOCUMENT_GET_PRIVATE(document);
   if (GTK_IS_SCINTILLA(docdet->scintilla)){
-  gtk_scintilla_clear_document_style (GTK_SCINTILLA(docdet->scintilla));
   /* SCLEX_NULL to select no lexing action */
   gtk_scintilla_set_lexer(GTK_SCINTILLA (docdet->scintilla), SCLEX_NULL); 
+  tab_set_configured_scintilla_properties(GTK_SCINTILLA (docdet->scintilla));
+  gtk_scintilla_colourise(GTK_SCINTILLA (docdet->scintilla), 0, -1);
   docdet->type = TAB_FILE;
   }
 }
@@ -1880,18 +1863,6 @@ GtkScintilla *document_get_scintilla(Document *document)
       return GTK_SCINTILLA(docdet->scintilla);
   }
   return NULL;
-}
-
-void document_set_scintilla(Document *document, GtkWidget *scintilla)
-{
-  g_return_if_fail (document && scintilla);
-  
-  DocumentDetails *docdet = DOCUMENT_GET_PRIVATE(document);
-  if (GTK_IS_SCINTILLA(scintilla)){
-  docdet->container = gtk_vbox_new (FALSE, 0);
-  docdet->scintilla = scintilla;
-  gtk_box_pack_end(GTK_BOX(docdet->container), docdet->scintilla, TRUE, TRUE, 0);
-  }
 }
 
 gboolean document_is_php_file(Document *document)

@@ -138,7 +138,6 @@ void tab_check_cobol_file(Document *document);
 void tab_check_python_file(Document *document);
 void tab_check_sql_file(Document *document);
 GtkScintilla *document_get_scintilla(Document *document);
-void document_set_scintilla(Document *document, GtkWidget *scintilla);
 void document_insert_text(Document *doc, gchar *data);
 void document_replace_current_selection(Document *doc, gchar *data);
 gchar *document_get_title(Document *doc);
