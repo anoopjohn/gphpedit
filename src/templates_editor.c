@@ -274,7 +274,7 @@ templates_editor_init (TemplatesEditor *te)
   // Can't unref it because I need to add to it later....
   templates_treeview_add_column(priv);
   
-  gtk_tree_view_set_search_column (GTK_TREE_VIEW (priv->Templates),0);
+  gtk_tree_view_set_search_column (GTK_TREE_VIEW (priv->Templates), 0);
   gtk_widget_show (priv->Templates);
   gtk_container_add (GTK_CONTAINER (scrolledwindow1), priv->Templates);
 
