@@ -51,6 +51,7 @@ prefix lib, e.g. libgtk2.0-dev)
 	     - gettext
 	     - gvfs
 	     - webkit-1.0
+	     - libxml-2.0 (>= 2.6.0)
 	     - php5-cli (optional for php sintax checking)
 	     - php-doc (optional for php help support) *
    * if you don't have php-doc pakage installed gphpedit will search help in PHP online resources.
@@ -238,7 +239,7 @@ The following list all gphpedit’s shortcut keys.
  7) Autocompletion:
     * Insert template (Ctrl + j)
 
-=======
+================
 Find and Replace
 ================
 
@@ -260,6 +261,11 @@ In a regular expression, special characters interpreted are:
 $ 	This matches the end of a line.
 * 	This matches 0 or more times. For example, Sa*m matches Sm, Sam, Saam, Saaam and so on.
 + 	This matches 1 or more times. For example, Sa+m matches Sam, Saam, Saaam and so on.
+
+
+====================
+Themes
+====================
 
 	The gphpedit team.
 

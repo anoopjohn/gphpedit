@@ -694,5 +694,8 @@ void document_manager_refresh_properties_all(DocumentManager *docmg)
     tab_check_cobol_file(document);
     tab_check_python_file(document);
     tab_check_sql_file(document);
+    if (document_get_document_type(document)==TAB_FILE){
+      set_document_to_text_plain(document);
+    }
   }
 }
