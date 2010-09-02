@@ -55,7 +55,6 @@ prefix lib, e.g. libgtk2.0-dev)
 	     - php-doc (optional for php help support) *
    * if you don't have php-doc pakage installed gphpedit will search help in PHP online resources.
 
-
 Debug system
 ============
 Since 0.9.98 version GPHPEdit has a new debug system.
@@ -239,6 +238,7 @@ The following list all gphpedit’s shortcut keys.
  7) Autocompletion:
     * Insert template (Ctrl + j)
 
+=======
 Find and Replace
 ================
 

@@ -122,6 +122,7 @@ gphpedit_classbrowser_get_type (void)
 static void
 gphpedit_classbrowser_destroy (GtkObject *object)
 {
+  if(!object) return;
 	gphpeditClassBrowserPrivate *priv;
 
 	priv = CLASSBROWSER_BACKEND_GET_PRIVATE(object);

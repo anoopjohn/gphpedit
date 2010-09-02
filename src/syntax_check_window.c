@@ -124,9 +124,10 @@ gtk_syntax_check_window_init (GtkSyntax_Check_Window *win)
 static void
 gtk_syntax_check_window_finalize (GObject *object)
 {
-//  GtkSyntax_Check_Window *menu = GTK_SYNTAX_CHECK_WINDOW (object);
-//  GtkSyntax_Check_WindowPrivate *priv = menu->priv;
-  
+  GtkSyntax_Check_Window *menu = GTK_SYNTAX_CHECK_WINDOW (object);
+  GtkSyntax_Check_WindowPrivate *priv = menu->priv;
+  if (priv->synmg) g_object_unref(priv->synmg);
+
   G_OBJECT_CLASS (gtk_syntax_check_window_parent_class)->finalize (object);
 }
 
@@ -137,7 +138,6 @@ gtk_syntax_check_window_dispose (GObject *object)
   GtkSyntax_Check_WindowPrivate *priv = menu->priv;
 
   if (priv->lint_store) gtk_list_store_clear(priv->lint_store);
-//  if (priv->synmg) g_object_unref(priv->synmg);
 
   G_OBJECT_CLASS (gtk_syntax_check_window_parent_class)->dispose (object);
 }

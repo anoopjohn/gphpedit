@@ -196,7 +196,9 @@ static void
 gphpedit_filebrowser_init (gphpeditFileBrowser *button)
 {
   gphpeditFileBrowserPrivate *priv = FILEBROWSER_BACKEND_GET_PRIVATE(button);
-  priv->fbbackend= filebrowser_backend_new (get_preferences_manager_filebrowser_last_folder(main_window.prefmg));
+  gchar *fol = g_strdup(get_preferences_manager_filebrowser_last_folder(main_window.prefmg));
+  priv->fbbackend= filebrowser_backend_new (fol);//get_preferences_manager_filebrowser_last_folder(main_window.prefmg));
+  g_free(fol);
   priv->handlerid = g_signal_connect(G_OBJECT(priv->fbbackend), "done_loading", G_CALLBACK(print_files), priv);
   priv->handleridchange = g_signal_connect(G_OBJECT(priv->fbbackend), "change_folder", G_CALLBACK(change_folder_cb), priv);
   priv->folder = gtk_vbox_new(FALSE, 0);
@@ -693,6 +695,7 @@ void print_files (FilebrowserBackend *directory, gpointer user_data){
       p_file_image = gtk_icon_info_load_icon (ificon, NULL);
       gtk_tree_store_insert_with_values(GTK_TREE_STORE(priv->pTree), &iter2, iter, 0, ICON_COLUMN, p_file_image, FILE_COLUMN, current->display_name,MIME_COLUMN,current->mime,-1);
       g_object_unref(p_file_image);
+       gtk_icon_info_free(ificon);
     }
   if (get_filebrowser_backend_number_files(priv->fbbackend)!=0){
     priv->cache_model=gtk_tree_view_get_model (GTK_TREE_VIEW(priv->pListView));

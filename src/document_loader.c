@@ -309,19 +309,18 @@ void document_loader_load_document(DocumentLoader *doclod)
 gboolean validate_and_convert_utf8_buffer (gchar *buffer) //FIXME: multiple enconding support
 {
   gboolean result;
-  if (g_utf8_validate(buffer, strlen(buffer), NULL)) {
+  if (g_utf8_validate(buffer, -1, NULL)) {
     gphpedit_debug_message (DEBUG_DOCUMENT,"%s", "Valid UTF8\n");
     result = FALSE;
   } else {
     gchar *converted_text;
     gsize utf8_size;
     GError *error = NULL;      
-    converted_text = g_locale_to_utf8(buffer, strlen(buffer), NULL, &utf8_size, &error); 
+    converted_text = g_locale_to_utf8(buffer, -1, NULL, &utf8_size, &error); 
     if (error != NULL) {
-      gssize nchars=strlen(buffer);
       // if locale isn't set
       error=NULL;
-      converted_text = g_convert(buffer, nchars, "UTF-8", "ISO-8859-15", NULL, &utf8_size, &error);
+      converted_text = g_convert(buffer, -1, "UTF-8", "ISO-8859-15", NULL, &utf8_size, &error);
       if (error!=NULL){
         gphpedit_debug_message (DEBUG_DOCUMENT,_("gPHPEdit UTF-8 Error: %s\n"), error->message);
         g_error_free(error);

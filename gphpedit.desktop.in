@@ -2,8 +2,9 @@
 Version=0.9.98
 _Name=gPHPEdit
 _GenericName=PHP/HTML/CSS editor
+_X-GNOME-FullName=gPHPEdit
 _Comment=Edit PHP source files
-Exec=gphpedit %U
+Exec=gphpedit
 Icon=gphpedit.png
 Terminal=false
 StartupNotify=true
