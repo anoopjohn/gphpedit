@@ -175,11 +175,9 @@ void add_file_filters(GtkFileChooser *chooser){
   gtk_file_filter_set_name (filter, caption->str);
   //add a pattern to the filter
   gtk_file_chooser_add_filter (GTK_FILE_CHOOSER (chooser), filter);
-  //set default filter to the dialog
-  gtk_file_chooser_set_filter (GTK_FILE_CHOOSER (chooser), filter);
 
   filter = gtk_file_filter_new ();
-  gtk_file_filter_set_name (filter, _("HTML files (*.html *.htm *.xhtml *tpl)"));
+  gtk_file_filter_set_name (filter, _("HTML files (*.html *.htm *.xhtml *.tpl)"));
   gtk_file_filter_add_pattern(filter, "*.html");
   gtk_file_filter_add_pattern(filter, "*.htm");
   gtk_file_filter_add_pattern(filter, "*.xhtml");
@@ -237,6 +235,9 @@ void add_file_filters(GtkFileChooser *chooser){
   gtk_file_filter_set_name (filter, _("All files"));
   gtk_file_filter_add_pattern(filter, "*");
   gtk_file_chooser_add_filter (GTK_FILE_CHOOSER (chooser), filter);
+
+  //set default filter to the dialog
+  gtk_file_chooser_set_filter (GTK_FILE_CHOOSER (chooser), filter);
 }
 
 void on_open1_activate(GtkWidget *widget)
