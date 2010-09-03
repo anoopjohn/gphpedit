@@ -263,9 +263,18 @@ $ 	This matches the end of a line.
 + 	This matches 1 or more times. For example, Sa+m matches Sam, Saam, Saaam and so on.
 
 
-====================
-Themes
-====================
+=======
+Themes (New in 0.9.98)
+=======
+GPHPEdit has support for GtkSourceView's Themes. These are feature rich themes supported by many Gnome applications 
+like Gedit and Anjuta. 
+This implies don't  configure each languaje item in the preferences dialog, never more.  Now you could set a theme and editor will load its color scheme also you can easily change between themes.
+The main advantage of choose this theme system it's a lot of themes already exist, along with good documentation
+about how to write a new one, making transition more easy, between this and the old system.
+You can get some examples at: http://live.gnome.org/GtkSourceView/StyleSchemes
+also You may want to visit http://library.gnome.org/devel/gtksourceview/stable/style-reference.html
+if you want to create a new theme.
+
 
 	The gphpedit team.
 
