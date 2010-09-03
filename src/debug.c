@@ -33,7 +33,9 @@
 #include <stdio.h>
 #include "debug.h"
 
+#ifdef DEBUG
 static DebugSection debug = GPHPEDIT_NO_DEBUG;
+#endif
 
 void
 gphpedit_debug_init (void)
