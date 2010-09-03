@@ -847,7 +847,7 @@ set_selection_style (GtkWidget *widget,
 {
 	GdkColor bg;
 	GdkColor fg;
-	if (get_color (style, TRUE, &bg)) {
+	if (get_color (style, FALSE, &bg)) {
 		gtk_scintilla_set_sel_back(GTK_SCINTILLA(widget), 1, GdkColor_to_Int(bg));
 	 } else { 
 		GtkSourceStyle *style2 = gtk_source_style_scheme_get_style (scheme, STYLE_TEXT);
@@ -859,10 +859,14 @@ set_selection_style (GtkWidget *widget,
 		}
 		generate_highlight_color(bgin, &bg);
 		gtk_scintilla_set_sel_back(GTK_SCINTILLA(widget), TRUE, GdkColor_to_Int(bg));
-       }
+  }
+  if (get_color (style, TRUE, &fg)) {
+  gtk_scintilla_set_sel_fore(GTK_SCINTILLA(widget), TRUE, GdkColor_to_Int(fg));
+  } else {
 	/* generate fore for current back color */
 	generate_highlight_color(bg, &fg);
 	gtk_scintilla_set_sel_fore(GTK_SCINTILLA(widget), TRUE, GdkColor_to_Int(fg));
+  }
 }
 
 static void
@@ -874,7 +878,7 @@ set_current_line_style (GtkWidget      *widget,
 		gtk_scintilla_set_caret_line_back(GTK_SCINTILLA(widget), GdkColor_to_Int(bg));
 	} else {
 		gtk_scintilla_set_caret_line_back(GTK_SCINTILLA(widget), 13684944);
-        }
+  }
 }
 
 static void
