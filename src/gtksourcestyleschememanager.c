@@ -580,8 +580,11 @@ gtk_source_style_scheme_manager_get_scheme (GtkSourceStyleSchemeManager *manager
 {
 	g_return_val_if_fail (GTK_IS_SOURCE_STYLE_SCHEME_MANAGER (manager), NULL);
 	g_return_val_if_fail (scheme_id != NULL, NULL);
-
+	GtkSourceStyleScheme *scheme;
 	reload_if_needed (manager);
 
-	return g_hash_table_lookup (manager->priv->schemes_hash, scheme_id);
+	scheme = g_hash_table_lookup (manager->priv->schemes_hash, scheme_id);
+	/* if scheme isn't found return default scheme name */
+	if (!scheme) scheme = g_hash_table_lookup (manager->priv->schemes_hash, "mixer");
+	return scheme;
 }
