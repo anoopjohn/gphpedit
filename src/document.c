@@ -94,7 +94,6 @@ struct DocumentDetails
   GtkWidget *container;
   GtkWidget *infobar;
   GtkWidget *infolabel;
-
 };
 
 typedef struct
@@ -256,7 +255,7 @@ void tab_reset_scintilla_after_open(GtkScintilla *scintilla, guint current_line)
 }
 
 
-static void document_create_webkit(Document *doc, const gchar *buffer, gboolean is_help)
+static void document_create_webkit(Document *doc, const gchar *buffer, gboolean is_help, const gchar *raw_uri)
 {
   DocumentDetails *docdet = DOCUMENT_GET_PRIVATE(doc);
   GString *caption=NULL;
@@ -276,8 +275,8 @@ static void document_create_webkit(Document *doc, const gchar *buffer, gboolean 
   docdet->short_filename = g_strdup(caption->str);
   docdet->label = gtk_label_new (caption->str);
   gtk_widget_show (docdet->label);
- 
-  webkit_web_view_load_string (WEBKIT_WEB_VIEW(docdet->help_view), buffer, "text/html", "UTF-8", filename);
+  document_set_GFile(doc, get_gfile_from_filename( (gchar *)raw_uri));
+  webkit_web_view_load_string (WEBKIT_WEB_VIEW(docdet->help_view), buffer, "text/html", "UTF-8", raw_uri);
 
   gphpedit_debug_message (DEBUG_DOCUMENT, "WEBKIT FILE: %s\n", caption->str);
 
@@ -416,9 +415,9 @@ void document_done_loading_cb (DocumentLoader *doc, guint result, gpointer user_
     tab_set_event_handlers(document);
     gtk_scintilla_goto_pos(GTK_SCINTILLA(docdet->scintilla), 0);
     } else if (docdet->type == TAB_HELP) {
-      document_create_webkit(document, document_loader_get_file_contents (doc), TRUE);
+      document_create_webkit(document, document_loader_get_file_contents (doc), TRUE, document_loader_get_raw_uri (doc));
     } else if (docdet->type == TAB_PREVIEW) {
-      document_create_webkit(document, document_loader_get_file_contents (doc), FALSE);
+      document_create_webkit(document, document_loader_get_file_contents (doc), FALSE, NULL);
       }
     }
   g_signal_emit (G_OBJECT (document), signals[LOAD_COMPLETE], 0, result);
@@ -452,6 +451,7 @@ static void document_create_new(Document *doc, gint type, gchar *filename, gint 
   g_signal_connect(G_OBJECT(docdet->load), "done_navigate", G_CALLBACK(document_done_navigate_cb), doc);
   g_signal_connect(G_OBJECT(docdet->load), "done_refresh", G_CALLBACK(document_done_refresh_cb), NULL);
 }
+
 void document_load(Document *document){
   gphpedit_debug (DEBUG_DOCUMENT);
   g_return_if_fail(document);
@@ -1040,8 +1040,8 @@ static void notify_title_cb (WebKitWebView* web_view, GParamSpec* pspec, Documen
      docdet->short_filename = g_strconcat(_("Preview: "), main_title, NULL);
    }
 #ifdef PHP_DOC_DIR
-   if (docdet->help_function) g_free(docdet->help_function);
-     docdet->help_function = main_title;
+//   if (docdet->help_function) g_free(docdet->help_function);
+//     docdet->help_function = main_title;
 #endif
      gtk_label_set_text(GTK_LABEL(docdet->label), docdet->short_filename);
      g_signal_emit (G_OBJECT (document), signals[SAVE_UPDATE], 0);  /* emito señal */
@@ -1058,6 +1058,7 @@ void document_done_navigate_cb (DocumentLoader *doclod, gboolean result, gpointe
       } else {
         docdet->short_filename = g_strdup_printf("%s%s",_("Preview: "), docdet->help_function);
       }
+      webkit_web_view_load_string (WEBKIT_WEB_VIEW(docdet->help_view), document_loader_get_file_contents (doclod), "text/html", "UTF-8", document_loader_get_raw_uri (doclod));
     }
 }
 /*
@@ -1069,6 +1070,7 @@ gboolean webkit_link_clicked (WebKitWebView *web_view, WebKitWebFrame *frame, We
 {
   DocumentDetails *docdet = DOCUMENT_GET_PRIVATE(document);
   gchar *uri= (gchar *)webkit_network_request_get_uri(request);
+  if (webkit_web_navigation_action_get_reason (navigation_action) !=WEBKIT_WEB_NAVIGATION_REASON_LINK_CLICKED) return FALSE;
   if (uri){
     //if it's a direction like filename.html#refpoint skips refpoint part
     uri=trunc_on_char(uri, '#');
@@ -1076,10 +1078,17 @@ gboolean webkit_link_clicked (WebKitWebView *web_view, WebKitWebFrame *frame, We
       if (g_str_has_suffix(uri,".htm")){
        return TRUE;
       }
+    } else {
+      gchar *filename = document_get_filename(document);
+      gchar *parent = filename_parent_uri(filename);
+      g_free(filename);
+      gchar *nav_uri = get_absolute_from_relative(uri, parent);
+      g_free(parent);
+      document_navigate_url(docdet->load, document, nav_uri);
+      g_free(nav_uri);
     }
     }
-    document_navigate_url(docdet->load, document, uri);
-    return FALSE;
+  return TRUE;
 }
 static void tab_set_folding(Document *document, gint folding)
 {

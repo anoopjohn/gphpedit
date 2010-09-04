@@ -59,6 +59,7 @@ typedef struct
 /* Basic GObject requirements. */
 GType document_loader_get_type (void);
 DocumentLoader *document_loader_new (Document *document, GtkWindow *dialog_parent_window);
+const gchar *document_loader_get_raw_uri (DocumentLoader *doclod);
 gboolean document_loader_get_UTF8_converted (DocumentLoader *doclod);
 Document *document_loader_get_document (DocumentLoader *doclod);
 void document_loader_load_document(DocumentLoader *doclod);

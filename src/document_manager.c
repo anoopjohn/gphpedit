@@ -333,7 +333,7 @@ void document_manager_session_save(DocumentManager *docmg)
           } else {
             if (document_get_document_type(document)==TAB_HELP){
               /* it's a help page */
-              g_string_append_printf (session_file_contents,"phphelp:%s\n",document_get_help_function(document));
+              g_string_append_printf (session_file_contents,"phphelp:%s\n", document_get_help_function(document));
             } else if (document_get_document_type(document)==TAB_PREVIEW){
               /* it's a preview page */
               gchar *prevfilename = document_get_filename(document);

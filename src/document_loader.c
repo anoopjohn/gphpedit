@@ -72,13 +72,13 @@ struct DocumentLoaderDetails
   guint file_contents_len;
   gchar *buffer;
   gint webkit_action;
+  gchar *raw_uri;
 };
 
 #define DOCUMENT_LOADER_GET_PRIVATE(object)(G_TYPE_INSTANCE_GET_PRIVATE ((object),\
 					    DOCUMENT_LOADER_TYPE,\
 					    DocumentLoaderDetails))
 
-static void document_loader_finalize (GObject *object);
 static void document_loader_dispose (GObject *gobject);
 
 void document_create_help(DocumentLoader *doclod);
@@ -96,7 +96,6 @@ document_loader_class_init (DocumentLoaderClass *klass)
 	GObjectClass *object_class;
 
 	object_class = G_OBJECT_CLASS (klass);
-	object_class->finalize = document_loader_finalize;
   object_class->dispose = document_loader_dispose;
 
 /*
@@ -150,20 +149,10 @@ static void document_loader_dispose (GObject *object)
   /* free object resources*/
   g_object_unref(docloddet->dialog_parent_window);
   if (docloddet->gmo) g_object_unref(docloddet->gmo);
+  if (docloddet->raw_uri) g_free(docloddet->raw_uri);
 
   /* Chain up to the parent class */
   G_OBJECT_CLASS (document_loader_parent_class)->dispose (object);
-}
-
-static void
-document_loader_finalize (GObject *object)
-{
-//  DocumentLoader *doclod = DOCUMENT_LOADER(object);
-//  DocumentLoaderDetails *docloddet;
-//	docloddet = DOCUMENT_LOADER_GET_PRIVATE(doclod);
-  
-  //free class data
-	G_OBJECT_CLASS (document_loader_parent_class)->finalize (object);
 }
 
 DocumentLoader *document_loader_new (Document *document, GtkWindow *dialog_parent_window)
@@ -177,6 +166,7 @@ DocumentLoader *document_loader_new (Document *document, GtkWindow *dialog_paren
   docloddet->document = document;
   docloddet->file_contents_len = 0;
   docloddet->buffer = NULL;
+  docloddet->raw_uri = NULL;
 	return doclod; /* return new object */
 }
 
@@ -429,7 +419,7 @@ void tab_help_opened (GObject *source_object, GAsyncResult *res, gpointer user_d
   if (docloddet->webkit_action==LOAD){
     g_signal_emit (G_OBJECT (doclod), signals[DONE_LOADING], 0, TRUE);
   } else {
-    g_signal_emit (G_OBJECT (doclod), signals[DONE_NAVIGATE], 0, FALSE);
+    g_signal_emit (G_OBJECT (doclod), signals[DONE_NAVIGATE], 0, TRUE);
   }
 }
 
@@ -553,6 +543,7 @@ void document_create_help(DocumentLoader *doclod)
   }
   else {
     gphpedit_debug_message (DEBUG_DOCUMENT,"filename:%s", long_filename->str);
+    docloddet->raw_uri = g_strdup(long_filename->str);
     docloddet->file=get_gfile_from_filename(long_filename->str);
     tab_help_load_file(doclod);
   }
@@ -576,7 +567,11 @@ void document_navigate_url(DocumentLoader *doclod, Document *document, gchar *ur
   docloddet->webkit_action= NAVIGATE;
   GString *long_filename = NULL;
   if (document_get_document_type(docloddet->document)==TAB_HELP){
-  long_filename = tab_help_find_helpfile(uri);
+    if (!g_str_has_prefix(uri, "file:")) {
+      long_filename = tab_help_find_helpfile(uri);
+    } else {
+      long_filename = g_string_new(uri);
+    }
   } else {
   long_filename = g_string_new(uri);
   }
@@ -588,7 +583,7 @@ void document_navigate_url(DocumentLoader *doclod, Document *document, gchar *ur
     return ;
   } else {
     gphpedit_debug_message (DEBUG_DOCUMENT,"filename:%s", long_filename->str);
-    docloddet->file=get_gfile_from_filename(long_filename->str);
+    docloddet->file = get_gfile_from_filename(long_filename->str);
     tab_help_load_file(doclod);
   }
 }
@@ -610,8 +605,16 @@ const gchar *document_loader_get_file_contents (DocumentLoader *doclod)
   return docloddet->buffer;
 }
 
+const gchar *document_loader_get_raw_uri (DocumentLoader *doclod)
+{
+  DocumentLoaderDetails *docloddet = DOCUMENT_LOADER_GET_PRIVATE(doclod);
+  return docloddet->raw_uri;
+}
+
+
 Document *document_loader_get_document (DocumentLoader *doclod)
 {
   DocumentLoaderDetails *docloddet = DOCUMENT_LOADER_GET_PRIVATE(doclod);
   return docloddet->document;
 }
+
