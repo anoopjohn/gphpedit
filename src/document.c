@@ -2546,7 +2546,7 @@ void document_done_refresh_cb (DocumentLoader *doclod, gboolean result, gpointer
     tab_check_python_file(document); 
     tab_check_sql_file(document); 
     gtk_scintilla_set_save_point(GTK_SCINTILLA(docdet->scintilla));
-      }
+    }
     }
 }
 
@@ -2556,6 +2556,7 @@ void document_reload(Document *document)
   g_return_if_fail(document);
   DocumentDetails *docdet = DOCUMENT_GET_PRIVATE(document);
   if (GTK_IS_SCINTILLA(docdet->scintilla)){
+    docdet->type = TAB_FILE;
     document_loader_reload_file(docdet->load, document);
   } else if (WEBKIT_IS_WEB_VIEW(docdet->help_view)){
     webkit_web_view_reload (docdet->help_view);

@@ -388,7 +388,6 @@ void document_load_file_helper(DocumentLoader *doclod, gint action)
   }
   document_set_readonly(docloddet->document, !g_file_info_get_attribute_boolean (info,"access::can-write"), FALSE);
   document_set_content_type(docloddet->document, g_file_info_get_content_type (info));
-
   GIcon *icon= g_file_info_get_icon (info); /* get Gicon for mimetype*/
   GtkIconInfo *ificon= gtk_icon_theme_lookup_by_gicon (gtk_icon_theme_get_default (), icon, ICON_SIZE, 0);
   document_set_file_icon(docloddet->document, gtk_icon_info_load_icon (ificon, NULL));
@@ -563,8 +562,8 @@ void document_loader_reload_file(DocumentLoader *doclod, Document *document)
 {
   DocumentLoaderDetails *docloddet = DOCUMENT_LOADER_GET_PRIVATE(doclod);
   docloddet->document = document;
-  if (document_get_document_type(docloddet->document)!=TAB_HELP && document_get_document_type(docloddet->document)!=TAB_PREVIEW){
-  document_load_file_helper(doclod, REFRESH);
+  if (document_get_document_type(docloddet->document)!=TAB_HELP && document_get_document_type(docloddet->document)!=TAB_PREVIEW){ //FIXME: usar funcion que pregunta por scintilla
+    document_load_file_helper(doclod, REFRESH);
   }
 }
 
