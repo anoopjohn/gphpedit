@@ -85,11 +85,10 @@ gboolean poke_existing_instance (int argc, char **argv){
   /* if another process creates a pipe while we are doing this,
     we may not get that pipe here. dunno if it's a problem */
   while ((entry = g_dir_read_name (dir))){
-    if (!g_str_has_prefix(entry, prefix)) {
+    if (g_str_has_prefix(entry, prefix)) {
       const char *pid_string;
       pid_t pid;
       char *filename;
-
       //g_print ("%s\n", entry);
 
       pid_string = entry + prefix_len;
@@ -99,7 +98,6 @@ gboolean poke_existing_instance (int argc, char **argv){
       filename = g_build_filename (tmp_path, entry, NULL);
 
       gphpedit_debug_message( DEBUG_IPC, "filename: %s\n", filename);
-
       if (!errno && pid > 0 && !kill (pid, 0)){
         int i;
         /* it would be cool to check that the file is indeed a fifo,
