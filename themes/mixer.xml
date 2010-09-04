@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+ Copyright (C) 2010 Jose Rostagno (for vijona.com.ar)
+
+ This library is free software; you can redistribute it and/or
+ modify it under the terms of the GNU Library General Public
+ License as published by the Free Software Foundation; either
+ version 2 of the License, or (at your option) any later version.
+
+ This library is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ Library General Public License for more details.
+
+ You should have received a copy of the GNU Library General Public
+ License along with this library; if not, write to the
+ Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+ Boston, MA 02111-1307, USA.
+
+-->
+<style-scheme id="mixer" _name="Mixer" version="1.0">
+  <author>José Rostagno</author>
+  <description>A theme for GPHPedit.</description>
+
+<!-- Colors -->
+
+  <color name="background" value="#F8F8FF"/>
+  <color name="foreground" value="#black"/>
+  <color name="highlight" value="#000012"/>
+  <color name="comment" value="#2ca610"/>
+  <color name="keyword" value="#0000FF"/>
+  <color name="function" value="#990000"/>
+  <color name="class" value="#445588"/>
+  <color name="number" value="#ed971c"/>
+  <color name="variable" value="#182944"/>
+  <color name="constant" value="#0F8787"/>
+  <color name="constant2" value="#0F8787"/>
+  <color name="string" value="#DD1144"/>
+  <color name="symbol" value="#AA2C8C"/>
+  <color name="identifier" value="#0086b3"/>
+
+<!-- Global Settings -->
+
+  <style name="text" foreground="#black" background="#white"/>
+  <style name="selection" foreground="#black" background="#e06666"/>
+  <style name="cursor" foreground="#black"/>
+  <style name="current-line" background="#gray92" />
+  <style name="line-numbers" foreground="#black" background="#gray"/>
+  
+<!-- Bracket Matching -->
+  <style name="bracket-match" background="background" foreground="#2f12de" bold="true"/>
+  <style name="bracket-mismatch" background="background" foreground="#b70909" bold="true"/>
+
+<!-- Comments -->
+  <style name="def:comment" foreground="#2ca610" italic="true"/>
+  <style name="def:shebang" foreground="comment" italic="true"/>
+  <style name="def:doc-comment-element" foreground="#165508" bold="true"/>
+
+<!-- Constants and Variables-->
+  <style name="def:constant" foreground="#ea4787"/>
+  <style name="def:string" foreground="#DD1144"/>
+  <style name="def:special-char" foreground="string"/>
+  <style name="def:special-constant" foreground="constant" bold="true"/>
+  <style name="def:boolean" foreground="constant"/>
+  <style name="def:number" foreground="number"/>
+  <style name="def:floating-point" foreground="number"/>
+  <style name="def:keyword" foreground="#slate blue"/>
+  <style name="def:builtin" foreground="#blue" />
+  <style name="def:variable" foreground="#blue"/>
+  
+<!-- Identifiers -->
+  <style name="def:identifier" foreground="identifier"/>
+
+<!-- Statements -->
+  <style name="def:statement" foreground="constant"/>
+
+<!-- Types -->
+  <style name="def:type" foreground="class" />
+  
+<!-- Others -->
+  <style name="def:error" foreground="highlight" bold="true"/>
+  <style name="def:note" foreground="highlight" bold="true"/>
+  <style name="def:preprocessor" foreground="#6794ba"/>
+    
+<!-- XML Styles -->
+  <style name="xml:attribute-name" foreground="keyword"/>
+  <style name="xml:element-name" foreground="keyword"/>
+
+</style-scheme>

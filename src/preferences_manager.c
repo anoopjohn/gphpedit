@@ -1292,5 +1292,5 @@ void load_styles(Preferences_ManagerDetails *prefdet)
 { 
   gphpedit_debug(DEBUG_PREFS);
   load_font_settings(prefdet);
-  prefdet->style_name = get_string("/gPHPEdit/defaults/style", "classic");
+  prefdet->style_name = get_string("/gPHPEdit/defaults/style", "mixer");
 }

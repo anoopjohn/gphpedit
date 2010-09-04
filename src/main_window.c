@@ -290,6 +290,9 @@ void main_window_create(void){
   update_app_title(document_manager_get_current_document(main_window.docmg));
 
   main_window.stylemg = gtk_source_style_scheme_manager_new ();
+  gchar *theme_dir = g_build_path (G_DIR_SEPARATOR_S, API_DIR, "themes", NULL);
+  gtk_source_style_scheme_manager_prepend_search_path (main_window.stylemg, theme_dir);
+  g_free(theme_dir);
 }
 
 void update_controls(Document *document){
