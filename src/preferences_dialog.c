@@ -648,7 +648,8 @@ PREFERENCES_DIALOG_init (PreferencesDialog *dialog)
   g_signal_connect(G_OBJECT(priv->font_settings), "font-set", G_CALLBACK(on_font_settings_toggle), NULL);
   gtk_font_button_set_show_style (GTK_FONT_BUTTON(priv->font_settings), FALSE);
 
-	label = gtk_label_new_with_mnemonic (_("Color Scheme:"));
+	label = gtk_label_new (_("<b>Color Scheme:</b>"));
+  gtk_label_set_use_markup (GTK_LABEL(label), TRUE);
 	gtk_label_set_justify (GTK_LABEL (label), GTK_JUSTIFY_LEFT);
 	gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 	
