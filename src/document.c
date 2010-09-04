@@ -1316,7 +1316,7 @@ void set_document_to_cxx(Document *document)
   if (GTK_IS_SCINTILLA(docdet->scintilla)){
     tab_cxx_set_lexer(document);
     docdet->type = TAB_CXX;
-    //FIXME: folding
+    tab_set_folding(document, TRUE);
   }
 }
 
@@ -1327,7 +1327,7 @@ void set_document_to_sql(Document *document)
   if (GTK_IS_SCINTILLA(docdet->scintilla)){
     tab_sql_set_lexer(document);
     docdet->type = TAB_SQL;
-    //FIXME: folding
+    tab_set_folding(document, TRUE);
   }
 }
 
@@ -1338,7 +1338,7 @@ void set_document_to_perl(Document *document)
   if (GTK_IS_SCINTILLA(docdet->scintilla)){
     tab_perl_set_lexer(document);
     docdet->type = TAB_PERL;
-    //FIXME: folding
+    tab_set_folding(document, TRUE);
   }
 }
 
