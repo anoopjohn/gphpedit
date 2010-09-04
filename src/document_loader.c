@@ -562,7 +562,7 @@ void document_loader_reload_file(DocumentLoader *doclod, Document *document)
 {
   DocumentLoaderDetails *docloddet = DOCUMENT_LOADER_GET_PRIVATE(doclod);
   docloddet->document = document;
-  if (document_get_document_type(docloddet->document)!=TAB_HELP && document_get_document_type(docloddet->document)!=TAB_PREVIEW){ //FIXME: usar funcion que pregunta por scintilla
+  if (document_get_document_type(docloddet->document)!=TAB_HELP && document_get_document_type(docloddet->document)!=TAB_PREVIEW){
     document_load_file_helper(doclod, REFRESH);
   }
 }
