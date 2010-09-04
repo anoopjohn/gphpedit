@@ -1,4 +1,4 @@
-/* This file is part of gPHPEdit, a GNOME2 PHP Editor.
+/* This file is part of gPHPEdit, a GNOME PHP Editor.
 
    Copyright (C) 2003, 2004, 2005 Andy Jeffries <andy at gphpedit.org>
    Copyright (C) 2009 Anoop John <anoop dot john at zyxware.com>
@@ -591,35 +591,27 @@ gboolean document_manager_try_save_page(DocumentManager *docmg, Document *docume
   gphpedit_debug(DEBUG_DOC_MANAGER);
   if (!docmg) return TRUE;
   gint ret;
-  GString *string;
-  string = g_string_new("");
-  GtkWidget *confirm_dialog = gtk_message_dialog_new (GTK_WINDOW(main_window.window),
-    GTK_DIALOG_DESTROY_WITH_PARENT,GTK_MESSAGE_WARNING,GTK_BUTTONS_NONE,
-    _("The file '%s' has not been saved since your last changes, are you sure you want to close it and lose these changes?"),
+  GtkWidget *confirm_dialog = gtk_message_dialog_new_with_markup (GTK_WINDOW(main_window.window),
+    GTK_DIALOG_DESTROY_WITH_PARENT, GTK_MESSAGE_WARNING, GTK_BUTTONS_NONE,
+      /*TRANSLATORS: this is a pango markup string you must keep the format tags. */
+    _("<b>The file '%s' has not been saved since your last changes.</b>\n<small>Are you sure you want to close it and lose these changes?</small>"),
      document_get_shortfilename(document));
 
-  gchar *filename = document_get_filename(document);
-  g_string_printf(string,_("Unsaved changes to '%s'"), filename);
-  g_free(filename);
-  gtk_window_set_title(GTK_WINDOW(confirm_dialog), string->str);
-  g_string_free(string,TRUE);
   gtk_dialog_add_button (GTK_DIALOG(confirm_dialog),_("Close and _lose changes"), 0);
-  gtk_dialog_add_button (GTK_DIALOG(confirm_dialog),_("_Save file"), 1);
-  gtk_dialog_add_button (GTK_DIALOG(confirm_dialog),_("_Cancel closing"), 2);
+  if (document_get_untitled(document)){
+    gtk_dialog_add_button (GTK_DIALOG(confirm_dialog), GTK_STOCK_SAVE_AS, 1);
+  } else {
+    gtk_dialog_add_button (GTK_DIALOG(confirm_dialog), GTK_STOCK_SAVE, 1);
+  }
+  gtk_dialog_add_button (GTK_DIALOG(confirm_dialog), GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL);
+  gtk_dialog_set_default_response (GTK_DIALOG(confirm_dialog), 1); /* set save as default */
+
   ret = gtk_dialog_run (GTK_DIALOG (confirm_dialog));
   gtk_widget_destroy(confirm_dialog);
   switch (ret) {
     case 0:
       if (close_if_can) {
           document_manager_close_page(docmg, document);
-#if 0
-          close_page(document);
-          g_object_unref(document);
-          docmgdet->editors = g_slist_remove(docmgdet->editors, document);
-          if (!docmgdet->editors) {
-            docmgdet->current_document = NULL;
-          }
-#endif
       }
       return TRUE;
     case 1:
@@ -640,7 +632,7 @@ void document_manager_save_all(DocumentManager *docmg)
   for(li = docmgdet->editors; li!= NULL; li = g_slist_next(li)) {
     doc = li->data;
     if (document_get_untitled(doc)){
-      gphpedit_debug_message(DEBUG_MAIN_WINDOW,"%s","Untitled found. Save not implemented");
+      gphpedit_debug_message(DEBUG_MAIN_WINDOW,"%s","Untitled found. Save not implemented"); //FIXME:
     } else {
       document_save(doc);
     }
