@@ -23,12 +23,8 @@
 */
 #include "tab.h"
 #include "debug.h"
-#include "main_window_callbacks.h"
+#include "main_window.h"
 #include "gvfs_utils.h"
-#include "gphpedit-close-button.h"
-#include "gphpedit-statusbar.h"
-#include "classbrowser_ui.h"
-#include "classbrowser_parse.h"
 
 /**
 * str_replace
