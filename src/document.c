@@ -115,7 +115,6 @@ gboolean calltip_timer_set;
 					    DOCUMENT_TYPE,\
 					    DocumentDetails))
 
-static void document_finalize (GObject *object);
 static void document_dispose (GObject *gobject);
 
 static void document_create_new(Document *doc, gint type, gchar *filename, gint goto_line);
@@ -155,7 +154,6 @@ document_class_init (DocumentClass *klass)
 	GObjectClass *object_class;
 
 	object_class = G_OBJECT_CLASS (klass);
-	object_class->finalize = document_finalize;
   object_class->dispose = document_dispose;
 
 	signals[LOAD_COMPLETE] =
@@ -202,17 +200,6 @@ static void document_dispose (GObject *object)
   if (docdet->contenttype) g_free(docdet->contenttype);
   /* Chain up to the parent class */
   G_OBJECT_CLASS (document_parent_class)->dispose (object);
-}
-
-static void
-document_finalize (GObject *object)
-{
-//  Document *doc = DOCUMENT(object);
-//  DocumentDetails *docdet;
-//	docdet = DOCUMENT_GET_PRIVATE(doc);
-  
-  //free class data
-	G_OBJECT_CLASS (document_parent_class)->finalize (object);
 }
 
 Document *document_new (gint type, const gchar *filename, gint goto_line)
