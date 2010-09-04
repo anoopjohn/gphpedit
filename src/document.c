@@ -771,7 +771,7 @@ void process_user_list_selection (GtkWidget *w, gint type, gchar *text, gpointer
 
 static void char_added(GtkWidget *scintilla, guint ch, gpointer user_data)
 {
-  gphpedit_debug_message (DEBUG_DOCUMENT, "char added:%d\n",ch);
+  gphpedit_debug_message (DEBUG_DOCUMENT, "char added:%d",ch);
   Document *doc = DOCUMENT(user_data);
   g_return_if_fail(doc);
   DocumentDetails *docdet = DOCUMENT_GET_PRIVATE(doc);
@@ -1293,7 +1293,7 @@ void set_document_to_cobol(Document *document)
     gtk_scintilla_set_word_chars(GTK_SCINTILLA(docdet->scintilla), "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-");
     tab_cobol_set_lexer(document);
     docdet->type = TAB_COBOL;
-    //FIXME: folding
+    tab_set_folding(document, TRUE);
   }
 }
 
@@ -1305,7 +1305,7 @@ void set_document_to_python(Document *document)
     gtk_scintilla_set_word_chars(GTK_SCINTILLA(docdet->scintilla), "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-");
     tab_python_set_lexer(document);
     docdet->type = TAB_PYTHON;
-    //FIXME: folding
+    tab_set_folding(document, TRUE);
   }
 }
 
