@@ -251,23 +251,22 @@ void on_open1_activate(GtkWidget *widget)
   
   gtk_file_chooser_set_local_only (GTK_FILE_CHOOSER(file_selection_box), FALSE);
   gtk_dialog_set_default_response (GTK_DIALOG(file_selection_box), GTK_RESPONSE_ACCEPT);  
-  //Add filters to the open dialog
-  add_file_filters(GTK_FILE_CHOOSER(file_selection_box));
-  last_opened_folder = get_preferences_manager_last_opened_folder(main_window.prefmg);
-  gphpedit_debug_message(DEBUG_MAIN_WINDOW,"last_opened_folder: %s", last_opened_folder);
   /* opening of multiple files at once */
   gtk_file_chooser_set_select_multiple(GTK_FILE_CHOOSER(file_selection_box), TRUE);
+
+  //Add filters to the open dialog
+  add_file_filters(GTK_FILE_CHOOSER(file_selection_box));
   gchar *filename = (gchar *)document_get_filename(document_manager_get_current_document(main_window.docmg));
   if (filename && !document_get_untitled(document_manager_get_current_document(main_window.docmg))) {
     folder = filename_parent_uri(filename);
-      gphpedit_debug_message(DEBUG_MAIN_WINDOW,"folder: %s", folder);
+    gphpedit_debug_message(DEBUG_MAIN_WINDOW,"folder: %s", folder);
     gtk_file_chooser_set_current_folder_uri(GTK_FILE_CHOOSER(file_selection_box),  folder);
     g_free(folder);
+  } else {
+    last_opened_folder = get_preferences_manager_last_opened_folder(main_window.prefmg);
+    gphpedit_debug_message(DEBUG_MAIN_WINDOW,"last_opened_folder: %s", last_opened_folder);
+    gtk_file_chooser_set_current_folder_uri(GTK_FILE_CHOOSER(file_selection_box), last_opened_folder);
   }
-  else if (last_opened_folder){
-    gtk_file_chooser_set_current_folder_uri(GTK_FILE_CHOOSER(file_selection_box),  last_opened_folder);
-  }
-  
   if (gtk_dialog_run(GTK_DIALOG(file_selection_box)) == GTK_RESPONSE_ACCEPT) {
     open_file_ok(GTK_FILE_CHOOSER(file_selection_box));
   }
@@ -278,11 +277,12 @@ void save_file_as_ok(GtkFileChooser *file_selection_box)
 {
   gchar *uri=gtk_file_chooser_get_uri(file_selection_box);
   // Set the filename of the current document to be that
-  document_set_GFile(document_manager_get_current_document(main_window.docmg), gtk_file_chooser_get_file(file_selection_box));
-  document_set_untitled(document_manager_get_current_document(main_window.docmg), FALSE);
+  Document *document = document_manager_get_current_document(main_window.docmg);
+  document_set_GFile(document, gtk_file_chooser_get_file(file_selection_box));
+  document_set_untitled(document, FALSE);
   gchar *basename = filename_get_basename(uri);
   g_free(uri);
-  document_set_shortfilename(document_manager_get_current_document(main_window.docmg), basename);
+  document_set_shortfilename(document, basename);
 
   // Call Save method to actually save it now it has a filename
   on_save1_activate(NULL);
@@ -290,14 +290,15 @@ void save_file_as_ok(GtkFileChooser *file_selection_box)
 
 void on_save1_activate(GtkWidget *widget)
 {
-  if (document_manager_get_current_document(main_window.docmg)) {
+  Document *document = document_manager_get_current_document(main_window.docmg);
+  if (document) {
     //if document is Untitled
-    if (document_get_untitled(document_manager_get_current_document(main_window.docmg))) {
+    if (document_get_untitled(document)) {
       on_save_as1_activate(widget);
     } else {
       /* show status in statusbar */
-      gphpedit_statusbar_flash_message (GPHPEDIT_STATUSBAR(main_window.appbar),0,_("Saving %s"), document_get_shortfilename(document_manager_get_current_document(main_window.docmg)));
-      document_save(document_manager_get_current_document(main_window.docmg));
+      gphpedit_statusbar_flash_message (GPHPEDIT_STATUSBAR(main_window.appbar),0,_("Saving %s"), document_get_shortfilename(document));
+      document_save(document);
     }
   }
 }
@@ -365,13 +366,14 @@ void on_tab_close_activate(GtkWidget *widget, Document *document)
 
 void rename_file(GString *newfilename)
 {
+  Document *document = document_manager_get_current_document(main_window.docmg);
   gchar *basename=filename_get_basename(newfilename->str);
-  gchar *filename = document_get_filename(document_manager_get_current_document(main_window.docmg));
+  gchar *filename = document_get_filename(document);
   if (filename_rename(filename, basename)){
   // Set the filename of the current document to be that
-  document_set_GFile(document_manager_get_current_document(main_window.docmg), get_gfile_from_filename(newfilename->str));
-  document_set_untitled(document_manager_get_current_document(main_window.docmg), FALSE);
-  document_set_shortfilename(document_manager_get_current_document(main_window.docmg), basename);
+  document_set_GFile(document, get_gfile_from_filename(newfilename->str));
+  document_set_untitled(document, FALSE);
+  document_set_shortfilename(document, basename);
   g_free(basename);
   // save as new filename
   on_save1_activate(NULL);
