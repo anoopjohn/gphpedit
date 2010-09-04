@@ -274,6 +274,10 @@ about how to write a new one, making transition more easy, between this and the 
 You can get some examples at: http://live.gnome.org/GtkSourceView/StyleSchemes
 also You may want to visit http://library.gnome.org/devel/gtksourceview/stable/style-reference.html
 if you want to create a new theme.
+To put a gphpedit's specific theme or if you don't have gtksourceview installed, 
+you should put the new theme in /usr/share/gphpedit/themes 
+or in /usr/local/share/gphpedit/themes 
+depending on instalation prefix.
 
 
 	The gphpedit team.
