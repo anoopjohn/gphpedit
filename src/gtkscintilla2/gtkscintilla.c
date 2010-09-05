@@ -45,8 +45,6 @@ enum {
     ZOOM,
     LAST_SIGNAL
 };
-static void gtk_scintilla_finalize (GObject *gobject);
-static void gtk_scintilla_dispose (GObject *gobject);
 static void notify_cb                (GtkWidget         *w,
                                       gint               param,
                                       gpointer           notif,
@@ -69,8 +67,6 @@ gtk_scintilla_class_init (GtkScintillaClass *klass)
 {
 
   GObjectClass *object_class = G_OBJECT_CLASS (klass);	
-  object_class->dispose = gtk_scintilla_dispose;
-  object_class->finalize = gtk_scintilla_finalize;
 
     signals[STYLE_NEEDED] =
         g_signal_new ("style_needed",
@@ -263,40 +259,14 @@ gtk_scintilla_init (GtkScintilla *sci)
     
     gtk_widget_show_all (GTK_WIDGET(sci));
 }
-/*
-* gtk_scintilla_dispose
-* disposes the Gobject
-*/
-static void gtk_scintilla_dispose (GObject *gobject)
-{
-  g_return_if_fail (gobject != NULL);
-  g_return_if_fail (GTK_IS_SCINTILLA (gobject));
 
-//  GtkScintilla *self = GTK_SCINTILLA (gobject);
-
-  /* Chain up to the parent class */
-  G_OBJECT_CLASS (gtk_scintilla_parent_class)->dispose (gobject);
-}
-/*
-* gtk_scintilla_finalize
-* Finalize class and release resources
-*/
-static void gtk_scintilla_finalize (GObject *gobject)
-{
-  g_return_if_fail (gobject != NULL);
-  g_return_if_fail (GTK_IS_SCINTILLA (gobject));
-  //GtkScintilla *self = GTK_SCINTILLA (gobject);
-
-  /* Chain up to the parent class */
-  G_OBJECT_CLASS (gtk_scintilla_parent_class)->finalize (gobject);
-}
 /*
 * gtk_scintilla_new
 * Creates a new instance of GtkScintilla object and returns a GtkWidget
 */
 GtkWidget *gtk_scintilla_new (void)
 {
-    return gtk_widget_new (gtk_scintilla_get_type (), NULL);
+    return gtk_widget_new (GTK_TYPE_SCINTILLA, NULL);
 }
 
 glong
