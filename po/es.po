@@ -8,34 +8,18 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 0.9.96\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2010-08-21 20:28-0300\n"
-"PO-Revision-Date: 2010-08-21 21:46-0300\n"
+"POT-Creation-Date: 2010-09-05 20:32-0300\n"
+"PO-Revision-Date: 2010-01-25 22:45-0300\n"
 "Last-Translator: jose rostagno <joserostagno@hotmail.com>\n"
 "Language-Team: español <none@none.com>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: ../gphpedit.desktop.in.h:1
-msgid "Edit PHP source files"
-msgstr "Editar archivos fuente PHP"
-
-#: ../gphpedit.desktop.in.h:2
-msgid "PHP/HTML/CSS editor"
-msgstr "Editor PHP/HTML/CSS"
-
-#. If there is no file opened set the name as gPHPEdit
-#. confirm deletion with dialog
-#: ../gphpedit.desktop.in.h:3 ../src/document_loader.c:247
-#: ../src/main_window.c:210 ../src/main_window.c:255
-#: ../src/main_window_callbacks.c:421 ../src/preferences_dialog.c:356
-#: ../src/preferences_dialog.c:720 ../src/preferences_dialog.c:733
-msgid "gPHPEdit"
-msgstr "gPHPEdit"
-
 #: ../src/calltip.c:93 ../src/calltip.c:119
+#, fuzzy
 msgid "Could not open php-gphpedit.api file"
-msgstr "No se pudo abrir el archivo php-gphpedit.api"
+msgstr "ADVERTENCIA: No se pudo abrir el archivo php-gphpedit.api \n"
 
 #: ../src/classbrowser_ui.c:185
 msgid "Parse only current file"
@@ -53,84 +37,95 @@ msgstr "Nombre"
 msgid "FILE:"
 msgstr "Archivo:"
 
-#: ../src/document.c:252 ../src/document.c:1042 ../src/document.c:1061
+#: ../src/document.c:265 ../src/document.c:1038 ../src/document.c:1057
 msgid "Help: "
 msgstr "Ayuda:"
 
-#: ../src/document.c:255 ../src/document.c:1044 ../src/document.c:1063
+#: ../src/document.c:268 ../src/document.c:1040 ../src/document.c:1059
 msgid "Preview: "
 msgstr "Vista Previa: "
 
-#: ../src/document.c:283 ../src/main_window_callbacks.c:375
-#: ../src/main_window_callbacks.c:381
+#: ../src/document.c:296 ../src/main_window_callbacks.c:348
+#: ../src/main_window_callbacks.c:353
 #, c-format
 msgid "Opening %s"
-msgstr "Abriendo %s"
+msgstr ""
 
-#: ../src/document.c:300 ../src/document.c:333
-#, c-format
+#: ../src/document.c:313 ../src/document.c:346
+#, fuzzy, c-format
 msgid "<b>The file \"%s\" has been externally modified.</b>"
-msgstr "<b>El Archivo %s fue modificado externamente. Desea re-cargarlo?</b>"
+msgstr "El Archivo %s fue modificado externamente. Desea re-cargarlo?"
 
-#: ../src/document.c:342
+#: ../src/document.c:355
+#, fuzzy
 msgid "Do you want reload it?"
-msgstr "¿Desea recargarlo?"
+msgstr "¿Desea reemplazar esta ocurrencia?"
 
-#: ../src/document.c:365 ../src/document.c:368 ../src/document.c:1432
-#: ../src/document.c:1433
+#: ../src/document.c:378 ../src/document.c:381 ../src/document.c:1438
+#: ../src/document.c:1439
 msgid "Untitled"
 msgstr "Sin titulo"
 
-#: ../src/document.c:1823
+#: ../src/document.c:1829
+#, fuzzy
 msgid "No marker found"
-msgstr "No se encontraron marcadores"
+msgstr "Color de texto:"
 
-#: ../src/document.c:1999 ../src/document.c:2006
+#: ../src/document.c:1993 ../src/document.c:2000
 msgid " - gPHPEdit"
 msgstr " - gPHPEdit"
 
-#: ../src/document.c:2027
+#: ../src/document.c:2021
 msgid "Cannot allocate write buffer"
 msgstr "No se pudo alojar buffer de escritura"
 
-#: ../src/document.c:2195
+#: ../src/document.c:2189
 msgid "Do you want to replace this occurence?"
 msgstr "¿Desea reemplazar esta ocurrencia?"
 
-#: ../src/document.c:2196 ../src/filebrowser_backend.c:380
+#: ../src/document.c:2190 ../src/filebrowser_backend.c:380
+#: ../src/main_window_callbacks.c:346
 msgid "Question"
 msgstr "Pregunta"
 
-#: ../src/document.c:2256
+#: ../src/document.c:2250
 #, c-format
 msgid "GIO Error: %s saving file:%s\n"
 msgstr "Error GIO: %s guardando archivo:%s\n"
 
-#: ../src/document.c:2266
+#: ../src/document.c:2260
 #, c-format
-msgid "Could not get the file modification time for file: '%s'. GIO error: %s \n"
-msgstr "No se pudo obtener la fecha de modificación del archivo: '%s'. Error GIO: %s \n"
+msgid ""
+"Could not get the file modification time for file: '%s'. GIO error: %s \n"
+msgstr ""
+"No se pudo obtener la fecha de modificación del archivo: '%s'. Error GIO: %"
+"s \n"
 
-#: ../src/document.c:2301
+#: ../src/document.c:2295
 #, c-format
 msgid "UTF-8 Error: %s\n"
 msgstr "UTF-8 Error: %s\n"
 
-#: ../src/document.c:2489
+#: ../src/document.c:2483
 #, c-format
 msgid "Unhandle keyboard macro function %d, please report\n"
 msgstr ""
 
-#: ../src/document_loader.c:189
+#: ../src/document_loader.c:179
 #, c-format
 msgid "Error mounting volume. GIO error:%s\n"
 msgstr "Error montando volumen. Error GIO:%s\n"
 
-#: ../src/document_loader.c:203
-msgid "Error filesystem not mounted. Mounting filesystem, this will take a few seconds..."
-msgstr "Error el sistema de archivos no esta montado. Montando sistema de archivos, esto tardara unos segundos..."
+#: ../src/document_loader.c:193
+#, fuzzy
+msgid ""
+"Error filesystem not mounted. Mounting filesystem, this will take a few "
+"seconds..."
+msgstr ""
+"Error el sistema de archivos no esta montado.\n"
+"Montando sistema de archivos, esto tardara unos segundos...\n"
 
-#: ../src/document_loader.c:209
+#: ../src/document_loader.c:199
 #, c-format
 msgid ""
 "Error opening file GIO error:%s\n"
@@ -139,7 +134,7 @@ msgstr ""
 "Error abriendo archivo. Error GIO:%s\n"
 "Archivo:%s"
 
-#: ../src/document_loader.c:225
+#: ../src/document_loader.c:215
 #, c-format
 msgid ""
 "The file %s was not found.\n"
@@ -150,78 +145,77 @@ msgstr ""
 "\n"
 "¿Desea crearlo como un documento vacío?"
 
-#: ../src/document_loader.c:226
+#: ../src/document_loader.c:216
 msgid "File not found"
 msgstr "Archivo no encontrado"
 
-#: ../src/document_loader.c:240 ../src/document_loader.c:381
+#: ../src/document_loader.c:230 ../src/document_loader.c:371
 #, c-format
 msgid "Could not get the file info. GIO error: %s \n"
 msgstr "No se pudo obtener la información del archivo. Error GIO: %s.\n"
 
-#: ../src/document_loader.c:247
+#. If there is no file opened set the name as gPHPEdit
+#: ../src/document_loader.c:237 ../src/main_window.c:210
+#: ../src/main_window.c:255 ../src/main_window_callbacks.c:393
+#: ../gphpedit.desktop.in.h:3
+msgid "gPHPEdit"
+msgstr "gPHPEdit"
+
+#: ../src/document_loader.c:237
 msgid "Sorry, I can open this kind of file.\n"
 msgstr "Lo siento, no puedo abrir esa clase de archivo.\n"
 
-#: ../src/document_loader.c:325
-#, c-format
-msgid "gPHPEdit UTF-8 Error: %s\n"
+#: ../src/document_loader.c:315
+#, fuzzy, c-format
+msgid "gPHPEdit UTF-8 Error: %s"
 msgstr "Error gPHPEdit UTF-8 : %s\n"
 
-#: ../src/document_loader.c:330
-#, c-format
-msgid "Converted to UTF-8 size: %u\n"
-msgstr "Tamaño convertido a UTF-8: %u\n"
+#: ../src/document_loader.c:320
+#, fuzzy, c-format
+msgid "Converted to UTF-8 size: %u"
+msgstr "Tamaño convertido a UTF-8: %d\n"
 
-#: ../src/document_loader.c:449
+#: ../src/document_loader.c:438
 #, c-format
 msgid "Could not get file info for file %s. GIO error: %s \n"
 msgstr "No se pudo obtener la información del archivo %s. Error GIO: %s.\n"
 
-#: ../src/document_loader.c:527 ../src/document_loader.c:539
-#, c-format
-msgid "Help for function not found: %s\n"
+#: ../src/document_loader.c:516 ../src/document_loader.c:528
+#, fuzzy, c-format
+msgid "Help for function not found: %s"
 msgstr "Ayuda para la función no encontrada: %s\n"
 
-#: ../src/document_loader.c:551 ../src/document_loader.c:586
+#: ../src/document_loader.c:540 ../src/document_loader.c:580
 msgid "Could not find the required command in the online help"
 msgstr "No se pudo encontrar el comando requerido en la ayuda online"
 
 #: ../src/document_manager.c:162
 msgid "Close Tab"
-msgstr "Cerrar Pestaña"
+msgstr ""
 
 #: ../src/document_manager.c:352
-#, c-format
+#, fuzzy, c-format
 msgid "Error Saving session file: %s\n"
-msgstr "Error guardando archivo de session:%s\n"
+msgstr "Error GIO: %s guardando archivo:%s\n"
 
 #: ../src/document_manager.c:360 ../src/document_manager.c:439
-#, c-format
+#, fuzzy, c-format
 msgid "GIO Error deleting file: %s, code %d\n"
-msgstr "Error GIO borrando archivo: %s, codigo %d\n"
+msgstr "Error GIO borrando archivo: %s\n"
 
-#: ../src/document_manager.c:598
-#, c-format
-msgid "The file '%s' has not been saved since your last changes, are you sure you want to close it and lose these changes?"
-msgstr "El archivo '%s' no ha sido guardado desde el ultimo cambio, ¿esta seguro que desea cerrarlo y perder los cambios?"
+#. TRANSLATORS: this is a pango markup string you must keep the format tags.
+#: ../src/document_manager.c:597
+#, fuzzy, c-format
+msgid ""
+"<b>The file '%s' has not been saved since your last changes.</b>\n"
+"<small>Are you sure you want to close it and lose these changes?</small>"
+msgstr ""
+"El archivo '%s' no ha sido guardado desde el ultimo cambio, ¿esta seguro que "
+"desea cerrarlo y perder los cambios?"
 
-#: ../src/document_manager.c:602
-#, c-format
-msgid "Unsaved changes to '%s'"
-msgstr "Cambios no guardados en '%s'"
-
-#: ../src/document_manager.c:606
+#: ../src/document_manager.c:600
 msgid "Close and _lose changes"
 msgstr "Cerrar y _perder cambios"
-
-#: ../src/document_manager.c:607
-msgid "_Save file"
-msgstr "_Guardar Archivo"
-
-#: ../src/document_manager.c:608
-msgid "_Cancel closing"
-msgstr "_Cancelar"
 
 #: ../src/edit_template.c:34
 msgid "Add/Edit Template"
@@ -237,12 +231,12 @@ msgstr "Código:"
 
 #: ../src/filebrowser_backend.c:38
 msgid "Workspace's directory"
-msgstr "Directorio de Trabajo"
+msgstr ""
 
 #: ../src/filebrowser_backend.c:229
-#, c-format
+#, fuzzy, c-format
 msgid "Error getting file browser files. GIO Error:%s\t"
-msgstr "Error obteniendo archivos del visor de archivos. Error GIO:%s"
+msgstr "Error re-nombrando archivo. Error GIO:%s\n"
 
 #: ../src/filebrowser_backend.c:281
 #, c-format
@@ -254,9 +248,9 @@ msgid "Are you sure you wish to delete this file?"
 msgstr "¿Está seguro de que desea eliminar este archivo?"
 
 #: ../src/filebrowser_backend.c:412
-#, c-format
+#, fuzzy, c-format
 msgid "Error creating folder. GIO error:%s\n"
-msgstr "Error creando carpeta. Error GIO:%s\n"
+msgstr "Error montando volumen. Error GIO:%s\n"
 
 #: ../src/filebrowser_backend.c:471
 #, c-format
@@ -267,58 +261,58 @@ msgstr "%s no se puede copiar, ya existe, sobreescribirlo?"
 msgid "Overwrite file?"
 msgstr "Sobrescribir archivo?"
 
-#: ../src/filebrowser_ui.c:228
+#: ../src/filebrowser_ui.c:229
 msgid "File"
 msgstr "Archivo"
 
-#: ../src/filebrowser_ui.c:231
+#: ../src/filebrowser_ui.c:232
 msgid "Mime"
 msgstr ""
 
 #. home button
-#: ../src/filebrowser_ui.c:243
+#: ../src/filebrowser_ui.c:244
 msgid "Go Home Dir"
 msgstr ""
 
 #. up button
-#: ../src/filebrowser_ui.c:249
+#: ../src/filebrowser_ui.c:250
 msgid "Go Up one level"
 msgstr "Subir un nivel"
 
 #. refresh button
-#: ../src/filebrowser_ui.c:255
+#: ../src/filebrowser_ui.c:256
 msgid "Refresh Filebrowser"
-msgstr "Recargar Visor de archivos"
+msgstr ""
 
-#: ../src/filebrowser_ui.c:262
+#: ../src/filebrowser_ui.c:263
 msgid "Search Files in Folder Browser"
-msgstr "Buscar archivos en el visor de archivos"
+msgstr ""
 
-#: ../src/filebrowser_ui.c:535 ../src/filebrowser_ui.c:610
+#: ../src/filebrowser_ui.c:536 ../src/filebrowser_ui.c:611
 msgid "Rename File"
 msgstr "Renombrar archivo"
 
-#: ../src/filebrowser_ui.c:542
+#: ../src/filebrowser_ui.c:543
 msgid "New Filename"
 msgstr "Nuevo nombre archivo"
 
-#: ../src/filebrowser_ui.c:563
+#: ../src/filebrowser_ui.c:564
 msgid "New Dir"
 msgstr "Nuevo Directorio"
 
-#: ../src/filebrowser_ui.c:570
+#: ../src/filebrowser_ui.c:571
 msgid "Directory Name"
 msgstr "Nombre directorio"
 
-#: ../src/filebrowser_ui.c:602
+#: ../src/filebrowser_ui.c:603
 msgid "Open file"
 msgstr "Abrir archivo"
 
-#: ../src/filebrowser_ui.c:614
+#: ../src/filebrowser_ui.c:615
 msgid "Delete file"
 msgstr "Borrar Archivo"
 
-#: ../src/filebrowser_ui.c:621
+#: ../src/filebrowser_ui.c:622
 msgid "Create New Directory"
 msgstr "Crea un nuevo directorio"
 
@@ -335,11 +329,11 @@ msgstr "Buscar"
 
 #: ../src/find_dialog.c:130 ../src/replace_dialog.c:200
 msgid "_Match case"
-msgstr "_Coincidir con capitalización"
+msgstr ""
 
 #: ../src/find_dialog.c:139 ../src/replace_dialog.c:209
 msgid "Match _entire word only"
-msgstr "Coincidir sólo palabras compl_etas"
+msgstr ""
 
 #: ../src/find_dialog.c:148 ../src/replace_dialog.c:218
 msgid "Whole document"
@@ -350,70 +344,76 @@ msgid "RegExp"
 msgstr "Expresión regular"
 
 #: ../src/gphpedit-statusbar.c:134 ../src/gphpedit-statusbar.c:169
-#: ../src/gphpedit-statusbar.c:171 ../src/main_window_callbacks.c:683
+#: ../src/gphpedit-statusbar.c:171 ../src/main_window_callbacks.c:655
+#, fuzzy
 msgid "Cobol"
-msgstr "Cobol"
+msgstr "_Cobol"
 
 #: ../src/gphpedit-statusbar.c:136 ../src/gphpedit-statusbar.c:172
-#: ../src/gphpedit-statusbar.c:174 ../src/main_window_callbacks.c:680
+#: ../src/gphpedit-statusbar.c:174 ../src/main_window_callbacks.c:652
+#, fuzzy
 msgid "C/C++"
-msgstr "C/C++"
+msgstr "C/C_++"
 
 #: ../src/gphpedit-statusbar.c:138 ../src/gphpedit-statusbar.c:175
-#: ../src/gphpedit-statusbar.c:177 ../src/main_window_callbacks.c:677
+#: ../src/gphpedit-statusbar.c:177 ../src/main_window_callbacks.c:649
+#, fuzzy
 msgid "CSS"
-msgstr "CSS"
+msgstr "_CSS"
 
 #: ../src/gphpedit-statusbar.c:140 ../src/gphpedit-statusbar.c:178
-#: ../src/gphpedit-statusbar.c:180 ../src/main_window_callbacks.c:674
+#: ../src/gphpedit-statusbar.c:180 ../src/main_window_callbacks.c:646
+#, fuzzy
 msgid "PHP/HTML/XML"
-msgstr "PHP/HTML/XML"
+msgstr "_PHP/HTML/XML"
 
 #: ../src/gphpedit-statusbar.c:142 ../src/gphpedit-statusbar.c:181
-#: ../src/gphpedit-statusbar.c:183 ../src/main_window_callbacks.c:689
+#: ../src/gphpedit-statusbar.c:183 ../src/main_window_callbacks.c:661
+#, fuzzy
 msgid "Perl"
-msgstr "Perl"
+msgstr "_Perl"
 
 #: ../src/gphpedit-statusbar.c:144 ../src/gphpedit-statusbar.c:187
-#: ../src/gphpedit-statusbar.c:189 ../src/main_window_callbacks.c:686
+#: ../src/gphpedit-statusbar.c:189 ../src/main_window_callbacks.c:658
+#, fuzzy
 msgid "SQL"
-msgstr "SQL"
+msgstr "_SQL"
 
 #: ../src/gphpedit-statusbar.c:146 ../src/gphpedit-statusbar.c:184
-#: ../src/gphpedit-statusbar.c:186 ../src/main_window_callbacks.c:692
+#: ../src/gphpedit-statusbar.c:186 ../src/main_window_callbacks.c:664
+#, fuzzy
 msgid "Python"
-msgstr "Python"
+msgstr "P_ython"
 
 #: ../src/gphpedit-statusbar.c:190 ../src/gphpedit-statusbar.c:192
-#: ../src/main_window_callbacks.c:695
+#: ../src/main_window_callbacks.c:667
 msgid "Text-Plain"
-msgstr "Texto Plano"
+msgstr ""
 
 #: ../src/gphpedit-statusbar.c:200 ../src/gphpedit-statusbar.c:206
 msgid "OVR"
-msgstr "SOB"
+msgstr ""
 
 #: ../src/gphpedit-statusbar.c:200 ../src/gphpedit-statusbar.c:206
 msgid "INS"
-msgstr "INS"
+msgstr ""
 
 #: ../src/gphpedit-statusbar.c:312
-#, c-format
+#, fuzzy, c-format
 msgid "Zoom: %d%s"
-msgstr "Zoom: %d%s"
+msgstr "Zoom: 100%"
 
-#. Translators: "Ln" is an abbreviation for "Line", Col is an abbreviation for
-#. "Column". Please,
+#. Translators: "Ln" is an abbreviation for "Line", Col is an abbreviation for "Column". Please,
 #. use abbreviations if possible to avoid space problems.
 #: ../src/gphpedit-statusbar.c:434
 #, c-format
 msgid "  Ln %d, Col %d"
-msgstr "  Ln %d, Col %d"
+msgstr ""
 
 #: ../src/gvfs_utils.c:121
-#, c-format
+#, fuzzy, c-format
 msgid "Error reading file sync '%s'. GIO error:%s\n"
-msgstr "Error leyendo archivo. '%s'. Error GIO:%s\n"
+msgstr "Error re-nombrando archivo. Error GIO:%s\n"
 
 #: ../src/gvfs_utils.c:209 ../src/gvfs_utils.c:227
 #, c-format
@@ -426,9 +426,9 @@ msgid "GIO Error deleting file: %s\n"
 msgstr "Error GIO borrando archivo: %s\n"
 
 #: ../src/gvfs_utils.c:369
-#, c-format
+#, fuzzy, c-format
 msgid "Error saving temp file: '%s'. GIO Error:%s"
-msgstr "Error guardando archivo. temporal: '%s' Error GIO:%s"
+msgstr "Error re-nombrando archivo. Error GIO:%s\n"
 
 #: ../src/main_window.c:138
 msgid "Close side panel"
@@ -439,90 +439,98 @@ msgstr "Cerrar panel lateral"
 msgid "Class Browser"
 msgstr "Visor de Clases"
 
-#: ../src/main_window_callbacks.c:179
+#: ../src/main_window_callbacks.c:160
 msgid "PHP files ("
 msgstr "Archivos PHP ("
 
-#: ../src/main_window_callbacks.c:201
-msgid "HTML files (*.html *.htm *.xhtml *tpl)"
+#: ../src/main_window_callbacks.c:180
+#, fuzzy
+msgid "HTML files (*.html *.htm *.xhtml *.tpl)"
 msgstr "Archivos HTML (*.html *.htm *.xhtml *tpl)"
 
-#: ../src/main_window_callbacks.c:208
+#: ../src/main_window_callbacks.c:187
 msgid "XML files (*.xml)"
 msgstr "Archivos XML (*.xml)"
 
-#: ../src/main_window_callbacks.c:212
+#: ../src/main_window_callbacks.c:191
 msgid "Stylesheet files (*.css)"
 msgstr "Hojas de estilo (*.css)"
 
-#: ../src/main_window_callbacks.c:216
+#: ../src/main_window_callbacks.c:195
 msgid "SQL files (*.sql)"
 msgstr "Archivos SQL (*.sql)"
 
-#: ../src/main_window_callbacks.c:220
+#: ../src/main_window_callbacks.c:199
 msgid "Javascript files (*.js)"
 msgstr "Archivos Javascript (*.js)"
 
-#: ../src/main_window_callbacks.c:224
+#: ../src/main_window_callbacks.c:203
 msgid "C/C++ files (*.c *.h *.cpp *.hh *.cc)"
 msgstr "Archivos de C/C++ (*.c *.h *.cpp *.hh *.cc)"
 
-#: ../src/main_window_callbacks.c:234
+#: ../src/main_window_callbacks.c:213
 msgid "Perl Files (*.pl *.ph *.pm)"
 msgstr "Archivos Perl (*.pl *.ph *.pm)"
 
-#: ../src/main_window_callbacks.c:242
+#: ../src/main_window_callbacks.c:221
 msgid "Cobol Files (*.cbl)"
 msgstr "Archivos de Cobol (*.cbl)"
 
-#: ../src/main_window_callbacks.c:248
+#: ../src/main_window_callbacks.c:227
 msgid "Python Files (*.py *.pyd *.pyw)"
 msgstr "Archivos de Python (*.py *.pyd *.pyw)"
 
-#: ../src/main_window_callbacks.c:256
+#: ../src/main_window_callbacks.c:235
 msgid "All files"
 msgstr "Todos los archivos"
 
 #. show status in statusbar
-#: ../src/main_window_callbacks.c:317
+#: ../src/main_window_callbacks.c:300
 #, c-format
 msgid "Saving %s"
-msgstr "Guardando %s"
+msgstr ""
 
 #. Create the selector widget
-#: ../src/main_window_callbacks.c:337
+#: ../src/main_window_callbacks.c:320
 msgid "Please type the filename to save as..."
 msgstr "Por favor, escriba el nombre de archivo para guardar como ..."
 
-#: ../src/main_window_callbacks.c:371
+#: ../src/main_window_callbacks.c:346
 msgid "Are you sure you wish to reload the current file, losing your changes?"
-msgstr "¿Estás seguro de que desea volver a cargar el archivo actual, perdiendo los cambios?"
+msgstr ""
+"¿Estás seguro de que desea volver a cargar el archivo actual, perdiendo los "
+"cambios?"
 
-#: ../src/main_window_callbacks.c:421
+#: ../src/main_window_callbacks.c:393
 msgid "This file already exists, are you sure you want to overwrite it?"
 msgstr "El archivo ya existe, esta seguro que desea sobreescribirlo?"
 
 #. Create the selector widget
-#: ../src/main_window_callbacks.c:439
+#: ../src/main_window_callbacks.c:411
 msgid "Please type the filename to rename this file to..."
 msgstr "Por favor escriba el nuevo nombre para renombrar este archivo..."
 
-#: ../src/main_window_callbacks.c:637
+#: ../src/main_window_callbacks.c:609
 msgid "translator_credits"
 msgstr "Jose Rostagno <joserostagno@hotmail.com>"
 
-#: ../src/main_window_callbacks.c:644
+#: ../src/main_window_callbacks.c:616
+#, fuzzy
 msgid "Copyright © 2003-2006 Andy Jeffries, 2009-2010 Anoop John"
-msgstr "Copyright © 2003-2006 Andy Jeffries, 2009-2010 Anoop John"
+msgstr "Copyright  2003-2006 Andy Jeffries, 2009-2010 Anoop John"
 
-#: ../src/main_window_callbacks.c:646
-msgid "gPHPEdit is a GNOME2 editor specialised for editing PHP scripts and related files (HTML/CSS/JS)."
-msgstr "gPHPEdit es un editor de GNOME2 especializado en editar specialised for editing PHP scripts and related files (HTML/CSS/JS)."
+#: ../src/main_window_callbacks.c:618
+msgid ""
+"gPHPEdit is a GNOME2 editor specialised for editing PHP scripts and related "
+"files (HTML/CSS/JS)."
+msgstr ""
+"gPHPEdit es un editor de GNOME2 especializado en editar specialised for "
+"editing PHP scripts and related files (HTML/CSS/JS)."
 
-#: ../src/main_window_callbacks.c:704
-#, c-format
+#: ../src/main_window_callbacks.c:676
+#, fuzzy, c-format
 msgid "Unable to get data for page %d"
-msgstr "No se pudo obtener información para la pagina %d"
+msgstr "No se pudo obtener información para la pagina %d\n"
 
 #: ../src/menubar.c:341
 msgid "Creates a new file"
@@ -861,39 +869,7 @@ msgstr "_Complementos"
 msgid "_Help"
 msgstr "Ayuda"
 
-#: ../src/plugindialog.c:46 ../src/preferences_dialog.c:1664
-msgid "Plugin"
-msgstr "Complemento"
-
-#: ../src/plugindialog.c:47
-msgid "Enabled"
-msgstr "Activado"
-
-#: ../src/plugindialog.c:446
-msgid "_About"
-msgstr "_Acerca De"
-
-#: ../src/plugindialog.c:454
-msgid "A_ctivate"
-msgstr "A_ctivar"
-
-#: ../src/plugindialog.c:464
-msgid "Ac_tivate All"
-msgstr "Ac_tivar Todos"
-
-#: ../src/plugindialog.c:469
-msgid "_Deactivate All"
-msgstr "_Desactivar Todos"
-
-#: ../src/plugindialog.c:783
-msgid "Active _Plugins:"
-msgstr "_Complementos Activos"
-
-#: ../src/plugindialog.c:808
-msgid "_About Plugin"
-msgstr "_Acerca del Complemento"
-
-#: ../src/pluginmanager.c:106 ../src/preferences_manager.c:238
+#: ../src/pluginmanager.c:106 ../src/preferences_manager.c:210
 #, c-format
 msgid "Unable to create ~/.gphpedit/ (%d) %s"
 msgstr "Imposible crear ~/.gphpedit/ (%d) %s"
@@ -907,577 +883,182 @@ msgstr "Imposible crear ~/.gphpedit/ (%d) %s"
 #. * right place when idly populating the menu in case the
 #. * user appended or prepended custom menu items to the
 #. * recent chooser menu widget.
-#. 
+#.
 #: ../src/pluginmenu.c:82
+#, fuzzy
 msgid "No items found"
-msgstr "Items no encontrados"
+msgstr "Color de texto:"
 
-#. Font drop down elements : General
-#: ../src/preferences_dialog.c:126 ../src/preferences_dialog.c:443
-#: ../src/preferences_dialog.c:445 ../src/preferences_dialog.c:759
-msgid "Default"
-msgstr "General"
-
-#: ../src/preferences_dialog.c:127 ../src/preferences_dialog.c:447
-#: ../src/preferences_dialog.c:449 ../src/preferences_dialog.c:762
-msgid "Line Number (margin)"
-msgstr "Numero de linea (margen)"
-
-#. Font drop down elements : HTML
-#: ../src/preferences_dialog.c:130 ../src/preferences_dialog.c:451
-#: ../src/preferences_dialog.c:453 ../src/preferences_dialog.c:765
-msgid "HTML Tag"
-msgstr "Etiqueta HTML"
-
-#: ../src/preferences_dialog.c:131 ../src/preferences_dialog.c:455
-#: ../src/preferences_dialog.c:457 ../src/preferences_dialog.c:768
-msgid "HTML Unknown Tag"
-msgstr "Etiqueta HTML desconocida"
-
-#: ../src/preferences_dialog.c:132 ../src/preferences_dialog.c:459
-#: ../src/preferences_dialog.c:461 ../src/preferences_dialog.c:771
-msgid "HTML Attribute"
-msgstr "Atributo HTML"
-
-#: ../src/preferences_dialog.c:133 ../src/preferences_dialog.c:463
-#: ../src/preferences_dialog.c:465 ../src/preferences_dialog.c:774
-msgid "HTML Unknown Attribute"
-msgstr "Atributo HTML desconocido"
-
-#: ../src/preferences_dialog.c:134 ../src/preferences_dialog.c:467
-#: ../src/preferences_dialog.c:469 ../src/preferences_dialog.c:777
-msgid "HTML Number"
-msgstr "Numero HTML"
-
-#: ../src/preferences_dialog.c:135 ../src/preferences_dialog.c:471
-#: ../src/preferences_dialog.c:473 ../src/preferences_dialog.c:780
-msgid "HTML Single-quoted String"
-msgstr "Cadena HTML con comillas simples"
-
-#: ../src/preferences_dialog.c:136 ../src/preferences_dialog.c:475
-#: ../src/preferences_dialog.c:477 ../src/preferences_dialog.c:783
-msgid "HTML Double-quoted String"
-msgstr "Cadena HTML con comillas dobles"
-
-#: ../src/preferences_dialog.c:137 ../src/preferences_dialog.c:479
-#: ../src/preferences_dialog.c:481 ../src/preferences_dialog.c:786
-msgid "HTML Comment"
-msgstr "Comentario HTML"
-
-#: ../src/preferences_dialog.c:138 ../src/preferences_dialog.c:483
-#: ../src/preferences_dialog.c:485 ../src/preferences_dialog.c:789
-msgid "HTML Entity"
-msgstr "Entidad HTML"
-
-#: ../src/preferences_dialog.c:139 ../src/preferences_dialog.c:487
-#: ../src/preferences_dialog.c:489 ../src/preferences_dialog.c:792
-msgid "HTML Script"
-msgstr "Script HTML"
-
-#: ../src/preferences_dialog.c:140 ../src/preferences_dialog.c:491
-#: ../src/preferences_dialog.c:493 ../src/preferences_dialog.c:795
-msgid "HTML Question"
-msgstr "HTML Pregunta"
-
-#: ../src/preferences_dialog.c:141 ../src/preferences_dialog.c:495
-#: ../src/preferences_dialog.c:497 ../src/preferences_dialog.c:798
-msgid "HTML Value"
-msgstr "Valor HTML"
-
-#. Font drop down elements : JavaScript
-#: ../src/preferences_dialog.c:144 ../src/preferences_dialog.c:499
-#: ../src/preferences_dialog.c:501 ../src/preferences_dialog.c:801
-msgid "JavaScript Multiple-line Comment"
-msgstr "JavaScript Comentario Multilinea"
-
-#: ../src/preferences_dialog.c:145 ../src/preferences_dialog.c:503
-#: ../src/preferences_dialog.c:505 ../src/preferences_dialog.c:804
-msgid "JavaScript Single-line Comment"
-msgstr "PHP Comentario Monolinea"
-
-#: ../src/preferences_dialog.c:146 ../src/preferences_dialog.c:507
-#: ../src/preferences_dialog.c:509 ../src/preferences_dialog.c:807
-msgid "JavaScript Document Comment"
-msgstr ""
-
-#: ../src/preferences_dialog.c:147 ../src/preferences_dialog.c:511
-#: ../src/preferences_dialog.c:513 ../src/preferences_dialog.c:810
-msgid "JavaScript Word"
-msgstr ""
-
-#: ../src/preferences_dialog.c:148 ../src/preferences_dialog.c:515
-#: ../src/preferences_dialog.c:517 ../src/preferences_dialog.c:813
-msgid "JavaScript Keyword"
-msgstr ""
-
-#: ../src/preferences_dialog.c:149 ../src/preferences_dialog.c:519
-#: ../src/preferences_dialog.c:521 ../src/preferences_dialog.c:816
-msgid "JavaScript Single-quoted String"
-msgstr ""
-
-#: ../src/preferences_dialog.c:150 ../src/preferences_dialog.c:523
-#: ../src/preferences_dialog.c:525 ../src/preferences_dialog.c:819
-msgid "JavaScript Double-quoted String"
-msgstr ""
-
-#: ../src/preferences_dialog.c:151 ../src/preferences_dialog.c:527
-#: ../src/preferences_dialog.c:529 ../src/preferences_dialog.c:822
-msgid "JavaScript Symbol"
-msgstr "Símbolo Javascript"
-
-#. Font drop down elements : PHP
-#: ../src/preferences_dialog.c:154 ../src/preferences_dialog.c:531
-#: ../src/preferences_dialog.c:533 ../src/preferences_dialog.c:825
-msgid "PHP Default"
-msgstr "PHP Por Defecto"
-
-#: ../src/preferences_dialog.c:155 ../src/preferences_dialog.c:535
-#: ../src/preferences_dialog.c:537 ../src/preferences_dialog.c:828
-msgid "PHP 'HString'"
-msgstr ""
-
-#: ../src/preferences_dialog.c:156 ../src/preferences_dialog.c:539
-#: ../src/preferences_dialog.c:541 ../src/preferences_dialog.c:831
-msgid "PHP Simple String"
-msgstr "Cadena Simple PHP"
-
-#: ../src/preferences_dialog.c:157 ../src/preferences_dialog.c:543
-#: ../src/preferences_dialog.c:545 ../src/preferences_dialog.c:834
-msgid "PHP Word"
-msgstr ""
-
-#: ../src/preferences_dialog.c:158 ../src/preferences_dialog.c:547
-#: ../src/preferences_dialog.c:549 ../src/preferences_dialog.c:837
-msgid "PHP Number"
-msgstr "Numero PHP"
-
-#: ../src/preferences_dialog.c:159 ../src/preferences_dialog.c:551
-#: ../src/preferences_dialog.c:553 ../src/preferences_dialog.c:840
-msgid "PHP Variable"
-msgstr "Variable PHP"
-
-#: ../src/preferences_dialog.c:160 ../src/preferences_dialog.c:555
-#: ../src/preferences_dialog.c:557 ../src/preferences_dialog.c:843
-msgid "PHP Single-line Comment"
-msgstr "PHP Comentario Monolinea"
-
-#: ../src/preferences_dialog.c:161 ../src/preferences_dialog.c:559
-#: ../src/preferences_dialog.c:561 ../src/preferences_dialog.c:846
-msgid "PHP Multiple-line Comment"
-msgstr "PHP comentario multi-linea"
-
-#. Font drop down elements : CSS
-#: ../src/preferences_dialog.c:164 ../src/preferences_dialog.c:563
-#: ../src/preferences_dialog.c:849
-msgid "CSS Tag"
-msgstr "Etiqueta CSS"
-
-#: ../src/preferences_dialog.c:165 ../src/preferences_dialog.c:567
-#: ../src/preferences_dialog.c:569 ../src/preferences_dialog.c:852
-msgid "CSS Class"
-msgstr "Clase CSS"
-
-#: ../src/preferences_dialog.c:166 ../src/preferences_dialog.c:855
-msgid "CSS Psuedoclass"
-msgstr "Pseudoclase CSS"
-
-#: ../src/preferences_dialog.c:167 ../src/preferences_dialog.c:575
-#: ../src/preferences_dialog.c:577 ../src/preferences_dialog.c:858
-msgid "CSS Unknown Pseudoclass"
-msgstr "Pseudoclase CSS desconocida"
-
-#: ../src/preferences_dialog.c:168 ../src/preferences_dialog.c:579
-#: ../src/preferences_dialog.c:581 ../src/preferences_dialog.c:861
-msgid "CSS Operator"
-msgstr "Operador CSS"
-
-#: ../src/preferences_dialog.c:169 ../src/preferences_dialog.c:583
-#: ../src/preferences_dialog.c:585 ../src/preferences_dialog.c:864
-msgid "CSS Identifier"
-msgstr "Identificador CSS"
-
-#: ../src/preferences_dialog.c:170 ../src/preferences_dialog.c:587
-#: ../src/preferences_dialog.c:589 ../src/preferences_dialog.c:867
-msgid "CSS Unknown Identifier"
-msgstr "Identificador CSS desconocido"
-
-#: ../src/preferences_dialog.c:171 ../src/preferences_dialog.c:591
-#: ../src/preferences_dialog.c:593 ../src/preferences_dialog.c:870
-msgid "CSS Value"
-msgstr "Valor CSS"
-
-#: ../src/preferences_dialog.c:172 ../src/preferences_dialog.c:595
-#: ../src/preferences_dialog.c:597 ../src/preferences_dialog.c:873
-msgid "CSS Comment"
-msgstr "Comentario CSS"
-
-#: ../src/preferences_dialog.c:173 ../src/preferences_dialog.c:599
-#: ../src/preferences_dialog.c:876
-msgid "CSS ID"
-msgstr "ID CSS"
-
-#: ../src/preferences_dialog.c:174 ../src/preferences_dialog.c:603
-#: ../src/preferences_dialog.c:605 ../src/preferences_dialog.c:879
-msgid "CSS Important"
-msgstr "CSS Important"
-
-#: ../src/preferences_dialog.c:175 ../src/preferences_dialog.c:607
-#: ../src/preferences_dialog.c:609 ../src/preferences_dialog.c:882
-msgid "CSS Directive"
-msgstr "Directiva CSS"
-
-#. Font drop down elements : SQL
-#: ../src/preferences_dialog.c:178 ../src/preferences_dialog.c:611
-#: ../src/preferences_dialog.c:613 ../src/preferences_dialog.c:885
-msgid "SQL Word"
-msgstr "Palabra SQL"
-
-#: ../src/preferences_dialog.c:179 ../src/preferences_dialog.c:615
-#: ../src/preferences_dialog.c:617 ../src/preferences_dialog.c:888
-msgid "SQL Identifier"
-msgstr "Identificador SQL"
-
-#: ../src/preferences_dialog.c:180 ../src/preferences_dialog.c:619
-#: ../src/preferences_dialog.c:621 ../src/preferences_dialog.c:891
-msgid "SQL Number"
-msgstr "Numero SQL"
-
-#: ../src/preferences_dialog.c:181 ../src/preferences_dialog.c:623
-#: ../src/preferences_dialog.c:625 ../src/preferences_dialog.c:894
-msgid "SQL String"
-msgstr "Cadena SQL"
-
-#: ../src/preferences_dialog.c:182 ../src/preferences_dialog.c:627
-#: ../src/preferences_dialog.c:629 ../src/preferences_dialog.c:897
-msgid "SQL Operator"
-msgstr "Operador SQL"
-
-#: ../src/preferences_dialog.c:183 ../src/preferences_dialog.c:631
-#: ../src/preferences_dialog.c:633 ../src/preferences_dialog.c:900
-msgid "SQL Comment"
-msgstr "Comentario SQL"
-
-#: ../src/preferences_dialog.c:185 ../src/preferences_dialog.c:635
-#: ../src/preferences_dialog.c:637 ../src/preferences_dialog.c:903
-msgid "C Default"
-msgstr "General"
-
-#: ../src/preferences_dialog.c:186 ../src/preferences_dialog.c:639
-#: ../src/preferences_dialog.c:641 ../src/preferences_dialog.c:906
-msgid "C String"
-msgstr "C Cadena"
-
-#: ../src/preferences_dialog.c:187 ../src/preferences_dialog.c:643
-#: ../src/preferences_dialog.c:645 ../src/preferences_dialog.c:909
-msgid "C Character"
-msgstr "Carácter C"
-
-#: ../src/preferences_dialog.c:188 ../src/preferences_dialog.c:647
-#: ../src/preferences_dialog.c:649 ../src/preferences_dialog.c:912
-msgid "C Word"
-msgstr ""
-
-#: ../src/preferences_dialog.c:189 ../src/preferences_dialog.c:651
-#: ../src/preferences_dialog.c:653 ../src/preferences_dialog.c:915
-msgid "C Number"
-msgstr "Numero C"
-
-#: ../src/preferences_dialog.c:190 ../src/preferences_dialog.c:655
-#: ../src/preferences_dialog.c:657 ../src/preferences_dialog.c:918
-msgid "C Identifier"
-msgstr "Identificador C"
-
-#: ../src/preferences_dialog.c:191 ../src/preferences_dialog.c:659
-#: ../src/preferences_dialog.c:661 ../src/preferences_dialog.c:921
-msgid "C Comment"
-msgstr "Comentario C"
-
-#: ../src/preferences_dialog.c:192 ../src/preferences_dialog.c:663
-#: ../src/preferences_dialog.c:665 ../src/preferences_dialog.c:924
-msgid "C Commentline"
-msgstr "C Comentario"
-
-#: ../src/preferences_dialog.c:193
-msgid "C Preprocessor"
-msgstr "Pre-procesador C"
-
-#: ../src/preferences_dialog.c:194 ../src/preferences_dialog.c:671
-#: ../src/preferences_dialog.c:673 ../src/preferences_dialog.c:930
-msgid "C Operator"
-msgstr "Operador C"
-
-#: ../src/preferences_dialog.c:195 ../src/preferences_dialog.c:675
-#: ../src/preferences_dialog.c:677 ../src/preferences_dialog.c:933
-msgid "C Regex"
-msgstr "Expresión regular C"
-
-#: ../src/preferences_dialog.c:196 ../src/preferences_dialog.c:679
-#: ../src/preferences_dialog.c:681 ../src/preferences_dialog.c:936
-msgid "C UUID"
-msgstr "C UUID"
-
-#: ../src/preferences_dialog.c:197 ../src/preferences_dialog.c:683
-#: ../src/preferences_dialog.c:685 ../src/preferences_dialog.c:939
-msgid "C Verbatim"
-msgstr ""
-
-#: ../src/preferences_dialog.c:198 ../src/preferences_dialog.c:687
-#: ../src/preferences_dialog.c:689 ../src/preferences_dialog.c:942
-msgid "C Globalclass"
-msgstr "C Clase Global"
-
-#: ../src/preferences_dialog.c:257
-msgid "Name/Shortcut"
-msgstr "Nombre"
-
-#: ../src/preferences_dialog.c:354
-#, c-format
-msgid "Are you sure you want to delete template %s?"
-msgstr "¿Está seguro de que desea eliminar la plantilla% s?"
-
-#: ../src/preferences_dialog.c:565
-msgid "CSS_Tag"
-msgstr "_Etiqueta CSS"
-
-#: ../src/preferences_dialog.c:571 ../src/preferences_dialog.c:573
-msgid "CSS Pseudoclass"
-msgstr "Pseudoclase CSS"
-
-#: ../src/preferences_dialog.c:601
-msgid "CSS Id"
-msgstr "CSS Id"
-
-#: ../src/preferences_dialog.c:667 ../src/preferences_dialog.c:669
-#: ../src/preferences_dialog.c:927
-msgid "C Preprocesor"
-msgstr "Preprocesador C"
-
-#: ../src/preferences_dialog.c:719
-#, c-format
-msgid ""
-"You have just changed the font to %s\n"
-"\n"
-"Would you like to use this font as the default for every element?"
-msgstr ""
-"Ha cambiado la fuente a %s\n"
-"\n"
-"¿Desea usar esta fuente como la fuente por defecto para todos los elementos?"
-
-#: ../src/preferences_dialog.c:732
-#, c-format
-msgid ""
-"You have just changed the font size to %dpt\n"
-"\n"
-"Would you like to use this font size as the default for every element?"
-msgstr ""
-"Ha cambiado el tamaño de la fuente a %dpt\n"
-"\n"
-"¿Desea usar este tamaño como el tamaño por defecto para cada elemento?"
-
-#: ../src/preferences_dialog.c:1115
+#: ../src/preferences_dialog.c:369
+#, fuzzy
 msgid "<b>Session:</b>"
-msgstr "<b>Sesión:</b>"
+msgstr "Sesión:"
 
-#: ../src/preferences_dialog.c:1121
+#: ../src/preferences_dialog.c:375
 msgid "Save session (including open files) on exit"
 msgstr "Guardar sesión (incluido archivos abiertos) al salir"
 
-#: ../src/preferences_dialog.c:1128
+#: ../src/preferences_dialog.c:382
 msgid "Only ever run 1 copy of gPHPEdit at a time"
 msgstr "Ejecutar solo 1 copia de gPHPEdit a la vez"
 
-#: ../src/preferences_dialog.c:1139
+#: ../src/preferences_dialog.c:393
+#, fuzzy
 msgid "<b>Hand edge guide:</b>"
-msgstr "<b>Guía del borde derecho:</b>"
+msgstr "Guía del borde derecho:"
 
-#: ../src/preferences_dialog.c:1145
+#: ../src/preferences_dialog.c:399
 msgid "Show right hand edge guide"
 msgstr "Mostrar la guía del borde derecho"
 
-#: ../src/preferences_dialog.c:1157
-msgid "Right hand edge colour:"
-msgstr "Color de la guía del borde derecho"
-
-#: ../src/preferences_dialog.c:1179
+#: ../src/preferences_dialog.c:411
 msgid "Right hand edge column"
 msgstr "Columna de la guía del borde derecho"
 
-#: ../src/preferences_dialog.c:1194
+#: ../src/preferences_dialog.c:426
+#, fuzzy
 msgid "<b>Side Panel:</b>"
-msgstr "<b>Panel lateral:</b>"
+msgstr "Panel lateral"
 
-#: ../src/preferences_dialog.c:1200
+#: ../src/preferences_dialog.c:432
 msgid "Show file browser (need restart)"
-msgstr "Mostrar visor de archivos (necesita reiniciar)"
+msgstr ""
 
 #. set tooltip
-#: ../src/preferences_dialog.c:1202
+#: ../src/preferences_dialog.c:434
 msgid "Show/Hide side-panel Folder Browser"
-msgstr "Mostrar/Ocultar visor de archivos del panel lateral"
+msgstr ""
 
-#: ../src/preferences_dialog.c:1214
+#: ../src/preferences_dialog.c:446
+#, fuzzy
 msgid "<b>Auto-completion:</b>"
-msgstr "<b>Auto-completado:</b>"
+msgstr "Auto-completado:"
 
-#: ../src/preferences_dialog.c:1220
+#: ../src/preferences_dialog.c:452
 msgid "Auto-Completion of Brackets and Quotes"
 msgstr "Auto-completado de Paréntesis y Corchetes "
 
 #. set tooltip
-#: ../src/preferences_dialog.c:1222
+#: ../src/preferences_dialog.c:454
 msgid "Auto-complete the closing brackets/quotes"
 msgstr "Auto-completa el paréntesis/corchete de cierre"
 
-#: ../src/preferences_dialog.c:1233
+#: ../src/preferences_dialog.c:465
 msgid "Delay (calltip/function list):"
-msgstr "Retardo (calltip/autocompletado)"
+msgstr ""
 
 #. end autocompletion part
-#: ../src/preferences_dialog.c:1243
+#: ../src/preferences_dialog.c:475
 msgid "General"
 msgstr "General"
 
-#: ../src/preferences_dialog.c:1261
+#: ../src/preferences_dialog.c:493
 msgid "<b>Tabs:</b>"
-msgstr "<b>Tabulaciones:</b>"
+msgstr ""
 
-#: ../src/preferences_dialog.c:1271
+#: ../src/preferences_dialog.c:503
 msgid "Tab size:"
 msgstr "Tamaño Tabulación:"
 
-#: ../src/preferences_dialog.c:1281
+#: ../src/preferences_dialog.c:513
 msgid "Use tabs instead of spaces for indentation"
 msgstr "Usar tabulaciones en lugar de espacios para indentar"
 
-#: ../src/preferences_dialog.c:1288
+#: ../src/preferences_dialog.c:520
 msgid "Show indentation guides"
 msgstr "Mostrar guías de sangrado"
 
-#: ../src/preferences_dialog.c:1298
+#: ../src/preferences_dialog.c:530
 msgid "<b>Line Properties:</b>"
-msgstr "<b>Propiedades de Linea</b>"
+msgstr ""
 
-#: ../src/preferences_dialog.c:1308
+#: ../src/preferences_dialog.c:540
 msgid "Wrap long lines"
 msgstr "Ajustar lineas largas"
 
-#: ../src/preferences_dialog.c:1315
+#: ../src/preferences_dialog.c:547
 msgid "Highlight Caret Line"
 msgstr "Resaltar la linea actual"
 
-#: ../src/preferences_dialog.c:1327
-msgid "Highlight Caret Line colour:"
-msgstr "Color del resaltado de la linea actual:"
-
-#: ../src/preferences_dialog.c:1344
-msgid "<b>Selection:</b>"
-msgstr "<b>Selección:</b>"
-
-#. Begin: Selection Color
-#: ../src/preferences_dialog.c:1355
-msgid "Selection colour:"
-msgstr "Color de la selección:"
-
-#. End: Selection Color
-#. end editor page
-#: ../src/preferences_dialog.c:1373
-msgid "Editor"
-msgstr "Editor"
-
-#: ../src/preferences_dialog.c:1383
-msgid "Element:"
-msgstr "Elemento:"
-
-#: ../src/preferences_dialog.c:1406
-msgid "Font:"
-msgstr "Fuente:"
-
-#: ../src/preferences_dialog.c:1460
-msgid "Attributes"
-msgstr "Atributos"
-
-#: ../src/preferences_dialog.c:1469
-msgid "Bold"
-msgstr "Negrita"
-
-#: ../src/preferences_dialog.c:1474
-msgid "Italic"
-msgstr "Cursiva"
-
-#: ../src/preferences_dialog.c:1479
-msgid "Colours"
-msgstr "Colores"
-
-#: ../src/preferences_dialog.c:1492
-msgid "Foreground:"
-msgstr "Color de texto:"
-
-#: ../src/preferences_dialog.c:1506
-msgid "Background:"
-msgstr "Color de fondo:"
-
-#: ../src/preferences_dialog.c:1516
-msgid "Colour"
-msgstr "Color"
-
-#: ../src/preferences_dialog.c:1534
+#: ../src/preferences_dialog.c:564
+#, fuzzy
 msgid "<b>PHP Coding:</b>"
-msgstr "<b>Codificación PHP</b>"
+msgstr "Codificación PHP"
 
-#: ../src/preferences_dialog.c:1544
+#: ../src/preferences_dialog.c:574
 msgid "Syntax check program:"
 msgstr "Programa de comprobación de sintaxis:"
 
-#: ../src/preferences_dialog.c:1558
+#: ../src/preferences_dialog.c:588
 msgid "Recognised PHP file extensions:"
 msgstr "Extensiones de archivos PHP reconocidas:"
 
-#: ../src/preferences_dialog.c:1572
+#: ../src/preferences_dialog.c:602
 msgid "Shared library path(s):"
 msgstr "Ruta a la librería(s) compartida(s):"
 
-#: ../src/preferences_dialog.c:1586
-msgid "Templates:"
+#. end editor page
+#: ../src/preferences_dialog.c:614
+msgid "Editor"
+msgstr "Editor"
+
+#: ../src/preferences_dialog.c:627
+#, fuzzy
+msgid "<b>Font:</b>"
+msgstr "Sesión:"
+
+#: ../src/preferences_dialog.c:637
+#, fuzzy
+msgid "Editor _font:"
+msgstr "Editor"
+
+#: ../src/preferences_dialog.c:651
+msgid "<b>Color Scheme:</b>"
+msgstr ""
+
+#: ../src/preferences_dialog.c:708
+msgid "Colour"
+msgstr "Color"
+
+#: ../src/preferences_dialog.c:718
+#, fuzzy
+msgid "Active Templates:"
 msgstr "Plantillas:"
 
-#: ../src/preferences_dialog.c:1623
-msgid "Add..."
-msgstr "Agregar..."
+#.
+#: ../src/preferences_dialog.c:728
+#, fuzzy
+msgid "Templates"
+msgstr "Plantillas:"
 
-#: ../src/preferences_dialog.c:1629
-msgid "Edit..."
-msgstr "Editar..."
+#: ../src/preferences_dialog.c:742
+#, fuzzy
+msgid "Plugin"
+msgstr "_Complementos"
 
-#: ../src/preferences_dialog.c:1635
-msgid "Delete"
-msgstr "Borrar"
-
-#: ../src/preferences_dialog.c:1650
-msgid "Coding"
-msgstr "Codificación"
-
-#: ../src/preferences_dialog.c:1698
+#: ../src/preferences_dialog.c:774
 msgid "Preferences"
 msgstr "Preferencias"
 
 #: ../src/replace_dialog.c:93 ../src/replace_dialog.c:132
-#, c-format
+#, fuzzy, c-format
 msgid "\"%s\" not found, no replacements made."
-msgstr "\"%s\" no encontrada, no se hicieron reemplazos."
+msgstr "%s no encontrada, no se hicieron reemplazos."
 
 #: ../src/replace_dialog.c:96
-#, c-format
+#, fuzzy, c-format
 msgid "1 occurence of \"%s\" found, replaced."
-msgstr "Encontrada  1 ocurrencia de \"%s\", reemplazada."
+msgstr "Encontrada  1 ocurrencia de %s, reemplazada."
 
 #: ../src/replace_dialog.c:99
-#, c-format
+#, fuzzy, c-format
 msgid "\"%d\" occurences of \"%s\" found, all replaced."
-msgstr "Encontradas \"%d\" ocurrencias de \"%s\", todas reemplazadas."
+msgstr "Encontradas %d ocurrencias de %s, todas reemplazadas."
 
 #: ../src/replace_dialog.c:183
+#, fuzzy
 msgid "Replace with: "
-msgstr "Reemplazar con:"
+msgstr "Reemplazar texto"
 
 #: ../src/replace_dialog.c:237
 msgid "Prompt before Replace"
@@ -1488,7 +1069,9 @@ msgid "Replace _all"
 msgstr "Reemplazar _Todos"
 
 #: ../src/syntax_check_manager.c:303
-msgid "Error calling PHP CLI (is PHP command line binary installed? If so, check if it's in your path or set php_binary in Preferences)\n"
+msgid ""
+"Error calling PHP CLI (is PHP command line binary installed? If so, check if "
+"it's in your path or set php_binary in Preferences)\n"
 msgstr ""
 
 #: ../src/syntax_check_window.c:112
@@ -1499,15 +1082,15 @@ msgstr "Resultado de la comprobación de sintaxis"
 msgid "You don't have any files open to check\n"
 msgstr "No hay archivos abiertos para chequear\n"
 
-#: ../src/templates.c:83
+#: ../src/templates.c:145
+#, fuzzy, c-format
+msgid "CANNOT Create templates file:: %s\n"
+msgstr "No se puedo crear el archivo de plantilla: %s\n"
+
+#: ../src/templates.c:226
 #, c-format
 msgid "CANNOT Create templates file: %s\n"
 msgstr "No se puedo crear el archivo de plantilla: %s\n"
-
-#: ../src/templates.c:147
-#, c-format
-msgid "CANNOT Create templates file:: %s\n"
-msgstr "No se puedo crear el archivo de plantilla:: %s\n"
 
 #. Add the File operations to the Main Toolbar
 #: ../src/toolbar.c:133
@@ -1602,155 +1185,10 @@ msgstr "Ir a linea:"
 msgid "Go to line"
 msgstr "Ir a linea"
 
-#~ msgid "Classbrowser::Cannot allocate buffer"
-#~ msgstr "No se pudo alojar buffer de escritura"
+#: ../gphpedit.desktop.in.h:1
+msgid "Edit PHP source files"
+msgstr ""
 
-#~ msgid "RegExp/String to search"
-#~ msgstr "Expresión regular/cadena a buscar"
-
-#~ msgid "From cursor"
-#~ msgstr "Desde el cursor"
-
-#~ msgid "Search"
-#~ msgstr "Buscar"
-
-#~ msgid "String"
-#~ msgstr "Cadena"
-
-#~ msgid "Type"
-#~ msgstr "Tipo"
-
-#~ msgid "Whole word"
-#~ msgstr "Palabra completa"
-
-#~ msgid "Ignore case while searching"
-#~ msgstr "Ignorar mayúsculas en la búsqueda"
-
-#~ msgid "Options"
-#~ msgstr "Opciones"
-
-#~ msgid "Find and Replace"
-#~ msgstr "Buscar y Reemplazar"
-
-#~ msgid "String to Replace"
-#~ msgstr "Cadena a Reemplazar"
-
-#~ msgid "Plugin is null!\n"
-#~ msgstr "El plugin es nulo!\n"
-
-#~ msgid "Reload"
-#~ msgstr "Recargar"
-
-#~ msgid "Cancel"
-#~ msgstr "Cancelar"
-
-#~ msgid "Tabs:"
-#~ msgstr "Tabuladores:"
-
-#~ msgid "Text wrap:"
-#~ msgstr "Ajuste de Texto:"
-
-#~ msgid "Current line:"
-#~ msgstr "Linea Actual:"
-
-#~ msgid "Apply"
-#~ msgstr "Aplicar"
-
-#~ msgid "Error reading file. GIO error:%s\n"
-#~ msgstr "Error re-nombrando archivo. Error GIO:%s\n"
-
-#~ msgid "File size and loaded size not matching"
-#~ msgstr "El tamaño del archivo y el tamaño cargado no coinciden"
-
-#~ msgid "_Reload current file"
-#~ msgstr "_Recargar archivo actual"
-
-#~ msgid "Reload the file currently selected in the editor"
-#~ msgstr "Recarga el archivo actualmente seleccionado en el editor"
-
-#~ msgid "Folder Browser"
-#~ msgstr "Visor de archivos"
-
-#~ msgid "Close Current File"
-#~ msgstr "Cerrar archivo actual"
-
-#~ msgid "_Recent"
-#~ msgstr "_Reciente"
-
-#~ msgid "ERROR: cannot save session to %s\n"
-#~ msgstr "ERROR: No se puede guardar sesión en %s\n"
-
-#~ msgid "ERROR: cannot open session file (%s)\n"
-#~ msgstr "ERROR: no se puede abrir archivo de sesión (%s)\n"
-
-#~ msgid "Zoom:"
-#~ msgstr "Zoom:"
-
-#~ msgid "Rename file"
-#~ msgstr "Renombrar archivo"
-
-#~ msgid "C string"
-#~ msgstr "Cadena C"
-
-#~ msgid "C character"
-#~ msgstr "Carácter C"
-
-#~ msgid "C word"
-#~ msgstr "Palabra completa"
-
-#~ msgid "C number"
-#~ msgstr "Numero C"
-
-#~ msgid "C identifier"
-#~ msgstr "Identificador C"
-
-#~ msgid "C comment"
-#~ msgstr "Comentario SQL"
-
-#~ msgid "C operator"
-#~ msgstr "Operador CSS"
-
-#~ msgid "PHP-Help not compiled in. Help for function not found: %s\n"
-#~ msgstr "Ayuda para la función no encontrada: %s\n"
-
-#~ msgid "Close class Browser"
-#~ msgstr "Cerrar visor de clases"
-
-#~ msgid "Cannot open '%s' for writing"
-#~ msgstr "No se pudo abrir '%s' para escribir"
-
-#~ msgid "This file is too big. Unable to allocate memory."
-#~ msgstr "El archivo es demasiado grande. Imposible alojar memoria."
-
-#~ msgid ""
-#~ "Error loading file:%s\n"
-#~ "File was loaded partially\n"
-#~ "Press Shift + Ctrl + R to reload the file\n"
-#~ msgstr ""
-#~ "Error cargando archivo:%s\n"
-#~ "El archivo fue cargado parcialmente\n"
-#~ "Presione Mayús + Ctrl + R para recargar el archivo\n"
-
-#~ msgid "Could not stat the file %s. GIO error: %s \n"
-#~ msgstr "No se pudo obtener informacion del archivo %s. GIO error: %s.\n"
-
-#~ msgid "_Project"
-#~ msgstr "_Proyectos"
-
-#~ msgid "_New Project"
-#~ msgstr "_Nuevo Proyecto"
-
-#~ msgid "Create a new gPHPEdit project"
-#~ msgstr "Crear un nuevo proyecto de gPHPEdit"
-
-#~ msgid "_Open Project"
-#~ msgstr "_Abrir Proyecto"
-
-#~ msgid "Open a gPHPEdit project"
-#~ msgstr "Abrir un proyecto de gPHPEdit"
-
-#~ msgid "_Close Project"
-#~ msgstr "_Cerrar Proyecto"
-
-#~ msgid "Close Current project"
-#~ msgstr "Cerrar proyecto actual"
+#: ../gphpedit.desktop.in.h:2
+msgid "PHP/HTML/CSS editor"
+msgstr ""
