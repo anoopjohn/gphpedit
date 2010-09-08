@@ -174,12 +174,6 @@ static void main_window_fill_panes(void)
 
   main_window.notebook_editor = gtk_notebook_new ();
   gtk_notebook_set_scrollable(GTK_NOTEBOOK(main_window.notebook_editor), TRUE);
-  /*
-    GTK_WIDGET_UNSET_FLAGS (main_window.notebook_editor, GTK_CAN_FOCUS | GTK_RECEIVES_DEFAULT);
-   Fix to scrollable list of tabs, however it then messes up grabbing of focus
-   Hence the focus-tab event (which GTK doesn't seem to recognise
-  */
-  gtk_widget_set_receives_default (main_window.notebook_editor,FALSE);
   gtk_widget_show (main_window.notebook_editor);
   gtk_box_pack_start(GTK_BOX(main_window.prin_hbox), main_window.notebook_editor, TRUE, TRUE, 2);
 
@@ -235,13 +229,14 @@ static void create_app_main_window(const gchar *title){
   main_window.window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
   gtk_window_set_title(GTK_WINDOW(main_window.window), title);
   gint w, h, x, y;
-  get_preferences_manager_window_size (main_window.prefmg, &w, &h);
-  gtk_window_set_default_size(GTK_WINDOW(main_window.window), w, h);
-  get_preferences_manager_window_position (main_window.prefmg, &y, &x);
-  gtk_window_move(GTK_WINDOW(main_window.window), x, y);
   if (get_preferences_manager_window_maximized(main_window.prefmg)) {
  		gtk_window_maximize(GTK_WINDOW(main_window.window));
-	}
+	} else {
+    get_preferences_manager_window_size (main_window.prefmg, &w, &h);
+    gtk_window_set_default_size(GTK_WINDOW(main_window.window), w, h);
+    get_preferences_manager_window_position (main_window.prefmg, &y, &x);
+    gtk_window_move(GTK_WINDOW(main_window.window), x, y);
+  }
   g_set_application_name (title);
   gtk_window_set_default_icon_name ("gphpedit");
   /* set RGBA colormap */        
