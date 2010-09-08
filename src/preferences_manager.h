@@ -57,10 +57,8 @@ typedef struct
 GType preferences_manager_get_type (void);
 Preferences_Manager *preferences_manager_new (void);
 /*main_window session preferences*/
-gint get_preferences_manager_window_height(Preferences_Manager *preferences_manager);
-void set_preferences_manager_window_height(Preferences_Manager *preferences_manager, gint newstate);
-gint get_preferences_manager_window_width(Preferences_Manager *preferences_manager);
-void set_preferences_manager_window_width(Preferences_Manager *preferences_manager, gint newstate);
+void get_preferences_manager_window_size (Preferences_Manager *preferences_manager, gint *width, gint *height);
+void set_preferences_manager_window_size (Preferences_Manager *preferences_manager, gint width, gint height);
 gint get_preferences_manager_window_left(Preferences_Manager *preferences_manager);
 void set_preferences_manager_window_left(Preferences_Manager *preferences_manager, gint newstate);
 gint get_preferences_manager_window_top(Preferences_Manager *preferences_manager);

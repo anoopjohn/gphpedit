@@ -537,39 +537,22 @@ void set_preferences_manager_show_maintoolbar(Preferences_Manager *preferences_m
   prefdet->showmaintoolbar = newstate; 
 }
 
-
-gint get_preferences_manager_window_height(Preferences_Manager *preferences_manager)
+void get_preferences_manager_window_size (Preferences_Manager *preferences_manager, gint *width, gint *height)
 {
-  g_return_val_if_fail (OBJECT_IS_PREFERENCES_MANAGER (preferences_manager), 0); /**/
+  g_return_if_fail (OBJECT_IS_PREFERENCES_MANAGER (preferences_manager));
   Preferences_ManagerDetails *prefdet;
   prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
-  return prefdet->height;
+  if (width) *width = prefdet->width;
+  if (height) *height = prefdet->height;
 }
 
-void set_preferences_manager_window_height(Preferences_Manager *preferences_manager, gint newstate)
+void set_preferences_manager_window_size (Preferences_Manager *preferences_manager, gint width, gint height)
 {
-  if (!OBJECT_IS_PREFERENCES_MANAGER (preferences_manager)) return ;
+  g_return_if_fail (OBJECT_IS_PREFERENCES_MANAGER (preferences_manager));
   Preferences_ManagerDetails *prefdet;
   prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
-  prefdet->height = newstate; 
-
-}
-
-gint get_preferences_manager_window_width(Preferences_Manager *preferences_manager)
-{
-  g_return_val_if_fail (OBJECT_IS_PREFERENCES_MANAGER (preferences_manager), 0); /**/
-  Preferences_ManagerDetails *prefdet;
-  prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
-  return prefdet->width;
-}
-
-void set_preferences_manager_window_width(Preferences_Manager *preferences_manager, gint newstate)
-{
-  if (!OBJECT_IS_PREFERENCES_MANAGER (preferences_manager)) return ;
-  Preferences_ManagerDetails *prefdet;
-  prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
-  prefdet->width = newstate; 
-
+  prefdet->width = width;
+  prefdet->height = height;
 }
 
 gint get_preferences_manager_window_left(Preferences_Manager *preferences_manager)
