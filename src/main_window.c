@@ -52,8 +52,7 @@ void main_window_resize(GtkWidget *widget, GtkAllocation *allocation, gpointer u
   if (!get_preferences_manager_window_maximized(main_window.prefmg)) {
     gint left, width, top, height;
     gtk_window_get_position(GTK_WINDOW(main_window.window), &left, &top);
-    gtk_window_get_size(GTK_WINDOW(main_window.window), &width, &height);
-    set_preferences_manager_window_size (main_window.prefmg, width, height);
+    set_preferences_manager_window_size (main_window.prefmg, allocation->width, allocation->height);
     set_preferences_manager_window_left(main_window.prefmg, left);
     set_preferences_manager_window_top(main_window.prefmg, top);
   }
