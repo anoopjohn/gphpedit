@@ -50,11 +50,10 @@ void main_window_state_changed(GtkWidget *widget, GdkEventWindowState *event, gp
 
 void main_window_resize(GtkWidget *widget, GtkAllocation *allocation, gpointer user_data) {
   if (!get_preferences_manager_window_maximized(main_window.prefmg)) {
-    gint left, width, top, height;
+    gint left, top;
     gtk_window_get_position(GTK_WINDOW(main_window.window), &left, &top);
     set_preferences_manager_window_size (main_window.prefmg, allocation->width, allocation->height);
-    set_preferences_manager_window_left(main_window.prefmg, left);
-    set_preferences_manager_window_top(main_window.prefmg, top);
+    set_preferences_manager_window_position (main_window.prefmg, top, left);
   }
 }
 
@@ -235,11 +234,11 @@ static void set_colormap(GtkWidget *window){
 static void create_app_main_window(const gchar *title){
   main_window.window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
   gtk_window_set_title(GTK_WINDOW(main_window.window), title);
-  gint w, h;
+  gint w, h, x, y;
   get_preferences_manager_window_size (main_window.prefmg, &w, &h);
   gtk_window_set_default_size(GTK_WINDOW(main_window.window), w, h);
-  gtk_window_move(GTK_WINDOW(main_window.window), get_preferences_manager_window_left(main_window.prefmg), 
-         get_preferences_manager_window_top(main_window.prefmg));
+  get_preferences_manager_window_position (main_window.prefmg, &y, &x);
+  gtk_window_move(GTK_WINDOW(main_window.window), x, y);
   if (get_preferences_manager_window_maximized(main_window.prefmg)) {
  		gtk_window_maximize(GTK_WINDOW(main_window.window));
 	}

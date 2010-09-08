@@ -59,10 +59,8 @@ Preferences_Manager *preferences_manager_new (void);
 /*main_window session preferences*/
 void get_preferences_manager_window_size (Preferences_Manager *preferences_manager, gint *width, gint *height);
 void set_preferences_manager_window_size (Preferences_Manager *preferences_manager, gint width, gint height);
-gint get_preferences_manager_window_left(Preferences_Manager *preferences_manager);
-void set_preferences_manager_window_left(Preferences_Manager *preferences_manager, gint newstate);
-gint get_preferences_manager_window_top(Preferences_Manager *preferences_manager);
-void set_preferences_manager_window_top(Preferences_Manager *preferences_manager, gint newstate);
+void get_preferences_manager_window_position (Preferences_Manager *preferences_manager, gint *top, gint *left);
+void set_preferences_manager_window_position (Preferences_Manager *preferences_manager, gint top, gint left);
 gboolean get_preferences_manager_window_maximized(Preferences_Manager *preferences_manager);
 void set_preferences_manager_window_maximized(Preferences_Manager *preferences_manager, gboolean newstate);
 /**/

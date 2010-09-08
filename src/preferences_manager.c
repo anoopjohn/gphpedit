@@ -555,38 +555,22 @@ void set_preferences_manager_window_size (Preferences_Manager *preferences_manag
   prefdet->height = height;
 }
 
-gint get_preferences_manager_window_left(Preferences_Manager *preferences_manager)
+void get_preferences_manager_window_position (Preferences_Manager *preferences_manager, gint *top, gint *left)
 {
-  g_return_val_if_fail (OBJECT_IS_PREFERENCES_MANAGER (preferences_manager), 0); /**/
+  g_return_if_fail (OBJECT_IS_PREFERENCES_MANAGER (preferences_manager));
   Preferences_ManagerDetails *prefdet;
   prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
-  return prefdet->left;
+  if (top) *top = prefdet->top;
+  if (left) *left = prefdet->left;
 }
 
-void set_preferences_manager_window_left(Preferences_Manager *preferences_manager, gint newstate)
+void set_preferences_manager_window_position (Preferences_Manager *preferences_manager, gint top, gint left)
 {
-  if (!OBJECT_IS_PREFERENCES_MANAGER (preferences_manager)) return ;
+  g_return_if_fail (OBJECT_IS_PREFERENCES_MANAGER (preferences_manager));
   Preferences_ManagerDetails *prefdet;
   prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
-  prefdet->left = newstate; 
-
-}
-
-gint get_preferences_manager_window_top(Preferences_Manager *preferences_manager)
-{
-  g_return_val_if_fail (OBJECT_IS_PREFERENCES_MANAGER (preferences_manager), 0); /**/
-  Preferences_ManagerDetails *prefdet;
-  prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
-  return prefdet->top;
-}
-
-void set_preferences_manager_window_top(Preferences_Manager *preferences_manager, gint newstate)
-{
-  if (!OBJECT_IS_PREFERENCES_MANAGER (preferences_manager)) return ;
-  Preferences_ManagerDetails *prefdet;
-  prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
-  prefdet->top = newstate; 
-
+  prefdet->top = top;
+  prefdet->left = left;
 }
 
 gboolean get_preferences_manager_window_maximized(Preferences_Manager *preferences_manager)
@@ -603,8 +587,8 @@ void set_preferences_manager_window_maximized(Preferences_Manager *preferences_m
   Preferences_ManagerDetails *prefdet;
   prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
   prefdet->maximized = newstate; 
-
 }
+
 gint get_preferences_manager_indentation_size(Preferences_Manager *preferences_manager)
 {
   g_return_val_if_fail (OBJECT_IS_PREFERENCES_MANAGER (preferences_manager), 0); /**/
