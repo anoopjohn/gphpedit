@@ -77,14 +77,6 @@ gboolean main_window_delete_event(GtkWidget *widget, GdkEvent *event, gpointer u
   return cancel_quit;
 }
 
-gboolean classbrowser_accept_size(GtkPaned *paned, gpointer user_data)
-{
-  if (gtk_paned_get_position(GTK_PANED(main_window.main_horizontal_pane)) != 0) {
-    set_preferences_manager_classbrowser_size(main_window.prefmg, gtk_paned_get_position(GTK_PANED(main_window.main_horizontal_pane)));
-  }
-  return TRUE;
-}
-
 gint main_window_key_press_event(GtkWidget   *widget, GdkEventKey *event,gpointer user_data)
 {
 
@@ -814,7 +806,7 @@ void syntax_check_clear(GtkWidget *widget)
 void classbrowser_show(void)
 {
   gphpedit_debug(DEBUG_MAIN_WINDOW);
-  gtk_paned_set_position(GTK_PANED(main_window.main_horizontal_pane), get_preferences_manager_classbrowser_get_size(main_window.prefmg));
+  gtk_paned_set_position(GTK_PANED(main_window.main_horizontal_pane), get_preferences_manager_side_panel_get_size(main_window.prefmg));
   set_preferences_manager_parse_classbrowser_status(main_window.prefmg, FALSE);
   classbrowser_update(GPHPEDIT_CLASSBROWSER(main_window.classbrowser));
 }

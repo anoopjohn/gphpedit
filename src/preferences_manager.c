@@ -395,14 +395,14 @@ void set_preferences_manager_parse_classbrowser_status(Preferences_Manager *pref
  *return current classbrowser size
  * default size 100
 */
-gint get_preferences_manager_classbrowser_get_size(Preferences_Manager *preferences_manager){
+gint get_preferences_manager_side_panel_get_size(Preferences_Manager *preferences_manager){
   g_return_val_if_fail (OBJECT_IS_PREFERENCES_MANAGER (preferences_manager), 0); /**/
   Preferences_ManagerDetails *prefdet;
   prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
   return prefdet->classbrowser_size;
 }
 
-void set_preferences_manager_classbrowser_size(Preferences_Manager *preferences_manager, gint new_size){
+void set_preferences_manager_side_panel_size(Preferences_Manager *preferences_manager, gint new_size){
   if (!OBJECT_IS_PREFERENCES_MANAGER (preferences_manager)) return ;
   Preferences_ManagerDetails *prefdet;
   prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);

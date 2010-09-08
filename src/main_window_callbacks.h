@@ -86,7 +86,6 @@ void selectiontoupper(void);
 void selectiontolower(void);
 gboolean on_notebook_focus_tab(GtkNotebook *notebook, GtkNotebookTab arg1, gpointer user_data);
 void on_reload1_activate(GtkWidget *widget);
-gboolean classbrowser_accept_size(GtkPaned *paned, gpointer user_data);
 void keyboard_macro_startstop(GtkWidget *widget);
 void keyboard_macro_playback(GtkWidget *widget);
 void classbrowser_show(void);

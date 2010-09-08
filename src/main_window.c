@@ -57,6 +57,15 @@ void main_window_resize(GtkWidget *widget, GtkAllocation *allocation, gpointer u
   }
 }
 
+gboolean classbrowser_accept_size(GtkPaned *paned, gpointer user_data)
+{
+  if (gtk_paned_get_position(GTK_PANED(main_window.main_horizontal_pane)) != 0) {
+    set_preferences_manager_side_panel_size(main_window.prefmg, gtk_paned_get_position(GTK_PANED(main_window.main_horizontal_pane)));
+  }
+  return TRUE;
+}
+
+
 void main_window_pass_command_line_files(char **argv)
 {
   guint i;
@@ -108,7 +117,7 @@ static void main_window_create_panes(void)
   gtk_widget_show (main_window.main_vertical_pane);
   gtk_paned_pack1 (GTK_PANED (main_window.main_horizontal_pane), main_window.main_vertical_pane, FALSE, TRUE);
   g_signal_connect (G_OBJECT (main_window.window), "size_allocate", G_CALLBACK (classbrowser_accept_size), NULL);
-  gtk_paned_set_position(GTK_PANED(main_window.main_horizontal_pane),get_preferences_manager_classbrowser_get_size(main_window.prefmg));
+  gtk_paned_set_position(GTK_PANED(main_window.main_horizontal_pane),get_preferences_manager_side_panel_get_size(main_window.prefmg));
     
   if (get_preferences_manager_classbrowser_status(main_window.prefmg)==1)
     classbrowser_hide();
