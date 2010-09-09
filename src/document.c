@@ -142,6 +142,7 @@ void macro_record (GtkWidget *scintilla, gint message, gulong wparam, glong lpar
 void process_user_list_selection (GtkWidget *w, gint type, gchar *text, gpointer user_data);
 void document_done_refresh_cb (DocumentLoader *doclod, gboolean result, gpointer user_data);
 void scintilla_modified (GtkWidget *w);
+void document_add_recent(Document *document);
 /*
  * register Document type and returns a new GType
 */
@@ -407,7 +408,8 @@ void document_done_loading_cb (DocumentLoader *doc, guint result, gpointer user_
       tab_check_perl_file(document); 
       tab_check_cobol_file(document); 
       tab_check_python_file(document); 
-      tab_check_sql_file(document); 
+      tab_check_sql_file(document);
+      document_add_recent(document);
       }
     docdet->converted_to_utf8 = document_loader_get_UTF8_converted(doc);
     gtk_widget_show (docdet->container);
@@ -418,7 +420,7 @@ void document_done_loading_cb (DocumentLoader *doc, guint result, gpointer user_
       document_create_webkit(document, document_loader_get_file_contents (doc), TRUE, document_loader_get_raw_uri (doc));
     } else if (docdet->type == TAB_PREVIEW) {
       document_create_webkit(document, document_loader_get_file_contents (doc), FALSE, NULL);
-      }
+    }
     }
   g_signal_emit (G_OBJECT (document), signals[LOAD_COMPLETE], 0, result);
 }
@@ -2700,3 +2702,14 @@ void document_incremental_search(Document *document, gchar *current_text, gboole
     }
   }
 }
+
+void document_add_recent(Document *document)
+{
+  g_return_if_fail(document);
+  gchar *full_filename = document_get_filename(document);
+  GtkRecentManager *manager;
+  manager = gtk_recent_manager_get_default ();
+  gtk_recent_manager_add_item (manager, full_filename);
+  g_free(full_filename);
+}
+

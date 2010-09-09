@@ -211,14 +211,6 @@ void update_app_title(Document *document)
   g_free(title);
 }
 
-void main_window_add_to_reopen_menu(gchar *full_filename)
-{
-  if (!full_filename) return;
-  GtkRecentManager *manager;
-  manager = gtk_recent_manager_get_default ();
-  gtk_recent_manager_add_item (manager, full_filename);
-}
-
 static void main_window_create_prinbox(void){
   main_window.prinbox = gtk_vbox_new (FALSE, 0);
   gtk_container_add (GTK_CONTAINER (main_window.window), main_window.prinbox);
