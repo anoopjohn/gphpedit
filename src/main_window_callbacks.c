@@ -807,7 +807,7 @@ void classbrowser_show(void)
 {
   gphpedit_debug(DEBUG_MAIN_WINDOW);
   gtk_paned_set_position(GTK_PANED(main_window.main_horizontal_pane), get_preferences_manager_side_panel_get_size(main_window.prefmg));
-  set_preferences_manager_parse_classbrowser_status(main_window.prefmg, FALSE);
+  set_preferences_manager_parse_side_panel_status(main_window.prefmg, FALSE);
   classbrowser_update(GPHPEDIT_CLASSBROWSER(main_window.classbrowser));
 }
 
@@ -815,15 +815,15 @@ void classbrowser_show(void)
 void classbrowser_hide(void)
 {
   gphpedit_debug(DEBUG_MAIN_WINDOW);
-  gtk_paned_set_position(GTK_PANED(main_window.main_horizontal_pane),0);
-  set_preferences_manager_parse_classbrowser_status(main_window.prefmg, TRUE);
+  gtk_paned_set_position(GTK_PANED(main_window.main_horizontal_pane), 0);
+  set_preferences_manager_parse_side_panel_status(main_window.prefmg, TRUE);
 }
 
 void classbrowser_show_hide(GtkWidget *widget)
 {
-  gboolean hidden = get_preferences_manager_classbrowser_status(main_window.prefmg);
+  gboolean hidden = get_preferences_manager_side_panel_status(main_window.prefmg);
   menubar_set_classbrowser_status(MENUBAR(main_window.menu), hidden);
-  if (hidden == 1)
+  if (hidden)
     classbrowser_show();
   else
     classbrowser_hide();

@@ -317,7 +317,7 @@ void classbrowser_update_cb (Classbrowser_Backend *classback, gboolean result, g
   gphpeditClassBrowserPrivate *priv= (gphpeditClassBrowserPrivate *) user_data;
   static guint press_event = 0;
   static guint release_event = 0;
-  if (get_preferences_manager_classbrowser_status(main_window.prefmg)!=0){ /* do nothing if classbrowser is hidden */
+  if (!get_preferences_manager_side_panel_status(main_window.prefmg)){ /* do nothing if classbrowser is hidden */
     return;
   }
   if (press_event && g_signal_handler_is_connected (priv->classtreeview, press_event)) {

@@ -370,11 +370,11 @@ GSList *get_preferences_manager_search_history(Preferences_Manager *preferences_
   return prefdet->search_history;
 }
 /*
- *get_preferences_manager_classbrowser_status
- *return 0 if classbrowser is hidden
- *return 1 if classbrowser is show
+ *get_preferences_manager_side_panel_status
+ *return 1 if side_panel is hidden
+ *return 0 if side_panel is show
 */
-gboolean get_preferences_manager_classbrowser_status(Preferences_Manager *preferences_manager)
+gboolean get_preferences_manager_side_panel_status(Preferences_Manager *preferences_manager)
 {
   g_return_val_if_fail (OBJECT_IS_PREFERENCES_MANAGER (preferences_manager), 0); /**/
   Preferences_ManagerDetails *prefdet;
@@ -382,17 +382,17 @@ gboolean get_preferences_manager_classbrowser_status(Preferences_Manager *prefer
   return prefdet->classbrowser_hidden;
 }
 
-void set_preferences_manager_parse_classbrowser_status(Preferences_Manager *preferences_manager, gint new_status){
+void set_preferences_manager_parse_side_panel_status(Preferences_Manager *preferences_manager, gint new_status){
   if (!OBJECT_IS_PREFERENCES_MANAGER (preferences_manager)) return ;
   Preferences_ManagerDetails *prefdet;
   prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
   prefdet->classbrowser_hidden=new_status;
-  set_int("/gPHPEdit/main_window/classbrowser_hidden",new_status);
+  set_int("/gPHPEdit/main_window/classbrowser_hidden", new_status);
 }
 
 /*
  *classbrowser_get_size
- *return current classbrowser size
+ *return currentside panel size
  * default size 100
 */
 gint get_preferences_manager_side_panel_get_size(Preferences_Manager *preferences_manager){
