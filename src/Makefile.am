@@ -116,6 +116,8 @@ gphpedit_SOURCES = \
   tab_util.h \
   templates.c \
   templates.h \
+  templates_editor.c \
+  templates_editor.h \
   toolbar.c \
   toolbar.h
 

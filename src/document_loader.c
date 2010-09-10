@@ -310,7 +310,7 @@ gboolean validate_and_convert_utf8_buffer (gchar *buffer) //FIXME: multiple enco
 {
   gboolean result;
   if (g_utf8_validate(buffer, -1, NULL)) {
-    gphpedit_debug_message (DEBUG_DOCUMENT,"%s", "Valid UTF8\n");
+    gphpedit_debug_message (DEBUG_DOCUMENT,"%s", "Valid UTF8");
     result = FALSE;
   } else {
     gchar *converted_text;
@@ -322,12 +322,12 @@ gboolean validate_and_convert_utf8_buffer (gchar *buffer) //FIXME: multiple enco
       error=NULL;
       converted_text = g_convert(buffer, -1, "UTF-8", "ISO-8859-15", NULL, &utf8_size, &error);
       if (error!=NULL){
-        gphpedit_debug_message (DEBUG_DOCUMENT,_("gPHPEdit UTF-8 Error: %s\n"), error->message);
+        gphpedit_debug_message (DEBUG_DOCUMENT,_("gPHPEdit UTF-8 Error: %s"), error->message);
         g_error_free(error);
       return FALSE;
       }
     }
-    gphpedit_debug_message (DEBUG_DOCUMENT,_("Converted to UTF-8 size: %u\n"), utf8_size);
+    gphpedit_debug_message (DEBUG_DOCUMENT,_("Converted to UTF-8 size: %u"), utf8_size);
     g_free(buffer);
     buffer = g_strdup(converted_text);
     g_free(converted_text);
@@ -354,8 +354,8 @@ void tab_file_opened (GObject *source_object, GAsyncResult *res, gpointer user_d
     return ;
   }
 
-  gphpedit_debug_message (DEBUG_DOCUMENT,"Loaded %u bytes\n",size);
-  gphpedit_debug_message (DEBUG_DOCUMENT,"BUFFER=\n%s\n-------------------------------------------\n", docloddet->buffer);
+  gphpedit_debug_message (DEBUG_DOCUMENT,"Loaded %u bytes",size);
+  gphpedit_debug_message (DEBUG_DOCUMENT,"BUFFER=\n%s\n-------------------------------------------", docloddet->buffer);
 
   docloddet->converted_to_UTF8 = validate_and_convert_utf8_buffer(docloddet->buffer);
   docloddet->file_contents_len = strlen(docloddet->buffer);
@@ -422,8 +422,8 @@ void tab_help_opened (GObject *source_object, GAsyncResult *res, gpointer user_d
     }
     return ;
   }
-  gphpedit_debug_message (DEBUG_DOCUMENT,"Loaded %u bytes\n",size);
-  gphpedit_debug_message (DEBUG_DOCUMENT,"BUFFER=\n%s\n-------------------------------------------\n", docloddet->buffer);
+  gphpedit_debug_message (DEBUG_DOCUMENT,"Loaded %u bytes",size);
+  gphpedit_debug_message (DEBUG_DOCUMENT,"BUFFER=\n%s\n-------------------------------------------", docloddet->buffer);
 
   docloddet->converted_to_UTF8 = validate_and_convert_utf8_buffer(docloddet->buffer);
   docloddet->file_contents_len = strlen(docloddet->buffer);
@@ -475,7 +475,7 @@ GString *tab_help_try_filename(gchar *prefix, gchar *command, gchar *suffix)
   if (suffix) {
     long_filename = g_string_append(long_filename, suffix);
   }
-  gphpedit_debug_message (DEBUG_DOCUMENT,"filename: %s\n", long_filename->str);
+  gphpedit_debug_message (DEBUG_DOCUMENT,"filename: %s", long_filename->str);
 
   if (filename_file_exist(long_filename->str)){
     return long_filename;
@@ -489,7 +489,7 @@ GString *tab_help_try_filename(gchar *prefix, gchar *command, gchar *suffix)
   if (suffix) {
     long_filename = g_string_append(long_filename, suffix);
   }
-  gphpedit_debug_message (DEBUG_DOCUMENT,"filename: %s\n", long_filename->str);
+  gphpedit_debug_message (DEBUG_DOCUMENT,"filename: %s", long_filename->str);
 
   if (filename_file_exist(long_filename->str)){
     return long_filename;
@@ -524,7 +524,7 @@ GString *tab_help_find_helpfile(gchar *command)
  g_free(temp);
  if (long_filename)
   return long_filename;
-    gphpedit_debug_message (DEBUG_DOCUMENT,_("Help for function not found: %s\n"), command);
+    gphpedit_debug_message (DEBUG_DOCUMENT,_("Help for function not found: %s"), command);
  return long_filename;
 #else
   long_filename = g_string_new("http://www.php.net/manual/en/function.");
@@ -536,7 +536,7 @@ GString *tab_help_find_helpfile(gchar *command)
   return long_filename;
   }else{
   g_object_unref(temp);
-  gphpedit_debug_message (DEBUG_DOCUMENT,_("Help for function not found: %s\n"), command);
+  gphpedit_debug_message (DEBUG_DOCUMENT,_("Help for function not found: %s"), command);
   return NULL;
   }
 #endif
@@ -553,7 +553,7 @@ void document_create_help(DocumentLoader *doclod)
     return ;
   }
   else {
-    gphpedit_debug_message (DEBUG_DOCUMENT,"filename:%s\n", long_filename->str);
+    gphpedit_debug_message (DEBUG_DOCUMENT,"filename:%s", long_filename->str);
     docloddet->file=get_gfile_from_filename(long_filename->str);
     tab_help_load_file(doclod);
   }
@@ -588,7 +588,7 @@ void document_navigate_url(DocumentLoader *doclod, Document *document, gchar *ur
     g_signal_emit (G_OBJECT (doclod), signals[DONE_NAVIGATE], 0);
     return ;
   } else {
-    gphpedit_debug_message (DEBUG_DOCUMENT,"filename:%s\n", long_filename->str);
+    gphpedit_debug_message (DEBUG_DOCUMENT,"filename:%s", long_filename->str);
     docloddet->file=get_gfile_from_filename(long_filename->str);
     tab_help_load_file(doclod);
   }

@@ -30,6 +30,8 @@
 #include <stdlib.h>
 #include <gtk/gtk.h>
 #include <webkit/webkit.h>
+#include <gdk/gdkkeysyms.h>
+
 #include "debug.h"
 #include "document.h"
 #include "document_loader.h"
@@ -221,6 +223,30 @@ Document *document_new (gint type, const gchar *filename, gint goto_line)
 	return doc; /* return new object */
 }
 
+gboolean scintilla_key_press (GtkWidget *widget, GdkEventKey *event, gpointer user_data) {
+  if ((event->state & GDK_CONTROL_MASK)==GDK_CONTROL_MASK && ((event->keyval == GDK_F2)))  {
+    document_modify_current_line_marker(user_data);
+    return TRUE;
+  }
+  else if ((event->keyval == GDK_F2))  {
+      document_find_next_marker(user_data);
+      return TRUE;
+  }  
+  else if (((event->state & (GDK_CONTROL_MASK | GDK_SHIFT_MASK))==(GDK_CONTROL_MASK | GDK_SHIFT_MASK)) && (event->keyval == GDK_space)) {
+    document_show_calltip_at_current_pos(user_data);
+    return TRUE;
+  }
+  else if ((event->state & GDK_CONTROL_MASK)==GDK_CONTROL_MASK && ((event->keyval == GDK_j) || (event->keyval == GDK_J)))  {
+    template_find_and_insert(main_window.tempmg, user_data);
+    return TRUE;
+  }
+  else if ((event->state & GDK_CONTROL_MASK)==GDK_CONTROL_MASK && (event->keyval == GDK_space)) { 
+      document_force_autocomplete(user_data);
+      return TRUE;
+ }
+
+  return FALSE;
+}
 static void tab_set_event_handlers(Document *doc)
 {
   g_return_if_fail(doc);
@@ -230,6 +256,7 @@ static void tab_set_event_handlers(Document *doc)
   g_signal_connect (G_OBJECT (docdet->scintilla), "uri_dropped", G_CALLBACK (process_drag_uri), NULL);
   g_signal_connect (G_OBJECT (docdet->scintilla), "user_list_selection", G_CALLBACK (process_user_list_selection), doc);
   g_signal_connect (G_OBJECT (docdet->scintilla), "painted", G_CALLBACK (scintilla_modified), NULL);
+  g_signal_connect (G_OBJECT (docdet->scintilla), "key-press-event", G_CALLBACK (scintilla_key_press), doc);
 }
 
 void tab_reset_scintilla_after_open(GtkScintilla *scintilla, guint current_line)
@@ -381,21 +408,22 @@ void document_done_loading_cb (DocumentLoader *doc, guint result, gpointer user_
     if (docdet->type==TAB_FILE){
       if (document_loader_get_file_content_lenght (doc)==0){
       create_new_document(document);
+      set_document_to_text_plain(document);
       } else {
       create_new_document(document);
       // Clear scintilla buffer
       gtk_scintilla_clear_all(GTK_SCINTILLA (docdet->scintilla));
       gtk_scintilla_add_text(GTK_SCINTILLA (docdet->scintilla), document_loader_get_file_content_lenght (doc), document_loader_get_file_contents (doc));
+      tab_reset_scintilla_after_open(GTK_SCINTILLA (docdet->scintilla), docdet->current_line);
+      tab_check_php_file(document);
+      tab_check_css_file(document);
+      tab_check_cxx_file(document);
+      tab_check_perl_file(document);
+      tab_check_cobol_file(document);
+      tab_check_python_file(document);
+      tab_check_sql_file(document);
       }
     docdet->converted_to_utf8 = document_loader_get_UTF8_converted(doc);
-    tab_reset_scintilla_after_open(GTK_SCINTILLA (docdet->scintilla), docdet->current_line);
-    tab_check_php_file(document); 
-    tab_check_css_file(document); 
-    tab_check_cxx_file(document); 
-    tab_check_perl_file(document); 
-    tab_check_cobol_file(document); 
-    tab_check_python_file(document); 
-    tab_check_sql_file(document); 
     gtk_widget_show (docdet->container);
     gtk_scintilla_set_save_point(GTK_SCINTILLA(docdet->scintilla));
     tab_set_event_handlers(document);
@@ -1351,9 +1379,10 @@ void set_document_to_text_plain(Document *document)
   if (!document) return ;
   DocumentDetails *docdet = DOCUMENT_GET_PRIVATE(document);
   if (GTK_IS_SCINTILLA(docdet->scintilla)){
-  gtk_scintilla_clear_document_style (GTK_SCINTILLA(docdet->scintilla));
   /* SCLEX_NULL to select no lexing action */
   gtk_scintilla_set_lexer(GTK_SCINTILLA (docdet->scintilla), SCLEX_NULL); 
+  tab_set_configured_scintilla_properties(GTK_SCINTILLA (docdet->scintilla));
+  gtk_scintilla_colourise(GTK_SCINTILLA (docdet->scintilla), 0, -1);
   docdet->type = TAB_FILE;
   }
 }
