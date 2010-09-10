@@ -926,7 +926,7 @@ msgstr "General"
 
 #: ../src/preferences_dialog.c:493
 msgid "<b>Tabs:</b>"
-msgstr ""
+msgstr "<b>Tabulaciones:</b>"
 
 #: ../src/preferences_dialog.c:503
 msgid "Tab size:"
@@ -983,7 +983,7 @@ msgstr "_Fuente del editor:"
 
 #: ../src/preferences_dialog.c:651
 msgid "<b>Color Scheme:</b>"
-msgstr ""
+msgstr "<b>Esquema de Colores:</b>"
 
 #: ../src/preferences_dialog.c:708
 msgid "Colour"
@@ -1165,11 +1165,11 @@ msgstr ""
 
 #: ../src/gtksourcestyle.c:88
 msgid "Background"
-msgstr ""
+msgstr "Fondo"
 
 #: ../src/gtksourcestyle.c:89
 msgid "Background color"
-msgstr ""
+msgstr "Color de Fondo"
 
 #: ../src/gtksourcestyle.c:96
 #, fuzzy
@@ -1194,7 +1194,7 @@ msgstr "Subrayado"
 
 #: ../src/gtksourcestyle.c:128 ../src/gtksourcestyle.c:129
 msgid "Strikethrough"
-msgstr ""
+msgstr "Tachado"
 
 #: ../src/gtksourcestyle.c:136
 msgid "Line background set"
@@ -1296,7 +1296,7 @@ msgstr "_Acerca De"
 #: ../src/plugindialog.c:454
 #, fuzzy
 msgid "A_ctivate"
-msgstr "Plantillas:"
+msgstr "A_ctivado"
 
 #: ../src/plugindialog.c:464
 msgid "Ac_tivate All"
