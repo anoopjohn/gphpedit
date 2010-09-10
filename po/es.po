@@ -1294,17 +1294,16 @@ msgid "_About"
 msgstr "_Acerca De"
 
 #: ../src/plugindialog.c:454
-#, fuzzy
 msgid "A_ctivate"
-msgstr "A_ctivado"
+msgstr "A_ctivar"
 
 #: ../src/plugindialog.c:464
 msgid "Ac_tivate All"
-msgstr ""
+msgstr "Ac_tivar Todos"
 
 #: ../src/plugindialog.c:469
 msgid "_Deactivate All"
-msgstr ""
+msgstr "_Desactivar Todos"
 
 #: ../src/plugindialog.c:783
 msgid "Active _Plugins:"
