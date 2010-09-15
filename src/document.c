@@ -115,7 +115,6 @@ typedef struct
 					    DocumentDetails))
 
 static void document_dispose (GObject *gobject);
-
 static void document_create_new(Document *doc, gint type, gchar *filename, gint goto_line);
 void document_done_navigate_cb (DocumentLoader *doclod, gboolean result, gpointer user_data);
 static void char_added(GtkWidget *scintilla, guint ch, gpointer user_data);
@@ -248,11 +247,13 @@ static void tab_set_event_handlers(Document *doc)
 
 void tab_reset_scintilla_after_open(GtkScintilla *scintilla, guint current_line)
 {
+  gtk_scintilla_set_undo_collection(scintilla, FALSE);
   gtk_scintilla_empty_undo_buffer(scintilla);
   gtk_scintilla_set_save_point(scintilla);
   gtk_scintilla_goto_line(scintilla, current_line);
   gtk_scintilla_scroll_caret(scintilla);
   gtk_scintilla_grab_focus(scintilla);
+  gtk_scintilla_set_undo_collection(scintilla, TRUE);
 }
 
 
@@ -578,6 +579,7 @@ static void save_point_left(GtkWidget *scintilla, gpointer user_data)
     g_signal_emit (G_OBJECT (doc), signals[SAVE_UPDATE], 0); 
   }
 }
+
 void scintilla_modified (GtkWidget *scintilla){
   gint current_pos = gtk_scintilla_get_current_pos(GTK_SCINTILLA(scintilla));
   gphpedit_statusbar_set_cursor_position (GPHPEDIT_STATUSBAR(main_window.appbar), 
@@ -585,6 +587,7 @@ void scintilla_modified (GtkWidget *scintilla){
     gtk_scintilla_get_column(GTK_SCINTILLA(scintilla), current_pos));
   gphpedit_statusbar_set_overwrite (GPHPEDIT_STATUSBAR(main_window.appbar), gtk_scintilla_get_overtype(GTK_SCINTILLA(scintilla)));
 }
+
 void update_ui(GtkWidget *scintilla)
 {
   // ----------------------------------------------------
@@ -854,7 +857,7 @@ static void char_added(GtkWidget *scintilla, guint ch, gpointer user_data)
         break; /*exit nothing todo */
           case ('('):
         if ((gtk_scintilla_get_line_state(GTK_SCINTILLA(scintilla), current_line))==274 &&
-        (docdet->calltip_timer_set==FALSE)) {
+        (!docdet->calltip_timer_set)) {
           docdet->calltip_timer_id = g_timeout_add(get_preferences_manager_calltip_delay(pref), calltip_callback, GINT_TO_POINTER(current_pos));
           docdet->calltip_timer_set=TRUE;
         }
@@ -867,7 +870,7 @@ static void char_added(GtkWidget *scintilla, guint ch, gpointer user_data)
           gint line_size;
           gchar *line_text= gtk_scintilla_get_text_range (GTK_SCINTILLA(scintilla), initial_pos, wordStart-1, &line_size);
             if (!check_php_variable_before(line_text)) return;
-            if (docdet->completion_timer_set==FALSE) {
+            if (!docdet->completion_timer_set) {
               docdet->completion_timer_id = g_timeout_add(get_preferences_manager_auto_complete_delay(pref), auto_memberfunc_complete_callback, GINT_TO_POINTER(current_pos));
               docdet->completion_timer_set=TRUE;
             }
@@ -919,7 +922,7 @@ static void char_added(GtkWidget *scintilla, guint ch, gpointer user_data)
           default:  
         member_function_buffer = gtk_scintilla_get_text_range (GTK_SCINTILLA(scintilla), wordStart-2, wordStart, &member_function_length);
         if(current_word_length>=3){
-            if (docdet->completion_timer_set==FALSE) {
+            if (!docdet->completion_timer_set) {
               docdet->completion_timer_id = g_timeout_add(get_preferences_manager_auto_complete_delay(pref), css_auto_complete_callback, GINT_TO_POINTER(current_pos));
               docdet->completion_timer_set=TRUE;
             }
@@ -930,7 +933,7 @@ static void char_added(GtkWidget *scintilla, guint ch, gpointer user_data)
       case(TAB_COBOL):
         member_function_buffer = gtk_scintilla_get_text_range (GTK_SCINTILLA(scintilla), wordStart-2, wordStart, &member_function_length);
         if(current_word_length>=3){
-            if (docdet->completion_timer_set==FALSE) {
+            if (!docdet->completion_timer_set) {
               docdet->completion_timer_id = g_timeout_add(get_preferences_manager_auto_complete_delay(pref), cobol_auto_complete_callback, GINT_TO_POINTER(current_pos));
               docdet->completion_timer_set=TRUE;
             }
@@ -940,7 +943,7 @@ static void char_added(GtkWidget *scintilla, guint ch, gpointer user_data)
       case(TAB_SQL): 
         member_function_buffer = gtk_scintilla_get_text_range (GTK_SCINTILLA(scintilla), wordStart-2, wordStart, &member_function_length);
         if(current_word_length>=3){
-            if (docdet->completion_timer_set==FALSE) {
+            if (!docdet->completion_timer_set) {
               docdet->completion_timer_id = g_timeout_add(get_preferences_manager_auto_complete_delay(pref), sql_auto_complete_callback, GINT_TO_POINTER(current_pos));
               docdet->completion_timer_set=TRUE;
             }
@@ -1862,63 +1865,21 @@ GtkScintilla *document_get_scintilla(Document *document)
   return NULL;
 }
 
-gboolean document_is_php_file(Document *document)
-{
-  g_return_val_if_fail (document, FALSE);
-  DocumentDetails *docdet = DOCUMENT_GET_PRIVATE(document);
-  if (GTK_IS_SCINTILLA(docdet->scintilla)){
-    // New style function for configuration of what constitutes a PHP file
-    gboolean is_php = FALSE;
-    gint i;
-    gchar *buffer = NULL;
-    gsize text_length;
-    gchar **lines;
-    gchar *filename;
-    
-    filename = document_get_filename(document);
-    is_php=is_php_file_from_filename(filename);
-    g_free(filename);
-    if (!is_php) { // If it's not recognised as a PHP file, examine the contents for <?php and #!.*php
-      
-      text_length = gtk_scintilla_get_length(GTK_SCINTILLA(docdet->scintilla));
-      buffer = g_malloc0(text_length+1); // Include terminating null
-      if (buffer == NULL) {
-        g_warning ("%s\n", "Cannot allocate write buffer");
-        return is_php;
-      }
-      gtk_scintilla_get_text(GTK_SCINTILLA(docdet->scintilla), text_length+1, buffer);
-      lines = g_strsplit(buffer, "\n", 10);
-      if (!lines[0]) {
-        g_free(buffer);
-        g_strfreev(lines);
-        return is_php;
-      }
-      if (lines[0][0] == '#' && lines[0][1] == '!' && strstr(lines[0], "php") != NULL) {
-        is_php = TRUE;
-      }
-      else {
-        for (i = 0; lines[i+1] != NULL; i++) {
-          if (strstr (lines[i], "<?php") != NULL) {
-            is_php = TRUE;
-            break;
-          }
-        }
-      }
-      g_strfreev(lines);
-      g_free(buffer);
-    }
-    
-    return is_php;
-  } else {
-    return FALSE;
-  }
-}
-
 void tab_check_php_file(Document *document)
 {
-  if (document_is_php_file(document)) {
+  if (!document) return;
+  gchar *content;
+  gchar *filename = document_get_filename(document);
+  if (is_php_file_from_filename(filename)){
     set_document_to_php(document);
+  } else {
+    content = document_get_text(document);
+    if (is_php_file_from_content(content)){
+      set_document_to_php(document);
+    }
+    g_free(content);
   }
+  g_free(filename);
 }
 
 void tab_check_css_file(Document *document)

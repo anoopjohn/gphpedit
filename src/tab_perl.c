@@ -95,3 +95,11 @@ void tab_perl_set_lexer(Document *document)
 {
   scintilla_perl_set_lexer(document_get_scintilla(document));
 }
+
+gboolean is_perl_file(const gchar *filename)
+{
+  if (g_str_has_suffix(filename,".pl") || g_str_has_suffix(filename,".pm") || g_str_has_suffix(filename,".al") || g_str_has_suffix(filename,".perl"))
+      return TRUE;
+  return FALSE;
+}
+

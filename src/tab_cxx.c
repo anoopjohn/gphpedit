@@ -81,3 +81,12 @@ void tab_cxx_set_lexer(Document *document)
 {
   scintilla_cxx_set_lexer(document_get_scintilla(document));
 }
+
+gboolean is_cxx_file(const gchar *filename)
+{
+  if (g_str_has_suffix(filename,".cxx") || g_str_has_suffix(filename,".c") || g_str_has_suffix(filename,".h")
+  || g_str_has_suffix(filename,".cpp") || g_str_has_suffix(filename,".cc") || g_str_has_suffix(filename,".c++"))
+      return TRUE;
+  return FALSE;
+}
+

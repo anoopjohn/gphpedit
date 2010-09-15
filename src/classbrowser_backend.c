@@ -35,6 +35,9 @@
 #include "main_window_callbacks.h"
 #include "gvfs_utils.h"
 
+#include "tab_php.h"
+#include "tab_css.h"
+#include "tab_cobol.h"
 /* object signal enumeration */
 enum {
 	DONE_REFRESH,

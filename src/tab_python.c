@@ -75,3 +75,10 @@ void tab_python_set_lexer(Document *document)
 {
   scintilla_python_set_lexer(document_get_scintilla(document));
 }
+
+gboolean is_python_file(const gchar *filename)
+{
+  if (g_str_has_suffix(filename,".py"))
+      return TRUE;
+  return FALSE;
+}

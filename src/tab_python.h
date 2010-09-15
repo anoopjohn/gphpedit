@@ -28,5 +28,6 @@
 #include "document.h"
 
 void tab_python_set_lexer(Document *document);
+gboolean is_python_file(const gchar *filename);
 
 #endif

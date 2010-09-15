@@ -73,3 +73,10 @@ void tab_css_set_lexer(Document *document)
   
   g_object_unref(prefmg);
 }
+
+gboolean is_css_file(const gchar *filename)
+{
+  if (g_str_has_suffix(filename,".css"))
+      return TRUE;
+  return FALSE;
+}

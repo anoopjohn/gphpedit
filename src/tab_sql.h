@@ -28,5 +28,6 @@
 #include "document.h"
 
 void tab_sql_set_lexer(Document *document);
+gboolean is_sql_file(const gchar *filename);
 
 #endif

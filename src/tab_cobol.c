@@ -71,3 +71,11 @@ void tab_cobol_set_lexer(Document *document)
 {
   scintilla_cobol_set_lexer(document_get_scintilla(document));
 }
+
+gboolean is_cobol_file(const gchar *filename)
+{
+  if (g_str_has_suffix(filename,".cbl") || g_str_has_suffix(filename,".CBL"))
+      return TRUE;
+  return FALSE;
+}
+

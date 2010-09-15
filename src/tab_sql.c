@@ -71,3 +71,11 @@ gtk_scintilla_set_keywords(scintilla, 1, "all alter and any array as asc at auth
   gtk_scintilla_colourise(scintilla, 0, -1);
   g_object_unref(prefmg);
 }
+
+gboolean is_sql_file(const gchar *filename)
+{
+if (g_str_has_suffix(filename,".sql"))
+      return TRUE;
+  return FALSE;
+}
+
