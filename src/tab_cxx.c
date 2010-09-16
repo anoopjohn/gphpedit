@@ -2,6 +2,7 @@
 
    Copyright (C) 2003, 2004, 2005 Andy Jeffries <andy at gphpedit.org>
    Copyright (C) 2009 Anoop John <anoop dot john at zyxware.com>
+   Copyright (C) 2009 José Rostagno(for vijona.com.ar)
 
    For more information or to find the latest release, visit our 
    website at http://www.gphpedit.org/
@@ -25,6 +26,8 @@
 #include "tab_cxx.h"
 #include "tab_util.h"
 #include "preferences_manager.h"
+#include "main_window.h"
+#include "gtksourcestyleschememanager.h"
 
 void scintilla_cxx_set_lexer(GtkScintilla *scintilla)
 {
@@ -34,178 +37,31 @@ void scintilla_cxx_set_lexer(GtkScintilla *scintilla)
   gtk_scintilla_set_lexer(scintilla, SCLEX_CPP);
   gtk_scintilla_set_style_bits(scintilla, 5);
 
-  gchar *font =NULL;
-  gint size, fore, back;
-  gboolean italic, bold;
-
-  get_preferences_manager_style_settings(prefmg, "c_default", &font , &size, &fore, &back, &italic, &bold);
-
-  gtk_scintilla_style_set_font (scintilla, SCE_C_DEFAULT, font);
-  gtk_scintilla_style_set_fore (scintilla, SCE_C_DEFAULT, fore);
-  gtk_scintilla_style_set_back (scintilla, SCE_C_DEFAULT, back);
-  gtk_scintilla_style_set_size (scintilla, SCE_C_DEFAULT, size);
-  gtk_scintilla_style_set_italic (scintilla, SCE_C_DEFAULT, italic);
-  gtk_scintilla_style_set_bold (scintilla, SCE_C_DEFAULT, bold);
-
-  get_preferences_manager_style_settings(prefmg, "php_default", &font , &size, &fore, &back, &italic, &bold);
-
-  gtk_scintilla_style_set_font (scintilla, STYLE_BRACELIGHT, font);
-  gtk_scintilla_style_set_fore (scintilla, STYLE_BRACELIGHT, 16711680);// Matching bracket
-  if(get_preferences_manager_higthlight_caret_line (prefmg))
-    gtk_scintilla_style_set_back (scintilla, STYLE_BRACELIGHT, get_preferences_manager_higthlight_caret_line_color(prefmg));
-  else
-    gtk_scintilla_style_set_back (scintilla, STYLE_BRACELIGHT, back);
-  gtk_scintilla_style_set_size (scintilla, STYLE_BRACELIGHT, size);
-  gtk_scintilla_style_set_italic (scintilla, STYLE_BRACELIGHT, italic);
-  gtk_scintilla_style_set_bold (scintilla, STYLE_BRACELIGHT, TRUE);
-  gtk_scintilla_style_set_font (scintilla, STYLE_BRACEBAD, font);
-  gtk_scintilla_style_set_fore (scintilla, STYLE_BRACEBAD, 255);
-  if(get_preferences_manager_higthlight_caret_line (prefmg))
-    gtk_scintilla_style_set_back (scintilla, STYLE_BRACEBAD, get_preferences_manager_higthlight_caret_line_color(prefmg));
-  else
-    gtk_scintilla_style_set_back (scintilla, STYLE_BRACEBAD, back);
-  gtk_scintilla_style_set_size (scintilla, STYLE_BRACEBAD, size);
-  gtk_scintilla_style_set_italic (scintilla, STYLE_BRACEBAD, italic);
-  gtk_scintilla_style_set_bold (scintilla, STYLE_BRACEBAD, TRUE);
-
   gtk_scintilla_set_keywords(scintilla, 0, "asm auto bool break case catch char class const const_cast continue default delete do double dynamic_cast else enum explicit export extern false float for friend goto if inline int long mutable namespace new operator private protected public register reinterpret_cast return short signed sizeof static static_cast struct switch template this throw true try typedef typeid typename union unsigned using virtual void volatile wchar_t while addindex addtogroup anchor arg attention author b brief bug c class code date def defgroup deprecated dontinclude e em endcode endhtmlonly endif endlatexonly endlink endverbatim enum example exception file hideinitializer htmlinclude htmlonly if image include ingroup internal invariant interface latexonly li line link mainpage name namespace nosubgrouping note overload p page par param post pre ref relates remarks return retval sa section see showinitializer since skip skipline struct subsection test throw todo typedef union until var verbatim verbinclude version warning weakgroup printf scanf");
   
   gtk_scintilla_set_keywords(scintilla, 1, "strstr strlen strcmp clrscr gotoXY FILE stat memcpy memmove memccpy memset strncpy strcpy strdup strndup fclose fopen freopen fdopen remove rename rewind tmpfile clearerr feof ferror fflush fflush fgetpos fgetc fgets fputc fputs ftell fseek fsetpos fread fwrite getc getchar gets fprintf sprintf vprintf perror putc putchar fputchar fscanf sscanf setbuf setvbuf tmpnam ungetc puts atof atoi atol strtod strtol strtoul rand srand malloc calloc realloc free abort atexit exit getenv system bsearch qsort abs div ldiv");
 
-  get_preferences_manager_style_settings(prefmg, "c_string", &font , &size, &fore, &back, &italic, &bold);
+  const gchar *font = get_preferences_manager_style_font(prefmg);
+  guint size = get_preferences_manager_style_size(prefmg);
 
-  gtk_scintilla_style_set_fore (scintilla, SCE_C_STRING, fore);
-  gtk_scintilla_style_set_font (scintilla, SCE_C_STRING, font);
-  gtk_scintilla_style_set_back (scintilla, SCE_C_STRING, back);
-  gtk_scintilla_style_set_size (scintilla, SCE_C_STRING, size);
-  gtk_scintilla_style_set_italic (scintilla, SCE_C_STRING, italic);
-  gtk_scintilla_style_set_bold (scintilla, SCE_C_STRING, bold);
-  
-  get_preferences_manager_style_settings(prefmg, "c_character", &font , &size, &fore, &back, &italic, &bold);
-
-  gtk_scintilla_style_set_fore (scintilla, SCE_C_CHARACTER, fore);
-  gtk_scintilla_style_set_font (scintilla, SCE_C_CHARACTER, font);
-  gtk_scintilla_style_set_back (scintilla, SCE_C_CHARACTER, back);
-  gtk_scintilla_style_set_size (scintilla, SCE_C_CHARACTER, size);
-  gtk_scintilla_style_set_italic (scintilla, SCE_C_CHARACTER, italic);
-  gtk_scintilla_style_set_bold (scintilla, SCE_C_CHARACTER, bold);
-
-  get_preferences_manager_style_settings(prefmg, "c_word", &font , &size, &fore, &back, &italic, &bold);
-
-  gtk_scintilla_style_set_font (scintilla, SCE_C_WORD, font);
-  gtk_scintilla_style_set_fore (scintilla, SCE_C_WORD, fore);
-  gtk_scintilla_style_set_back (scintilla, SCE_C_WORD, back);
-  gtk_scintilla_style_set_size (scintilla, SCE_C_WORD, size);
-  gtk_scintilla_style_set_italic (scintilla, SCE_C_WORD, italic);
-  gtk_scintilla_style_set_bold (scintilla, SCE_C_WORD, bold);
-
-  get_preferences_manager_style_settings(prefmg, "css_pseudoclass", &font , &size, &fore, &back, &italic, &bold);
-
-  gtk_scintilla_style_set_font (scintilla, SCE_C_WORD2, font);
-  gtk_scintilla_style_set_fore (scintilla, SCE_C_WORD2, fore);
-  gtk_scintilla_style_set_back (scintilla, SCE_C_WORD2, back);
-  gtk_scintilla_style_set_size (scintilla, SCE_C_WORD2, size);
-  gtk_scintilla_style_set_italic (scintilla, SCE_C_WORD2, italic);
-  gtk_scintilla_style_set_bold (scintilla, SCE_C_WORD2, bold);
-
-  get_preferences_manager_style_settings(prefmg, "c_number", &font , &size, &fore, &back, &italic, &bold);
-
-  gtk_scintilla_style_set_fore (scintilla, SCE_C_NUMBER, fore);
-  gtk_scintilla_style_set_font (scintilla, SCE_C_NUMBER, font);
-  gtk_scintilla_style_set_back (scintilla, SCE_C_NUMBER, back);
-  gtk_scintilla_style_set_size (scintilla, SCE_C_NUMBER, size);
-  gtk_scintilla_style_set_italic (scintilla, SCE_C_NUMBER, italic);
-  gtk_scintilla_style_set_bold (scintilla, SCE_C_NUMBER, bold);
-
-  get_preferences_manager_style_settings(prefmg, "c_identifier", &font , &size, &fore, &back, &italic, &bold);
-
-  gtk_scintilla_style_set_fore (scintilla, SCE_C_IDENTIFIER, fore);
-  gtk_scintilla_style_set_font (scintilla, SCE_C_IDENTIFIER, font);
-  gtk_scintilla_style_set_back (scintilla, SCE_C_IDENTIFIER, back);
-  gtk_scintilla_style_set_size (scintilla, SCE_C_IDENTIFIER, size);
-  gtk_scintilla_style_set_italic (scintilla, SCE_C_IDENTIFIER, italic);
-  gtk_scintilla_style_set_bold (scintilla, SCE_C_IDENTIFIER, bold);
-
-  get_preferences_manager_style_settings(prefmg, "c_comment", &font , &size, &fore, &back, &italic, &bold);
-
-  gtk_scintilla_style_set_fore (scintilla, SCE_C_COMMENT, fore);
-  gtk_scintilla_style_set_font (scintilla, SCE_C_COMMENT, font);
-  gtk_scintilla_style_set_back (scintilla, SCE_C_COMMENT, back);
-  gtk_scintilla_style_set_size (scintilla, SCE_C_COMMENT, size);
-  gtk_scintilla_style_set_italic (scintilla, SCE_C_COMMENT, italic);
-  gtk_scintilla_style_set_bold (scintilla, SCE_C_COMMENT, bold);
-
-  get_preferences_manager_style_settings(prefmg, "c_comment", &font , &size, &fore, &back, &italic, &bold);
-
-  gtk_scintilla_style_set_fore (scintilla, SCE_C_COMMENTDOC, fore);
-  gtk_scintilla_style_set_font (scintilla, SCE_C_COMMENTDOC, font);
-  gtk_scintilla_style_set_back (scintilla, SCE_C_COMMENTDOC, back);
-  gtk_scintilla_style_set_size (scintilla, SCE_C_COMMENTDOC, size);
-  gtk_scintilla_style_set_italic (scintilla, SCE_C_COMMENTDOC, italic);
-  gtk_scintilla_style_set_bold (scintilla, SCE_C_COMMENTDOC, bold);
-
-  get_preferences_manager_style_settings(prefmg, "c_commentline", &font , &size, &fore, &back, &italic, &bold);
-
-  gtk_scintilla_style_set_fore (scintilla, SCE_C_COMMENTLINE, fore);
-  gtk_scintilla_style_set_font (scintilla, SCE_C_COMMENTLINE, font);
-  gtk_scintilla_style_set_back (scintilla, SCE_C_COMMENTLINE, back);
-  gtk_scintilla_style_set_size (scintilla, SCE_C_COMMENTLINE, size);
-  gtk_scintilla_style_set_italic (scintilla, SCE_C_COMMENTLINE, italic);
-  gtk_scintilla_style_set_bold (scintilla, SCE_C_COMMENTLINE, bold);
-
-  get_preferences_manager_style_settings(prefmg, "c_preprocesor", &font , &size, &fore, &back, &italic, NULL);
-
-  gtk_scintilla_style_set_fore (scintilla, SCE_C_PREPROCESSOR, fore);
-  gtk_scintilla_style_set_font (scintilla, SCE_C_PREPROCESSOR, font);
-  gtk_scintilla_style_set_back (scintilla, SCE_C_PREPROCESSOR, back);
-  gtk_scintilla_style_set_size (scintilla, SCE_C_PREPROCESSOR, size);
-  gtk_scintilla_style_set_italic (scintilla, SCE_C_PREPROCESSOR, italic);
-  gtk_scintilla_style_set_bold (scintilla, SCE_C_PREPROCESSOR, TRUE);
-
-  get_preferences_manager_style_settings(prefmg, "c_operator", &font , &size, &fore, &back, &italic, &bold);
-
-  gtk_scintilla_style_set_fore (scintilla, SCE_C_OPERATOR, fore);
-  gtk_scintilla_style_set_font (scintilla, SCE_C_OPERATOR, font);
-  gtk_scintilla_style_set_back (scintilla, SCE_C_OPERATOR, back);
-  gtk_scintilla_style_set_size (scintilla, SCE_C_OPERATOR, size);
-  gtk_scintilla_style_set_italic (scintilla, SCE_C_OPERATOR, italic);
-  gtk_scintilla_style_set_bold (scintilla, SCE_C_OPERATOR, bold);
-
-  get_preferences_manager_style_settings(prefmg, "c_uuid", &font , &size, &fore, &back, &italic, &bold);
-
-  gtk_scintilla_style_set_fore (scintilla, SCE_C_UUID, fore);
-  gtk_scintilla_style_set_font (scintilla, SCE_C_UUID, font);
-  gtk_scintilla_style_set_back (scintilla, SCE_C_UUID, back);
-  gtk_scintilla_style_set_size (scintilla, SCE_C_UUID, size);
-  gtk_scintilla_style_set_italic (scintilla, SCE_C_UUID, italic);
-  gtk_scintilla_style_set_bold (scintilla, SCE_C_UUID, bold);
- 
-  get_preferences_manager_style_settings(prefmg, "c_regex", &font , &size, &fore, &back, &italic, &bold);
-
-  gtk_scintilla_style_set_fore (scintilla, SCE_C_REGEX, fore);
-  gtk_scintilla_style_set_font (scintilla, SCE_C_REGEX, font);
-  gtk_scintilla_style_set_back (scintilla, SCE_C_REGEX, back);
-  gtk_scintilla_style_set_size (scintilla, SCE_C_REGEX, size);
-  gtk_scintilla_style_set_italic (scintilla, SCE_C_REGEX, italic);
-  gtk_scintilla_style_set_bold (scintilla, SCE_C_REGEX, bold);
-
-  get_preferences_manager_style_settings(prefmg, "c_verbatim", &font , &size, &fore, &back, &italic, &bold);
-  
-  gtk_scintilla_style_set_fore (scintilla, SCE_C_VERBATIM, fore);
-  gtk_scintilla_style_set_font (scintilla, SCE_C_VERBATIM, font);
-  gtk_scintilla_style_set_back (scintilla, SCE_C_VERBATIM, back);
-  gtk_scintilla_style_set_size (scintilla, SCE_C_VERBATIM, size);
-  gtk_scintilla_style_set_italic (scintilla, SCE_C_VERBATIM, italic);
-  gtk_scintilla_style_set_bold (scintilla, SCE_C_VERBATIM, bold);
-  
-  get_preferences_manager_style_settings(prefmg, "c_globalclass", &font , &size, &fore, &back, &italic, &bold);
-  
-  gtk_scintilla_style_set_fore (scintilla, SCE_C_GLOBALCLASS, fore);
-  gtk_scintilla_style_set_font (scintilla, SCE_C_GLOBALCLASS, font);
-  gtk_scintilla_style_set_back (scintilla, SCE_C_GLOBALCLASS, back);
-  gtk_scintilla_style_set_size (scintilla, SCE_C_GLOBALCLASS, size);
-  gtk_scintilla_style_set_italic (scintilla, SCE_C_GLOBALCLASS, italic);
-  gtk_scintilla_style_set_bold (scintilla, SCE_C_GLOBALCLASS, bold);
+  GtkSourceStyleScheme	*scheme = gtk_source_style_scheme_manager_get_scheme (main_window.stylemg, get_preferences_manager_style_name(prefmg));
+  /* PYTHON LEXER STYLE */
+  set_scintilla_lexer_default_style(GTK_WIDGET(scintilla), scheme, SCE_C_DEFAULT, font, size);
+  set_scintilla_lexer_keyword_style(GTK_WIDGET(scintilla), scheme, SCE_C_WORD, font, size);
+  set_scintilla_lexer_keyword_style(GTK_WIDGET(scintilla), scheme, SCE_C_WORD2, font, size);
+  set_scintilla_lexer_type_style(GTK_WIDGET(scintilla), scheme, SCE_C_IDENTIFIER, font, size);
+  set_scintilla_lexer_string_style(GTK_WIDGET(scintilla), scheme, SCE_C_STRING, font, size);
+  set_scintilla_lexer_simple_string_style(GTK_WIDGET(scintilla), scheme, SCE_C_CHARACTER, font, size);
+  set_scintilla_lexer_operator_style(GTK_WIDGET(scintilla), scheme, SCE_C_OPERATOR, font, size);
+  set_scintilla_lexer_number_style(GTK_WIDGET(scintilla), scheme, SCE_C_NUMBER, font, size);
+  set_scintilla_lexer_doc_comment_style(GTK_WIDGET(scintilla), scheme, SCE_C_COMMENTDOC, font, size);
+  set_scintilla_lexer_comment_style (GTK_WIDGET(scintilla), scheme, SCE_C_COMMENT, font, size);
+  set_scintilla_lexer_comment_style (GTK_WIDGET(scintilla), scheme, SCE_C_COMMENTLINE, font, size);
+  set_scintilla_lexer_preprocessor_style(GTK_WIDGET(scintilla), scheme, SCE_C_PREPROCESSOR, font, size);
+  set_scintilla_lexer_xml_element_style(GTK_WIDGET(scintilla), scheme, SCE_C_UUID, font, size);
+  set_scintilla_lexer_special_constant_style (GTK_WIDGET(scintilla), scheme, SCE_C_REGEX, font, size);
+  set_scintilla_lexer_xml_atribute_style(GTK_WIDGET(scintilla), scheme, SCE_C_VERBATIM, font, size);
+  set_scintilla_lexer_xml_instruction_style(GTK_WIDGET(scintilla), scheme, SCE_C_GLOBALCLASS, font, size);
 
   gtk_scintilla_indic_set_style(scintilla, 0, INDIC_SQUIGGLE);
   gtk_scintilla_indic_set_fore(scintilla, 0, scintilla_color(255,0,0));
@@ -225,3 +81,12 @@ void tab_cxx_set_lexer(Document *document)
 {
   scintilla_cxx_set_lexer(document_get_scintilla(document));
 }
+
+gboolean is_cxx_file(const gchar *filename)
+{
+  if (g_str_has_suffix(filename,".cxx") || g_str_has_suffix(filename,".c") || g_str_has_suffix(filename,".h")
+  || g_str_has_suffix(filename,".cpp") || g_str_has_suffix(filename,".cc") || g_str_has_suffix(filename,".c++"))
+      return TRUE;
+  return FALSE;
+}
+

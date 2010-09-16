@@ -36,12 +36,5 @@ void register_file_opened(gchar *filename);
 void str_replace(char *Str, char ToRp, char WithC);
 void info_dialog (gchar *title, gchar *message);
 gint yes_no_dialog (gchar *title, gchar *message);
-gboolean is_css_file(const gchar *filename);
-gboolean is_cobol_file(const gchar *filename);
-gboolean is_perl_file(const gchar *filename);
-gboolean is_python_file(const gchar *filename);
-gboolean is_cxx_file(const gchar *filename);
-gboolean is_sql_file(const gchar *filename);
-gboolean is_php_file_from_filename(const gchar *filename);
 gchar *trunc_on_char(gchar * string, gchar which_char);
 #endif

@@ -28,5 +28,6 @@
 #include "document.h"
 
 void tab_css_set_lexer(Document *document);
+gboolean is_css_file(const gchar *filename);
 
 #endif

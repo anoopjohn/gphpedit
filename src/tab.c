@@ -76,82 +76,9 @@ gint yes_no_dialog (gchar *title, gchar *message)
   return button;
 }
 
-gboolean is_php_file_from_filename(const gchar *filename)
-{
-  // New style function for configuration of what constitutes a PHP file
-  g_return_val_if_fail(filename, FALSE);
-  gchar *file_extension;
-  gchar **php_file_extensions;
-  gboolean is_php = FALSE;
-  gint i;
-
-  file_extension = strrchr(filename, '.');
-  if (file_extension) {
-    file_extension++;
-    
-    php_file_extensions = g_strsplit(get_preferences_manager_php_file_extensions(main_window.prefmg),",",-1);
-    
-    for (i = 0; php_file_extensions[i] != NULL; i++) {
-      if (g_str_has_suffix(filename,php_file_extensions[i])){
-        is_php = TRUE;
-        break;
-      }
-    }
-        
-    g_strfreev(php_file_extensions);
-  }
-  
-  return is_php;
-}
-
-gboolean is_css_file(const gchar *filename)
-{
-  if (g_str_has_suffix(filename,".css"))
-      return TRUE;
-  return FALSE;
-}
-
-gboolean is_perl_file(const gchar *filename)
-{
-  if (g_str_has_suffix(filename,".pl") || g_str_has_suffix(filename,".pm"))
-      return TRUE;
-  return FALSE;
-}
-
-gboolean is_cobol_file(const gchar *filename)
-{
-  if (g_str_has_suffix(filename,".cbl") || g_str_has_suffix(filename,".CBL"))
-      return TRUE;
-  return FALSE;
-}
-
-gboolean is_python_file(const gchar *filename)
-{
-  if (g_str_has_suffix(filename,".py"))
-      return TRUE;
-  return FALSE;
-}
-
-gboolean is_cxx_file(const gchar *filename)
-{
-  if (g_str_has_suffix(filename,".cxx") || g_str_has_suffix(filename,".c") || g_str_has_suffix(filename,".h"))
-      return TRUE;
-  return FALSE;
-}
-
-gboolean is_sql_file(const gchar *filename)
-{
-if (g_str_has_suffix(filename,".sql"))
-      return TRUE;
-  return FALSE;
-}
-
 void register_file_opened(gchar *filename)
 {
   gphpedit_debug_message(DEBUG_DOC_MANAGER,"filename: %s\n", filename);
-  gchar *full_filename=filename_get_uri(filename);
-  main_window_add_to_reopen_menu(full_filename);
-  g_free(full_filename);
   gchar *folder = filename_parent_uri(filename);
   set_preferences_manager_last_opened_folder(main_window.prefmg, folder);
   g_free(folder);

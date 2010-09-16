@@ -25,7 +25,8 @@ SUBDIRS = \
 	doc	\
 	pixmaps	\
 	src \
-	po
+	po \
+  themes
 
 applicationsdir = $(datadir)/applications
 applications_in_files = gphpedit.desktop.in

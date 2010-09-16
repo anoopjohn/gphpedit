@@ -6,30 +6,13 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gphpedit\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2010-08-21 20:28-0300\n"
+"POT-Creation-Date: 2010-09-05 20:32-0300\n"
 "PO-Revision-Date: 2010-06-07 01:05+0900\n"
 "Last-Translator: Tadashi Jokagi <elf@elf.no-ip.org>\n"
 "Language-Team: Japanese <elf@elf.no-ip.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-
-#: ../gphpedit.desktop.in.h:1
-msgid "Edit PHP source files"
-msgstr ""
-
-#: ../gphpedit.desktop.in.h:2
-msgid "PHP/HTML/CSS editor"
-msgstr ""
-
-#. If there is no file opened set the name as gPHPEdit
-#. confirm deletion with dialog
-#: ../gphpedit.desktop.in.h:3 ../src/document_loader.c:247
-#: ../src/main_window.c:210 ../src/main_window.c:255
-#: ../src/main_window_callbacks.c:421 ../src/preferences_dialog.c:356
-#: ../src/preferences_dialog.c:720 ../src/preferences_dialog.c:733
-msgid "gPHPEdit"
-msgstr "gPHPEdit"
 
 #: ../src/calltip.c:93 ../src/calltip.c:119
 #, fuzzy
@@ -52,89 +35,90 @@ msgstr "名前"
 msgid "FILE:"
 msgstr "ファイル:"
 
-#: ../src/document.c:252 ../src/document.c:1042 ../src/document.c:1061
+#: ../src/document.c:265 ../src/document.c:1038 ../src/document.c:1057
 msgid "Help: "
 msgstr "ヘルプ: "
 
-#: ../src/document.c:255 ../src/document.c:1044 ../src/document.c:1063
+#: ../src/document.c:268 ../src/document.c:1040 ../src/document.c:1059
 msgid "Preview: "
 msgstr "プレビュー: "
 
-#: ../src/document.c:283 ../src/main_window_callbacks.c:375
-#: ../src/main_window_callbacks.c:381
+#: ../src/document.c:296 ../src/main_window_callbacks.c:348
+#: ../src/main_window_callbacks.c:353
 #, c-format
 msgid "Opening %s"
 msgstr ""
 
-#: ../src/document.c:300 ../src/document.c:333
+#: ../src/document.c:313 ../src/document.c:346
 #, fuzzy, c-format
 msgid "<b>The file \"%s\" has been externally modified.</b>"
 msgstr "ファイル %s は外部で修正されました。再読み込みしますか?"
 
-#: ../src/document.c:342
+#: ../src/document.c:355
 msgid "Do you want reload it?"
 msgstr ""
 
-#: ../src/document.c:365 ../src/document.c:368 ../src/document.c:1432
-#: ../src/document.c:1433
+#: ../src/document.c:378 ../src/document.c:381 ../src/document.c:1438
+#: ../src/document.c:1439
 msgid "Untitled"
 msgstr "名称未設定"
 
-#: ../src/document.c:1823
+#: ../src/document.c:1829
 #, fuzzy
 msgid "No marker found"
 msgstr "前景色"
 
-#: ../src/document.c:1999 ../src/document.c:2006
+#: ../src/document.c:1993 ../src/document.c:2000
 msgid " - gPHPEdit"
 msgstr " - gPHPEdit"
 
-#: ../src/document.c:2027
+#: ../src/document.c:2021
 msgid "Cannot allocate write buffer"
 msgstr "書き込みバッファーを確保できません"
 
-#: ../src/document.c:2195
+#: ../src/document.c:2189
 msgid "Do you want to replace this occurence?"
 msgstr ""
 
-#: ../src/document.c:2196 ../src/filebrowser_backend.c:380
+#: ../src/document.c:2190 ../src/filebrowser_backend.c:380
+#: ../src/main_window_callbacks.c:346
 #, fuzzy
 msgid "Question"
 msgstr "HTML 質問"
 
-#: ../src/document.c:2256
+#: ../src/document.c:2250
 #, c-format
 msgid "GIO Error: %s saving file:%s\n"
 msgstr ""
 
-#: ../src/document.c:2266
+#: ../src/document.c:2260
 #, c-format
 msgid ""
 "Could not get the file modification time for file: '%s'. GIO error: %s \n"
 msgstr ""
 
-#: ../src/document.c:2301
+#: ../src/document.c:2295
 #, c-format
 msgid "UTF-8 Error: %s\n"
 msgstr "UTF-8 エラー: %s\n"
 
-#: ../src/document.c:2489
+#: ../src/document.c:2483
 #, c-format
 msgid "Unhandle keyboard macro function %d, please report\n"
 msgstr ""
 
-#: ../src/document_loader.c:189
+#: ../src/document_loader.c:179
 #, c-format
 msgid "Error mounting volume. GIO error:%s\n"
 msgstr "ボリュームのマウントについてのエラーです。GIO エラー:%s\n"
 
-#: ../src/document_loader.c:203
+#: ../src/document_loader.c:193
 msgid ""
 "Error filesystem not mounted. Mounting filesystem, this will take a few "
 "seconds..."
 msgstr ""
 
-#: ../src/document_loader.c:209
+#: ../src/document_loader.c:199
 #, c-format
 msgid ""
 "Error opening file GIO error:%s\n"
@@ -143,7 +127,7 @@ msgstr ""
 "ファイルを開く際の GIO エラー:%s\n"
 "ファイル:%s"
 
-#: ../src/document_loader.c:225
+#: ../src/document_loader.c:215
 #, c-format
 msgid ""
 "The file %s was not found.\n"
@@ -154,40 +138,47 @@ msgstr ""
 "\n"
 "空のドキュメントとして作成しますか?"
 
-#: ../src/document_loader.c:226
+#: ../src/document_loader.c:216
 msgid "File not found"
 msgstr "ファイルが見つかりません"
 
-#: ../src/document_loader.c:240 ../src/document_loader.c:381
+#: ../src/document_loader.c:230 ../src/document_loader.c:371
 #, c-format
 msgid "Could not get the file info. GIO error: %s \n"
 msgstr "ファイルの情報を取得できません。GIO エラー: %s \n"
 
-#: ../src/document_loader.c:247
+#. If there is no file opened set the name as gPHPEdit
+#: ../src/document_loader.c:237 ../src/main_window.c:210
+#: ../src/main_window.c:255 ../src/main_window_callbacks.c:393
+#: ../gphpedit.desktop.in.h:3
+msgid "gPHPEdit"
+msgstr "gPHPEdit"
+
+#: ../src/document_loader.c:237
 msgid "Sorry, I can open this kind of file.\n"
 msgstr ""
 
-#: ../src/document_loader.c:325
-#, c-format
-msgid "gPHPEdit UTF-8 Error: %s\n"
+#: ../src/document_loader.c:315
+#, fuzzy, c-format
+msgid "gPHPEdit UTF-8 Error: %s"
 msgstr "gPHPEdit UTF-8 エラー: %s\n"
 
-#: ../src/document_loader.c:330
+#: ../src/document_loader.c:320
 #, c-format
-msgid "Converted to UTF-8 size: %u\n"
+msgid "Converted to UTF-8 size: %u"
 msgstr ""
 
-#: ../src/document_loader.c:449
+#: ../src/document_loader.c:438
 #, c-format
 msgid "Could not get file info for file %s. GIO error: %s \n"
 msgstr "ファイル %s の情報を取得できません。GIO エラー: %s\n"
 
-#: ../src/document_loader.c:527 ../src/document_loader.c:539
-#, c-format
-msgid "Help for function not found: %s\n"
+#: ../src/document_loader.c:516 ../src/document_loader.c:528
+#, fuzzy, c-format
+msgid "Help for function not found: %s"
 msgstr "関数のヘルプが見つかりません: %s\n"
 
-#: ../src/document_loader.c:551 ../src/document_loader.c:586
+#: ../src/document_loader.c:540 ../src/document_loader.c:580
 msgid "Could not find the required command in the online help"
 msgstr "オンラインヘルプから要求されたコマンドを見つけることができません"
 
@@ -205,30 +196,18 @@ msgstr "エラー: セッションファイルが開けられません (%s)\n"
 msgid "GIO Error deleting file: %s, code %d\n"
 msgstr ""
 
-#: ../src/document_manager.c:598
-#, c-format
+#. TRANSLATORS: this is a pango markup string you must keep the format tags.
+#: ../src/document_manager.c:597
+#, fuzzy, c-format
 msgid ""
-"The file '%s' has not been saved since your last changes, are you sure you "
-"want to close it and lose these changes?"
+"<b>The file '%s' has not been saved since your last changes.</b>\n"
+"<small>Are you sure you want to close it and lose these changes?</small>"
 msgstr ""
 "最後の変更からファイル「%s」は保存していません。本当に変更を捨てて閉じますか?"
 
-#: ../src/document_manager.c:602
-#, c-format
-msgid "Unsaved changes to '%s'"
-msgstr "「%s」の変更は保存しませんでした"
-
-#: ../src/document_manager.c:606
+#: ../src/document_manager.c:600
 msgid "Close and _lose changes"
 msgstr "変更を捨てて閉じる (_L)"
-
-#: ../src/document_manager.c:607
-msgid "_Save file"
-msgstr "ファイルを保存する(_S)"
-
-#: ../src/document_manager.c:608
-msgid "_Cancel closing"
-msgstr "閉じるのを辞める(_C)"
 
 #: ../src/edit_template.c:34
 msgid "Add/Edit Template"
@@ -275,65 +254,65 @@ msgstr ""
 msgid "Overwrite file?"
 msgstr ""
 
-#: ../src/filebrowser_ui.c:228
+#: ../src/filebrowser_ui.c:229
 #, fuzzy
 msgid "File"
 msgstr "ファイル(_F)"
 
-#: ../src/filebrowser_ui.c:231
+#: ../src/filebrowser_ui.c:232
 msgid "Mime"
 msgstr ""
 
 #. home button
-#: ../src/filebrowser_ui.c:243
+#: ../src/filebrowser_ui.c:244
 msgid "Go Home Dir"
 msgstr ""
 
 #. up button
-#: ../src/filebrowser_ui.c:249
+#: ../src/filebrowser_ui.c:250
 msgid "Go Up one level"
 msgstr ""
 
 #. refresh button
-#: ../src/filebrowser_ui.c:255
+#: ../src/filebrowser_ui.c:256
 msgid "Refresh Filebrowser"
 msgstr ""
 
-#: ../src/filebrowser_ui.c:262
+#: ../src/filebrowser_ui.c:263
 #, fuzzy
 msgid "Search Files in Folder Browser"
 msgstr "サイドパネル フォルダー ブラウザーを表示する/隠す"
 
-#: ../src/filebrowser_ui.c:535 ../src/filebrowser_ui.c:610
+#: ../src/filebrowser_ui.c:536 ../src/filebrowser_ui.c:611
 #, fuzzy
 msgid "Rename File"
 msgstr "ファイルを開く"
 
-#: ../src/filebrowser_ui.c:542
+#: ../src/filebrowser_ui.c:543
 #, fuzzy
 msgid "New Filename"
 msgstr "新規ファイル"
 
-#: ../src/filebrowser_ui.c:563
+#: ../src/filebrowser_ui.c:564
 #, fuzzy
 msgid "New Dir"
 msgstr "新規ファイル"
 
-#: ../src/filebrowser_ui.c:570
+#: ../src/filebrowser_ui.c:571
 msgid "Directory Name"
 msgstr ""
 
-#: ../src/filebrowser_ui.c:602
+#: ../src/filebrowser_ui.c:603
 #, fuzzy
 msgid "Open file"
 msgstr "ファイルを開く"
 
-#: ../src/filebrowser_ui.c:614
+#: ../src/filebrowser_ui.c:615
 #, fuzzy
 msgid "Delete file"
 msgstr "削除する..."
 
-#: ../src/filebrowser_ui.c:621
+#: ../src/filebrowser_ui.c:622
 #, fuzzy
 msgid "Create New Directory"
 msgstr "新規ファイルを作成する"
@@ -366,49 +345,49 @@ msgid "RegExp"
 msgstr "正規表現"
 
 #: ../src/gphpedit-statusbar.c:134 ../src/gphpedit-statusbar.c:169
-#: ../src/gphpedit-statusbar.c:171 ../src/main_window_callbacks.c:683
+#: ../src/gphpedit-statusbar.c:171 ../src/main_window_callbacks.c:655
 #, fuzzy
 msgid "Cobol"
 msgstr "_COBOL"
 
 #: ../src/gphpedit-statusbar.c:136 ../src/gphpedit-statusbar.c:172
-#: ../src/gphpedit-statusbar.c:174 ../src/main_window_callbacks.c:680
+#: ../src/gphpedit-statusbar.c:174 ../src/main_window_callbacks.c:652
 #, fuzzy
 msgid "C/C++"
 msgstr "C/C_++"
 
 #: ../src/gphpedit-statusbar.c:138 ../src/gphpedit-statusbar.c:175
-#: ../src/gphpedit-statusbar.c:177 ../src/main_window_callbacks.c:677
+#: ../src/gphpedit-statusbar.c:177 ../src/main_window_callbacks.c:649
 #, fuzzy
 msgid "CSS"
 msgstr "_CSS"
 
 #: ../src/gphpedit-statusbar.c:140 ../src/gphpedit-statusbar.c:178
-#: ../src/gphpedit-statusbar.c:180 ../src/main_window_callbacks.c:674
+#: ../src/gphpedit-statusbar.c:180 ../src/main_window_callbacks.c:646
 #, fuzzy
 msgid "PHP/HTML/XML"
 msgstr "_PHP/HTML/XML"
 
 #: ../src/gphpedit-statusbar.c:142 ../src/gphpedit-statusbar.c:181
-#: ../src/gphpedit-statusbar.c:183 ../src/main_window_callbacks.c:689
+#: ../src/gphpedit-statusbar.c:183 ../src/main_window_callbacks.c:661
 #, fuzzy
 msgid "Perl"
 msgstr "_Perl"
 
 #: ../src/gphpedit-statusbar.c:144 ../src/gphpedit-statusbar.c:187
-#: ../src/gphpedit-statusbar.c:189 ../src/main_window_callbacks.c:686
+#: ../src/gphpedit-statusbar.c:189 ../src/main_window_callbacks.c:658
 #, fuzzy
 msgid "SQL"
 msgstr "_SQL"
 
 #: ../src/gphpedit-statusbar.c:146 ../src/gphpedit-statusbar.c:184
-#: ../src/gphpedit-statusbar.c:186 ../src/main_window_callbacks.c:692
+#: ../src/gphpedit-statusbar.c:186 ../src/main_window_callbacks.c:664
 #, fuzzy
 msgid "Python"
 msgstr "P_ython"
 
 #: ../src/gphpedit-statusbar.c:190 ../src/gphpedit-statusbar.c:192
-#: ../src/main_window_callbacks.c:695
+#: ../src/main_window_callbacks.c:667
 msgid "Text-Plain"
 msgstr ""
 
@@ -467,84 +446,85 @@ msgstr "サイドパネルを閉じる"
 msgid "Class Browser"
 msgstr "クラス ブラウザー"
 
-#: ../src/main_window_callbacks.c:179
+#: ../src/main_window_callbacks.c:160
 msgid "PHP files ("
 msgstr "PHP ファイル("
 
-#: ../src/main_window_callbacks.c:201
-msgid "HTML files (*.html *.htm *.xhtml *tpl)"
+#: ../src/main_window_callbacks.c:180
+#, fuzzy
+msgid "HTML files (*.html *.htm *.xhtml *.tpl)"
 msgstr "HTML ファイル (*.html *.htm *.xhtml *tpl)"
 
-#: ../src/main_window_callbacks.c:208
+#: ../src/main_window_callbacks.c:187
 msgid "XML files (*.xml)"
 msgstr "XML ファイル (*.xml)"
 
-#: ../src/main_window_callbacks.c:212
+#: ../src/main_window_callbacks.c:191
 msgid "Stylesheet files (*.css)"
 msgstr "スタイルシート ファイル (*.css)"
 
-#: ../src/main_window_callbacks.c:216
+#: ../src/main_window_callbacks.c:195
 msgid "SQL files (*.sql)"
 msgstr "SQL ファイル (*.sql)"
 
-#: ../src/main_window_callbacks.c:220
+#: ../src/main_window_callbacks.c:199
 msgid "Javascript files (*.js)"
 msgstr "Javascript ファイル (*.js)"
 
-#: ../src/main_window_callbacks.c:224
+#: ../src/main_window_callbacks.c:203
 msgid "C/C++ files (*.c *.h *.cpp *.hh *.cc)"
 msgstr "C/C++ ファイル (*.c *.h *.cpp *.hh *.cc)"
 
-#: ../src/main_window_callbacks.c:234
+#: ../src/main_window_callbacks.c:213
 msgid "Perl Files (*.pl *.ph *.pm)"
 msgstr "Perl ファイル (*.pl *.ph *.pm)"
 
-#: ../src/main_window_callbacks.c:242
+#: ../src/main_window_callbacks.c:221
 msgid "Cobol Files (*.cbl)"
 msgstr "COBOL ファイル (*.cbl)"
 
-#: ../src/main_window_callbacks.c:248
+#: ../src/main_window_callbacks.c:227
 msgid "Python Files (*.py *.pyd *.pyw)"
 msgstr "Python ファイル (*.py *.pyd *.pyw)"
 
-#: ../src/main_window_callbacks.c:256
+#: ../src/main_window_callbacks.c:235
 msgid "All files"
 msgstr "すべてのファイル"
 
 #. show status in statusbar
-#: ../src/main_window_callbacks.c:317
+#: ../src/main_window_callbacks.c:300
 #, c-format
 msgid "Saving %s"
 msgstr ""
 
 #. Create the selector widget
-#: ../src/main_window_callbacks.c:337
+#: ../src/main_window_callbacks.c:320
 msgid "Please type the filename to save as..."
 msgstr "保存するファイル名を入力してください..."
 
-#: ../src/main_window_callbacks.c:371
+#: ../src/main_window_callbacks.c:346
 msgid "Are you sure you wish to reload the current file, losing your changes?"
 msgstr "変更を失いますが、本当に現在のファイルを読み込みなおしますか?"
 
-#: ../src/main_window_callbacks.c:421
+#: ../src/main_window_callbacks.c:393
 msgid "This file already exists, are you sure you want to overwrite it?"
 msgstr "ファイルは既に存在します。本当に上書きしますか?"
 
 #. Create the selector widget
-#: ../src/main_window_callbacks.c:439
+#: ../src/main_window_callbacks.c:411
 msgid "Please type the filename to rename this file to..."
 msgstr "このファイルの新しい名前を入力してください..."
 
-#: ../src/main_window_callbacks.c:637
+#: ../src/main_window_callbacks.c:609
 msgid "translator_credits"
 msgstr "Tadashi Jokagi <elf@elf.no-ip.org>"
 
-#: ../src/main_window_callbacks.c:644
+#: ../src/main_window_callbacks.c:616
 #, fuzzy
 msgid "Copyright © 2003-2006 Andy Jeffries, 2009-2010 Anoop John"
 msgstr "Copyright  2003-2006 Andy Jeffries、2009-2010 Anoop John"
 
-#: ../src/main_window_callbacks.c:646
+#: ../src/main_window_callbacks.c:618
 msgid ""
 "gPHPEdit is a GNOME2 editor specialised for editing PHP scripts and related "
 "files (HTML/CSS/JS)."
@@ -552,7 +532,7 @@ msgstr ""
 "gPHPEdit は、PHP スクリプトと関連するファイル(HTML/CSS/JS)の編集に特定化され"
 "た GNOME2 エディタです。"
 
-#: ../src/main_window_callbacks.c:704
+#: ../src/main_window_callbacks.c:676
 #, fuzzy, c-format
 msgid "Unable to get data for page %d"
 msgstr "ページ %d のデータを取得できませんでした\n"
@@ -894,42 +874,7 @@ msgstr "プラグイン(_P)"
 msgid "_Help"
 msgstr "ヘルプ(_H)"
 
-#: ../src/plugindialog.c:46 ../src/preferences_dialog.c:1664
-#, fuzzy
-msgid "Plugin"
-msgstr "プラグイン(_P)"
-
-#: ../src/plugindialog.c:47
-msgid "Enabled"
-msgstr ""
-
-#: ../src/plugindialog.c:446
-msgid "_About"
-msgstr ""
-
-#: ../src/plugindialog.c:454
-msgid "A_ctivate"
-msgstr ""
-
-#: ../src/plugindialog.c:464
-msgid "Ac_tivate All"
-msgstr ""
-
-#: ../src/plugindialog.c:469
-msgid "_Deactivate All"
-msgstr ""
-
-#: ../src/plugindialog.c:783
-#, fuzzy
-msgid "Active _Plugins:"
-msgstr "プラグイン(_P)"
-
-#: ../src/plugindialog.c:808
-#, fuzzy
-msgid "_About Plugin"
-msgstr "プラグイン(_P)"
-
-#: ../src/pluginmanager.c:106 ../src/preferences_manager.c:238
+#: ../src/pluginmanager.c:106 ../src/preferences_manager.c:210
 #, c-format
 msgid "Unable to create ~/.gphpedit/ (%d) %s"
 msgstr ""
@@ -949,564 +894,154 @@ msgstr ""
 msgid "No items found"
 msgstr "前景色"
 
-#. Font drop down elements : General
-#: ../src/preferences_dialog.c:126 ../src/preferences_dialog.c:443
-#: ../src/preferences_dialog.c:445 ../src/preferences_dialog.c:759
-msgid "Default"
-msgstr "標準"
-
-#: ../src/preferences_dialog.c:127 ../src/preferences_dialog.c:447
-#: ../src/preferences_dialog.c:449 ../src/preferences_dialog.c:762
-msgid "Line Number (margin)"
-msgstr "行番号 (余白)"
-
-#. Font drop down elements : HTML
-#: ../src/preferences_dialog.c:130 ../src/preferences_dialog.c:451
-#: ../src/preferences_dialog.c:453 ../src/preferences_dialog.c:765
-msgid "HTML Tag"
-msgstr "HTML タグ"
-
-#: ../src/preferences_dialog.c:131 ../src/preferences_dialog.c:455
-#: ../src/preferences_dialog.c:457 ../src/preferences_dialog.c:768
-msgid "HTML Unknown Tag"
-msgstr "HTML 未知のタグ"
-
-#: ../src/preferences_dialog.c:132 ../src/preferences_dialog.c:459
-#: ../src/preferences_dialog.c:461 ../src/preferences_dialog.c:771
-msgid "HTML Attribute"
-msgstr "HTML 属性"
-
-#: ../src/preferences_dialog.c:133 ../src/preferences_dialog.c:463
-#: ../src/preferences_dialog.c:465 ../src/preferences_dialog.c:774
-msgid "HTML Unknown Attribute"
-msgstr "HTML 未知の属性"
-
-#: ../src/preferences_dialog.c:134 ../src/preferences_dialog.c:467
-#: ../src/preferences_dialog.c:469 ../src/preferences_dialog.c:777
-msgid "HTML Number"
-msgstr "HTML 番号"
-
-#: ../src/preferences_dialog.c:135 ../src/preferences_dialog.c:471
-#: ../src/preferences_dialog.c:473 ../src/preferences_dialog.c:780
-msgid "HTML Single-quoted String"
-msgstr "HTML 単一引用文字列"
-
-#: ../src/preferences_dialog.c:136 ../src/preferences_dialog.c:475
-#: ../src/preferences_dialog.c:477 ../src/preferences_dialog.c:783
-msgid "HTML Double-quoted String"
-msgstr "HTML 二重引用文字列"
-
-#: ../src/preferences_dialog.c:137 ../src/preferences_dialog.c:479
-#: ../src/preferences_dialog.c:481 ../src/preferences_dialog.c:786
-msgid "HTML Comment"
-msgstr "HTML コメント"
-
-#: ../src/preferences_dialog.c:138 ../src/preferences_dialog.c:483
-#: ../src/preferences_dialog.c:485 ../src/preferences_dialog.c:789
-msgid "HTML Entity"
-msgstr "HTML 要素"
-
-#: ../src/preferences_dialog.c:139 ../src/preferences_dialog.c:487
-#: ../src/preferences_dialog.c:489 ../src/preferences_dialog.c:792
-msgid "HTML Script"
-msgstr "HTML スクリプト"
-
-#: ../src/preferences_dialog.c:140 ../src/preferences_dialog.c:491
-#: ../src/preferences_dialog.c:493 ../src/preferences_dialog.c:795
-msgid "HTML Question"
-msgstr "HTML 質問"
-
-#: ../src/preferences_dialog.c:141 ../src/preferences_dialog.c:495
-#: ../src/preferences_dialog.c:497 ../src/preferences_dialog.c:798
-msgid "HTML Value"
-msgstr "HTML 値"
-
-#. Font drop down elements : JavaScript
-#: ../src/preferences_dialog.c:144 ../src/preferences_dialog.c:499
-#: ../src/preferences_dialog.c:501 ../src/preferences_dialog.c:801
-msgid "JavaScript Multiple-line Comment"
-msgstr "JavaScript 複数行コメント"
-
-#: ../src/preferences_dialog.c:145 ../src/preferences_dialog.c:503
-#: ../src/preferences_dialog.c:505 ../src/preferences_dialog.c:804
-msgid "JavaScript Single-line Comment"
-msgstr "JavaScript 単一行コメント"
-
-#: ../src/preferences_dialog.c:146 ../src/preferences_dialog.c:507
-#: ../src/preferences_dialog.c:509 ../src/preferences_dialog.c:807
-msgid "JavaScript Document Comment"
-msgstr "JavaScript ドキュメントコメント"
-
-#: ../src/preferences_dialog.c:147 ../src/preferences_dialog.c:511
-#: ../src/preferences_dialog.c:513 ../src/preferences_dialog.c:810
-msgid "JavaScript Word"
-msgstr "JavaScript 単語"
-
-#: ../src/preferences_dialog.c:148 ../src/preferences_dialog.c:515
-#: ../src/preferences_dialog.c:517 ../src/preferences_dialog.c:813
-msgid "JavaScript Keyword"
-msgstr "JavaScript キーワード"
-
-#: ../src/preferences_dialog.c:149 ../src/preferences_dialog.c:519
-#: ../src/preferences_dialog.c:521 ../src/preferences_dialog.c:816
-msgid "JavaScript Single-quoted String"
-msgstr "JavaScript 単一引用符文字列"
-
-#: ../src/preferences_dialog.c:150 ../src/preferences_dialog.c:523
-#: ../src/preferences_dialog.c:525 ../src/preferences_dialog.c:819
-msgid "JavaScript Double-quoted String"
-msgstr "JavaScript 二重引用符文字列"
-
-#: ../src/preferences_dialog.c:151 ../src/preferences_dialog.c:527
-#: ../src/preferences_dialog.c:529 ../src/preferences_dialog.c:822
-msgid "JavaScript Symbol"
-msgstr "JavaScript シンボル"
-
-#. Font drop down elements : PHP
-#: ../src/preferences_dialog.c:154 ../src/preferences_dialog.c:531
-#: ../src/preferences_dialog.c:533 ../src/preferences_dialog.c:825
-msgid "PHP Default"
-msgstr "PHP デフォルト"
-
-#: ../src/preferences_dialog.c:155 ../src/preferences_dialog.c:535
-#: ../src/preferences_dialog.c:537 ../src/preferences_dialog.c:828
-msgid "PHP 'HString'"
-msgstr "PHP 「HString」"
-
-#: ../src/preferences_dialog.c:156 ../src/preferences_dialog.c:539
-#: ../src/preferences_dialog.c:541 ../src/preferences_dialog.c:831
-msgid "PHP Simple String"
-msgstr "PHP 簡易文字列"
-
-#: ../src/preferences_dialog.c:157 ../src/preferences_dialog.c:543
-#: ../src/preferences_dialog.c:545 ../src/preferences_dialog.c:834
-msgid "PHP Word"
-msgstr "PHP 単語"
-
-#: ../src/preferences_dialog.c:158 ../src/preferences_dialog.c:547
-#: ../src/preferences_dialog.c:549 ../src/preferences_dialog.c:837
-msgid "PHP Number"
-msgstr "PHP 番号"
-
-#: ../src/preferences_dialog.c:159 ../src/preferences_dialog.c:551
-#: ../src/preferences_dialog.c:553 ../src/preferences_dialog.c:840
-msgid "PHP Variable"
-msgstr "PHP 値"
-
-#: ../src/preferences_dialog.c:160 ../src/preferences_dialog.c:555
-#: ../src/preferences_dialog.c:557 ../src/preferences_dialog.c:843
-msgid "PHP Single-line Comment"
-msgstr "PHP 単一行コメント"
-
-#: ../src/preferences_dialog.c:161 ../src/preferences_dialog.c:559
-#: ../src/preferences_dialog.c:561 ../src/preferences_dialog.c:846
-msgid "PHP Multiple-line Comment"
-msgstr "PHP 複数行コメント"
-
-#. Font drop down elements : CSS
-#: ../src/preferences_dialog.c:164 ../src/preferences_dialog.c:563
-#: ../src/preferences_dialog.c:849
-msgid "CSS Tag"
-msgstr "CSS タグ"
-
-#: ../src/preferences_dialog.c:165 ../src/preferences_dialog.c:567
-#: ../src/preferences_dialog.c:569 ../src/preferences_dialog.c:852
-msgid "CSS Class"
-msgstr "CSS クラス"
-
-#: ../src/preferences_dialog.c:166 ../src/preferences_dialog.c:855
-msgid "CSS Psuedoclass"
-msgstr "CSS Psuedoclass"
-
-#: ../src/preferences_dialog.c:167 ../src/preferences_dialog.c:575
-#: ../src/preferences_dialog.c:577 ../src/preferences_dialog.c:858
-msgid "CSS Unknown Pseudoclass"
-msgstr "CSS 不明な Psuedoclass"
-
-#: ../src/preferences_dialog.c:168 ../src/preferences_dialog.c:579
-#: ../src/preferences_dialog.c:581 ../src/preferences_dialog.c:861
-msgid "CSS Operator"
-msgstr "CSS 操作"
-
-#: ../src/preferences_dialog.c:169 ../src/preferences_dialog.c:583
-#: ../src/preferences_dialog.c:585 ../src/preferences_dialog.c:864
-msgid "CSS Identifier"
-msgstr "CSS 識別子"
-
-#: ../src/preferences_dialog.c:170 ../src/preferences_dialog.c:587
-#: ../src/preferences_dialog.c:589 ../src/preferences_dialog.c:867
-msgid "CSS Unknown Identifier"
-msgstr "CSS 不明な識別子"
-
-#: ../src/preferences_dialog.c:171 ../src/preferences_dialog.c:591
-#: ../src/preferences_dialog.c:593 ../src/preferences_dialog.c:870
-msgid "CSS Value"
-msgstr "CSS 値"
-
-#: ../src/preferences_dialog.c:172 ../src/preferences_dialog.c:595
-#: ../src/preferences_dialog.c:597 ../src/preferences_dialog.c:873
-msgid "CSS Comment"
-msgstr "CSS コメント"
-
-#: ../src/preferences_dialog.c:173 ../src/preferences_dialog.c:599
-#: ../src/preferences_dialog.c:876
-msgid "CSS ID"
-msgstr "CSS ID"
-
-#: ../src/preferences_dialog.c:174 ../src/preferences_dialog.c:603
-#: ../src/preferences_dialog.c:605 ../src/preferences_dialog.c:879
-msgid "CSS Important"
-msgstr "CSS 重要"
-
-#: ../src/preferences_dialog.c:175 ../src/preferences_dialog.c:607
-#: ../src/preferences_dialog.c:609 ../src/preferences_dialog.c:882
-msgid "CSS Directive"
-msgstr "CSS ディレクティブ"
-
-#. Font drop down elements : SQL
-#: ../src/preferences_dialog.c:178 ../src/preferences_dialog.c:611
-#: ../src/preferences_dialog.c:613 ../src/preferences_dialog.c:885
-msgid "SQL Word"
-msgstr "SQL 単語"
-
-#: ../src/preferences_dialog.c:179 ../src/preferences_dialog.c:615
-#: ../src/preferences_dialog.c:617 ../src/preferences_dialog.c:888
-msgid "SQL Identifier"
-msgstr "SQL 識別子"
-
-#: ../src/preferences_dialog.c:180 ../src/preferences_dialog.c:619
-#: ../src/preferences_dialog.c:621 ../src/preferences_dialog.c:891
-msgid "SQL Number"
-msgstr "SQL 番号"
-
-#: ../src/preferences_dialog.c:181 ../src/preferences_dialog.c:623
-#: ../src/preferences_dialog.c:625 ../src/preferences_dialog.c:894
-msgid "SQL String"
-msgstr "SQL 文字列"
-
-#: ../src/preferences_dialog.c:182 ../src/preferences_dialog.c:627
-#: ../src/preferences_dialog.c:629 ../src/preferences_dialog.c:897
-msgid "SQL Operator"
-msgstr "SQL 操作"
-
-#: ../src/preferences_dialog.c:183 ../src/preferences_dialog.c:631
-#: ../src/preferences_dialog.c:633 ../src/preferences_dialog.c:900
-msgid "SQL Comment"
-msgstr "SQL コメント"
-
-#: ../src/preferences_dialog.c:185 ../src/preferences_dialog.c:635
-#: ../src/preferences_dialog.c:637 ../src/preferences_dialog.c:903
-msgid "C Default"
-msgstr "C 言語標準"
-
-#: ../src/preferences_dialog.c:186 ../src/preferences_dialog.c:639
-#: ../src/preferences_dialog.c:641 ../src/preferences_dialog.c:906
-msgid "C String"
-msgstr "C 言語文字列"
-
-#: ../src/preferences_dialog.c:187 ../src/preferences_dialog.c:643
-#: ../src/preferences_dialog.c:645 ../src/preferences_dialog.c:909
-msgid "C Character"
-msgstr "C 言語文字"
-
-#: ../src/preferences_dialog.c:188 ../src/preferences_dialog.c:647
-#: ../src/preferences_dialog.c:649 ../src/preferences_dialog.c:912
-msgid "C Word"
-msgstr "C 言語単語"
-
-#: ../src/preferences_dialog.c:189 ../src/preferences_dialog.c:651
-#: ../src/preferences_dialog.c:653 ../src/preferences_dialog.c:915
-msgid "C Number"
-msgstr "C 言語番号"
-
-#: ../src/preferences_dialog.c:190 ../src/preferences_dialog.c:655
-#: ../src/preferences_dialog.c:657 ../src/preferences_dialog.c:918
-msgid "C Identifier"
-msgstr "C 言語識別子"
-
-#: ../src/preferences_dialog.c:191 ../src/preferences_dialog.c:659
-#: ../src/preferences_dialog.c:661 ../src/preferences_dialog.c:921
-msgid "C Comment"
-msgstr "C 言語コメント"
-
-#: ../src/preferences_dialog.c:192 ../src/preferences_dialog.c:663
-#: ../src/preferences_dialog.c:665 ../src/preferences_dialog.c:924
-msgid "C Commentline"
-msgstr "C 言語コメント行"
-
-#: ../src/preferences_dialog.c:193
-msgid "C Preprocessor"
-msgstr "C 言語プリプロセッサー"
-
-#: ../src/preferences_dialog.c:194 ../src/preferences_dialog.c:671
-#: ../src/preferences_dialog.c:673 ../src/preferences_dialog.c:930
-msgid "C Operator"
-msgstr "C 言語演算子"
-
-#: ../src/preferences_dialog.c:195 ../src/preferences_dialog.c:675
-#: ../src/preferences_dialog.c:677 ../src/preferences_dialog.c:933
-msgid "C Regex"
-msgstr "C 言語正規表現"
-
-#: ../src/preferences_dialog.c:196 ../src/preferences_dialog.c:679
-#: ../src/preferences_dialog.c:681 ../src/preferences_dialog.c:936
-msgid "C UUID"
-msgstr "C 言語 UUID"
-
-#: ../src/preferences_dialog.c:197 ../src/preferences_dialog.c:683
-#: ../src/preferences_dialog.c:685 ../src/preferences_dialog.c:939
-msgid "C Verbatim"
-msgstr ""
-
-#: ../src/preferences_dialog.c:198 ../src/preferences_dialog.c:687
-#: ../src/preferences_dialog.c:689 ../src/preferences_dialog.c:942
-msgid "C Globalclass"
-msgstr "C 言語グローバル クラス"
-
-#: ../src/preferences_dialog.c:257
-msgid "Name/Shortcut"
-msgstr "名前/ショートカット"
-
-#: ../src/preferences_dialog.c:354
-#, c-format
-msgid "Are you sure you want to delete template %s?"
-msgstr "本当にテンプレート「%s」を削除しますか?"
-
-#: ../src/preferences_dialog.c:565
-#, fuzzy
-msgid "CSS_Tag"
-msgstr "CSS タグ"
-
-#: ../src/preferences_dialog.c:571 ../src/preferences_dialog.c:573
-#, fuzzy
-msgid "CSS Pseudoclass"
-msgstr "CSS Psuedoclass"
-
-#: ../src/preferences_dialog.c:601
-#, fuzzy
-msgid "CSS Id"
-msgstr "CSS ID"
-
-#: ../src/preferences_dialog.c:667 ../src/preferences_dialog.c:669
-#: ../src/preferences_dialog.c:927
-msgid "C Preprocesor"
-msgstr "C 言語プリ プロセッサー"
-
-#: ../src/preferences_dialog.c:719
-#, c-format
-msgid ""
-"You have just changed the font to %s\n"
-"\n"
-"Would you like to use this font as the default for every element?"
-msgstr ""
-"今フォントを %s に変更しました\n"
-"\n"
-"すべての要素のデフォルトとしてこのフォントを使用しますか?"
-
-#: ../src/preferences_dialog.c:732
-#, c-format
-msgid ""
-"You have just changed the font size to %dpt\n"
-"\n"
-"Would you like to use this font size as the default for every element?"
-msgstr ""
-"今フォントサイズを %d pt に変更しました。\n"
-"\n"
-"すべての要素のデフォルトとしてこのフォントサイズを使用しますか?"
-
-#: ../src/preferences_dialog.c:1115
+#: ../src/preferences_dialog.c:369
 #, fuzzy
 msgid "<b>Session:</b>"
 msgstr "セッション:"
 
-#: ../src/preferences_dialog.c:1121
+#: ../src/preferences_dialog.c:375
 msgid "Save session (including open files) on exit"
 msgstr "終了時にセッション(開いているファイルを含む)<を保存する"
 
-#: ../src/preferences_dialog.c:1128
+#: ../src/preferences_dialog.c:382
 msgid "Only ever run 1 copy of gPHPEdit at a time"
 msgstr "常にひとつの gPHPEdit のコピーのみを実行する"
 
-#: ../src/preferences_dialog.c:1139
+#: ../src/preferences_dialog.c:393
 msgid "<b>Hand edge guide:</b>"
 msgstr ""
 
-#: ../src/preferences_dialog.c:1145
+#: ../src/preferences_dialog.c:399
 msgid "Show right hand edge guide"
 msgstr "右側の端のガイドを表示する"
 
-#: ../src/preferences_dialog.c:1157
-msgid "Right hand edge colour:"
-msgstr "右側の端の色"
-
-#: ../src/preferences_dialog.c:1179
+#: ../src/preferences_dialog.c:411
 msgid "Right hand edge column"
 msgstr "右側の端の文字数"
 
-#: ../src/preferences_dialog.c:1194
+#: ../src/preferences_dialog.c:426
 #, fuzzy
 msgid "<b>Side Panel:</b>"
 msgstr "サイドパネル:"
 
-#: ../src/preferences_dialog.c:1200
+#: ../src/preferences_dialog.c:432
 #, fuzzy
 msgid "Show file browser (need restart)"
 msgstr "フォルダー ブラウザーを表示する (再起動が必要)"
 
 #. set tooltip
-#: ../src/preferences_dialog.c:1202
+#: ../src/preferences_dialog.c:434
 msgid "Show/Hide side-panel Folder Browser"
 msgstr "サイドパネル フォルダー ブラウザーを表示する/隠す"
 
-#: ../src/preferences_dialog.c:1214
+#: ../src/preferences_dialog.c:446
 #, fuzzy
 msgid "<b>Auto-completion:</b>"
 msgstr "自動補完:"
 
-#: ../src/preferences_dialog.c:1220
+#: ../src/preferences_dialog.c:452
 msgid "Auto-Completion of Brackets and Quotes"
 msgstr "ブラケットとクォートの自動補完"
 
 #. set tooltip
-#: ../src/preferences_dialog.c:1222
+#: ../src/preferences_dialog.c:454
 msgid "Auto-complete the closing brackets/quotes"
 msgstr "閉じブラケットとクォートの自動補完"
 
-#: ../src/preferences_dialog.c:1233
+#: ../src/preferences_dialog.c:465
 msgid "Delay (calltip/function list):"
 msgstr "遅延 (コール ティップ/関数一覧)"
 
 #. end autocompletion part
-#: ../src/preferences_dialog.c:1243
+#: ../src/preferences_dialog.c:475
 msgid "General"
 msgstr ""
 
-#: ../src/preferences_dialog.c:1261
+#: ../src/preferences_dialog.c:493
 msgid "<b>Tabs:</b>"
 msgstr ""
 
-#: ../src/preferences_dialog.c:1271
+#: ../src/preferences_dialog.c:503
 msgid "Tab size:"
 msgstr "タブ幅:"
 
-#: ../src/preferences_dialog.c:1281
+#: ../src/preferences_dialog.c:513
 msgid "Use tabs instead of spaces for indentation"
 msgstr "インデントを半角空白の変わりにタブを使う"
 
-#: ../src/preferences_dialog.c:1288
+#: ../src/preferences_dialog.c:520
 msgid "Show indentation guides"
 msgstr "インデントガイドを表示する"
 
-#: ../src/preferences_dialog.c:1298
+#: ../src/preferences_dialog.c:530
 msgid "<b>Line Properties:</b>"
 msgstr ""
 
-#: ../src/preferences_dialog.c:1308
+#: ../src/preferences_dialog.c:540
 msgid "Wrap long lines"
 msgstr "長い行を禁則処理する"
 
-#: ../src/preferences_dialog.c:1315
+#: ../src/preferences_dialog.c:547
 msgid "Highlight Caret Line"
 msgstr "キャレット行のハイライト"
 
-#: ../src/preferences_dialog.c:1327
-msgid "Highlight Caret Line colour:"
-msgstr "キャレット行ハイライトの色"
-
-#: ../src/preferences_dialog.c:1344
-#, fuzzy
-msgid "<b>Selection:</b>"
-msgstr "選択:"
-
-#. Begin: Selection Color
-#: ../src/preferences_dialog.c:1355
-msgid "Selection colour:"
-msgstr "選択色:"
-
-#. End: Selection Color
-#. end editor page
-#: ../src/preferences_dialog.c:1373
-msgid "Editor"
-msgstr "エディタ"
-
-#: ../src/preferences_dialog.c:1383
-#, fuzzy
-msgid "Element:"
-msgstr "要素"
-
-#: ../src/preferences_dialog.c:1406
-#, fuzzy
-msgid "Font:"
-msgstr "フォント"
-
-#: ../src/preferences_dialog.c:1460
-msgid "Attributes"
-msgstr "属性"
-
-#: ../src/preferences_dialog.c:1469
-msgid "Bold"
-msgstr "強調"
-
-#: ../src/preferences_dialog.c:1474
-msgid "Italic"
-msgstr "斜体"
-
-#: ../src/preferences_dialog.c:1479
-msgid "Colours"
-msgstr "色"
-
-#: ../src/preferences_dialog.c:1492
-msgid "Foreground:"
-msgstr "前景色"
-
-#: ../src/preferences_dialog.c:1506
-msgid "Background:"
-msgstr "背景色"
-
-#: ../src/preferences_dialog.c:1516
-msgid "Colour"
-msgstr "色"
-
-#: ../src/preferences_dialog.c:1534
+#: ../src/preferences_dialog.c:564
 #, fuzzy
 msgid "<b>PHP Coding:</b>"
 msgstr "PHP コーディング"
 
-#: ../src/preferences_dialog.c:1544
+#: ../src/preferences_dialog.c:574
 msgid "Syntax check program:"
 msgstr "文法確認プログラム"
 
-#: ../src/preferences_dialog.c:1558
+#: ../src/preferences_dialog.c:588
 msgid "Recognised PHP file extensions:"
 msgstr "認識される PHP ファイルの拡張子:"
 
-#: ../src/preferences_dialog.c:1572
+#: ../src/preferences_dialog.c:602
 msgid "Shared library path(s):"
 msgstr "共有ライブラリーのパス:"
 
-#: ../src/preferences_dialog.c:1586
-msgid "Templates:"
+#. end editor page
+#: ../src/preferences_dialog.c:614
+msgid "Editor"
+msgstr "エディタ"
+
+#: ../src/preferences_dialog.c:627
+#, fuzzy
+msgid "<b>Font:</b>"
+msgstr "セッション:"
+
+#: ../src/preferences_dialog.c:637
+#, fuzzy
+msgid "Editor _font:"
+msgstr "エディタ"
+
+#: ../src/preferences_dialog.c:651
+msgid "<b>Color Scheme:</b>"
+msgstr ""
+
+#: ../src/preferences_dialog.c:708
+msgid "Colour"
+msgstr "色"
+
+#: ../src/preferences_dialog.c:718
+#, fuzzy
+msgid "Active Templates:"
 msgstr "テンプレート:"
 
-#: ../src/preferences_dialog.c:1623
-msgid "Add..."
-msgstr "追加する..."
-
-#: ../src/preferences_dialog.c:1629
-msgid "Edit..."
-msgstr "編集する..."
-
-#: ../src/preferences_dialog.c:1635
-msgid "Delete"
-msgstr "削除する..."
-
 #.
-#: ../src/preferences_dialog.c:1650
+#: ../src/preferences_dialog.c:728
 #, fuzzy
-msgid "Coding"
-msgstr "PHP コーディング"
+msgid "Templates"
+msgstr "テンプレート:"
 
-#: ../src/preferences_dialog.c:1698
+#: ../src/preferences_dialog.c:742
+#, fuzzy
+msgid "Plugin"
+msgstr "プラグイン(_P)"
+
+#: ../src/preferences_dialog.c:774
 msgid "Preferences"
 msgstr "プリファレンス"
 
@@ -1556,14 +1091,14 @@ msgstr "文法確認の出力"
 msgid "You don't have any files open to check\n"
 msgstr "確認のためにいくつかのファイルを開きません\n"
 
-#: ../src/templates.c:83
-#, c-format
-msgid "CANNOT Create templates file: %s\n"
-msgstr "テンプレート ファイルを作成できません: %s\n"
-
-#: ../src/templates.c:147
+#: ../src/templates.c:145
 #, fuzzy, c-format
 msgid "CANNOT Create templates file:: %s\n"
+msgstr "テンプレート ファイルを作成できません: %s\n"
+
+#: ../src/templates.c:226
+#, c-format
+msgid "CANNOT Create templates file: %s\n"
 msgstr "テンプレート ファイルを作成できません: %s\n"
 
 #. Add the File operations to the Main Toolbar
@@ -1665,128 +1200,10 @@ msgstr "指定行に移動: "
 msgid "Go to line"
 msgstr "指定行に移動"
 
-#, fuzzy
-#~ msgid "Classbrowser::Cannot allocate buffer"
-#~ msgstr "書き込みバッファーを確保できません"
+#: ../gphpedit.desktop.in.h:1
+msgid "Edit PHP source files"
+msgstr ""
 
-#~ msgid "RegExp/String to search"
-#~ msgstr "正規表現/文字列で検索する"
-
-#~ msgid "From cursor"
-#~ msgstr "カーソルから"
-
-#~ msgid "Search"
-#~ msgstr "検索"
-
-#~ msgid "String"
-#~ msgstr "文字列"
-
-#~ msgid "Type"
-#~ msgstr "種類"
-
-#~ msgid "Whole word"
-#~ msgstr "単語全体"
-
-#~ msgid "Ignore case while searching"
-#~ msgstr "英大小文字の区別をしない"
-
-#~ msgid "Options"
-#~ msgstr "オプション"
-
-#~ msgid "Find and Replace"
-#~ msgstr "検索と置換"
-
-#~ msgid "String to Replace"
-#~ msgstr "文字列で置換する"
-
-#~ msgid "Plugin is null!\n"
-#~ msgstr "プラグインが NULL です!\n"
-
-#~ msgid "Reload"
-#~ msgstr "再読み込み"
-
-#~ msgid "Cancel"
-#~ msgstr "取り消し"
-
-#~ msgid "Tabs:"
-#~ msgstr "タブ:"
-
-#~ msgid "Current line:"
-#~ msgstr "現在行:"
-
-#~ msgid "Font Quality"
-#~ msgstr "フォントの品質"
-
-#~ msgid "Apply"
-#~ msgstr "適用する"
-
-#, fuzzy
-#~ msgid "Error reading file. GIO error:%s\n"
-#~ msgstr ""
-#~ "ファイルを開く際の GIO エラー:%s\n"
-#~ "ファイル:%s"
-
-#~ msgid "File size and loaded size not matching"
-#~ msgstr "ファイルの大きさと読み込んだ大きさが一致しません"
-
-#~ msgid "_Reload current file"
-#~ msgstr "現在のファイルを再読み込みする(_R)"
-
-#~ msgid "Reload the file currently selected in the editor"
-#~ msgstr "エディターで選択したすべてのファイルを再読み込みする"
-
-#, fuzzy
-#~ msgid "Folder Browser"
-#~ msgstr "クラス ブラウザー"
-
-#~ msgid "Close Current File"
-#~ msgstr "現在のファイルを閉じる"
-
-#~ msgid "_Recent"
-#~ msgstr "最近(_R)"
-
-#~ msgid "ERROR: cannot save session to %s\n"
-#~ msgstr "エラー: セッションを %s に保存できません\n"
-
-#~ msgid "C string"
-#~ msgstr "C 言語文字列"
-
-#~ msgid "C character"
-#~ msgstr "C 言語文字"
-
-#~ msgid "C word"
-#~ msgstr "C 言語単語"
-
-#~ msgid "C number"
-#~ msgstr "C 言語番号"
-
-#~ msgid "C identifier"
-#~ msgstr "C 言語識別子"
-
-#~ msgid "C comment"
-#~ msgstr "C 言語コメント"
-
-#~ msgid "C commentline"
-#~ msgstr "C 言語コメント行"
-
-#~ msgid "C preprocesor"
-#~ msgstr "C 言語プリプロセッサー"
-
-#~ msgid "C operator"
-#~ msgstr "C 言語演算子"
-
-#~ msgid "C regex"
-#~ msgstr "C 言語正規表現"
-
-#~ msgid "C uuid"
-#~ msgstr "C 言語 UUID"
-
-#~ msgid " (amended) - gPHPEdit"
-#~ msgstr " (amended) - gPHPEdi"
-
-#~ msgid ""
-#~ "Your old settings used non-Pango (modern) fonts.  gPHPEdit no longer "
-#~ "supports old fonts, your preferences have been updated."
-#~ msgstr ""
-#~ "古い設定は非 Pango(モダン)フォントを用いています。gPHPEdit はもはや古い"
-#~ "フォントをサポートしていませんので、プリファレンスを更新しました。"
+#: ../gphpedit.desktop.in.h:2
+msgid "PHP/HTML/CSS editor"
+msgstr ""

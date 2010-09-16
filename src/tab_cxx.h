@@ -28,5 +28,6 @@
 #include "document.h"
 
 void tab_cxx_set_lexer(Document *document);
+gboolean is_cxx_file(const gchar *filename);
 
 #endif

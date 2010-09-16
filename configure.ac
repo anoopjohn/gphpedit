@@ -82,10 +82,12 @@ dnl  --------------
 dnl Checking for the required libraries.
 GTK_REQUIRED_VERSION=2.20.0
 GCONF_REQUIRED_VERSION=2.0.0
+LIBXML_REQUIRED_VERSION=2.6.0
 
 PKG_CHECK_MODULES(GTK, gtk+-2.0 >= $GTK_REQUIRED_VERSION)
 PKG_CHECK_MODULES(GCONF, gconf-2.0 >= $GCONF_REQUIRED_VERSION)
 PKG_CHECK_MODULES(WEBKIT,[webkit-1.0])
+PKG_CHECK_MODULES(LIBXML, libxml-2.0 >= $LIBXML_REQUIRED_VERSION)
 
 AC_SUBST(GTK_CFLAGS)
 AC_SUBST(GTK_LIBS)
@@ -93,6 +95,8 @@ AC_SUBST(GCONF_CFLAGS)
 AC_SUBST(GCONF_LIBS)
 AC_SUBST(WEBKIT_CFLAGS)
 AC_SUBST(WEBKIT_LIBS)
+AC_SUBST(LIBXML_CFLAGS)
+AC_SUBST(LIBXML_LIBS)
 
 AC_PATH_PROG([CTAGS_EXUBERANT], [ctags-exuberant], [/usr/bin/ctags-exuberant],
                    [$PATH$PATH_SEPARATOR/usr/bin$PATH_SEPARATOR]dnl
@@ -244,6 +248,7 @@ gphpedit.spec
 data/Makefile
 doc/Makefile
 pixmaps/Makefile
+themes/Makefile
 po/Makefile.in
 src/Makefile
 ])

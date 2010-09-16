@@ -16,6 +16,13 @@ New Features and Fixes
 - Improve Classbrowser parse performance
 - Improve autocompletion performance
 - Fix syntax check when file contains %xx scapes chars
+- New Theme system.
+- Improve syntax check plugins.
+- Added ability to enable/disable plugins.
+- Better externally mmodified notification.
+- New preferences dialog.
+- Show current line and column in statusbar.
+- Improved desktop integration.
 - New japanese translation. Thanks to Tadashi Jokagi <elf@elf.no-ip.org>
 - Added new debug option.
 - Misc bugfixes and code cleanups

@@ -26,7 +26,7 @@
 bin_PROGRAMS = gphpedit
 
 AM_CFLAGS = \
-	$(WEBKIT_CFLAGS) $(GTK_CFLAGS) $(GCONF_CFLAGS) \
+	$(WEBKIT_CFLAGS) $(GTK_CFLAGS) $(GCONF_CFLAGS) $(LIBXML_CFLAGS)\
 	-I$(top_srcdir)/src/gtkscintilla2 \
 	-Wall -DGTK -DSCI_LEXER \
 	-DPIXMAP_DIR=\""$(datadir)/pixmaps"\" 
@@ -118,6 +118,15 @@ gphpedit_SOURCES = \
   templates.h \
   templates_editor.c \
   templates_editor.h \
+  gtksourcestylescheme.c \
+  gtksourcestylescheme.h \
+  gtksourcestyleschememanager.c \
+  gtksourcestyleschememanager.h \
+  gtksourcestyle.c \
+  gtksourcestyle.h \
+  gtksourcestyle-private.h \
+  gtksourceview-utils.c \
+  gtksourceview-utils.h \
   toolbar.c \
   toolbar.h
 
@@ -126,6 +135,6 @@ gtkscintilla2/libgtkscintilla2.a:
 	cd gtkscintilla2 && $(MAKE) libgtkscintilla2.a && cd ..
 
 gphpedit_LDADD = \
-	$(WEBKIT_LIBS) $(GTK_LIBS) $(GCONF_LIBS)\
+	$(WEBKIT_LIBS) $(GTK_LIBS) $(GCONF_LIBS) $(LIBXML_LIBS)\
 	gtkscintilla2/libgtkscintilla2.a\
 	gtkscintilla2/scintilla/bin/scintilla.a

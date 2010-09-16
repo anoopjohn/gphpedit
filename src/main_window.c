@@ -50,15 +50,21 @@ void main_window_state_changed(GtkWidget *widget, GdkEventWindowState *event, gp
 
 void main_window_resize(GtkWidget *widget, GtkAllocation *allocation, gpointer user_data) {
   if (!get_preferences_manager_window_maximized(main_window.prefmg)) {
-    gint left, width, top, height;
+    gint left, top;
     gtk_window_get_position(GTK_WINDOW(main_window.window), &left, &top);
-    gtk_window_get_size(GTK_WINDOW(main_window.window), &width, &height);
-    set_preferences_manager_window_height(main_window.prefmg, height);
-    set_preferences_manager_window_width(main_window.prefmg, width);
-    set_preferences_manager_window_left(main_window.prefmg, left);
-    set_preferences_manager_window_top(main_window.prefmg, top);
+    set_preferences_manager_window_size (main_window.prefmg, allocation->width, allocation->height);
+    set_preferences_manager_window_position (main_window.prefmg, top, left);
   }
 }
+
+gboolean classbrowser_accept_size(GtkPaned *paned, gpointer user_data)
+{
+  if (gtk_paned_get_position(GTK_PANED(main_window.main_horizontal_pane)) != 0) {
+    set_preferences_manager_side_panel_size(main_window.prefmg, gtk_paned_get_position(GTK_PANED(main_window.main_horizontal_pane)));
+  }
+  return TRUE;
+}
+
 
 void main_window_pass_command_line_files(char **argv)
 {
@@ -111,10 +117,9 @@ static void main_window_create_panes(void)
   gtk_widget_show (main_window.main_vertical_pane);
   gtk_paned_pack1 (GTK_PANED (main_window.main_horizontal_pane), main_window.main_vertical_pane, FALSE, TRUE);
   g_signal_connect (G_OBJECT (main_window.window), "size_allocate", G_CALLBACK (classbrowser_accept_size), NULL);
-  gtk_paned_set_position(GTK_PANED(main_window.main_horizontal_pane),get_preferences_manager_classbrowser_get_size(main_window.prefmg));
+  gtk_paned_set_position(GTK_PANED(main_window.main_horizontal_pane),get_preferences_manager_side_panel_get_size(main_window.prefmg));
     
-  if (get_preferences_manager_classbrowser_status(main_window.prefmg)==1)
-    classbrowser_hide();
+  if (get_preferences_manager_side_panel_status(main_window.prefmg)) classbrowser_hide();
 
   main_window.prin_hbox = gtk_vbox_new(FALSE, 0);
   gtk_widget_show(main_window.prin_hbox);
@@ -177,12 +182,6 @@ static void main_window_fill_panes(void)
 
   main_window.notebook_editor = gtk_notebook_new ();
   gtk_notebook_set_scrollable(GTK_NOTEBOOK(main_window.notebook_editor), TRUE);
-  /*
-    GTK_WIDGET_UNSET_FLAGS (main_window.notebook_editor, GTK_CAN_FOCUS | GTK_RECEIVES_DEFAULT);
-   Fix to scrollable list of tabs, however it then messes up grabbing of focus
-   Hence the focus-tab event (which GTK doesn't seem to recognise
-  */
-  gtk_widget_set_receives_default (main_window.notebook_editor,FALSE);
   gtk_widget_show (main_window.notebook_editor);
   gtk_box_pack_start(GTK_BOX(main_window.prin_hbox), main_window.notebook_editor, TRUE, TRUE, 2);
 
@@ -212,14 +211,6 @@ void update_app_title(Document *document)
   g_free(title);
 }
 
-void main_window_add_to_reopen_menu(gchar *full_filename)
-{
-  if (!full_filename) return;
-  GtkRecentManager *manager;
-  manager = gtk_recent_manager_get_default ();
-  gtk_recent_manager_add_item (manager, full_filename);
-}
-
 static void main_window_create_prinbox(void){
   main_window.prinbox = gtk_vbox_new (FALSE, 0);
   gtk_container_add (GTK_CONTAINER (main_window.window), main_window.prinbox);
@@ -237,13 +228,15 @@ static void set_colormap(GtkWidget *window){
 static void create_app_main_window(const gchar *title){
   main_window.window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
   gtk_window_set_title(GTK_WINDOW(main_window.window), title);
-  gtk_window_set_default_size(GTK_WINDOW(main_window.window), get_preferences_manager_window_height(main_window.prefmg),
-         get_preferences_manager_window_width(main_window.prefmg));
-  gtk_window_move(GTK_WINDOW(main_window.window), get_preferences_manager_window_left(main_window.prefmg), 
-         get_preferences_manager_window_top(main_window.prefmg));
+  gint w, h, x, y;
   if (get_preferences_manager_window_maximized(main_window.prefmg)) {
  		gtk_window_maximize(GTK_WINDOW(main_window.window));
-	}
+	} else {
+    get_preferences_manager_window_size (main_window.prefmg, &w, &h);
+    gtk_window_set_default_size(GTK_WINDOW(main_window.window), w, h);
+    get_preferences_manager_window_position (main_window.prefmg, &y, &x);
+    gtk_window_move(GTK_WINDOW(main_window.window), x, y);
+  }
   g_set_application_name (title);
   gtk_window_set_default_icon_name ("gphpedit");
   /* set RGBA colormap */        
@@ -275,6 +268,7 @@ void main_window_create(void){
   
   function_list_prepare();
   css_function_list_prepare();
+  cobol_function_list_prepare();
 
   g_signal_connect (G_OBJECT (main_window.window), "delete_event", G_CALLBACK(main_window_delete_event), NULL);
   g_signal_connect (G_OBJECT (main_window.window), "destroy", G_CALLBACK (main_window_destroy_event), NULL);
@@ -288,6 +282,11 @@ void main_window_create(void){
   gtk_widget_show(main_window.window);
   
   update_app_title(document_manager_get_current_document(main_window.docmg));
+
+  main_window.stylemg = gtk_source_style_scheme_manager_new ();
+  gchar *theme_dir = g_build_path (G_DIR_SEPARATOR_S, API_DIR, "themes", NULL);
+  gtk_source_style_scheme_manager_prepend_search_path (main_window.stylemg, theme_dir);
+  g_free(theme_dir);
 }
 
 void update_controls(Document *document){

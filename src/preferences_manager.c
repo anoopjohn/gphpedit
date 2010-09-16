@@ -2,7 +2,7 @@
 
    Copyright (C) 2003, 2004, 2005 Andy Jeffries <andy at gphpedit.org>
    Copyright (C) 2009 Anoop John <anoop dot john at zyxware.com>
-   Copyright (C) 2009 José Rostagno (for vijona.com.ar) 
+   Copyright (C) 2009-2010 José Rostagno (for vijona.com.ar) 
 
    For more information or to find the latest release, visit our 
    website at http://www.gphpedit.org/
@@ -47,25 +47,11 @@
 
 #define MAXHISTORY 16
 
-typedef struct
-{
-  gchar *name; /* useful value */
-  gint color_back;
-  gchar *font;
-  gint color_fore;
-  gint font_size;
-  gboolean font_bold;
-  gboolean font_italic;
-} Scintilla_Style;
-
 /*
 * preferences_manager private struct
 */
 struct Preferences_ManagerDetails
 {
-  gchar *default_font;
-  gint default_size;
-
   /* important value */
   gboolean save_session;
 
@@ -87,7 +73,6 @@ struct Preferences_ManagerDetails
   guint showmaintoolbar:1;
   guint showfindtoolbar:1;
   // Default settings
-  gint set_sel_back;
   gint marker_back;
   gint indentation_size;
   gint tab_size;
@@ -95,14 +80,12 @@ struct Preferences_ManagerDetails
   guint show_folding:1;
   gint edge_mode;
   gint edge_column;
-  gint edge_colour;
   gchar *php_binary_location;
   gchar *shared_source_location;
   gchar *php_file_extensions;
 
   guint auto_complete_braces:1;
   guint higthlightcaretline:1;
-  gint higthlightcaretline_color;
   //gint auto_indent_after_brace;
   gint auto_complete_delay;
   gint calltip_delay;
@@ -111,10 +94,10 @@ struct Preferences_ManagerDetails
   guint single_instance_only:1;
   gint font_quality;  
   GSList *search_history; /* for incremental search history */
-  /* style_table:
-  * has a list with styles of the diferent lexers.
-  */
-  GHashTable *styles_table;
+
+  gchar *style_name;
+  gint font_size;
+  gchar *font_name;
 };
 
 #define PREFERENCES_MANAGER_GET_PRIVATE(object)(G_TYPE_INSTANCE_GET_PRIVATE ((object),\
@@ -205,17 +188,6 @@ preferences_manager_class_init (Preferences_ManagerClass *klass)
   object_class->constructor = preferences_manager_constructor;
   g_type_class_add_private (klass, sizeof (Preferences_ManagerDetails));
 }
-/*
-* clean_style (internal)
-* free resources
-*/
-void clean_style (gpointer data){
-  Scintilla_Style *style= (Scintilla_Style *) data;
-  if (!style) return ;
-  if (style->name) g_free(style->name);
-  if (style->font) g_free(style->font);
-  g_slice_free(Scintilla_Style, style);
-}
 
 void clean_default_settings(Preferences_ManagerDetails *prefdet){
   /* free object resources*/
@@ -256,8 +228,6 @@ preferences_manager_init (gpointer object, gpointer klass)
 #endif
 
   force_config_folder();
-  /* init styles table*/
-  prefdet->styles_table= g_hash_table_new_full (g_str_hash, g_str_equal,NULL, clean_style);
   load_default_settings(prefdet);
   load_window_settings(prefdet); /* load main window settings*/
   load_session_settings(prefdet);
@@ -286,9 +256,10 @@ preferences_manager_finalize (GObject *object)
   Preferences_ManagerDetails *prefdet;
   prefdet = PREFERENCES_MANAGER_GET_PRIVATE(pref);
   clean_default_settings(prefdet);
-  g_hash_table_destroy (prefdet->styles_table); /* clean data */
 
-  g_free(prefdet->default_font);
+  g_free(prefdet->font_name);
+  g_free(prefdet->style_name);
+
   G_OBJECT_CLASS (parent_class)->finalize (object);
 }
 
@@ -335,7 +306,6 @@ gint get_default_delay(void){
 void load_default_settings(Preferences_ManagerDetails *prefdet)
 {
   gphpedit_debug(DEBUG_PREFS);
-  prefdet->set_sel_back = get_color("/gPHPEdit/default_style/selection","default_style",11250603);
   prefdet->marker_back = get_color("/gPHPEdit/default_style/bookmark","default_style",15908608);
   prefdet->php_binary_location= get_string("/gPHPEdit/locations/phpbinary","php");
   prefdet->shared_source_location = get_string("/gPHPEdit/locations/shared_source","");
@@ -349,13 +319,11 @@ void load_default_settings(Preferences_ManagerDetails *prefdet)
   prefdet->show_folding = TRUE;//gconf_client_get_bool (config,"/gPHPEdit/defaults/showfolding",NULL);
   prefdet->edge_mode = get_bool ("/gPHPEdit/defaults/edgemode",FALSE);
   prefdet->edge_column = get_size("/gPHPEdit/defaults/edgecolumn", 80);
-  prefdet->edge_colour = get_color("/gPHPEdit/defaults/edgecolour","defaults",8355712);
   prefdet->line_wrapping = get_color("/gPHPEdit/defaults/linewrapping","defaults", TRUE);
   /* font quality */
   prefdet->font_quality = preferences_manager_parse_font_quality();
   prefdet->auto_complete_braces= get_bool("/gPHPEdit/defaults/autocompletebraces", FALSE);
   prefdet->higthlightcaretline= get_bool("/gPHPEdit/defaults/higthlightcaretline", FALSE);
-  prefdet->higthlightcaretline_color= get_color("/gPHPEdit/defaults/higthlightcaretline_color","higthlightcaretline_color",13684944);
   prefdet->save_session = get_color("/gPHPEdit/defaults/save_session","defaults", TRUE);
   prefdet->use_tabs_instead_spaces = get_color("/gPHPEdit/defaults/use_tabs_instead_spaces","defaults", TRUE);
   prefdet->single_instance_only = get_color("/gPHPEdit/defaults/single_instance_only","defaults", TRUE);
@@ -402,11 +370,11 @@ GSList *get_preferences_manager_search_history(Preferences_Manager *preferences_
   return prefdet->search_history;
 }
 /*
- *get_preferences_manager_classbrowser_status
- *return 0 if classbrowser is hidden
- *return 1 if classbrowser is show
+ *get_preferences_manager_side_panel_status
+ *return 1 if side_panel is hidden
+ *return 0 if side_panel is show
 */
-gboolean get_preferences_manager_classbrowser_status(Preferences_Manager *preferences_manager)
+gboolean get_preferences_manager_side_panel_status(Preferences_Manager *preferences_manager)
 {
   g_return_val_if_fail (OBJECT_IS_PREFERENCES_MANAGER (preferences_manager), 0); /**/
   Preferences_ManagerDetails *prefdet;
@@ -414,27 +382,27 @@ gboolean get_preferences_manager_classbrowser_status(Preferences_Manager *prefer
   return prefdet->classbrowser_hidden;
 }
 
-void set_preferences_manager_parse_classbrowser_status(Preferences_Manager *preferences_manager, gint new_status){
+void set_preferences_manager_parse_side_panel_status(Preferences_Manager *preferences_manager, gint new_status){
   if (!OBJECT_IS_PREFERENCES_MANAGER (preferences_manager)) return ;
   Preferences_ManagerDetails *prefdet;
   prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
   prefdet->classbrowser_hidden=new_status;
-  set_int("/gPHPEdit/main_window/classbrowser_hidden",new_status);
+  set_int("/gPHPEdit/main_window/classbrowser_hidden", new_status);
 }
 
 /*
  *classbrowser_get_size
- *return current classbrowser size
+ *return currentside panel size
  * default size 100
 */
-gint get_preferences_manager_classbrowser_get_size(Preferences_Manager *preferences_manager){
+gint get_preferences_manager_side_panel_get_size(Preferences_Manager *preferences_manager){
   g_return_val_if_fail (OBJECT_IS_PREFERENCES_MANAGER (preferences_manager), 0); /**/
   Preferences_ManagerDetails *prefdet;
   prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
   return prefdet->classbrowser_size;
 }
 
-void set_preferences_manager_classbrowser_size(Preferences_Manager *preferences_manager, gint new_size){
+void set_preferences_manager_side_panel_size(Preferences_Manager *preferences_manager, gint new_size){
   if (!OBJECT_IS_PREFERENCES_MANAGER (preferences_manager)) return ;
   Preferences_ManagerDetails *prefdet;
   prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
@@ -569,73 +537,40 @@ void set_preferences_manager_show_maintoolbar(Preferences_Manager *preferences_m
   prefdet->showmaintoolbar = newstate; 
 }
 
-
-gint get_preferences_manager_window_height(Preferences_Manager *preferences_manager)
+void get_preferences_manager_window_size (Preferences_Manager *preferences_manager, gint *width, gint *height)
 {
-  g_return_val_if_fail (OBJECT_IS_PREFERENCES_MANAGER (preferences_manager), 0); /**/
+  g_return_if_fail (OBJECT_IS_PREFERENCES_MANAGER (preferences_manager));
   Preferences_ManagerDetails *prefdet;
   prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
-  return prefdet->height;
+  if (width) *width = prefdet->width;
+  if (height) *height = prefdet->height;
 }
 
-void set_preferences_manager_window_height(Preferences_Manager *preferences_manager, gint newstate)
+void set_preferences_manager_window_size (Preferences_Manager *preferences_manager, gint width, gint height)
 {
-  if (!OBJECT_IS_PREFERENCES_MANAGER (preferences_manager)) return ;
+  g_return_if_fail (OBJECT_IS_PREFERENCES_MANAGER (preferences_manager));
   Preferences_ManagerDetails *prefdet;
   prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
-  prefdet->height = newstate; 
-
+  prefdet->width = width;
+  prefdet->height = height;
 }
 
-gint get_preferences_manager_window_width(Preferences_Manager *preferences_manager)
+void get_preferences_manager_window_position (Preferences_Manager *preferences_manager, gint *top, gint *left)
 {
-  g_return_val_if_fail (OBJECT_IS_PREFERENCES_MANAGER (preferences_manager), 0); /**/
+  g_return_if_fail (OBJECT_IS_PREFERENCES_MANAGER (preferences_manager));
   Preferences_ManagerDetails *prefdet;
   prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
-  return prefdet->width;
+  if (top) *top = prefdet->top;
+  if (left) *left = prefdet->left;
 }
 
-void set_preferences_manager_window_width(Preferences_Manager *preferences_manager, gint newstate)
+void set_preferences_manager_window_position (Preferences_Manager *preferences_manager, gint top, gint left)
 {
-  if (!OBJECT_IS_PREFERENCES_MANAGER (preferences_manager)) return ;
+  g_return_if_fail (OBJECT_IS_PREFERENCES_MANAGER (preferences_manager));
   Preferences_ManagerDetails *prefdet;
   prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
-  prefdet->width = newstate; 
-
-}
-
-gint get_preferences_manager_window_left(Preferences_Manager *preferences_manager)
-{
-  g_return_val_if_fail (OBJECT_IS_PREFERENCES_MANAGER (preferences_manager), 0); /**/
-  Preferences_ManagerDetails *prefdet;
-  prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
-  return prefdet->left;
-}
-
-void set_preferences_manager_window_left(Preferences_Manager *preferences_manager, gint newstate)
-{
-  if (!OBJECT_IS_PREFERENCES_MANAGER (preferences_manager)) return ;
-  Preferences_ManagerDetails *prefdet;
-  prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
-  prefdet->left = newstate; 
-
-}
-
-gint get_preferences_manager_window_top(Preferences_Manager *preferences_manager)
-{
-  g_return_val_if_fail (OBJECT_IS_PREFERENCES_MANAGER (preferences_manager), 0); /**/
-  Preferences_ManagerDetails *prefdet;
-  prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
-  return prefdet->top;
-}
-
-void set_preferences_manager_window_top(Preferences_Manager *preferences_manager, gint newstate)
-{
-  if (!OBJECT_IS_PREFERENCES_MANAGER (preferences_manager)) return ;
-  Preferences_ManagerDetails *prefdet;
-  prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
-  prefdet->top = newstate; 
-
+  prefdet->top = top;
+  prefdet->left = left;
 }
 
 gboolean get_preferences_manager_window_maximized(Preferences_Manager *preferences_manager)
@@ -652,8 +587,8 @@ void set_preferences_manager_window_maximized(Preferences_Manager *preferences_m
   Preferences_ManagerDetails *prefdet;
   prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
   prefdet->maximized = newstate; 
-
 }
+
 gint get_preferences_manager_indentation_size(Preferences_Manager *preferences_manager)
 {
   g_return_val_if_fail (OBJECT_IS_PREFERENCES_MANAGER (preferences_manager), 0); /**/
@@ -842,23 +777,6 @@ void set_preferences_manager_higthlight_caret_line(Preferences_Manager *preferen
 
 }
 
-gboolean get_preferences_manager_higthlight_caret_line_color(Preferences_Manager *preferences_manager)
-{
-  g_return_val_if_fail (OBJECT_IS_PREFERENCES_MANAGER (preferences_manager), 0); /**/
-  Preferences_ManagerDetails *prefdet;
-  prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
-  return prefdet->higthlightcaretline_color;
-}
-
-void set_preferences_manager_higthlight_caret_line_color(Preferences_Manager *preferences_manager, gint newstate)
-{
-  if (!OBJECT_IS_PREFERENCES_MANAGER (preferences_manager)) return ;
-  Preferences_ManagerDetails *prefdet;
-  prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
-  prefdet->higthlightcaretline_color = newstate; 
-
-}
-
 gboolean get_preferences_manager_show_indentation_guides(Preferences_Manager *preferences_manager)
 {
   g_return_val_if_fail (OBJECT_IS_PREFERENCES_MANAGER (preferences_manager), 0); /**/
@@ -907,40 +825,6 @@ void set_preferences_manager_edge_column(Preferences_Manager *preferences_manage
   Preferences_ManagerDetails *prefdet;
   prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
   prefdet->edge_column = newstate; 
-
-}
-
-gint get_preferences_manager_edge_colour(Preferences_Manager *preferences_manager)
-{
-  g_return_val_if_fail (OBJECT_IS_PREFERENCES_MANAGER (preferences_manager), 0); /**/
-  Preferences_ManagerDetails *prefdet;
-  prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
-  return prefdet->edge_colour;
-}
-
-void set_preferences_manager_edge_colour(Preferences_Manager *preferences_manager, gint newstate)
-{
-  if (!OBJECT_IS_PREFERENCES_MANAGER (preferences_manager)) return ;
-  Preferences_ManagerDetails *prefdet;
-  prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
-  prefdet->edge_colour = newstate; 
-
-}
-
-gint get_preferences_manager_set_sel_back(Preferences_Manager *preferences_manager)
-{
-  g_return_val_if_fail (OBJECT_IS_PREFERENCES_MANAGER (preferences_manager), 0); /**/
-  Preferences_ManagerDetails *prefdet;
-  prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
-  return prefdet->set_sel_back;
-}
-
-void set_preferences_manager_set_sel_back(Preferences_Manager *preferences_manager, gint newstate)
-{
-  if (!OBJECT_IS_PREFERENCES_MANAGER (preferences_manager)) return ;
-  Preferences_ManagerDetails *prefdet;
-  prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
-  prefdet->set_sel_back = newstate; 
 
 }
 
@@ -1016,143 +900,39 @@ void set_preferences_manager_new_search_history_item(Preferences_Manager *prefer
     }
 }
 
-/*
- * get_preferences_manager_style_settings
- * get an style data. If stylename isn't found in the hash table set parameters to NULL.
- * @stylename: name of the style to find
- * @font: name of the style font.
- * @size: pointer to the style size. 
- * @fore: pointer to the style fore color
- * @back: pointer to the style bold color
- * @italic: pointer to the boolean value
- * @bold: pointer to the boolean value
- * this function retrieves style settings. Set parameter to NULL to avoid it.
-*/
-void get_preferences_manager_style_settings(Preferences_Manager *preferences_manager, gchar *stylename, gchar **font , gint *size, gint *fore, gint *back, gboolean *italic, gboolean *bold)
+gchar *get_preferences_manager_style_name(Preferences_Manager *preferences_manager)
 {
+  g_return_val_if_fail (OBJECT_IS_PREFERENCES_MANAGER (preferences_manager), 0); /**/
   Preferences_ManagerDetails *prefdet;
   prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
-  Scintilla_Style *style = g_hash_table_lookup (prefdet->styles_table,stylename);
-  if (!style) /*style not found set info to NULL to avoid crash */ {
-    if (font) *font = NULL;
-    /*FIXME:: is this value correct?? */
-    if (size) size = NULL;
-    if (fore) fore = NULL;
-    if (back) back = NULL;
-    if (italic) italic = NULL;
-    if (bold) bold = NULL;
-    gphpedit_debug_message(DEBUG_PREFS, "not found:%s", stylename);
-    return;
-  }
-  if (font) *font= style->font;
-  if (size) *size= style->font_size;
-  if (fore) *fore= style->color_fore;
-  if (back) *back= style->color_back;
-  if (italic) *italic = style->font_italic;
-  if (bold) *bold = style->font_bold;
+  if (!prefdet->style_name) return "classic";
+  return prefdet->style_name;
 }
 
-/*
- * set_preferences_manager_style_settings
- * update style data. If stylename isn't found in the hash table do nothing.
- * @stylename: name of the style to modify
- * @font: name of the new font or NULL to keep actual font.
- * @size: pointer to the new size or NULL to keep actual size. 
- * @fore: pointer to the new fore color or NULL to keep actual fore color
- * @back: pointer to the new bold color or NULL to keep actual bold color
- * @italic: pointer to the boolean value or NULL to keep actual value. TRUE to set italic mode.
- * @bold: pointer to the boolean value or NULL to keep actual value. TRUE to set bold mode.
- * this function store new values internally, you need to call "preferences_manager_save_data" in order to update gconf values.
-*/
-void set_preferences_manager_style_settings(Preferences_Manager *preferences_manager, gchar *stylename, gchar *font , gint *size, gint *fore, gint *back, gboolean *italic, gboolean *bold)
+void set_preferences_manager_style_name(Preferences_Manager *preferences_manager, gchar *newstate)
 {
+  if (!OBJECT_IS_PREFERENCES_MANAGER (preferences_manager)) return ;
+  if (!newstate) return;
   Preferences_ManagerDetails *prefdet;
   prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
-  Scintilla_Style *style = g_hash_table_lookup (prefdet->styles_table,stylename);
-  if (!style) return;
-  if (font) style->font = g_strdup(font);
-  if (size) style->font_size = *size;
-  if (fore) style->color_fore = *fore;
-  if (back) style->color_back = *back;
-  if (italic) style->font_italic = *italic;
-  if (bold) style->font_bold = *bold;
+  prefdet->style_name = g_strdup(newstate);
 }
 
-void modify_style_font (gpointer key, gpointer value, gpointer user_data)
+guint get_preferences_manager_style_size(Preferences_Manager *preferences_manager)
 {
-  Scintilla_Style *style = (Scintilla_Style *) value;
-  if (style->font) g_free(style->font);
-  style->font = g_strdup(user_data);
-}
-
-/*
- * set_preferences_manager_style_settings_font_to_all
- * set font to be the new font for all the styles.
- * @font: name of the new font or NULL to keep actual font.
- * this function store new values internally, you need to call "preferences_manager_save_data" in order to update gconf values.
-*/
-
-void set_preferences_manager_style_settings_font_to_all (Preferences_Manager *preferences_manager, gchar *font)
-{
-  if (!font || !preferences_manager) return ;
+  g_return_val_if_fail (OBJECT_IS_PREFERENCES_MANAGER (preferences_manager), 0); /**/
   Preferences_ManagerDetails *prefdet;
   prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
-  g_hash_table_foreach (prefdet->styles_table, modify_style_font, font);
+  return prefdet->font_size;
 }
 
-void modify_style_size (gpointer key, gpointer value, gpointer user_data)
+gchar *get_preferences_manager_style_font(Preferences_Manager *preferences_manager)
 {
-  Scintilla_Style *style = (Scintilla_Style *) value;
-  style->font_size = GPOINTER_TO_INT(user_data);
-}
-
-/*
- * set_preferences_manager_style_settings_size_to_all
- * set size to be the new size for all the styles.
- * @size: the new size.
- * this function store new values internally, you need to call "preferences_manager_save_data" in order to update gconf values.
-*/
-
-void set_preferences_manager_style_settings_size_to_all (Preferences_Manager *preferences_manager, gint size)
-{
-  if (!preferences_manager) return ;
+  g_return_val_if_fail (OBJECT_IS_PREFERENCES_MANAGER (preferences_manager), 0); /**/
   Preferences_ManagerDetails *prefdet;
   prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
-  g_hash_table_foreach (prefdet->styles_table, modify_style_size, GINT_TO_POINTER(size));
+  return prefdet->font_name;
 }
-
-/*
-* save_style_settings
-* save actual style data of each style in the hash table
-*/
-void save_style_settings (gpointer key, gpointer value, gpointer user_data)
-{
-  gchar *keyfont, *keysize, *keyfore, *keyback, *keyitalic, *keybold;
-  Scintilla_Style *style = (Scintilla_Style *) value;
-  if (!style) return;
-  keyfont=g_strdup_printf("/gPHPEdit/%s/font",style->name);
-  keysize=g_strdup_printf("/gPHPEdit/%s/size",style->name);
-  keyfore=g_strdup_printf("/gPHPEdit/%s/fore",style->name);
-  keyback=g_strdup_printf("/gPHPEdit/%s/back",style->name);
-  keyitalic=g_strdup_printf("/gPHPEdit/%s/italic",style->name);
-  keybold=g_strdup_printf("/gPHPEdit/%s/bold",style->name);
-  
-  set_string(keyfont, style->font);
-  set_int (keysize, style->font_size);
-  gphpedit_debug_message(DEBUG_PREFS, "%s %d %d",style->name, style->color_fore, style->color_back);
-  set_int (keyfore, style->color_fore);
-  set_int (keyback, style->color_back);
-  set_bool (keyitalic, style->font_italic);
-  set_bool (keybold, style->font_bold);
-
-  g_free(keysize);
-  g_free(keyfont);
-  g_free(keyfore);
-  g_free(keyback);
-  g_free(keyitalic);
-  g_free(keybold);
-}
-
 /*
 * preferences_manager_save_data
 * update session preferences data in gconf with new internal data
@@ -1189,11 +969,7 @@ void preferences_manager_save_data_full(Preferences_Manager *preferences_manager
   Preferences_ManagerDetails *prefdet;
   prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
   preferences_manager_save_data(preferences_manager);  /* save session data */
-  /* store style settings */
-  g_hash_table_foreach (prefdet->styles_table, save_style_settings, NULL);
-  /**/
 
-  set_int ("/gPHPEdit/default_style/selection", prefdet->set_sel_back);
   set_int ("/gPHPEdit/default_style/bookmark", prefdet->marker_back);
   set_string ("/gPHPEdit/locations/phpbinary", prefdet->php_binary_location);
   set_string ("/gPHPEdit/locations/shared_source", prefdet->shared_source_location);
@@ -1205,17 +981,20 @@ void preferences_manager_save_data_full(Preferences_Manager *preferences_manager
   prefdet->show_folding = TRUE;
   set_bool ("/gPHPEdit/defaults/edgemode", prefdet->edge_mode);
   set_int ("/gPHPEdit/defaults/edgecolumn", prefdet->edge_column);
-  set_int ("/gPHPEdit/defaults/edgecolour", prefdet->edge_colour);
   set_bool ("/gPHPEdit/defaults/linewrapping", prefdet->line_wrapping);
   /* font quality */
   set_int ("/gPHPEdit/defaults/fontquality", prefdet->font_quality);
   set_bool("/gPHPEdit/defaults/autocompletebraces", prefdet->auto_complete_braces);
   set_bool ("/gPHPEdit/defaults/higthlightcaretline", prefdet->higthlightcaretline);
-  set_int ("/gPHPEdit/defaults/higthlightcaretline_color", prefdet->higthlightcaretline_color);
   set_bool ("/gPHPEdit/defaults/save_session", prefdet->save_session);
   set_bool ("/gPHPEdit/defaults/use_tabs_instead_spaces", prefdet->use_tabs_instead_spaces);
   set_bool ("/gPHPEdit/defaults/single_instance_only", prefdet->single_instance_only);
   set_string ("/gPHPEdit/defaults/php_file_extensions", prefdet->php_file_extensions);
+  /* style settings */
+  gchar *font_setting = g_strdup_printf("%s %d",prefdet->font_name + 1, prefdet->font_size);
+  set_string ("/gPHPEdit/defaults/font", font_setting);
+  g_free(font_setting);
+  set_string ("/gPHPEdit/defaults/style", prefdet->style_name);
 }
 
 /*
@@ -1231,8 +1010,6 @@ void preferences_manager_restore_data(Preferences_Manager *preferences_manager){
   prefdet->filebrowser_last_folder=get_string("/gPHPEdit/main_window/folderbrowser/folder", (gchar *)g_get_home_dir());
 
   load_default_settings(prefdet);
-  g_hash_table_destroy (prefdet->styles_table); /* clean styles data */
-  prefdet->styles_table= g_hash_table_new_full (g_str_hash, g_str_equal,NULL, clean_style);
   load_styles(prefdet); /* load lexer styles */
 }
 
@@ -1378,7 +1155,7 @@ static gboolean get_bool(const gchar *key,gboolean default_value){
 static gint get_color(const gchar *key,const gchar *subdir,gint default_color){
   gchar *uri= g_strdup_printf("%s/%s/%s",g_get_home_dir(),".gconf/gPHPEdit",subdir);
   if (!g_file_test (uri,G_FILE_TEST_EXISTS)){
-    gphpedit_debug_message(DEBUG_PREFS, "key %s don't exist. load default value\n",key);
+    gphpedit_debug_message(DEBUG_PREFS, "key %s don't exist. load default value",key);
     //load default value
     g_free(uri);
     return default_color;
@@ -1413,125 +1190,67 @@ static GSList *get_string_list(const gchar *key){
 
   /**internal styles functions **/
 /*
-* init_default_font_settings
+* get_default_font_settings
 * read default font and default font size from GtkSettings
 */
-void init_default_font_settings(Preferences_ManagerDetails *prefdet){
-gchar *string=NULL;
-
-g_object_get(G_OBJECT(gtk_settings_get_default()), "gtk-font-name", &string, NULL);
-
-PangoFontDescription *desc = pango_font_description_from_string (string);
-prefdet->default_size = PANGO_PIXELS(pango_font_description_get_size (desc));
-/* add ! needed by scintilla for pango render */
-prefdet->default_font = g_strdup_printf("!%s",pango_font_description_get_family (desc));
-pango_font_description_free (desc);
+gchar *get_default_font_settings(Preferences_ManagerDetails *prefdet){
+  gphpedit_debug(DEBUG_PREFS);
+  gchar *string=NULL;
+  g_object_get(G_OBJECT(gtk_settings_get_default()), "gtk-font-name", &string, NULL);
+  return string;
 }
 
-/*
-* load_style_font_string (internal)
-* @style_name: the name of the style
-* return a new allocated string. must be freed with g_free when no longer needed
-* if font isn't found return default_font
-* default_font is read from GtkSettings.
-*/
-gchar *load_style_font_string(const gchar *style_name, gchar *default_font){
-  gchar *key = g_strdup_printf("/gPHPEdit/%s/font",style_name);
-  gchar *result = get_string(key, default_font);
-  g_free(key);
-  return result;
-}
-/*
-* load_style_color_back (internal)
-* @style_name: the name of the style
-* return a back color.
-* if value isn't found return default back
-*/
-gint load_style_color_back(const gchar *style_name, gint default_back){
-  gchar *key = g_strdup_printf("/gPHPEdit/%s/back",style_name);
-  gint result = get_color(key, style_name, default_back);
-  g_free(key);
-  return result;
-}
-/*
-* load_style_color_fore (internal)
-* @style_name: the name of the style
-* return a fore color.
-* if value isn't found return default fore
-*/
-gint load_style_color_fore(const gchar *style_name, gint default_fore){
-  gchar *key = g_strdup_printf("/gPHPEdit/%s/fore",style_name);
-  gint result = get_color(key, style_name, default_fore);
-  g_free(key);
-  return result;
-}
-/*
-* load_style_font_size (internal)
-* @style_name: the name of the style
-* return the font size for the requested style.
-* if size isn't found return default_font_size
-* default_font_size is read from GtkSettings
-*/
-gint load_style_size (const gchar *style_name, gint default_font_size){
-  gchar *key = g_strdup_printf("/gPHPEdit/%s/size",style_name);
-  gint result = get_size(key, default_font_size);
-  g_free(key);
-  return result;
-}
-/*
-* load_style_bold (internal)
-* @style_name: the name of the style
-* return TRUE if bold is activated.
-* default value always FALSE.
-*/
-gboolean load_style_bold (const gchar *style_name){
-  GConfClient *config = gconf_client_get_default ();
-  gchar *key = g_strdup_printf("/gPHPEdit/%s/bold",style_name);
-   gboolean result = gconf_client_get_bool(config, key, NULL);
-  g_free(key);
-  g_object_unref (G_OBJECT (config));
-  return result;
+void load_font_settings(Preferences_ManagerDetails *prefdet)
+{
+  gphpedit_debug(DEBUG_PREFS);
+  gchar *font_desc= get_string("/gPHPEdit/defaults/font" , get_default_font_settings(prefdet));
+  PangoFontDescription *desc = pango_font_description_from_string (font_desc);
+  prefdet->font_size = PANGO_PIXELS(pango_font_description_get_size (desc));
+  /* add ! needed by scintilla for pango render */
+  prefdet->font_name = g_strdup_printf("!%s",pango_font_description_get_family (desc));
+  pango_font_description_free (desc);
 }
 
-/*
-* load_style_italic (internal)
-* @style_name: the name of the style
-* return TRUE if italic is activated.
-* default value always FALSE.
+/**
+* set_font_settings
+* set a new font name and font size.
+* font_desc must be a pango font description string like "Helvetica 12"
+* this function don't save new values to gconf. 
+* you must call "preferences_manager_save_data_full" to update gconf values.
 */
-gboolean load_style_italic (const gchar *style_name){
-  GConfClient *config = gconf_client_get_default ();
-  gchar *key = g_strdup_printf("/gPHPEdit/%s/italic",style_name);
-   gboolean result = gconf_client_get_bool(config, key, NULL);
-  g_free(key);
-  g_object_unref (G_OBJECT (config));
-  return result;
-}
-/*
-* load_style (internal)
-* @style_name: the name of the style
-* @default_back: default back value. used if no back value is found.
-* @default_fore: default back value. used if no fore value is found.
-* loads the requested style settings and insert it in the hash table.
-*/
-void load_style(Preferences_ManagerDetails *prefdet, const gchar *style_name, gint default_back, gint default_fore){
+void set_font_settings (Preferences_Manager *preferences_manager, gchar *font_desc)
+{
+  gphpedit_debug(DEBUG_PREFS);
+  if (!OBJECT_IS_PREFERENCES_MANAGER (preferences_manager)) return ;
+  if (!font_desc) return ;
+  Preferences_ManagerDetails *prefdet;
+  prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
 
-  Scintilla_Style *style= g_slice_new(Scintilla_Style);  /* create new style */
-  style->name = g_strdup(style_name);
-  style->font = load_style_font_string(style_name, prefdet->default_font);
-  style->color_fore = load_style_color_fore(style_name, default_fore);
-  style->color_back = load_style_color_back(style_name, default_back);
-  style->font_size = load_style_size(style_name, prefdet->default_size);
-  style->font_bold = load_style_bold(style_name);
-  style->font_italic = load_style_italic(style_name);
-  
-  g_hash_table_insert (prefdet->styles_table, style->name, style); /* add style to hash table */
-  
-  gphpedit_debug_message(DEBUG_PREFS,"%s %s %d %d %d", style->name, style->font, style->font_size, style->color_back, style->color_fore);
+  PangoFontDescription *desc = pango_font_description_from_string (font_desc);
+  prefdet->font_size = PANGO_PIXELS(pango_font_description_get_size (desc));
+  /* add ! needed by scintilla for pango render */
+  if (prefdet->font_name) g_free(prefdet->font_name);
+  prefdet->font_name = g_strdup_printf("!%s",pango_font_description_get_family (desc));
+  pango_font_description_free (desc);
 }
 
-/* Default values */
-#define DEFAULT_BACK_COLOR 16777215
+/**
+* set_style_name
+* set a new style name.
+* this function don't save new values to gconf. 
+* you must call "preferences_manager_save_data_full" to update gconf values.
+*/
+
+void set_style_name (Preferences_Manager *preferences_manager, gchar *newstyle)
+{
+  if (!OBJECT_IS_PREFERENCES_MANAGER (preferences_manager)) return ;
+  if (!newstyle) return ;
+  Preferences_ManagerDetails *prefdet;
+  prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
+
+  if (newstyle) g_free(prefdet->style_name);
+  prefdet->style_name = g_strdup(newstyle);
+}
 /*
 * load_styles (internal)
 * loads lexer styles
@@ -1539,68 +1258,6 @@ void load_style(Preferences_ManagerDetails *prefdet, const gchar *style_name, gi
 void load_styles(Preferences_ManagerDetails *prefdet)
 { 
   gphpedit_debug(DEBUG_PREFS);
-  init_default_font_settings(prefdet);
-
-  load_style(prefdet ,"default_style", DEFAULT_BACK_COLOR, 0);
-  load_style(prefdet ,"line_numbers", 11053224, 0);
-  load_style(prefdet ,"html_tag", DEFAULT_BACK_COLOR, 7553164);
-  load_style(prefdet ,"html_tag_unknown", DEFAULT_BACK_COLOR, 7553164);
-  load_style(prefdet ,"html_attribute", DEFAULT_BACK_COLOR, 9204544);
-  load_style(prefdet ,"html_attribute_unknown", DEFAULT_BACK_COLOR, 7472544);
-  load_style(prefdet ,"html_number", DEFAULT_BACK_COLOR, 9204544);
-  load_style(prefdet ,"html_single_string", DEFAULT_BACK_COLOR, 32768);
-  load_style(prefdet ,"html_double_string", DEFAULT_BACK_COLOR, 32768);
-  load_style(prefdet ,"html_comment", DEFAULT_BACK_COLOR, 842125504);
-  load_style(prefdet ,"html_entity", DEFAULT_BACK_COLOR, 8421504);
-  load_style(prefdet ,"html_script", DEFAULT_BACK_COLOR, 7553165);
-  load_style(prefdet ,"html_question", DEFAULT_BACK_COLOR, 7553165);
-  load_style(prefdet ,"html_value", DEFAULT_BACK_COLOR, 21632);
-  load_style(prefdet ,"javascript_comment", DEFAULT_BACK_COLOR, 8421504);
-  load_style(prefdet ,"javascript_comment_line", DEFAULT_BACK_COLOR, 8421504);
-  load_style(prefdet ,"javascript_comment_doc", DEFAULT_BACK_COLOR, 8355712);
-  load_style(prefdet ,"javascript_word", DEFAULT_BACK_COLOR, 9204544);
-  load_style(prefdet ,"javascript_keyword", DEFAULT_BACK_COLOR, 8388608);
-  load_style(prefdet ,"javascript_doublestring", DEFAULT_BACK_COLOR, 8388608);
-  load_style(prefdet ,"javascript_singlestring", DEFAULT_BACK_COLOR, 8388608);
-  load_style(prefdet ,"javascript_symbols", DEFAULT_BACK_COLOR, 8355712);
-  load_style(prefdet ,"php_default", DEFAULT_BACK_COLOR, 1052688);
-  load_style(prefdet ,"php_hstring", DEFAULT_BACK_COLOR, 8388736);
-  load_style(prefdet ,"php_simplestring", DEFAULT_BACK_COLOR, 8388736);
-  load_style(prefdet ,"php_word", DEFAULT_BACK_COLOR, 3946645);
-  load_style(prefdet ,"php_number", DEFAULT_BACK_COLOR, 9204544);
-  load_style(prefdet ,"php_variable", DEFAULT_BACK_COLOR, 16746496);
-  load_style(prefdet ,"php_comment", DEFAULT_BACK_COLOR, 8421594);
-  load_style(prefdet ,"php_comment_line", DEFAULT_BACK_COLOR, 8421504);
-  load_style(prefdet ,"css_tag", DEFAULT_BACK_COLOR, 8388608);
-  load_style(prefdet ,"css_class", DEFAULT_BACK_COLOR, 8388608);
-  load_style(prefdet ,"css_pseudoclass", DEFAULT_BACK_COLOR, 8388608);
-  load_style(prefdet ,"css_unknown_pseudoclass", DEFAULT_BACK_COLOR, 16711680);
-  load_style(prefdet ,"css_operator", DEFAULT_BACK_COLOR, 128);
-  load_style(prefdet ,"css_identifier", DEFAULT_BACK_COLOR, 256);
-  load_style(prefdet ,"css_unknown_identifier", DEFAULT_BACK_COLOR, 16711680);
-  load_style(prefdet ,"css_value", DEFAULT_BACK_COLOR, 8388736);
-  load_style(prefdet ,"css_comment", DEFAULT_BACK_COLOR, 84215504);
-  load_style(prefdet ,"css_id", DEFAULT_BACK_COLOR, 8388608);
-  load_style(prefdet ,"css_important", DEFAULT_BACK_COLOR, 255);
-  load_style(prefdet ,"css_directive", DEFAULT_BACK_COLOR, 32768);
-  load_style(prefdet ,"sql_word", DEFAULT_BACK_COLOR, 8388608);
-  load_style(prefdet ,"sql_string", DEFAULT_BACK_COLOR, 8388736);
-  load_style(prefdet ,"sql_operator", DEFAULT_BACK_COLOR, 128);
-  load_style(prefdet ,"sql_comment", DEFAULT_BACK_COLOR, 8421504);
-  load_style(prefdet ,"sql_number", DEFAULT_BACK_COLOR, 9204544);
-  load_style(prefdet ,"sql_identifier", DEFAULT_BACK_COLOR, 16746496);
-  load_style(prefdet ,"c_default", DEFAULT_BACK_COLOR, 1052688);
-  load_style(prefdet ,"c_string", DEFAULT_BACK_COLOR, 8388736);
-  load_style(prefdet ,"c_character", DEFAULT_BACK_COLOR, 8388736);
-  load_style(prefdet ,"c_word", DEFAULT_BACK_COLOR, 16746496);
-  load_style(prefdet ,"c_commentline", DEFAULT_BACK_COLOR, 8421504);
-  load_style(prefdet ,"c_number", DEFAULT_BACK_COLOR, 9204544);
-  load_style(prefdet ,"c_identifier", DEFAULT_BACK_COLOR, 1052688);
-  load_style(prefdet ,"c_comment", DEFAULT_BACK_COLOR, 8421594);
-  load_style(prefdet ,"c_preprocesor", DEFAULT_BACK_COLOR, 7553165);
-  load_style(prefdet ,"c_operator", DEFAULT_BACK_COLOR, 128);
-  load_style(prefdet ,"c_regex", DEFAULT_BACK_COLOR, 8388608);
-  load_style(prefdet ,"c_uuid", DEFAULT_BACK_COLOR, 8388608);
-  load_style(prefdet ,"c_verbatim", DEFAULT_BACK_COLOR, 255);
-  load_style(prefdet ,"c_globalclass", DEFAULT_BACK_COLOR, 8388608);
+  load_font_settings(prefdet);
+  prefdet->style_name = get_string("/gPHPEdit/defaults/style", "mixer");
 }

@@ -35,13 +35,15 @@
 #include "syntax_check_window.h"
 #include "preferences_manager.h"
 #include "templates.h"
+#include "gtksourcestyleschememanager.h"
 
 typedef struct
 {
   /* preferences manager */
   Preferences_Manager *prefmg;
-
   TemplatesManager *tempmg;
+
+  GtkSourceStyleSchemeManager *stylemg;
 
   GtkWidget *window;
   GtkWidget *prinbox;
@@ -83,7 +85,6 @@ void main_window_create(void);
 void update_app_title(Document *document);
 void main_window_pass_command_line_files(char **argv);
 gboolean channel_pass_filename_callback(GIOChannel *source, GIOCondition condition, gpointer data );
-void main_window_add_to_reopen_menu(gchar *full_filename);
 extern GIOChannel* inter_gphpedit_io;
 extern guint inter_gphpedit_event_id;
 extern guint idle_id;

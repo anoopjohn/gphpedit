@@ -28,5 +28,5 @@
 #include "document.h"
 
 void tab_perl_set_lexer(Document *document);
-
+gboolean is_perl_file(const gchar *filename);
 #endif

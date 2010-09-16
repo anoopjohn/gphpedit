@@ -28,5 +28,7 @@
 #include "document.h"
 void tab_php_set_lexer(Document *document);
 void scintilla_php_set_lexer(GtkScintilla *scintilla);
+gboolean is_php_file_from_filename(const gchar *filename);
+gboolean is_php_file_from_content(const gchar *content);
 
 #endif

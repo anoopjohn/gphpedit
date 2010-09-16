@@ -57,14 +57,10 @@ typedef struct
 GType preferences_manager_get_type (void);
 Preferences_Manager *preferences_manager_new (void);
 /*main_window session preferences*/
-gint get_preferences_manager_window_height(Preferences_Manager *preferences_manager);
-void set_preferences_manager_window_height(Preferences_Manager *preferences_manager, gint newstate);
-gint get_preferences_manager_window_width(Preferences_Manager *preferences_manager);
-void set_preferences_manager_window_width(Preferences_Manager *preferences_manager, gint newstate);
-gint get_preferences_manager_window_left(Preferences_Manager *preferences_manager);
-void set_preferences_manager_window_left(Preferences_Manager *preferences_manager, gint newstate);
-gint get_preferences_manager_window_top(Preferences_Manager *preferences_manager);
-void set_preferences_manager_window_top(Preferences_Manager *preferences_manager, gint newstate);
+void get_preferences_manager_window_size (Preferences_Manager *preferences_manager, gint *width, gint *height);
+void set_preferences_manager_window_size (Preferences_Manager *preferences_manager, gint width, gint height);
+void get_preferences_manager_window_position (Preferences_Manager *preferences_manager, gint *top, gint *left);
+void set_preferences_manager_window_position (Preferences_Manager *preferences_manager, gint top, gint left);
 gboolean get_preferences_manager_window_maximized(Preferences_Manager *preferences_manager);
 void set_preferences_manager_window_maximized(Preferences_Manager *preferences_manager, gboolean newstate);
 /**/
@@ -77,10 +73,11 @@ gboolean get_preferences_manager_show_maintoolbar(Preferences_Manager *preferenc
 void set_preferences_manager_show_maintoolbar(Preferences_Manager *preferences_manager, gboolean new_status);
 gboolean get_preferences_manager_show_findtoolbar(Preferences_Manager *preferences_manager);
 void set_preferences_manager_show_findtoolbar(Preferences_Manager *preferences_manager, gboolean new_status);
-gboolean get_preferences_manager_classbrowser_status(Preferences_Manager *preferences_manager);
-void set_preferences_manager_parse_classbrowser_status(Preferences_Manager *preferences_manager, gint new_status);
-gint get_preferences_manager_classbrowser_get_size(Preferences_Manager *preferences_manager);
-void set_preferences_manager_classbrowser_size(Preferences_Manager *preferences_manager, gint new_size);
+
+gboolean get_preferences_manager_side_panel_status(Preferences_Manager *preferences_manager);
+void set_preferences_manager_parse_side_panel_status(Preferences_Manager *preferences_manager, gint new_status);
+gint get_preferences_manager_side_panel_get_size(Preferences_Manager *preferences_manager);
+void set_preferences_manager_side_panel_size(Preferences_Manager *preferences_manager, gint new_size);
 /**/
 gint get_preferences_manager_parse_only_current_file(Preferences_Manager *preferences_manager);
 void set_preferences_manager_parse_only_current_file(Preferences_Manager *preferences_manager, gint new_status);
@@ -111,18 +108,12 @@ gboolean get_preferences_manager_single_instance_only(Preferences_Manager *prefe
 void set_preferences_manager_single_instance_only(Preferences_Manager *preferences_manager, gboolean newstate);
 gboolean get_preferences_manager_higthlight_caret_line(Preferences_Manager *preferences_manager);
 void set_preferences_manager_higthlight_caret_line(Preferences_Manager *preferences_manager, gboolean newstate);
-gboolean get_preferences_manager_higthlight_caret_line_color(Preferences_Manager *preferences_manager);
-void set_preferences_manager_higthlight_caret_line_color(Preferences_Manager *preferences_manager, gint newstate);
 gboolean get_preferences_manager_show_indentation_guides(Preferences_Manager *preferences_manager);
 void set_preferences_manager_show_indentation_guides(Preferences_Manager *preferences_manager, gboolean newstate);
 gboolean get_preferences_manager_edge_mode(Preferences_Manager *preferences_manager);
 void set_preferences_manager_edge_mode(Preferences_Manager *preferences_manager, gboolean newstate);
 gint get_preferences_manager_edge_column(Preferences_Manager *preferences_manager);
 void set_preferences_manager_edge_column(Preferences_Manager *preferences_manager, gint newstate);
-gint get_preferences_manager_edge_colour(Preferences_Manager *preferences_manager);
-void set_preferences_manager_edge_colour(Preferences_Manager *preferences_manager, gint newstate);
-gint get_preferences_manager_set_sel_back(Preferences_Manager *preferences_manager);
-void set_preferences_manager_set_sel_back(Preferences_Manager *preferences_manager, gint newstate);
 gint get_preferences_manager_tab_size(Preferences_Manager *preferences_manager);
 void set_preferences_manager_tab_size(Preferences_Manager *preferences_manager, gint newstate);
 gchar *get_preferences_manager_shared_source_location(Preferences_Manager *preferences_manager);
@@ -135,10 +126,13 @@ void set_preferences_manager_new_search_history_item(Preferences_Manager *prefer
 gboolean get_plugin_is_active(Preferences_Manager *preferences_manager, const gchar *name);
 void set_plugin_is_active(Preferences_Manager *preferences_manager, const gchar *name, gboolean status);
 /*styles */
-void get_preferences_manager_style_settings(Preferences_Manager *preferences_manager, gchar *stylename, gchar **font , gint *size, gint *fore, gint *back, gboolean *italic, gboolean *bold);
-void set_preferences_manager_style_settings(Preferences_Manager *preferences_manager, gchar *stylename, gchar *font , gint *size, gint *fore, gint *back, gboolean *italic, gboolean *bold);
-void set_preferences_manager_style_settings_font_to_all (Preferences_Manager *preferences_manager, gchar *font);
-void set_preferences_manager_style_settings_size_to_all (Preferences_Manager *preferences_manager, gint size);
+gchar *get_preferences_manager_style_name(Preferences_Manager *preferences_manager);
+void set_preferences_manager_style_name(Preferences_Manager *preferences_manager, gchar *newstate);
+guint get_preferences_manager_style_size(Preferences_Manager *preferences_manager);
+gchar *get_preferences_manager_style_font(Preferences_Manager *preferences_manager);
+void set_font_settings (Preferences_Manager *preferences_manager, gchar *font_desc);
+void set_style_name (Preferences_Manager *preferences_manager, gchar *newstyle);
+
 void preferences_manager_save_data(Preferences_Manager *preferences_manager);
 void preferences_manager_save_data_full(Preferences_Manager *preferences_manager);
 void preferences_manager_restore_data(Preferences_Manager *preferences_manager);

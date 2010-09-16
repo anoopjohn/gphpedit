@@ -1,4 +1,3 @@
-gphpedit.desktop.in
 src/calltip.c
 src/calltip.h
 src/classbrowser_backend.c
@@ -33,6 +32,7 @@ src/gvfs_utils.c
 src/gvfs_utils.h
 src/history-entry.c
 src/history-entry.h
+src/images.h
 src/main.c
 src/main.h
 src/main_window.c
@@ -41,8 +41,6 @@ src/main_window_callbacks.c
 src/main_window_callbacks.h
 src/menubar.c
 src/menubar.h
-src/plugindialog.c
-src/plugindialog.h
 src/pluginmanager.c
 src/pluginmanager.h
 src/pluginmenu.c
@@ -71,8 +69,6 @@ src/tab_cxx.c
 src/tab_cxx.h
 src/tab_perl.c
 src/tab_perl.h
-src/tab_php.c
-src/tab_php.h
 src/tab_python.c
 src/tab_python.h
 src/tab_sql.c
@@ -83,4 +79,10 @@ src/templates.c
 src/templates.h
 src/toolbar.c
 src/toolbar.h
-intl/plural.c
+gphpedit.desktop.in
+src/gtksourcestyle.c
+src/gtksourcestylescheme.c
+src/gtksourcestyleschememanager.c
+src/plugindialog.c
+src/templates_editor.c
+themes/mixer.xml
