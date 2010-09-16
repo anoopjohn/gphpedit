@@ -36,6 +36,7 @@
 
 GTree *php_api_tree;
 GTree *css_api_tree;
+GTree *cobol_api_tree;
 GString *completion_list_tree;
 #define MAX_API_LINE_LENGTH 16384
 
@@ -120,6 +121,22 @@ void css_function_list_prepare(void)
   }
   g_free(api_dir);
 }
+
+/*
+* load COBOL keywords string in a GTree to make search faster.
+*/
+void cobol_function_list_prepare(void)
+{
+  gphpedit_debug(DEBUG_CALLTIP);
+  guint n;
+
+  cobol_api_tree=g_tree_new_full((GCompareDataFunc) g_utf8_collate, NULL, NULL, NULL);
+  for (n = 0; cobol_keywords[n]!=NULL; n++) {
+    g_tree_insert (cobol_api_tree, cobol_keywords[n], NULL); /* we only need the key */
+  }
+}
+
+
 gchar *get_css_api_line(gchar *buffer)
 {
   gchar *value=g_tree_lookup (css_api_tree, buffer);
@@ -260,28 +277,14 @@ gchar *autocomplete_word(gchar *buffer)
 
 gchar *cobol_autocomplete_word(gchar *buffer)
 {
-  GString *completion_list;
   gchar *result = NULL;
-  guint n;
-
-  completion_list=NULL;
-
-  for (n = 0; cobol_keywords[n]!=NULL; n++) {
-    if (g_str_has_prefix(cobol_keywords[n], buffer)) {
-      if (completion_list == NULL) {
-        completion_list = g_string_new(cobol_keywords[n]);
-      } else {
-        completion_list = g_string_append(completion_list, " ");
-        completion_list = g_string_append(completion_list, cobol_keywords[n]);
-      }
-    }
+  gchar *upp = g_ascii_strup (buffer,-1);
+  g_tree_foreach (cobol_api_tree, make_completion_string, upp);
+  if (completion_list_tree != NULL) {
+    result = g_string_free (completion_list_tree, FALSE);
+    completion_list_tree=NULL;
   }
-
-  if (completion_list != NULL) {
-    completion_list = g_string_append(completion_list, " ");
-    result = g_string_free(completion_list, FALSE);
-  }
-
+  g_free(upp);
   gphpedit_debug_message(DEBUG_CALLTIP,"Autocomplete list: %s\n", result);
 
   return result;
@@ -342,6 +345,11 @@ void cleanup_calltip(void){
   if (css_api_tree){
      g_tree_destroy(css_api_tree);
   }
+
+  if (cobol_api_tree){
+     g_tree_destroy(cobol_api_tree);
+  }
+
   if (cache_completion) g_free(cache_completion);
 }
 

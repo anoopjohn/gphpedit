@@ -30,6 +30,7 @@
 gchar *show_call_tip(gint type, gchar *prefix);
 gchar *autocomplete_word(gchar *prefix);
 void function_list_prepare(void);
+void cobol_function_list_prepare(void);
 void css_function_list_prepare(void);
 gchar *css_autocomplete_word(gchar *buffer);
 gchar *cobol_autocomplete_word(gchar *buffer);

@@ -268,6 +268,7 @@ void main_window_create(void){
   
   function_list_prepare();
   css_function_list_prepare();
+  cobol_function_list_prepare();
 
   g_signal_connect (G_OBJECT (main_window.window), "delete_event", G_CALLBACK(main_window_delete_event), NULL);
   g_signal_connect (G_OBJECT (main_window.window), "destroy", G_CALLBACK (main_window_destroy_event), NULL);
