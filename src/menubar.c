@@ -449,6 +449,11 @@ static void fill_menu_edit(MenuBarPrivate *priv){
   g_signal_connect(G_OBJECT(priv->upper), "activate", G_CALLBACK(selectiontoupper), NULL);
   create_mnemonic_menu_item(&priv->lower,priv->menuedit,_("_ToLower"), _("Convert the current selection text to lower case"),priv->accel_group, GDK_l, GDK_CONTROL_MASK);
   g_signal_connect(G_OBJECT(priv->lower), "activate", G_CALLBACK(selectiontolower), NULL);
+  /* separator */
+  _create_separator_item(priv->menuedit);
+
+  create_stock_menu_item(&priv->preferences, priv->menuedit, GTK_STOCK_PREFERENCES, _("Application Config"), priv->accel_group, GDK_F5, 0);
+  g_signal_connect(G_OBJECT(priv->preferences), "activate", G_CALLBACK(on_preferences1_activate), NULL);
 }
 
 /*
@@ -508,11 +513,6 @@ static void fill_menu_view(MenuBarPrivate *priv)
 
   create_mnemonic_menu_item(&priv->preview ,priv->menuview,_("_Show Preview"), _("Preview the Document"),priv->accel_group, 0, 0);
   g_signal_connect(G_OBJECT(priv->preview), "activate", G_CALLBACK(showpreview), NULL);
-  /* separator */
-  _create_separator_item(priv->menuview);
-
-  create_stock_menu_item(&priv->preferences,priv->menuview,GTK_STOCK_PREFERENCES, _("Application Config"),priv->accel_group, GDK_F5, 0);
-  g_signal_connect(G_OBJECT(priv->preferences), "activate", G_CALLBACK(on_preferences1_activate), NULL);
 }
 
 /*
