@@ -781,8 +781,7 @@ static void char_added(GtkWidget *scintilla, guint ch, gpointer user_data)
   }
 
   switch(type) {
-    case(TAB_PHP):   
-      gtk_scintilla_autoc_set_fill_ups(GTK_SCINTILLA(scintilla), "( .");
+    case(TAB_PHP):
       if ((style != SCE_HPHP_SIMPLESTRING) && (style != SCE_HPHP_HSTRING) && (style != SCE_HPHP_COMMENTLINE) && (style !=SCE_HPHP_COMMENT)) {
       switch(ch) {
           case ('\r'):
