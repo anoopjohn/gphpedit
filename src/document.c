@@ -824,7 +824,7 @@ static void char_added(GtkWidget *scintilla, guint ch, gpointer user_data)
         gtk_scintilla_call_tip_cancel(GTK_SCINTILLA(scintilla));
         }
         break; /*exit nothing todo */
-          case ('('):
+        case ('('):
         if (!docdet->calltip_timer_set) {
           docdet->calltip_timer_id = g_timeout_add(get_preferences_manager_calltip_delay(pref), calltip_callback, GINT_TO_POINTER(current_pos));
           docdet->calltip_timer_set=TRUE;
@@ -916,7 +916,6 @@ static void char_added(GtkWidget *scintilla, guint ch, gpointer user_data)
                 set_document_to_php(doc);
                 update_status_combobox(doc);
                }
-//          g_print("buffer:%s",member_function_buffer);
             g_free(member_function_buffer);
             break;
     }
@@ -1237,7 +1236,6 @@ void set_document_to_php(Document *document)
   DocumentDetails *docdet = DOCUMENT_GET_PRIVATE(document);
   if (GTK_IS_SCINTILLA(docdet->scintilla)){
   tab_php_set_lexer(document);
-  gtk_scintilla_set_word_chars(GTK_SCINTILLA(docdet->scintilla), "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_$");
   docdet->type = TAB_PHP;
   tab_set_folding(document, TRUE);
   }
@@ -1249,7 +1247,6 @@ void set_document_to_css(Document *document)
   DocumentDetails *docdet = DOCUMENT_GET_PRIVATE(document);
   if (GTK_IS_SCINTILLA(docdet->scintilla)){
   tab_css_set_lexer(document);
-  gtk_scintilla_set_word_chars(GTK_SCINTILLA(docdet->scintilla), "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-");
   docdet->type = TAB_CSS;
   tab_set_folding(document, TRUE);
   }
@@ -1260,7 +1257,6 @@ void set_document_to_cobol(Document *document)
   if (!document) return ;
   DocumentDetails *docdet = DOCUMENT_GET_PRIVATE(document);
   if (GTK_IS_SCINTILLA(docdet->scintilla)){
-    gtk_scintilla_set_word_chars(GTK_SCINTILLA(docdet->scintilla), "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-");
     tab_cobol_set_lexer(document);
     docdet->type = TAB_COBOL;
     tab_set_folding(document, TRUE);
@@ -1272,7 +1268,6 @@ void set_document_to_python(Document *document)
   if (!document) return ;
   DocumentDetails *docdet = DOCUMENT_GET_PRIVATE(document);
   if (GTK_IS_SCINTILLA(docdet->scintilla)){
-    gtk_scintilla_set_word_chars(GTK_SCINTILLA(docdet->scintilla), "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-");
     tab_python_set_lexer(document);
     docdet->type = TAB_PYTHON;
     tab_set_folding(document, TRUE);
@@ -1321,6 +1316,7 @@ void set_document_to_text_plain(Document *document)
   gtk_scintilla_set_lexer(GTK_SCINTILLA (docdet->scintilla), SCLEX_NULL); 
   tab_set_configured_scintilla_properties(GTK_SCINTILLA (docdet->scintilla));
   gtk_scintilla_colourise(GTK_SCINTILLA (docdet->scintilla), 0, -1);
+  tab_set_folding(document, FALSE);
   docdet->type = TAB_FILE;
   }
 }

@@ -104,6 +104,7 @@ void scintilla_php_set_lexer(GtkScintilla *scintilla)
 
   gtk_scintilla_colourise(scintilla, 0, -1);
 
+  gtk_scintilla_set_word_chars(scintilla, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_$");
   gtk_scintilla_autoc_set_fill_ups(scintilla, "( .");
 
   g_object_unref(prefmg);
