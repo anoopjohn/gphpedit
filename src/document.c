@@ -732,6 +732,27 @@ void process_user_list_selection (GtkWidget *w, gint type, gchar *text, gpointer
   g_free(current);
 }
 
+static gboolean IsOpenBrace(gchar ch) {
+	return ch == '[' || ch == '(' || ch == '{';
+}
+
+static void InsertCloseBrace (GtkScintilla *scintilla, gint current_pos, gchar ch) {
+  switch (ch) {
+    case '[':
+      gtk_scintilla_insert_text(scintilla, current_pos,"]");
+      gtk_scintilla_goto_pos(scintilla, current_pos);
+      break;
+    case '{':
+      gtk_scintilla_insert_text(scintilla, current_pos,"}");
+      gtk_scintilla_goto_pos(scintilla, current_pos);
+      break;
+    case '(':
+      gtk_scintilla_insert_text(scintilla, current_pos,")");
+      gtk_scintilla_goto_pos(scintilla, current_pos);
+      break;
+  }
+}
+
 static void char_added(GtkWidget *scintilla, guint ch, gpointer user_data)
 {
   gphpedit_debug_message (DEBUG_DOCUMENT, "char added:%d",ch);
@@ -756,7 +777,7 @@ static void char_added(GtkWidget *scintilla, guint ch, gpointer user_data)
   guint style;
   gint type;
   type = docdet->type;
-  if ((type != TAB_PHP) && (ch=='\r'|| ch=='\n' || ch=='\t'))return;
+  if ((type != TAB_PHP) && (ch=='\r'|| ch=='\n' || ch=='\t')) return;
   Preferences_Manager *pref = preferences_manager_new ();
   current_pos = gtk_scintilla_get_current_pos(GTK_SCINTILLA(scintilla));
   current_line = gtk_scintilla_line_from_position(GTK_SCINTILLA(scintilla), current_pos);
@@ -764,18 +785,9 @@ static void char_added(GtkWidget *scintilla, guint ch, gpointer user_data)
   wordEnd = gtk_scintilla_word_end_position(GTK_SCINTILLA(scintilla), current_pos-1, TRUE);
   current_word_length = wordEnd - wordStart;
   style = gtk_scintilla_get_style_at(GTK_SCINTILLA(scintilla), current_pos);
-  if (get_preferences_manager_auto_complete_braces(pref)){
-    if (ch=='{'){
-      gtk_scintilla_insert_text(GTK_SCINTILLA(scintilla), current_pos,"}");
-      gtk_scintilla_goto_pos(GTK_SCINTILLA(scintilla), current_pos);
-    } else if (ch=='('){
-      gtk_scintilla_insert_text(GTK_SCINTILLA(scintilla), current_pos,")");
-      gtk_scintilla_goto_pos(GTK_SCINTILLA(scintilla), current_pos);
-   } else if (ch=='['){
-     gtk_scintilla_insert_text(GTK_SCINTILLA(scintilla), current_pos,"]");
-     gtk_scintilla_goto_pos(GTK_SCINTILLA(scintilla), current_pos);
+  if (IsOpenBrace(ch) && get_preferences_manager_auto_complete_braces(pref)) {
+      InsertCloseBrace (GTK_SCINTILLA(scintilla), current_pos, ch);
     }
-  }
   if (gtk_scintilla_autoc_active(GTK_SCINTILLA(scintilla))==1) {
     style = 0; // Hack to get around the drop-down not showing in comments, but if it's been forced...  
   }
