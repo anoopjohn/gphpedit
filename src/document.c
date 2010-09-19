@@ -863,7 +863,6 @@ static void char_added(GtkWidget *scintilla, guint ch, gpointer user_data)
         }
         break;
       case(TAB_CSS):
-        gtk_scintilla_autoc_set_fill_ups(GTK_SCINTILLA(scintilla), ":");
       switch(ch) {
           case (';'):
         if (gtk_scintilla_call_tip_active(GTK_SCINTILLA(scintilla))) {
@@ -897,7 +896,7 @@ static void char_added(GtkWidget *scintilla, guint ch, gpointer user_data)
           }  
         g_free(member_function_buffer);
         break;
-      case(TAB_SQL): 
+      case(TAB_SQL):
         member_function_buffer = gtk_scintilla_get_text_range (GTK_SCINTILLA(scintilla), wordStart-2, wordStart, &member_function_length);
         if(current_word_length>=3){
             if (!docdet->completion_timer_set) {
