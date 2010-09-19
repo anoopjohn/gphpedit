@@ -863,7 +863,7 @@ static void char_added(GtkWidget *scintilla, guint ch, gpointer user_data)
         break;
       case(TAB_CSS):
       switch(ch) {
-          case (';'):
+        case (';'):
         if (gtk_scintilla_call_tip_active(GTK_SCINTILLA(scintilla))) {
         gtk_scintilla_call_tip_cancel(GTK_SCINTILLA(scintilla));
         }
@@ -886,15 +886,6 @@ static void char_added(GtkWidget *scintilla, guint ch, gpointer user_data)
         }
         break;
       case(TAB_COBOL):
-        member_function_buffer = gtk_scintilla_get_text_range (GTK_SCINTILLA(scintilla), wordStart-2, wordStart, &member_function_length);
-        if(current_word_length>=3){
-            if (!docdet->completion_timer_set) {
-              docdet->completion_timer_id = g_timeout_add(get_preferences_manager_auto_complete_delay(pref), auto_complete_callback, GINT_TO_POINTER(current_pos));
-              docdet->completion_timer_set=TRUE;
-            }
-          }  
-        g_free(member_function_buffer);
-        break;
       case(TAB_SQL):
         member_function_buffer = gtk_scintilla_get_text_range (GTK_SCINTILLA(scintilla), wordStart-2, wordStart, &member_function_length);
         if(current_word_length>=3){
@@ -902,7 +893,7 @@ static void char_added(GtkWidget *scintilla, guint ch, gpointer user_data)
               docdet->completion_timer_id = g_timeout_add(get_preferences_manager_auto_complete_delay(pref), auto_complete_callback, GINT_TO_POINTER(current_pos));
               docdet->completion_timer_set=TRUE;
             }
-          }  
+          }
         g_free(member_function_buffer);
         break;
       }
