@@ -676,15 +676,15 @@ gboolean auto_memberfunc_complete_callback(gpointer data)
 
 gboolean auto_complete_callback(gpointer data)
 {
-  DocumentDetails *docdet = DOCUMENT_GET_PRIVATE(document_manager_get_current_document(main_window.docmg));
+  Document *doc = document_manager_get_current_document(main_window.docmg);
+  DocumentDetails *docdet = DOCUMENT_GET_PRIVATE(doc);
   gint current_pos;
-  current_pos = document_get_current_position(document_manager_get_current_document(main_window.docmg));
+  current_pos = document_get_current_position(doc);
   if (current_pos == GPOINTER_TO_INT(data)) {
-    gchar *prefix = document_get_current_word(document_manager_get_current_document(main_window.docmg));
-    gchar *calltip = calltip_manager_autocomplete_word(main_window.clltipmg, prefix);
-    if (calltip && strlen(calltip)!=0) 
-          gtk_scintilla_user_list_show(GTK_SCINTILLA(docdet->scintilla), 1, calltip);
-      g_free(prefix);
+    gchar *prefix = document_get_current_word(doc);
+    gchar *calltip = calltip_manager_autocomplete_word(main_window.clltipmg, document_get_document_type(doc), prefix);
+    if (calltip && strlen(calltip)!=0) gtk_scintilla_user_list_show(GTK_SCINTILLA(docdet->scintilla), 1, calltip);
+    g_free(prefix);
     g_free(calltip);
   }
   docdet->completion_timer_set=FALSE;
@@ -693,11 +693,12 @@ gboolean auto_complete_callback(gpointer data)
 
 gboolean calltip_callback(gpointer data)
 {
-  DocumentDetails *docdet = DOCUMENT_GET_PRIVATE(document_manager_get_current_document(main_window.docmg));
+  Document *doc = document_manager_get_current_document(main_window.docmg);
+  DocumentDetails *docdet = DOCUMENT_GET_PRIVATE(doc);
   gint current_pos;
-  current_pos = document_get_current_position(document_manager_get_current_document(main_window.docmg));
+  current_pos = document_get_current_position(doc);
   if (current_pos == GPOINTER_TO_INT(data)) {
-    gchar *prefix = document_get_current_word(document_manager_get_current_document(main_window.docmg));
+    gchar *prefix = document_get_current_word(doc);
     
     gchar *calltip = calltip_manager_show_call_tip(main_window.clltipmg, docdet->type, prefix);
     if (calltip){
@@ -719,50 +720,6 @@ void document_show_calltip_at_current_pos(Document *document)
   }
 }
 
-gboolean sql_auto_complete_callback(gpointer data)
-{
-  DocumentDetails *docdet = DOCUMENT_GET_PRIVATE(document_manager_get_current_document(main_window.docmg));
-  gint current_pos;
-  current_pos = document_get_current_position(document_manager_get_current_document(main_window.docmg));
-  if (current_pos == GPOINTER_TO_INT(data)) {
-    gchar *prefix = document_get_current_word(document_manager_get_current_document(main_window.docmg));
-    gchar *calltip = calltip_manager_sql_autocomplete_word(main_window.clltipmg, prefix);
-    if (calltip && strlen(calltip)!=0) gtk_scintilla_user_list_show(GTK_SCINTILLA(docdet->scintilla), 1, calltip);
-    g_free(prefix);
-  }
-  docdet->completion_timer_set=FALSE;
-  return FALSE;
-}
-
-gboolean css_auto_complete_callback(gpointer data)
-{
-  DocumentDetails *docdet = DOCUMENT_GET_PRIVATE(document_manager_get_current_document(main_window.docmg));
-  gint current_pos;
-  current_pos = document_get_current_position(document_manager_get_current_document(main_window.docmg));
-  if (current_pos == GPOINTER_TO_INT(data)) {
-    gchar *prefix = document_get_current_word(document_manager_get_current_document(main_window.docmg));
-    gchar *calltip = calltip_manager_css_autocomplete_word(main_window.clltipmg, prefix);
-    if (calltip && strlen(calltip)!=0) gtk_scintilla_user_list_show(GTK_SCINTILLA(docdet->scintilla), 1, calltip);
-    g_free(prefix);
-  }
-  docdet->completion_timer_set=FALSE;
-  return FALSE;
-}
-
-gboolean cobol_auto_complete_callback(gpointer data)
-{
-  DocumentDetails *docdet = DOCUMENT_GET_PRIVATE(document_manager_get_current_document(main_window.docmg));
-  gint current_pos;
-  current_pos = document_get_current_position(document_manager_get_current_document(main_window.docmg));
-  if (current_pos == GPOINTER_TO_INT(data)) {
-    gchar *prefix = document_get_current_word(document_manager_get_current_document(main_window.docmg));
-    gchar *calltip = calltip_manager_cobol_autocomplete_word(main_window.clltipmg, prefix);
-    if (calltip && strlen(calltip)!=0) gtk_scintilla_user_list_show(GTK_SCINTILLA(docdet->scintilla), 1, calltip);
-    g_free(prefix);
-  }
-  docdet->completion_timer_set=FALSE;
-  return FALSE;
-}
 /*
 * autocomplete current word
 */
@@ -923,7 +880,7 @@ static void char_added(GtkWidget *scintilla, guint ch, gpointer user_data)
         member_function_buffer = gtk_scintilla_get_text_range (GTK_SCINTILLA(scintilla), wordStart-2, wordStart, &member_function_length);
         if(current_word_length>=3){
             if (!docdet->completion_timer_set) {
-              docdet->completion_timer_id = g_timeout_add(get_preferences_manager_auto_complete_delay(pref), css_auto_complete_callback, GINT_TO_POINTER(current_pos));
+              docdet->completion_timer_id = g_timeout_add(get_preferences_manager_auto_complete_delay(pref), auto_complete_callback, GINT_TO_POINTER(current_pos));
               docdet->completion_timer_set=TRUE;
             }
           }  
@@ -934,7 +891,7 @@ static void char_added(GtkWidget *scintilla, guint ch, gpointer user_data)
         member_function_buffer = gtk_scintilla_get_text_range (GTK_SCINTILLA(scintilla), wordStart-2, wordStart, &member_function_length);
         if(current_word_length>=3){
             if (!docdet->completion_timer_set) {
-              docdet->completion_timer_id = g_timeout_add(get_preferences_manager_auto_complete_delay(pref), cobol_auto_complete_callback, GINT_TO_POINTER(current_pos));
+              docdet->completion_timer_id = g_timeout_add(get_preferences_manager_auto_complete_delay(pref), auto_complete_callback, GINT_TO_POINTER(current_pos));
               docdet->completion_timer_set=TRUE;
             }
           }  
@@ -944,7 +901,7 @@ static void char_added(GtkWidget *scintilla, guint ch, gpointer user_data)
         member_function_buffer = gtk_scintilla_get_text_range (GTK_SCINTILLA(scintilla), wordStart-2, wordStart, &member_function_length);
         if(current_word_length>=3){
             if (!docdet->completion_timer_set) {
-              docdet->completion_timer_id = g_timeout_add(get_preferences_manager_auto_complete_delay(pref), sql_auto_complete_callback, GINT_TO_POINTER(current_pos));
+              docdet->completion_timer_id = g_timeout_add(get_preferences_manager_auto_complete_delay(pref), auto_complete_callback, GINT_TO_POINTER(current_pos));
               docdet->completion_timer_set=TRUE;
             }
           }  
@@ -2552,18 +2509,8 @@ void document_force_autocomplete(Document *document)
       member_function_buffer = gtk_scintilla_get_text_range (GTK_SCINTILLA(docdet->scintilla), current_pos-2, current_pos, &member_function_length);
         if (g_strcmp0(member_function_buffer, "->")==0) {
             auto_memberfunc_complete_callback(GINT_TO_POINTER(document_get_current_position(document)));
-        }
-        else if (document_get_document_type(document) == TAB_PHP) {
+        } else {
           auto_complete_callback(GINT_TO_POINTER(document_get_current_position(document)));
-        }
-        else if (document_get_document_type(document) == TAB_CSS) {
-          css_auto_complete_callback(GINT_TO_POINTER(document_get_current_position(document)));
-        }
-        else if (document_get_document_type(document) == TAB_SQL) {
-          sql_auto_complete_callback(GINT_TO_POINTER(document_get_current_position(document)));
-        }
-        else if (document_get_document_type(document) == TAB_COBOL) {
-          cobol_auto_complete_callback(GINT_TO_POINTER(document_get_current_position(document)));
         }
       g_free(member_function_buffer);
   }

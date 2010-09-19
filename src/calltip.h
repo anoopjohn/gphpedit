@@ -59,9 +59,6 @@ typedef struct
 GType calltip_manager_get_type (void) G_GNUC_CONST;
 CalltipManager *calltip_manager_new (void);
 gchar *calltip_manager_show_call_tip(CalltipManager *calltipmg, gint type, gchar *prefix);
-gchar *calltip_manager_cobol_autocomplete_word(CalltipManager *calltipmg, gchar *buffer);
-gchar *calltip_manager_sql_autocomplete_word(CalltipManager *calltipmg, gchar *buffer);
-gchar *calltip_manager_css_autocomplete_word(CalltipManager *calltipmg, gchar *buffer);
-gchar *calltip_manager_autocomplete_word(CalltipManager *calltipmg, gchar *buffer);
+gchar *calltip_manager_autocomplete_word(CalltipManager *calltipmg, gint type, gchar *buffer);
 #endif /* CALLTIP_MANAGER_H */
 

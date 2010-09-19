@@ -372,7 +372,7 @@ static inline void clear_list(void){
   list=NULL;
 }
 
-gchar *calltip_manager_autocomplete_word(CalltipManager *calltipmg, gchar *buffer)
+gchar *calltip_manager_php_autocomplete_word(CalltipManager *calltipmg, gchar *buffer)
 {
   CalltipManagerDetails *calltipmgdet;
 	calltipmgdet = CALLTIP_MANAGER_GET_PRIVATE(calltipmg);
@@ -417,3 +417,25 @@ gchar *calltip_manager_autocomplete_word(CalltipManager *calltipmg, gchar *buffe
   return g_string_free(result,FALSE);
 }
 
+gchar *calltip_manager_autocomplete_word(CalltipManager *calltipmg, gint type, gchar *buffer)
+{
+  if (!calltipmg || !buffer) return NULL;
+  gchar *result = NULL;
+  switch(type) {
+    case TAB_PHP:
+      result = calltip_manager_php_autocomplete_word(calltipmg, buffer);
+      break;
+    case TAB_CSS:
+      result = calltip_manager_css_autocomplete_word(calltipmg, buffer);
+      break;
+    case TAB_SQL:
+      result = calltip_manager_sql_autocomplete_word(calltipmg, buffer);
+      break;
+    case TAB_COBOL:
+      result = calltip_manager_cobol_autocomplete_word(calltipmg, buffer);
+      break;
+    default:
+      break;
+  }
+  return result;
+}
