@@ -266,9 +266,7 @@ void main_window_create(void){
   main_window_fill_panes();
   main_window_create_appbar();
   
-  function_list_prepare();
-  css_function_list_prepare();
-  cobol_function_list_prepare();
+  main_window.clltipmg = calltip_manager_new();
 
   g_signal_connect (G_OBJECT (main_window.window), "delete_event", G_CALLBACK(main_window_delete_event), NULL);
   g_signal_connect (G_OBJECT (main_window.window), "destroy", G_CALLBACK (main_window_destroy_event), NULL);

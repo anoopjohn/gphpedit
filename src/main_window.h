@@ -37,6 +37,7 @@
 #include "templates.h"
 #include "gtksourcestyleschememanager.h"
 
+
 typedef struct
 {
   /* preferences manager */
@@ -44,6 +45,8 @@ typedef struct
   TemplatesManager *tempmg;
 
   GtkSourceStyleSchemeManager *stylemg;
+
+  CalltipManager *clltipmg;
 
   GtkWidget *window;
   GtkWidget *prinbox;

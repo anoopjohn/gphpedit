@@ -681,7 +681,7 @@ gboolean auto_complete_callback(gpointer data)
   current_pos = document_get_current_position(document_manager_get_current_document(main_window.docmg));
   if (current_pos == GPOINTER_TO_INT(data)) {
     gchar *prefix = document_get_current_word(document_manager_get_current_document(main_window.docmg));
-    gchar *calltip = autocomplete_word(prefix);
+    gchar *calltip = calltip_manager_autocomplete_word(main_window.clltipmg, prefix);
     if (calltip && strlen(calltip)!=0) 
           gtk_scintilla_user_list_show(GTK_SCINTILLA(docdet->scintilla), 1, calltip);
       g_free(prefix);
@@ -698,7 +698,8 @@ gboolean calltip_callback(gpointer data)
   current_pos = document_get_current_position(document_manager_get_current_document(main_window.docmg));
   if (current_pos == GPOINTER_TO_INT(data)) {
     gchar *prefix = document_get_current_word(document_manager_get_current_document(main_window.docmg));
-    gchar *calltip = show_call_tip(docdet->type, prefix);
+    
+    gchar *calltip = calltip_manager_show_call_tip(main_window.clltipmg, docdet->type, prefix);
     if (calltip){
       gtk_scintilla_call_tip_show(GTK_SCINTILLA(docdet->scintilla), current_pos, calltip);
       g_free(prefix);
@@ -725,7 +726,7 @@ gboolean sql_auto_complete_callback(gpointer data)
   current_pos = document_get_current_position(document_manager_get_current_document(main_window.docmg));
   if (current_pos == GPOINTER_TO_INT(data)) {
     gchar *prefix = document_get_current_word(document_manager_get_current_document(main_window.docmg));
-    gchar *calltip = sql_autocomplete_word(prefix);
+    gchar *calltip = calltip_manager_sql_autocomplete_word(main_window.clltipmg, prefix);
     if (calltip && strlen(calltip)!=0) gtk_scintilla_user_list_show(GTK_SCINTILLA(docdet->scintilla), 1, calltip);
     g_free(prefix);
   }
@@ -740,7 +741,7 @@ gboolean css_auto_complete_callback(gpointer data)
   current_pos = document_get_current_position(document_manager_get_current_document(main_window.docmg));
   if (current_pos == GPOINTER_TO_INT(data)) {
     gchar *prefix = document_get_current_word(document_manager_get_current_document(main_window.docmg));
-    gchar *calltip = css_autocomplete_word(prefix);
+    gchar *calltip = calltip_manager_css_autocomplete_word(main_window.clltipmg, prefix);
     if (calltip && strlen(calltip)!=0) gtk_scintilla_user_list_show(GTK_SCINTILLA(docdet->scintilla), 1, calltip);
     g_free(prefix);
   }
@@ -755,7 +756,7 @@ gboolean cobol_auto_complete_callback(gpointer data)
   current_pos = document_get_current_position(document_manager_get_current_document(main_window.docmg));
   if (current_pos == GPOINTER_TO_INT(data)) {
     gchar *prefix = document_get_current_word(document_manager_get_current_document(main_window.docmg));
-    gchar *calltip = cobol_autocomplete_word(prefix);
+    gchar *calltip = calltip_manager_cobol_autocomplete_word(main_window.clltipmg, prefix);
     if (calltip && strlen(calltip)!=0) gtk_scintilla_user_list_show(GTK_SCINTILLA(docdet->scintilla), 1, calltip);
     g_free(prefix);
   }
@@ -856,8 +857,7 @@ static void char_added(GtkWidget *scintilla, guint ch, gpointer user_data)
         }
         break; /*exit nothing todo */
           case ('('):
-        if ((gtk_scintilla_get_line_state(GTK_SCINTILLA(scintilla), current_line))==274 &&
-        (!docdet->calltip_timer_set)) {
+        if (!docdet->calltip_timer_set) {
           docdet->calltip_timer_id = g_timeout_add(get_preferences_manager_calltip_delay(pref), calltip_callback, GINT_TO_POINTER(current_pos));
           docdet->calltip_timer_set=TRUE;
         }
@@ -914,7 +914,7 @@ static void char_added(GtkWidget *scintilla, guint ch, gpointer user_data)
         }
         break; /*exit nothing to do*/
           case (':'):
-        if ((docdet->calltip_timer_set==FALSE)) {
+        if (!docdet->calltip_timer_set) {
           docdet->calltip_timer_id = g_timeout_add(get_preferences_manager_calltip_delay(pref), calltip_callback, GINT_TO_POINTER(current_pos));
           docdet->calltip_timer_set=TRUE;
         }
@@ -951,7 +951,6 @@ static void char_added(GtkWidget *scintilla, guint ch, gpointer user_data)
         g_free(member_function_buffer);
         break;
       }
-      // Drop down for HTML here (line_state = 272)
      default:
             member_function_buffer = gtk_scintilla_get_text_range (GTK_SCINTILLA(scintilla), wordStart-2, wordEnd, &member_function_length);
             /* if we type <?php then we are in a php file so force php syntax mode */
