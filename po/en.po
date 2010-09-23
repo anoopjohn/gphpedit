@@ -322,7 +322,7 @@ msgstr ""
 
 #: ../src/find_dialog.c:148 ../src/replace_dialog.c:218
 msgid "Whole document"
-msgstr "Documento Completo"
+msgstr ""
 
 #: ../src/find_dialog.c:157 ../src/replace_dialog.c:227
 msgid "RegExp"

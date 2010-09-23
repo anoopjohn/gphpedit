@@ -108,9 +108,12 @@ SEARCH_DIALOG_init (SearchDialog *dialog)
 
   priv->findentry = gphpedit_history_entry_new ("find", TRUE);
 	gtk_widget_set_size_request (priv->findentry, 300, -1);
+  // Set enter key in the text box to activate find
+  gtk_entry_set_activates_default (GTK_ENTRY (gtk_bin_get_child (GTK_BIN (priv->findentry))), TRUE);
   gtk_widget_show (priv->findentry);
 
   gtk_box_pack_start(GTK_BOX(box), priv->findentry, FALSE, FALSE, 6);
+
   gtk_box_pack_start(GTK_BOX(priv->diagbox), box, FALSE, FALSE, 4);
 
   /* Get selected text (Wendell) */
@@ -165,7 +168,6 @@ SEARCH_DIALOG_init (SearchDialog *dialog)
   gtk_dialog_set_default_response (GTK_DIALOG(dialog), GTK_RESPONSE_OK);
 
   g_signal_connect(G_OBJECT(dialog), "response", G_CALLBACK(search_dialog_process_response), priv);
-
 }
 
 GtkWidget *
