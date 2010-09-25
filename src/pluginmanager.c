@@ -46,13 +46,12 @@ struct PluginManagerDetails
 					    PLUGIN_MANAGER_TYPE,\
 					    PluginManagerDetails))
 
-static gpointer parent_class;
 static void plugin_manager_finalize (GObject  *object);
 static void  plugin_manager_class_init (PluginManagerClass *klass);
 static void plugin_discover_available(PluginManager *plugmg);
 
 /* http://library.gnome.org/devel/gobject/unstable/gobject-Type-Information.html#G-DEFINE-TYPE:CAPS */
-G_DEFINE_TYPE(PluginManager, plugin_manager, G_TYPE_OBJECT);  
+G_DEFINE_TYPE(PluginManager, plugin_manager, G_TYPE_OBJECT);
 
 /*
 * overide default contructor to make a singleton.
@@ -67,7 +66,7 @@ plugin_manager_constructor (GType type,
 
   if (self == NULL)
     {
-      self = G_OBJECT_CLASS (parent_class)->constructor (
+      self = G_OBJECT_CLASS (plugin_manager_parent_class)->constructor (
           type, n_construct_params, construct_params);
       g_object_add_weak_pointer (self, (gpointer) &self);
       return self;
@@ -82,7 +81,6 @@ plugin_manager_class_init (PluginManagerClass *klass)
 	GObjectClass *object_class;
 
 	object_class = G_OBJECT_CLASS (klass);
-  parent_class = g_type_class_peek_parent (klass);
 	object_class->finalize = plugin_manager_finalize;
   object_class->constructor = plugin_manager_constructor;
 	g_type_class_add_private (klass, sizeof (PluginManagerDetails));
@@ -122,7 +120,7 @@ plugin_manager_finalize (GObject *object)
 	plugmgdet = PLUGIN_MANAGER_GET_PRIVATE(plugmg);
   /* free object resources*/
   g_hash_table_destroy(plugmgdet->plugins_table);
-	G_OBJECT_CLASS (parent_class)->finalize (object);
+	G_OBJECT_CLASS (plugin_manager_parent_class)->finalize (object);
 }
 
 
