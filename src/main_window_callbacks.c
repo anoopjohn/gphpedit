@@ -41,6 +41,7 @@
 #include "find_dialog.h"
 #include "replace_dialog.h"
 #include "document_manager.h"
+#include "syntax_check_window.h"
 
 gboolean is_app_closing = FALSE;
 
@@ -794,7 +795,7 @@ void zoom_100(GtkWidget *widget)
 
 void syntax_check(GtkWidget *widget)
 {
-   gtk_syntax_check_window_run_check(main_window.win, document_manager_get_current_document(main_window.docmg));
+   gtk_syntax_check_window_run_check(GTK_SYNTAX_CHECK_WINDOW(main_window.win), document_manager_get_current_document(main_window.docmg));
 }
 
 

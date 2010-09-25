@@ -190,7 +190,7 @@ static void main_window_fill_panes(void)
   g_signal_connect (G_OBJECT (main_window.notebook_editor), "focus-tab", G_CALLBACK (on_notebook_focus_tab), NULL);
 
   /* add syntax check window */
-  main_window.win= GTK_SYNTAX_CHECK_WINDOW(gtk_syntax_check_window_new ());
+  main_window.win= gtk_syntax_check_window_new ();
   gtk_box_pack_start(GTK_BOX(main_window.prin_hbox), GTK_WIDGET(main_window.win), TRUE, TRUE, 2);
 }
 
