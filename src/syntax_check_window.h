@@ -31,25 +31,25 @@
 G_BEGIN_DECLS
 
 #define GTK_TYPE_SYNTAX_CHECK_WINDOW		(gtk_syntax_check_window_get_type ())
-#define GTK_SYNTAX_CHECK_WINDOW(obj)		(G_TYPE_CHECK_INSTANCE_CAST ((obj), GTK_TYPE_SYNTAX_CHECK_WINDOW, GtkSyntax_Check_Window))
+#define GTK_SYNTAX_CHECK_WINDOW(obj)		(G_TYPE_CHECK_INSTANCE_CAST ((obj), GTK_TYPE_SYNTAX_CHECK_WINDOW, GtkSyntaxCheckWindow))
 #define GTK_IS_SYNTAX_CHECK_WINDOW(obj)		(G_TYPE_CHECK_INSTANCE_TYPE ((obj), GTK_TYPE_SYNTAX_CHECK_WINDOW))
-#define GTK_SYNTAX_CHECK_WINDOW_CLASS(klass)	(G_TYPE_CHECK_CLASS_CAST ((klass), GTK_TYPE_SYNTAX_CHECK_WINDOW, GtkSyntax_Check_WindowClass))
+#define GTK_SYNTAX_CHECK_WINDOW_CLASS(klass)	(G_TYPE_CHECK_CLASS_CAST ((klass), GTK_TYPE_SYNTAX_CHECK_WINDOW, GtkSyntaxCheckWindowClass))
 #define GTK_IS_SYNTAX_CHECK_WINDOW_CLASS(klass)	(G_TYPE_CHECK_CLASS_TYPE ((klass), GTK_TYPE_SYNTAX_CHECK_WINDOW))
-#define GTK_SYNTAX_CHECK_WINDOW_GET_CLASS(obj)	(G_TYPE_INSTANCE_GET_CLASS ((obj), GTK_TYPE_SYNTAX_CHECK_WINDOW, GtkSyntax_Check_WindowClass))
+#define GTK_SYNTAX_CHECK_WINDOW_GET_CLASS(obj)	(G_TYPE_INSTANCE_GET_CLASS ((obj), GTK_TYPE_SYNTAX_CHECK_WINDOW, GtkSyntaxCheckWindowClass))
 
-typedef struct _GtkSyntax_Check_Window		GtkSyntax_Check_Window;
-typedef struct _GtkSyntax_Check_WindowClass	GtkSyntax_Check_WindowClass;
-typedef struct _GtkSyntax_Check_WindowPrivate	GtkSyntax_Check_WindowPrivate;
+typedef struct _GtkSyntaxCheckWindow		GtkSyntaxCheckWindow;
+typedef struct _GtkSyntaxCheckWindowClass	GtkSyntaxCheckWindowClass;
+typedef struct _GtkSyntaxCheckWindowPrivate	GtkSyntaxCheckWindowPrivate;
 
-struct _GtkSyntax_Check_Window
+struct _GtkSyntaxCheckWindow
 {
   /*< private >*/
   GtkBox parent_instance;
 
-  GtkSyntax_Check_WindowPrivate *GSEAL (priv);
+  GtkSyntaxCheckWindowPrivate *GSEAL (priv);
 };
 
-struct _GtkSyntax_Check_WindowClass
+struct _GtkSyntaxCheckWindowClass
 {
   GtkBoxClass parent_class;
 
@@ -57,8 +57,8 @@ struct _GtkSyntax_Check_WindowClass
 
 GType      gtk_syntax_check_window_get_type         (void) G_GNUC_CONST;
 GtkWidget *gtk_syntax_check_window_new              (void);
-void syntax_window(GtkSyntax_Check_Window *win, Document *document, gchar *data);
-void gtk_syntax_check_window_run_check(GtkSyntax_Check_Window *win, Document *document);
+void syntax_window(GtkSyntaxCheckWindow *win, Document *document, gchar *data);
+void gtk_syntax_check_window_run_check(GtkSyntaxCheckWindow *win, Document *document);
 G_END_DECLS
 
 #endif /* ! __GTK_SYNTAX_CHECK_WINDOW_H__ */

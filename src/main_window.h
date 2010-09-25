@@ -66,7 +66,7 @@ typedef struct
   
   GtkWidget *notebook_editor;
   /* syntax check widget */
-  GtkSyntax_Check_Window *win;
+  GtkSyntaxCheckWindow *win;
 
   DocumentManager *docmg;
 
