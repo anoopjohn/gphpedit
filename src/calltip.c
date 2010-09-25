@@ -144,6 +144,7 @@ calltip_manager_init (CalltipManager  *object)
   calltip_manager_function_list_from_array_prepare(sql_keywords, calltipmgdet->sql_api_tree);
 
   calltipmgdet->cache_str[0]=0;
+  calltipmgdet->cache_completion = NULL;
 }
 
 static void
@@ -384,7 +385,8 @@ gchar *calltip_manager_php_autocomplete_word(CalltipManager *calltipmg, gchar *b
   *   refine last search we take that search and remove words that don't match new text
   *   so we improve performance a lot because we don't make another full search.
   */
-  if (strlen(buffer) > strlen(calltipmgdet->cache_str) && g_str_has_prefix(buffer,calltipmgdet->cache_str)){ 
+  gint len =strlen(calltipmgdet->cache_str);
+  if (len !=0 && strlen(buffer) > len && g_str_has_prefix(buffer, calltipmgdet->cache_str)){ 
     gchar **strings;
     strings = g_strsplit (calltipmgdet->cache_completion," ",0);
     int i=0;
