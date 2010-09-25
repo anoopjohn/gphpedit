@@ -457,13 +457,15 @@ void document_manager_switch_to_file_or_open(DocumentManager *docmg, gchar *file
   for (walk = docmgdet->editors; walk!=NULL; walk = g_slist_next(walk)) {
     document = walk->data;
     gchar *docfilename = document_get_filename(document);
-    if (g_strcmp0(docfilename, filename)==0) {
+    gchar *filename_uri = filename_get_uri(filename);
+    if (g_strcmp0(docfilename, filename_uri)==0) {
       gtk_notebook_set_current_page( GTK_NOTEBOOK(main_window.notebook_editor), gtk_notebook_page_num(GTK_NOTEBOOK(main_window.notebook_editor),document_get_editor_widget(document)));
       docmgdet->current_document = document;
       document_goto_line(docmgdet->current_document, line_number);
       g_free(docfilename);
       return ;
     }
+    g_free(filename_uri);
     g_free(docfilename);
   }
   tmp_filename = g_string_new(filename);
@@ -563,7 +565,7 @@ gboolean document_manager_can_all_tabs_be_saved(DocumentManager *docmg)
     document = walk->data;
     if (document_get_editor_widget(document)) {
       if (!document_get_saved_status(document) && document_get_can_save(document)) {
-        saved = document_manager_try_save_page(docmg, document, FALSE);// try_save_page(document, FALSE);
+        saved = document_manager_try_save_page(docmg, document, FALSE);
         if (saved==FALSE) {
           return FALSE;
         }
