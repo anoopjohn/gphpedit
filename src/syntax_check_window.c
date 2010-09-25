@@ -33,7 +33,7 @@
 
 struct _GtkSyntax_Check_WindowPrivate
 {
-  Syntax_Check_Manager *synmg;  
+  SyntaxCheckManager *synmg;
 
   GtkWidget *scrolledwindow;
   // My new best friend: http://developer.gnome.org/doc/API/2.0/gtk/TreeWidget.html

@@ -29,88 +29,32 @@
 #include "gvfs_utils.h"
 #include "main_window_callbacks.h"
 
-/*
-* syntax_check_manager private struct
-*/
-struct Syntax_Check_Manager_Details
-{
-  gchar *dummy;
-};
-
 #define SYNTAX_CHECK_MANAGER_GET_PRIVATE(object)(G_TYPE_INSTANCE_GET_PRIVATE ((object),\
 					    SYNTAX_CHECK_MANAGER_TYPE,\
-					    Syntax_Check_Manager_Details))
+					    SyntaxCheckManager_Details))
 
-static gpointer parent_class;
-static void               syntax_check_manager_finalize         (GObject                *object);
-static void               syntax_check_manager_init             (gpointer                object,
-							       gpointer                klass);
-static void  syntax_check_manager_class_init (Syntax_Check_ManagerClass *klass);
+static void  syntax_check_manager_class_init (SyntaxCheckManagerClass *klass);
+static void  syntax_check_manager_init (SyntaxCheckManager *klass);
 
-/*
- * syntax_check_manager_get_type
- * register Syntax_Check_Manager type and returns a new GType
-*/
-GType
-syntax_check_manager_get_type (void)
-{
-    static GType our_type = 0;
-    
-    if (!our_type) {
-        static const GTypeInfo our_info =
-        {
-            sizeof (Syntax_Check_ManagerClass),
-            NULL,               /* base_init */
-            NULL,               /* base_finalize */
-            (GClassInitFunc) syntax_check_manager_class_init,
-            NULL,               /* class_finalize */
-            NULL,               /* class_data */
-            sizeof (Syntax_Check_Manager),
-            0,                  /* n_preallocs */
-            (GInstanceInitFunc) syntax_check_manager_init,
-        };
+/* http://library.gnome.org/devel/gobject/unstable/gobject-Type-Information.html#G-DEFINE-TYPE:CAPS */
+G_DEFINE_TYPE(SyntaxCheckManager, syntax_check_manager, G_TYPE_OBJECT);
 
-        our_type = g_type_register_static (G_TYPE_OBJECT, "Syntax_Check_Manager",
-                                           &our_info, 0);
-  }
-    
-    return our_type;
-}
 static void
-syntax_check_manager_class_init (Syntax_Check_ManagerClass *klass)
+syntax_check_manager_class_init (SyntaxCheckManagerClass *klass)
 {
-	GObjectClass *object_class;
-
-	object_class = G_OBJECT_CLASS (klass);
-  parent_class = g_type_class_peek_parent (klass);
-	object_class->finalize = syntax_check_manager_finalize;
-	g_type_class_add_private (klass, sizeof (Syntax_Check_Manager_Details));
 }
 
 static void
-syntax_check_manager_init (gpointer object, gpointer klass)
+syntax_check_manager_init (SyntaxCheckManager *object)
 {
-	Syntax_Check_Manager_Details *synmgdet;
-	synmgdet = SYNTAX_CHECK_MANAGER_GET_PRIVATE(object);
 }
 
-static void
-syntax_check_manager_finalize (GObject *object)
+SyntaxCheckManager *syntax_check_manager_new (void)
 {
-  Syntax_Check_Manager *plugmg = SYNTAX_CHECK_MANAGER(object);
-  Syntax_Check_Manager_Details *synmgdet;
-	synmgdet = SYNTAX_CHECK_MANAGER_GET_PRIVATE(plugmg);
-  /* free object resources*/
-	G_OBJECT_CLASS (parent_class)->finalize (object);
-}
-
-
-Syntax_Check_Manager *syntax_check_manager_new (void)
-{
-	Syntax_Check_Manager *plugmg;
-  plugmg = g_object_new (SYNTAX_CHECK_MANAGER_TYPE, NULL);
+	SyntaxCheckManager *synmg;
+  synmg = g_object_new (SYNTAX_CHECK_MANAGER_TYPE, NULL);
   
-	return plugmg; /* return new object */
+	return synmg; /* return new object */
 }
 
 

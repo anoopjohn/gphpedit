@@ -31,33 +31,33 @@
 
 #define SYNTAX_CHECK_MANAGER_TYPE syntax_check_manager_get_type()
 #define SYNTAX_CHECK_MANAGER(obj) \
-  (G_TYPE_CHECK_INSTANCE_CAST ((obj), SYNTAX_CHECK_MANAGER_TYPE, Syntax_Check_Manager))
+  (G_TYPE_CHECK_INSTANCE_CAST ((obj), SYNTAX_CHECK_MANAGER_TYPE, SyntaxCheckManager))
 #define SYNTAX_CHECK_MANAGER_CLASS(klass) \
-  (G_TYPE_CHECK_CLASS_CAST ((klass), SYNTAX_CHECK_MANAGER_TYPE, Syntax_Check_ManagerClass))
+  (G_TYPE_CHECK_CLASS_CAST ((klass), SYNTAX_CHECK_MANAGER_TYPE, SyntaxCheckManagerClass))
 #define OBJECT_IS_SYNTAX_CHECK_MANAGER(obj) \
   (G_TYPE_CHECK_INSTANCE_TYPE ((obj), SYNTAX_CHECK_MANAGER_TYPE))
 #define OBJECT_IS_SYNTAX_CHECK_MANAGER_CLASS(klass) \
   (G_TYPE_CHECK_CLASS_TYPE ((klass), SYNTAX_CHECK_MANAGER_TYPE))
 #define SYNTAX_CHECK_MANAGER_GET_CLASS(obj) \
-  (G_TYPE_INSTANCE_GET_CLASS ((obj), SYNTAX_CHECK_MANAGER_TYPE, Syntax_Check_ManagerClass))
+  (G_TYPE_INSTANCE_GET_CLASS ((obj), SYNTAX_CHECK_MANAGER_TYPE, SyntaxCheckManagerClass))
 
-typedef struct Syntax_Check_Manager_Details Syntax_Check_Manager_Details;
+typedef struct SyntaxCheckManager_Details SyntaxCheckManager_Details;
 
 typedef struct
 {
 	GObject object;
-	Syntax_Check_Manager_Details *details;
-} Syntax_Check_Manager;
+	SyntaxCheckManager_Details *details;
+} SyntaxCheckManager;
 
 typedef struct
 {
 	GObjectClass parent_class;
 
-} Syntax_Check_ManagerClass;
+} SyntaxCheckManagerClass;
 
 /* Basic GObject requirements. */
 GType syntax_check_manager_get_type (void) G_GNUC_CONST;
-Syntax_Check_Manager *syntax_check_manager_new (void);
+SyntaxCheckManager *syntax_check_manager_new (void);
 gchar *syntax_check_manager_run(Document *document);
 #endif /* SYNTAX_CHECK_MANAGER_H */
 
