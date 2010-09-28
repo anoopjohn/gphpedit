@@ -60,7 +60,7 @@ GString *classbrowser_get_autocomplete_php_classes_string(gphpeditClassBrowser *
 gchar *classbrowser_autocomplete_php_variables(gphpeditClassBrowser *classbrowser, gchar *prefix);
 gchar *classbrowser_autocomplete_member_function(gphpeditClassBrowser *classbrowser, gchar *member);
 gchar *classbrowser_custom_function_calltip(gphpeditClassBrowser *classbrowser, gchar *function_name);
-gchar *classbrowser_add_custom_autocompletion(gphpeditClassBrowser *classbrowser, gchar *prefix, GSList *list);
+gchar *classbrowser_add_custom_autocompletion(gphpeditClassBrowser *classbrowser, gchar *prefix, gint file_type, GSList *list);
 G_END_DECLS
 
 #endif /* __GPHPEDIT_CLASSBROWSER_H__ */

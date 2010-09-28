@@ -305,29 +305,46 @@ static gboolean make_completion_string (gpointer key, gpointer value, gpointer d
   return FALSE;
 }
 
+GSList *list = NULL;
+static gboolean make_completion_list (gpointer key, gpointer value, gpointer data){
+  if(g_str_has_prefix(key, (gchar *)data)){
+      gchar *string=g_strdup_printf("%s?2",(gchar *)key); /*must free when no longer needed*/
+	    list = g_slist_prepend(list, string);
+      }
+  if (strncmp(key, (gchar *)data,MIN(strlen(key),strlen(data)))>0){
+    return TRUE;
+  }
+  return FALSE;
+}
+
+static inline void clear_list(void){
+  g_slist_foreach (list,(GFunc) g_free,NULL);
+  g_slist_free(list);
+  list=NULL;
+}
+
 gchar *calltip_manager_cobol_autocomplete_word(CalltipManager *calltipmg, gchar *buffer) 
 {
   CalltipManagerDetails *calltipmgdet;
 	calltipmgdet = CALLTIP_MANAGER_GET_PRIVATE(calltipmg);
 
-  gchar *result = NULL;
+  GString *result=NULL;
+
   calltipmgdet->prefix = g_ascii_strup (buffer,-1);
   if (calltip_manager_has_cache(calltipmgdet->prefix, calltipmgdet->cache_str, calltipmgdet->cache_completion)){
-    GString *res=NULL;
-    res = calltip_manager_get_autocomp_from_cache(calltipmgdet->prefix, calltipmgdet->cache_str, calltipmgdet->cache_completion);
-    result = g_string_free(res, FALSE);
+    result = calltip_manager_get_autocomp_from_cache(calltipmgdet->prefix, calltipmgdet->cache_str, calltipmgdet->cache_completion);
   } else {
-  g_tree_foreach (calltipmgdet->cobol_api_tree, make_completion_string, calltipmgdet);
-  if (calltipmgdet->completion_list_tree != NULL) {
-    result = g_string_free (calltipmgdet->completion_list_tree, FALSE);
-    calltipmgdet->completion_list_tree=NULL;
-    calltip_manager_save_result_in_cache(calltipmgdet, result, calltipmgdet->prefix);
-  }
+    g_tree_foreach (calltipmgdet->php_api_tree, make_completion_list, calltipmgdet->prefix);
+    gchar *custom = classbrowser_add_custom_autocompletion(GPHPEDIT_CLASSBROWSER(main_window.classbrowser), buffer, TAB_COBOL, list);
+    result = g_string_new(custom);
+    if (custom) g_free(custom);
+    calltip_manager_save_result_in_cache(calltipmgdet, result->str, buffer);
+    clear_list();
   }
   g_free(calltipmgdet->prefix);
-  gphpedit_debug_message(DEBUG_CALLTIP,"Autocomplete list: %s\n", result);
 
-  return result;
+  gphpedit_debug_message(DEBUG_CALLTIP,"Autocomplete list: %s\n", result->str);
+  return g_string_free(result,FALSE);
 }
 
 gchar *calltip_manager_sql_autocomplete_word(CalltipManager *calltipmg, gchar *buffer)
@@ -383,24 +400,6 @@ gchar *calltip_manager_css_autocomplete_word(CalltipManager *calltipmg, gchar *b
   return result;
 }
 
-GSList *list = NULL;
-static gboolean make_completion_list (gpointer key, gpointer value, gpointer data){
-  if(g_str_has_prefix(key, (gchar *)data)){
-      gchar *string=g_strdup_printf("%s?2",(gchar *)key); /*must free when no longer needed*/
-	    list = g_slist_prepend(list, string);
-      }
-  if (strncmp(key, (gchar *)data,MIN(strlen(key),strlen(data)))>0){
-    return TRUE;
-  }
-  return FALSE;
-}
-
-static inline void clear_list(void){
-  g_slist_foreach (list,(GFunc) g_free,NULL);
-  g_slist_free(list);
-  list=NULL;
-}
-
 gboolean calltip_manager_has_cache(gchar *buffer, gchar *cache_str, gchar *cache_completion)
 {
   gint len = strlen(cache_str);
@@ -453,7 +452,7 @@ gchar *calltip_manager_php_autocomplete_word(CalltipManager *calltipmg, gchar *b
   } else { 
     g_tree_foreach (calltipmgdet->php_api_tree, make_completion_list, buffer);
     /* add custom php functions */
-    gchar *custom = classbrowser_add_custom_autocompletion(GPHPEDIT_CLASSBROWSER(main_window.classbrowser), buffer, list);
+    gchar *custom = classbrowser_add_custom_autocompletion(GPHPEDIT_CLASSBROWSER(main_window.classbrowser), buffer, TAB_PHP, list);
     result = g_string_new(custom);
     if (custom) g_free(custom);
     calltip_manager_save_result_in_cache(calltipmgdet, result->str, buffer);
