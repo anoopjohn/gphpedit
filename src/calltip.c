@@ -306,12 +306,14 @@ static gboolean make_completion_string (gpointer key, gpointer value, gpointer d
 }
 
 GSList *list = NULL;
-static gboolean make_completion_list (gpointer key, gpointer value, gpointer data){
-  if(g_str_has_prefix(key, (gchar *)data)){
+static gboolean make_completion_list (gpointer key, gpointer value, gpointer data)
+{
+  gchar *prefix = (gchar *)data;
+  if(g_str_has_prefix(key, prefix)){
       gchar *string=g_strdup_printf("%s?2",(gchar *)key); /*must free when no longer needed*/
 	    list = g_slist_prepend(list, string);
       }
-  if (strncmp(key, (gchar *)data,MIN(strlen(key),strlen(data)))>0){
+  if (strncmp(key, prefix,MIN(strlen(key),strlen(prefix)))>0){
     return TRUE;
   }
   return FALSE;
@@ -334,15 +336,15 @@ gchar *calltip_manager_cobol_autocomplete_word(CalltipManager *calltipmg, gchar 
   if (calltip_manager_has_cache(calltipmgdet->prefix, calltipmgdet->cache_str, calltipmgdet->cache_completion)){
     result = calltip_manager_get_autocomp_from_cache(calltipmgdet->prefix, calltipmgdet->cache_str, calltipmgdet->cache_completion);
   } else {
-    g_tree_foreach (calltipmgdet->php_api_tree, make_completion_list, calltipmgdet->prefix);
+    g_tree_foreach (calltipmgdet->cobol_api_tree, make_completion_list, calltipmgdet->prefix);
     gchar *custom = classbrowser_add_custom_autocompletion(GPHPEDIT_CLASSBROWSER(main_window.classbrowser), buffer, TAB_COBOL, list);
+    //FIXME: add custom variables support
     result = g_string_new(custom);
     if (custom) g_free(custom);
     calltip_manager_save_result_in_cache(calltipmgdet, result->str, buffer);
     clear_list();
   }
   g_free(calltipmgdet->prefix);
-
   gphpedit_debug_message(DEBUG_CALLTIP,"Autocomplete list: %s\n", result->str);
   return g_string_free(result,FALSE);
 }

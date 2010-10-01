@@ -476,7 +476,7 @@ void call_ctags(Classbrowser_Backend *classback, gchar *filename){
   g_free(command_line);
   g_free(path);
   if (result) {
-   g_print("ctags:%s ->(%s)\n",stdout,stdouterr); //FIXME::
+//   g_print("ctags:%s ->(%s)\n",stdout,stdouterr); //FIXME::
 
   gchar *copy;
   gchar *token;
@@ -698,9 +698,7 @@ static gboolean make_class_completion_string (gpointer key, gpointer value, gpoi
     completion_result = g_string_new(g_strchug(class->classname));
     completion_result = g_string_append(completion_result, "?4"); /* add corresponding image*/
   } else {
-    completion_result = g_string_append(completion_result, " ");
-    completion_result = g_string_append(completion_result, g_strchug(class->classname));
-    completion_result = g_string_append(completion_result, "?4"); /* add corresponding image*/
+    g_string_append_printf (completion_result," %s?4", g_strchug(class->classname)); /* add corresponding image*/
   }
   return FALSE;
 }
@@ -872,6 +870,7 @@ gchar *classbrowser_backend_add_custom_autocompletion(Classbrowser_Backend *clas
           result = g_string_append(result, "?1");
     }
   }
+
   if (result){
     result = g_string_append(result, " ");
     gphpedit_debug_message(DEBUG_CLASSBROWSER, "prefix: %s autocomplete list:%s\n", prefix, result->str);
