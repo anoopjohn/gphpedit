@@ -71,6 +71,9 @@ void tab_css_set_lexer(Document *document)
   gtk_scintilla_set_property(scintilla, "fold.css", "1");
   gtk_scintilla_set_property(scintilla, "fold", "1");
   
+  gtk_scintilla_autoc_set_fill_ups(scintilla, ":");
+  gtk_scintilla_set_word_chars(scintilla, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-");
+
   g_object_unref(prefmg);
 }
 

@@ -68,6 +68,8 @@ void scintilla_python_set_lexer(GtkScintilla *scintilla)
   gtk_scintilla_set_property(scintilla, "lexer.python.strings.over.newline", "1");
   gtk_scintilla_colourise(scintilla, 0, -1);
 
+  gtk_scintilla_set_word_chars(scintilla, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-");
+
   g_object_unref(prefmg);
 }
 

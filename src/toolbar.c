@@ -38,9 +38,16 @@
 						GOBJECT_TYPE_TOOLBAR,              \
 						ToolBarPrivate))
 
+/* toolbar type */
+enum 
+{
+	MAIN_TOOLBAR = 0,
+	FIND_TOOLBAR = 1
+};
+
 struct _ToolBarPrivate 
 {
-  guint type:1; /* 0 for main toolbar 1 for find toolbar*/
+  gint type; /* 0 for main toolbar 1 for find toolbar*/
 
 /* main toolbar widgets */
   GtkWidget *button_new;
@@ -127,7 +134,7 @@ main_toolbar_init (ToolBar *toolbar)
 {
   ToolBarPrivate *priv = TOOLBAR_GET_PRIVATE(toolbar);
 
-  priv->type = 0;
+  priv->type = MAIN_TOOLBAR;
       
   /* Add the File operations to the Main Toolbar */
   create_toolbar_stock_item(&priv->button_new,toolbar,GTK_STOCK_NEW, _("New File"));
@@ -257,12 +264,12 @@ find_toolbar_init (ToolBar *toolbar, GtkAccelGroup *accel_group)
 {
   ToolBarPrivate *priv = TOOLBAR_GET_PRIVATE(toolbar);
   
-  priv->type = 1;
+  priv->type = FIND_TOOLBAR;
   priv->search_label = gtk_label_new(_("Search for: "));
   gtk_widget_show(priv->search_label);
   create_custom_toolbar_item (GTK_TOOLBAR(toolbar), priv->search_label);
 
-  create_entry(&priv->search_entry, _("Incremental search"),20);
+  create_entry(&priv->search_entry, _("Incremental search"), 20);
   g_signal_connect (G_OBJECT (priv->search_entry), "icon-press", G_CALLBACK (on_cleanicon_press), NULL);
 
   /* search completion code */
@@ -314,7 +321,7 @@ GtkWidget *
 toolbar_new (gboolean type, GtkAccelGroup *accel_group)
 {
   ToolBar *toolbar = g_object_new (GOBJECT_TYPE_TOOLBAR, NULL);
-  if (type==0)  main_toolbar_init (toolbar);
+  if (type==MAIN_TOOLBAR)  main_toolbar_init (toolbar);
   else find_toolbar_init (toolbar, accel_group);
 
 	return GTK_WIDGET(toolbar);
@@ -322,14 +329,14 @@ toolbar_new (gboolean type, GtkAccelGroup *accel_group)
 
 gboolean toolbar_is_visible(ToolBar *toolbar){
  ToolBarPrivate *priv = TOOLBAR_GET_PRIVATE(toolbar);
- if (priv->type==0) return get_preferences_manager_show_maintoolbar(main_window.prefmg);
- if (priv->type==1) return get_preferences_manager_show_findtoolbar(main_window.prefmg);
+ if (priv->type==MAIN_TOOLBAR) return get_preferences_manager_show_maintoolbar(main_window.prefmg);
+ if (priv->type==FIND_TOOLBAR) return get_preferences_manager_show_findtoolbar(main_window.prefmg);
  return FALSE;
 }
 
 void toolbar_set_search_text(ToolBar *toolbar, gchar *text){
  ToolBarPrivate *priv = TOOLBAR_GET_PRIVATE(toolbar);
-  if (priv->type==1){
+  if (priv->type==FIND_TOOLBAR){
   if (text) gtk_entry_set_text(GTK_ENTRY(priv->search_entry), text);
   gtk_widget_grab_focus(GTK_WIDGET(priv->search_entry));
   }
@@ -337,14 +344,14 @@ void toolbar_set_search_text(ToolBar *toolbar, gchar *text){
 
 void toolbar_completion_add_text(ToolBar *toolbar, const gchar *text){
  ToolBarPrivate *priv = TOOLBAR_GET_PRIVATE(toolbar);
-  if (priv->type==1){
+  if (priv->type==FIND_TOOLBAR){
   if (text) gtk_entry_completion_insert_action_text (priv->completion, 0, g_strdup(text));    
   }
 }
 
 void toolbar_grab_goto_focus(ToolBar *toolbar){
  ToolBarPrivate *priv = TOOLBAR_GET_PRIVATE(toolbar);
-  if (priv->type==1){
+  if (priv->type==FIND_TOOLBAR){
       gtk_widget_grab_focus(GTK_WIDGET(priv->goto_entry));
   }
 }
@@ -354,7 +361,7 @@ void toolbar_update_controls(ToolBar *toolbar, gboolean is_scintilla, gboolean i
  ToolBarPrivate *priv = TOOLBAR_GET_PRIVATE(toolbar);
   if (is_scintilla){
     //activate toolbar items
-    if (priv->type==0){
+    if (priv->type==MAIN_TOOLBAR){
       gtk_widget_set_sensitive (priv->button_cut, TRUE);
       gtk_widget_set_sensitive (priv->button_paste, TRUE);
       gtk_widget_set_sensitive (priv->button_undo, TRUE);
@@ -374,7 +381,7 @@ void toolbar_update_controls(ToolBar *toolbar, gboolean is_scintilla, gboolean i
     }
   }else{
       //deactivate toolbar items
-        if (priv->type==0){
+        if (priv->type==MAIN_TOOLBAR){
           gtk_widget_set_sensitive (priv->button_cut, FALSE);
           gtk_widget_set_sensitive (priv->button_paste, FALSE);
           gtk_widget_set_sensitive (priv->button_undo, FALSE);

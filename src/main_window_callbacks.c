@@ -41,6 +41,7 @@
 #include "find_dialog.h"
 #include "replace_dialog.h"
 #include "document_manager.h"
+#include "syntax_check_window.h"
 
 gboolean is_app_closing = FALSE;
 
@@ -55,13 +56,13 @@ void quit_application()
   is_app_closing = FALSE;
   g_object_unref(main_window.prefmg);
   g_object_unref(main_window.stylemg);
+  g_object_unref(main_window.clltipmg);
 }
 
 
 void main_window_destroy_event(GtkWidget *widget, gpointer data)
 {
   quit_application();
-  cleanup_calltip();
   gtk_main_quit();
 }
 
@@ -162,6 +163,7 @@ void add_file_filters(GtkFileChooser *chooser){
     caption =g_string_append(caption, ext_pattern->str);
     gtk_file_filter_add_pattern(filter, ext_pattern->str);
   }
+
   g_strfreev(php_file_extensions);
   caption =g_string_append(caption, ")");
   gtk_file_filter_set_name (filter, caption->str);
@@ -793,7 +795,7 @@ void zoom_100(GtkWidget *widget)
 
 void syntax_check(GtkWidget *widget)
 {
-   gtk_syntax_check_window_run_check(main_window.win, document_manager_get_current_document(main_window.docmg));
+   gtk_syntax_check_window_run_check(GTK_SYNTAX_CHECK_WINDOW(main_window.win), document_manager_get_current_document(main_window.docmg));
 }
 
 

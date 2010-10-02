@@ -14,6 +14,7 @@ CFLAGS = $(shell pkg-config --cflags gtk+-2.0) -g -Wall -DGTK -DSCI_LEXER -fPIC
 LDFLAGS_PRE = $(shell pkg-config --libs gtk+-2.0) -DGTK2
 LDFLAGS_POST =  $(LEXERS)  $(SCINTILLA_LIB) -lstdc++
 
+ARCH=-arch i386 
 CC = gcc
 LD = gcc
 AR = ar

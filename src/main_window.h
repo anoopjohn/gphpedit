@@ -32,10 +32,10 @@
 #include "tab.h"
 #include "menubar.h"
 #include "toolbar.h"
-#include "syntax_check_window.h"
 #include "preferences_manager.h"
 #include "templates.h"
 #include "gtksourcestyleschememanager.h"
+
 
 typedef struct
 {
@@ -44,6 +44,8 @@ typedef struct
   TemplatesManager *tempmg;
 
   GtkSourceStyleSchemeManager *stylemg;
+
+  CalltipManager *clltipmg;
 
   GtkWidget *window;
   GtkWidget *prinbox;
@@ -63,7 +65,7 @@ typedef struct
   
   GtkWidget *notebook_editor;
   /* syntax check widget */
-  GtkSyntax_Check_Window *win;
+  GtkWidget *win;
 
   DocumentManager *docmg;
 

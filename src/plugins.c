@@ -636,7 +636,7 @@ void plugin_run(Plugin *plugin, Document *document)
         }
     }
     else if (g_str_has_prefix(stdout, "SYNTAX")){
-        syntax_window(main_window.win, document, data);
+        syntax_window(GTK_SYNTAX_CHECK_WINDOW(main_window.win), document, data);
     }
     else if (g_str_has_prefix(stdout, "OPEN")){
       gphpedit_debug_message(DEBUG_PLUGINS,"Opening file :date: %s\n", data);

@@ -82,7 +82,6 @@ ClassBrowserVar;
 */
 
 static gpointer parent_class;
-static void               classbrowser_backend_finalize         (GObject                *object);
 static void               classbrowser_backend_init             (gpointer                object,
 							       gpointer                klass);
 static void classbrowser_backend_class_init (Classbrowser_BackendClass *klass);
@@ -133,7 +132,6 @@ classbrowser_backend_class_init (Classbrowser_BackendClass *klass)
 
 	object_class = G_OBJECT_CLASS (klass);
   parent_class = g_type_class_peek_parent (klass);
-	object_class->finalize = classbrowser_backend_finalize;
   object_class->dispose = classbrowser_backend_dispose;
 
 /*
@@ -175,18 +173,6 @@ void classbrowser_backend_dispose (GObject *object)
   if (classbackdet->php_class_tree) g_tree_destroy (classbackdet->php_class_tree);
   /* Chain up to the parent class */
   G_OBJECT_CLASS (parent_class)->dispose (object);
-}
-
-void
-classbrowser_backend_finalize (GObject *object)
-{
-//  Classbrowser_Backend *classback = CLASSBROWSER_BACKEND(object);
-//  Classbrowser_BackendDetails *classbackdet;
-//	classbackdet = CLASSBROWSER_BACKEND_GET_PRIVATE(classback);
-  
-  //free class data
-
-	G_OBJECT_CLASS (parent_class)->finalize (object);
 }
 
 Classbrowser_Backend *classbrowser_backend_new (void)
@@ -490,7 +476,7 @@ void call_ctags(Classbrowser_Backend *classback, gchar *filename){
   g_free(command_line);
   g_free(path);
   if (result) {
-  // g_print("ctags:%s ->(%s)\n",stdout,stdouterr);
+//   g_print("ctags:%s ->(%s)\n",stdout,stdouterr); //FIXME::
 
   gchar *copy;
   gchar *token;
@@ -712,9 +698,7 @@ static gboolean make_class_completion_string (gpointer key, gpointer value, gpoi
     completion_result = g_string_new(g_strchug(class->classname));
     completion_result = g_string_append(completion_result, "?4"); /* add corresponding image*/
   } else {
-    completion_result = g_string_append(completion_result, " ");
-    completion_result = g_string_append(completion_result, g_strchug(class->classname));
-    completion_result = g_string_append(completion_result, "?4"); /* add corresponding image*/
+    g_string_append_printf (completion_result," %s?4", g_strchug(class->classname)); /* add corresponding image*/
   }
   return FALSE;
 }
@@ -844,7 +828,7 @@ gchar *classbrowser_backend_custom_function_calltip(Classbrowser_Backend *classb
   return calltip;
 }
 
-gchar *classbrowser_backend_add_custom_autocompletion(Classbrowser_Backend *classback, gchar *prefix, GSList *list){
+gchar *classbrowser_backend_add_custom_autocompletion(Classbrowser_Backend *classback, gchar *prefix, gint file_type, GSList *list){
   Classbrowser_BackendDetails *classbackdet;
 	classbackdet = CLASSBROWSER_BACKEND_GET_PRIVATE(classback);
   GSList *li;
@@ -857,7 +841,7 @@ gchar *classbrowser_backend_add_custom_autocompletion(Classbrowser_Backend *clas
   for(li = classbackdet->functionlist; li!= NULL; li = g_slist_next(li)) {
     function = li->data;
     if (function) {
-      if ((g_str_has_prefix(function->functionname, prefix) && function->file_type==TAB_PHP)) {
+      if ((g_str_has_prefix(function->functionname, prefix) && function->file_type==file_type)) {
         member_functions = g_list_prepend(member_functions, function->functionname);
       }
     }
@@ -886,6 +870,7 @@ gchar *classbrowser_backend_add_custom_autocompletion(Classbrowser_Backend *clas
           result = g_string_append(result, "?1");
     }
   }
+
   if (result){
     result = g_string_append(result, " ");
     gphpedit_debug_message(DEBUG_CLASSBROWSER, "prefix: %s autocomplete list:%s\n", prefix, result->str);

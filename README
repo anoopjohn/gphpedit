@@ -239,6 +239,9 @@ The following list all gphpedit’s shortcut keys.
  7) Autocompletion:
     * Insert template (Ctrl + j)
 
+8) folding
+	* if you hold Ctrl key pressed and you click a fold mark, all it's children will be folded. 
+	* if you hold SHIFT key pressed and you click a fold mark, all it's children will be expanded. 
 ================
 Find and Replace
 ================

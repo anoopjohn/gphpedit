@@ -317,7 +317,7 @@ void classbrowser_update_cb (Classbrowser_Backend *classback, gboolean result, g
   gphpeditClassBrowserPrivate *priv= (gphpeditClassBrowserPrivate *) user_data;
   static guint press_event = 0;
   static guint release_event = 0;
-  if (!get_preferences_manager_side_panel_status(main_window.prefmg)){ /* do nothing if classbrowser is hidden */
+  if (get_preferences_manager_side_panel_status(main_window.prefmg)){ /* do nothing if classbrowser is hidden */
     return;
   }
   if (press_event && g_signal_handler_is_connected (priv->classtreeview, press_event)) {
@@ -583,8 +583,8 @@ gchar *classbrowser_custom_function_calltip(gphpeditClassBrowser *classbrowser, 
   return classbrowser_backend_custom_function_calltip(priv->classbackend, function_name);
 }
 
-gchar *classbrowser_add_custom_autocompletion(gphpeditClassBrowser *classbrowser, gchar *prefix, GSList *list)
+gchar *classbrowser_add_custom_autocompletion(gphpeditClassBrowser *classbrowser, gchar *prefix, gint file_type, GSList *list)
 {
 	gphpeditClassBrowserPrivate *priv = CLASSBROWSER_BACKEND_GET_PRIVATE(classbrowser);
-  return classbrowser_backend_add_custom_autocompletion(priv->classbackend, prefix, list);
+  return classbrowser_backend_add_custom_autocompletion(priv->classbackend, prefix, file_type, list);
 } 
