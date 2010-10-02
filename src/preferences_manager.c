@@ -306,33 +306,34 @@ gint get_default_delay(void){
 void load_default_settings(Preferences_ManagerDetails *prefdet)
 {
   gphpedit_debug(DEBUG_PREFS);
-  prefdet->marker_back = get_color("/gPHPEdit/default_style/bookmark","default_style",15908608);
-  prefdet->php_binary_location= get_string("/gPHPEdit/locations/phpbinary","php");
-  prefdet->shared_source_location = get_string("/gPHPEdit/locations/shared_source","");
+  prefdet->marker_back = get_color("/gPHPEdit/default_style/bookmark", "default_style", 15908608);
+  prefdet->php_binary_location= get_string("/gPHPEdit/locations/phpbinary", "php");
+  prefdet->shared_source_location = get_string("/gPHPEdit/locations/shared_source", "");
 
-  prefdet->indentation_size = get_size("/gPHPEdit/defaults/indentationsize",4); 
-  prefdet->tab_size = get_size("/gPHPEdit/defaults/tabsize",4); 
+  prefdet->indentation_size = get_size("/gPHPEdit/defaults/indentationsize", 4); 
+  prefdet->tab_size = get_size("/gPHPEdit/defaults/tabsize", 4); 
   prefdet->auto_complete_delay = get_size("/gPHPEdit/defaults/auto_complete_delay", get_default_delay());
   prefdet->calltip_delay = get_size("/gPHPEdit/defaults/calltip_delay", get_default_delay());
 
-  prefdet->show_indentation_guides = get_bool ("/gPHPEdit/defaults/showindentationguides",FALSE);
-  prefdet->show_folding = TRUE;//gconf_client_get_bool (config,"/gPHPEdit/defaults/showfolding",NULL);
-  prefdet->edge_mode = get_bool ("/gPHPEdit/defaults/edgemode",FALSE);
+  prefdet->show_indentation_guides = get_bool("/gPHPEdit/defaults/showindentationguides", FALSE);
+  prefdet->show_folding = TRUE;
+  //gconf_client_get_bool (config,"/gPHPEdit/defaults/showfolding",NULL);
+  prefdet->edge_mode = get_bool("/gPHPEdit/defaults/edgemode", FALSE);
   prefdet->edge_column = get_size("/gPHPEdit/defaults/edgecolumn", 80);
-  prefdet->line_wrapping = get_color("/gPHPEdit/defaults/linewrapping","defaults", TRUE);
+  prefdet->line_wrapping = get_bool("/gPHPEdit/defaults/linewrapping", TRUE);
   /* font quality */
   prefdet->font_quality = preferences_manager_parse_font_quality();
   prefdet->auto_complete_braces= get_bool("/gPHPEdit/defaults/autocompletebraces", FALSE);
   prefdet->higthlightcaretline= get_bool("/gPHPEdit/defaults/higthlightcaretline", FALSE);
-  prefdet->save_session = get_color("/gPHPEdit/defaults/save_session","defaults", TRUE);
-  prefdet->use_tabs_instead_spaces = get_color("/gPHPEdit/defaults/use_tabs_instead_spaces","defaults", TRUE);
-  prefdet->single_instance_only = get_color("/gPHPEdit/defaults/single_instance_only","defaults", TRUE);
-  prefdet->php_file_extensions = get_string("/gPHPEdit/defaults/php_file_extensions",DEFAULT_PHP_EXTENSIONS);
+  prefdet->save_session = get_bool("/gPHPEdit/defaults/save_session", TRUE);
+  prefdet->use_tabs_instead_spaces = get_bool("/gPHPEdit/defaults/use_tabs_instead_spaces", FALSE);
+  prefdet->single_instance_only = get_bool("/gPHPEdit/defaults/single_instance_only", TRUE);
+  prefdet->php_file_extensions = get_string("/gPHPEdit/defaults/php_file_extensions", DEFAULT_PHP_EXTENSIONS);
   prefdet->search_history= get_string_list("/gPHPEdit/search_history");
-  prefdet->showfilebrowser = get_color("/gPHPEdit/defaults/showfolderbrowser", "defaults",TRUE);
-  prefdet->showstatusbar = get_color("/gPHPEdit/defaults/showstatusbar", "defaults",TRUE);
-  prefdet->showmaintoolbar = get_color("/gPHPEdit/defaults/showmaintoolbar", "defaults",TRUE);
-  prefdet->showfindtoolbar = get_color("/gPHPEdit/defaults/showfindtoolbar", "defaults",TRUE);
+  prefdet->showfilebrowser = get_bool("/gPHPEdit/defaults/showfolderbrowser", TRUE);
+  prefdet->showstatusbar = get_bool("/gPHPEdit/defaults/showstatusbar", TRUE);
+  prefdet->showmaintoolbar = get_bool("/gPHPEdit/defaults/showmaintoolbar", TRUE);
+  prefdet->showfindtoolbar = get_bool("/gPHPEdit/defaults/showfindtoolbar", TRUE);
 }
 
 void load_window_settings(Preferences_ManagerDetails *prefdet)
