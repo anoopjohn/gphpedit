@@ -760,7 +760,7 @@ static void InsertCloseBrace (GtkScintilla *scintilla, gint current_pos, gchar c
   }
 }
 
-void autoindent_brace_code (GtkScintilla *sci)
+static void autoindent_brace_code (GtkScintilla *sci)
 {
   gint current_pos;
   gint current_line;
@@ -797,6 +797,21 @@ void autoindent_brace_code (GtkScintilla *sci)
     }
     gtk_scintilla_goto_pos(sci, pos);
     gtk_scintilla_end_undo_action(sci);
+  }
+}
+
+static void cancel_calltip (GtkScintilla *sci)
+{
+  if (gtk_scintilla_call_tip_active(sci)) {
+    gtk_scintilla_call_tip_cancel(sci);
+  }
+}
+
+static void show_calltip (DocumentDetails *docdet, gint delay, gint pos)
+{
+  if (!docdet->calltip_timer_set) {
+    docdet->calltip_timer_id = g_timeout_add(delay, calltip_callback, GINT_TO_POINTER(pos));
+    docdet->calltip_timer_set=TRUE;
   }
 }
 
@@ -840,22 +855,17 @@ static void char_added(GtkWidget *scintilla, guint ch, gpointer user_data)
     case(TAB_PHP):
       if ((style != SCE_HPHP_SIMPLESTRING) && (style != SCE_HPHP_HSTRING) && (style != SCE_HPHP_COMMENTLINE) && (style !=SCE_HPHP_COMMENT)) {
       switch(ch) {
-          case ('\r'):
-          case ('\n'):
-            autoindent_brace_code (sci);
+        case ('\r'):
+        case ('\n'):
+          autoindent_brace_code (sci);
           break;
-          case (')'):
-        if (gtk_scintilla_call_tip_active(sci)) {
-        gtk_scintilla_call_tip_cancel(sci);
-        }
-        break; /*exit nothing todo */
+        case (')'):
+          cancel_calltip (sci);
+          break;
         case ('('):
-        if (!docdet->calltip_timer_set) {
-          docdet->calltip_timer_id = g_timeout_add(get_preferences_manager_calltip_delay(pref), calltip_callback, GINT_TO_POINTER(current_pos));
-          docdet->calltip_timer_set=TRUE;
-        }
-        break;
-          default:      
+          show_calltip (docdet, get_preferences_manager_calltip_delay(pref), current_pos);
+          break;
+        default:
         member_function_buffer = gtk_scintilla_get_text_range (sci, wordEnd-1, wordEnd +1, &member_function_length);
         if (strcmp(member_function_buffer, "->")==0 || strcmp(member_function_buffer, "::")==0) {
           /*search back for a '$' in that line */
@@ -912,16 +922,11 @@ static void char_added(GtkWidget *scintilla, guint ch, gpointer user_data)
             autoindent_brace_code (sci);
           break;
         case (';'):
-        if (gtk_scintilla_call_tip_active(sci)) {
-        gtk_scintilla_call_tip_cancel(sci);
-        }
-        break; /*exit nothing to do*/
+            cancel_calltip (sci);
+            break;
           case (':'):
-        if (!docdet->calltip_timer_set) {
-          docdet->calltip_timer_id = g_timeout_add(get_preferences_manager_calltip_delay(pref), calltip_callback, GINT_TO_POINTER(current_pos));
-          docdet->calltip_timer_set=TRUE;
-        }
-        break;
+            show_calltip (docdet, get_preferences_manager_calltip_delay(pref), current_pos);
+            break;
           default:  
         member_function_buffer = gtk_scintilla_get_text_range (sci, wordStart-2, wordStart, &member_function_length);
         if(current_word_length>=3){
