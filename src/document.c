@@ -815,6 +815,30 @@ static void show_calltip (DocumentDetails *docdet, gint delay, gint pos)
   }
 }
 
+static void show_autocompletion (DocumentDetails *docdet, gint pos)
+{
+  if (!docdet->completion_timer_set) {
+    Preferences_Manager *pref = preferences_manager_new ();
+    docdet->completion_timer_id = g_timeout_add(get_preferences_manager_auto_complete_delay(pref), auto_complete_callback, GINT_TO_POINTER(pos));
+    docdet->completion_timer_set=TRUE;
+    g_object_unref(pref);
+  }
+}
+
+gboolean auto_complete_classes_callback(gpointer data)
+{
+  Document *doc = document_manager_get_current_document(main_window.docmg);
+  DocumentDetails *docdet = DOCUMENT_GET_PRIVATE(doc);
+  gint current_pos;
+  current_pos = document_get_current_position(doc);
+  if (current_pos == GPOINTER_TO_INT(data)) {
+    GString *autocomp = classbrowser_get_autocomplete_php_classes_string(GPHPEDIT_CLASSBROWSER(main_window.classbrowser)); 
+    if (autocomp) gtk_scintilla_user_list_show(GTK_SCINTILLA(docdet->scintilla), 1, autocomp->str);
+    g_string_free(autocomp,TRUE); /*release resources*/
+  }
+  docdet->completion_timer_set=FALSE;
+  return FALSE;
+}
 static void char_added(GtkWidget *scintilla, guint ch, gpointer user_data)
 {
   gphpedit_debug_message (DEBUG_DOCUMENT, "char added:%d",ch);
@@ -888,11 +912,9 @@ static void char_added(GtkWidget *scintilla, guint ch, gpointer user_data)
             g_free(result);
             g_free(buff);
         } else if (g_strcmp0(member_function_buffer,"instanceof")==0 || g_strcmp0(member_function_buffer,"is_subclass_of")==0) {
-        gtk_scintilla_insert_text(sci, current_pos," ");
-        gtk_scintilla_goto_pos(sci, current_pos +1);
-        GString *autocomp = classbrowser_get_autocomplete_php_classes_string(GPHPEDIT_CLASSBROWSER(main_window.classbrowser)); 
-        if (autocomp) gtk_scintilla_user_list_show(sci, 1, autocomp->str);
-        g_string_free(autocomp,TRUE); /*release resources*/
+          gtk_scintilla_insert_text(sci, current_pos," ");
+          gtk_scintilla_goto_pos(sci, current_pos + 1);
+          auto_complete_classes_callback(GINT_TO_POINTER(current_pos));
         } else if (current_word_length>=3) {
         // check to see if they've typed <?php and if so do nothing
         if (wordStart>1) {
@@ -903,7 +925,7 @@ static void char_added(GtkWidget *scintilla, guint ch, gpointer user_data)
           }
           g_free(ac_buffer);
         }
-        docdet->completion_timer_id = g_timeout_add(get_preferences_manager_auto_complete_delay(pref), auto_complete_callback, GINT_TO_POINTER(current_pos));
+        show_autocompletion (docdet, current_pos);
         }
         g_free(member_function_buffer);
         }
@@ -915,6 +937,7 @@ static void char_added(GtkWidget *scintilla, guint ch, gpointer user_data)
               autoindent_brace_code (sci);
             break;
         }
+        break;
       case(TAB_CSS):
       switch(ch) {
           case ('\r'):
@@ -930,10 +953,7 @@ static void char_added(GtkWidget *scintilla, guint ch, gpointer user_data)
           default:  
         member_function_buffer = gtk_scintilla_get_text_range (sci, wordStart-2, wordStart, &member_function_length);
         if(current_word_length>=3){
-            if (!docdet->completion_timer_set) {
-              docdet->completion_timer_id = g_timeout_add(get_preferences_manager_auto_complete_delay(pref), auto_complete_callback, GINT_TO_POINTER(current_pos));
-              docdet->completion_timer_set=TRUE;
-            }
+          show_autocompletion (docdet, current_pos);
           }  
         g_free(member_function_buffer);
         }
@@ -942,10 +962,7 @@ static void char_added(GtkWidget *scintilla, guint ch, gpointer user_data)
       case(TAB_SQL):
         member_function_buffer = gtk_scintilla_get_text_range (sci, wordStart-2, wordStart, &member_function_length);
         if(current_word_length>=3){
-            if (!docdet->completion_timer_set) {
-              docdet->completion_timer_id = g_timeout_add(get_preferences_manager_auto_complete_delay(pref), auto_complete_callback, GINT_TO_POINTER(current_pos));
-              docdet->completion_timer_set=TRUE;
-            }
+          show_autocompletion (docdet, current_pos);
           }
         g_free(member_function_buffer);
         break;
