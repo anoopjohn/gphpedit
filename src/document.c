@@ -807,11 +807,13 @@ static void cancel_calltip (GtkScintilla *sci)
   }
 }
 
-static void show_calltip (DocumentDetails *docdet, gint delay, gint pos)
+static void show_calltip (DocumentDetails *docdet, gint pos)
 {
   if (!docdet->calltip_timer_set) {
-    docdet->calltip_timer_id = g_timeout_add(delay, calltip_callback, GINT_TO_POINTER(pos));
+    Preferences_Manager *pref = preferences_manager_new ();
+    docdet->calltip_timer_id = g_timeout_add(get_preferences_manager_calltip_delay(pref), calltip_callback, GINT_TO_POINTER(pos));
     docdet->calltip_timer_set=TRUE;
+    g_object_unref(pref);
   }
 }
 
@@ -887,7 +889,7 @@ static void char_added(GtkWidget *scintilla, guint ch, gpointer user_data)
           cancel_calltip (sci);
           break;
         case ('('):
-          show_calltip (docdet, get_preferences_manager_calltip_delay(pref), current_pos);
+          show_calltip (docdet, current_pos);
           break;
         default:
         member_function_buffer = gtk_scintilla_get_text_range (sci, wordEnd-1, wordEnd +1, &member_function_length);
@@ -896,7 +898,7 @@ static void char_added(GtkWidget *scintilla, guint ch, gpointer user_data)
           gint initial_pos= gtk_scintilla_position_from_line(sci, current_line);
           gint line_size;
           gchar *line_text= gtk_scintilla_get_text_range (sci, initial_pos, wordStart-1, &line_size);
-            if (!check_php_variable_before(line_text)) return;
+            if (!check_php_variable_before(line_text)) break;
             if (!docdet->completion_timer_set) {
               docdet->completion_timer_id = g_timeout_add(get_preferences_manager_auto_complete_delay(pref), auto_memberfunc_complete_callback, GINT_TO_POINTER(current_pos));
               docdet->completion_timer_set=TRUE;
@@ -948,13 +950,13 @@ static void char_added(GtkWidget *scintilla, guint ch, gpointer user_data)
             cancel_calltip (sci);
             break;
           case (':'):
-            show_calltip (docdet, get_preferences_manager_calltip_delay(pref), current_pos);
+            show_calltip (docdet, current_pos);
             break;
           default:  
         member_function_buffer = gtk_scintilla_get_text_range (sci, wordStart-2, wordStart, &member_function_length);
         if(current_word_length>=3){
           show_autocompletion (docdet, current_pos);
-          }  
+        }
         g_free(member_function_buffer);
         }
         break;
@@ -963,7 +965,7 @@ static void char_added(GtkWidget *scintilla, guint ch, gpointer user_data)
         member_function_buffer = gtk_scintilla_get_text_range (sci, wordStart-2, wordStart, &member_function_length);
         if(current_word_length>=3){
           show_autocompletion (docdet, current_pos);
-          }
+        }
         g_free(member_function_buffer);
         break;
       }
