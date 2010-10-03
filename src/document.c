@@ -938,6 +938,18 @@ static void char_added(GtkWidget *scintilla, guint ch, gpointer user_data)
             case ('\n'):
               autoindent_brace_code (sci);
             break;
+            case (')'):
+              cancel_calltip (sci);
+            break;
+            case ('('):
+              show_calltip (docdet, current_pos);
+            break;
+            default:
+              member_function_buffer = gtk_scintilla_get_text_range (sci, wordStart-2, wordStart, &member_function_length);
+              if(current_word_length>=3){
+                show_autocompletion (docdet, current_pos);
+              }
+              g_free(member_function_buffer);
         }
         break;
       case(TAB_CSS):
@@ -952,7 +964,7 @@ static void char_added(GtkWidget *scintilla, guint ch, gpointer user_data)
           case (':'):
             show_calltip (docdet, current_pos);
             break;
-          default:  
+          default:
         member_function_buffer = gtk_scintilla_get_text_range (sci, wordStart-2, wordStart, &member_function_length);
         if(current_word_length>=3){
           show_autocompletion (docdet, current_pos);
