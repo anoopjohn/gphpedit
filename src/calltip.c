@@ -59,8 +59,8 @@ struct CalltipManagerDetails
 
 static void calltip_manager_finalize (GObject  *object);
 static void  calltip_manager_class_init (CalltipManagerClass *klass);
-static void calltip_manager_load_api_file(const gchar *api_filename, GTree *api_tree);
-static void calltip_manager_function_list_from_array_prepare(gchar **keywords, GTree *api_tree);
+static void calltip_manager_load_api_file(const gchar *api_filename, GTree **api_tree);
+static void calltip_manager_function_list_from_array_prepare(gchar **keywords, GTree **api_tree);
 gboolean calltip_manager_has_cache(gchar *buffer, gchar *cache_str, gchar *cache_completion);
 GString *calltip_manager_get_autocomp_from_cache(gchar *buffer, gchar *cache_str, gchar *cache_completion);
 static void calltip_manager_save_result_in_cache(CalltipManagerDetails *calltipmgdet, gchar *result, gchar *search_word);
@@ -137,18 +137,11 @@ calltip_manager_init (CalltipManager  *object)
 	CalltipManagerDetails *calltipmgdet;
 	calltipmgdet = CALLTIP_MANAGER_GET_PRIVATE(object);
   /* init calltips table*/
-  calltipmgdet->php_api_tree=g_tree_new_full((GCompareDataFunc) g_utf8_collate, NULL, g_free, NULL); 
-  //FIXME: only init if api file is found.
-  calltipmgdet->css_api_tree=g_tree_new_full((GCompareDataFunc) g_utf8_collate, NULL, g_free, NULL);
-  calltipmgdet->cxx_api_tree=g_tree_new_full((GCompareDataFunc) g_utf8_collate, NULL, g_free, NULL);
-  calltipmgdet->cobol_api_tree=g_tree_new_full((GCompareDataFunc) g_utf8_collate, NULL, g_free, NULL);
-  calltipmgdet->sql_api_tree=g_tree_new_full((GCompareDataFunc) g_utf8_collate, NULL, g_free, NULL);
-
-  calltip_manager_load_api_file("php-gphpedit.api", calltipmgdet->php_api_tree);
-  calltip_manager_load_api_file("css.api", calltipmgdet->css_api_tree);
-  calltip_manager_load_api_file("c.api", calltipmgdet->cxx_api_tree);
-  calltip_manager_function_list_from_array_prepare(cobol_keyword, calltipmgdet->cobol_api_tree);
-  calltip_manager_function_list_from_array_prepare(sql_keywords, calltipmgdet->sql_api_tree);
+  calltip_manager_load_api_file("php-gphpedit.api", &calltipmgdet->php_api_tree);
+  calltip_manager_load_api_file("css.api", &calltipmgdet->css_api_tree);
+  calltip_manager_load_api_file("c.api", &calltipmgdet->cxx_api_tree);
+  calltip_manager_function_list_from_array_prepare(cobol_keyword, &calltipmgdet->cobol_api_tree);
+  calltip_manager_function_list_from_array_prepare(sql_keywords, &calltipmgdet->sql_api_tree);
 
   calltipmgdet->cache_str[0]=0;
   calltipmgdet->cache_completion = NULL;
@@ -191,7 +184,7 @@ CalltipManager *calltip_manager_new (void)
 * calltip_manager_load_api_file (internal function)
 * loads APi file content in the given GTree
 */
-static void calltip_manager_load_api_file(const gchar *api_filename, GTree *api_tree)
+static void calltip_manager_load_api_file(const gchar *api_filename, GTree **api_tree)
 {
   FILE *apifile;
   char buffer[MAX_API_LINE_LENGTH];
@@ -201,12 +194,13 @@ static void calltip_manager_load_api_file(const gchar *api_filename, GTree *api_
   gphpedit_debug_message(DEBUG_CALLTIP, "API PATH:'%s'", api_dir);
   apifile = fopen(api_dir, "r");
   if(apifile) {
+    *api_tree=g_tree_new_full((GCompareDataFunc) g_utf8_collate, NULL, g_free, NULL);
     while(fgets( buffer, MAX_API_LINE_LENGTH, apifile ) != NULL ) {
       gchar *line=g_strdup(buffer);
       gchar *token_line = line;
       gchar *function_name = strtok(token_line, "|");
       gphpedit_debug_message(DEBUG_CALLTIP, "function name:%s",function_name);
-      g_tree_insert (api_tree, function_name, (line + strlen(function_name)+1));
+      g_tree_insert (*api_tree, function_name, (line + strlen(function_name)+1));
       //g_free(line);
     }
     fclose( apifile );
@@ -216,6 +210,19 @@ static void calltip_manager_load_api_file(const gchar *api_filename, GTree *api_
   g_free(api_dir);
 }
 
+/*
+* load keywords string in a GTree to make search faster.
+*/
+static void calltip_manager_function_list_from_array_prepare(gchar **keywords, GTree **api_tree)
+{
+  gphpedit_debug(DEBUG_CALLTIP);
+  guint n;
+
+  *api_tree=g_tree_new_full((GCompareDataFunc) g_utf8_collate, NULL, g_free, NULL);
+  for (n = 0; keywords[n]!=NULL; n++) {
+    g_tree_insert (*api_tree, g_strdup(keywords[n]), ""); /* we only need the key */
+  }
+}
 
 static gchar *get_css_api_line(CalltipManagerDetails *calltipmgdet, gchar *buffer)
 {
@@ -310,19 +317,6 @@ gchar *calltip_manager_show_call_tip(CalltipManager *calltipmg, gint type, gchar
       break;
   }
   return result;
-}
-
-/*
-* load keywords string in a GTree to make search faster.
-*/
-static void calltip_manager_function_list_from_array_prepare(gchar **keywords, GTree *api_tree)
-{
-  gphpedit_debug(DEBUG_CALLTIP);
-  guint n;
-
-  for (n = 0; keywords[n]!=NULL; n++) {
-    g_tree_insert (api_tree, g_strdup(keywords[n]), ""); /* we only need the key */
-  }
 }
 
 static gboolean make_completion_string (gpointer key, gpointer value, gpointer data){
