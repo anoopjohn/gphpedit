@@ -128,7 +128,7 @@ void tab_set_general_scintilla_properties(Document *doc);
 static void save_point_reached(GtkWidget *scintilla, gpointer user_data);
 static void save_point_left(GtkWidget *scintilla, gpointer user_data);
 void update_ui(GtkWidget *scintilla);
-static void indent_line(GtkWidget *scintilla, gint line, gint indent);
+static void indent_line(GtkScintilla *scintilla, gint line, gint indent);
 gboolean calltip_callback(gpointer data);
 gboolean auto_complete_callback(gpointer data);
 void tab_set_configured_scintilla_properties(GtkScintilla *scintilla);
@@ -760,6 +760,44 @@ static void InsertCloseBrace (GtkScintilla *scintilla, gint current_pos, gchar c
   }
 }
 
+void autoindent_brace_code (GtkScintilla *sci)
+{
+  gint current_pos;
+  gint current_line;
+  gint previous_line;
+  gint previous_line_indentation;
+  gint previous_line_end;
+  gchar *previous_char_buffer;
+  gint previous_char_buffer_length;
+
+  Preferences_Manager *pref = preferences_manager_new ();
+  current_pos = gtk_scintilla_get_current_pos(sci);
+  current_line = gtk_scintilla_line_from_position(sci, current_pos);
+
+  gphpedit_debug (DEBUG_DOCUMENT);
+
+  if (current_line>0) {
+    previous_line = current_line-1;
+    previous_line_indentation = gtk_scintilla_get_line_indentation(sci, previous_line);
+
+    previous_line_end = gtk_scintilla_get_line_end_position(sci, previous_line);
+    previous_char_buffer = gtk_scintilla_get_text_range (sci, previous_line_end-1, previous_line_end, &previous_char_buffer_length);
+    if (*previous_char_buffer=='{') {
+      previous_line_indentation+=get_preferences_manager_indentation_size(pref);
+    }
+    g_free(previous_char_buffer);
+    indent_line(sci, current_line, previous_line_indentation);
+    gphpedit_debug_message (DEBUG_DOCUMENT, "previous_line=%d, previous_indent=%d\n", previous_line, previous_line_indentation);
+    gint pos;
+    if (get_preferences_manager_use_tabs_instead_spaces(pref)) {
+      pos= gtk_scintilla_position_from_line(sci, current_line)+(previous_line_indentation/gtk_scintilla_get_tab_width(sci));
+    } else {
+      pos=gtk_scintilla_position_from_line(sci, current_line)+(previous_line_indentation);
+    }
+    gtk_scintilla_goto_pos(sci, pos);
+  }
+}
+
 static void char_added(GtkWidget *scintilla, guint ch, gpointer user_data)
 {
   gphpedit_debug_message (DEBUG_DOCUMENT, "char added:%d",ch);
@@ -774,19 +812,14 @@ static void char_added(GtkWidget *scintilla, guint ch, gpointer user_data)
   gint wordEnd;
   gint current_word_length;
   gint current_line;
-  gint previous_line;
-  gint previous_line_indentation;
   gchar *ac_buffer = NULL;
   gint ac_length;
   gchar *member_function_buffer = NULL;
   gint member_function_length;
-  gint previous_line_end;
-  gchar *previous_char_buffer;
-  gint previous_char_buffer_length;
   guint style;
   gint type;
   type = docdet->type;
-  if ((type != TAB_PHP) && (ch=='\r'|| ch=='\n' || ch=='\t')) return;
+  if ((type != TAB_PHP && type != TAB_CSS) && (ch=='\r'|| ch=='\n' || ch=='\t')) return;
   Preferences_Manager *pref = preferences_manager_new ();
   current_pos = gtk_scintilla_get_current_pos(sci);
   current_line = gtk_scintilla_line_from_position(sci, current_pos);
@@ -807,27 +840,8 @@ static void char_added(GtkWidget *scintilla, guint ch, gpointer user_data)
       switch(ch) {
           case ('\r'):
           case ('\n'):
-        if (current_line>0) {
-        previous_line = current_line-1;
-        previous_line_indentation = gtk_scintilla_get_line_indentation(sci, previous_line);
-
-        previous_line_end = gtk_scintilla_get_line_end_position(sci, previous_line);
-        previous_char_buffer = gtk_scintilla_get_text_range (sci, previous_line_end-1, previous_line_end, &previous_char_buffer_length);
-        if (*previous_char_buffer=='{') {
-            previous_line_indentation+=get_preferences_manager_indentation_size(pref);
-        }
-        g_free(previous_char_buffer);
-        indent_line(scintilla, current_line, previous_line_indentation);
-        gphpedit_debug_message (DEBUG_DOCUMENT, "previous_line=%d, previous_indent=%d\n", previous_line, previous_line_indentation);
-        gint pos;
-        if (get_preferences_manager_use_tabs_instead_spaces(pref)) {
-        pos= gtk_scintilla_position_from_line(sci, current_line)+(previous_line_indentation/gtk_scintilla_get_tab_width(sci));
-        }
-        else {
-        pos=gtk_scintilla_position_from_line(sci, current_line)+(previous_line_indentation);
-        }
-        gtk_scintilla_goto_pos(sci, pos);
-        }
+            autoindent_brace_code (sci);
+          break;
           case (')'):
         if (gtk_scintilla_call_tip_active(sci)) {
         gtk_scintilla_call_tip_cancel(sci);
@@ -884,6 +898,10 @@ static void char_added(GtkWidget *scintilla, guint ch, gpointer user_data)
         break;
       case(TAB_CSS):
       switch(ch) {
+          case ('\r'):
+          case ('\n'):
+            autoindent_brace_code (sci);
+          break;
         case (';'):
         if (gtk_scintilla_call_tip_active(sci)) {
         gtk_scintilla_call_tip_cancel(sci);
@@ -931,15 +949,13 @@ static void char_added(GtkWidget *scintilla, guint ch, gpointer user_data)
   g_object_unref(pref);
 }
 
-static void indent_line(GtkWidget *scintilla, gint line, gint indent)
+static void indent_line(GtkScintilla *sci, gint line, gint indent)
 {
   gint selStart;
   gint selEnd;
   gint posBefore;
   gint posAfter;
   gint posDifference;
-
-  GtkScintilla *sci = GTK_SCINTILLA(scintilla);
 
   selStart = gtk_scintilla_get_selection_start(sci);
   selEnd = gtk_scintilla_get_selection_end(sci);
