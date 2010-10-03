@@ -41,6 +41,7 @@ struct CalltipManagerDetails
   GTree *php_api_tree;
   GTree *css_api_tree;
   GTree *cobol_api_tree;
+  GTree *cxx_api_tree;
   GTree *sql_api_tree;
 
   GString *completion_list_tree;
@@ -136,13 +137,16 @@ calltip_manager_init (CalltipManager  *object)
 	CalltipManagerDetails *calltipmgdet;
 	calltipmgdet = CALLTIP_MANAGER_GET_PRIVATE(object);
   /* init calltips table*/
-  calltipmgdet->php_api_tree=g_tree_new_full((GCompareDataFunc) g_utf8_collate, NULL, g_free, NULL);
+  calltipmgdet->php_api_tree=g_tree_new_full((GCompareDataFunc) g_utf8_collate, NULL, g_free, NULL); 
+  //FIXME: only init if api file is found.
   calltipmgdet->css_api_tree=g_tree_new_full((GCompareDataFunc) g_utf8_collate, NULL, g_free, NULL);
+  calltipmgdet->cxx_api_tree=g_tree_new_full((GCompareDataFunc) g_utf8_collate, NULL, g_free, NULL);
   calltipmgdet->cobol_api_tree=g_tree_new_full((GCompareDataFunc) g_utf8_collate, NULL, g_free, NULL);
   calltipmgdet->sql_api_tree=g_tree_new_full((GCompareDataFunc) g_utf8_collate, NULL, g_free, NULL);
 
   calltip_manager_load_api_file("php-gphpedit.api", calltipmgdet->php_api_tree);
   calltip_manager_load_api_file("css.api", calltipmgdet->css_api_tree);
+  calltip_manager_load_api_file("c.api", calltipmgdet->cxx_api_tree);
   calltip_manager_function_list_from_array_prepare(cobol_keyword, calltipmgdet->cobol_api_tree);
   calltip_manager_function_list_from_array_prepare(sql_keywords, calltipmgdet->sql_api_tree);
 
@@ -163,7 +167,11 @@ calltip_manager_finalize (GObject *object)
   if (calltipmgdet->php_api_tree){
      g_tree_destroy(calltipmgdet->php_api_tree);
   }
+  if (calltipmgdet->cxx_api_tree){
+     g_tree_destroy(calltipmgdet->cxx_api_tree);
+  }
   if (calltipmgdet->completion_list_tree != NULL) {
+
     g_string_free (calltipmgdet->completion_list_tree,TRUE);	
   }
   if (calltipmgdet->cache_completion) g_free(calltipmgdet->cache_completion);
@@ -253,9 +261,35 @@ static gchar *get_php_api_line(CalltipManagerDetails *calltipmgdet, gchar *buffe
   return result;
 }
 
+static gchar *get_cxx_api_line(CalltipManagerDetails *calltipmgdet, gchar *buffer)
+{
+  gchar *return_value;
+  gchar *params;
+  gchar *description;
+  gchar *token_line, *copy_line;
+  gchar *result = NULL;
+  gchar *value=g_tree_lookup (calltipmgdet->php_api_tree, buffer);
+  if (value){
+    token_line = g_strdup (value);
+    copy_line = token_line;
+    return_value = strtok(token_line, "|");
+    params = strtok(NULL, "|");
+    description = strtok(NULL, "|");
+    /* make calltip */
+    result=g_strdup_printf ("%s %s %s\n%s",return_value,buffer,params,description);
+    gphpedit_debug_message(DEBUG_CALLTIP, "calltip: %s\n",result);
+    g_free(copy_line);	
+  } else {
+    /*maybe a custom function*/
+    //FIXME: add custom function support
+//    result= classbrowser_custom_function_calltip(GPHPEDIT_CLASSBROWSER(main_window.classbrowser), buffer);
+  }
+  return result;
+}
+
 /*
 * function to show the tool tip with a short description about the
-* php function. The current word at the cursor is used to find the
+* function. The current word at the cursor is used to find the
 * corresponding function from the api file
 */
 gchar *calltip_manager_show_call_tip(CalltipManager *calltipmg, gint type, gchar *prefix)
@@ -270,6 +304,8 @@ gchar *calltip_manager_show_call_tip(CalltipManager *calltipmg, gint type, gchar
     case TAB_CSS:
       result = get_css_api_line(calltipmgdet, prefix);
       break;
+    case TAB_CXX:
+      result = get_cxx_api_line(calltipmgdet, prefix);
     default:
       break;
   }
@@ -464,6 +500,32 @@ gchar *calltip_manager_php_autocomplete_word(CalltipManager *calltipmg, gchar *b
   return g_string_free(result,FALSE);
 }
 
+gchar *calltip_manager_cxx_autocomplete_word(CalltipManager *calltipmg, gchar *buffer)
+{
+  CalltipManagerDetails *calltipmgdet;
+	calltipmgdet = CALLTIP_MANAGER_GET_PRIVATE(calltipmg);
+
+  gchar *result = NULL;
+  calltipmgdet->prefix = g_strdup (buffer);
+  if (calltip_manager_has_cache(calltipmgdet->prefix, calltipmgdet->cache_str, calltipmgdet->cache_completion)){
+    GString *res=NULL;
+    res = calltip_manager_get_autocomp_from_cache(calltipmgdet->prefix, calltipmgdet->cache_str, calltipmgdet->cache_completion);
+    result = g_string_free(res, FALSE);
+  } else {
+    g_tree_foreach (calltipmgdet->cxx_api_tree, make_completion_string, calltipmgdet);
+    if (calltipmgdet->completion_list_tree != NULL) {
+      result = g_string_free (calltipmgdet->completion_list_tree, FALSE);
+      calltipmgdet->completion_list_tree=NULL;
+      calltip_manager_save_result_in_cache(calltipmgdet, result, calltipmgdet->prefix);
+    }
+  }
+
+  g_free(calltipmgdet->prefix);
+  gphpedit_debug_message(DEBUG_CALLTIP,"Autocomplete list: %s\n", result);
+
+  return result;
+}
+
 gchar *calltip_manager_autocomplete_word(CalltipManager *calltipmg, gint type, gchar *buffer)
 {
   if (!calltipmg || !buffer) return NULL;
@@ -480,6 +542,9 @@ gchar *calltip_manager_autocomplete_word(CalltipManager *calltipmg, gint type, g
       break;
     case TAB_COBOL:
       result = calltip_manager_cobol_autocomplete_word(calltipmg, buffer);
+      break;
+    case TAB_CXX:
+      result = calltip_manager_cxx_autocomplete_word(calltipmg, buffer);
       break;
     default:
       break;

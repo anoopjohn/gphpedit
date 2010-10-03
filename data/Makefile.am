@@ -20,6 +20,7 @@
 
 api_DATA = \
 	php-gphpedit.api\
+	c.api\
 	css.api
 apidir = \
 	$(datadir)/gphpedit

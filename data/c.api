@@ -1,0 +1,133 @@
+abort|void|();|Similar to exit, it will return an exit code indicating an abnormal program exit to the operating system and quit the program.
+abs|int|(int n);|Returns the absolute value of a number (makes it positive) as an integer.
+acos|double|(double x);|Acos is used to find the arccosine of a number. It must be passed an argument between -1 and 1.
+asctime|char *|(const struct tm* tp);|Return a string containing the date and time information in a human-readable format.
+asin|double|(double x);|Asin is used to find the arcsine of a number. It must be passed an argument between -1 and 1.
+assert|void|(int expression);|If the argument expression compares equal to zero, a message is written to the standard error device and abort is called.
+atan|double|(double x);|Acos is used to find the arctangent of a number. It accepts all real numbers.
+atan2|double|(double y, double x);|Returns the principal value of the arc tangent of y/x, expressed in radians.
+atexit|int|(void (*fcm)(void));|Use atexit to have a function called when the program exits.
+atof|float|(const char* s);|This function accepts a string and converts it into a floating point number.
+atoi|int|(const char* s);|This function accepts a string and converts it into a integer number.
+atol|long|(const char* s);|This function accepts a string and converts it into a long.
+bsearch|void *|(const void* key, const void* base, size_t n, size_t size, int (*cmp)(const void* keyval, const void* datum));|This function performs a binary search.
+calloc|void *|(size_t nobj, size_t size);|Allocates a block of memory for an array of nobj elements, each of them size bytes long.
+ceil|double|(double x);|Use this to round a number up. It returns the smallest integer greater than or equal to x.
+clearerr|void|(FILE* stream);|Resets both the error and the EOF indicators of the stream.
+clock|clock_t|(void);|This function returns the number of clock ticks (the CPU time taken) the program has taken.
+cos|double|(double x);|Returns the cosine of an angle of x radians.
+cosh|double|(double x);|Returns the hyperbolic cosine of a.
+ctime|char *|(const time_t* tp);|Use ctime to convert a time_t variable into a string of 26 characters in the format Fri Jan 28 09:12:21 2000\n\0
+difftime|double|(time_t time2, time_t time1);|Calculates the difference in seconds between time1 and time2.
+div|div_t|(int num, int denom);|Div takes a fraction (numerator/denominator) and places the quotient and the remainder into the struct it returns.
+exit|void|(int status);|Exit ends the program. The status is returned to the operating system, similar to returning a value to int main.
+exp|double|(double x);|Returns the base-e exponential function of x, which is the e number raised to the power x.
+fabs|double|(double x);|This function returns the absolute value of a number. It will not truncate the decimal like abs().
+fclose|int|(FILE* stream);|Closes the file associated with the stream and disassociates it.
+feof|int|(FILE* stream);|Checks whether the End-of-File indicator associated with stream is set, returning a value different from zero if it is.
+ferror|int|(FILE* stream);|Checks if the error indicator associated with stream is set, returning a value different from zero if it is.
+fflush|int|(FILE* stream);|If the given stream was open for writing and the last i/o operation was an output operation, any unwritten data in the output buffer is written to the file.
+fgetc|int|(FILE* stream);|Returns the character currently pointed by the internal file position indicator of the specified stream. The internal file position indicator is then advanced by one character to point to the next character.
+fgetpos|int|(FILE* stream, fpos_t* ptr);|Gets the information needed to uniquely identify the current value of the stream's position indicator and stores it in the location pointed by position.
+fgets|char *|(char* s, int n, FILE* stream);|Reads characters from stream and stores them as a C string into str until (num-1) characters have been read or either a newline or a the End-of-File is reached, whichever comes first.
+floor|double|(double x);|Returns the largest interger value smaller than or equal to Value. (Rounds down)
+fmod|double|(double x, double y);|This function is the same as the modulus operator. It returns the remainder of the division numone/numtwo.
+fopen|FILE *|(const char* filename, const char* mode);|Opens the file whose name is specified in the parameter filename and associates it with a stream that can be identified in future operations by the FILE object whose pointer is returned. The operations that are allowed on the stream and how these are performed are defined by the mode parameter.
+fprintf|int|(FILE* stream, const char* format, ...);|Writes to the specified stream a sequence of data formatted as the format argument specifies. After the format parameter, the function expects at least as many additional arguments as specified in format.
+fputc|int|(int c, FILE* stream);|Writes a character to the stream and advances the position indicator.
+fputs|int|(const char* s, FILE* stream);|Writes the string pointed by str to the stream.
+fread|size_t|(void* ptr, size_t size, size_t nobj, FILE* stream);|Reads an array of count elements, each one with a size of size bytes, from the stream and stores them in the block of memory specified by ptr.
+free|void|(void* p);|A block of memory previously allocated using a call to malloc, calloc or realloc is deallocated, making it available again for further allocations.
+freopen|FILE *|(const char* filename, const char* mode, FILE* stream);|freopen first tries to close any file already associated with the stream given as third parameter and disassociates it. Then, whether that stream was successfuly closed or not, freopen opens the file whose name is passed in the first parameter, filename, and associates it with the specified stream just as fopen would do using the mode value specified as the second parameter.
+frexp|double|(double x, int* exp);|Breaks the floating point number x into its binary significand.
+fscanf|int|(FILE* stream, const char* format, ...);|Reads data from the stream and stores them according to the parameter format into the locations pointed by the additional arguments.
+fseek|int|(FILE* stream, long offset, int origin);|Sets the position indicator associated with the stream to a new position defined by adding offset to a reference position specified by origin.
+fsetpos|int|(FILE* stream, const fpos_t* ptr);|Changes the internal file position indicator associated with stream to a new position. The position parameter is a pointer to an fpos_t object whose value shall have been previously obtained with a call to fgetpos.
+ftell|long int|(FILE* stream);|Returns the current value of the position indicator of the stream.
+fwrite|size_t|(const void* ptr, size_t size, size_t nobj, FILE* stream);|Writes an array of count elements, each one with a size of size bytes, from the block of memory pointed by ptr to the current position in the stream.
+getc|int|(FILE* stream);|Returns the character currently pointed by the internal file position indicator of the specified stream.
+getchar|int|(void);|This function reads in a character. It returns the character as the ASCII value of that character.
+getenv|char *|(const char* name);|Getenv wll return a pointer to a string that contains system information pertaining to atypeofinformation.
+gets|char *|(char* s);|Get string from stdin.
+gmtime|struct tm *|(const time_t* tp);|Uses the value pointed by timer to fill a tm structure with the values that represent the corresponding time, expressed as UTC (or GMT timezone).
+isalnum|int|(int c);|Checks if the ASCII value passed in has a character equivalent to a number of letter.
+isalpha|int|(int c);|Based on the ASCII value of the character it will determine if it is an alphabetical character or not.
+iscntrl|int|(int c);|Checks if parameter c is a control character.
+isdigit|int|(int c);|This function accepts an ASCII value, and returns whether or not it is a digit (0 to 9)
+isgraph|int|(int c);|Checks whether the character is printable.
+islower|int|(int c);|Checks if parameter c is a lowercase alphabetic letter.
+isprint|int|(int c);|Checks if parameter c is a printable character. A printable character is any character that is not a control character.
+ispunct|int|(int c);|Tests if the ASCII character corresponding to the integer stored in c is a punctuation character.
+isspace|int|(int c);|Checks if the ASCII value passed in is that of a space key (such as tab, space, newline, etc).
+isupper|int|(int c);|Tests to see if the ASCII character associated with the integer c is an uppercase letter.
+isxdigit|int|(int c);|Checks if parameter c is a hexdecimal digit character.
+labs|long int|(long n);|Returns the absolute value of parameter n.
+ldexp|double|(double x, int n);|Returns the resulting floating point value from multiplying x (the significand) by 2 raised to the power of exp.
+ldiv|ldiv_t|(long num, long denom);|Returns the integral quotient and remainder of the division of num by denom as a structure of type ldiv_t, which has two members: quot and rem.
+localtime|struct tm *|(const time_t* tp);|Uses the time pointed by timer to fill a tm structure with the values that represent the corresponding local time.
+log|double|(double x);|Log returns the natural logarithm for anumber, as long as it is not negative, or zero.
+log10|double|(double x);|Log10 returns the logarithm for anumber, as long as it is not negative, or zero.
+malloc|void *|(size_t size);|Allocates a block of size bytes of memory, returning a pointer to the beginning of the block.
+memchr|void *|(const void* cs, int c, size_t n);|Searches within the first num bytes of the block of memory pointed by ptr for the first occurrence of value (interpreted as an unsigned char), and returns a pointer to it.
+memcmp|int|(const void* cs, const void* ct, size_t n);|Alphabetically compares two arrays passed in to it.
+memcpy|void *|(void* s, const void* ct, size_t n);|Copies the values of num bytes from the location pointed by source directly to the memory block pointed by destination.
+memmove|void *|(void* s, const void* ct, size_t n);|Copies the values of num bytes from the location pointed by source to the memory block pointed by destination. Copying takes place as if an intermediate buffer was used, allowing the destination and source to overlap.
+memset|void *|(void* s, int c, size_t n);|Sets the first num bytes of the block of memory pointed by ptr to the specified value (interpreted as an unsigned char).
+mktime|time_t|(struct tm* tp);|Interprets the contents of the tm structure pointed by timeptr as a calendar time expressed in local time. This calendar time is used to adjust the values of the members of timeptr accordingly and returned as an object of type time_t.
+modf|double|(double x, double* ip);|Return the decimal part of number.
+perror|void|(const char* s);|Interprets the value of the global variable errno into a string and prints that string to stderr (standard error output stream, usually the screen), optionaly preceding it with the custom message specified in str.
+pow|double|(double x, double y);|This function raises b to the p power.
+printf|int|(const char* format, ...);|Writes to the standard output (stdout) a sequence of data formatted as the format argument specifies. After the format parameter, the function expects at least as many additional arguments as specified in format.
+putc|int|(int c, FILE* stream);|Writes a character to the stream and advances the position indicator.
+putchar|int|(int c);|Putchar writes the character corresponding to the ASCII value of achar to stdout, which is usually the monitor.
+putenv|int|(const char *asetting);|Use putenv to modify the environmental settings for the program.
+puts|int|(const char* s);|Output the string pointed to by astring. It will then add a newline character.
+qsort|void|(void* base, size_t n, size_t size, int (*cmp)(const void*, const void*));|Sorts the num elements of the array pointed by base, each element size bytes long, using the comparator function to determine the order.
+raise|int|(int sig);|Sends signal sig to the current executing program.
+rand|int|(void);|Returns a value between(inclusive) 0 and and RAND_MAX
+realloc|void *|(void* p, size_t size);|The size of the memory block pointed to by the ptr parameter is changed to the size bytes, expanding or reducing the amount of memory available in the block.
+remove|int|(const char* filename);|Remove will erase a file specified by filename.
+rename|int|(const char* oldname, const char* newname);|Rename a file of name oldname, to whatever is newname. 
+rewind|void|(FILE* stream);|Sets the position indicator associated with stream to the beginning of the file.
+scanf|int|(const char* format, ...);|Reads data from stdin and stores them according to the parameter format into the locations pointed by the additional arguments.
+setbuf|void|(FILE* stream, char* buf);|Sets the buffer to be used for I/O operations with the specified stream.
+setvbuf|int|(FILE* stream, char* buf, int mode, size_t size);|Changes the buffer to be used for I/O operations with the specified stream. The function allows to specify the mode and size for the buffer.
+sin|double|(double x);|Returns the sine of an angle of x radians.
+sinh|double|(double x);|Returns the hyperbolic sine of a.
+sprintf|int|(char* s, const char* format, ...);|Writes into the array pointed by str a C string consisting on a sequence of data formatted as the format argument specifies. After the format parameter, the function expects at least as many additional arguments as specified in format.
+sqrt|double|(double x);|Returns the square root of Value. Probably not a good idea to try a negative number for Value...
+srand|void|(unsigned int seed);|seed the random number generator to prevent random numbers from being the same.
+sscanf|int|(char* s, const char* format, ...);|Reads data from str and stores them according to the parameter format into the locations given by the additional arguments.
+strcat|char *|(char* s, const char* ct);|Concatenate two strings.
+strchr|char *|(const char* cs, int c);|Returns a pointer to the first occurrence of character in the C string str.
+strcspn|size_t|(const char* cs, const char* ct);|Scans str1 for the first occurrence of any of the characters that are part of str2, returning the number of characters of str1 read before this first occurrence.
+strcmp|int|(const char* cs, const char* ct);|Tests the strings for equality.
+strcoll|int|(const char* cs, const char* ct);|Compares the C string str1 to the C string str2, both interpreted appropiately according to the LC_COLLATE category of the current locale.
+strcpy|char *|(char* s, const char* ct);|Copies the C string pointed by source into the array pointed by destination, including the terminating null character.
+strerror|char *|(int n);|Returns a pointer to a string that contains the identification for an error-number.
+strftime|size_t|(char* s, size_t smax, const char* fmt, const struct tm* tp);|Copies into ptr the content of format, expanding its format tags into the corresponding values as specified by timeptr, with a limit of maxsize characters.
+strlen|size_t|(const char* cs);|Returns the length of str.
+strncat|char *|(char* s, const char* ct, size_t n);|Appends the first num characters of source to destination, plus a terminating null-character. If the length of the C string in source is less than num, only the content up to the terminating null-character is copied.
+strncmp|int|(const char* cs, const char* ct, size_t n);|Compares up to num characters of the C string str1 to those of the C string str2.
+strncpy|char *|(char* s, const char* ct, size_t n);|Copies the first num characters of source to destination. If the end of the source C string is found before num characters have been copied, destination is padded with zeros until a total of num characters have been written to it.
+strpbrk|char *|(const char* cs, const char* ct);|Returns a pointer to the first occurrence in str1 of any of the characters that are part of str2, or a null pointer if there are no matches.
+strrchr|char *|(const char* cs, int c);|Returns a pointer to the last occurrence of character in the C string str.
+strspn|size_t|(const char* cs, const char* ct);|Returns the length of the initial portion of str1 which consists only of characters that are part of str2.
+strstr|char *|(const char* cs, const char* ct);|Returns a pointer to the first occurrence of str2 in str1, or a null pointer if str2 is not part of str1.
+strtod|double|(const char* str, char** endp);|Parses the C string str interpreting its content as a floating point number and returns its value as a double.
+strtok|char *|(char* s, const char* t);|A sequence of calls to this function split str into tokens, which are sequences of contiguous characters separated by any of the characters that are part of delimiters.
+strtol|long int|(const char* s, char** endp, int base);|Parses the C string str interpreting its content as an integral number of the specified base, which is returned as a long int value.
+strtoul|unsigned long int|(const char* s, char** endp, int base);|Parses the C string str interpreting its content as an unsigned integral number of the specified base, which is returned as an unsigned long int value.
+strxfrm|size_t|(char* s, const char* ct, size_t n);|Transforms the C string pointed by source according to the current locale and copies the first num characters of the transformed string to destination, returning its length.
+system|int|(const char* s);|Invokes the command processor to execute a command. Once the command execution has terminated, the processor gives the control back to the program, returning an int value, whose interpretation is system-dependent.
+tan|double|(double x);|Returns the tangent of an angle of x radians.
+tanh|double|(double x);|Returns the hyperbolic tangent of x.
+time|time_t|(time_t* tp);|Returns and sets the passed in variable to the number of seconds that have passed since 00:00:00 GMT January 1, 1970.
+tmpfile|FILE *|();|Creates a temporary binary file, open for update (wb+ mode -- see fopen for details). The filename is guaranteed to be different from any other existing file.
+tmpname|char *|(char s[L_tmpnam]);|A string containing a filename different from any existing file is generated.
+tolower|int|(int c);|Return the ASCII value for the lowercase equivalent of the ASCII character
+toupper|int|(int c);|Return the ASCII value for the uppercase equivalent of the ASCII character
+ungetc|int|(int c, FILE* stream);|A character is virtually put back into an input stream at the same position the last character was read and the internal file position indicator is decreased back to that previous position so that this character is returned by the next call to a reading operation on that stream.
+vfprintf|int|(FILE* stream, const char* format, va_list arg);|Writes to the specified stream the contents of the format string, expanding the format tags with the values of the argument list arg.
+vprintf|int|(const char* format, va_list arg);|Writes to stdout the contents of the format string, expanding the format tags with the value of the argument list arg.
+vsprintf|int|(char* s, const char* format, va_list arg);|Writes into the array pointer by str a C string consisting in format with its format tags expanded to the values of the argument list arg formatted appropiately.
