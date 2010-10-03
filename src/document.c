@@ -777,6 +777,7 @@ void autoindent_brace_code (GtkScintilla *sci)
   gphpedit_debug (DEBUG_DOCUMENT);
 
   if (current_line>0) {
+    gtk_scintilla_begin_undo_action(sci);
     previous_line = current_line-1;
     previous_line_indentation = gtk_scintilla_get_line_indentation(sci, previous_line);
 
@@ -795,6 +796,7 @@ void autoindent_brace_code (GtkScintilla *sci)
       pos=gtk_scintilla_position_from_line(sci, current_line)+(previous_line_indentation);
     }
     gtk_scintilla_goto_pos(sci, pos);
+    gtk_scintilla_end_undo_action(sci);
   }
 }
 
@@ -819,7 +821,7 @@ static void char_added(GtkWidget *scintilla, guint ch, gpointer user_data)
   guint style;
   gint type;
   type = docdet->type;
-  if ((type != TAB_PHP && type != TAB_CSS) && (ch=='\r'|| ch=='\n' || ch=='\t')) return;
+  if ((type != TAB_PHP && type != TAB_CSS && type != TAB_CXX) && (ch=='\r'|| ch=='\n' || ch=='\t')) return;
   Preferences_Manager *pref = preferences_manager_new ();
   current_pos = gtk_scintilla_get_current_pos(sci);
   current_line = gtk_scintilla_line_from_position(sci, current_pos);
@@ -896,6 +898,13 @@ static void char_added(GtkWidget *scintilla, guint ch, gpointer user_data)
         g_free(member_function_buffer);
         }
         break;
+      case(TAB_CXX):
+        switch(ch) {
+            case ('\r'):
+            case ('\n'):
+              autoindent_brace_code (sci);
+            break;
+        }
       case(TAB_CSS):
       switch(ch) {
           case ('\r'):
