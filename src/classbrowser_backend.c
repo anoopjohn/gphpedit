@@ -37,6 +37,7 @@
 
 #include "tab_php.h"
 #include "tab_css.h"
+#include "tab_cxx.h"
 #include "tab_cobol.h"
 /* object signal enumeration */
 enum {
@@ -96,7 +97,8 @@ void do_parse_file(Classbrowser_Backend *classback, Document *document);
 void free_function_list_item (gpointer data, gpointer user_data);
 #ifdef HAVE_CTAGS_EXUBERANT
 void call_ctags(Classbrowser_Backend *classback, gchar *filename);
-void process_cobol_word(Classbrowser_Backend *classback, gchar *name,gchar *filename,gchar *type,gchar *line);
+void process_cobol_word(Classbrowser_Backend *classback, gchar *name, gchar *filename, gchar *type, gchar *line);
+void process_cxx_word(Classbrowser_Backend *classback, gchar *name, gchar *filename, gchar *type, gchar *line, gchar *param);
 #endif
 
 GType
@@ -461,6 +463,25 @@ gchar *get_ctags_token(gchar *text,gint *advancing){
   *advancing=i+k; /* skip spaces*/
   return name;
 }
+
+gchar *get_ctags_param(gchar *text,gint *advancing){
+  int i;
+  gchar *name;
+  gchar *part = text;
+  name=part;
+  for (i=0;i<strlen(text);i++){
+    if (*(part+i)=='('){
+      break;
+    }
+  }
+  int len = strlen(part) - i -1;
+  if (len < 0) return NULL;
+  name = g_malloc0(strlen(part) - i);
+  strncpy(name, part + i + 1, strlen(part) - i -2);
+//  g_print("res: %s\n", name);
+  return name;
+}
+
 //FIXME:: only COBOL support for now
 void call_ctags(Classbrowser_Backend *classback, gchar *filename){
   if (!filename) return;
@@ -476,13 +497,14 @@ void call_ctags(Classbrowser_Backend *classback, gchar *filename){
   g_free(command_line);
   g_free(path);
   if (result) {
-//   g_print("ctags:%s ->(%s)\n",stdout,stdouterr); //FIXME::
+//   g_print("ctags:%s ->(%s)\n",stdout,stdouterr);
 
   gchar *copy;
   gchar *token;
   gchar *name;
   gchar *type;
   gchar *line;
+  gchar *param;
   copy = stdout;
     while ((token = strtok(copy, "\n"))) {
         gint ad=0;
@@ -494,11 +516,15 @@ void call_ctags(Classbrowser_Backend *classback, gchar *filename){
         token+=ad;
         line=get_ctags_token(token,&ad);
 //        g_print("line:%s\n",line);
+        param = get_ctags_param(token,&ad);
         if (is_cobol_file(filename))
             process_cobol_word(classback, name, filename, type, line);
+        if (is_cxx_file(filename))
+            process_cxx_word(classback, name, filename, type, line, param);
         g_free(name);
         g_free(line);
         g_free(type);
+        g_free(param);
         copy = NULL;
       }
     //we have all functions in the same GTree and we distinguish by filetype (PHP,COBOL,C/C++,PERL,PYTHON,ect).
@@ -808,8 +834,9 @@ gchar *classbrowser_backend_autocomplete_member_function(Classbrowser_Backend *c
   return NULL;
 }
 
-gchar *classbrowser_backend_custom_function_calltip(Classbrowser_Backend *classback, gchar *function_name){
-/*FIXME::two functions diferent classes same name =bad calltip */
+gchar *classbrowser_backend_custom_function_calltip(Classbrowser_Backend *classback, gchar *function_name, gint file_type)
+{
+/*FIXME::two functions diferent classes same name = bad calltip */
   Classbrowser_BackendDetails *classbackdet;
 	classbackdet = CLASSBROWSER_BACKEND_GET_PRIVATE(classback);
   GSList *li;
@@ -818,7 +845,7 @@ gchar *classbrowser_backend_custom_function_calltip(Classbrowser_Backend *classb
   for(li = classbackdet->functionlist; li!= NULL; li = g_slist_next(li)) {
     function = li->data;
     if (function) {
-      if (g_utf8_collate(function->functionname, function_name)==0 && function->file_type==TAB_PHP) {
+      if (g_utf8_collate(function->functionname, function_name)==0 && function->file_type==file_type) {
           calltip=g_strdup_printf("%s (%s)",function->functionname,function->paramlist);
           break;
       }
@@ -889,6 +916,11 @@ static inline gboolean is_cobol_banned_word(gchar *word){
 void process_cobol_word(Classbrowser_Backend *classback, gchar *name,gchar *filename,gchar *type,gchar *line){
  if (g_strcmp0(type,"paragraph")==0 && !is_cobol_banned_word(name)) {
           classbrowser_functionlist_add(classback, NULL, name, filename, TAB_COBOL, atoi(line), NULL);
- } /* not support for autocomplete yet */
+ }
+}
+void process_cxx_word(Classbrowser_Backend *classback, gchar *name,gchar *filename,gchar *type,gchar *line, gchar *param){
+ if (g_strcmp0(type,"function")==0) {
+          classbrowser_functionlist_add(classback, NULL, name, filename, TAB_CXX, atoi(line), param);
+ }
 }
 #endif

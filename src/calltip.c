@@ -263,7 +263,7 @@ static gchar *get_php_api_line(CalltipManagerDetails *calltipmgdet, gchar *buffe
     g_free(copy_line);	
   } else {
     /*maybe a custom function*/
-    result= classbrowser_custom_function_calltip(GPHPEDIT_CLASSBROWSER(main_window.classbrowser), buffer);
+    result= classbrowser_custom_function_calltip(GPHPEDIT_CLASSBROWSER(main_window.classbrowser), buffer, TAB_PHP);
   }
   return result;
 }
@@ -288,8 +288,7 @@ static gchar *get_cxx_api_line(CalltipManagerDetails *calltipmgdet, gchar *buffe
     g_free(copy_line);	
   } else {
     /*maybe a custom function*/
-    //FIXME: add custom function support
-//    result= classbrowser_custom_function_calltip(GPHPEDIT_CLASSBROWSER(main_window.classbrowser), buffer);
+    result= classbrowser_custom_function_calltip(GPHPEDIT_CLASSBROWSER(main_window.classbrowser), buffer, TAB_CXX);
   }
   return result;
 }
@@ -496,28 +495,25 @@ gchar *calltip_manager_php_autocomplete_word(CalltipManager *calltipmg, gchar *b
 
 gchar *calltip_manager_cxx_autocomplete_word(CalltipManager *calltipmg, gchar *buffer)
 {
+
   CalltipManagerDetails *calltipmgdet;
 	calltipmgdet = CALLTIP_MANAGER_GET_PRIVATE(calltipmg);
 
-  gchar *result = NULL;
-  calltipmgdet->prefix = g_strdup (buffer);
-  if (calltip_manager_has_cache(calltipmgdet->prefix, calltipmgdet->cache_str, calltipmgdet->cache_completion)){
-    GString *res=NULL;
-    res = calltip_manager_get_autocomp_from_cache(calltipmgdet->prefix, calltipmgdet->cache_str, calltipmgdet->cache_completion);
-    result = g_string_free(res, FALSE);
+  GString *result=NULL;
+
+  if (calltip_manager_has_cache(buffer, calltipmgdet->cache_str, calltipmgdet->cache_completion)){
+    result = calltip_manager_get_autocomp_from_cache(buffer, calltipmgdet->cache_str, calltipmgdet->cache_completion);
   } else {
-    g_tree_foreach (calltipmgdet->cxx_api_tree, make_completion_string, calltipmgdet);
-    if (calltipmgdet->completion_list_tree != NULL) {
-      result = g_string_free (calltipmgdet->completion_list_tree, FALSE);
-      calltipmgdet->completion_list_tree=NULL;
-      calltip_manager_save_result_in_cache(calltipmgdet, result, calltipmgdet->prefix);
-    }
+    g_tree_foreach (calltipmgdet->cxx_api_tree, make_completion_list, buffer);
+    gchar *custom = classbrowser_add_custom_autocompletion(GPHPEDIT_CLASSBROWSER(main_window.classbrowser), buffer, TAB_CXX, list);
+    //FIXME: add custom variables support
+    result = g_string_new(custom);
+    if (custom) g_free(custom);
+    calltip_manager_save_result_in_cache(calltipmgdet, result->str, buffer);
+    clear_list();
   }
-
-  g_free(calltipmgdet->prefix);
-  gphpedit_debug_message(DEBUG_CALLTIP,"Autocomplete list: %s\n", result);
-
-  return result;
+  gphpedit_debug_message(DEBUG_CALLTIP,"Autocomplete list: %s\n", result->str);
+  return g_string_free(result,FALSE);
 }
 
 gchar *calltip_manager_autocomplete_word(CalltipManager *calltipmg, gint type, gchar *buffer)

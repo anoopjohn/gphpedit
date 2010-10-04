@@ -577,10 +577,10 @@ gchar *classbrowser_autocomplete_member_function(gphpeditClassBrowser *classbrow
   return classbrowser_backend_autocomplete_member_function(priv->classbackend, prefix);
 }
 
-gchar *classbrowser_custom_function_calltip(gphpeditClassBrowser *classbrowser, gchar *function_name)
+gchar *classbrowser_custom_function_calltip(gphpeditClassBrowser *classbrowser, gchar *function_name, gint file_type)
 {
 	gphpeditClassBrowserPrivate *priv = CLASSBROWSER_BACKEND_GET_PRIVATE(classbrowser);
-  return classbrowser_backend_custom_function_calltip(priv->classbackend, function_name);
+  return classbrowser_backend_custom_function_calltip(priv->classbackend, function_name, file_type);
 }
 
 gchar *classbrowser_add_custom_autocompletion(gphpeditClassBrowser *classbrowser, gchar *prefix, gint file_type, GSList *list)

@@ -94,7 +94,7 @@ GString *classbrowser_backend_get_selected_label(Classbrowser_Backend *classback
 GString *classbrowser_backend_get_autocomplete_php_classes_string(Classbrowser_Backend *classback);
 gchar *classbrowser_backend_autocomplete_php_variables(Classbrowser_Backend *classback, gchar *buffer);
 gchar *classbrowser_backend_autocomplete_member_function(Classbrowser_Backend *classback, gchar *prefix);
-gchar *classbrowser_backend_custom_function_calltip(Classbrowser_Backend *classback, gchar *function_name);
+gchar *classbrowser_backend_custom_function_calltip(Classbrowser_Backend *classback, gchar *function_name, gint file_type);
 gchar *classbrowser_backend_add_custom_autocompletion(Classbrowser_Backend *classback, gchar *prefix, gint file_type, GSList *list);
 #endif /* CLASSBROWSER_BACKEND_H */
 
