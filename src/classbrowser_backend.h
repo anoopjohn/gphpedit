@@ -89,7 +89,7 @@ GSList *classbrowser_backend_get_function_list(Classbrowser_Backend *classback);
 GTree *classbrowser_backend_get_class_list(Classbrowser_Backend *classback);
 void classbrowser_functionlist_add(Classbrowser_Backend *classback, gchar *classname, gchar *funcname, gchar *filename, gint file_type, guint line_number, gchar *param_list);
 void classbrowser_classlist_add(Classbrowser_Backend *classback, gchar *classname, gchar *filename, gint line_number,gint file_type);
-void classbrowser_varlist_add(Classbrowser_Backend *classback, gchar *varname, gchar *funcname, gchar *filename);
+void classbrowser_varlist_add(Classbrowser_Backend *classback, gchar *varname, gchar *funcname, gchar *filename, gint file_type);
 GString *classbrowser_backend_get_selected_label(Classbrowser_Backend *classback, gchar *filename, gint line);
 GString *classbrowser_backend_get_autocomplete_php_classes_string(Classbrowser_Backend *classback);
 gchar *classbrowser_backend_autocomplete_php_variables(Classbrowser_Backend *classback, gchar *buffer);

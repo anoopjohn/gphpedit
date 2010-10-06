@@ -56,6 +56,9 @@ struct Classbrowser_BackendDetails
   GTree *php_variables_tree;
   GTree *php_class_tree;
   guint identifierid;
+
+  GHashTable *completion_list;
+  GString *completion_string;
 };
 
 /* internal struct */
@@ -74,6 +77,7 @@ typedef struct
   gchar *filename;
   gboolean remove;
   guint identifierid;
+  gint file_type;
 }
 ClassBrowserVar;
 
@@ -228,7 +232,7 @@ void add_global_var(Classbrowser_BackendDetails *classbackdet, const gchar *var_
     var->filename = NULL; /*NULL FOR PHP GLOBAL VARIABLES*/
     var->remove = FALSE;
     var->identifierid = classbackdet->identifierid++;
-
+    var->file_type = TAB_PHP;
     g_tree_insert (classbackdet->php_variables_tree, g_strdup(var_name), var); /* key = variables name value var struct */
 
     gphpedit_debug_message(DEBUG_CLASSBROWSER, "%s\n", var_name);
@@ -394,7 +398,7 @@ void classbrowser_remove_dead_wood(Classbrowser_Backend *classback)
   g_tree_foreach (classbackdet->php_class_tree, classbrowser_remove_class, classback);
 }
 
-void classbrowser_varlist_add(Classbrowser_Backend *classback, gchar *varname, gchar *funcname, gchar *filename)
+void classbrowser_varlist_add(Classbrowser_Backend *classback, gchar *varname, gchar *funcname, gchar *filename, gint file_type)
 {
   Classbrowser_BackendDetails *classbackdet;
 	classbackdet = CLASSBROWSER_BACKEND_GET_PRIVATE(classback);
@@ -406,20 +410,18 @@ void classbrowser_varlist_add(Classbrowser_Backend *classback, gchar *varname, g
   } else {
     var = g_slice_new0(ClassBrowserVar);
     var->varname = g_strdup(varname);
-    if (funcname) {
-      var->functionname = g_strdup(funcname);
-    }
+    if (funcname) var->functionname = g_strdup(funcname);
     var->filename = g_strdup(filename);
     var->remove = FALSE;
     var->identifierid = classbackdet->identifierid++;
-
+    var->file_type = file_type;
     g_tree_insert (classbackdet->php_variables_tree, g_strdup(varname), var); /* key =variables name value var struct */
 
     gphpedit_debug_message(DEBUG_CLASSBROWSER, "filename: %s var name: %s\n", filename, varname);
   }
 }
 
-void classbrowser_classlist_add(Classbrowser_Backend *classback, gchar *classname, gchar *filename, gint line_number,gint file_type)
+void classbrowser_classlist_add(Classbrowser_Backend *classback, gchar *classname, gchar *filename, gint line_number, gint file_type)
 {
   Classbrowser_BackendDetails *classbackdet;
 	classbackdet = CLASSBROWSER_BACKEND_GET_PRIVATE(classback);
@@ -438,7 +440,7 @@ void classbrowser_classlist_add(Classbrowser_Backend *classback, gchar *classnam
     class->line_number = line_number;
     class->remove = FALSE;
     class->identifierid = classbackdet->identifierid++;
-    class->file_type=file_type;
+    class->file_type = file_type;
     g_tree_insert (classbackdet->php_class_tree,keyname,class);
     gphpedit_debug_message(DEBUG_CLASSBROWSER,"filename: %s class name: %s\n", filename, classname);
   }
@@ -740,6 +742,8 @@ GString *classbrowser_backend_get_autocomplete_php_classes_string(Classbrowser_B
 typedef struct {
  gchar *prefix;
  GString *completion_result;
+ gint file_type;
+ GHashTable *completion_list;
 } var_find;
 
 static gboolean make_completion_string (gpointer key, gpointer value, gpointer data)
@@ -747,7 +751,7 @@ static gboolean make_completion_string (gpointer key, gpointer value, gpointer d
   var_find *search_data = (var_find *)data;
   ClassBrowserVar *var;
   var=(ClassBrowserVar *)value;
-  if (g_str_has_prefix(key,search_data->prefix)){
+  if (g_str_has_prefix(key,search_data->prefix) && search_data->file_type == var->file_type){
         if (!search_data->completion_result) {
         search_data->completion_result = g_string_new(var->varname);
         search_data->completion_result = g_string_append(search_data->completion_result, "?3");
@@ -760,7 +764,11 @@ static gboolean make_completion_string (gpointer key, gpointer value, gpointer d
   return FALSE;
 }
 
-gchar *classbrowser_backend_autocomplete_php_variables(Classbrowser_Backend *classback, gchar *buffer){
+/*
+* classbrowser_backend_autocomplete_php_variables
+*/
+gchar *classbrowser_backend_autocomplete_php_variables(Classbrowser_Backend *classback, gchar *buffer)
+{
   Classbrowser_BackendDetails *classbackdet;
 	classbackdet = CLASSBROWSER_BACKEND_GET_PRIVATE(classback);
   gchar *result = NULL;
@@ -768,6 +776,7 @@ gchar *classbrowser_backend_autocomplete_php_variables(Classbrowser_Backend *cla
   var_find *search_data= g_slice_new(var_find);
   search_data->prefix=buffer;
   search_data->completion_result = NULL;
+  search_data->file_type = TAB_PHP;
   g_tree_foreach (classbackdet->php_variables_tree, make_completion_string,search_data);
   if (search_data->completion_result){
     result = g_string_free(search_data->completion_result, FALSE); /*release resources*/
@@ -855,53 +864,47 @@ gchar *classbrowser_backend_custom_function_calltip(Classbrowser_Backend *classb
   return calltip;
 }
 
+void make_result_string (gpointer key, gpointer value, gpointer user_data)
+{
+    gchar *function_name = (gchar *)value;
+    Classbrowser_BackendDetails *classbackdet = (Classbrowser_BackendDetails *) user_data;
+    if (!classbackdet->completion_string) {
+      classbackdet->completion_string = g_string_new(function_name);
+    } else {
+      classbackdet->completion_string = g_string_append(classbackdet->completion_string, " ");
+      classbackdet->completion_string = g_string_append(classbackdet->completion_string, function_name);
+    }
+}
+
 gchar *classbrowser_backend_add_custom_autocompletion(Classbrowser_Backend *classback, gchar *prefix, gint file_type, GSList *list){
   Classbrowser_BackendDetails *classbackdet;
 	classbackdet = CLASSBROWSER_BACKEND_GET_PRIVATE(classback);
   GSList *li;
-  GList *li2;
-  ClassBrowserFunction *function;
-  GString *result=NULL;
-  GList* member_functions = NULL;
-  GList* sorted_member_functions = NULL;
+  ClassBrowserFunction *function = NULL;
   gchar *function_name;
+
+  classbackdet->completion_list = g_hash_table_new_full (g_str_hash, g_str_equal, NULL, (GDestroyNotify) g_free);
+
   for(li = classbackdet->functionlist; li!= NULL; li = g_slist_next(li)) {
     function = li->data;
     if (function) {
       if ((g_str_has_prefix(function->functionname, prefix) && function->file_type==file_type)) {
-        member_functions = g_list_prepend(member_functions, function->functionname);
+          g_hash_table_insert (classbackdet->completion_list, function->functionname, g_strdup_printf("%s?1",function->functionname));
       }
     }
   }
   /* add functions */
   for(li = list; li!= NULL; li = g_slist_next(li)) {
-    function = li->data;
-    if (function) {
-        member_functions = g_list_prepend(member_functions, function);
-    }
-  }
-  sorted_member_functions = g_list_sort(member_functions, (GCompareFunc) g_utf8_collate);
-  member_functions = sorted_member_functions;
-
-  for(li2 = member_functions; li2!= NULL; li2 = g_list_next(li2)) {
-    function_name = li2->data;
-    if (!result) {
-      result = g_string_new(function_name);
-      if (!g_str_has_suffix(function_name,"?2"))
-          result = g_string_append(result, "?1");
-    }
-    else {
-      result = g_string_append(result, " ");
-      result = g_string_append(result, function_name);
-      if (!g_str_has_suffix(function_name,"?2") && !g_str_has_suffix(function_name,"?3"))
-          result = g_string_append(result, "?1");
-    }
+    function_name = li->data;
+    g_hash_table_insert (classbackdet->completion_list, function_name, g_strdup(function_name));
   }
 
-  if (result){
-    result = g_string_append(result, " ");
-    gphpedit_debug_message(DEBUG_CLASSBROWSER, "prefix: %s autocomplete list:%s\n", prefix, result->str);
-    return result->str;
+  classbackdet->completion_string = NULL;
+  g_hash_table_foreach (classbackdet->completion_list, make_result_string, classbackdet);
+  g_hash_table_destroy (classbackdet->completion_list);
+  if (classbackdet->completion_string){
+    gphpedit_debug_message(DEBUG_CLASSBROWSER, "prefix: %s autocomplete list:%s\n", prefix, classbackdet->completion_string->str);
+    return classbackdet->completion_string->str;
   } else {
     gphpedit_debug_message(DEBUG_CLASSBROWSER, "prefix: %s autocomplete list:%s\n", prefix, "null");
     return NULL;
@@ -909,18 +912,23 @@ gchar *classbrowser_backend_add_custom_autocompletion(Classbrowser_Backend *clas
 }
 
 #ifdef HAVE_CTAGS_EXUBERANT
-static inline gboolean is_cobol_banned_word(gchar *word){
+static inline gboolean is_cobol_banned_word(gchar *word)
+{
   return (g_strcmp0(word,"AUTHOR")==0 || g_strcmp0(word,"OBJECT-COMPUTER")==0 || g_strcmp0(word,"DATE-WRITTEN")==0 || g_strcmp0(word,"PROGRAM-ID")==0 || g_strcmp0(word,"SOURCE-COMPUTER")==0 || g_strcmp0(word, "END-EVALUATE")==0 || g_strcmp0(word,"FILE-CONTROL")==0 || g_strcmp0(word,"SPECIAL-NAMES")==0 || g_strcmp0(word,"END-IF")==0);
 }
 
-void process_cobol_word(Classbrowser_Backend *classback, gchar *name,gchar *filename,gchar *type,gchar *line){
+void process_cobol_word(Classbrowser_Backend *classback, gchar *name,gchar *filename,gchar *type,gchar *line)
+{
  if (g_strcmp0(type,"paragraph")==0 && !is_cobol_banned_word(name)) {
           classbrowser_functionlist_add(classback, NULL, name, filename, TAB_COBOL, atoi(line), NULL);
  }
 }
-void process_cxx_word(Classbrowser_Backend *classback, gchar *name,gchar *filename,gchar *type,gchar *line, gchar *param){
+void process_cxx_word(Classbrowser_Backend *classback, gchar *name,gchar *filename,gchar *type,gchar *line, gchar *param)
+{
  if (g_strcmp0(type,"function")==0) {
-          classbrowser_functionlist_add(classback, NULL, name, filename, TAB_CXX, atoi(line), param);
+    classbrowser_functionlist_add(classback, NULL, name, filename, TAB_CXX, atoi(line), param);
+ } else if (g_strcmp0(type,"macro")==0) {
+    classbrowser_functionlist_add(classback, NULL, name, filename, TAB_CXX, atoi(line), NULL);
  }
 }
 #endif
