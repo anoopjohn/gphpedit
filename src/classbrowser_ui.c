@@ -2,7 +2,7 @@
 
    Copyright (C) 2003, 2004, 2005 Andy Jeffries <andy at gphpedit.org>
    Copyright (C) 2009 Anoop John <anoop dot john at zyxware.com>
-   Copyright (C) 2009 José Rostagno(for vijona.com.ar)
+   Copyright (C) 2009, 2010 José Rostagno(for vijona.com.ar)
    For more information or to find the latest release, visit our
    website at http://www.gphpedit.org/
 
@@ -38,7 +38,7 @@ static void gphpedit_classbrowser_init (gphpeditClassBrowser *button);
 
 struct _gphpeditClassBrowserPrivate
 {
-  Classbrowser_Backend *classbackend;
+  ClassbrowserBackend *classbackend;
 
   GtkWidget *classbrowser;
   //Checkbox above treeview to parse only the current tab  
@@ -80,7 +80,7 @@ enum {
 static gpointer gphpedit_class_browser_parent_class;
 void classbrowser_set_sortable(GtkTreeStore *classtreestore);
 gint on_parse_current_click (GtkWidget *widget, gpointer user_data);
-void classbrowser_update_cb (Classbrowser_Backend *classback, gboolean result, gpointer user_data);
+void classbrowser_update_cb (ClassbrowserBackend *classback, gboolean result, gpointer user_data);
 
 void classbrowser_function_add (gpointer data, gpointer user_data);
 gboolean classbrowser_class_add (gpointer key, gpointer value, gpointer data);
@@ -312,7 +312,7 @@ static gboolean visible_func (GtkTreeModel *model, GtkTreeIter  *iter, gpointer 
 * Then when load is finished we change the current model for the new one.
 * doing this we avoid flicker when we update the classbrowser.
 */
-void classbrowser_update_cb (Classbrowser_Backend *classback, gboolean result, gpointer user_data)
+void classbrowser_update_cb (ClassbrowserBackend *classback, gboolean result, gpointer user_data)
 {
   gphpeditClassBrowserPrivate *priv= (gphpeditClassBrowserPrivate *) user_data;
   static guint press_event = 0;

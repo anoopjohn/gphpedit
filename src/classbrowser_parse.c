@@ -176,7 +176,7 @@ gint str_sec_print(gchar *label, gchar *pstart, gchar *pend, guint line_number) 
   return 0;
 }
 
-void classbrowser_parse_file(Classbrowser_Backend *classback, gchar *filename)
+void classbrowser_parse_file(ClassbrowserBackend *classback, gchar *filename)
 {
   gchar *file_contents;
   gchar *o; // original pointer to start of contents

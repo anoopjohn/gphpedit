@@ -29,31 +29,31 @@
 
 #define CLASSBROWSER_BACKEND_TYPE classbrowser_backend_get_type()
 #define CLASSBROWSER_BACKEND(obj) \
-  (G_TYPE_CHECK_INSTANCE_CAST ((obj), CLASSBROWSER_BACKEND_TYPE, Classbrowser_Backend))
+  (G_TYPE_CHECK_INSTANCE_CAST ((obj), CLASSBROWSER_BACKEND_TYPE, ClassbrowserBackend))
 #define CLASSBROWSER_BACKEND_CLASS(klass) \
-  (G_TYPE_CHECK_CLASS_CAST ((klass), CLASSBROWSER_BACKEND_TYPE, Classbrowser_BackendClass))
+  (G_TYPE_CHECK_CLASS_CAST ((klass), CLASSBROWSER_BACKEND_TYPE, ClassbrowserBackendClass))
 #define OBJECT_IS_CLASSBROWSER_BACKEND(obj) \
   (G_TYPE_CHECK_INSTANCE_TYPE ((obj), CLASSBROWSER_BACKEND_TYPE))
 #define OBJECT_IS_CLASSBROWSER_BACKEND_CLASS(klass) \
   (G_TYPE_CHECK_CLASS_TYPE ((klass), CLASSBROWSER_BACKEND_TYPE))
 #define CLASSBROWSER_BACKEND_GET_CLASS(obj) \
-  (G_TYPE_INSTANCE_GET_CLASS ((obj), CLASSBROWSER_BACKEND_TYPE, Classbrowser_BackendClass))
+  (G_TYPE_INSTANCE_GET_CLASS ((obj), CLASSBROWSER_BACKEND_TYPE, ClassbrowserBackendClass))
 
-typedef struct Classbrowser_BackendDetails Classbrowser_BackendDetails;
+typedef struct ClassbrowserBackendDetails ClassbrowserBackendDetails;
 
 typedef struct
 {
 	GObject object;
-	Classbrowser_BackendDetails *details;
-} Classbrowser_Backend;
+	ClassbrowserBackendDetails *details;
+} ClassbrowserBackend;
 
 typedef struct
 {
 	GObjectClass parent_class;
 
-	void (* done_refresh) (Classbrowser_Backend *doclod, gboolean result, gpointer user_data);
+	void (* done_refresh) (ClassbrowserBackend *doclod, gboolean result, gpointer user_data);
 
-} Classbrowser_BackendClass;
+} ClassbrowserBackendClass;
 
 /* needed types */
 typedef struct
@@ -83,18 +83,18 @@ ClassBrowserClass;
 
 /* Basic GObject requirements. */
 GType classbrowser_backend_get_type (void);
-Classbrowser_Backend *classbrowser_backend_new (void);
-void classbrowser_backend_update(Classbrowser_Backend *classback, gboolean only_current_file);
-GSList *classbrowser_backend_get_function_list(Classbrowser_Backend *classback);
-GTree *classbrowser_backend_get_class_list(Classbrowser_Backend *classback);
-void classbrowser_functionlist_add(Classbrowser_Backend *classback, gchar *classname, gchar *funcname, gchar *filename, gint file_type, guint line_number, gchar *param_list);
-void classbrowser_classlist_add(Classbrowser_Backend *classback, gchar *classname, gchar *filename, gint line_number,gint file_type);
-void classbrowser_varlist_add(Classbrowser_Backend *classback, gchar *varname, gchar *funcname, gchar *filename, gint file_type);
-GString *classbrowser_backend_get_selected_label(Classbrowser_Backend *classback, gchar *filename, gint line);
-GString *classbrowser_backend_get_autocomplete_php_classes_string(Classbrowser_Backend *classback);
-gchar *classbrowser_backend_autocomplete_php_variables(Classbrowser_Backend *classback, gchar *buffer);
-gchar *classbrowser_backend_autocomplete_member_function(Classbrowser_Backend *classback, gchar *prefix);
-gchar *classbrowser_backend_custom_function_calltip(Classbrowser_Backend *classback, gchar *function_name, gint file_type);
-gchar *classbrowser_backend_add_custom_autocompletion(Classbrowser_Backend *classback, gchar *prefix, gint file_type, GSList *list);
+ClassbrowserBackend *classbrowser_backend_new (void);
+void classbrowser_backend_update(ClassbrowserBackend *classback, gboolean only_current_file);
+GSList *classbrowser_backend_get_function_list(ClassbrowserBackend *classback);
+GTree *classbrowser_backend_get_class_list(ClassbrowserBackend *classback);
+void classbrowser_functionlist_add(ClassbrowserBackend *classback, gchar *classname, gchar *funcname, gchar *filename, gint file_type, guint line_number, gchar *param_list);
+void classbrowser_classlist_add(ClassbrowserBackend *classback, gchar *classname, gchar *filename, gint line_number,gint file_type);
+void classbrowser_varlist_add(ClassbrowserBackend *classback, gchar *varname, gchar *funcname, gchar *filename, gint file_type);
+GString *classbrowser_backend_get_selected_label(ClassbrowserBackend *classback, gchar *filename, gint line);
+GString *classbrowser_backend_get_autocomplete_php_classes_string(ClassbrowserBackend *classback);
+gchar *classbrowser_backend_autocomplete_php_variables(ClassbrowserBackend *classback, gchar *buffer);
+gchar *classbrowser_backend_autocomplete_member_function(ClassbrowserBackend *classback, gchar *prefix);
+gchar *classbrowser_backend_custom_function_calltip(ClassbrowserBackend *classback, gchar *function_name, gint file_type);
+gchar *classbrowser_backend_add_custom_autocompletion(ClassbrowserBackend *classback, gchar *prefix, gint file_type, GSList *list);
 #endif /* CLASSBROWSER_BACKEND_H */
 

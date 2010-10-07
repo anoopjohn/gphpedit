@@ -2,7 +2,7 @@
 
    Copyright (C) 2003, 2004, 2005 Andy Jeffries <andy at gphpedit.org>
    Copyright (C) 2009 Anoop John <anoop dot john at zyxware.com>
-   Copyright (C) 2009 José Rostagno (for vijona.com.ar) 
+   Copyright (C) 2009, 2010 José Rostagno (for vijona.com.ar) 
 
    For more information or to find the latest release, visit our 
    website at http://www.gphpedit.org/
@@ -50,7 +50,7 @@ static guint signals[LAST_SIGNAL];
 /*
 * classbrowser_backend private struct
 */
-struct Classbrowser_BackendDetails
+struct ClassbrowserBackendDetails
 {
   GSList *functionlist;
   GTree *php_variables_tree;
@@ -83,61 +83,34 @@ ClassBrowserVar;
 
 /*
  * classbrowser_backend_get_type
- * register Classbrowser_Backend type and returns a new GType
+ * register ClassbrowserBackend type and returns a new GType
 */
 
-static gpointer parent_class;
-static void               classbrowser_backend_init             (gpointer                object,
-							       gpointer                klass);
-static void classbrowser_backend_class_init (Classbrowser_BackendClass *klass);
+static void classbrowser_backend_class_init (ClassbrowserBackendClass *klass);
 static void classbrowser_backend_dispose (GObject *gobject);
 
 #define CLASSBROWSER_BACKEND_GET_PRIVATE(object)(G_TYPE_INSTANCE_GET_PRIVATE ((object),\
 					    CLASSBROWSER_BACKEND_TYPE,\
-					    Classbrowser_BackendDetails))
+					    ClassbrowserBackendDetails))
 
-void classbrowser_remove_dead_wood(Classbrowser_Backend *classback);
-void do_parse_file(Classbrowser_Backend *classback, Document *document);
+void classbrowser_remove_dead_wood(ClassbrowserBackend *classback);
+void do_parse_file(ClassbrowserBackend *classback, Document *document);
 void free_function_list_item (gpointer data, gpointer user_data);
 #ifdef HAVE_CTAGS_EXUBERANT
-void call_ctags(Classbrowser_Backend *classback, gchar *filename);
-void process_cobol_word(Classbrowser_Backend *classback, gchar *name, gchar *filename, gchar *type, gchar *line);
-void process_cxx_word(Classbrowser_Backend *classback, gchar *name, gchar *filename, gchar *type, gchar *line, gchar *param);
+void call_ctags(ClassbrowserBackend *classback, gchar *filename);
+void process_cobol_word(ClassbrowserBackend *classback, gchar *name, gchar *filename, gchar *type, gchar *line);
+void process_cxx_word(ClassbrowserBackend *classback, gchar *name, gchar *filename, gchar *type, gchar *line, gchar *param);
 #endif
 
-GType
-classbrowser_backend_get_type (void)
-{
-    static GType our_type = 0;
-    
-    if (!our_type) {
-        static const GTypeInfo our_info =
-        {
-            sizeof (Classbrowser_BackendClass),
-            NULL,               /* base_init */
-            NULL,               /* base_finalize */
-            (GClassInitFunc) classbrowser_backend_class_init,
-            NULL,               /* class_finalize */
-            NULL,               /* class_data */
-            sizeof (Classbrowser_Backend),
-            0,                  /* n_preallocs */
-            (GInstanceInitFunc) classbrowser_backend_init,
-        };
-
-        our_type = g_type_register_static (G_TYPE_OBJECT, "Classbrowser_Backend",
-                                           &our_info, 0);
-  }
-    
-    return our_type;
-}
+/* http://library.gnome.org/devel/gobject/unstable/gobject-Type-Information.html#G-DEFINE-TYPE:CAPS */
+G_DEFINE_TYPE(ClassbrowserBackend, classbrowser_backend, G_TYPE_OBJECT);
 
 void
-classbrowser_backend_class_init (Classbrowser_BackendClass *klass)
+classbrowser_backend_class_init (ClassbrowserBackendClass *klass)
 {
 	GObjectClass *object_class;
 
 	object_class = G_OBJECT_CLASS (klass);
-  parent_class = g_type_class_peek_parent (klass);
   object_class->dispose = classbrowser_backend_dispose;
 
 /*
@@ -147,19 +120,20 @@ if load is ok return TRUE. if load isn't complete return FALSE
 		g_signal_new ("done_refresh",
 		              G_TYPE_FROM_CLASS (object_class),
 		              G_SIGNAL_RUN_LAST,
-		              G_STRUCT_OFFSET (Classbrowser_BackendClass, done_refresh),
+		              G_STRUCT_OFFSET (ClassbrowserBackendClass, done_refresh),
 		              NULL, NULL,
 		               g_cclosure_marshal_VOID__BOOLEAN ,
 		               G_TYPE_NONE, 1, G_TYPE_BOOLEAN, NULL);
 
-	g_type_class_add_private (klass, sizeof (Classbrowser_BackendDetails));
+	g_type_class_add_private (klass, sizeof (ClassbrowserBackendDetails));
 }
 
 void
-classbrowser_backend_init (gpointer object, gpointer klass)
+classbrowser_backend_init (ClassbrowserBackend *classback)
 {
-//	Classbrowser_BackendDetails *classbackdet;
-//	classbackdet = CLASSBROWSER_BACKEND_GET_PRIVATE(object);
+  ClassbrowserBackendDetails *classbackdet;
+	classbackdet = CLASSBROWSER_BACKEND_GET_PRIVATE(classback);
+  classbackdet->identifierid = 0;
 }
 
 /*
@@ -167,8 +141,8 @@ classbrowser_backend_init (gpointer object, gpointer klass)
 */
 void classbrowser_backend_dispose (GObject *object)
 {
-  Classbrowser_Backend *classback = CLASSBROWSER_BACKEND(object);
-  Classbrowser_BackendDetails *classbackdet;
+  ClassbrowserBackend *classback = CLASSBROWSER_BACKEND(object);
+  ClassbrowserBackendDetails *classbackdet;
 	classbackdet = CLASSBROWSER_BACKEND_GET_PRIVATE(classback);
   /* free object resources*/
   if (classbackdet->functionlist){
@@ -178,16 +152,13 @@ void classbrowser_backend_dispose (GObject *object)
   if (classbackdet->php_variables_tree) g_tree_destroy (classbackdet->php_variables_tree);
   if (classbackdet->php_class_tree) g_tree_destroy (classbackdet->php_class_tree);
   /* Chain up to the parent class */
-  G_OBJECT_CLASS (parent_class)->dispose (object);
+  G_OBJECT_CLASS (classbrowser_backend_parent_class)->dispose (object);
 }
 
-Classbrowser_Backend *classbrowser_backend_new (void)
+ClassbrowserBackend *classbrowser_backend_new (void)
 {
-	Classbrowser_Backend *classback;
+	ClassbrowserBackend *classback;
   classback = g_object_new (CLASSBROWSER_BACKEND_TYPE, NULL);
-  Classbrowser_BackendDetails *classbackdet;
-	classbackdet = CLASSBROWSER_BACKEND_GET_PRIVATE(classback);
-  classbackdet->identifierid = 0;
 
 	return classback; /* return new object */
 }
@@ -223,7 +194,7 @@ ClassBrowserFunction *function = (ClassBrowserFunction *) data;
   }
   g_slice_free(ClassBrowserFunction,function);
 }
-void add_global_var(Classbrowser_BackendDetails *classbackdet, const gchar *var_name)
+void add_global_var(ClassbrowserBackendDetails *classbackdet, const gchar *var_name)
 {
   ClassBrowserVar *var;
     var = g_slice_new(ClassBrowserVar);
@@ -255,9 +226,8 @@ void list_php_files_open (gpointer data, gpointer user_data){
 * parse an editor
 * if editor is PHP uses our internal code
 * otherwise use CTAGS EXUBERANT if it's avariable.
-* //FIXME: CTAGS EXUBERANT don't support CSS files
 */
-void do_parse_file(Classbrowser_Backend *classback, Document *document){
+void do_parse_file(ClassbrowserBackend *classback, Document *document){
     g_return_if_fail(document);
     if (document_is_scintilla_based(document) && !document_get_untitled(document)) {
     gphpedit_debug_message(DEBUG_CLASSBROWSER, "Parsing: %s\n",document_get_shortfilename(document));
@@ -274,7 +244,7 @@ void do_parse_file(Classbrowser_Backend *classback, Document *document){
     }  
 }
 
-void classbrowser_backend_start_update(Classbrowser_BackendDetails *classbackdet)
+void classbrowser_backend_start_update(ClassbrowserBackendDetails *classbackdet)
 {
   GSList *li;
   ClassBrowserFunction *function;
@@ -295,11 +265,11 @@ void classbrowser_backend_start_update(Classbrowser_BackendDetails *classbackdet
 
 //FIXME: this function can be optimized by not requesting to reparse files on tab change
 //when the parse only selected tab is set - Anoop
-void classbrowser_backend_update(Classbrowser_Backend *classback, gboolean only_current_file)
+void classbrowser_backend_update(ClassbrowserBackend *classback, gboolean only_current_file)
 {
 
   gphpedit_debug(DEBUG_CLASSBROWSER);
-  Classbrowser_BackendDetails *classbackdet;
+  ClassbrowserBackendDetails *classbackdet;
 	classbackdet = CLASSBROWSER_BACKEND_GET_PRIVATE(classback);
   if (!classbackdet->php_variables_tree){
      /* create new tree */
@@ -339,9 +309,9 @@ void classbrowser_backend_update(Classbrowser_Backend *classback, gboolean only_
   g_signal_emit (G_OBJECT (classback), signals[DONE_REFRESH], 0, TRUE); /* emit process and update UI */
 }
 
-void classbrowser_classlist_remove(Classbrowser_Backend *classback, ClassBrowserClass *class)
+void classbrowser_classlist_remove(ClassbrowserBackend *classback, ClassBrowserClass *class)
 {
-  Classbrowser_BackendDetails *classbackdet;
+  ClassbrowserBackendDetails *classbackdet;
 	classbackdet = CLASSBROWSER_BACKEND_GET_PRIVATE(classback);
 
   gchar *keyname=g_strdup_printf("%s%s",class->classname,class->filename);
@@ -359,9 +329,9 @@ gboolean classbrowser_remove_class(gpointer key, gpointer value, gpointer data){
   return FALSE;
 }
 
-void classbrowser_backend_functionlist_free(Classbrowser_Backend *classback, ClassBrowserFunction *function)
+void classbrowser_backend_functionlist_free(ClassbrowserBackend *classback, ClassBrowserFunction *function)
 {
-  Classbrowser_BackendDetails *classbackdet;
+  ClassbrowserBackendDetails *classbackdet;
 	classbackdet = CLASSBROWSER_BACKEND_GET_PRIVATE(classback);
 
   g_free(function->filename);
@@ -376,9 +346,9 @@ void classbrowser_backend_functionlist_free(Classbrowser_Backend *classback, Cla
   g_slice_free(ClassBrowserFunction,function);
 }
 
-void classbrowser_remove_dead_wood(Classbrowser_Backend *classback)
+void classbrowser_remove_dead_wood(ClassbrowserBackend *classback)
 {
-  Classbrowser_BackendDetails *classbackdet;
+  ClassbrowserBackendDetails *classbackdet;
 	classbackdet = CLASSBROWSER_BACKEND_GET_PRIVATE(classback);
 
   GSList *orig;
@@ -398,9 +368,9 @@ void classbrowser_remove_dead_wood(Classbrowser_Backend *classback)
   g_tree_foreach (classbackdet->php_class_tree, classbrowser_remove_class, classback);
 }
 
-void classbrowser_varlist_add(Classbrowser_Backend *classback, gchar *varname, gchar *funcname, gchar *filename, gint file_type)
+void classbrowser_varlist_add(ClassbrowserBackend *classback, gchar *varname, gchar *funcname, gchar *filename, gint file_type)
 {
-  Classbrowser_BackendDetails *classbackdet;
+  ClassbrowserBackendDetails *classbackdet;
 	classbackdet = CLASSBROWSER_BACKEND_GET_PRIVATE(classback);
   ClassBrowserVar *var;
   var=g_tree_lookup (classbackdet->php_variables_tree, varname);
@@ -421,9 +391,9 @@ void classbrowser_varlist_add(Classbrowser_Backend *classback, gchar *varname, g
   }
 }
 
-void classbrowser_classlist_add(Classbrowser_Backend *classback, gchar *classname, gchar *filename, gint line_number, gint file_type)
+void classbrowser_classlist_add(ClassbrowserBackend *classback, gchar *classname, gchar *filename, gint line_number, gint file_type)
 {
-  Classbrowser_BackendDetails *classbackdet;
+  ClassbrowserBackendDetails *classbackdet;
 	classbackdet = CLASSBROWSER_BACKEND_GET_PRIVATE(classback);
 
   ClassBrowserClass *class;
@@ -485,7 +455,7 @@ gchar *get_ctags_param(gchar *text,gint *advancing){
 }
 
 //FIXME:: only COBOL support for now
-void call_ctags(Classbrowser_Backend *classback, gchar *filename){
+void call_ctags(ClassbrowserBackend *classback, gchar *filename){
   if (!filename) return;
   gboolean result;
   gchar *stdout;
@@ -536,7 +506,7 @@ void call_ctags(Classbrowser_Backend *classback, gchar *filename){
 }
 #endif
 
-ClassBrowserFunction *classbrowser_functionlist_find(Classbrowser_BackendDetails *classbackdet, gchar *funcname, gchar *param_list, gchar *filename, gchar *classname)
+ClassBrowserFunction *classbrowser_functionlist_find(ClassbrowserBackendDetails *classbackdet, gchar *funcname, gchar *param_list, gchar *filename, gchar *classname)
 {
   GSList *li;
   ClassBrowserFunction *function;
@@ -558,9 +528,9 @@ ClassBrowserFunction *classbrowser_functionlist_find(Classbrowser_BackendDetails
   return NULL;
 }
 
-void classbrowser_functionlist_add(Classbrowser_Backend *classback, gchar *classname, gchar *funcname, gchar *filename, gint file_type, guint line_number, gchar *param_list)
+void classbrowser_functionlist_add(ClassbrowserBackend *classback, gchar *classname, gchar *funcname, gchar *filename, gint file_type, guint line_number, gchar *param_list)
 {
-  Classbrowser_BackendDetails *classbackdet;
+  ClassbrowserBackendDetails *classbackdet;
 	classbackdet = CLASSBROWSER_BACKEND_GET_PRIVATE(classback);
 
   ClassBrowserClass *class;
@@ -590,14 +560,14 @@ void classbrowser_functionlist_add(Classbrowser_Backend *classback, gchar *class
   }
 }
 
-GSList *classbrowser_backend_get_function_list(Classbrowser_Backend *classback){
-  Classbrowser_BackendDetails *classbackdet;
+GSList *classbrowser_backend_get_function_list(ClassbrowserBackend *classback){
+  ClassbrowserBackendDetails *classbackdet;
 	classbackdet = CLASSBROWSER_BACKEND_GET_PRIVATE(classback);
   return classbackdet->functionlist; 
 }
 
-GTree *classbrowser_backend_get_class_list(Classbrowser_Backend *classback){
-  Classbrowser_BackendDetails *classbackdet;
+GTree *classbrowser_backend_get_class_list(ClassbrowserBackend *classback){
+  ClassbrowserBackendDetails *classbackdet;
 	classbackdet = CLASSBROWSER_BACKEND_GET_PRIVATE(classback);
   return classbackdet->php_class_tree; 
 }
@@ -681,9 +651,9 @@ GString *get_differing_part(GSList *filenames, gchar *file_requested)
 * classbrowser_backend_get_selected_label
 * return a new GString with new label text
 */
-GString *classbrowser_backend_get_selected_label(Classbrowser_Backend *classback, gchar *filename, gint line)
+GString *classbrowser_backend_get_selected_label(ClassbrowserBackend *classback, gchar *filename, gint line)
 {
-  Classbrowser_BackendDetails *classbackdet;
+  ClassbrowserBackendDetails *classbackdet;
 	classbackdet = CLASSBROWSER_BACKEND_GET_PRIVATE(classback);
   GSList *filenames;
   GSList *function_walk;
@@ -731,8 +701,8 @@ static gboolean make_class_completion_string (gpointer key, gpointer value, gpoi
   return FALSE;
 }
 
-GString *classbrowser_backend_get_autocomplete_php_classes_string(Classbrowser_Backend *classback){
-  Classbrowser_BackendDetails *classbackdet;
+GString *classbrowser_backend_get_autocomplete_php_classes_string(ClassbrowserBackend *classback){
+  ClassbrowserBackendDetails *classbackdet;
 	classbackdet = CLASSBROWSER_BACKEND_GET_PRIVATE(classback);
   GString *completion_result = NULL;
   g_tree_foreach (classbackdet->php_class_tree, make_class_completion_string, completion_result);
@@ -767,9 +737,9 @@ static gboolean make_completion_string (gpointer key, gpointer value, gpointer d
 /*
 * classbrowser_backend_autocomplete_php_variables
 */
-gchar *classbrowser_backend_autocomplete_php_variables(Classbrowser_Backend *classback, gchar *buffer)
+gchar *classbrowser_backend_autocomplete_php_variables(ClassbrowserBackend *classback, gchar *buffer)
 {
-  Classbrowser_BackendDetails *classbackdet;
+  ClassbrowserBackendDetails *classbackdet;
 	classbackdet = CLASSBROWSER_BACKEND_GET_PRIVATE(classback);
   gchar *result = NULL;
 
@@ -786,7 +756,7 @@ gchar *classbrowser_backend_autocomplete_php_variables(Classbrowser_Backend *cla
   return result;
 }
 
-GString *get_member_function_completion_list(Classbrowser_BackendDetails *classbackdet, gchar *buffer)
+GString *get_member_function_completion_list(ClassbrowserBackendDetails *classbackdet, gchar *buffer)
 {
   GSList *li;
   GList *li2;
@@ -829,9 +799,9 @@ GString *get_member_function_completion_list(Classbrowser_BackendDetails *classb
 }
 
 
-gchar *classbrowser_backend_autocomplete_member_function(Classbrowser_Backend *classback, gchar *prefix)
+gchar *classbrowser_backend_autocomplete_member_function(ClassbrowserBackend *classback, gchar *prefix)
 {
-  Classbrowser_BackendDetails *classbackdet;
+  ClassbrowserBackendDetails *classbackdet;
 	classbackdet = CLASSBROWSER_BACKEND_GET_PRIVATE(classback);
   GString *list;
   list = get_member_function_completion_list(classbackdet, prefix);
@@ -843,10 +813,10 @@ gchar *classbrowser_backend_autocomplete_member_function(Classbrowser_Backend *c
   return NULL;
 }
 
-gchar *classbrowser_backend_custom_function_calltip(Classbrowser_Backend *classback, gchar *function_name, gint file_type)
+gchar *classbrowser_backend_custom_function_calltip(ClassbrowserBackend *classback, gchar *function_name, gint file_type)
 {
 /*FIXME::two functions diferent classes same name = bad calltip */
-  Classbrowser_BackendDetails *classbackdet;
+  ClassbrowserBackendDetails *classbackdet;
 	classbackdet = CLASSBROWSER_BACKEND_GET_PRIVATE(classback);
   GSList *li;
   ClassBrowserFunction *function;
@@ -867,7 +837,7 @@ gchar *classbrowser_backend_custom_function_calltip(Classbrowser_Backend *classb
 void make_result_string (gpointer key, gpointer value, gpointer user_data)
 {
     gchar *function_name = (gchar *)value;
-    Classbrowser_BackendDetails *classbackdet = (Classbrowser_BackendDetails *) user_data;
+    ClassbrowserBackendDetails *classbackdet = (ClassbrowserBackendDetails *) user_data;
     if (!classbackdet->completion_string) {
       classbackdet->completion_string = g_string_new(function_name);
     } else {
@@ -876,8 +846,8 @@ void make_result_string (gpointer key, gpointer value, gpointer user_data)
     }
 }
 
-gchar *classbrowser_backend_add_custom_autocompletion(Classbrowser_Backend *classback, gchar *prefix, gint file_type, GSList *list){
-  Classbrowser_BackendDetails *classbackdet;
+gchar *classbrowser_backend_add_custom_autocompletion(ClassbrowserBackend *classback, gchar *prefix, gint file_type, GSList *list){
+  ClassbrowserBackendDetails *classbackdet;
 	classbackdet = CLASSBROWSER_BACKEND_GET_PRIVATE(classback);
   GSList *li;
   ClassBrowserFunction *function = NULL;
@@ -917,13 +887,13 @@ static inline gboolean is_cobol_banned_word(gchar *word)
   return (g_strcmp0(word,"AUTHOR")==0 || g_strcmp0(word,"OBJECT-COMPUTER")==0 || g_strcmp0(word,"DATE-WRITTEN")==0 || g_strcmp0(word,"PROGRAM-ID")==0 || g_strcmp0(word,"SOURCE-COMPUTER")==0 || g_strcmp0(word, "END-EVALUATE")==0 || g_strcmp0(word,"FILE-CONTROL")==0 || g_strcmp0(word,"SPECIAL-NAMES")==0 || g_strcmp0(word,"END-IF")==0);
 }
 
-void process_cobol_word(Classbrowser_Backend *classback, gchar *name,gchar *filename,gchar *type,gchar *line)
+void process_cobol_word(ClassbrowserBackend *classback, gchar *name,gchar *filename,gchar *type,gchar *line)
 {
  if (g_strcmp0(type,"paragraph")==0 && !is_cobol_banned_word(name)) {
           classbrowser_functionlist_add(classback, NULL, name, filename, TAB_COBOL, atoi(line), NULL);
  }
 }
-void process_cxx_word(Classbrowser_Backend *classback, gchar *name,gchar *filename,gchar *type,gchar *line, gchar *param)
+void process_cxx_word(ClassbrowserBackend *classback, gchar *name,gchar *filename,gchar *type,gchar *line, gchar *param)
 {
  if (g_strcmp0(type,"function")==0) {
     classbrowser_functionlist_add(classback, NULL, name, filename, TAB_CXX, atoi(line), param);
