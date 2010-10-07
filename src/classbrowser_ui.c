@@ -76,8 +76,6 @@ enum {
 #define CB_ITEM_TYPE_CLASS_METHOD 2
 #define CB_ITEM_TYPE_FUNCTION 3
 
-
-static gpointer gphpedit_class_browser_parent_class;
 void classbrowser_set_sortable(GtkTreeStore *classtreestore);
 gint on_parse_current_click (GtkWidget *widget, gpointer user_data);
 void classbrowser_update_cb (ClassbrowserBackend *classback, gboolean result, gpointer user_data);
@@ -92,32 +90,9 @@ void classbrowser_update_selected_label(gphpeditClassBrowserPrivate *priv, gchar
 					    GPHPEDIT_TYPE_CLASSBROWSER,\
 					    gphpeditClassBrowserPrivate))
 
+/* http://library.gnome.org/devel/gobject/unstable/gobject-Type-Information.html#G-DEFINE-TYPE:CAPS */
+G_DEFINE_TYPE(gphpeditClassBrowser, gphpedit_classbrowser, GTK_TYPE_VBOX);
 
-GType
-gphpedit_classbrowser_get_type (void)
-{
-    static GType our_type = 0;
-    
-    if (!our_type) {
-        static const GTypeInfo our_info =
-        {
-            sizeof (gphpeditClassBrowserClass),
-            NULL,               /* base_init */
-            NULL,               /* base_finalize */
-            (GClassInitFunc) gphpedit_classbrowser_class_init,
-            NULL,               /* class_finalize */
-            NULL,               /* class_data */
-            sizeof (gphpeditClassBrowser),
-            0,                  /* n_preallocs */
-            (GInstanceInitFunc) gphpedit_classbrowser_init,
-        };
-
-        our_type = g_type_register_static (GTK_TYPE_VBOX, "gphpeditClassBrowser",
-                                           &our_info, 0);
-  }
-    
-    return our_type;
-}
 
 static void
 gphpedit_classbrowser_destroy (GtkObject *object)
@@ -133,17 +108,7 @@ gphpedit_classbrowser_destroy (GtkObject *object)
 
   if (G_IS_OBJECT(priv->classbackend)) g_object_unref(priv->classbackend);
 
-	GTK_OBJECT_CLASS (gphpedit_class_browser_parent_class)->destroy (object);
-}
-
-static void
-gphpedit_classbrowser_finalize (GObject *object)
-{
-	gphpeditClassBrowserPrivate *priv;
-
-	priv = CLASSBROWSER_BACKEND_GET_PRIVATE(object);
-
-	G_OBJECT_CLASS (gphpedit_class_browser_parent_class)->finalize (object);
+	GTK_OBJECT_CLASS (gphpedit_classbrowser_parent_class)->destroy (object);
 }
 
 static void 
@@ -151,8 +116,6 @@ gphpedit_classbrowser_class_init (gphpeditClassBrowserClass *klass)
 {
 	GObjectClass   *object_class = G_OBJECT_CLASS (klass);
 	GtkObjectClass *gtkobject_class = GTK_OBJECT_CLASS (klass);
-	gphpedit_class_browser_parent_class = g_type_class_peek_parent (klass);
-	object_class->finalize = gphpedit_classbrowser_finalize;
 	gtkobject_class->destroy = gphpedit_classbrowser_destroy;
 	
 	g_type_class_add_private (object_class, sizeof(gphpeditClassBrowserPrivate));
