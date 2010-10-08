@@ -841,6 +841,24 @@ gboolean auto_complete_classes_callback(gpointer data)
   docdet->completion_timer_set=FALSE;
   return FALSE;
 }
+
+gboolean auto_complete_php_variables_callback(gpointer data)
+{
+  Document *doc = document_manager_get_current_document(main_window.docmg);
+  DocumentDetails *docdet = DOCUMENT_GET_PRIVATE(doc);
+  gint current_pos;
+  current_pos = document_get_current_position(doc);
+  if (current_pos == GPOINTER_TO_INT(data)) {
+    gchar *prefix = document_get_current_word(doc);
+    gchar *result = classbrowser_autocomplete_php_variables(GPHPEDIT_CLASSBROWSER(main_window.classbrowser), prefix);
+    if (result) gtk_scintilla_user_list_show(GTK_SCINTILLA(docdet->scintilla), 1, result);
+    g_free(prefix);
+  }
+  docdet->completion_timer_set=FALSE;
+  return FALSE;
+}
+
+
 static void char_added(GtkWidget *scintilla, guint ch, gpointer user_data)
 {
   gphpedit_debug_message (DEBUG_DOCUMENT, "char added:%d",ch);
@@ -907,12 +925,11 @@ static void char_added(GtkWidget *scintilla, guint ch, gpointer user_data)
         g_free(member_function_buffer);
         member_function_buffer = gtk_scintilla_get_text_range (sci, wordStart, wordEnd, &member_function_length);
         if (g_str_has_prefix(member_function_buffer,"$") || g_str_has_prefix(member_function_buffer,"__")) {
-            gint s;
-            gchar *buff= gtk_scintilla_get_text_range (sci, wordStart, wordEnd, &s);
-            gchar *result = classbrowser_autocomplete_php_variables(GPHPEDIT_CLASSBROWSER(main_window.classbrowser), buff);
-            if (result) gtk_scintilla_user_list_show(sci, 1, result);
-            g_free(result);
-            g_free(buff);
+            if (!docdet->completion_timer_set) {
+              docdet->completion_timer_id = g_timeout_add(get_preferences_manager_auto_complete_delay(pref), 
+                  auto_complete_php_variables_callback, GINT_TO_POINTER(current_pos));
+              docdet->completion_timer_set=TRUE;
+            }
         } else if (g_strcmp0(member_function_buffer,"instanceof")==0 || g_strcmp0(member_function_buffer,"is_subclass_of")==0) {
           gtk_scintilla_insert_text(sci, current_pos," ");
           gtk_scintilla_goto_pos(sci, current_pos + 1);
