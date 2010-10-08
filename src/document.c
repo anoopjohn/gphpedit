@@ -878,9 +878,6 @@ static void char_added(GtkWidget *scintilla, guint ch, gpointer user_data)
   gchar *member_function_buffer = NULL;
   gint member_function_length;
   guint style;
-  gint type;
-  type = docdet->type;
-  if ((type != TAB_PHP && type != TAB_CSS && type != TAB_CXX) && (ch=='\r'|| ch=='\n' || ch=='\t')) return;
   Preferences_Manager *pref = preferences_manager_new ();
   current_pos = gtk_scintilla_get_current_pos(sci);
   current_line = gtk_scintilla_line_from_position(sci, current_pos);
@@ -895,7 +892,7 @@ static void char_added(GtkWidget *scintilla, guint ch, gpointer user_data)
     style = 0; // Hack to get around the drop-down not showing in comments, but if it's been forced...  
   }
 
-  switch(type) {
+  switch(docdet->type) {
     case(TAB_PHP):
       if ((style != SCE_HPHP_SIMPLESTRING) && (style != SCE_HPHP_HSTRING) && (style != SCE_HPHP_COMMENTLINE) && (style !=SCE_HPHP_COMMENT)) {
       switch(ch) {
@@ -950,6 +947,7 @@ static void char_added(GtkWidget *scintilla, guint ch, gpointer user_data)
         }
         break;
       case(TAB_CXX):
+      case (TAB_PERL):
         switch(ch) {
             case ('\r'):
             case ('\n'):
@@ -991,12 +989,19 @@ static void char_added(GtkWidget *scintilla, guint ch, gpointer user_data)
         break;
       case(TAB_COBOL):
       case(TAB_SQL):
+        switch(ch) {
+            case ('\r'):
+            case ('\n'):
+              autoindent_brace_code (sci);
+            break;
+            default:
         member_function_buffer = gtk_scintilla_get_text_range (sci, wordStart-2, wordStart, &member_function_length);
         if(current_word_length>=3){
           show_autocompletion (docdet, current_pos);
         }
         g_free(member_function_buffer);
         break;
+        }
       }
      default:
             member_function_buffer = gtk_scintilla_get_text_range (sci, wordStart-2, wordEnd, &member_function_length);
