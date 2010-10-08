@@ -713,7 +713,6 @@ typedef struct {
  gchar *prefix;
  GString *completion_result;
  gint file_type;
- GHashTable *completion_list;
 } var_find;
 
 static gboolean make_completion_string (gpointer key, gpointer value, gpointer data)
@@ -756,60 +755,45 @@ gchar *classbrowser_backend_autocomplete_php_variables(ClassbrowserBackend *clas
   return result;
 }
 
-GString *get_member_function_completion_list(ClassbrowserBackendDetails *classbackdet, gchar *buffer)
+void make_result_string (gpointer key, gpointer value, gpointer user_data)
 {
-  GSList *li;
-  GList *li2;
-  ClassBrowserFunction *function;
-  GList* member_functions = NULL;
-  GList* sorted_member_functions = NULL;
-  GString *result = NULL;
-  gchar *function_name;
-
-  for(li = classbackdet->functionlist; li!= NULL; li = g_slist_next(li)) {
-    function = li->data;
-    if (function) {
-      if ((g_str_has_prefix(function->functionname, buffer) || strlen(buffer)!=0) && function->file_type==TAB_PHP ) {
-        member_functions = g_list_append(member_functions, function->functionname);
-      }
+    gchar *function_name = (gchar *)value;
+    ClassbrowserBackendDetails *classbackdet = (ClassbrowserBackendDetails *) user_data;
+    if (!classbackdet->completion_string) {
+      classbackdet->completion_string = g_string_new(function_name);
+    } else {
+      classbackdet->completion_string = g_string_append(classbackdet->completion_string, " ");
+      classbackdet->completion_string = g_string_append(classbackdet->completion_string, function_name);
     }
-  }
-
-  sorted_member_functions = g_list_sort(member_functions, (GCompareFunc) g_utf8_collate);
-  member_functions = sorted_member_functions;
-
-  for(li2 = member_functions; li2!= NULL; li2 = g_list_next(li2)) {
-    function_name = li2->data;
-    if (!result) {
-      result = g_string_new(function_name);
-      result = g_string_append(result, "?1");
-    }
-    else {
-      result = g_string_append(result, " ");
-      result = g_string_append(result, function_name);
-      result = g_string_append(result, "?1");
-    }
-  }
-
-  if (result){
-  result = g_string_append(result, " ");
-  gphpedit_debug_message(DEBUG_CLASSBROWSER,"prefix: %s autocomplete list:%s\n", buffer, result->str);
-  }
-  return result;
 }
-
 
 gchar *classbrowser_backend_autocomplete_member_function(ClassbrowserBackend *classback, gchar *prefix)
 {
   ClassbrowserBackendDetails *classbackdet;
 	classbackdet = CLASSBROWSER_BACKEND_GET_PRIVATE(classback);
-  GString *list;
-  list = get_member_function_completion_list(classbackdet, prefix);
-  if (list) {
-    gphpedit_debug_message(DEBUG_CLASSBROWSER,"prefix: %s autocomplete list:%s\n", prefix, list->str);
-    return g_string_free(list, FALSE);
+  GSList *li;
+  ClassBrowserFunction *function;
+
+  classbackdet->completion_list = g_hash_table_new_full (g_str_hash, g_str_equal, NULL, (GDestroyNotify) g_free);
+
+  for(li = classbackdet->functionlist; li!= NULL; li = g_slist_next(li)) {
+    function = li->data;
+    if (function) {
+      if ((g_str_has_prefix(function->functionname, prefix) && function->file_type==TAB_PHP)) {
+          g_hash_table_insert (classbackdet->completion_list, function->functionname, g_strdup_printf("%s?1",function->functionname));
+      }
+    }
   }
-  gphpedit_debug_message(DEBUG_CLASSBROWSER,"prefix: %s autocomplete list:%s\n", prefix, "null");
+
+  classbackdet->completion_string = NULL;
+  g_hash_table_foreach (classbackdet->completion_list, make_result_string, classbackdet);
+  g_hash_table_destroy (classbackdet->completion_list);
+  if (classbackdet->completion_string){
+    gphpedit_debug_message(DEBUG_CLASSBROWSER, "prefix: %s autocomplete list:%s\n", prefix, classbackdet->completion_string->str);
+    return g_string_free(classbackdet->completion_string, FALSE);
+  }
+
+  gphpedit_debug_message(DEBUG_CLASSBROWSER, "prefix: %s autocomplete list:%s\n", prefix, "null");
   return NULL;
 }
 
@@ -832,18 +816,6 @@ gchar *classbrowser_backend_custom_function_calltip(ClassbrowserBackend *classba
   }
   gphpedit_debug_message(DEBUG_CLASSBROWSER,"custom calltip: %s\n", calltip);
   return calltip;
-}
-
-void make_result_string (gpointer key, gpointer value, gpointer user_data)
-{
-    gchar *function_name = (gchar *)value;
-    ClassbrowserBackendDetails *classbackdet = (ClassbrowserBackendDetails *) user_data;
-    if (!classbackdet->completion_string) {
-      classbackdet->completion_string = g_string_new(function_name);
-    } else {
-      classbackdet->completion_string = g_string_append(classbackdet->completion_string, " ");
-      classbackdet->completion_string = g_string_append(classbackdet->completion_string, function_name);
-    }
 }
 
 gchar *classbrowser_backend_add_custom_autocompletion(ClassbrowserBackend *classback, gchar *prefix, gint file_type, GSList *list){
@@ -872,13 +844,14 @@ gchar *classbrowser_backend_add_custom_autocompletion(ClassbrowserBackend *class
   classbackdet->completion_string = NULL;
   g_hash_table_foreach (classbackdet->completion_list, make_result_string, classbackdet);
   g_hash_table_destroy (classbackdet->completion_list);
+
   if (classbackdet->completion_string){
     gphpedit_debug_message(DEBUG_CLASSBROWSER, "prefix: %s autocomplete list:%s\n", prefix, classbackdet->completion_string->str);
-    return classbackdet->completion_string->str;
-  } else {
-    gphpedit_debug_message(DEBUG_CLASSBROWSER, "prefix: %s autocomplete list:%s\n", prefix, "null");
-    return NULL;
+    return g_string_free(classbackdet->completion_string, FALSE);
   }
+
+  gphpedit_debug_message(DEBUG_CLASSBROWSER, "prefix: %s autocomplete list:%s\n", prefix, "null");
+  return NULL;
 }
 
 #ifdef HAVE_CTAGS_EXUBERANT
