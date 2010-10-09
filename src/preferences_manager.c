@@ -65,7 +65,7 @@ struct PreferencesManagerDetails
   /* session settings*/
   gchar *last_opened_folder;
   gboolean parseonlycurrentfile;
-  guint classbrowser_hidden:1;
+  gboolean classbrowser_hidden;
   gint classbrowser_size;
   gchar *filebrowser_last_folder;
   gboolean showfilebrowser;
@@ -152,6 +152,7 @@ enum
   PROP_0,
   PROP_SAVE_SESSION,
   PROP_LAST_OPENED_FOLDER,
+  PROP_CLASSBROWSER_HIDDEN,
   PROP_PARSE_ONLY_CURRENT_FILE
 };
 
@@ -171,6 +172,10 @@ preferences_manager_set_property (GObject      *object,
 		case PROP_PARSE_ONLY_CURRENT_FILE:
 			prefdet->parseonlycurrentfile = g_value_get_boolean (value);
 			set_bool("/gPHPEdit/classbrowser/onlycurrentfile", prefdet->parseonlycurrentfile);
+			break;
+		case PROP_CLASSBROWSER_HIDDEN:
+			prefdet->classbrowser_hidden = g_value_get_boolean (value);
+			set_bool("/gPHPEdit/main_window/classbrowser_hidden", prefdet->classbrowser_hidden);
 			break;
 		case PROP_LAST_OPENED_FOLDER:
 			g_free(prefdet->last_opened_folder);
@@ -199,6 +204,9 @@ preferences_manager_get_property (GObject    *object,
 			break;
 		case PROP_PARSE_ONLY_CURRENT_FILE:
 			g_value_set_boolean (value, prefdet->parseonlycurrentfile);
+			break;
+		case PROP_CLASSBROWSER_HIDDEN:
+			g_value_set_boolean (value, prefdet->classbrowser_hidden);
 			break;
 		case PROP_LAST_OPENED_FOLDER:
 			g_value_set_string (value, prefdet->last_opened_folder);
@@ -235,6 +243,16 @@ preferences_manager_class_init (PreferencesManagerClass *klass)
                               g_param_spec_boolean ("parse_only_current_file",
                               NULL, NULL,
                               FALSE, G_PARAM_READWRITE));
+
+ //value is true if side_panel is hidden
+ //value is false if side_panel is show
+ //FIXME: the value of this property is the hidden status of the side panel
+ // it's name is for compatibility reason.
+  g_object_class_install_property (object_class,
+                              PROP_CLASSBROWSER_HIDDEN,
+                              g_param_spec_boolean ("classbrowser_hidden",
+                              NULL, NULL,
+                              TRUE, G_PARAM_READWRITE));
 
   /* last folder gPHPEdit open property */
   g_object_class_install_property (object_class,
@@ -407,7 +425,7 @@ void load_session_settings(PreferencesManagerDetails *prefdet){
   gphpedit_debug(DEBUG_PREFS);
   prefdet->last_opened_folder = get_string("/gPHPEdit/general/last_opened_folder", (gchar *)g_get_home_dir());
   prefdet->parseonlycurrentfile = get_bool("/gPHPEdit/classbrowser/onlycurrentfile", FALSE);
-  prefdet->classbrowser_hidden = get_size("/gPHPEdit/main_window/classbrowser_hidden", FALSE);
+  prefdet->classbrowser_hidden = get_bool("/gPHPEdit/main_window/classbrowser_hidden", FALSE);
   prefdet->classbrowser_size = get_color("/gPHPEdit/main_window/classbrowser_size", "main_window", 100);
   
   prefdet->filebrowser_last_folder=get_string("/gPHPEdit/main_window/folderbrowser/folder", (gchar *)g_get_home_dir());
@@ -426,26 +444,6 @@ GSList *get_preferences_manager_search_history(PreferencesManager *preferences_m
   PreferencesManagerDetails *prefdet;
   prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
   return prefdet->search_history;
-}
-/*
- *get_preferences_manager_side_panel_status
- *return 1 if side_panel is hidden
- *return 0 if side_panel is show
-*/
-gboolean get_preferences_manager_side_panel_status(PreferencesManager *preferences_manager)
-{
-  g_return_val_if_fail (OBJECT_IS_PREFERENCES_MANAGER (preferences_manager), 0); /**/
-  PreferencesManagerDetails *prefdet;
-  prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
-  return prefdet->classbrowser_hidden;
-}
-
-void set_preferences_manager_parse_side_panel_status(PreferencesManager *preferences_manager, gint new_status){
-  if (!OBJECT_IS_PREFERENCES_MANAGER (preferences_manager)) return ;
-  PreferencesManagerDetails *prefdet;
-  prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
-  prefdet->classbrowser_hidden=new_status;
-  set_int("/gPHPEdit/main_window/classbrowser_hidden", new_status);
 }
 
 /*

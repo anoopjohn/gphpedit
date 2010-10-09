@@ -118,8 +118,10 @@ static void main_window_create_panes(void)
   gtk_paned_pack1 (GTK_PANED (main_window.main_horizontal_pane), main_window.main_vertical_pane, FALSE, TRUE);
   g_signal_connect (G_OBJECT (main_window.window), "size_allocate", G_CALLBACK (classbrowser_accept_size), NULL);
   gtk_paned_set_position(GTK_PANED(main_window.main_horizontal_pane),get_preferences_manager_side_panel_get_size(main_window.prefmg));
-    
-  if (get_preferences_manager_side_panel_status(main_window.prefmg)) classbrowser_hide();
+  
+  gboolean hidden;
+  g_object_get(main_window.prefmg, "classbrowser_hidden", &hidden, NULL);
+  if (hidden) classbrowser_hide();
 
   main_window.prin_hbox = gtk_vbox_new(FALSE, 0);
   gtk_widget_show(main_window.prin_hbox);

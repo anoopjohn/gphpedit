@@ -74,8 +74,6 @@ void set_preferences_manager_show_maintoolbar(PreferencesManager *preferences_ma
 gboolean get_preferences_manager_show_findtoolbar(PreferencesManager *preferences_manager);
 void set_preferences_manager_show_findtoolbar(PreferencesManager *preferences_manager, gboolean new_status);
 
-gboolean get_preferences_manager_side_panel_status(PreferencesManager *preferences_manager);
-void set_preferences_manager_parse_side_panel_status(PreferencesManager *preferences_manager, gint new_status);
 gint get_preferences_manager_side_panel_get_size(PreferencesManager *preferences_manager);
 void set_preferences_manager_side_panel_size(PreferencesManager *preferences_manager, gint new_size);
 /**/
