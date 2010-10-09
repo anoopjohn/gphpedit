@@ -90,8 +90,6 @@ gint get_preferences_manager_indentation_size (PreferencesManager *preferences_m
 void set_preferences_manager_indentation_size(PreferencesManager *preferences_manager, gint newstate);
 const gchar *get_preferences_manager_php_binary_location(PreferencesManager *preferences_manager);
 void set_preferences_manager_php_binary_location(PreferencesManager *preferences_manager, gchar *newstate);
-gboolean get_preferences_manager_saved_session(PreferencesManager *preferences_manager);
-void set_preferences_manager_saved_session(PreferencesManager *preferences_manager, gboolean newstate);
 gint get_preferences_manager_font_quality(PreferencesManager *preferences_manager);
 gboolean get_preferences_manager_line_wrapping(PreferencesManager *preferences_manager);
 void set_preferences_manager_line_wrapping(PreferencesManager *preferences_manager, gboolean newstate);

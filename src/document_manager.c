@@ -297,6 +297,7 @@ void document_manager_session_save(DocumentManager *docmg)
   Document *current_focus_editor;
   GString *session_file;
   GString *session_file_contents;
+  gboolean save_session;
 
   session_file = g_string_new(g_get_home_dir());
   session_file = g_string_append(session_file, "/.gphpedit/session");
@@ -305,8 +306,8 @@ void document_manager_session_save(DocumentManager *docmg)
   g_string_free(session_file,TRUE);
   GError *error=NULL;
 
-
-  if (get_preferences_manager_saved_session(main_window.prefmg) && (g_slist_length(docmgdet->editors) > 0)) { 
+  g_object_get (main_window.prefmg, "save_session", &save_session, NULL);
+  if (save_session && (g_slist_length(docmgdet->editors) > 0)) {
     current_focus_editor = docmgdet->current_document;
     session_file_contents=g_string_new(NULL);
     for(walk = docmgdet->editors; walk!= NULL; walk = g_slist_next(walk)) {
@@ -344,7 +345,7 @@ void document_manager_session_save(DocumentManager *docmg)
       }
      if (session_file_contents) g_string_free(session_file_contents,TRUE);
   } else {
-      if (get_preferences_manager_saved_session(main_window.prefmg)){
+      if (save_session){
         if (!g_file_delete (file,NULL,&error)){
           if (error->code!=G_FILE_ERROR_NOENT && error->code!=1){
             g_print(_("GIO Error deleting file: %s, code %d\n"), error->message,error->code);

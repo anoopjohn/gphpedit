@@ -146,7 +146,7 @@ void on_use_tabs_instead_spaces_toggle(GtkToggleButton *togglebutton, gpointer u
 
 void on_save_session_toggle(GtkToggleButton *togglebutton, gpointer user_data)
 {
- set_preferences_manager_saved_session(main_window.prefmg, gtk_toggle_button_get_active(togglebutton));
+ g_object_set (main_window.prefmg, "save_session", gtk_toggle_button_get_active(togglebutton), NULL);
 }
 
 void on_save_folderbrowser_toggle(GtkToggleButton *togglebutton, gpointer user_data)
@@ -376,7 +376,9 @@ PREFERENCES_DIALOG_init (PreferencesDialog *dialog)
   gtk_widget_show (priv->save_session);
   gtk_box_pack_start (GTK_BOX (prinbox), priv->save_session, FALSE, FALSE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (priv->save_session), 8);
-  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(priv->save_session), get_preferences_manager_saved_session(main_window.prefmg));
+  gboolean save_session;
+  g_object_get (main_window.prefmg, "save_session", &save_session, NULL);
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(priv->save_session), save_session);
   g_signal_connect(G_OBJECT(GTK_CHECK_BUTTON(priv->save_session)), "toggled", G_CALLBACK(on_save_session_toggle), NULL);
 
   priv->single_instance_only = gtk_check_button_new_with_mnemonic (_("Only ever run 1 copy of gPHPEdit at a time"));

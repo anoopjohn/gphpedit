@@ -104,7 +104,6 @@ struct PreferencesManagerDetails
               PREFERENCES_MANAGER_TYPE,\
               PreferencesManagerDetails))
 
-//static gpointer parent_class;
 static void               preferences_manager_finalize         (GObject                *object);
 static void  preferences_manager_class_init (PreferencesManagerClass *klass);
 static void preferences_manager_dispose (GObject *gobject);
@@ -148,6 +147,52 @@ preferences_manager_constructor (GType type,
   return g_object_ref (self);
 }
 
+enum
+{
+	PROP_0,
+	PROP_SAVE_SESSION
+};
+
+static void
+preferences_manager_set_property (GObject      *object,
+			      guint         prop_id,
+			      const GValue *value,
+			      GParamSpec   *pspec)
+{
+  PreferencesManagerDetails *prefdet = PREFERENCES_MANAGER_GET_PRIVATE(object);
+
+	switch (prop_id)
+	{
+		case PROP_SAVE_SESSION:
+			prefdet->save_session = g_value_get_boolean (value);
+			break;
+
+		default:
+			G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
+			break;
+	}
+}
+
+static void
+preferences_manager_get_property (GObject    *object,
+			      guint       prop_id,
+			      GValue     *value,
+			      GParamSpec *pspec)
+{
+  PreferencesManagerDetails *prefdet = PREFERENCES_MANAGER_GET_PRIVATE(object);
+
+	switch (prop_id)
+	{
+		case PROP_SAVE_SESSION:
+			g_value_set_boolean (value, prefdet->save_session);
+			break;
+
+		default:
+			G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
+			break;
+	}
+}
+
 static void
 preferences_manager_class_init (PreferencesManagerClass *klass)
 {
@@ -157,6 +202,16 @@ preferences_manager_class_init (PreferencesManagerClass *klass)
   object_class->finalize = preferences_manager_finalize;
   object_class->dispose = preferences_manager_dispose;
   object_class->constructor = preferences_manager_constructor;
+  object_class->set_property = preferences_manager_set_property;
+  object_class->get_property = preferences_manager_get_property;
+
+  /* save_session property */
+  g_object_class_install_property (object_class,
+                              PROP_SAVE_SESSION,
+                              g_param_spec_boolean ("save_session", 
+                              "Save_Session", "If gPHPEdit save session", 
+                              FALSE, G_PARAM_READWRITE));
+
   g_type_class_add_private (klass, sizeof (PreferencesManagerDetails));
 }
 
@@ -592,23 +647,6 @@ void set_preferences_manager_php_binary_location(PreferencesManager *preferences
   PreferencesManagerDetails *prefdet;
   prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
   prefdet->php_binary_location = newstate; 
-
-}
-
-gboolean get_preferences_manager_saved_session(PreferencesManager *preferences_manager)
-{
-  g_return_val_if_fail (OBJECT_IS_PREFERENCES_MANAGER (preferences_manager), 0); /**/
-  PreferencesManagerDetails *prefdet;
-  prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
-  return prefdet->save_session;
-}
-
-void set_preferences_manager_saved_session(PreferencesManager *preferences_manager, gboolean newstate)
-{
-  if (!OBJECT_IS_PREFERENCES_MANAGER (preferences_manager)) return ;
-  PreferencesManagerDetails *prefdet;
-  prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
-  prefdet->save_session = newstate; 
 
 }
 
