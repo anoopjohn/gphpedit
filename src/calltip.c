@@ -2,7 +2,7 @@
 
    Copyright (C) 2003, 2004, 2005 Andy Jeffries <andy at gphpedit.org>
    Copyright (C) 2009 Anoop John <anoop dot john at zyxware.com>
-   Copyright (C) 2009 José Rostagno (for vijona.com.ar) 
+   Copyright (C) 2009- 2010 José Rostagno (for vijona.com.ar) 
 
    For more information or to find the latest release, visit our 
    website at http://www.gphpedit.org/
@@ -43,6 +43,7 @@ struct CalltipManagerDetails
   GTree *cobol_api_tree;
   GTree *cxx_api_tree;
   GTree *sql_api_tree;
+  GTree *python_api_tree;
 
   GString *completion_list_tree;
   gchar *prefix; 
@@ -140,6 +141,7 @@ calltip_manager_init (CalltipManager  *object)
   calltip_manager_load_api_file("php-gphpedit.api", &calltipmgdet->php_api_tree);
   calltip_manager_load_api_file("css.api", &calltipmgdet->css_api_tree);
   calltip_manager_load_api_file("c.api", &calltipmgdet->cxx_api_tree);
+  calltip_manager_load_api_file("python.api", &calltipmgdet->python_api_tree);
   calltip_manager_function_list_from_array_prepare(cobol_keyword, &calltipmgdet->cobol_api_tree);
   calltip_manager_function_list_from_array_prepare(sql_keywords, &calltipmgdet->sql_api_tree);
 
@@ -275,7 +277,7 @@ static gchar *get_cxx_api_line(CalltipManagerDetails *calltipmgdet, gchar *buffe
   gchar *description;
   gchar *token_line, *copy_line;
   gchar *result = NULL;
-  gchar *value=g_tree_lookup (calltipmgdet->php_api_tree, buffer);
+  gchar *value=g_tree_lookup (calltipmgdet->cxx_api_tree, buffer);
   if (value){
     token_line = g_strdup (value);
     copy_line = token_line;
@@ -289,6 +291,29 @@ static gchar *get_cxx_api_line(CalltipManagerDetails *calltipmgdet, gchar *buffe
   } else {
     /*maybe a custom function*/
     result= classbrowser_custom_function_calltip(GPHPEDIT_CLASSBROWSER(main_window.classbrowser), buffer, TAB_CXX);
+  }
+  return result;
+}
+
+static gchar *get_python_api_line(CalltipManagerDetails *calltipmgdet, gchar *buffer)
+{
+  gchar *params;
+  gchar *description;
+  gchar *token_line, *copy_line;
+  gchar *result = NULL;
+  gchar *value=g_tree_lookup (calltipmgdet->python_api_tree, buffer);
+  if (value){
+    token_line = g_strdup (value);
+    copy_line = token_line;
+    params = strtok(token_line, "|");
+    description = strtok(NULL, "|");
+    /* make calltip */
+    result=g_strdup_printf ("%s %s\n%s",buffer,params,description);
+    gphpedit_debug_message(DEBUG_CALLTIP, "calltip: %s\n",result);
+    g_free(copy_line);	
+  } else {
+    /*maybe a custom function*/
+    result= classbrowser_custom_function_calltip(GPHPEDIT_CLASSBROWSER(main_window.classbrowser), buffer, TAB_PYTHON);
   }
   return result;
 }
@@ -312,6 +337,8 @@ gchar *calltip_manager_show_call_tip(CalltipManager *calltipmg, gint type, gchar
       break;
     case TAB_CXX:
       result = get_cxx_api_line(calltipmgdet, prefix);
+    case TAB_PYTHON:
+      result = get_python_api_line(calltipmgdet, prefix);
     default:
       break;
   }
@@ -516,6 +543,29 @@ gchar *calltip_manager_cxx_autocomplete_word(CalltipManager *calltipmg, gchar *b
   return g_string_free(result,FALSE);
 }
 
+gchar *calltip_manager_python_autocomplete_word(CalltipManager *calltipmg, gchar *buffer)
+{
+
+  CalltipManagerDetails *calltipmgdet;
+	calltipmgdet = CALLTIP_MANAGER_GET_PRIVATE(calltipmg);
+
+  GString *result=NULL;
+
+  if (calltip_manager_has_cache(buffer, calltipmgdet->cache_str, calltipmgdet->cache_completion)){
+    result = calltip_manager_get_autocomp_from_cache(buffer, calltipmgdet->cache_str, calltipmgdet->cache_completion);
+  } else {
+    g_tree_foreach (calltipmgdet->python_api_tree, make_completion_list, buffer); 
+    gchar *custom = classbrowser_add_custom_autocompletion(GPHPEDIT_CLASSBROWSER(main_window.classbrowser), buffer, TAB_PYTHON, list);
+    //FIXME: add custom variables support
+    result = g_string_new(custom);
+    if (custom) g_free(custom);
+    calltip_manager_save_result_in_cache(calltipmgdet, result->str, buffer);
+    clear_list();
+  }
+  gphpedit_debug_message(DEBUG_CALLTIP,"Autocomplete list: %s\n", result->str);
+  return g_string_free(result,FALSE);
+}
+
 gchar *calltip_manager_autocomplete_word(CalltipManager *calltipmg, gint type, gchar *buffer)
 {
   if (!calltipmg || !buffer) return NULL;
@@ -535,6 +585,9 @@ gchar *calltip_manager_autocomplete_word(CalltipManager *calltipmg, gint type, g
       break;
     case TAB_CXX:
       result = calltip_manager_cxx_autocomplete_word(calltipmg, buffer);
+      break;
+    case TAB_PYTHON:
+      result = calltip_manager_python_autocomplete_word(calltipmg, buffer);
       break;
     default:
       break;

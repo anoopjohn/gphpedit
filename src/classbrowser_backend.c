@@ -456,7 +456,6 @@ gchar *get_ctags_param(gchar *text,gint *advancing){
   return name;
 }
 
-//FIXME:: only COBOL support for now
 void call_ctags(ClassbrowserBackend *classback, gchar *filename){
   if (!filename) return;
   gboolean result;
