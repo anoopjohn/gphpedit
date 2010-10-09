@@ -39,6 +39,7 @@
 #include "tab_css.h"
 #include "tab_cxx.h"
 #include "tab_cobol.h"
+#include "tab_python.h"
 /* object signal enumeration */
 enum {
 	DONE_REFRESH,
@@ -100,6 +101,7 @@ void free_function_list_item (gpointer data, gpointer user_data);
 void call_ctags(ClassbrowserBackend *classback, gchar *filename);
 void process_cobol_word(ClassbrowserBackend *classback, gchar *name, gchar *filename, gchar *type, gchar *line);
 void process_cxx_word(ClassbrowserBackend *classback, gchar *name, gchar *filename, gchar *type, gchar *line, gchar *param);
+void process_python_word(ClassbrowserBackend *classback, gchar *name,gchar *filename,gchar *type,gchar *line, gchar *param);
 #endif
 
 /* http://library.gnome.org/devel/gobject/unstable/gobject-Type-Information.html#G-DEFINE-TYPE:CAPS */
@@ -468,6 +470,7 @@ void call_ctags(ClassbrowserBackend *classback, gchar *filename){
   result = g_spawn_command_line_sync (command_line, &stdout, &stdouterr, &exit_status, &error);
   g_free(command_line);
   g_free(path);
+
   if (result) {
 //   g_print("ctags:%s ->(%s)\n",stdout,stdouterr);
 
@@ -493,6 +496,8 @@ void call_ctags(ClassbrowserBackend *classback, gchar *filename){
             process_cobol_word(classback, name, filename, type, line);
         if (is_cxx_file(filename))
             process_cxx_word(classback, name, filename, type, line, param);
+        if (is_python_file(filename))
+            process_python_word(classback, name, filename, type, line, param);
         g_free(name);
         g_free(line);
         g_free(type);
@@ -863,15 +868,87 @@ static inline gboolean is_cobol_banned_word(gchar *word)
 void process_cobol_word(ClassbrowserBackend *classback, gchar *name,gchar *filename,gchar *type,gchar *line)
 {
  if (g_strcmp0(type,"paragraph")==0 && !is_cobol_banned_word(name)) {
-          classbrowser_functionlist_add(classback, NULL, name, filename, TAB_COBOL, atoi(line), NULL);
+  classbrowser_functionlist_add(classback, NULL, name, filename, TAB_COBOL, atoi(line), NULL);
  }
 }
+
 void process_cxx_word(ClassbrowserBackend *classback, gchar *name,gchar *filename,gchar *type,gchar *line, gchar *param)
 {
  if (g_strcmp0(type,"function")==0) {
     classbrowser_functionlist_add(classback, NULL, name, filename, TAB_CXX, atoi(line), param);
  } else if (g_strcmp0(type,"macro")==0) {
     classbrowser_functionlist_add(classback, NULL, name, filename, TAB_CXX, atoi(line), NULL);
+ }
+}
+
+typedef struct {
+ gint line;
+ ClassBrowserClass *class;
+ gint file_type;
+} class_find;
+
+/*
+  search class for the member based on line number.
+  we have a line number, so search back for last defined class.
+*/
+gboolean search_class (gpointer key, gpointer value, gpointer data){
+  class_find *cl = (class_find *) data;
+  ClassBrowserClass *class = (ClassBrowserClass *) value;
+  if (class->line_number < cl->line) {
+    if (cl->class) {
+      if (class->line_number > cl->class->line_number) cl->class = class;
+    } else {
+      cl->class = class;
+    }
+  }
+  return FALSE;
+}
+
+gchar *get_fixed_param(gchar *param)
+{
+  gchar *parameters = NULL;
+  /* some function came with a trailing ')' we must remove it */
+  gchar *par = param;
+  if (g_str_has_suffix(param, ")")) {
+    gint len = strlen(param) - 1;
+    if (len != 0) {
+      parameters = g_malloc0(len);
+      strncpy(parameters, param, len);
+      par = parameters;
+    } else {
+      par = NULL;
+    }
+  } else {
+    par = g_strdup(param);
+  }
+  return par;
+}
+
+void process_python_word(ClassbrowserBackend *classback, gchar *name, gchar *filename, gchar *type, gchar *line, gchar *param)
+{
+  ClassbrowserBackendDetails *classbackdet;
+	classbackdet = CLASSBROWSER_BACKEND_GET_PRIVATE(classback);
+  gchar *parameters = NULL;
+
+ if (g_strcmp0(type,"function")==0) {
+    /* some function came with a trailing ')' we must remove it */
+    parameters = get_fixed_param(param);
+    classbrowser_functionlist_add(classback, NULL, name, filename, TAB_PYTHON, atoi(line), parameters);
+    g_free(parameters);
+ } else if (g_strcmp0(type,"class")==0){
+    classbrowser_classlist_add(classback, name, filename, atoi(line), TAB_PYTHON);
+ } else if (g_strcmp0(type,"member")==0){
+  gchar *classname = NULL;
+  class_find *search_data= g_slice_new(class_find);
+  search_data->line = atoi(line);
+  search_data->class = NULL;
+  search_data->file_type = TAB_PYTHON;
+  g_tree_foreach (classbackdet->php_class_tree, search_class, search_data);
+  if (search_data->class) classname = search_data->class->classname;
+  parameters = get_fixed_param(param);
+  classbrowser_functionlist_add(classback, classname, name, filename, TAB_PYTHON, atoi(line), parameters);
+  g_free(parameters);
+  g_slice_free(class_find, search_data);
  }
 }
 #endif
