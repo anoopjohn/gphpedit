@@ -50,8 +50,6 @@ struct DocumentManagerDetails
 					    DocumentManagerDetails))
 
 static void document_manager_finalize (GObject *object);
-static void document_manager_dispose (GObject *gobject);
-
 void document_manager_create_new(void);
 
 /*
@@ -85,31 +83,22 @@ document_manager_constructor (GType type,
 static void
 document_manager_class_init (DocumentManagerClass *klass)
 {
-	GObjectClass *object_class;
+  GObjectClass *object_class;
 
-	object_class = G_OBJECT_CLASS (klass);
-	object_class->finalize = document_manager_finalize;
-  object_class->dispose = document_manager_dispose;
+  object_class = G_OBJECT_CLASS (klass);
+  object_class->finalize = document_manager_finalize;
   object_class->constructor = document_manager_constructor;
-	g_type_class_add_private (klass, sizeof (DocumentManagerDetails));
+  g_type_class_add_private (klass, sizeof (DocumentManagerDetails));
 }
 
 static void
 document_manager_init (DocumentManager * object)
 {
-}
-
-/*
-* disposes the Gobject
-*/
-static void document_manager_dispose (GObject *object)
-{
-  DocumentManager *doc = DOCUMENT_MANAGER(object);
+  gphpedit_debug(DEBUG_DOC_MANAGER);
   DocumentManagerDetails *docdet;
-	docdet = DOCUMENT_MANAGER_GET_PRIVATE(doc);
-  /* dispose object data */
-  /* Chain up to the parent class */
-  G_OBJECT_CLASS (document_manager_parent_class)->dispose (object);
+  docdet = DOCUMENT_MANAGER_GET_PRIVATE(object);
+  docdet->current_document = NULL;
+  docdet->editors = NULL;
 }
 
 static void
@@ -201,7 +190,7 @@ void document_save_update_cb (Document *doc, gpointer user_data){
   DocumentManagerDetails *docmgdet;
 	docmgdet = DOCUMENT_MANAGER_GET_PRIVATE(docmg);
   update_app_title(docmgdet->current_document);
-  classbrowser_update(main_window.classbrowser);
+  classbrowser_update(GPHPEDIT_CLASSBROWSER(main_window.classbrowser));
 }
 
 void document_manager_add_new_document(DocumentManager *docmg, gint type, const gchar *filename, gint goto_line){
