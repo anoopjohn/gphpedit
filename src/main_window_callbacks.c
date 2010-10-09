@@ -482,11 +482,10 @@ GdkPixbuf *get_window_icon (void){
 void on_close1_activate(GtkWidget *widget)
 {
   document_manager_try_close_current_document(main_window.docmg);
-    if(document_manager_get_document_count(main_window.docmg)!=0){
+  if(document_manager_get_document_count(main_window.docmg)!=0){
     classbrowser_update(GPHPEDIT_CLASSBROWSER(main_window.classbrowser));
     update_app_title(document_manager_get_current_document(main_window.docmg));
     update_zoom_level();
-    classbrowser_force_label_update(GPHPEDIT_CLASSBROWSER(main_window.classbrowser));
   }
 }
 

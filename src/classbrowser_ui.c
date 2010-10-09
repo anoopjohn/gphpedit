@@ -486,6 +486,12 @@ void classbrowser_update(gphpeditClassBrowser *classbrowser){
   if (!classbrowser) return ;
 	gphpeditClassBrowserPrivate *priv;
 	priv = CLASSBROWSER_BACKEND_GET_PRIVATE(classbrowser);
+  /* update FILE: label text */
+  GtkTreeIter iter;
+  if (!gtk_tree_selection_get_selected (priv->classtreeselect, NULL, &iter)) {
+      gtk_label_set_text(GTK_LABEL(priv->treeviewlabel), _("FILE:"));
+  }
+
   if (document_manager_get_document_count (main_window.docmg)){
     classbrowser_backend_update(priv->classbackend, get_preferences_manager_parse_only_current_file(main_window.prefmg));
   }
@@ -501,16 +507,6 @@ void classbrowser_update_selected_label(gphpeditClassBrowserPrivate *priv, gchar
     g_string_append_printf(new_label, "(%d)", line);
     gtk_label_set_text(GTK_LABEL(priv->treeviewlabel), new_label->str);
     g_string_free(new_label, TRUE);
-  }
-}
-
-void classbrowser_force_label_update(gphpeditClassBrowser *classbrowser)
-{
-	gphpeditClassBrowserPrivate *priv;
-	priv = CLASSBROWSER_BACKEND_GET_PRIVATE(classbrowser);
-  GtkTreeIter iter;
-  if (!gtk_tree_selection_get_selected (priv->classtreeselect, NULL, &iter)) {
-      gtk_label_set_text(GTK_LABEL(priv->treeviewlabel), _("FILE:"));
   }
 }
 
