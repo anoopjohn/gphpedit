@@ -201,6 +201,7 @@ void document_save_update_cb (Document *doc, gpointer user_data){
   DocumentManagerDetails *docmgdet;
 	docmgdet = DOCUMENT_MANAGER_GET_PRIVATE(docmg);
   update_app_title(docmgdet->current_document);
+  classbrowser_update(main_window.classbrowser);
 }
 
 void document_manager_add_new_document(DocumentManager *docmg, gint type, const gchar *filename, gint goto_line){
