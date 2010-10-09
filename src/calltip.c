@@ -165,6 +165,9 @@ calltip_manager_finalize (GObject *object)
   if (calltipmgdet->cxx_api_tree){
      g_tree_destroy(calltipmgdet->cxx_api_tree);
   }
+  if (calltipmgdet->python_api_tree){
+     g_tree_destroy(calltipmgdet->python_api_tree);
+  }
   if (calltipmgdet->completion_list_tree != NULL) {
 
     g_string_free (calltipmgdet->completion_list_tree,TRUE);	
