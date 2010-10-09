@@ -149,8 +149,9 @@ preferences_manager_constructor (GType type,
 
 enum
 {
-	PROP_0,
-	PROP_SAVE_SESSION
+  PROP_0,
+  PROP_SAVE_SESSION,
+  PROP_LAST_OPENED_FOLDER
 };
 
 static void
@@ -165,6 +166,10 @@ preferences_manager_set_property (GObject      *object,
 	{
 		case PROP_SAVE_SESSION:
 			prefdet->save_session = g_value_get_boolean (value);
+			break;
+		case PROP_LAST_OPENED_FOLDER:
+			g_free(prefdet->last_opened_folder);
+			prefdet->last_opened_folder = g_value_dup_string (value);
 			break;
 
 		default:
@@ -185,6 +190,9 @@ preferences_manager_get_property (GObject    *object,
 	{
 		case PROP_SAVE_SESSION:
 			g_value_set_boolean (value, prefdet->save_session);
+			break;
+		case PROP_LAST_OPENED_FOLDER:
+			g_value_set_string (value, prefdet->last_opened_folder);
 			break;
 
 		default:
@@ -210,6 +218,13 @@ preferences_manager_class_init (PreferencesManagerClass *klass)
                               PROP_SAVE_SESSION,
                               g_param_spec_boolean ("save_session", 
                               "Save_Session", "If gPHPEdit save session", 
+                              FALSE, G_PARAM_READWRITE));
+
+  /* last folder gPHPEdit open property */
+  g_object_class_install_property (object_class,
+                              PROP_LAST_OPENED_FOLDER,
+                              g_param_spec_string ("last_opened_folder",
+                              "Last_Opened_Folder", NULL,
                               FALSE, G_PARAM_READWRITE));
 
   g_type_class_add_private (klass, sizeof (PreferencesManagerDetails));
@@ -455,28 +470,6 @@ void set_preferences_manager_parse_only_current_file(PreferencesManager *prefere
   set_int("/gPHPEdit/classbrowser/onlycurrentfile",new_status);
 }
 
-/*
- *get_preferences_manager_last_opened_folder
- * return an internal string must not be freed.
-*/
-const gchar *get_preferences_manager_last_opened_folder(PreferencesManager *preferences_manager){
-  g_return_val_if_fail (OBJECT_IS_PREFERENCES_MANAGER (preferences_manager), 0); /**/
-  PreferencesManagerDetails *prefdet;
-  prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
-  return prefdet->last_opened_folder;
-}
-/*
-*store a new value for last opened folder
-*/
-void set_preferences_manager_last_opened_folder(PreferencesManager *preferences_manager, const gchar *new_last_folder){
-  if (!OBJECT_IS_PREFERENCES_MANAGER (preferences_manager)) return ;
-  if (!new_last_folder) return ;
-  PreferencesManagerDetails *prefdet;
-  prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
-  if (prefdet->last_opened_folder) g_free(prefdet->last_opened_folder);
-  prefdet->last_opened_folder= g_strdup(new_last_folder);
-  set_string ("/gPHPEdit/general/last_opened_folder", new_last_folder);
-}
 /*
  *get_preferences_manager_filebrowser_last_folder
  * return an internal string must not be freed.

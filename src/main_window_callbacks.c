@@ -257,7 +257,7 @@ void on_open1_activate(GtkWidget *widget)
     gtk_file_chooser_set_current_folder_uri(GTK_FILE_CHOOSER(file_selection_box),  folder);
     g_free(folder);
   } else {
-    last_opened_folder = get_preferences_manager_last_opened_folder(main_window.prefmg);
+    g_object_get (main_window.prefmg, "last_opened_folder", &last_opened_folder, NULL);
     gphpedit_debug_message(DEBUG_MAIN_WINDOW,"last_opened_folder: %s", last_opened_folder);
     gtk_file_chooser_set_current_folder_uri(GTK_FILE_CHOOSER(file_selection_box), last_opened_folder);
   }
@@ -324,7 +324,7 @@ void on_save_as1_activate(GtkWidget *widget)
     gtk_file_chooser_set_uri(GTK_FILE_CHOOSER(file_selection_box), filename);
     g_free(filename);
   } else {
-    last_opened_folder = get_preferences_manager_last_opened_folder(main_window.prefmg);
+    g_object_get (main_window.prefmg, "last_opened_folder", &last_opened_folder, NULL);
     gphpedit_debug_message(DEBUG_MAIN_WINDOW, "Setting current_folder_uri to %s", last_opened_folder);
     gtk_file_chooser_set_current_folder_uri(GTK_FILE_CHOOSER(file_selection_box), last_opened_folder);
   }
