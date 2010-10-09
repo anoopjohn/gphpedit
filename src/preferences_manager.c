@@ -64,7 +64,7 @@ struct PreferencesManagerDetails
 
   /* session settings*/
   gchar *last_opened_folder;
-  guint parseonlycurrentfile:1;
+  gboolean parseonlycurrentfile;
   guint classbrowser_hidden:1;
   gint classbrowser_size;
   gchar *filebrowser_last_folder;
@@ -151,7 +151,8 @@ enum
 {
   PROP_0,
   PROP_SAVE_SESSION,
-  PROP_LAST_OPENED_FOLDER
+  PROP_LAST_OPENED_FOLDER,
+  PROP_PARSE_ONLY_CURRENT_FILE
 };
 
 static void
@@ -167,9 +168,14 @@ preferences_manager_set_property (GObject      *object,
 		case PROP_SAVE_SESSION:
 			prefdet->save_session = g_value_get_boolean (value);
 			break;
+		case PROP_PARSE_ONLY_CURRENT_FILE:
+			prefdet->parseonlycurrentfile = g_value_get_boolean (value);
+			set_bool("/gPHPEdit/classbrowser/onlycurrentfile", prefdet->parseonlycurrentfile);
+			break;
 		case PROP_LAST_OPENED_FOLDER:
 			g_free(prefdet->last_opened_folder);
 			prefdet->last_opened_folder = g_value_dup_string (value);
+			set_string ("/gPHPEdit/general/last_opened_folder", prefdet->last_opened_folder);
 			break;
 
 		default:
@@ -190,6 +196,9 @@ preferences_manager_get_property (GObject    *object,
 	{
 		case PROP_SAVE_SESSION:
 			g_value_set_boolean (value, prefdet->save_session);
+			break;
+		case PROP_PARSE_ONLY_CURRENT_FILE:
+			g_value_set_boolean (value, prefdet->parseonlycurrentfile);
 			break;
 		case PROP_LAST_OPENED_FOLDER:
 			g_value_set_string (value, prefdet->last_opened_folder);
@@ -218,6 +227,13 @@ preferences_manager_class_init (PreferencesManagerClass *klass)
                               PROP_SAVE_SESSION,
                               g_param_spec_boolean ("save_session", 
                               "Save_Session", "If gPHPEdit save session", 
+                              FALSE, G_PARAM_READWRITE));
+
+  /* when classbrowser will parse only the current file property */
+  g_object_class_install_property (object_class,
+                              PROP_PARSE_ONLY_CURRENT_FILE,
+                              g_param_spec_boolean ("parse_only_current_file",
+                              NULL, NULL,
                               FALSE, G_PARAM_READWRITE));
 
   /* last folder gPHPEdit open property */
@@ -390,7 +406,7 @@ void load_window_settings(PreferencesManagerDetails *prefdet)
 void load_session_settings(PreferencesManagerDetails *prefdet){
   gphpedit_debug(DEBUG_PREFS);
   prefdet->last_opened_folder = get_string("/gPHPEdit/general/last_opened_folder", (gchar *)g_get_home_dir());
-  prefdet->parseonlycurrentfile = get_size("/gPHPEdit/classbrowser/onlycurrentfile", FALSE);
+  prefdet->parseonlycurrentfile = get_bool("/gPHPEdit/classbrowser/onlycurrentfile", FALSE);
   prefdet->classbrowser_hidden = get_size("/gPHPEdit/main_window/classbrowser_hidden", FALSE);
   prefdet->classbrowser_size = get_color("/gPHPEdit/main_window/classbrowser_size", "main_window", 100);
   
@@ -450,24 +466,6 @@ void set_preferences_manager_side_panel_size(PreferencesManager *preferences_man
   prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
   prefdet->classbrowser_size=new_size;
   set_int("/gPHPEdit/main_window/classbrowser_size",new_size);
-}
-
-/*
- *get_preferences_manager_parse_only_current_file
-*/
-gint get_preferences_manager_parse_only_current_file(PreferencesManager *preferences_manager){
-  g_return_val_if_fail (OBJECT_IS_PREFERENCES_MANAGER (preferences_manager), 0); /**/
-  PreferencesManagerDetails *prefdet;
-  prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
-  return prefdet->parseonlycurrentfile;
-}
-
-void set_preferences_manager_parse_only_current_file(PreferencesManager *preferences_manager, gint new_status){
-  if (!OBJECT_IS_PREFERENCES_MANAGER (preferences_manager)) return ;
-  PreferencesManagerDetails *prefdet;
-  prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
-  prefdet->parseonlycurrentfile=new_status;
-  set_int("/gPHPEdit/classbrowser/onlycurrentfile",new_status);
 }
 
 /*

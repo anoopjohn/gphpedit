@@ -79,9 +79,6 @@ void set_preferences_manager_parse_side_panel_status(PreferencesManager *prefere
 gint get_preferences_manager_side_panel_get_size(PreferencesManager *preferences_manager);
 void set_preferences_manager_side_panel_size(PreferencesManager *preferences_manager, gint new_size);
 /**/
-gint get_preferences_manager_parse_only_current_file(PreferencesManager *preferences_manager);
-void set_preferences_manager_parse_only_current_file(PreferencesManager *preferences_manager, gint new_status);
-/**/
 void set_preferences_manager_filebrowser_last_folder(PreferencesManager *preferences_manager, const gchar *new_last_folder);
 const gchar *get_preferences_manager_filebrowser_last_folder(PreferencesManager *preferences_manager);
 gint get_preferences_manager_indentation_size (PreferencesManager *preferences_manager);

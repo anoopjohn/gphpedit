@@ -146,7 +146,9 @@ gphpedit_classbrowser_init (gphpeditClassBrowser *button)
   */
   GtkWidget *hbox = gtk_hbox_new(FALSE, 0);
   priv->chkOnlyCurFileFuncs = gtk_check_button_new_with_label(_("Parse only current file"));
-  gtk_toggle_button_set_active ((GtkToggleButton *)priv->chkOnlyCurFileFuncs, get_preferences_manager_parse_only_current_file(main_window.prefmg));
+  gboolean active;
+  g_object_get (main_window.prefmg, "parse_only_current_file", &active, NULL);
+  gtk_toggle_button_set_active ((GtkToggleButton *)priv->chkOnlyCurFileFuncs, active);
   gtk_widget_show (priv->chkOnlyCurFileFuncs);
   gtk_widget_show (hbox);
   gtk_box_pack_start(GTK_BOX(hbox), priv->chkOnlyCurFileFuncs, TRUE, TRUE, 10);
@@ -212,7 +214,7 @@ gphpedit_classbrowser_new (void)
 */
 gint on_parse_current_click (GtkWidget *widget, gpointer user_data)
 {
-  set_preferences_manager_parse_only_current_file(main_window.prefmg, gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget)));
+  g_object_set (main_window.prefmg, "parse_only_current_file", gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget)), NULL);
   classbrowser_backend_update(user_data, gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget)));
   return 0;
 }
@@ -493,7 +495,9 @@ void classbrowser_update(gphpeditClassBrowser *classbrowser){
   }
 
   if (document_manager_get_document_count (main_window.docmg)){
-    classbrowser_backend_update(priv->classbackend, get_preferences_manager_parse_only_current_file(main_window.prefmg));
+  gboolean active;
+  g_object_get (main_window.prefmg, "parse_only_current_file", &active, NULL);
+  classbrowser_backend_update(priv->classbackend, active);
   }
 }
 
