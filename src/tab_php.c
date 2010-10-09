@@ -32,7 +32,7 @@
 
 void scintilla_php_set_lexer(GtkScintilla *scintilla)
 {
-  Preferences_Manager *prefmg = preferences_manager_new ();
+  PreferencesManager *prefmg = preferences_manager_new ();
 
   gtk_scintilla_clear_document_style (scintilla);
   gtk_scintilla_set_lexer(scintilla, SCLEX_HTML);

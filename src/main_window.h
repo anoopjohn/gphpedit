@@ -40,7 +40,7 @@
 typedef struct
 {
   /* preferences manager */
-  Preferences_Manager *prefmg;
+  PreferencesManager *prefmg;
   TemplatesManager *tempmg;
 
   GtkSourceStyleSchemeManager *stylemg;

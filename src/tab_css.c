@@ -33,7 +33,7 @@
 void tab_css_set_lexer(Document *document)
 {
 
-  Preferences_Manager *prefmg = preferences_manager_new ();
+  PreferencesManager *prefmg = preferences_manager_new ();
   GtkScintilla *scintilla = document_get_scintilla(document);
   gtk_scintilla_clear_document_style (scintilla);
   gtk_scintilla_set_lexer(scintilla, SCLEX_CSS);

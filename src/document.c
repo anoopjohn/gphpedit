@@ -503,7 +503,7 @@ void tab_set_general_scintilla_properties(Document *doc)
 
 void tab_set_configured_scintilla_properties(GtkScintilla *scintilla)
 {
-  Preferences_Manager *pref = preferences_manager_new ();
+  PreferencesManager *pref = preferences_manager_new ();
   gtk_scintilla_set_wrap_mode(scintilla, get_preferences_manager_line_wrapping(pref));
   if (get_preferences_manager_line_wrapping(pref)) {
     gtk_scintilla_set_h_scroll_bar(scintilla, 0);
@@ -560,7 +560,6 @@ static void save_point_reached(GtkWidget *scintilla, gpointer user_data)
   DocumentDetails *docdet = DOCUMENT_GET_PRIVATE(doc);
   if (docdet->short_filename != NULL) {
     gtk_label_set_text(GTK_LABEL (docdet->label), docdet->short_filename);
-
     /*emit save update signal*/
     g_signal_emit (G_OBJECT (doc), signals[SAVE_UPDATE], 0); 
   }
@@ -770,7 +769,7 @@ static void autoindent_brace_code (GtkScintilla *sci)
   gchar *previous_char_buffer;
   gint previous_char_buffer_length;
 
-  Preferences_Manager *pref = preferences_manager_new ();
+  PreferencesManager *pref = preferences_manager_new ();
   current_pos = gtk_scintilla_get_current_pos(sci);
   current_line = gtk_scintilla_line_from_position(sci, current_pos);
 
@@ -810,7 +809,7 @@ static void cancel_calltip (GtkScintilla *sci)
 static void show_calltip (DocumentDetails *docdet, gint pos)
 {
   if (!docdet->calltip_timer_set) {
-    Preferences_Manager *pref = preferences_manager_new ();
+    PreferencesManager *pref = preferences_manager_new ();
     docdet->calltip_timer_id = g_timeout_add(get_preferences_manager_calltip_delay(pref), calltip_callback, GINT_TO_POINTER(pos));
     docdet->calltip_timer_set=TRUE;
     g_object_unref(pref);
@@ -820,7 +819,7 @@ static void show_calltip (DocumentDetails *docdet, gint pos)
 static void show_autocompletion (DocumentDetails *docdet, gint pos)
 {
   if (!docdet->completion_timer_set) {
-    Preferences_Manager *pref = preferences_manager_new ();
+    PreferencesManager *pref = preferences_manager_new ();
     docdet->completion_timer_id = g_timeout_add(get_preferences_manager_auto_complete_delay(pref), auto_complete_callback, GINT_TO_POINTER(pos));
     docdet->completion_timer_set=TRUE;
     g_object_unref(pref);
@@ -878,7 +877,7 @@ static void char_added(GtkWidget *scintilla, guint ch, gpointer user_data)
   gchar *member_function_buffer = NULL;
   gint member_function_length;
   guint style;
-  Preferences_Manager *pref = preferences_manager_new ();
+  PreferencesManager *pref = preferences_manager_new ();
   current_pos = gtk_scintilla_get_current_pos(sci);
   current_line = gtk_scintilla_line_from_position(sci, current_pos);
   wordStart = gtk_scintilla_word_start_position(sci, current_pos-1, TRUE);
@@ -948,6 +947,7 @@ static void char_added(GtkWidget *scintilla, guint ch, gpointer user_data)
         break;
       case(TAB_CXX):
       case (TAB_PERL):
+      case (TAB_PYTHON):
         switch(ch) {
             case ('\r'):
             case ('\n'):
@@ -1192,7 +1192,7 @@ void margin_clicked (GtkWidget *scintilla, gint modifiers, gint position, gint m
   if(margin!=1){
     gint line;
     line = gtk_scintilla_line_from_position(GTK_SCINTILLA(scintilla), position);
-    Preferences_Manager *pref = preferences_manager_new ();
+    PreferencesManager *pref = preferences_manager_new ();
     if (get_preferences_manager_show_folding(pref) && margin == 2) {
       fold_clicked(scintilla, line, modifiers);
     }
@@ -1321,7 +1321,7 @@ void fold_changed(GtkWidget *scintilla, int line,int levelNow,int levelPrev)
 void handle_modified(GtkWidget *scintilla, gint pos,gint mtype,gchar *text,gint len,
            gint added,gint line,gint foldNow,gint foldPrev)
 {
-  Preferences_Manager *pref = preferences_manager_new ();
+  PreferencesManager *pref = preferences_manager_new ();
   if (get_preferences_manager_show_folding(pref) && (mtype & SC_MOD_CHANGEFOLD)) {
     fold_changed(scintilla, line, foldNow, foldPrev);
   }
@@ -2060,7 +2060,7 @@ void document_set_sintax_line(Document *doc, guint current_line_number)
     gint line_start;
     gint line_end;
     gint indent;
-    Preferences_Manager *pref = preferences_manager_new ();
+    PreferencesManager *pref = preferences_manager_new ();
     indent = gtk_scintilla_get_line_indentation(GTK_SCINTILLA(docdet->scintilla), current_line_number);
     line_start = gtk_scintilla_position_from_line(GTK_SCINTILLA(docdet->scintilla), current_line_number);
     line_start += (indent/get_preferences_manager_indentation_size(pref));
