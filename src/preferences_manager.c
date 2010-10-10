@@ -66,7 +66,7 @@ struct PreferencesManagerDetails
   gchar *last_opened_folder;
   gboolean parseonlycurrentfile;
   gboolean classbrowser_hidden;
-  gint classbrowser_size;
+  gint side_panel_size;
   gchar *filebrowser_last_folder;
   gboolean showfilebrowser;
   guint showstatusbar:1;
@@ -153,7 +153,8 @@ enum
   PROP_SAVE_SESSION,
   PROP_LAST_OPENED_FOLDER,
   PROP_CLASSBROWSER_HIDDEN,
-  PROP_PARSE_ONLY_CURRENT_FILE
+  PROP_PARSE_ONLY_CURRENT_FILE,
+  PROP_SIDE_PANEL_SIZE
 };
 
 static void
@@ -172,6 +173,10 @@ preferences_manager_set_property (GObject      *object,
 		case PROP_PARSE_ONLY_CURRENT_FILE:
 			prefdet->parseonlycurrentfile = g_value_get_boolean (value);
 			set_bool("/gPHPEdit/classbrowser/onlycurrentfile", prefdet->parseonlycurrentfile);
+			break;
+		case PROP_SIDE_PANEL_SIZE:
+			prefdet->side_panel_size = g_value_get_int (value);
+			set_int("/gPHPEdit/main_window/classbrowser_size", prefdet->side_panel_size);
 			break;
 		case PROP_CLASSBROWSER_HIDDEN:
 			prefdet->classbrowser_hidden = g_value_get_boolean (value);
@@ -204,6 +209,9 @@ preferences_manager_get_property (GObject    *object,
 			break;
 		case PROP_PARSE_ONLY_CURRENT_FILE:
 			g_value_set_boolean (value, prefdet->parseonlycurrentfile);
+			break;
+		case PROP_SIDE_PANEL_SIZE:
+			g_value_set_int (value, prefdet->side_panel_size);
 			break;
 		case PROP_CLASSBROWSER_HIDDEN:
 			g_value_set_boolean (value, prefdet->classbrowser_hidden);
@@ -253,6 +261,12 @@ preferences_manager_class_init (PreferencesManagerClass *klass)
                               g_param_spec_boolean ("classbrowser_hidden",
                               NULL, NULL,
                               TRUE, G_PARAM_READWRITE));
+
+  g_object_class_install_property (object_class,
+                              PROP_SIDE_PANEL_SIZE,
+                              g_param_spec_int ("side_panel_size",
+                              NULL, NULL, 0, G_MAXINT, 
+                              100, G_PARAM_READWRITE));
 
   /* last folder gPHPEdit open property */
   g_object_class_install_property (object_class,
@@ -426,7 +440,7 @@ void load_session_settings(PreferencesManagerDetails *prefdet){
   prefdet->last_opened_folder = get_string("/gPHPEdit/general/last_opened_folder", (gchar *)g_get_home_dir());
   prefdet->parseonlycurrentfile = get_bool("/gPHPEdit/classbrowser/onlycurrentfile", FALSE);
   prefdet->classbrowser_hidden = get_bool("/gPHPEdit/main_window/classbrowser_hidden", FALSE);
-  prefdet->classbrowser_size = get_color("/gPHPEdit/main_window/classbrowser_size", "main_window", 100);
+  prefdet->side_panel_size = get_color("/gPHPEdit/main_window/classbrowser_size", "main_window", 100);
   
   prefdet->filebrowser_last_folder=get_string("/gPHPEdit/main_window/folderbrowser/folder", (gchar *)g_get_home_dir());
 }
@@ -444,26 +458,6 @@ GSList *get_preferences_manager_search_history(PreferencesManager *preferences_m
   PreferencesManagerDetails *prefdet;
   prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
   return prefdet->search_history;
-}
-
-/*
- *classbrowser_get_size
- *return currentside panel size
- * default size 100
-*/
-gint get_preferences_manager_side_panel_get_size(PreferencesManager *preferences_manager){
-  g_return_val_if_fail (OBJECT_IS_PREFERENCES_MANAGER (preferences_manager), 0); /**/
-  PreferencesManagerDetails *prefdet;
-  prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
-  return prefdet->classbrowser_size;
-}
-
-void set_preferences_manager_side_panel_size(PreferencesManager *preferences_manager, gint new_size){
-  if (!OBJECT_IS_PREFERENCES_MANAGER (preferences_manager)) return ;
-  PreferencesManagerDetails *prefdet;
-  prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
-  prefdet->classbrowser_size=new_size;
-  set_int("/gPHPEdit/main_window/classbrowser_size",new_size);
 }
 
 /*

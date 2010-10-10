@@ -807,7 +807,9 @@ void syntax_check_clear(GtkWidget *widget)
 void classbrowser_show(void)
 {
   gphpedit_debug(DEBUG_MAIN_WINDOW);
-  gtk_paned_set_position(GTK_PANED(main_window.main_horizontal_pane), get_preferences_manager_side_panel_get_size(main_window.prefmg));
+  gint size;
+  g_object_get(main_window.prefmg, "side_panel_size", &size, NULL);
+  gtk_paned_set_position(GTK_PANED(main_window.main_horizontal_pane), size);
   g_object_set(main_window.prefmg, "classbrowser_hidden", FALSE, NULL);
   classbrowser_update(GPHPEDIT_CLASSBROWSER(main_window.classbrowser));
 }
