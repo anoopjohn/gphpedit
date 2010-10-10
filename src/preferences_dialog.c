@@ -126,7 +126,7 @@ void on_edge_column_changed(GtkSpinButton *spinbutton, gpointer user_data)
 
 void on_show_indentation_guides_toggle(GtkToggleButton *togglebutton, gpointer user_data)
 {
-  set_preferences_manager_show_indentation_guides(main_window.prefmg, gtk_toggle_button_get_active(togglebutton));  
+  g_object_set(main_window.prefmg, "show_indentation_guides", gtk_toggle_button_get_active(togglebutton), NULL);
 }
 
 void on_edge_mode_toggle(GtkToggleButton *togglebutton, gpointer user_data)
@@ -136,12 +136,12 @@ void on_edge_mode_toggle(GtkToggleButton *togglebutton, gpointer user_data)
 
 void on_line_wrapping_toggle(GtkToggleButton *togglebutton, gpointer user_data)
 {
-  set_preferences_manager_line_wrapping(main_window.prefmg, gtk_toggle_button_get_active(togglebutton));
+  g_object_set(main_window.prefmg, "line_wrapping", gtk_toggle_button_get_active(togglebutton), NULL);
 }
 
 void on_use_tabs_instead_spaces_toggle(GtkToggleButton *togglebutton, gpointer user_data)
 {
-  set_preferences_manager_use_tabs_instead_spaces(main_window.prefmg, gtk_toggle_button_get_active(togglebutton));
+  g_object_set(main_window.prefmg, "tabs_instead_spaces", gtk_toggle_button_get_active(togglebutton), NULL);
 }
 
 void on_save_session_toggle(GtkToggleButton *togglebutton, gpointer user_data)
@@ -156,12 +156,12 @@ void on_save_folderbrowser_toggle(GtkToggleButton *togglebutton, gpointer user_d
 
 void on_save_autobrace_toggle(GtkToggleButton *togglebutton, gpointer user_data)
 {
-  set_preferences_manager_auto_complete_braces(main_window.prefmg, gtk_toggle_button_get_active(togglebutton));
+  g_object_set (main_window.prefmg, "auto_complete_braces", gtk_toggle_button_get_active(togglebutton), NULL);
 }
 
 void on_save_higthlightcaretline_toggle(GtkToggleButton *togglebutton, gpointer user_data)
 {
-  set_preferences_manager_higthlight_caret_line(main_window.prefmg, gtk_toggle_button_get_active(togglebutton));
+  g_object_set (main_window.prefmg, "higthlight_caret_line", gtk_toggle_button_get_active(togglebutton), NULL);
 }
 
 void on_single_instance_only_toggle(GtkToggleButton *togglebutton, gpointer user_data)
@@ -461,7 +461,9 @@ PREFERENCES_DIALOG_init (PreferencesDialog *dialog)
   gtk_widget_show (priv->autobrace);
   gtk_container_add (GTK_CONTAINER (prinbox), priv->autobrace);
   gtk_container_set_border_width (GTK_CONTAINER (priv->autobrace), 8);
-  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(priv->autobrace), get_preferences_manager_auto_complete_braces(main_window.prefmg));
+  gboolean auto_brace;
+  g_object_get(main_window.prefmg, "auto_complete_braces", &auto_brace, NULL);
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(priv->autobrace), auto_brace);
   g_signal_connect(G_OBJECT(GTK_CHECK_BUTTON(priv->autobrace)), "toggled", G_CALLBACK(on_save_autobrace_toggle), NULL);
 
   hbox15 = gtk_hbox_new (FALSE, 0);
@@ -516,18 +518,22 @@ PREFERENCES_DIALOG_init (PreferencesDialog *dialog)
   gtk_box_pack_start (GTK_BOX (hbox15), priv->tab_size, FALSE, TRUE, 0);
   g_signal_connect (G_OBJECT (priv->tab_size), "value_changed", G_CALLBACK (on_tab_size_changed), NULL);
 
+  gboolean show_indent_guides, higthlight_caret_line, line_wrapping, tabs_spaces;
+  g_object_get(main_window.prefmg, "show_indentation_guides", &show_indent_guides, "higthlight_caret_line", &higthlight_caret_line,
+    "line_wrapping",&line_wrapping,"tabs_instead_spaces", &tabs_spaces, NULL);
+
   priv->use_tabs_instead_spaces = gtk_check_button_new_with_mnemonic (_("Use tabs instead of spaces for indentation"));
   gtk_widget_show (priv->use_tabs_instead_spaces);
   gtk_box_pack_start (GTK_BOX (edgebox), priv->use_tabs_instead_spaces, FALSE, FALSE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (priv->use_tabs_instead_spaces), 8);
-  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(priv->use_tabs_instead_spaces), get_preferences_manager_use_tabs_instead_spaces(main_window.prefmg));
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(priv->use_tabs_instead_spaces), tabs_spaces);
   g_signal_connect(G_OBJECT(GTK_CHECK_BUTTON(priv->use_tabs_instead_spaces)), "toggled", G_CALLBACK(on_use_tabs_instead_spaces_toggle), NULL);
 
   priv->show_indentation_guides = gtk_check_button_new_with_mnemonic (_("Show indentation guides"));
   gtk_widget_show (priv->show_indentation_guides);
   gtk_box_pack_start (GTK_BOX (edgebox), priv->show_indentation_guides, FALSE, FALSE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (priv->show_indentation_guides), 8);
-  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(priv->show_indentation_guides), get_preferences_manager_show_indentation_guides(main_window.prefmg));
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(priv->show_indentation_guides), show_indent_guides);
   g_signal_connect(G_OBJECT(GTK_CHECK_BUTTON(priv->show_indentation_guides)), "toggled", G_CALLBACK(on_show_indentation_guides_toggle), NULL);
 
   adj= gtk_alignment_new (0.00, 0.50, 0, 0);
@@ -547,7 +553,7 @@ PREFERENCES_DIALOG_init (PreferencesDialog *dialog)
   gtk_widget_show (priv->line_wrapping);
   gtk_container_add (GTK_CONTAINER (hbox15), priv->line_wrapping);
   gtk_container_set_border_width (GTK_CONTAINER (priv->line_wrapping), 8);
-  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(priv->line_wrapping), get_preferences_manager_line_wrapping(main_window.prefmg));
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(priv->line_wrapping), line_wrapping);
   g_signal_connect(G_OBJECT(GTK_CHECK_BUTTON(priv->line_wrapping)), "toggled", G_CALLBACK(on_line_wrapping_toggle), NULL);
 
   priv->higthlightcaretline = gtk_check_button_new_with_mnemonic (_("Highlight Caret Line"));
@@ -555,7 +561,7 @@ PREFERENCES_DIALOG_init (PreferencesDialog *dialog)
   gtk_widget_show (priv->higthlightcaretline);
   gtk_box_pack_start (GTK_BOX (prinboxed), priv->higthlightcaretline, FALSE, FALSE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (priv->higthlightcaretline), 8);
-  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(priv->higthlightcaretline), get_preferences_manager_higthlight_caret_line(main_window.prefmg));
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(priv->higthlightcaretline), higthlight_caret_line);
   g_signal_connect(G_OBJECT(GTK_CHECK_BUTTON(priv->higthlightcaretline)), "toggled", G_CALLBACK(on_save_higthlightcaretline_toggle), NULL);
 
 

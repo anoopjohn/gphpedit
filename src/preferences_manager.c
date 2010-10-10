@@ -76,20 +76,20 @@ struct PreferencesManagerDetails
   gint marker_back;
   gint indentation_size;
   gint tab_size;
-  guint show_indentation_guides:1;
+  gboolean show_indentation_guides;
   gboolean edge_mode;
   gint edge_column;
   gchar *php_binary_location;
   gchar *shared_source_location;
   gchar *php_file_extensions;
 
-  guint auto_complete_braces:1;
-  guint higthlightcaretline:1;
+  gboolean auto_complete_braces;
+  gboolean higthlightcaretline;
   //gint auto_indent_after_brace;
   gint auto_complete_delay;
   gint calltip_delay;
-  guint line_wrapping:1;
-  guint use_tabs_instead_spaces:1;
+  gboolean line_wrapping;
+  gboolean use_tabs_instead_spaces;
   guint single_instance_only:1;
   gint font_quality;  
   GSList *search_history; /* for incremental search history */
@@ -103,7 +103,7 @@ struct PreferencesManagerDetails
               PREFERENCES_MANAGER_TYPE,\
               PreferencesManagerDetails))
 
-static void               preferences_manager_finalize         (GObject                *object);
+static void preferences_manager_finalize  (GObject  *object);
 static void  preferences_manager_class_init (PreferencesManagerClass *klass);
 static void preferences_manager_dispose (GObject *gobject);
 void load_default_settings(PreferencesManagerDetails *prefdet);
@@ -157,7 +157,12 @@ enum
   PROP_FILEBROWSER_LAST_FOLDER,
   PROP_EDGE_MODE,
   PROP_EDGE_COLUMN,
-  PROP_SHOW_FOLDING
+  PROP_SHOW_FOLDING,
+  PROP_SHOW_INDENTATION_GUIDES,
+  PROP_AUTO_COMPLETE_BRACES,
+  PROP_HIGTHLIGHT_CARET_LINE,
+  PROP_LINE_WRAPPING,
+  PROP_TABS_INSTEAD_SPACES
 };
 
 static void
@@ -186,6 +191,21 @@ preferences_manager_set_property (GObject      *object,
 			break;
 		case PROP_EDGE_COLUMN:
 			prefdet->edge_column = g_value_get_int (value);
+			break;
+		case PROP_SHOW_INDENTATION_GUIDES:
+			prefdet->show_indentation_guides = g_value_get_boolean (value);
+			break;
+		case PROP_AUTO_COMPLETE_BRACES:
+			prefdet->auto_complete_braces = g_value_get_boolean (value);
+			break;
+		case PROP_HIGTHLIGHT_CARET_LINE:
+			prefdet->higthlightcaretline = g_value_get_boolean (value);
+			break;
+		case PROP_LINE_WRAPPING:
+			prefdet->line_wrapping = g_value_get_boolean (value);
+			break;
+		case PROP_TABS_INSTEAD_SPACES:
+			prefdet->use_tabs_instead_spaces = g_value_get_boolean (value);
 			break;
 		case PROP_SIDE_PANEL_HIDDEN:
 			prefdet->side_panel_hidden = g_value_get_boolean (value);
@@ -232,6 +252,21 @@ preferences_manager_get_property (GObject    *object,
 			break;
 		case PROP_EDGE_COLUMN:
 			g_value_set_int (value, prefdet->edge_column);
+			break;
+		case PROP_SHOW_INDENTATION_GUIDES:
+			g_value_set_boolean (value, prefdet->show_indentation_guides);
+			break;
+		case PROP_AUTO_COMPLETE_BRACES:
+			g_value_set_boolean (value, prefdet->auto_complete_braces);
+			break;
+		case PROP_HIGTHLIGHT_CARET_LINE:
+			g_value_set_boolean (value, prefdet->higthlightcaretline);
+			break;
+		case PROP_LINE_WRAPPING:
+			g_value_set_boolean (value, prefdet->line_wrapping);
+			break;
+		case PROP_TABS_INSTEAD_SPACES:
+			g_value_set_boolean (value, prefdet->use_tabs_instead_spaces);
 			break;
 		case PROP_SHOW_FOLDING:
 			g_value_set_boolean (value, TRUE);
@@ -307,8 +342,36 @@ preferences_manager_class_init (PreferencesManagerClass *klass)
                               PROP_SHOW_FOLDING,
                               g_param_spec_boolean ("show_folding",
                               NULL, NULL,
-                              TRUE, G_PARAM_READWRITE));
+                              TRUE, G_PARAM_READABLE));
 
+  g_object_class_install_property (object_class,
+                              PROP_SHOW_INDENTATION_GUIDES,
+                              g_param_spec_boolean ("show_indentation_guides",
+                              NULL, NULL,
+                              FALSE, G_PARAM_READWRITE));
+
+  g_object_class_install_property (object_class,
+                              PROP_AUTO_COMPLETE_BRACES,
+                              g_param_spec_boolean ("auto_complete_braces",
+                              NULL, NULL,
+                              FALSE, G_PARAM_READWRITE));
+
+  g_object_class_install_property (object_class,
+                              PROP_HIGTHLIGHT_CARET_LINE,
+                              g_param_spec_boolean ("higthlight_caret_line",
+                              NULL, NULL,
+                              FALSE, G_PARAM_READWRITE));
+
+  g_object_class_install_property (object_class,
+                              PROP_LINE_WRAPPING,
+                              g_param_spec_boolean ("line_wrapping",
+                              NULL, NULL,
+                              FALSE, G_PARAM_READWRITE));
+  g_object_class_install_property (object_class,
+                              PROP_TABS_INSTEAD_SPACES,
+                              g_param_spec_boolean ("tabs_instead_spaces",
+                              NULL, NULL,
+                              FALSE, G_PARAM_READWRITE));
   /* last folder gPHPEdit open property */
   g_object_class_install_property (object_class,
                               PROP_LAST_OPENED_FOLDER,
@@ -664,23 +727,6 @@ gint get_preferences_manager_font_quality(PreferencesManager *preferences_manage
   return prefdet->font_quality;
 }
 
-gboolean get_preferences_manager_line_wrapping(PreferencesManager *preferences_manager)
-{
-  g_return_val_if_fail (OBJECT_IS_PREFERENCES_MANAGER (preferences_manager), 0); /**/
-  PreferencesManagerDetails *prefdet;
-  prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
-  return prefdet->line_wrapping;
-}
-
-void set_preferences_manager_line_wrapping(PreferencesManager *preferences_manager, gboolean newstate)
-{
-  if (!OBJECT_IS_PREFERENCES_MANAGER (preferences_manager)) return ;
-  PreferencesManagerDetails *prefdet;
-  prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
-  prefdet->line_wrapping = newstate; 
-
-}
-
 gint get_preferences_manager_calltip_delay(PreferencesManager *preferences_manager)
 {
   g_return_val_if_fail (OBJECT_IS_PREFERENCES_MANAGER (preferences_manager), 0); /**/
@@ -715,41 +761,6 @@ void set_preferences_manager_auto_complete_delay(PreferencesManager *preferences
 
 }
 
-gboolean get_preferences_manager_use_tabs_instead_spaces(PreferencesManager *preferences_manager)
-{
-  g_return_val_if_fail (OBJECT_IS_PREFERENCES_MANAGER (preferences_manager), 0); /**/
-  PreferencesManagerDetails *prefdet;
-  prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
-  return prefdet->use_tabs_instead_spaces;
-}
-
-void set_preferences_manager_use_tabs_instead_spaces(PreferencesManager *preferences_manager, gboolean newstate)
-{
-  if (!OBJECT_IS_PREFERENCES_MANAGER (preferences_manager)) return ;
-  PreferencesManagerDetails *prefdet;
-  prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
-  prefdet->use_tabs_instead_spaces = newstate; 
-
-}
-
-
-gboolean get_preferences_manager_auto_complete_braces(PreferencesManager *preferences_manager)
-{
-  g_return_val_if_fail (OBJECT_IS_PREFERENCES_MANAGER (preferences_manager), 0); /**/
-  PreferencesManagerDetails *prefdet;
-  prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
-  return prefdet->auto_complete_braces;
-}
-
-void set_preferences_manager_auto_complete_braces(PreferencesManager *preferences_manager, gboolean newstate)
-{
-  if (!OBJECT_IS_PREFERENCES_MANAGER (preferences_manager)) return ;
-  PreferencesManagerDetails *prefdet;
-  prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
-  prefdet->auto_complete_braces = newstate; 
-
-}
-
 gboolean get_preferences_manager_single_instance_only(PreferencesManager *preferences_manager)
 {
   g_return_val_if_fail (OBJECT_IS_PREFERENCES_MANAGER (preferences_manager), 0); /**/
@@ -764,41 +775,6 @@ void set_preferences_manager_single_instance_only(PreferencesManager *preference
   PreferencesManagerDetails *prefdet;
   prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
   prefdet->single_instance_only = newstate; 
-
-}
-
-
-gboolean get_preferences_manager_higthlight_caret_line(PreferencesManager *preferences_manager)
-{
-  g_return_val_if_fail (OBJECT_IS_PREFERENCES_MANAGER (preferences_manager), 0); /**/
-  PreferencesManagerDetails *prefdet;
-  prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
-  return prefdet->higthlightcaretline;
-}
-
-void set_preferences_manager_higthlight_caret_line(PreferencesManager *preferences_manager, gboolean newstate)
-{
-  if (!OBJECT_IS_PREFERENCES_MANAGER (preferences_manager)) return ;
-  PreferencesManagerDetails *prefdet;
-  prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
-  prefdet->higthlightcaretline = newstate; 
-
-}
-
-gboolean get_preferences_manager_show_indentation_guides(PreferencesManager *preferences_manager)
-{
-  g_return_val_if_fail (OBJECT_IS_PREFERENCES_MANAGER (preferences_manager), 0); /**/
-  PreferencesManagerDetails *prefdet;
-  prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
-  return prefdet->show_indentation_guides;
-}
-
-void set_preferences_manager_show_indentation_guides(PreferencesManager *preferences_manager, gboolean newstate)
-{
-  if (!OBJECT_IS_PREFERENCES_MANAGER (preferences_manager)) return ;
-  PreferencesManagerDetails *prefdet;
-  prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
-  prefdet->show_indentation_guides = newstate; 
 
 }
 

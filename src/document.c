@@ -504,13 +504,15 @@ void tab_set_general_scintilla_properties(Document *doc)
 void tab_set_configured_scintilla_properties(GtkScintilla *scintilla)
 {
   PreferencesManager *pref = preferences_manager_new ();
-  gtk_scintilla_set_wrap_mode(scintilla, get_preferences_manager_line_wrapping(pref));
-  if (get_preferences_manager_line_wrapping(pref)) {
-    gtk_scintilla_set_h_scroll_bar(scintilla, 0);
-  }
-  else {
-    gtk_scintilla_set_h_scroll_bar(scintilla, 1);
-  }
+  gboolean edge_mode, show_indent_guides, higthlight_caret_line, line_wrapping, tabs_instead_spaces;
+  gint edge_column;
+
+  g_object_get(pref, "edge_mode", &edge_mode,"edge_column", &edge_column, "show_indentation_guides", &show_indent_guides,
+       "higthlight_caret_line", &higthlight_caret_line, "line_wrapping",&line_wrapping,
+        "tabs_instead_spaces",&tabs_instead_spaces,NULL);
+  
+  gtk_scintilla_set_wrap_mode(scintilla, line_wrapping);
+  gtk_scintilla_set_h_scroll_bar(scintilla, !line_wrapping); /* if line wrapping is ON disable hscrollbar*/
   /* reset styles */
   gtk_scintilla_style_clear_all(scintilla);
 
@@ -521,12 +523,9 @@ void tab_set_configured_scintilla_properties(GtkScintilla *scintilla)
   gtk_source_style_scheme_apply (scheme, GTK_WIDGET(scintilla), font, size);
   /* set font quality */
   gtk_scintilla_set_font_quality(scintilla, get_preferences_manager_font_quality (pref));
-  gtk_scintilla_set_caret_line_visible(scintilla, get_preferences_manager_higthlight_caret_line (pref));
+  gtk_scintilla_set_caret_line_visible(scintilla, higthlight_caret_line);
 
-  gtk_scintilla_set_indentation_guides (scintilla, get_preferences_manager_show_indentation_guides (pref));
-  gboolean edge_mode;
-  gint edge_column;
-  g_object_get(pref, "edge_mode", &edge_mode,"edge_column", &edge_column, NULL);
+  gtk_scintilla_set_indentation_guides (scintilla, show_indent_guides);
   gtk_scintilla_set_edge_mode (scintilla, edge_mode);
   gtk_scintilla_set_edge_column (scintilla, edge_column);
 
@@ -534,7 +533,7 @@ void tab_set_configured_scintilla_properties(GtkScintilla *scintilla)
   gtk_scintilla_set_caret_period (scintilla, 250);
 
   gtk_scintilla_autoc_set_choose_single (scintilla, FALSE);
-  gtk_scintilla_set_use_tabs (scintilla, get_preferences_manager_use_tabs_instead_spaces(pref));
+  gtk_scintilla_set_use_tabs (scintilla, tabs_instead_spaces);
   gtk_scintilla_set_tab_indents (scintilla, 1);
   gtk_scintilla_set_backspace_unindents (scintilla, 1);
   gtk_scintilla_set_tab_width (scintilla, get_preferences_manager_indentation_size (pref));
@@ -792,7 +791,9 @@ static void autoindent_brace_code (GtkScintilla *sci)
     indent_line(sci, current_line, previous_line_indentation);
     gphpedit_debug_message (DEBUG_DOCUMENT, "previous_line=%d, previous_indent=%d\n", previous_line, previous_line_indentation);
     gint pos;
-    if (get_preferences_manager_use_tabs_instead_spaces(pref)) {
+    gboolean tabs_instead_spaces;
+    g_object_get(pref,"tabs_instead_spaces", &tabs_instead_spaces, NULL);
+    if(tabs_instead_spaces){
       pos= gtk_scintilla_position_from_line(sci, current_line)+(previous_line_indentation/gtk_scintilla_get_tab_width(sci));
     } else {
       pos=gtk_scintilla_position_from_line(sci, current_line)+(previous_line_indentation);
@@ -887,7 +888,9 @@ static void char_added(GtkWidget *scintilla, guint ch, gpointer user_data)
   wordEnd = gtk_scintilla_word_end_position(sci, current_pos-1, TRUE);
   current_word_length = wordEnd - wordStart;
   style = gtk_scintilla_get_style_at(sci, current_pos);
-  if (IsOpenBrace(ch) && get_preferences_manager_auto_complete_braces(pref)) {
+  gboolean auto_brace;
+  g_object_get(pref, "auto_complete_braces", &auto_brace, NULL);
+  if (IsOpenBrace(ch) && auto_brace) {
       InsertCloseBrace (sci, current_pos, ch);
     }
   if (gtk_scintilla_autoc_active(sci)==1) {
