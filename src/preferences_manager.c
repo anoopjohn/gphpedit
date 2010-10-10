@@ -77,7 +77,6 @@ struct PreferencesManagerDetails
   gint indentation_size;
   gint tab_size;
   guint show_indentation_guides:1;
-  guint show_folding:1;
   gboolean edge_mode;
   gint edge_column;
   gchar *php_binary_location;
@@ -157,7 +156,8 @@ enum
   PROP_SIDE_PANEL_SIZE,
   PROP_FILEBROWSER_LAST_FOLDER,
   PROP_EDGE_MODE,
-  PROP_EDGE_COLUMN
+  PROP_EDGE_COLUMN,
+  PROP_SHOW_FOLDING
 };
 
 static void
@@ -233,7 +233,9 @@ preferences_manager_get_property (GObject    *object,
 		case PROP_EDGE_COLUMN:
 			g_value_set_int (value, prefdet->edge_column);
 			break;
-
+		case PROP_SHOW_FOLDING:
+			g_value_set_boolean (value, TRUE);
+			break;
 		case PROP_SIDE_PANEL_HIDDEN:
 			g_value_set_boolean (value, prefdet->side_panel_hidden);
 			break;
@@ -300,6 +302,12 @@ preferences_manager_class_init (PreferencesManagerClass *klass)
                               g_param_spec_int ("edge_column",
                               NULL, NULL, 0, G_MAXINT, 
                               80, G_PARAM_READWRITE));
+
+  g_object_class_install_property (object_class,
+                              PROP_SHOW_FOLDING,
+                              g_param_spec_boolean ("show_folding",
+                              NULL, NULL,
+                              TRUE, G_PARAM_READWRITE));
 
   /* last folder gPHPEdit open property */
   g_object_class_install_property (object_class,
@@ -444,8 +452,6 @@ void load_default_settings(PreferencesManagerDetails *prefdet)
   prefdet->calltip_delay = get_size("/gPHPEdit/defaults/calltip_delay", get_default_delay());
 
   prefdet->show_indentation_guides = get_bool("/gPHPEdit/defaults/showindentationguides", FALSE);
-  prefdet->show_folding = TRUE;
-  //gconf_client_get_bool (config,"/gPHPEdit/defaults/showfolding",NULL);
   prefdet->edge_mode = get_bool("/gPHPEdit/defaults/edgemode", FALSE);
   prefdet->edge_column = get_size("/gPHPEdit/defaults/edgecolumn", 80);
   prefdet->line_wrapping = get_bool("/gPHPEdit/defaults/linewrapping", TRUE);
@@ -744,14 +750,6 @@ void set_preferences_manager_auto_complete_braces(PreferencesManager *preference
 
 }
 
-gboolean get_preferences_manager_show_folding(PreferencesManager *preferences_manager)
-{
-  g_return_val_if_fail (OBJECT_IS_PREFERENCES_MANAGER (preferences_manager), 0); /**/
-  PreferencesManagerDetails *prefdet;
-  prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
-  return prefdet->show_folding;
-}
-
 gboolean get_preferences_manager_single_instance_only(PreferencesManager *preferences_manager)
 {
   g_return_val_if_fail (OBJECT_IS_PREFERENCES_MANAGER (preferences_manager), 0); /**/
@@ -954,7 +952,6 @@ void preferences_manager_save_data_full(PreferencesManager *preferences_manager)
   set_int ("/gPHPEdit/defaults/auto_complete_delay", prefdet->auto_complete_delay);
   set_int ("/gPHPEdit/defaults/calltip_delay", prefdet->calltip_delay);
   set_bool ("/gPHPEdit/defaults/showindentationguides", prefdet->show_indentation_guides);
-  prefdet->show_folding = TRUE;
   set_bool ("/gPHPEdit/defaults/edgemode", prefdet->edge_mode);
   set_int ("/gPHPEdit/defaults/edgecolumn", prefdet->edge_column);
   set_bool ("/gPHPEdit/defaults/linewrapping", prefdet->line_wrapping);

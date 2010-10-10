@@ -1194,9 +1194,11 @@ void margin_clicked (GtkWidget *scintilla, gint modifiers, gint position, gint m
 {
   if(margin!=1){
     gint line;
+    gboolean show_folding;
     line = gtk_scintilla_line_from_position(GTK_SCINTILLA(scintilla), position);
     PreferencesManager *pref = preferences_manager_new ();
-    if (get_preferences_manager_show_folding(pref) && margin == 2) {
+    g_object_get(pref,"show_folding", &show_folding, NULL);
+    if (show_folding && margin == 2) {
       fold_clicked(scintilla, line, modifiers);
     }
     g_object_unref(pref);
@@ -1325,7 +1327,9 @@ void handle_modified(GtkWidget *scintilla, gint pos,gint mtype,gchar *text,gint 
            gint added,gint line,gint foldNow,gint foldPrev)
 {
   PreferencesManager *pref = preferences_manager_new ();
-  if (get_preferences_manager_show_folding(pref) && (mtype & SC_MOD_CHANGEFOLD)) {
+  gboolean show_folding;
+  g_object_get(pref,"show_folding", &show_folding, NULL);
+  if (show_folding && (mtype & SC_MOD_CHANGEFOLD)) {
     fold_changed(scintilla, line, foldNow, foldPrev);
   }
   g_object_unref(pref);
