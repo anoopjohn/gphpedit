@@ -65,7 +65,7 @@ struct PreferencesManagerDetails
   /* session settings*/
   gchar *last_opened_folder;
   gboolean parseonlycurrentfile;
-  gboolean classbrowser_hidden;
+  gboolean side_panel_hidden;
   gint side_panel_size;
   gchar *filebrowser_last_folder;
   gboolean showfilebrowser;
@@ -78,7 +78,7 @@ struct PreferencesManagerDetails
   gint tab_size;
   guint show_indentation_guides:1;
   guint show_folding:1;
-  gint edge_mode;
+  gboolean edge_mode;
   gint edge_column;
   gchar *php_binary_location;
   gchar *shared_source_location;
@@ -152,10 +152,12 @@ enum
   PROP_0,
   PROP_SAVE_SESSION,
   PROP_LAST_OPENED_FOLDER,
-  PROP_CLASSBROWSER_HIDDEN,
+  PROP_SIDE_PANEL_HIDDEN,
   PROP_PARSE_ONLY_CURRENT_FILE,
   PROP_SIDE_PANEL_SIZE,
-  PROP_FILEBROWSER_LAST_FOLDER
+  PROP_FILEBROWSER_LAST_FOLDER,
+  PROP_EDGE_MODE,
+  PROP_EDGE_COLUMN
 };
 
 static void
@@ -179,9 +181,15 @@ preferences_manager_set_property (GObject      *object,
 			prefdet->side_panel_size = g_value_get_int (value);
 			set_int("/gPHPEdit/main_window/classbrowser_size", prefdet->side_panel_size);
 			break;
-		case PROP_CLASSBROWSER_HIDDEN:
-			prefdet->classbrowser_hidden = g_value_get_boolean (value);
-			set_bool("/gPHPEdit/main_window/classbrowser_hidden", prefdet->classbrowser_hidden);
+		case PROP_EDGE_MODE:
+			prefdet->edge_mode = g_value_get_boolean (value);
+			break;
+		case PROP_EDGE_COLUMN:
+			prefdet->edge_column = g_value_get_int (value);
+			break;
+		case PROP_SIDE_PANEL_HIDDEN:
+			prefdet->side_panel_hidden = g_value_get_boolean (value);
+			set_bool("/gPHPEdit/main_window/classbrowser_hidden", prefdet->side_panel_hidden);
 			break;
 		case PROP_LAST_OPENED_FOLDER:
 			g_free(prefdet->last_opened_folder);
@@ -219,8 +227,15 @@ preferences_manager_get_property (GObject    *object,
 		case PROP_SIDE_PANEL_SIZE:
 			g_value_set_int (value, prefdet->side_panel_size);
 			break;
-		case PROP_CLASSBROWSER_HIDDEN:
-			g_value_set_boolean (value, prefdet->classbrowser_hidden);
+		case PROP_EDGE_MODE:
+			g_value_set_boolean (value, prefdet->edge_mode);
+			break;
+		case PROP_EDGE_COLUMN:
+			g_value_set_int (value, prefdet->edge_column);
+			break;
+
+		case PROP_SIDE_PANEL_HIDDEN:
+			g_value_set_boolean (value, prefdet->side_panel_hidden);
 			break;
 		case PROP_LAST_OPENED_FOLDER:
 			g_value_set_string (value, prefdet->last_opened_folder);
@@ -261,13 +276,10 @@ preferences_manager_class_init (PreferencesManagerClass *klass)
                               NULL, NULL,
                               FALSE, G_PARAM_READWRITE));
 
- //value is true if side_panel is hidden
- //value is false if side_panel is show
- //FIXME: the value of this property is the hidden status of the side panel
- // it's name is for compatibility reason.
+  /* return TRUE if side panel isn't visible */  
   g_object_class_install_property (object_class,
-                              PROP_CLASSBROWSER_HIDDEN,
-                              g_param_spec_boolean ("classbrowser_hidden",
+                              PROP_SIDE_PANEL_HIDDEN,
+                              g_param_spec_boolean ("side_panel_hidden",
                               NULL, NULL,
                               TRUE, G_PARAM_READWRITE));
 
@@ -276,6 +288,18 @@ preferences_manager_class_init (PreferencesManagerClass *klass)
                               g_param_spec_int ("side_panel_size",
                               NULL, NULL, 0, G_MAXINT, 
                               100, G_PARAM_READWRITE));
+
+  g_object_class_install_property (object_class,
+                              PROP_EDGE_MODE,
+                              g_param_spec_boolean ("edge_mode",
+                              NULL, NULL,
+                              FALSE, G_PARAM_READWRITE));
+
+  g_object_class_install_property (object_class,
+                              PROP_EDGE_COLUMN,
+                              g_param_spec_int ("edge_column",
+                              NULL, NULL, 0, G_MAXINT, 
+                              80, G_PARAM_READWRITE));
 
   /* last folder gPHPEdit open property */
   g_object_class_install_property (object_class,
@@ -454,7 +478,7 @@ void load_session_settings(PreferencesManagerDetails *prefdet){
   gphpedit_debug(DEBUG_PREFS);
   prefdet->last_opened_folder = get_string("/gPHPEdit/general/last_opened_folder", (gchar *)g_get_home_dir());
   prefdet->parseonlycurrentfile = get_bool("/gPHPEdit/classbrowser/onlycurrentfile", FALSE);
-  prefdet->classbrowser_hidden = get_bool("/gPHPEdit/main_window/classbrowser_hidden", FALSE);
+  prefdet->side_panel_hidden = get_bool("/gPHPEdit/main_window/classbrowser_hidden", FALSE);
   prefdet->side_panel_size = get_color("/gPHPEdit/main_window/classbrowser_size", "main_window", 100);
   
   prefdet->filebrowser_last_folder=get_string("/gPHPEdit/main_window/folderbrowser/folder", (gchar *)g_get_home_dir());
@@ -777,40 +801,6 @@ void set_preferences_manager_show_indentation_guides(PreferencesManager *prefere
   PreferencesManagerDetails *prefdet;
   prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
   prefdet->show_indentation_guides = newstate; 
-
-}
-
-gboolean get_preferences_manager_edge_mode(PreferencesManager *preferences_manager)
-{
-  g_return_val_if_fail (OBJECT_IS_PREFERENCES_MANAGER (preferences_manager), 0); /**/
-  PreferencesManagerDetails *prefdet;
-  prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
-  return prefdet->edge_mode;
-}
-
-void set_preferences_manager_edge_mode(PreferencesManager *preferences_manager, gboolean newstate)
-{
-  if (!OBJECT_IS_PREFERENCES_MANAGER (preferences_manager)) return ;
-  PreferencesManagerDetails *prefdet;
-  prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
-  prefdet->edge_mode = newstate; 
-
-}
-
-gint get_preferences_manager_edge_column(PreferencesManager *preferences_manager)
-{
-  g_return_val_if_fail (OBJECT_IS_PREFERENCES_MANAGER (preferences_manager), 0); /**/
-  PreferencesManagerDetails *prefdet;
-  prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
-  return prefdet->edge_column;
-}
-
-void set_preferences_manager_edge_column(PreferencesManager *preferences_manager, gint newstate)
-{
-  if (!OBJECT_IS_PREFERENCES_MANAGER (preferences_manager)) return ;
-  PreferencesManagerDetails *prefdet;
-  prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
-  prefdet->edge_column = newstate; 
 
 }
 

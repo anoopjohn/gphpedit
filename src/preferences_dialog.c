@@ -121,7 +121,7 @@ void on_calltip_delay_changed(GtkSpinButton *spinbutton, gpointer user_data)
 
 void on_edge_column_changed(GtkSpinButton *spinbutton, gpointer user_data)
 {
-  set_preferences_manager_edge_column(main_window.prefmg, gtk_spin_button_get_value_as_int(spinbutton));
+  g_object_set(main_window.prefmg, "edge_column", gtk_spin_button_get_value_as_int(spinbutton), NULL);
 }
 
 void on_show_indentation_guides_toggle(GtkToggleButton *togglebutton, gpointer user_data)
@@ -131,7 +131,7 @@ void on_show_indentation_guides_toggle(GtkToggleButton *togglebutton, gpointer u
 
 void on_edge_mode_toggle(GtkToggleButton *togglebutton, gpointer user_data)
 {
-  set_preferences_manager_edge_mode(main_window.prefmg, gtk_toggle_button_get_active(togglebutton));  
+  g_object_set(main_window.prefmg, "edge_mode", gtk_toggle_button_get_active(togglebutton), NULL);
 }
 
 void on_line_wrapping_toggle(GtkToggleButton *togglebutton, gpointer user_data)
@@ -398,11 +398,15 @@ PREFERENCES_DIALOG_init (PreferencesDialog *dialog)
   gtk_widget_show(label);
   gtk_container_add (GTK_CONTAINER (adj), label);
 
+  gboolean edge_mode;
+  gint edge_column;
+  g_object_get (main_window.prefmg, "edge_mode", &edge_mode, "edge_column",&edge_column, NULL);
+
   priv->edge_mode = gtk_check_button_new_with_mnemonic (_("Show right hand edge guide"));
   gtk_widget_show (priv->edge_mode);
   gtk_box_pack_start(GTK_BOX(prinbox), priv->edge_mode, FALSE, FALSE, 6);
   gtk_container_set_border_width (GTK_CONTAINER (priv->edge_mode), 8);
-  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(priv->edge_mode), get_preferences_manager_edge_mode(main_window.prefmg));
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(priv->edge_mode), edge_mode);
   g_signal_connect(G_OBJECT(GTK_CHECK_BUTTON(priv->edge_mode)), "toggled", G_CALLBACK(on_edge_mode_toggle), NULL);
 
 /*Begin: Right Hand Edge */
@@ -415,7 +419,7 @@ PREFERENCES_DIALOG_init (PreferencesDialog *dialog)
   gtk_box_pack_start (GTK_BOX (hbox15), label, FALSE, FALSE, 8);
   
   priv->edge_column = gtk_spin_button_new_with_range(0, 160, 1);
-  gtk_spin_button_set_value (GTK_SPIN_BUTTON(priv->edge_column), get_preferences_manager_edge_column(main_window.prefmg));
+  gtk_spin_button_set_value (GTK_SPIN_BUTTON(priv->edge_column), edge_column);
   gtk_widget_show (priv->edge_column);
   gtk_box_pack_start (GTK_BOX (hbox15), priv->edge_column, FALSE, TRUE, 0);
   g_signal_connect (G_OBJECT (priv->edge_column), "value_changed", G_CALLBACK (on_edge_column_changed), NULL);

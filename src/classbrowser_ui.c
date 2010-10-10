@@ -283,7 +283,7 @@ void classbrowser_update_cb (ClassbrowserBackend *classback, gboolean result, gp
   static guint press_event = 0;
   static guint release_event = 0;
   gboolean hidden;
-  g_object_get(main_window.prefmg, "classbrowser_hidden", &hidden, NULL);
+  g_object_get(main_window.prefmg, "side_panel_hidden", &hidden, NULL);
   if(hidden) return ;
   if (press_event && g_signal_handler_is_connected (priv->classtreeview, press_event)) {
     g_signal_handler_disconnect(priv->classtreeview, press_event);

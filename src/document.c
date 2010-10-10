@@ -524,8 +524,11 @@ void tab_set_configured_scintilla_properties(GtkScintilla *scintilla)
   gtk_scintilla_set_caret_line_visible(scintilla, get_preferences_manager_higthlight_caret_line (pref));
 
   gtk_scintilla_set_indentation_guides (scintilla, get_preferences_manager_show_indentation_guides (pref));
-  gtk_scintilla_set_edge_mode (scintilla, get_preferences_manager_edge_mode (pref));
-  gtk_scintilla_set_edge_column (scintilla, get_preferences_manager_edge_column (pref));
+  gboolean edge_mode;
+  gint edge_column;
+  g_object_get(pref, "edge_mode", &edge_mode,"edge_column", &edge_column, NULL);
+  gtk_scintilla_set_edge_mode (scintilla, edge_mode);
+  gtk_scintilla_set_edge_column (scintilla, edge_column);
 
   gtk_scintilla_set_caret_width (scintilla, 2);
   gtk_scintilla_set_caret_period (scintilla, 250);

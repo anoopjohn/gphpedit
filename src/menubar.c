@@ -475,7 +475,7 @@ static void fill_menu_view(MenuBarPrivate *priv)
   _create_separator_item(priv->menuview);
 
   gboolean status;
-  g_object_get(main_window.prefmg, "classbrowser_hidden", &status, NULL);
+  g_object_get(main_window.prefmg, "side_panel_hidden", &status, NULL);
   create_check_menu_item(&priv->tog_class,priv->menuview,_("Show Side Panel"), _("Show/Hide Application Side Panel"),priv->accel_group, GDK_F8, 0,status);
   g_signal_connect(G_OBJECT(priv->tog_class), "activate", G_CALLBACK(tog_classbrowser),NULL);
 

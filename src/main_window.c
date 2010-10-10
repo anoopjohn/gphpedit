@@ -119,7 +119,7 @@ static void main_window_create_panes(void)
   g_signal_connect (G_OBJECT (main_window.window), "size_allocate", G_CALLBACK (classbrowser_accept_size), NULL);
   gboolean hidden;
   gint size;
-  g_object_get(main_window.prefmg, "classbrowser_hidden", &hidden,"side_panel_size", &size, NULL);
+  g_object_get(main_window.prefmg, "side_panel_hidden", &hidden,"side_panel_size", &size, NULL);
 
   gtk_paned_set_position(GTK_PANED(main_window.main_horizontal_pane), size);
   if (hidden) classbrowser_hide();

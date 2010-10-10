@@ -97,10 +97,6 @@ gboolean get_preferences_manager_higthlight_caret_line(PreferencesManager *prefe
 void set_preferences_manager_higthlight_caret_line(PreferencesManager *preferences_manager, gboolean newstate);
 gboolean get_preferences_manager_show_indentation_guides(PreferencesManager *preferences_manager);
 void set_preferences_manager_show_indentation_guides(PreferencesManager *preferences_manager, gboolean newstate);
-gboolean get_preferences_manager_edge_mode(PreferencesManager *preferences_manager);
-void set_preferences_manager_edge_mode(PreferencesManager *preferences_manager, gboolean newstate);
-gint get_preferences_manager_edge_column(PreferencesManager *preferences_manager);
-void set_preferences_manager_edge_column(PreferencesManager *preferences_manager, gint newstate);
 gint get_preferences_manager_tab_size(PreferencesManager *preferences_manager);
 void set_preferences_manager_tab_size(PreferencesManager *preferences_manager, gint newstate);
 gchar *get_preferences_manager_shared_source_location(PreferencesManager *preferences_manager);
