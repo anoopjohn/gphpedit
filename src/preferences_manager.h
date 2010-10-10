@@ -75,8 +75,6 @@ gboolean get_preferences_manager_show_findtoolbar(PreferencesManager *preference
 void set_preferences_manager_show_findtoolbar(PreferencesManager *preferences_manager, gboolean new_status);
 
 /**/
-void set_preferences_manager_filebrowser_last_folder(PreferencesManager *preferences_manager, const gchar *new_last_folder);
-const gchar *get_preferences_manager_filebrowser_last_folder(PreferencesManager *preferences_manager);
 gint get_preferences_manager_indentation_size (PreferencesManager *preferences_manager);
 void set_preferences_manager_indentation_size(PreferencesManager *preferences_manager, gint newstate);
 const gchar *get_preferences_manager_php_binary_location(PreferencesManager *preferences_manager);

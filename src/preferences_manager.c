@@ -154,7 +154,8 @@ enum
   PROP_LAST_OPENED_FOLDER,
   PROP_CLASSBROWSER_HIDDEN,
   PROP_PARSE_ONLY_CURRENT_FILE,
-  PROP_SIDE_PANEL_SIZE
+  PROP_SIDE_PANEL_SIZE,
+  PROP_FILEBROWSER_LAST_FOLDER
 };
 
 static void
@@ -187,6 +188,11 @@ preferences_manager_set_property (GObject      *object,
 			prefdet->last_opened_folder = g_value_dup_string (value);
 			set_string ("/gPHPEdit/general/last_opened_folder", prefdet->last_opened_folder);
 			break;
+		case PROP_FILEBROWSER_LAST_FOLDER:
+			g_free(prefdet->filebrowser_last_folder);
+			prefdet->filebrowser_last_folder = g_value_dup_string (value);
+			set_string ("/gPHPEdit/main_window/folderbrowser/folder", prefdet->filebrowser_last_folder);
+			break;
 
 		default:
 			G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -218,6 +224,9 @@ preferences_manager_get_property (GObject    *object,
 			break;
 		case PROP_LAST_OPENED_FOLDER:
 			g_value_set_string (value, prefdet->last_opened_folder);
+			break;
+		case PROP_FILEBROWSER_LAST_FOLDER:
+			g_value_set_string (value, prefdet->filebrowser_last_folder);
 			break;
 
 		default:
@@ -273,7 +282,13 @@ preferences_manager_class_init (PreferencesManagerClass *klass)
                               PROP_LAST_OPENED_FOLDER,
                               g_param_spec_string ("last_opened_folder",
                               "Last_Opened_Folder", NULL,
-                              FALSE, G_PARAM_READWRITE));
+                              "", G_PARAM_READWRITE));
+
+  g_object_class_install_property (object_class,
+                              PROP_FILEBROWSER_LAST_FOLDER,
+                              g_param_spec_string ("filebrowser_last_folder",
+                              NULL, NULL,
+                              "", G_PARAM_READWRITE));
 
   g_type_class_add_private (klass, sizeof (PreferencesManagerDetails));
 }
@@ -458,28 +473,6 @@ GSList *get_preferences_manager_search_history(PreferencesManager *preferences_m
   PreferencesManagerDetails *prefdet;
   prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
   return prefdet->search_history;
-}
-
-/*
- *get_preferences_manager_filebrowser_last_folder
- * return an internal string must not be freed.
-*/
-const gchar *get_preferences_manager_filebrowser_last_folder(PreferencesManager *preferences_manager){
-  g_return_val_if_fail (OBJECT_IS_PREFERENCES_MANAGER (preferences_manager), 0); /**/
-  PreferencesManagerDetails *prefdet;
-  prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
-  return prefdet->filebrowser_last_folder;
-}
-/*
-*store a new value for filebrowser last folder
-*/
-void set_preferences_manager_filebrowser_last_folder(PreferencesManager *preferences_manager, const gchar *new_last_folder){
-  if (!OBJECT_IS_PREFERENCES_MANAGER (preferences_manager)) return ;
-  PreferencesManagerDetails *prefdet;
-  prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
-  if (prefdet->filebrowser_last_folder) g_free(prefdet->filebrowser_last_folder);
-  prefdet->filebrowser_last_folder= g_strdup(new_last_folder);
-  set_string ("/gPHPEdit/main_window/folderbrowser/folder", new_last_folder);
 }
 
 gboolean get_preferences_manager_show_filebrowser(PreferencesManager *preferences_manager)

@@ -432,7 +432,7 @@ static inline void change_current_folder(FilebrowserBackend *filebackend, const 
   if (!new_folder && *(new_folder)!=0) return;
   directory->current_folder= g_strdup(new_folder);
   PreferencesManager *prefmg = preferences_manager_new ();
-  set_preferences_manager_filebrowser_last_folder(prefmg, directory->current_folder);
+  g_object_set(prefmg, "filebrowser_last_folder", directory->current_folder,NULL);
   g_object_unref(prefmg);
   gchar *real_path=filename_get_relative_path((gchar *)new_folder);
   if (!real_path) real_path=g_strdup(DEFAULT_DIR);

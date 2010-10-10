@@ -197,9 +197,9 @@ static void
 gphpedit_filebrowser_init (gphpeditFileBrowser *button)
 {
   gphpeditFileBrowserPrivate *priv = FILEBROWSER_BACKEND_GET_PRIVATE(button);
-  gchar *fol = g_strdup(get_preferences_manager_filebrowser_last_folder(main_window.prefmg));
-  priv->fbbackend= filebrowser_backend_new (fol);//get_preferences_manager_filebrowser_last_folder(main_window.prefmg));
-  g_free(fol);
+  gchar *current_dir;
+  g_object_get(main_window.prefmg, "filebrowser_last_folder", &current_dir, NULL);
+  priv->fbbackend= filebrowser_backend_new (current_dir);
   priv->handlerid = g_signal_connect(G_OBJECT(priv->fbbackend), "done_loading", G_CALLBACK(print_files), priv);
   priv->handleridchange = g_signal_connect(G_OBJECT(priv->fbbackend), "change_folder", G_CALLBACK(change_folder_cb), priv);
   priv->folder = gtk_vbox_new(FALSE, 0);
