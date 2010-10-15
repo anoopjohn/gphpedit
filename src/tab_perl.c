@@ -39,10 +39,14 @@ void scintilla_perl_set_lexer(GtkScintilla *scintilla)
 
   gtk_scintilla_set_keywords(scintilla, 0, "NULL __FILE__ __LINE__ __PACKAGE__ __DATA__ __END__ AUTOLOAD BEGIN CORE DESTROY END EQ GE GT INIT LE LT NE CHECK abs accept alarm and atan2 bind binmode bless caller chdir chmod chomp chop chown chr chroot close closedir cmp connect continue cos crypt dbmclose dbmopen defined delete die do dump each else elsif endgrent endhostent endnetent endprotoent endpwent endservent eof eq eval exec exists exit exp fcntl fileno flock for foreach fork format formline ge getc getgrent getgrgid getgrnam gethostbyaddr gethostbyname gethostent getlogin getnetbyaddr getnetbyname getnetent getpeername getpgrp getppid getpriority getprotobyname getprotobynumber getprotoent getpwent getpwnam getpwuid getservbyname getservbyport getservent getsockname getsockopt glob gmtime goto grep gt hex if index int ioctl join keys kill last lc lcfirst le length link listen local localtime lock log lstat lt m map mkdir msgctl msgget msgrcv msgsnd my ne next no not oct open opendir or ord our pack package pipe pop pos print printf prototype push q qq qr quotemeta qu qw qx rand read readdir readline readlink readpipe recv redo ref rename require reset return reverse rewinddir rindex rmdir s scalar seek seekdir select semctl semget semop send setgrent sethostent setnetent setpgrp setpriority setprotoent setpwent setservent setsockopt shift shmctl shmget shmread shmwrite shutdown sin sleep socket socketpair sort splice split sprintf sqrt srand stat study sub substr symlink syscall sysopen sysread sysseek system syswrite tell telldir tie tied time times tr truncate uc ucfirst umask undef unless unlink unpack unshift untie until use utime values vec wait waitpid wantarray warn while write x xor y");
   
-  const gchar *font = get_preferences_manager_style_font(prefmg);
-  guint size = get_preferences_manager_style_size(prefmg);
+  const gchar *font;
+  guint size;
+  g_object_get(prefmg, "style_font_name", &font,"font_size", &size, NULL);
 
-  GtkSourceStyleScheme	*scheme = gtk_source_style_scheme_manager_get_scheme (main_window.stylemg, get_preferences_manager_style_name(prefmg));
+  const gchar *style_name;
+  g_object_get(prefmg, "style_name", &style_name, NULL);
+
+  GtkSourceStyleScheme	*scheme = gtk_source_style_scheme_manager_get_scheme (main_window.stylemg, style_name);
   /* PHP LEXER STYLE */
   set_scintilla_lexer_doc_comment_style(GTK_WIDGET(scintilla), scheme, SCE_PL_FORMAT_IDENT, font, size);
   set_scintilla_lexer_doc_comment_style(GTK_WIDGET(scintilla), scheme, SCE_PL_FORMAT, font, size);

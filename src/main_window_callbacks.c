@@ -153,7 +153,10 @@ void add_file_filters(GtkFileChooser *chooser){
   caption = g_string_new(_("PHP files ("));
   gchar **php_file_extensions;
   gint i;
-  php_file_extensions = g_strsplit(get_preferences_manager_php_file_extensions(main_window.prefmg),",",-1);
+  const gchar *php_extensions;
+  g_object_get(main_window.prefmg, "php_file_extensions", &php_extensions, NULL);
+
+  php_file_extensions = g_strsplit(php_extensions, ",", -1);
 
   for (i = 0; php_file_extensions[i] != NULL; i++) {
     //make file pattern
@@ -706,7 +709,7 @@ void add_to_search_history(const gchar *current_text){
     /* add text to search history*/
     GSList *walk;
     gint i=0;
-    for (walk = get_preferences_manager_php_search_history(main_window.prefmg); walk!=NULL; walk = g_slist_next(walk)) {
+    for (walk = get_preferences_manager_search_history(main_window.prefmg); walk!=NULL; walk = g_slist_next(walk)) {
       i++;
       if (g_strcmp0((gchar *) walk->data,current_text)==0){
         return;  /* already in the list */
@@ -763,13 +766,17 @@ void goto_line_activate(GtkEntry *entry,gpointer user_data)
 
 void block_indent(GtkWidget *widget)
 {
-  document_block_indent(document_manager_get_current_document(main_window.docmg), get_preferences_manager_indentation_size(main_window.prefmg));
+  gint indentation_size;
+  g_object_get(main_window.prefmg, "indentation_size", &indentation_size, NULL);
+  document_block_indent(document_manager_get_current_document(main_window.docmg), indentation_size);
 }
 
 
 void block_unindent(GtkWidget *widget)
 {
-  document_block_unindent(document_manager_get_current_document(main_window.docmg), get_preferences_manager_indentation_size(main_window.prefmg));
+  gint indentation_size;
+  g_object_get(main_window.prefmg, "indentation_size", &indentation_size, NULL);
+  document_block_unindent(document_manager_get_current_document(main_window.docmg), indentation_size);
 }
 
 //zoom in

@@ -217,10 +217,10 @@ gchar *syntax_check_manager_run(Document *document)
     g_free(docfilename);
     if(ftype==TAB_PHP){
     PreferencesManager *pref = preferences_manager_new ();
-    command_line = g_string_new(get_preferences_manager_php_binary_location(pref));
-    command_line = g_string_append(command_line, " -q -l -d html_errors=Off -f '");
-    command_line = g_string_append(command_line, filename->str);
-    command_line = g_string_append(command_line, "'");
+    const gchar *php_binary_location;
+    g_object_get(main_window.prefmg, "php_binary_location", &php_binary_location, NULL);
+    command_line = g_string_new(php_binary_location);
+    g_string_append_printf (command_line," -q -l -d html_errors=Off -f '%s'", filename->str);
     g_object_unref(pref);
     gphpedit_debug_message(DEBUG_SYNTAX, "eject:%s\n", command_line->str);
     } else if (ftype==TAB_PERL){

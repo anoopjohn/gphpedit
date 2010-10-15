@@ -42,9 +42,13 @@ void tab_sql_set_lexer(Document *document)
 
 gtk_scintilla_set_keywords(scintilla, 1, "all alter and any array as asc at authid avg begin between binary_integer body boolean bulk by char char_base check close cluster collect comment commit compress connect constant create current currval cursor date day declare decimal default delete desc distinct do drop else elsif end exception exclusive execute exists exit extends false fetch float for forall from function goto group having heap hour if immediate in index indicator insert integer interface intersect interval into is isolation java level like limited lock long loop max min minus minute mlslabel mod mode month natural naturaln new nextval nocopy not nowait null number number_base ocirowid of on opaque open operator option or order organization others out package partition pctfree pls_integer positive positiven pragma prior private procedure public raise range raw real record ref release return reverse rollback row rowid rownum rowtype savepoint second select separate set share smallint space sql sqlcode sqlerrm start stddev subtype successful sum synonym sysdate table then time timestamp to trigger true type uid union unique update use user validate values varchar varchar2 variance view when whenever where while with work write year zone");
 
-  const gchar *font = get_preferences_manager_style_font(prefmg);
-  guint size = get_preferences_manager_style_size(prefmg);
-  GtkSourceStyleScheme	*scheme = gtk_source_style_scheme_manager_get_scheme (main_window.stylemg, get_preferences_manager_style_name(prefmg));
+  const gchar *font;
+  guint size;
+  g_object_get(prefmg, "style_font_name", &font,"font_size", &size, NULL);
+  const gchar *style_name;
+  g_object_get(prefmg, "style_name", &style_name, NULL);
+
+  GtkSourceStyleScheme	*scheme = gtk_source_style_scheme_manager_get_scheme (main_window.stylemg, style_name);
   /* SQL LEXER STYLE */
   set_scintilla_lexer_default_style(GTK_WIDGET(scintilla), scheme, SCE_SQL_DEFAULT, font, size);
   set_scintilla_lexer_keyword_style(GTK_WIDGET(scintilla), scheme, SCE_SQL_WORD, font, size);

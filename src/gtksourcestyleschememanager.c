@@ -588,7 +588,7 @@ gtk_source_style_scheme_manager_get_scheme (GtkSourceStyleSchemeManager *manager
 	if (!scheme){
    PreferencesManager *prefmg = preferences_manager_new ();
    scheme = g_hash_table_lookup (manager->priv->schemes_hash, "mixer");
-   set_style_name (prefmg, "mixer");
+   g_object_set(prefmg, "style_name", "mixer", NULL);
    preferences_manager_save_data_full(prefmg);
    g_object_unref(prefmg);
   }

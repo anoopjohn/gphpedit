@@ -2,7 +2,7 @@
 
    Copyright (C) 2003, 2004, 2005 Andy Jeffries <andy at gphpedit.org>
    Copyright (C) 2009 Anoop John <anoop dot john at zyxware.com>
-   Copyright (C) 2009-2010 José Rostagno (for vijona.com.ar) 
+   Copyright (C) 2009, 2010 José Rostagno (for vijona.com.ar) 
 
    For more information or to find the latest release, visit our 
    website at http://www.gphpedit.org/
@@ -27,15 +27,12 @@
  */
 /*
 * manage all aplication preferences in a clean way, so aplication don't need to know how it's settings are stored.
-* 
 */
 
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
 
-#include <stdlib.h>
-#include <string.h>
 #include <gtk/gtk.h>
 #include <gconf/gconf-client.h>
 #include <glib/gi18n.h>
@@ -73,7 +70,6 @@ struct PreferencesManagerDetails
   guint showmaintoolbar:1;
   guint showfindtoolbar:1;
   // Default settings
-  gint marker_back;
   gint indentation_size;
   gint tab_size;
   gboolean show_indentation_guides;
@@ -90,7 +86,7 @@ struct PreferencesManagerDetails
   gint calltip_delay;
   gboolean line_wrapping;
   gboolean use_tabs_instead_spaces;
-  guint single_instance_only:1;
+  gboolean single_instance_only;
   gint font_quality;  
   GSList *search_history; /* for incremental search history */
 
@@ -117,8 +113,8 @@ static void set_string_list (const gchar *key, GSList *value);
 
 static GSList *get_string_list(const gchar *key);
 static gchar *get_string(const gchar *key,gchar *default_string);
-static gint get_size(const gchar *key,gint default_size);
-static gint get_color(const gchar *key,const gchar *subdir,gint default_color);
+static gint get_uint(const gchar *key,gint default_size);
+static gint get_int_with_default(const gchar *key,const gchar *subdir,gint default_value);
 static gboolean get_bool(const gchar *key,gboolean default_value);
 
 /* http://library.gnome.org/devel/gobject/unstable/gobject-Type-Information.html#G-DEFINE-TYPE:CAPS */
@@ -162,7 +158,19 @@ enum
   PROP_AUTO_COMPLETE_BRACES,
   PROP_HIGTHLIGHT_CARET_LINE,
   PROP_LINE_WRAPPING,
-  PROP_TABS_INSTEAD_SPACES
+  PROP_TABS_INSTEAD_SPACES,
+  PROP_SINGLE_INSTANCE_ONLY,
+  PROP_SHARED_SOURCE_LOCATION,
+  PROP_FONT_QUALITY,
+  PROP_PHP_BINARY_LOCATION,
+  PROP_STYLE_NAME,
+  PROP_INDENTATION_SIZE,
+  PROP_PHP_FILE_EXTENSIONS,
+  PROP_FONT_NAME,
+  PROP_FONT_SIZE,
+  PROP_TAB_SIZE,
+  PROP_CALLTIP_DELAY,
+  PROP_AUTOCOMPLETE_DELAY
 };
 
 static void
@@ -192,6 +200,27 @@ preferences_manager_set_property (GObject      *object,
 		case PROP_EDGE_COLUMN:
 			prefdet->edge_column = g_value_get_int (value);
 			break;
+		case PROP_INDENTATION_SIZE:
+			prefdet->indentation_size = g_value_get_int (value);
+			break;
+		case PROP_TAB_SIZE:
+			prefdet->tab_size = g_value_get_int (value);
+			break;
+		case PROP_FONT_SIZE:
+			prefdet->font_size = g_value_get_uint (value);
+			break;
+		case PROP_CALLTIP_DELAY:
+			prefdet->calltip_delay = g_value_get_int (value);
+			break;
+		case PROP_AUTOCOMPLETE_DELAY:
+			prefdet->auto_complete_delay = g_value_get_int (value);
+			break;
+		case PROP_FONT_QUALITY:
+			prefdet->font_quality = g_value_get_int (value);
+			break;
+		case PROP_SINGLE_INSTANCE_ONLY:
+			prefdet->single_instance_only = g_value_get_boolean (value);
+			break;
 		case PROP_SHOW_INDENTATION_GUIDES:
 			prefdet->show_indentation_guides = g_value_get_boolean (value);
 			break;
@@ -215,6 +244,26 @@ preferences_manager_set_property (GObject      *object,
 			g_free(prefdet->last_opened_folder);
 			prefdet->last_opened_folder = g_value_dup_string (value);
 			set_string ("/gPHPEdit/general/last_opened_folder", prefdet->last_opened_folder);
+			break;
+		case PROP_SHARED_SOURCE_LOCATION:
+			g_free(prefdet->shared_source_location);
+			prefdet->shared_source_location = g_value_dup_string (value);
+			break;
+		case PROP_PHP_BINARY_LOCATION:
+			g_free(prefdet->php_binary_location);
+			prefdet->php_binary_location = g_value_dup_string (value);
+			break;
+		case PROP_STYLE_NAME:
+			g_free(prefdet->style_name);
+			prefdet->style_name = g_value_dup_string (value);
+			break;
+		case PROP_PHP_FILE_EXTENSIONS:
+			g_free(prefdet->php_file_extensions);
+			prefdet->php_file_extensions = g_value_dup_string (value);
+			break;
+		case PROP_FONT_NAME:
+			g_free(prefdet->font_name);
+			prefdet->font_name = g_value_dup_string (value);
 			break;
 		case PROP_FILEBROWSER_LAST_FOLDER:
 			g_free(prefdet->filebrowser_last_folder);
@@ -253,6 +302,27 @@ preferences_manager_get_property (GObject    *object,
 		case PROP_EDGE_COLUMN:
 			g_value_set_int (value, prefdet->edge_column);
 			break;
+		case PROP_FONT_QUALITY:
+			g_value_set_int (value, prefdet->font_quality);
+			break;
+		case PROP_INDENTATION_SIZE:
+			g_value_set_int (value, prefdet->indentation_size);
+			break;
+		case PROP_TAB_SIZE:
+			g_value_set_int (value, prefdet->tab_size);
+			break;
+		case PROP_FONT_SIZE:
+			g_value_set_uint (value, prefdet->font_size);
+			break;
+		case PROP_CALLTIP_DELAY:
+			g_value_set_int (value, prefdet->calltip_delay);
+			break;
+		case PROP_AUTOCOMPLETE_DELAY:
+			g_value_set_int (value, prefdet->auto_complete_delay);
+			break;
+		case PROP_SINGLE_INSTANCE_ONLY:
+			g_value_set_boolean (value, prefdet->single_instance_only);
+			break;
 		case PROP_SHOW_INDENTATION_GUIDES:
 			g_value_set_boolean (value, prefdet->show_indentation_guides);
 			break;
@@ -276,6 +346,21 @@ preferences_manager_get_property (GObject    *object,
 			break;
 		case PROP_LAST_OPENED_FOLDER:
 			g_value_set_string (value, prefdet->last_opened_folder);
+			break;
+		case PROP_SHARED_SOURCE_LOCATION:
+			g_value_set_string (value, prefdet->shared_source_location);
+			break;
+		case PROP_PHP_BINARY_LOCATION:
+			g_value_set_string (value, prefdet->php_binary_location);
+			break;
+		case PROP_STYLE_NAME:
+			g_value_set_string (value, prefdet->style_name);
+			break;
+		case PROP_PHP_FILE_EXTENSIONS:
+			g_value_set_string (value, prefdet->php_file_extensions);
+			break;
+		case PROP_FONT_NAME:
+			g_value_set_string (value, prefdet->font_name);
 			break;
 		case PROP_FILEBROWSER_LAST_FOLDER:
 			g_value_set_string (value, prefdet->filebrowser_last_folder);
@@ -339,6 +424,48 @@ preferences_manager_class_init (PreferencesManagerClass *klass)
                               80, G_PARAM_READWRITE));
 
   g_object_class_install_property (object_class,
+                              PROP_INDENTATION_SIZE,
+                              g_param_spec_int ("indentation_size",
+                              NULL, NULL, 0, G_MAXINT, 
+                              0, G_PARAM_READWRITE));
+
+  g_object_class_install_property (object_class,
+                              PROP_TAB_SIZE,
+                              g_param_spec_int ("tab_size",
+                              NULL, NULL, 0, G_MAXINT, 
+                              0, G_PARAM_READWRITE));
+
+  g_object_class_install_property (object_class,
+                              PROP_FONT_SIZE,
+                              g_param_spec_uint ("font_size",
+                              NULL, NULL, 0, G_MAXUINT, 
+                              0, G_PARAM_READWRITE));
+
+  g_object_class_install_property (object_class,
+                              PROP_CALLTIP_DELAY,
+                              g_param_spec_int ("calltip_delay",
+                              NULL, NULL, 0, G_MAXINT, 
+                              0, G_PARAM_READWRITE));
+
+  g_object_class_install_property (object_class,
+                              PROP_AUTOCOMPLETE_DELAY,
+                              g_param_spec_int ("autocomplete_delay",
+                              NULL, NULL, 0, G_MAXINT, 
+                              0, G_PARAM_READWRITE));
+
+  g_object_class_install_property (object_class,
+                              PROP_FONT_QUALITY,
+                              g_param_spec_int ("font_quality",
+                              NULL, NULL, 0, G_MAXINT, 
+                              0, G_PARAM_READWRITE));
+
+  g_object_class_install_property (object_class,
+                              PROP_SINGLE_INSTANCE_ONLY,
+                              g_param_spec_boolean ("single_instance_only",
+                              NULL, NULL,
+                              TRUE, G_PARAM_READWRITE));
+
+  g_object_class_install_property (object_class,
                               PROP_SHOW_FOLDING,
                               g_param_spec_boolean ("show_folding",
                               NULL, NULL,
@@ -377,6 +504,36 @@ preferences_manager_class_init (PreferencesManagerClass *klass)
                               PROP_LAST_OPENED_FOLDER,
                               g_param_spec_string ("last_opened_folder",
                               "Last_Opened_Folder", NULL,
+                              "", G_PARAM_READWRITE));
+
+  g_object_class_install_property (object_class,
+                              PROP_SHARED_SOURCE_LOCATION,
+                              g_param_spec_string ("shared_source_location",
+                              NULL, NULL,
+                              "", G_PARAM_READWRITE));
+
+  g_object_class_install_property (object_class,
+                              PROP_PHP_BINARY_LOCATION,
+                              g_param_spec_string ("php_binary_location",
+                              NULL, NULL,
+                              "", G_PARAM_READWRITE));
+
+  g_object_class_install_property (object_class,
+                              PROP_STYLE_NAME,
+                              g_param_spec_string ("style_name",
+                              NULL, NULL,
+                              "", G_PARAM_READWRITE));
+
+  g_object_class_install_property (object_class,
+                              PROP_PHP_FILE_EXTENSIONS,
+                              g_param_spec_string ("php_file_extensions",
+                              NULL, NULL,
+                              "", G_PARAM_READWRITE));
+
+  g_object_class_install_property (object_class,
+                              PROP_FONT_NAME,
+                              g_param_spec_string ("style_font_name",
+                              NULL, NULL,
                               "", G_PARAM_READWRITE));
 
   g_object_class_install_property (object_class,
@@ -440,8 +597,6 @@ static void preferences_manager_dispose (GObject *object)
 {
   gphpedit_debug(DEBUG_PREFS);
   PreferencesManager *pref = PREFERENCES_MANAGER(object);
-  PreferencesManagerDetails *prefdet;
-  prefdet = PREFERENCES_MANAGER_GET_PRIVATE(pref);
   /* free object resources*/
   preferences_manager_save_data(pref);
   /* Chain up to the parent class */
@@ -464,11 +619,7 @@ preferences_manager_finalize (GObject *object)
 
 PreferencesManager *preferences_manager_new (void)
 {
-  PreferencesManager *pref;
-  pref = g_object_new (PREFERENCES_MANAGER_TYPE, NULL);
-  PreferencesManagerDetails *prefdet;
-  prefdet = PREFERENCES_MANAGER_GET_PRIVATE(pref);
-  return pref; /* return new object */
+  return g_object_new (PREFERENCES_MANAGER_TYPE, NULL); /* return new object */
 }
 
 /*
@@ -505,18 +656,17 @@ gint get_default_delay(void){
 void load_default_settings(PreferencesManagerDetails *prefdet)
 {
   gphpedit_debug(DEBUG_PREFS);
-  prefdet->marker_back = get_color("/gPHPEdit/default_style/bookmark", "default_style", 15908608);
   prefdet->php_binary_location= get_string("/gPHPEdit/locations/phpbinary", "php");
   prefdet->shared_source_location = get_string("/gPHPEdit/locations/shared_source", "");
 
-  prefdet->indentation_size = get_size("/gPHPEdit/defaults/indentationsize", 4); 
-  prefdet->tab_size = get_size("/gPHPEdit/defaults/tabsize", 4); 
-  prefdet->auto_complete_delay = get_size("/gPHPEdit/defaults/auto_complete_delay", get_default_delay());
-  prefdet->calltip_delay = get_size("/gPHPEdit/defaults/calltip_delay", get_default_delay());
+  prefdet->indentation_size = get_uint("/gPHPEdit/defaults/indentationsize", 4); 
+  prefdet->tab_size = get_uint("/gPHPEdit/defaults/tabsize", 4); 
+  prefdet->auto_complete_delay = get_uint("/gPHPEdit/defaults/auto_complete_delay", get_default_delay());
+  prefdet->calltip_delay = get_uint("/gPHPEdit/defaults/calltip_delay", get_default_delay());
 
   prefdet->show_indentation_guides = get_bool("/gPHPEdit/defaults/showindentationguides", FALSE);
   prefdet->edge_mode = get_bool("/gPHPEdit/defaults/edgemode", FALSE);
-  prefdet->edge_column = get_size("/gPHPEdit/defaults/edgecolumn", 80);
+  prefdet->edge_column = get_uint("/gPHPEdit/defaults/edgecolumn", 80);
   prefdet->line_wrapping = get_bool("/gPHPEdit/defaults/linewrapping", TRUE);
   /* font quality */
   prefdet->font_quality = preferences_manager_parse_font_quality();
@@ -536,20 +686,20 @@ void load_default_settings(PreferencesManagerDetails *prefdet)
 void load_window_settings(PreferencesManagerDetails *prefdet)
 {
   gphpedit_debug(DEBUG_PREFS);
-  prefdet->left = get_color("/gPHPEdit/main_window/x","main_window",20);
-  prefdet->top = get_color("/gPHPEdit/main_window/y","main_window",20);
-  prefdet->width = get_color("/gPHPEdit/main_window/width","main_window",400);
-  prefdet->height = get_color("/gPHPEdit/main_window/height","main_window",400);
-  prefdet->maximized = get_size("/gPHPEdit/main_window/maximized",0);
+  prefdet->left = get_int_with_default("/gPHPEdit/main_window/x","main_window",20);
+  prefdet->top = get_int_with_default("/gPHPEdit/main_window/y","main_window",20);
+  prefdet->width = get_int_with_default("/gPHPEdit/main_window/width","main_window",400);
+  prefdet->height = get_int_with_default("/gPHPEdit/main_window/height","main_window",400);
+  prefdet->maximized = get_uint("/gPHPEdit/main_window/maximized",0);
 }
 
-void load_session_settings(PreferencesManagerDetails *prefdet){
+void load_session_settings(PreferencesManagerDetails *prefdet)
+{
   gphpedit_debug(DEBUG_PREFS);
   prefdet->last_opened_folder = get_string("/gPHPEdit/general/last_opened_folder", (gchar *)g_get_home_dir());
   prefdet->parseonlycurrentfile = get_bool("/gPHPEdit/classbrowser/onlycurrentfile", FALSE);
   prefdet->side_panel_hidden = get_bool("/gPHPEdit/main_window/classbrowser_hidden", FALSE);
-  prefdet->side_panel_size = get_color("/gPHPEdit/main_window/classbrowser_size", "main_window", 100);
-  
+  prefdet->side_panel_size = get_int_with_default("/gPHPEdit/main_window/classbrowser_size", "main_window", 100);
   prefdet->filebrowser_last_folder=get_string("/gPHPEdit/main_window/folderbrowser/folder", (gchar *)g_get_home_dir());
 }
 
@@ -559,14 +709,6 @@ void load_session_settings(PreferencesManagerDetails *prefdet){
   * set functions don't store new value in gconf directly, instead store new value internally. 
   * you must call "preferences_manager_save_data" in order to update values in gconf.
   */
-
-GSList *get_preferences_manager_search_history(PreferencesManager *preferences_manager)
-{
-  g_return_val_if_fail (OBJECT_IS_PREFERENCES_MANAGER (preferences_manager), 0); /**/
-  PreferencesManagerDetails *prefdet;
-  prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
-  return prefdet->search_history;
-}
 
 gboolean get_preferences_manager_show_filebrowser(PreferencesManager *preferences_manager)
 {
@@ -685,150 +827,7 @@ void set_preferences_manager_window_maximized(PreferencesManager *preferences_ma
   prefdet->maximized = newstate; 
 }
 
-gint get_preferences_manager_indentation_size(PreferencesManager *preferences_manager)
-{
-  g_return_val_if_fail (OBJECT_IS_PREFERENCES_MANAGER (preferences_manager), 0); /**/
-  PreferencesManagerDetails *prefdet;
-  prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
-  return prefdet->indentation_size;
-}
-
-void set_preferences_manager_indentation_size(PreferencesManager *preferences_manager, gint newstate)
-{
-  if (!OBJECT_IS_PREFERENCES_MANAGER (preferences_manager)) return ;
-  PreferencesManagerDetails *prefdet;
-  prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
-  prefdet->indentation_size = newstate; 
-
-}
-
-const gchar *get_preferences_manager_php_binary_location(PreferencesManager *preferences_manager)
-{
-  g_return_val_if_fail (OBJECT_IS_PREFERENCES_MANAGER (preferences_manager), 0); /**/
-  PreferencesManagerDetails *prefdet;
-  prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
-  return prefdet->php_binary_location;
-}
-
-void set_preferences_manager_php_binary_location(PreferencesManager *preferences_manager, gchar *newstate)
-{
-  if (!OBJECT_IS_PREFERENCES_MANAGER (preferences_manager)) return ;
-  PreferencesManagerDetails *prefdet;
-  prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
-  prefdet->php_binary_location = newstate; 
-
-}
-
-gint get_preferences_manager_font_quality(PreferencesManager *preferences_manager)
-{
-  g_return_val_if_fail (OBJECT_IS_PREFERENCES_MANAGER (preferences_manager), 0); /**/
-  PreferencesManagerDetails *prefdet;
-  prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
-  return prefdet->font_quality;
-}
-
-gint get_preferences_manager_calltip_delay(PreferencesManager *preferences_manager)
-{
-  g_return_val_if_fail (OBJECT_IS_PREFERENCES_MANAGER (preferences_manager), 0); /**/
-  PreferencesManagerDetails *prefdet;
-  prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
-  return prefdet->calltip_delay;
-}
-
-void set_preferences_manager_calltip_delay(PreferencesManager *preferences_manager, gint newstate)
-{
-  if (!OBJECT_IS_PREFERENCES_MANAGER (preferences_manager)) return ;
-  PreferencesManagerDetails *prefdet;
-  prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
-  prefdet->calltip_delay = newstate; 
-
-}
-
-gint get_preferences_manager_auto_complete_delay(PreferencesManager *preferences_manager)
-{
-  g_return_val_if_fail (OBJECT_IS_PREFERENCES_MANAGER (preferences_manager), 0); /**/
-  PreferencesManagerDetails *prefdet;
-  prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
-  return prefdet->auto_complete_delay;
-}
-
-void set_preferences_manager_auto_complete_delay(PreferencesManager *preferences_manager, gint newstate)
-{
-  if (!OBJECT_IS_PREFERENCES_MANAGER (preferences_manager)) return ;
-  PreferencesManagerDetails *prefdet;
-  prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
-  prefdet->auto_complete_delay = newstate; 
-
-}
-
-gboolean get_preferences_manager_single_instance_only(PreferencesManager *preferences_manager)
-{
-  g_return_val_if_fail (OBJECT_IS_PREFERENCES_MANAGER (preferences_manager), 0); /**/
-  PreferencesManagerDetails *prefdet;
-  prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
-  return prefdet->single_instance_only;
-}
-
-void set_preferences_manager_single_instance_only(PreferencesManager *preferences_manager, gboolean newstate)
-{
-  if (!OBJECT_IS_PREFERENCES_MANAGER (preferences_manager)) return ;
-  PreferencesManagerDetails *prefdet;
-  prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
-  prefdet->single_instance_only = newstate; 
-
-}
-
-gint get_preferences_manager_tab_size(PreferencesManager *preferences_manager)
-{
-  g_return_val_if_fail (OBJECT_IS_PREFERENCES_MANAGER (preferences_manager), 0); /**/
-  PreferencesManagerDetails *prefdet;
-  prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
-  return prefdet->tab_size;
-}
-
-void set_preferences_manager_tab_size(PreferencesManager *preferences_manager, gint newstate)
-{
-  if (!OBJECT_IS_PREFERENCES_MANAGER (preferences_manager)) return ;
-  PreferencesManagerDetails *prefdet;
-  prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
-  prefdet->tab_size = newstate; 
-
-}
-
-gchar *get_preferences_manager_php_file_extensions(PreferencesManager *preferences_manager)
-{
-  g_return_val_if_fail (OBJECT_IS_PREFERENCES_MANAGER (preferences_manager), 0); /**/
-  PreferencesManagerDetails *prefdet;
-  prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
-  return prefdet->php_file_extensions;
-}
-
-void set_preferences_manager_php_file_extensions(PreferencesManager *preferences_manager, gchar *newstate)
-{
-  if (!OBJECT_IS_PREFERENCES_MANAGER (preferences_manager)) return ;
-  if (!newstate) return;
-  PreferencesManagerDetails *prefdet;
-  prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
-  prefdet->php_file_extensions = newstate; 
-
-}
-
-gchar *get_preferences_manager_shared_source_location(PreferencesManager *preferences_manager)
-{
-  g_return_val_if_fail (OBJECT_IS_PREFERENCES_MANAGER (preferences_manager), 0); /**/
-  PreferencesManagerDetails *prefdet;
-  prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
-  return prefdet->shared_source_location;
-}
-void set_preferences_manager_shared_source_location(PreferencesManager *preferences_manager, gchar *newstate)
-{
-  if (!OBJECT_IS_PREFERENCES_MANAGER (preferences_manager)) return ;
-  PreferencesManagerDetails *prefdet;
-  prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
-  prefdet->shared_source_location = newstate; 
-}
-
-GSList *get_preferences_manager_php_search_history(PreferencesManager *preferences_manager)
+GSList *get_preferences_manager_search_history(PreferencesManager *preferences_manager)
 {
   g_return_val_if_fail (OBJECT_IS_PREFERENCES_MANAGER (preferences_manager), 0); /**/
   PreferencesManagerDetails *prefdet;
@@ -850,39 +849,6 @@ void set_preferences_manager_new_search_history_item(PreferencesManager *prefere
     }
 }
 
-gchar *get_preferences_manager_style_name(PreferencesManager *preferences_manager)
-{
-  g_return_val_if_fail (OBJECT_IS_PREFERENCES_MANAGER (preferences_manager), 0); /**/
-  PreferencesManagerDetails *prefdet;
-  prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
-  if (!prefdet->style_name) return "classic";
-  return prefdet->style_name;
-}
-
-void set_preferences_manager_style_name(PreferencesManager *preferences_manager, gchar *newstate)
-{
-  if (!OBJECT_IS_PREFERENCES_MANAGER (preferences_manager)) return ;
-  if (!newstate) return;
-  PreferencesManagerDetails *prefdet;
-  prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
-  prefdet->style_name = g_strdup(newstate);
-}
-
-guint get_preferences_manager_style_size(PreferencesManager *preferences_manager)
-{
-  g_return_val_if_fail (OBJECT_IS_PREFERENCES_MANAGER (preferences_manager), 0); /**/
-  PreferencesManagerDetails *prefdet;
-  prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
-  return prefdet->font_size;
-}
-
-gchar *get_preferences_manager_style_font(PreferencesManager *preferences_manager)
-{
-  g_return_val_if_fail (OBJECT_IS_PREFERENCES_MANAGER (preferences_manager), 0); /**/
-  PreferencesManagerDetails *prefdet;
-  prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
-  return prefdet->font_name;
-}
 /*
 * preferences_manager_save_data
 * update session preferences data in gconf with new internal data
@@ -920,7 +886,6 @@ void preferences_manager_save_data_full(PreferencesManager *preferences_manager)
   prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
   preferences_manager_save_data(preferences_manager);  /* save session data */
 
-  set_int ("/gPHPEdit/default_style/bookmark", prefdet->marker_back);
   set_string ("/gPHPEdit/locations/phpbinary", prefdet->php_binary_location);
   set_string ("/gPHPEdit/locations/shared_source", prefdet->shared_source_location);
   set_int ("/gPHPEdit/defaults/indentationsize", prefdet->indentation_size); 
@@ -972,7 +937,7 @@ gboolean get_plugin_is_active(PreferencesManager *preferences_manager, const gch
   
   gchar *key = g_strdup_printf("/gPHPEdit/plugins/%s/active", name);
   gchar *subdir = g_strdup_printf("plugins/%s", name);
-  gboolean result = get_color(key, subdir, TRUE);
+  gboolean result = get_int_with_default(key, subdir, TRUE);
   g_free(subdir);
   g_free(key);
   return result;
@@ -1060,11 +1025,11 @@ static gchar *get_string(const gchar *key,gchar *default_string){
   return temp;
 }
 /*
-* get_size (internal)
-* load a size value from gconf
+* get_uint (internal)
+* load an uint value from gconf
 * if value isn't found return default_size
 */
-static gint get_size(const gchar *key, gint default_size){
+static gint get_uint(const gchar *key, gint default_size){
   GConfClient *config = gconf_client_get_default ();
   GError *error=NULL;
   gint temp= gconf_client_get_int (config,key,&error);
@@ -1097,17 +1062,17 @@ static gboolean get_bool(const gchar *key,gboolean default_value){
 }
 
 /*
-* get_color (internal)
-* load a color value from gconf
-* if value isn't found return default_color
+* get_int_with_default (internal)
+* load an int value from gconf
+* if value isn't found return default_value
 */
-static gint get_color(const gchar *key,const gchar *subdir,gint default_color){
+static gint get_int_with_default(const gchar *key,const gchar *subdir,gint default_value){
   gchar *uri= g_strdup_printf("%s/%s/%s",g_get_home_dir(),".gconf/gPHPEdit",subdir);
   if (!g_file_test (uri,G_FILE_TEST_EXISTS)){
     gphpedit_debug_message(DEBUG_PREFS, "key %s don't exist. load default value",key);
     //load default value
     g_free(uri);
-    return default_color;
+    return default_value;
   } else {
     g_free(uri);
     //load key value
@@ -1119,7 +1084,7 @@ static gint get_color(const gchar *key,const gchar *subdir,gint default_color){
     if (error){
       //return default value
       g_error_free (error);
-      return default_color;
+      return default_value;
     } else {
       return temp;
     }
@@ -1183,23 +1148,6 @@ void set_font_settings (PreferencesManager *preferences_manager, gchar *font_des
   pango_font_description_free (desc);
 }
 
-/**
-* set_style_name
-* set a new style name.
-* this function don't save new values to gconf. 
-* you must call "preferences_manager_save_data_full" to update gconf values.
-*/
-
-void set_style_name (PreferencesManager *preferences_manager, gchar *newstyle)
-{
-  if (!OBJECT_IS_PREFERENCES_MANAGER (preferences_manager)) return ;
-  if (!newstyle) return ;
-  PreferencesManagerDetails *prefdet;
-  prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
-
-  if (newstyle) g_free(prefdet->style_name);
-  prefdet->style_name = g_strdup(newstyle);
-}
 /*
 * load_styles (internal)
 * loads lexer styles

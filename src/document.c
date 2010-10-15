@@ -505,24 +505,27 @@ void tab_set_configured_scintilla_properties(GtkScintilla *scintilla)
 {
   PreferencesManager *pref = preferences_manager_new ();
   gboolean edge_mode, show_indent_guides, higthlight_caret_line, line_wrapping, tabs_instead_spaces;
-  gint edge_column;
-
+  gint edge_column, font_quality;
+  const gchar *font;
   g_object_get(pref, "edge_mode", &edge_mode,"edge_column", &edge_column, "show_indentation_guides", &show_indent_guides,
        "higthlight_caret_line", &higthlight_caret_line, "line_wrapping",&line_wrapping,
-        "tabs_instead_spaces",&tabs_instead_spaces,NULL);
+        "tabs_instead_spaces",&tabs_instead_spaces,"font_quality", &font_quality, "style_font_name", &font, NULL);
   
   gtk_scintilla_set_wrap_mode(scintilla, line_wrapping);
   gtk_scintilla_set_h_scroll_bar(scintilla, !line_wrapping); /* if line wrapping is ON disable hscrollbar*/
   /* reset styles */
   gtk_scintilla_style_clear_all(scintilla);
 
-  const gchar *font = get_preferences_manager_style_font(pref);
-  guint size = get_preferences_manager_style_size(pref);
+  guint size;
 
-  GtkSourceStyleScheme	*scheme = gtk_source_style_scheme_manager_get_scheme (main_window.stylemg, get_preferences_manager_style_name(pref));
+  const gchar *style_name;
+  gint indentation_size, tab_size;
+  g_object_get(pref, "style_name", &style_name, "indentation_size", &indentation_size, 
+    "font_size", &size, "tab_size", &tab_size, NULL);
+  GtkSourceStyleScheme	*scheme = gtk_source_style_scheme_manager_get_scheme (main_window.stylemg, style_name);
   gtk_source_style_scheme_apply (scheme, GTK_WIDGET(scintilla), font, size);
   /* set font quality */
-  gtk_scintilla_set_font_quality(scintilla, get_preferences_manager_font_quality (pref));
+  gtk_scintilla_set_font_quality(scintilla, font_quality);
   gtk_scintilla_set_caret_line_visible(scintilla, higthlight_caret_line);
 
   gtk_scintilla_set_indentation_guides (scintilla, show_indent_guides);
@@ -536,8 +539,8 @@ void tab_set_configured_scintilla_properties(GtkScintilla *scintilla)
   gtk_scintilla_set_use_tabs (scintilla, tabs_instead_spaces);
   gtk_scintilla_set_tab_indents (scintilla, 1);
   gtk_scintilla_set_backspace_unindents (scintilla, 1);
-  gtk_scintilla_set_tab_width (scintilla, get_preferences_manager_indentation_size (pref));
-  gtk_scintilla_set_indent (scintilla, get_preferences_manager_tab_size(pref));
+  gtk_scintilla_set_tab_width (scintilla, tab_size);
+  gtk_scintilla_set_indent (scintilla, indentation_size);
 
   //annotation styles
   gtk_scintilla_style_set_size (scintilla,  STYLE_ANNOTATION_ERROR, 8);
@@ -785,7 +788,9 @@ static void autoindent_brace_code (GtkScintilla *sci)
     previous_line_end = gtk_scintilla_get_line_end_position(sci, previous_line);
     previous_char_buffer = gtk_scintilla_get_text_range (sci, previous_line_end-1, previous_line_end, &previous_char_buffer_length);
     if (*previous_char_buffer=='{') {
-      previous_line_indentation+=get_preferences_manager_indentation_size(pref);
+      gint indentation_size;
+      g_object_get(pref, "indentation_size", &indentation_size, NULL);
+      previous_line_indentation+=indentation_size;
     }
     g_free(previous_char_buffer);
     indent_line(sci, current_line, previous_line_indentation);
@@ -813,10 +818,12 @@ static void cancel_calltip (GtkScintilla *sci)
 static void show_calltip (DocumentDetails *docdet, gint pos)
 {
   if (!docdet->calltip_timer_set) {
+    gint delay;
     PreferencesManager *pref = preferences_manager_new ();
-    docdet->calltip_timer_id = g_timeout_add(get_preferences_manager_calltip_delay(pref), calltip_callback, GINT_TO_POINTER(pos));
-    docdet->calltip_timer_set=TRUE;
+    g_object_get(pref, "calltip_delay", &delay, NULL);
     g_object_unref(pref);
+    docdet->calltip_timer_id = g_timeout_add(delay, calltip_callback, GINT_TO_POINTER(pos));
+    docdet->calltip_timer_set=TRUE;
   }
 }
 
@@ -824,9 +831,11 @@ static void show_autocompletion (DocumentDetails *docdet, gint pos)
 {
   if (!docdet->completion_timer_set) {
     PreferencesManager *pref = preferences_manager_new ();
-    docdet->completion_timer_id = g_timeout_add(get_preferences_manager_auto_complete_delay(pref), auto_complete_callback, GINT_TO_POINTER(pos));
-    docdet->completion_timer_set=TRUE;
+    gint delay;
+    g_object_get(pref, "autocomplete_delay", &delay, NULL);
     g_object_unref(pref);
+    docdet->completion_timer_id = g_timeout_add(delay, auto_complete_callback, GINT_TO_POINTER(pos));
+    docdet->completion_timer_set=TRUE;
   }
 }
 
@@ -920,7 +929,9 @@ static void char_added(GtkWidget *scintilla, guint ch, gpointer user_data)
           gchar *line_text= gtk_scintilla_get_text_range (sci, initial_pos, wordStart-1, &line_size);
             if (!check_php_variable_before(line_text)) break;
             if (!docdet->completion_timer_set) {
-              docdet->completion_timer_id = g_timeout_add(get_preferences_manager_auto_complete_delay(pref), auto_memberfunc_complete_callback, GINT_TO_POINTER(current_pos));
+              gint delay;
+              g_object_get(pref, "autocomplete_delay", &delay, NULL);
+              docdet->completion_timer_id = g_timeout_add(delay, auto_memberfunc_complete_callback, GINT_TO_POINTER(current_pos));
               docdet->completion_timer_set=TRUE;
             }
         }
@@ -928,8 +939,9 @@ static void char_added(GtkWidget *scintilla, guint ch, gpointer user_data)
         member_function_buffer = gtk_scintilla_get_text_range (sci, wordStart, wordEnd, &member_function_length);
         if (g_str_has_prefix(member_function_buffer,"$") || g_str_has_prefix(member_function_buffer,"__")) {
             if (!docdet->completion_timer_set) {
-              docdet->completion_timer_id = g_timeout_add(get_preferences_manager_auto_complete_delay(pref), 
-                  auto_complete_php_variables_callback, GINT_TO_POINTER(current_pos));
+              gint delay;
+              g_object_get(pref, "autocomplete_delay", &delay, NULL);
+              docdet->completion_timer_id = g_timeout_add(delay, auto_complete_php_variables_callback, GINT_TO_POINTER(current_pos));
               docdet->completion_timer_set=TRUE;
             }
         } else if (g_strcmp0(member_function_buffer,"instanceof")==0 || g_strcmp0(member_function_buffer,"is_subclass_of")==0) {
@@ -2070,11 +2082,13 @@ void document_set_sintax_line(Document *doc, guint current_line_number)
     gint line_start;
     gint line_end;
     gint indent;
+    gint indentation_size;
     PreferencesManager *pref = preferences_manager_new ();
+    g_object_get(pref, "indentation_size", &indentation_size, NULL);
+    g_object_unref(pref);
     indent = gtk_scintilla_get_line_indentation(GTK_SCINTILLA(docdet->scintilla), current_line_number);
     line_start = gtk_scintilla_position_from_line(GTK_SCINTILLA(docdet->scintilla), current_line_number);
-    line_start += (indent/get_preferences_manager_indentation_size(pref));
-    g_object_unref(pref);
+    line_start += (indent/indentation_size);
     line_end = gtk_scintilla_get_line_end_position(GTK_SCINTILLA(docdet->scintilla), current_line_number);
     gtk_scintilla_indicator_fill_range(GTK_SCINTILLA(docdet->scintilla), line_start, line_end-line_start);  
   }

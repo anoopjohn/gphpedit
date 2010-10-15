@@ -41,10 +41,14 @@ void scintilla_cxx_set_lexer(GtkScintilla *scintilla)
   
   gtk_scintilla_set_keywords(scintilla, 1, "strstr strlen strcmp clrscr gotoXY FILE stat memcpy memmove memccpy memset strncpy strcpy strdup strndup fclose fopen freopen fdopen remove rename rewind tmpfile clearerr feof ferror fflush fflush fgetpos fgetc fgets fputc fputs ftell fseek fsetpos fread fwrite getc getchar gets fprintf sprintf vprintf perror putc putchar fputchar fscanf sscanf setbuf setvbuf tmpnam ungetc puts atof atoi atol strtod strtol strtoul rand srand malloc calloc realloc free abort atexit exit getenv system bsearch qsort abs div ldiv");
 
-  const gchar *font = get_preferences_manager_style_font(prefmg);
-  guint size = get_preferences_manager_style_size(prefmg);
+  const gchar *font;
+  guint size;
+  g_object_get(prefmg, "style_font_name", &font,"font_size", &size, NULL);
 
-  GtkSourceStyleScheme	*scheme = gtk_source_style_scheme_manager_get_scheme (main_window.stylemg, get_preferences_manager_style_name(prefmg));
+  const gchar *style_name;
+  g_object_get(prefmg, "style_name", &style_name, NULL);
+
+  GtkSourceStyleScheme	*scheme = gtk_source_style_scheme_manager_get_scheme (main_window.stylemg, style_name);
   /* PYTHON LEXER STYLE */
   set_scintilla_lexer_default_style(GTK_WIDGET(scintilla), scheme, SCE_C_DEFAULT, font, size);
   set_scintilla_lexer_keyword_style(GTK_WIDGET(scintilla), scheme, SCE_C_WORD, font, size);
