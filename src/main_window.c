@@ -256,13 +256,13 @@ void main_window_create(void){
   gtk_box_pack_start (GTK_BOX (main_window.prinbox), main_window.menu, FALSE, FALSE, 0);
   gtk_widget_show_all (main_window.menu);
 
-  main_window.toolbar_main= toolbar_new (FALSE, NULL);
+  main_window.toolbar_main= toolbar_new ();
   gtk_box_pack_start (GTK_BOX (main_window.prinbox), main_window.toolbar_main, FALSE, FALSE, 0);
-  if (toolbar_is_visible(TOOLBAR(main_window.toolbar_main))) gtk_widget_show (main_window.toolbar_main);
+  if (get_preferences_manager_show_maintoolbar(main_window.prefmg)) gtk_widget_show (main_window.toolbar_main);
 
-  main_window.toolbar_find= toolbar_new (TRUE, menubar_get_accel_group(MENUBAR(main_window.menu)));
+  main_window.toolbar_find = toolbar_find_new(menubar_get_accel_group(MENUBAR(main_window.menu)));
   gtk_box_pack_start (GTK_BOX (main_window.prinbox), main_window.toolbar_find, FALSE, FALSE, 0);
-  if (toolbar_is_visible(TOOLBAR(main_window.toolbar_find))) gtk_widget_show (main_window.toolbar_find);
+  if (get_preferences_manager_show_findtoolbar(main_window.prefmg)) gtk_widget_show (main_window.toolbar_find);
 
 
   main_window_create_panes();

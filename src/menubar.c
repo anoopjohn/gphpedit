@@ -152,13 +152,9 @@ static void tog_classbrowser(GtkCheckMenuItem *checkmenuitem, gpointer user_data
 */
 static void tog_statusbar(GtkWidget *widget, gpointer user_data)
 {
-  if (gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(widget))) {
-    gtk_widget_show(main_window.appbar);
-    set_preferences_manager_show_statusbar( main_window.prefmg, TRUE);
-  } else {
-    gtk_widget_hide(main_window.appbar);
-    set_preferences_manager_show_statusbar(main_window.prefmg, FALSE);
-  }
+  gboolean state = gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(widget));
+  set_preferences_manager_show_statusbar( main_window.prefmg, state);
+  gtk_widget_set_visible(main_window.appbar, state);
 }
 /*
  * tog_maintoolbar
@@ -167,13 +163,9 @@ static void tog_statusbar(GtkWidget *widget, gpointer user_data)
 
 static void tog_maintoolbar(GtkWidget *widget, gpointer user_data)
 {
-  if (gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(widget))) {
-    gtk_widget_show(main_window.toolbar_main);
-    set_preferences_manager_show_maintoolbar( main_window.prefmg, TRUE);
-  } else {
-    gtk_widget_hide(main_window.toolbar_main);
-    set_preferences_manager_show_maintoolbar(main_window.prefmg, FALSE);
-  }
+  gboolean state = gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(widget));
+  set_preferences_manager_show_maintoolbar( main_window.prefmg, state);
+  gtk_widget_set_visible(main_window.toolbar_main, state);
 }
 
 /*
@@ -182,13 +174,9 @@ static void tog_maintoolbar(GtkWidget *widget, gpointer user_data)
 */
 static void tog_findtoolbar(GtkWidget *widget, gpointer user_data)
 {
-  if (gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(widget))) {
-    gtk_widget_show(main_window.toolbar_find);
-    set_preferences_manager_show_findtoolbar( main_window.prefmg, TRUE);
-  } else {
-    gtk_widget_hide(main_window.toolbar_find);
-    set_preferences_manager_show_findtoolbar(main_window.prefmg, FALSE);
-  }
+  gboolean state = gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(widget));
+  set_preferences_manager_show_findtoolbar( main_window.prefmg, state);
+  gtk_widget_set_visible(main_window.toolbar_find, state);
 }
 /*
  * tog_fullscreen
