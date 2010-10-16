@@ -52,7 +52,6 @@ struct _GtkSyntaxCheckWindow
 struct _GtkSyntaxCheckWindowClass
 {
   GtkBoxClass parent_class;
-
 };
 
 GType      gtk_syntax_check_window_get_type         (void) G_GNUC_CONST;

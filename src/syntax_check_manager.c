@@ -51,10 +51,7 @@ syntax_check_manager_init (SyntaxCheckManager *object)
 
 SyntaxCheckManager *syntax_check_manager_new (void)
 {
-	SyntaxCheckManager *synmg;
-  synmg = g_object_new (SYNTAX_CHECK_MANAGER_TYPE, NULL);
-  
-	return synmg; /* return new object */
+	return g_object_new (SYNTAX_CHECK_MANAGER_TYPE, NULL); /* return new object */
 }
 
 
@@ -73,9 +70,8 @@ gchar *run_php_lint(gchar *command_line)
   result = g_spawn_command_line_sync (command_line,
                                       &stdout, &stdouterr, &exit_status, &error);
 
-  if (!result) {
-    return NULL;
-  }
+  if (!result) return NULL;
+
   gchar *res =g_strdup_printf ("%s\n%s",stdouterr,stdout);
   g_free(stdouterr);
   g_free(stdout);
@@ -196,59 +192,70 @@ GString *save_as_temp_file(Document *document)
   return filename;
 }
 
+GString *get_syntax_filename(Document *document, gboolean *using_temp)
+{
+  GString *filename = NULL;
+  gchar *docfilename = document_get_filename(document);
+  if (document_get_saved_status(document) && filename_is_native(docfilename) && !document_get_untitled(document)) {
+    gchar *local_path=filename_get_scaped_path(docfilename);
+    filename = g_string_new(local_path);
+    g_free(local_path);
+    *using_temp = FALSE;
+  } else {
+    filename = save_as_temp_file(document);
+    *using_temp = TRUE;
+  }
+  g_free(docfilename);
+  return filename;
+}
 gchar *syntax_check_manager_run(Document *document)
 {
   GString *command_line=NULL;
   gchar *output;
   gboolean using_temp;
-  GString *filename;
-  gint ftype = document_get_document_type(document);
-  gchar *docfilename = document_get_filename(document);
-  if (document_get_saved_status(document) && filename_is_native(docfilename) && document_get_untitled(document)) {
-      gchar *local_path=filename_get_scaped_path(docfilename);
-      filename = g_string_new(local_path);
-      g_free(local_path);
-      using_temp = FALSE;
-    }
-    else {
-      filename = save_as_temp_file(document);
-      using_temp = TRUE;
-    }
-    g_free(docfilename);
-    if(ftype==TAB_PHP){
-    PreferencesManager *pref = preferences_manager_new ();
-    const gchar *php_binary_location;
-    g_object_get(main_window.prefmg, "php_binary_location", &php_binary_location, NULL);
-    command_line = g_string_new(php_binary_location);
-    g_string_append_printf (command_line," -q -l -d html_errors=Off -f '%s'", filename->str);
-    g_object_unref(pref);
-    gphpedit_debug_message(DEBUG_SYNTAX, "eject:%s\n", command_line->str);
-    } else if (ftype==TAB_PERL){
-    command_line = g_string_new("perl -c ");
-    command_line = g_string_append(command_line, "'");
-    command_line = g_string_append(command_line, filename->str);
-    command_line = g_string_append(command_line, "'");
-    gphpedit_debug_message(DEBUG_SYNTAX, "eject:%s\n", command_line->str);
-    } else {
-      g_string_free(filename, TRUE);
-      return NULL;
-    }
-    output = run_php_lint(command_line->str);
-    g_string_free(command_line, TRUE);
-    gchar *result=NULL;
+  GString *filename = NULL;
+  const gchar *php_binary_location;
+  PreferencesManager *pref;
+  gint type = document_get_document_type(document);
 
-    if (output) {
-      if (ftype==TAB_PHP)
-      result = process_php_lines(output);
-      else
-      result = process_perl_lines(output);
-      g_free(output);
-    } else {
-      result =g_strdup(_("Error calling PHP CLI (is PHP command line binary installed? If so, check if it's in your path or set php_binary in Preferences)\n"));
+  command_line = g_string_new(NULL);
+  switch(type) {
+    case TAB_PHP:
+      pref = preferences_manager_new ();
+      g_object_get(main_window.prefmg, "php_binary_location", &php_binary_location, NULL);
+      filename = get_syntax_filename(document, &using_temp);
+      g_string_append_printf (command_line, "%s -q -l -d html_errors=Off -f '%s'", php_binary_location, filename->str);
+      g_object_unref(pref);
+      break;
+    case TAB_PERL:
+      filename = get_syntax_filename(document, &using_temp);
+      g_string_append_printf(command_line, "perl -c '%s'", filename->str);
+      break;
+    default:
+      return NULL;
+      break;
+  }
+  gphpedit_debug_message(DEBUG_SYNTAX, "eject:%s\n", command_line->str);
+  if (using_temp) release_temp_file (filename->str);
+  g_string_free(filename, TRUE);
+
+  output = run_php_lint(command_line->str);
+  g_string_free(command_line, TRUE);
+  gchar *result=NULL;
+  if (output) {
+    switch(type) {
+      case TAB_PHP:
+        result = process_php_lines(output);
+        break;
+      case TAB_PERL:
+        result = process_perl_lines(output);
+        break;
+      default:
+        break;
     }
-    if (using_temp) {
-      release_temp_file (filename->str);
-    }
-    g_string_free(filename, TRUE);
-    return result;
+    g_free(output);
+  } else {
+    result = g_strdup(_("Error calling PHP CLI (is PHP command line binary installed? If so, check if it's in your path or set php_binary in Preferences)\n"));
+  }
+  return result;
 }
