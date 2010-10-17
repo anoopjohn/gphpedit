@@ -43,6 +43,7 @@ struct CalltipManagerDetails
   GTree *cxx_api_tree;
   GTree *sql_api_tree;
   GTree *python_api_tree;
+  GTree *perl_api_tree;
 
   GString *completion_list_tree;
   gchar *prefix; 
@@ -141,6 +142,7 @@ calltip_manager_init (CalltipManager  *object)
   calltip_manager_load_api_file("css.api", &calltipmgdet->css_api_tree);
   calltip_manager_load_api_file("c.api", &calltipmgdet->cxx_api_tree);
   calltip_manager_load_api_file("python.api", &calltipmgdet->python_api_tree);
+  calltip_manager_load_api_file("perl.api", &calltipmgdet->perl_api_tree);
   calltip_manager_function_list_from_array_prepare(cobol_keyword, &calltipmgdet->cobol_api_tree);
   calltip_manager_function_list_from_array_prepare(sql_keywords, &calltipmgdet->sql_api_tree);
 
@@ -161,6 +163,9 @@ calltip_manager_finalize (GObject *object)
   if (calltipmgdet->php_api_tree){
      g_tree_destroy(calltipmgdet->php_api_tree);
   }
+  if (calltipmgdet->perl_api_tree){
+     g_tree_destroy(calltipmgdet->perl_api_tree);
+  }
   if (calltipmgdet->cxx_api_tree){
      g_tree_destroy(calltipmgdet->cxx_api_tree);
   }
@@ -168,7 +173,6 @@ calltip_manager_finalize (GObject *object)
      g_tree_destroy(calltipmgdet->python_api_tree);
   }
   if (calltipmgdet->completion_list_tree != NULL) {
-
     g_string_free (calltipmgdet->completion_list_tree,TRUE);	
   }
   if (calltipmgdet->cache_completion) g_free(calltipmgdet->cache_completion);
@@ -504,30 +508,6 @@ gchar *calltip_manager_autocomplete_word_full(CalltipManager *calltipmg, gchar *
   return g_string_free(result,FALSE);
 }
 
-//FIXME: implement proper perl stock function completion and use calltip_manager_autocomplete_word_full so we can remove this function
-gchar *calltip_manager_perl_autocomplete_word(CalltipManager *calltipmg, gchar *buffer)
-{
-
-  CalltipManagerDetails *calltipmgdet;
-	calltipmgdet = CALLTIP_MANAGER_GET_PRIVATE(calltipmg);
-
-  GString *result=NULL;
-
-  if (calltip_manager_has_cache(buffer, calltipmgdet->cache_str, calltipmgdet->cache_completion)){
-    result = calltip_manager_get_autocomp_from_cache(buffer, calltipmgdet->cache_str, calltipmgdet->cache_completion);
-  } else {
-//    g_tree_foreach (calltipmgdet->perl_api_tree, make_completion_list, buffer);
-    gchar *custom = classbrowser_add_custom_autocompletion(GPHPEDIT_CLASSBROWSER(main_window.classbrowser), buffer, TAB_PERL, list);
-    //FIXME: add custom variables support
-    result = g_string_new(custom);
-    if (custom) g_free(custom);
-    calltip_manager_save_result_in_cache(calltipmgdet, result->str, buffer);
-    clear_list();
-  }
-  gphpedit_debug_message(DEBUG_CALLTIP,"Autocomplete list: %s\n", result->str);
-  return g_string_free(result, FALSE);
-}
-
 gchar *calltip_manager_autocomplete_word(CalltipManager *calltipmg, gint type, gchar *buffer)
 {
   if (!calltipmg || !buffer) return NULL;
@@ -555,7 +535,7 @@ gchar *calltip_manager_autocomplete_word(CalltipManager *calltipmg, gint type, g
       result = calltip_manager_autocomplete_word_full(calltipmg, buffer, calltipmgdet->python_api_tree, FALSE, type);
       break;
     case TAB_PERL:
-      result = calltip_manager_perl_autocomplete_word(calltipmg, buffer);
+      result = calltip_manager_autocomplete_word_full(calltipmg, buffer, calltipmgdet->perl_api_tree, FALSE, type);
       break;
     default:
       break;
