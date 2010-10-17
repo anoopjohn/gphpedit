@@ -22,6 +22,7 @@ api_DATA = \
 	php-gphpedit.api\
 	c.api\
 	python.api\
+	perl.api\
 	css.api
 apidir = \
 	$(datadir)/gphpedit
