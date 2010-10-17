@@ -324,6 +324,17 @@ static gchar *get_python_api_line(CalltipManagerDetails *calltipmgdet, gchar *bu
   return result;
 }
 
+static gchar *get_perl_api_line(CalltipManagerDetails *calltipmgdet, gchar *buffer)
+{
+  gchar *callti = NULL;
+  gchar *value = g_tree_lookup (calltipmgdet->perl_api_tree, buffer);
+  if (value){
+  /* make calltip */
+  callti = g_strdup_printf ("%s\n%s", buffer,value);
+  gphpedit_debug_message(DEBUG_CALLTIP, "calltip:%s\n",callti);
+  }
+  return callti;
+}
 /*
 * function to show the tool tip with a short description about the
 * function. The current word at the cursor is used to find the
@@ -345,6 +356,8 @@ gchar *calltip_manager_show_call_tip(CalltipManager *calltipmg, gint type, gchar
       result = get_cxx_api_line(calltipmgdet, prefix);
     case TAB_PYTHON:
       result = get_python_api_line(calltipmgdet, prefix);
+    case TAB_PERL:
+      result = get_perl_api_line(calltipmgdet, prefix);
     default:
       break;
   }
