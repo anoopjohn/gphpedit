@@ -40,6 +40,7 @@
 #include "tab_cxx.h"
 #include "tab_cobol.h"
 #include "tab_python.h"
+#include "tab_perl.h"
 /* object signal enumeration */
 enum {
 	DONE_REFRESH,
@@ -102,6 +103,7 @@ void call_ctags(ClassbrowserBackend *classback, gchar *filename);
 void process_cobol_word(ClassbrowserBackend *classback, gchar *name, gchar *filename, gchar *type, gchar *line);
 void process_cxx_word(ClassbrowserBackend *classback, gchar *name, gchar *filename, gchar *type, gchar *line, gchar *param);
 void process_python_word(ClassbrowserBackend *classback, gchar *name,gchar *filename,gchar *type,gchar *line, gchar *param);
+void process_perl_word(ClassbrowserBackend *classback, gchar *name, gchar *filename, gchar *type, gchar *line, gchar *param);
 #endif
 
 /* http://library.gnome.org/devel/gobject/unstable/gobject-Type-Information.html#G-DEFINE-TYPE:CAPS */
@@ -491,12 +493,15 @@ void call_ctags(ClassbrowserBackend *classback, gchar *filename){
         line=get_ctags_token(token,&ad);
 //        g_print("line:%s\n",line);
         param = get_ctags_param(token,&ad);
-        if (is_cobol_file(filename))
+        if (is_cobol_file(filename)) {
             process_cobol_word(classback, name, filename, type, line);
-        if (is_cxx_file(filename))
+        } else if (is_cxx_file(filename)) {
             process_cxx_word(classback, name, filename, type, line, param);
-        if (is_python_file(filename))
+        } else if (is_python_file(filename)) {
             process_python_word(classback, name, filename, type, line, param);
+        } else if (is_perl_file(filename)) {
+            process_perl_word(classback, name, filename, type, line, param);
+        }
         g_free(name);
         g_free(line);
         g_free(type);
@@ -545,9 +550,7 @@ void classbrowser_functionlist_add(ClassbrowserBackend *classback, gchar *classn
   } else {
     function = g_slice_new0(ClassBrowserFunction);
     function->functionname = g_strdup(funcname);
-    if (param_list) {
-      function->paramlist = g_strdup(param_list);
-    }
+    if (param_list) function->paramlist = g_strdup(param_list);
     function->filename = g_strdup(filename);
     function->line_number = line_number;
     function->remove = FALSE;
@@ -948,6 +951,14 @@ void process_python_word(ClassbrowserBackend *classback, gchar *name, gchar *fil
   classbrowser_functionlist_add(classback, classname, name, filename, TAB_PYTHON, atoi(line), parameters);
   g_free(parameters);
   g_slice_free(class_find, search_data);
+ }
+}
+
+void process_perl_word(ClassbrowserBackend *classback, gchar *name, gchar *filename, gchar *type, gchar *line, gchar *param)
+{
+  //FIXME: no package support
+ if (g_strcmp0(type,"subroutine")==0) {
+    classbrowser_functionlist_add(classback, NULL, name, filename, TAB_PERL, atoi(line), param);
  }
 }
 #endif
