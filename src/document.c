@@ -57,6 +57,7 @@
 enum {
 	LOAD_COMPLETE,
   SAVE_UPDATE,
+	TYPE_CHANGED,
 	LAST_SIGNAL
 };
 
@@ -321,6 +322,15 @@ document_class_init (DocumentClass *klass)
 		              NULL, NULL,
 		               g_cclosure_marshal_VOID__VOID,
 		               G_TYPE_NONE, 0);
+
+	signals[TYPE_CHANGED] =
+		g_signal_new ("type_changed",
+		              G_TYPE_FROM_CLASS (object_class),
+		              G_SIGNAL_RUN_LAST,
+		              G_STRUCT_OFFSET (DocumentClass, save_update),
+		              NULL, NULL,
+		               g_cclosure_marshal_VOID__INT,
+		               G_TYPE_NONE, 1, G_TYPE_INT, NULL);
 
   /*DOCUMENT PROPERTIES*/
   g_object_class_install_property (object_class,
@@ -1250,7 +1260,6 @@ static void char_added(GtkWidget *scintilla, guint ch, gpointer user_data)
             /* if we type <?php then we are in a php file so force php syntax mode */
             if (g_strcmp0(member_function_buffer,"<?php")==0){
                 set_document_to_type(doc, TAB_PHP);
-                update_status_combobox(doc);
                }
             g_free(member_function_buffer);
             break;
@@ -1577,43 +1586,46 @@ void set_document_to_type(Document *document, gint type)
   if (!document) return ;
   DocumentDetails *docdet = DOCUMENT_GET_PRIVATE(document);
   if (GTK_IS_SCINTILLA(docdet->scintilla)){
-    docdet->type = type;
-    switch (type) {
-      case TAB_PHP:
-        tab_php_set_lexer(document);
-        tab_set_folding(document, TRUE);
-        break;
-      case TAB_CSS:
-        tab_css_set_lexer(document);
-        tab_set_folding(document, TRUE);
-        break;
-      case TAB_COBOL:
-        tab_cobol_set_lexer(document);
-        tab_set_folding(document, TRUE);
-        break;
-      case TAB_CXX:
-        break;
-      case TAB_PYTHON:
-        tab_python_set_lexer(document);
-        tab_set_folding(document, TRUE);
-        break;
-      case TAB_SQL:
-        tab_sql_set_lexer(document);
-        tab_set_folding(document, TRUE);
-        break;
-      case TAB_PERL:
-        tab_perl_set_lexer(document);
-        tab_set_folding(document, TRUE);
-        break;
-      case TAB_FILE:
-        /* SCLEX_NULL to select no lexing action */
-        gtk_scintilla_set_lexer(GTK_SCINTILLA (docdet->scintilla), SCLEX_NULL); 
-        tab_set_configured_scintilla_properties(GTK_SCINTILLA (docdet->scintilla));
-        gtk_scintilla_colourise(GTK_SCINTILLA (docdet->scintilla), 0, -1);
-        tab_set_folding(document, FALSE);
-        break;
-      default:
-        break;
+    if (docdet->type != type) {
+      docdet->type = type;
+      switch (type) {
+        case TAB_PHP:
+          tab_php_set_lexer(document);
+          tab_set_folding(document, TRUE);
+          break;
+        case TAB_CSS:
+          tab_css_set_lexer(document);
+          tab_set_folding(document, TRUE);
+          break;
+        case TAB_COBOL:
+          tab_cobol_set_lexer(document);
+          tab_set_folding(document, TRUE);
+          break;
+        case TAB_CXX:
+          break;
+        case TAB_PYTHON:
+          tab_python_set_lexer(document);
+          tab_set_folding(document, TRUE);
+          break;
+        case TAB_SQL:
+          tab_sql_set_lexer(document);
+          tab_set_folding(document, TRUE);
+          break;
+        case TAB_PERL:
+          tab_perl_set_lexer(document);
+          tab_set_folding(document, TRUE);
+          break;
+        case TAB_FILE:
+          /* SCLEX_NULL to select no lexing action */
+          gtk_scintilla_set_lexer(GTK_SCINTILLA (docdet->scintilla), SCLEX_NULL); 
+          tab_set_configured_scintilla_properties(GTK_SCINTILLA (docdet->scintilla));
+          gtk_scintilla_colourise(GTK_SCINTILLA (docdet->scintilla), 0, -1);
+          tab_set_folding(document, FALSE);
+          break;
+        default:
+          break;
+      }
+      g_signal_emit (G_OBJECT (document), signals[TYPE_CHANGED], 0, type);  /* emito señal */
     }
   }
 }
@@ -1801,7 +1813,6 @@ void on_paste_got_from_cliboard(GtkClipboard *clipboard, const gchar *text, gpoi
   /* if we type <?php then we are in a php file so force php syntax mode */
     if (strstr(text,"<?php")){
        set_document_to_type(data, TAB_PHP);
-       update_status_combobox(data);
       }
   }
   // Possible fix for rendering issues after pasting

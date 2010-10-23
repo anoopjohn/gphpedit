@@ -54,6 +54,7 @@ typedef struct
 
 	void (* load_complete) (Document *doc, gboolean result, gpointer user_data);
 	void (* save_update) (Document *doc, gpointer user_data); /* emited when document save state change*/
+	void (* type_changed) (Document *doc, gint type, gpointer user_data);
 
 } DocumentClass;
 

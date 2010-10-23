@@ -194,6 +194,14 @@ void document_save_update_cb (Document *doc, gpointer user_data){
   classbrowser_update(GPHPEDIT_CLASSBROWSER(main_window.classbrowser));
 }
 
+void document_type_changed_cb (Document *doc, gint type, gpointer user_data)
+{
+	DocumentManager *docmg = DOCUMENT_MANAGER(user_data);
+	DocumentManagerDetails *docmgdet = DOCUMENT_MANAGER_GET_PRIVATE(docmg);
+	/* only process if document is current_document */
+	if (doc==docmgdet->current_document) update_status_combobox(docmgdet->current_document);
+}
+
 void document_manager_add_new_document(DocumentManager *docmg, gint type, const gchar *filename, gint goto_line)
 {
   if (!docmg) return ;
@@ -201,6 +209,7 @@ void document_manager_add_new_document(DocumentManager *docmg, gint type, const 
   Document *doc = document_new (type, filename, goto_line);
   g_signal_connect(G_OBJECT(doc), "load_complete", G_CALLBACK(document_load_complete_cb), docmg);
   g_signal_connect(G_OBJECT(doc), "save_update", G_CALLBACK(document_save_update_cb), docmg);
+  g_signal_connect(G_OBJECT(doc), "type_changed", G_CALLBACK(document_type_changed_cb), docmg);
   document_load(doc);
 }
 

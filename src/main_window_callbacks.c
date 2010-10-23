@@ -652,10 +652,11 @@ void on_about1_activate(GtkWidget *widget)
   gtk_dialog_run(GTK_DIALOG (dialog));
   gtk_widget_destroy(dialog);
 }
-void update_status_combobox(Document *document){
+void update_status_combobox(Document *document)
+{
+      if (is_app_closing) return ;
       gint type = -1;
       if (document) g_object_get(document, "type", &type, NULL);
-      if (is_app_closing) return ;
       /* set statuscombo */
       switch(type) {
         case(TAB_PHP):   
