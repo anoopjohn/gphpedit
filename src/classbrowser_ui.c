@@ -263,7 +263,9 @@ static gboolean visible_func (GtkTreeModel *model, GtkTreeIter  *iter, gpointer 
   g_return_val_if_fail(document_manager_get_current_document(main_window.docmg), FALSE);
   guint file_type;
   gboolean visible = FALSE;
-  guint data_type= document_get_document_type(document_manager_get_current_document(main_window.docmg));
+  guint data_type = 0;
+  Document *doc = document_manager_get_current_document(main_window.docmg);
+  if (doc) g_object_get(doc, "type", &data_type, NULL);
   gtk_tree_model_get (model, iter, FILE_TYPE, &file_type, -1);
   if (data_type==file_type) visible = TRUE;
  // g_print("%d -> %d (%s)\n",data_type,file_type,main_window.current_editor->filename->str);

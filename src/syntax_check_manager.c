@@ -196,7 +196,9 @@ GString *get_syntax_filename(Document *document, gboolean *using_temp)
 {
   GString *filename = NULL;
   gchar *docfilename = document_get_filename(document);
-  if (document_get_saved_status(document) && filename_is_native(docfilename) && !document_get_untitled(document)) {
+  gboolean untitled, saved;
+  g_object_get(document, "untitled", &untitled, "saved", &saved, NULL);
+  if (saved && filename_is_native(docfilename) && !untitled) {
     gchar *local_path=filename_get_scaped_path(docfilename);
     filename = g_string_new(local_path);
     g_free(local_path);
@@ -216,7 +218,8 @@ gchar *syntax_check_manager_run(Document *document)
   GString *filename = NULL;
   const gchar *php_binary_location;
   PreferencesManager *pref;
-  gint type = document_get_document_type(document);
+  gint type;
+  g_object_get(document, "type", &type, NULL);
 
   command_line = g_string_new(NULL);
   switch(type) {

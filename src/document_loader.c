@@ -161,7 +161,8 @@ DocumentLoader *document_loader_new (Document *document, GtkWindow *dialog_paren
   doclod = g_object_new (DOCUMENT_LOADER_TYPE, NULL);
   DocumentLoaderDetails *docloddet;
 	docloddet = DOCUMENT_LOADER_GET_PRIVATE(doclod);
-  if (document_get_GFile(document)) docloddet->file = g_object_ref(document_get_GFile(document));
+  g_object_get(document, "GFile", &docloddet->file, NULL);
+  if (docloddet->file) g_object_ref(docloddet->file);
   docloddet->dialog_parent_window = g_object_ref(dialog_parent_window);
   docloddet->document = document;
   docloddet->file_contents_len = 0;
@@ -246,44 +247,43 @@ gboolean document_check_supported_type(GFile *file){
 void document_loader_load_document(DocumentLoader *doclod)
 {
   DocumentLoaderDetails *docloddet = DOCUMENT_LOADER_GET_PRIVATE(doclod);
-    if (!docloddet->file){
-        document_set_untitled(docloddet->document, TRUE);
-        document_set_file_icon(docloddet->document, gtk_icon_theme_load_icon (gtk_icon_theme_get_default (), "text-plain", ICON_SIZE, 0, NULL));
-        g_signal_emit (G_OBJECT (doclod), signals[DONE_LOADING], 0, TRUE); 
-        return ;
+  gint type;
+  g_object_get(docloddet->document, "type", &type, NULL);
+
+  if (!docloddet->file){
+    g_object_set(docloddet->document, "untitled", TRUE, NULL);
+    document_set_file_icon(docloddet->document, gtk_icon_theme_load_icon (gtk_icon_theme_get_default (), "text-plain", ICON_SIZE, 0, NULL));
+    g_signal_emit (G_OBJECT (doclod), signals[DONE_LOADING], 0, TRUE); 
+    return ;
+  }
+  if (!GFile_is_local_or_http(docloddet->file)){ /* pasarle un GFile */
+    if (!mount_mountable_file(doclod)){
+      return ; /* later emit load complete signal */
+    } else {
+      g_signal_emit (G_OBJECT (doclod), signals[DONE_LOADING], 0, FALSE);
+      return ;
     }
-    if (!GFile_is_local_or_http(docloddet->file)){ /* pasarle un GFile */
-        if (!mount_mountable_file(doclod)){
-             return ; /* later emit load complete signal */
-            } else {
-             g_signal_emit (G_OBJECT (doclod), signals[DONE_LOADING], 0, FALSE);
-             return ;
-            }
+  }
+  if(!validate_GFile_exist(docloddet->file) && type!=TAB_HELP && type!=TAB_PREVIEW) {
+    gchar *filename =g_file_get_uri(docloddet->file);
+    if (!prompt_create_file(filename)){
+      g_free(filename);
+      g_signal_emit (G_OBJECT (doclod), signals[DONE_LOADING], 0, FALSE); 
+      return;
+    } else {
+      document_set_file_icon(docloddet->document, gtk_icon_theme_load_icon (gtk_icon_theme_get_default (), "text-plain", ICON_SIZE, 0, NULL));       
+      g_object_set(docloddet->document, "untitled", FALSE, "read_only", FALSE, "can_modify", TRUE ,NULL);
+      g_free(filename);        
+      g_signal_emit (G_OBJECT (doclod), signals[DONE_LOADING], 0, TRUE); 
+      return;
     }
-    if(!validate_GFile_exist(docloddet->file) && document_get_document_type(docloddet->document)!=TAB_HELP && document_get_document_type(docloddet->document)!=TAB_PREVIEW) {
-       gchar *filename =g_file_get_uri(docloddet->file);
-       if (!prompt_create_file(filename)){
-         g_free(filename);
-         g_signal_emit (G_OBJECT (doclod), signals[DONE_LOADING], 0, FALSE); 
-         return;
-       } else {
-        document_set_file_icon(docloddet->document, gtk_icon_theme_load_icon (gtk_icon_theme_get_default (), "text-plain", ICON_SIZE, 0, NULL));       
-        document_set_untitled(docloddet->document, FALSE);
-        document_set_readonly(docloddet->document, FALSE, FALSE);
-        document_set_content_type(docloddet->document, "text/plain");
-        g_free(filename);        
-        g_signal_emit (G_OBJECT (doclod), signals[DONE_LOADING], 0, TRUE); 
-        return;
-       }
-    }
+  }
   docloddet->webkit_action= LOAD;
-  if (document_get_document_type(docloddet->document) == TAB_HELP) {
-      document_set_untitled(docloddet->document, FALSE);
-      document_set_content_type(docloddet->document, "text/plain");
+  if (type == TAB_HELP) {
+      g_object_set(docloddet->document, "untitled", FALSE, NULL);
       document_create_help(doclod);
-  } else if (document_get_document_type(docloddet->document)== TAB_PREVIEW) {
-    document_set_content_type(docloddet->document, "text/plain");
-    document_set_untitled(docloddet->document, FALSE);
+  } else if (type== TAB_PREVIEW) {
+    g_object_set(docloddet->document, "untitled", FALSE, NULL);
     tab_help_load_file(doclod);
   } else {
         /* TAB_FILE */ 
@@ -291,7 +291,7 @@ void document_loader_load_document(DocumentLoader *doclod)
           g_signal_emit (G_OBJECT (doclod), signals[DONE_LOADING], 0, FALSE); 
           return ;
         }
-        document_set_untitled(docloddet->document, FALSE);
+        g_object_set(docloddet->document, "untitled", FALSE, NULL);
         document_load_file(doclod);
   }
 }
@@ -347,7 +347,8 @@ void tab_file_opened (GObject *source_object, GAsyncResult *res, gpointer user_d
   gphpedit_debug_message (DEBUG_DOCUMENT,"Loaded %u bytes",size);
   gphpedit_debug_message (DEBUG_DOCUMENT,"BUFFER=\n%s\n-------------------------------------------", docloddet->buffer);
 
-  docloddet->converted_to_UTF8 = validate_and_convert_utf8_buffer(docloddet->buffer);
+  //converted_to_utf8
+  g_object_set(docloddet->document, "converted_to_utf8", validate_and_convert_utf8_buffer(docloddet->buffer), NULL);
   docloddet->file_contents_len = strlen(docloddet->buffer);
   if (docloddet->webkit_action==LOAD){
     g_signal_emit (G_OBJECT (doclod), signals[DONE_LOADING], 0, TRUE);
@@ -376,8 +377,8 @@ void document_load_file_helper(DocumentLoader *doclod, gint action)
     }
     return;
   }
-  document_set_readonly(docloddet->document, !g_file_info_get_attribute_boolean (info,"access::can-write"), FALSE);
-  document_set_content_type(docloddet->document, g_file_info_get_content_type (info));
+  g_object_set(docloddet->document, "read_only", !g_file_info_get_attribute_boolean (info,"access::can-write"), "can_modify", TRUE, NULL);
+  g_object_set(docloddet->document,"content_type", g_file_info_get_content_type (info),NULL);
   GIcon *icon= g_file_info_get_icon (info); /* get Gicon for mimetype*/
   GtkIconInfo *ificon= gtk_icon_theme_lookup_by_gicon (gtk_icon_theme_get_default (), icon, ICON_SIZE, 0);
   document_set_file_icon(docloddet->document, gtk_icon_info_load_icon (ificon, NULL));
@@ -414,7 +415,7 @@ void tab_help_opened (GObject *source_object, GAsyncResult *res, gpointer user_d
   gphpedit_debug_message (DEBUG_DOCUMENT,"Loaded %u bytes",size);
   gphpedit_debug_message (DEBUG_DOCUMENT,"BUFFER=\n%s\n-------------------------------------------", docloddet->buffer);
 
-  docloddet->converted_to_UTF8 = validate_and_convert_utf8_buffer(docloddet->buffer);
+  g_object_set(docloddet->document, "converted_to_utf8", validate_and_convert_utf8_buffer(docloddet->buffer), NULL);
   docloddet->file_contents_len = strlen(docloddet->buffer);
   if (docloddet->webkit_action==LOAD){
     g_signal_emit (G_OBJECT (doclod), signals[DONE_LOADING], 0, TRUE);
@@ -434,9 +435,7 @@ void tab_help_load_file(DocumentLoader *doclod)
   GError *error=NULL;
   info=g_file_query_info (docloddet->file,"standard::icon",0,NULL,&error);
   if (!info){
-    gchar *filename = document_get_filename(docloddet->document);
-    g_warning (_("Could not get file info for file %s. GIO error: %s \n"), filename,error->message);
-    g_free(filename);
+    g_warning ("%s\n", error->message);
     if (docloddet->webkit_action==LOAD){
     g_signal_emit (G_OBJECT (doclod), signals[DONE_LOADING], 0, FALSE);
     } else {
@@ -553,7 +552,9 @@ void document_loader_reload_file(DocumentLoader *doclod, Document *document)
 {
   DocumentLoaderDetails *docloddet = DOCUMENT_LOADER_GET_PRIVATE(doclod);
   docloddet->document = document;
-  if (document_get_document_type(docloddet->document)!=TAB_HELP && document_get_document_type(docloddet->document)!=TAB_PREVIEW){
+  gint type;
+  g_object_get(docloddet->document, "type", &type, NULL);
+  if (type!=TAB_HELP && type!=TAB_PREVIEW){
     document_load_file_helper(doclod, REFRESH);
   }
 }
@@ -566,7 +567,9 @@ void document_navigate_url(DocumentLoader *doclod, Document *document, gchar *ur
   docloddet->buffer = NULL;
   docloddet->webkit_action= NAVIGATE;
   GString *long_filename = NULL;
-  if (document_get_document_type(docloddet->document)==TAB_HELP){
+  gint type;
+  g_object_get(docloddet->document, "type", &type, NULL);
+  if (type==TAB_HELP){
     if (!g_str_has_prefix(uri, "file:")) {
       long_filename = tab_help_find_helpfile(uri);
     } else {
@@ -576,7 +579,7 @@ void document_navigate_url(DocumentLoader *doclod, Document *document, gchar *ur
   long_filename = g_string_new(uri);
   }
   if (!long_filename) {
-    if (document_get_document_type(docloddet->document)==TAB_HELP){
+    if (type==TAB_HELP){
     gphpedit_statusbar_flash_message (GPHPEDIT_STATUSBAR(main_window.appbar),0,"%s",_("Could not find the required command in the online help"));
     }
     g_signal_emit (G_OBJECT (doclod), signals[DONE_NAVIGATE], 0);
@@ -586,11 +589,6 @@ void document_navigate_url(DocumentLoader *doclod, Document *document, gchar *ur
     docloddet->file = get_gfile_from_filename(long_filename->str);
     tab_help_load_file(doclod);
   }
-}
-gboolean document_loader_get_UTF8_converted (DocumentLoader *doclod)
-{
-  DocumentLoaderDetails *docloddet = DOCUMENT_LOADER_GET_PRIVATE(doclod);
-  return docloddet->converted_to_UTF8;
 }
 
 gboolean document_loader_get_file_content_lenght (DocumentLoader *doclod)

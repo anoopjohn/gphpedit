@@ -772,7 +772,8 @@ void set_preferences_manager_show_maintoolbar(PreferencesManager *preferences_ma
   if (!OBJECT_IS_PREFERENCES_MANAGER (preferences_manager)) return ;
   PreferencesManagerDetails *prefdet;
   prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
-  prefdet->showmaintoolbar = newstate; 
+  prefdet->showmaintoolbar = newstate;
+  set_int("/gPHPEdit/defaults/showmaintoolbar", prefdet->showmaintoolbar);
 }
 
 void get_preferences_manager_window_size (PreferencesManager *preferences_manager, gint *width, gint *height)

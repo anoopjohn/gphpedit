@@ -233,8 +233,12 @@ void list_php_files_open (gpointer data, gpointer user_data){
 */
 void do_parse_file(ClassbrowserBackend *classback, Document *document){
     g_return_if_fail(document);
-    if (document_is_scintilla_based(document) && !document_get_untitled(document)) {
-    gphpedit_debug_message(DEBUG_CLASSBROWSER, "Parsing: %s\n",document_get_shortfilename(document));
+    gboolean untitled;
+    g_object_get(document, "untitled", &untitled, NULL);
+    if (document_is_scintilla_based(document) && !untitled){
+    const gchar *short_filename;
+    g_object_get(document, "short_filename", &short_filename, NULL);
+    gphpedit_debug_message(DEBUG_CLASSBROWSER, "Parsing: %s\n", short_filename);
     gchar *filename =document_get_filename(document);;
       if (is_php_file_from_filename(filename)) {
         classbrowser_parse_file(classback, filename); 

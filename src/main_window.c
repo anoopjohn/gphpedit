@@ -24,7 +24,7 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-#include <stdlib.h>
+
 #include "main_window.h"
 #include "debug.h"
 #include "tab.h"
@@ -292,7 +292,10 @@ void main_window_create(void){
 
 void update_controls(Document *document){
   gphpedit_debug(DEBUG_MAIN_WINDOW);
-  menubar_update_controls(MENUBAR(main_window.menu), document_is_scintilla_based(document), document_get_can_preview(document), document_get_readonly(document));
-  toolbar_update_controls(TOOLBAR(main_window.toolbar_main), document_is_scintilla_based(document), document_get_readonly(document));
-  toolbar_update_controls(TOOLBAR(main_window.toolbar_find), document_is_scintilla_based(document), document_get_readonly(document));
+  if (!document) return ;
+  gboolean read_only, can_modify, preview;
+  g_object_get(document, "read_only", &read_only, "can_modify", &can_modify, "can_preview", &preview, NULL);
+  menubar_update_controls(MENUBAR(main_window.menu), can_modify, preview, read_only);
+  toolbar_update_controls(TOOLBAR(main_window.toolbar_main), can_modify, read_only);
+  toolbar_update_controls(TOOLBAR(main_window.toolbar_find), can_modify, read_only);
 }

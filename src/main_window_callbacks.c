@@ -253,8 +253,12 @@ void on_open1_activate(GtkWidget *widget)
 
   //Add filters to the open dialog
   add_file_filters(GTK_FILE_CHOOSER(file_selection_box));
-  gchar *filename = (gchar *)document_get_filename(document_manager_get_current_document(main_window.docmg));
-  if (filename && !document_get_untitled(document_manager_get_current_document(main_window.docmg))) {
+  Document *document = document_manager_get_current_document(main_window.docmg);
+  gchar *filename = (gchar *)document_get_filename(document);
+  gboolean untitled;
+  g_object_get(document, "untitled", &untitled, NULL);
+
+  if (filename && !untitled) {
     folder = filename_parent_uri(filename);
     gphpedit_debug_message(DEBUG_MAIN_WINDOW,"folder: %s", folder);
     gtk_file_chooser_set_current_folder_uri(GTK_FILE_CHOOSER(file_selection_box),  folder);
@@ -275,11 +279,10 @@ void save_file_as_ok(GtkFileChooser *file_selection_box)
   gchar *uri=gtk_file_chooser_get_uri(file_selection_box);
   // Set the filename of the current document to be that
   Document *document = document_manager_get_current_document(main_window.docmg);
-  document_set_GFile(document, gtk_file_chooser_get_file(file_selection_box));
-  document_set_untitled(document, FALSE);
+  g_object_set(document, "GFile", gtk_file_chooser_get_file(file_selection_box), NULL);
   gchar *basename = filename_get_basename(uri);
   g_free(uri);
-  document_set_shortfilename(document, basename);
+  g_object_set(document, "untitled", FALSE,"short_filename", basename, NULL);
 
   // Call Save method to actually save it now it has a filename
   on_save1_activate(NULL);
@@ -289,12 +292,16 @@ void on_save1_activate(GtkWidget *widget)
 {
   Document *document = document_manager_get_current_document(main_window.docmg);
   if (document) {
+    gboolean untitled;
+    g_object_get(document, "untitled", &untitled, NULL);
     //if document is Untitled
-    if (document_get_untitled(document)) {
+    if (untitled) {
       on_save_as1_activate(widget);
     } else {
       /* show status in statusbar */
-      gphpedit_statusbar_flash_message (GPHPEDIT_STATUSBAR(main_window.appbar),0,_("Saving %s"), document_get_shortfilename(document));
+      const gchar *short_filename;
+      g_object_get(document, "short_filename", &short_filename, NULL);
+      gphpedit_statusbar_flash_message (GPHPEDIT_STATUSBAR(main_window.appbar),0,_("Saving %s"), short_filename);
       document_save(document);
     }
   }
@@ -322,7 +329,9 @@ void on_save_as1_activate(GtkWidget *widget)
   gtk_file_chooser_set_do_overwrite_confirmation (GTK_FILE_CHOOSER(file_selection_box), TRUE);
   gtk_dialog_set_default_response (GTK_DIALOG(file_selection_box), GTK_RESPONSE_ACCEPT);
 
-  if (!document_get_untitled(document)) {
+  gboolean untitled;
+  g_object_get(document, "untitled", &untitled, NULL);
+  if (!untitled) {
     filename = document_get_filename(document);
     gtk_file_chooser_set_uri(GTK_FILE_CHOOSER(file_selection_box), filename);
     g_free(filename);
@@ -339,16 +348,20 @@ void on_save_as1_activate(GtkWidget *widget)
 void on_reload1_activate(GtkWidget *widget)
 {
   Document *document = document_manager_get_current_document(main_window.docmg);
-  if (!document_get_saved_status(document)) {
+  gboolean saved;
+  g_object_get(document, "saved", &saved, NULL);
+  if (!saved) {
     gint result = yes_no_dialog (_("Question"), _("Are you sure you wish to reload the current file, losing your changes?"));
     if (result==GTK_RESPONSE_YES) {
-      gphpedit_statusbar_flash_message (GPHPEDIT_STATUSBAR(main_window.appbar),0,_("Opening %s"), 
-       document_get_shortfilename(document));
+      const gchar *short_filename;
+      g_object_get(document, "short_filename", &short_filename, NULL);
+      gphpedit_statusbar_flash_message (GPHPEDIT_STATUSBAR(main_window.appbar),0,_("Opening %s"), short_filename);
       document_reload(document);
     }
   } else {
-    gphpedit_statusbar_flash_message (GPHPEDIT_STATUSBAR(main_window.appbar),0,_("Opening %s"), 
-      document_get_shortfilename(document));
+    const gchar *short_filename;
+    g_object_get(document, "short_filename", &short_filename, NULL);
+    gphpedit_statusbar_flash_message (GPHPEDIT_STATUSBAR(main_window.appbar),0,_("Opening %s"), short_filename);
     document_reload(document);
   }
 }
@@ -368,9 +381,8 @@ void rename_file(GString *newfilename)
   gchar *filename = document_get_filename(document);
   if (filename_rename(filename, basename)){
   // Set the filename of the current document to be that
-  document_set_GFile(document, get_gfile_from_filename(newfilename->str));
-  document_set_untitled(document, FALSE);
-  document_set_shortfilename(document, basename);
+  g_object_set(document, "GFile", get_gfile_from_filename(newfilename->str), NULL);
+  g_object_set(document, "untitled", FALSE, "short_filename", basename, NULL);
   g_free(basename);
   // save as new filename
   on_save1_activate(NULL);
@@ -434,7 +446,13 @@ void set_active_tab(page_num)
 
 void update_zoom_level(void){
   gphpedit_debug(DEBUG_MAIN_WINDOW);
-  gphpedit_statusbar_set_zoom_level((GphpeditStatusbar *)main_window.appbar, document_get_zoom_level(document_manager_get_current_document(main_window.docmg)));
+  Document *doc = document_manager_get_current_document(main_window.docmg);
+  guint zoom_level;
+  if (doc)
+    g_object_get(document_manager_get_current_document(main_window.docmg), "zoom_level", &zoom_level, NULL);
+  else
+    zoom_level = 100;
+  gphpedit_statusbar_set_zoom_level((GphpeditStatusbar *)main_window.appbar, zoom_level);
 }
 
 /**
@@ -635,9 +653,11 @@ void on_about1_activate(GtkWidget *widget)
   gtk_widget_destroy(dialog);
 }
 void update_status_combobox(Document *document){
+      gint type = -1;
+      if (document) g_object_get(document, "type", &type, NULL);
       if (is_app_closing) return ;
       /* set statuscombo */
-      switch(document_get_document_type(document)) {
+      switch(type) {
         case(TAB_PHP):   
          set_status_combo_item (GPHPEDIT_STATUSBAR(main_window.appbar),_("PHP/HTML/XML"));          
          break;
@@ -842,36 +862,36 @@ void classbrowser_show_hide(GtkWidget *widget)
 
 void force_php(GtkWidget *widget)
 {
-    set_document_to_php(document_manager_get_current_document(main_window.docmg));
+    set_document_to_type(document_manager_get_current_document(main_window.docmg), TAB_PHP);
 }
 
 void force_css(GtkWidget *widget)
 {
-    set_document_to_css(document_manager_get_current_document(main_window.docmg));
+    set_document_to_type(document_manager_get_current_document(main_window.docmg), TAB_CSS);
 }
 
 void force_sql(GtkWidget *widget)
 {
-  set_document_to_sql(document_manager_get_current_document(main_window.docmg));
+  set_document_to_type(document_manager_get_current_document(main_window.docmg), TAB_SQL);
 }
 
 void force_cxx(GtkWidget *widget)
 {
-  set_document_to_cxx(document_manager_get_current_document(main_window.docmg));
+  set_document_to_type(document_manager_get_current_document(main_window.docmg), TAB_CXX);
 }
 
 void force_perl(GtkWidget *widget)
 {
-    set_document_to_perl(document_manager_get_current_document(main_window.docmg));
+    set_document_to_type(document_manager_get_current_document(main_window.docmg), TAB_PERL);
 }
 
 void force_cobol(GtkWidget *widget)
 {
-  set_document_to_cobol(document_manager_get_current_document(main_window.docmg));
+  set_document_to_type(document_manager_get_current_document(main_window.docmg), TAB_COBOL);
 }
 void force_python(GtkWidget *widget)
 {
-  set_document_to_python(document_manager_get_current_document(main_window.docmg));
+  set_document_to_type(document_manager_get_current_document(main_window.docmg), TAB_PYTHON);
 }
 
 //function to refresh treeview when the current tab changes 
