@@ -163,7 +163,10 @@ enum
   PROP_CONTENT_TYPE,
   PROP_SHORT_FILENAME,
   PROP_GFILE,
-  PROP_TYPE
+  PROP_TYPE,
+  PROP_LABEL,
+  PROP_FILE_ICON,
+  PROP_WIDGET
 };
 
 static void
@@ -207,6 +210,10 @@ document_set_property (GObject      *object,
       g_object_unref(docdet->file);
       docdet->file = g_value_dup_object (value);
       break;
+    case PROP_FILE_ICON:
+      if (docdet->file_icon) g_object_unref(docdet->file_icon);
+      docdet->file_icon = g_value_dup_object (value);
+      break;
 		default:
 			G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
 			break;
@@ -223,6 +230,7 @@ document_get_property (GObject    *object,
   
   gboolean temp;
   gint p;
+  GtkWidget *wid;
 	switch (prop_id)
 	{
 		case PROP_READ_ONLY:
@@ -289,6 +297,23 @@ document_get_property (GObject    *object,
       break;
     case PROP_GFILE:
       g_value_set_object (value, docdet->file);
+      break;
+    case PROP_LABEL:
+      g_value_set_object (value, docdet->label);
+      break;
+    case PROP_FILE_ICON:
+      g_value_set_object (value, docdet->file_icon);
+      break;
+    case PROP_WIDGET:
+      if (GTK_IS_SCINTILLA(docdet->scintilla)){
+        wid = docdet->container;
+      } else if (WEBKIT_IS_WEB_VIEW(docdet->help_view)){
+        wid = docdet->help_scrolled_window;
+      } else {
+        g_print("No document widget found\n");
+        wid = NULL;
+      }
+      g_value_set_object (value, wid);
       break;
 		default:
 			G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -408,6 +433,24 @@ document_class_init (DocumentClass *klass)
                               g_param_spec_object ("GFile",
                               NULL, NULL,
                               G_TYPE_FILE, G_PARAM_READWRITE));
+
+  g_object_class_install_property (object_class,
+                              PROP_LABEL,
+                              g_param_spec_object ("editor_label",
+                              NULL, NULL,
+                              GTK_TYPE_WIDGET, G_PARAM_READABLE));
+
+  g_object_class_install_property (object_class,
+                              PROP_FILE_ICON,
+                              g_param_spec_object ("file_icon",
+                              NULL, NULL,
+                              GDK_TYPE_PIXBUF, G_PARAM_READWRITE));
+
+  g_object_class_install_property (object_class,
+                              PROP_WIDGET,
+                              g_param_spec_object ("editor_widget",
+                              NULL, NULL,
+                              GTK_TYPE_WIDGET, G_PARAM_READABLE));
 
 	g_type_class_add_private (klass, sizeof (DocumentDetails));
 }
@@ -641,13 +684,7 @@ void document_done_loading_cb (DocumentLoader *doc, guint result, gpointer user_
       gtk_scintilla_clear_all(GTK_SCINTILLA (docdet->scintilla));
       gtk_scintilla_add_text(GTK_SCINTILLA (docdet->scintilla), document_loader_get_file_content_lenght (doc), document_loader_get_file_contents (doc));
       tab_reset_scintilla_after_open(GTK_SCINTILLA (docdet->scintilla), docdet->current_line);
-      tab_check_php_file(document); 
-      tab_check_css_file(document); 
-      tab_check_cxx_file(document); 
-      tab_check_perl_file(document); 
-      tab_check_cobol_file(document); 
-      tab_check_python_file(document); 
-      tab_check_sql_file(document);
+      tab_check_type_file(document);
       document_add_recent(document);
       }
     gtk_widget_show (docdet->container);
@@ -1652,42 +1689,10 @@ void document_set_mtime(Document *doc, GTimeVal value){
   docdet->file_mtime.tv_usec =value.tv_usec;
 }
 
-void document_set_file_icon(Document *doc, GdkPixbuf *value){
-  g_return_if_fail(doc);
-  DocumentDetails *docdet = DOCUMENT_GET_PRIVATE(doc);
-  docdet->file_icon=value;
-}
-
-GdkPixbuf *document_get_document_icon(Document *doc){
-  if (!doc) return NULL;
-  DocumentDetails *docdet = DOCUMENT_GET_PRIVATE(doc);
-  return docdet->file_icon;
-}
-
-GtkWidget *document_get_editor_label(Document *doc){
-  if (!doc) return NULL;
-  DocumentDetails *docdet = DOCUMENT_GET_PRIVATE(doc);
-  gtk_widget_show(docdet->label);
-  return docdet->label;
-}
-
 void document_refresh_properties(Document *doc){
   g_return_if_fail(doc);
   DocumentDetails *docdet = DOCUMENT_GET_PRIVATE(doc);
   tab_set_configured_scintilla_properties(GTK_SCINTILLA(docdet->scintilla));
-}
-
-GtkWidget *document_get_editor_widget(Document *doc){
-  if (!doc) return FALSE;
-  DocumentDetails *docdet = DOCUMENT_GET_PRIVATE(doc);
-  if (GTK_IS_SCINTILLA(docdet->scintilla)){
-    return docdet->container;
-  } else if (WEBKIT_IS_WEB_VIEW(docdet->help_view)){
-    return docdet->help_scrolled_window;
-  } else {
-    g_print("No document widget found\n");
-    return NULL;
-  }
 }
 
 void document_grab_focus(Document *doc){
@@ -1990,72 +1995,31 @@ GtkScintilla *document_get_scintilla(Document *document)
   return NULL;
 }
 
-void tab_check_php_file(Document *document)
-{
+void tab_check_type_file(Document *document) {
   if (!document) return;
-  gchar *content;
   gchar *filename = document_get_filename(document);
-  if (is_php_file_from_filename(filename)){
+
+  if (is_perl_file(filename)) {
+    set_document_to_type(document, TAB_PERL);
+  } else if (is_css_file(filename)) {
+    set_document_to_type(document, TAB_CSS);
+  } else if (is_cxx_file(filename)) {
+    set_document_to_type(document, TAB_CXX);
+  } else if (is_cobol_file(filename)) {
+    set_document_to_type(document, TAB_COBOL);
+  } else if (is_python_file(filename)) {
+    set_document_to_type(document, TAB_PYTHON);
+  } else if (is_sql_file(filename)) {
+    set_document_to_type(document, TAB_SQL);
+  } else if (is_php_file_from_filename(filename)){
     set_document_to_type(document, TAB_PHP);
   } else {
+    gchar *content;
     content = document_get_text(document);
     if (is_php_file_from_content(content)){
       set_document_to_type(document, TAB_PHP);
     }
     g_free(content);
-  }
-  g_free(filename);
-}
-
-void tab_check_css_file(Document *document)
-{
-  gchar *filename = document_get_filename(document);
-  if (is_css_file(filename)) {
-    set_document_to_type(document, TAB_CSS);
-  }
-  g_free(filename);
-}
-
-void tab_check_perl_file(Document *document)
-{
-  gchar *filename = document_get_filename(document);
-  if (is_perl_file(filename)) {
-    set_document_to_type(document, TAB_PERL);
-  }
-  g_free(filename);
-}
-
-void tab_check_cobol_file(Document *document)
-{
-  gchar *filename = document_get_filename(document);
-  if (is_cobol_file(filename)) {
-    set_document_to_type(document, TAB_COBOL);
-  }
-  g_free(filename);
-}
-void tab_check_python_file(Document *document)
-{
-  gchar *filename = document_get_filename(document);
-  if (is_python_file(filename)) {
-    set_document_to_type(document, TAB_PYTHON);
-  }
-  g_free(filename);
-}
-
-void tab_check_cxx_file(Document *document)
-{
-  gchar *filename = document_get_filename(document);
-  if (is_cxx_file(filename)) {
-    set_document_to_type(document, TAB_CXX);
-  }
-  g_free(filename);
-}
-
-void tab_check_sql_file(Document *document)
-{
-  gchar *filename = document_get_filename(document);
-  if (is_sql_file(filename)) {
-    set_document_to_type(document, TAB_SQL);
   }
   g_free(filename);
 }
@@ -2347,13 +2311,7 @@ void document_file_write (GObject *source_object, GAsyncResult *res, gpointer us
     g_object_unref(info);  
   }
   gchar *filename = document_get_filename(document);
-  tab_check_php_file(document); 
-  tab_check_css_file(document); 
-  tab_check_cxx_file(document); 
-  tab_check_perl_file(document); 
-  tab_check_cobol_file(document); 
-  tab_check_python_file(document); 
-  tab_check_sql_file(document); 
+  tab_check_type_file(document);
   register_file_opened(filename);
   g_free(filename);
 }
@@ -2622,13 +2580,7 @@ void document_done_refresh_cb (DocumentLoader *doclod, gboolean result, gpointer
       gtk_scintilla_add_text(GTK_SCINTILLA (docdet->scintilla), document_loader_get_file_content_lenght (doclod), document_loader_get_file_contents (doclod));
       }
     tab_reset_scintilla_after_open(GTK_SCINTILLA (docdet->scintilla), docdet->current_line);
-    tab_check_php_file(document); 
-    tab_check_css_file(document); 
-    tab_check_cxx_file(document); 
-    tab_check_perl_file(document); 
-    tab_check_cobol_file(document); 
-    tab_check_python_file(document); 
-    tab_check_sql_file(document); 
+    tab_check_type_file(document);
     gtk_scintilla_set_save_point(GTK_SCINTILLA(docdet->scintilla));
     }
     }

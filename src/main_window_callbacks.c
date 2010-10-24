@@ -469,14 +469,15 @@ void close_page(Document *document)
   gint page_num;
   gint page_num_closing;
   gint current_active_tab;
+  GtkWidget *document_widget;
 
-  page_num_closing = gtk_notebook_page_num(GTK_NOTEBOOK(main_window.notebook_editor), document_get_editor_widget(document));
+  g_object_get(document, "editor_widget", &document_widget, NULL);
+  page_num_closing = gtk_notebook_page_num(GTK_NOTEBOOK(main_window.notebook_editor), document_widget);
   current_active_tab = gtk_notebook_get_current_page(GTK_NOTEBOOK(main_window.notebook_editor));
   
   if (page_num_closing != current_active_tab) {
     page_num = current_active_tab;
-  }
-  else {
+  } else {
     // If there is a tab before the current one then set it as the active tab.
     page_num = page_num_closing - 1;
     // If the current tab is the 0th tab then set the current tab as 0 itself.

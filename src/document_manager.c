@@ -152,10 +152,13 @@ GtkWidget *get_close_tab_widget(Document *document) {
 
   g_signal_connect(G_OBJECT(close_button), "clicked", G_CALLBACK(on_tab_close_activate), document);
   /* load file icon */
-  GtkWidget *icon= gtk_image_new_from_pixbuf (document_get_document_icon(document));
+  GtkWidget *label;
+  GdkPixbuf *file_icon;
+  g_object_get(document, "editor_label", &label, "file_icon", &file_icon, NULL);
+  GtkWidget *icon= gtk_image_new_from_pixbuf (file_icon);
   gtk_widget_show (icon);
   gtk_box_pack_start(GTK_BOX(hbox), icon, FALSE, FALSE, 0);
-  gtk_box_pack_start(GTK_BOX(hbox), document_get_editor_label(document), FALSE, FALSE, 0);
+  gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 0);
   gtk_box_pack_end(GTK_BOX(hbox), close_button, FALSE, FALSE, 0);
   gtk_widget_show(close_button);
   gtk_widget_show(hbox);
@@ -172,14 +175,14 @@ void document_load_complete_cb (Document *doc, gboolean result, gpointer user_da
     docmgdet->editors = g_slist_append(docmgdet->editors, doc);
     GtkWidget *document_tab;
     document_tab = get_close_tab_widget(doc);
-    GtkWidget *document_widget = document_get_editor_widget(doc);
+    GtkWidget *document_widget;
+    g_object_get(doc, "untitled", &untitled, "editor_widget", &document_widget, NULL);
     gtk_widget_show(document_widget);
     gtk_notebook_append_page (GTK_NOTEBOOK (main_window.notebook_editor), document_widget, document_tab);
     gtk_notebook_set_current_page (GTK_NOTEBOOK (main_window.notebook_editor), -1);
     docmgdet->current_document = doc;
     document_grab_focus(doc);
     update_app_title(docmgdet->current_document);
-    g_object_get(doc, "untitled", &untitled, NULL);
     if (!untitled) document_manager_session_save(docmg);
     classbrowser_update(GPHPEDIT_CLASSBROWSER(main_window.classbrowser));
     }
@@ -220,12 +223,11 @@ Document *document_manager_find_document_from_widget (DocumentManager *docmg, vo
   DocumentManagerDetails *docmgdet = DOCUMENT_MANAGER_GET_PRIVATE(docmg);
   GSList *walk;
   Document *document;
-
+  GtkWidget *document_widget;
   for (walk = docmgdet->editors; walk != NULL; walk = g_slist_next (walk)) {
     document = walk->data;
-    if (document_get_editor_widget(document) == GTK_WIDGET(widget)) {
-      return walk->data;
-    }
+    g_object_get(document, "editor_widget", &document_widget, NULL);
+    if (document_widget == GTK_WIDGET(widget)) return walk->data;
   }
   return NULL;
 }
@@ -416,7 +418,9 @@ void document_manager_session_reopen(DocumentManager *docmg)
           }
         }
         if (focus_this_one && (docmgdet->current_document)) {
-            focus_tab = gtk_notebook_page_num(GTK_NOTEBOOK(main_window.notebook_editor), document_get_editor_widget(docmgdet->current_document));
+            GtkWidget *document_widget;
+            g_object_get(docmgdet->current_document, "editor_widget", &document_widget, NULL);
+            focus_tab = gtk_notebook_page_num(GTK_NOTEBOOK(main_window.notebook_editor), document_widget);
         }
         focus_this_one=FALSE;
         i++;    
@@ -463,7 +467,9 @@ void document_manager_switch_to_file_or_open(DocumentManager *docmg, gchar *file
     docfilename = g_file_get_uri(file);
     gchar *filename_uri = filename_get_uri(filename);
     if (g_strcmp0(docfilename, filename_uri)==0) {
-      gtk_notebook_set_current_page( GTK_NOTEBOOK(main_window.notebook_editor), gtk_notebook_page_num(GTK_NOTEBOOK(main_window.notebook_editor),document_get_editor_widget(document)));
+      GtkWidget *document_widget;
+      g_object_get(document, "editor_widget", &document_widget, NULL);
+      gtk_notebook_set_current_page( GTK_NOTEBOOK(main_window.notebook_editor), gtk_notebook_page_num(GTK_NOTEBOOK(main_window.notebook_editor),document_widget));
       docmgdet->current_document = document;
       document_goto_line(docmgdet->current_document, line_number);
       g_free(docfilename);
@@ -565,7 +571,9 @@ gboolean document_manager_can_all_tabs_be_saved(DocumentManager *docmg)
 
   for(walk = docmgdet->editors; walk!= NULL; walk = g_slist_next(walk)) {
     document = walk->data;
-    if (document_get_editor_widget(document)) {
+    GtkWidget *document_widget;
+    g_object_get(document, "editor_widget", &document_widget, NULL);
+    if (document_widget) {
       gboolean read_only, saved_status;
       g_object_get(document, "read_only", &read_only, "saved", &saved_status, NULL);
       if (!saved_status && !read_only) {
@@ -694,13 +702,7 @@ void document_manager_refresh_properties_all(DocumentManager *docmg)
   for (walk = docmgdet->editors; walk!=NULL; walk = g_slist_next(walk)) {
     Document *document = walk->data;
     document_refresh_properties(document);
-    tab_check_php_file(document);
-    tab_check_css_file(document);
-    tab_check_cxx_file(document);
-    tab_check_perl_file(document);
-    tab_check_cobol_file(document);
-    tab_check_python_file(document);
-    tab_check_sql_file(document);
+    tab_check_type_file(document);
     g_object_get(document, "type", &type, NULL);
     if (type==TAB_FILE) set_document_to_type(document, type);
   }

@@ -251,8 +251,7 @@ void document_loader_load_document(DocumentLoader *doclod)
   g_object_get(docloddet->document, "type", &type, NULL);
 
   if (!docloddet->file){
-    g_object_set(docloddet->document, "untitled", TRUE, NULL);
-    document_set_file_icon(docloddet->document, gtk_icon_theme_load_icon (gtk_icon_theme_get_default (), "text-plain", ICON_SIZE, 0, NULL));
+    g_object_set(docloddet->document, "untitled", TRUE, "file_icon", gtk_icon_theme_load_icon (gtk_icon_theme_get_default (), "text-plain", ICON_SIZE, 0, NULL) ,NULL);
     g_signal_emit (G_OBJECT (doclod), signals[DONE_LOADING], 0, TRUE); 
     return ;
   }
@@ -271,8 +270,8 @@ void document_loader_load_document(DocumentLoader *doclod)
       g_signal_emit (G_OBJECT (doclod), signals[DONE_LOADING], 0, FALSE); 
       return;
     } else {
-      document_set_file_icon(docloddet->document, gtk_icon_theme_load_icon (gtk_icon_theme_get_default (), "text-plain", ICON_SIZE, 0, NULL));       
-      g_object_set(docloddet->document, "untitled", FALSE, "read_only", FALSE, "can_modify", TRUE ,NULL);
+      g_object_set(docloddet->document, "untitled", FALSE, "read_only", FALSE, "can_modify", TRUE, "file_icon", 
+        gtk_icon_theme_load_icon (gtk_icon_theme_get_default (), "text-plain", ICON_SIZE, 0, NULL) ,NULL);
       g_free(filename);        
       g_signal_emit (G_OBJECT (doclod), signals[DONE_LOADING], 0, TRUE); 
       return;
@@ -381,7 +380,7 @@ void document_load_file_helper(DocumentLoader *doclod, gint action)
   g_object_set(docloddet->document,"content_type", g_file_info_get_content_type (info),NULL);
   GIcon *icon= g_file_info_get_icon (info); /* get Gicon for mimetype*/
   GtkIconInfo *ificon= gtk_icon_theme_lookup_by_gicon (gtk_icon_theme_get_default (), icon, ICON_SIZE, 0);
-  document_set_file_icon(docloddet->document, gtk_icon_info_load_icon (ificon, NULL));
+  g_object_set(docloddet->document, "file_icon",gtk_icon_info_load_icon (ificon, NULL), NULL); 
   GTimeVal file_mtime;
   g_file_info_get_modification_time (info,&file_mtime);
   document_set_mtime(docloddet->document, file_mtime);
@@ -445,7 +444,7 @@ void tab_help_load_file(DocumentLoader *doclod)
   }
   GIcon *icon= g_file_info_get_icon (info); /* get Gicon for mimetype*/
   GtkIconInfo *ificon= gtk_icon_theme_lookup_by_gicon (gtk_icon_theme_get_default (), icon, ICON_SIZE, 0);
-  document_set_file_icon(docloddet->document, gtk_icon_info_load_icon (ificon, NULL));
+  g_object_set(docloddet->document, "file_icon", gtk_icon_info_load_icon (ificon, NULL), NULL);
   g_object_unref(info);
 
   /* Open file*/
