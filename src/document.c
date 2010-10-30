@@ -34,7 +34,6 @@
 
 #include "debug.h"
 #include "document.h"
-#include "document_loader.h"
 #include "main_window.h"
 #include "main_window_callbacks.h"
 #include "gvfs_utils.h"
@@ -56,8 +55,9 @@
 /* object signal enumeration */
 enum {
 	LOAD_COMPLETE,
-  SAVE_UPDATE,
+	SAVE_UPDATE,
 	TYPE_CHANGED,
+	NEED_RELOAD,
 	LAST_SIGNAL
 };
 
@@ -69,7 +69,6 @@ static guint signals[LAST_SIGNAL];
 struct DocumentDetails
 {
 	gint type;
-  DocumentLoader *load;
 	GtkWidget *scintilla;
 	GtkWidget *help_scrolled_window;
 	WebKitWebView *help_view;
@@ -116,8 +115,6 @@ typedef struct
 					    DocumentDetails))
 
 static void document_dispose (GObject *gobject);
-static void document_create_new(Document *doc, gchar *filename, gint goto_line);
-void document_done_navigate_cb (DocumentLoader *doclod, gboolean result, gpointer user_data);
 static void char_added(GtkWidget *scintilla, guint ch, gpointer user_data);
 void process_drag_uri(GtkWidget *scintilla, gpointer data);
 static void notify_title_cb (WebKitWebView* web_view, GParamSpec* pspec, Document *document);
@@ -140,9 +137,10 @@ void fold_changed(GtkWidget *scintilla, int line,int levelNow,int levelPrev);
 void handle_modified(GtkWidget *scintilla, gint pos,gint mtype,gchar *text,gint len, gint added,gint line,gint foldNow,gint foldPrev);
 void macro_record (GtkWidget *scintilla, gint message, gulong wparam, glong lparam, gpointer user_data);
 void process_user_list_selection (GtkWidget *w, gint type, gchar *text, gpointer user_data);
-void document_done_refresh_cb (DocumentLoader *doclod, gboolean result, gpointer user_data);
 void scintilla_modified (GtkWidget *w);
 void document_add_recent(Document *document);
+static void document_create_webkit(Document *doc, gboolean is_help, const gchar *raw_uri);
+void document_create_scintilla (Document *document, gchar *contents, gsize size);
 
 /*
  * register Document type and returns a new GType
@@ -207,7 +205,7 @@ document_set_property (GObject      *object,
 			docdet->short_filename = g_value_dup_string (value);
       break;
     case PROP_GFILE:
-      g_object_unref(docdet->file);
+      if(docdet->file) g_object_unref(docdet->file);
       docdet->file = g_value_dup_object (value);
       break;
     case PROP_FILE_ICON:
@@ -339,6 +337,7 @@ document_class_init (DocumentClass *klass)
 		              NULL, NULL,
 		               g_cclosure_marshal_VOID__BOOLEAN,
 		               G_TYPE_NONE, 1, G_TYPE_BOOLEAN, NULL);
+
 	signals[SAVE_UPDATE] =
 		g_signal_new ("save_update",
 		              G_TYPE_FROM_CLASS (object_class),
@@ -357,12 +356,21 @@ document_class_init (DocumentClass *klass)
 		               g_cclosure_marshal_VOID__INT,
 		               G_TYPE_NONE, 1, G_TYPE_INT, NULL);
 
+	signals[NEED_RELOAD] =
+		g_signal_new ("need_reload",
+		              G_TYPE_FROM_CLASS (object_class),
+		              G_SIGNAL_RUN_LAST,
+		              G_STRUCT_OFFSET (DocumentClass, save_update),
+		              NULL, NULL,
+		               g_cclosure_marshal_VOID__VOID,
+		               G_TYPE_NONE, 0);
+
   /*DOCUMENT PROPERTIES*/
   g_object_class_install_property (object_class,
                               PROP_UNTITLED,
                               g_param_spec_boolean ("untitled",
                               NULL, NULL,
-                              TRUE, G_PARAM_READWRITE));
+                              TRUE, G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
 
   /* READ_ONLY PROPERTY:
   * When a document can't be saved. default value FALSE.
@@ -384,7 +392,7 @@ document_class_init (DocumentClass *klass)
                               PROP_CONVERTED_TO_UTF8,
                               g_param_spec_boolean ("converted_to_utf8",
                               NULL, NULL,
-                              FALSE, G_PARAM_READWRITE));
+                              FALSE, G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
 
   g_object_class_install_property (object_class,
                               PROP_IS_EMPTY,
@@ -432,7 +440,7 @@ document_class_init (DocumentClass *klass)
                               PROP_GFILE,
                               g_param_spec_object ("GFile",
                               NULL, NULL,
-                              G_TYPE_FILE, G_PARAM_READWRITE));
+                              G_TYPE_FILE, G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
 
   g_object_class_install_property (object_class,
                               PROP_LABEL,
@@ -471,7 +479,6 @@ static void document_dispose (GObject *object)
   DocumentDetails *docdet;
 	docdet = DOCUMENT_GET_PRIVATE(doc);
   /* free object resources*/
-  if (docdet->load) g_object_unref(docdet->load);
 	if (docdet->help_function) g_free(docdet->help_function);
 	if (docdet->short_filename) g_free(docdet->short_filename);
 	if (docdet->file) g_object_unref(docdet->file);
@@ -481,11 +488,21 @@ static void document_dispose (GObject *object)
   G_OBJECT_CLASS (document_parent_class)->dispose (object);
 }
 
-Document *document_new (gint type, const gchar *filename, gint goto_line)
+Document *document_scintilla_new (gint type, GFile *file, gint goto_line, gchar *contents, gsize size, gboolean untitled)
 {
 	Document *doc;
-  doc = g_object_new (DOCUMENT_TYPE, "type", type, NULL);
-  document_create_new(doc, (gchar *) filename, goto_line);
+  doc = g_object_new (DOCUMENT_TYPE, "type", type, "GFile", file, "untitled", untitled, NULL);
+  document_create_scintilla (doc, contents, size);
+
+	return doc; /* return new object */
+}
+
+Document *document_webkit_new (gint type, GFile *file, gchar *raw_uri)
+{
+	Document *doc;
+  doc = g_object_new (DOCUMENT_TYPE, "type", type, "untitled", FALSE, "GFile", file, NULL);
+  document_create_webkit(doc, type==TAB_HELP, raw_uri);
+
 	return doc; /* return new object */
 }
 
@@ -536,8 +553,7 @@ void tab_reset_scintilla_after_open(GtkScintilla *scintilla, guint current_line)
   gtk_scintilla_set_undo_collection(scintilla, TRUE);
 }
 
-
-static void document_create_webkit(Document *doc, const gchar *buffer, gboolean is_help, const gchar *raw_uri)
+static void document_create_webkit(Document *doc, gboolean is_help, const gchar *raw_uri)
 {
   DocumentDetails *docdet = DOCUMENT_GET_PRIVATE(doc);
   GString *caption=NULL;
@@ -557,9 +573,8 @@ static void document_create_webkit(Document *doc, const gchar *buffer, gboolean 
   docdet->short_filename = g_strdup(caption->str);
   docdet->label = gtk_label_new (caption->str);
   gtk_widget_show (docdet->label);
-  g_object_set(doc, "GFile", get_gfile_from_filename( (gchar *)raw_uri), NULL);
 
-  webkit_web_view_load_string (WEBKIT_WEB_VIEW(docdet->help_view), buffer, "text/html", "UTF-8", raw_uri);
+  webkit_web_view_load_uri (WEBKIT_WEB_VIEW(docdet->help_view), filename);
 
   gphpedit_debug_message (DEBUG_DOCUMENT, "WEBKIT FILE: %s\n", caption->str);
 
@@ -575,10 +590,7 @@ static void document_create_webkit(Document *doc, const gchar *buffer, gboolean 
 void process_external (GtkInfoBar *info_bar, gint response_id, Document *document)
 {
   if (response_id!=GTK_RESPONSE_CANCEL){
-    gchar *filename = document_get_filename(document);
-    gphpedit_statusbar_flash_message (GPHPEDIT_STATUSBAR(main_window.appbar),0,_("Opening %s"), filename); 
-    g_free(filename);
-    document_reload(document);
+    g_signal_emit (G_OBJECT (document), signals[NEED_RELOAD], 0);
   } else { 
     document_update_modified_mark(document); /*set current time*/
   }
@@ -651,91 +663,46 @@ static void create_infobar(Document *doc){
   gtk_box_pack_start(GTK_BOX(docdet->container), docdet->infobar, FALSE, FALSE, 0);
 }
 
-void create_new_document(Document *doc){
+void create_new_document(Document *doc) {
   DocumentDetails *docdet = DOCUMENT_GET_PRIVATE(doc);
   docdet->container = gtk_vbox_new (FALSE, 0);
   create_infobar(doc);
   docdet->scintilla = gtk_scintilla_new();
   gtk_box_pack_end(GTK_BOX(docdet->container), docdet->scintilla, TRUE, TRUE, 0);
   tab_set_general_scintilla_properties(doc);
-  docdet->label = gtk_label_new (_("Untitled"));
-  gtk_widget_show (docdet->label);
   if (docdet->is_untitled){
     docdet->short_filename = g_strdup(_("Untitled"));
   } else {
     docdet->short_filename = g_file_get_basename (docdet->file);
   }
+  docdet->label = gtk_label_new (docdet->short_filename);
+  gtk_widget_show (docdet->label);
   gtk_widget_show (docdet->scintilla);
 }
 
-void document_done_loading_cb (DocumentLoader *doc, guint result, gpointer user_data){
-  gphpedit_debug (DEBUG_DOCUMENT);
-
-  Document *document = document_loader_get_document(doc);
-  DocumentDetails *docdet = DOCUMENT_GET_PRIVATE(document);
-  if (result!=FALSE){
-    if (docdet->type==TAB_FILE){
-      if (document_loader_get_file_content_lenght (doc)==0){
-      create_new_document(document);
-      set_document_to_type(document, docdet->type);
-      } else {
-      create_new_document(document);
-      // Clear scintilla buffer
-      gtk_scintilla_clear_all(GTK_SCINTILLA (docdet->scintilla));
-      gtk_scintilla_add_text(GTK_SCINTILLA (docdet->scintilla), document_loader_get_file_content_lenght (doc), document_loader_get_file_contents (doc));
-      tab_reset_scintilla_after_open(GTK_SCINTILLA (docdet->scintilla), docdet->current_line);
-      tab_check_type_file(document);
-      document_add_recent(document);
-      }
-    gtk_widget_show (docdet->container);
-    gtk_scintilla_set_save_point(GTK_SCINTILLA(docdet->scintilla));
-    tab_set_event_handlers(document);
-    gtk_scintilla_goto_pos(GTK_SCINTILLA(docdet->scintilla), 0);
-    } else if (docdet->type == TAB_HELP) {
-      document_create_webkit(document, document_loader_get_file_contents (doc), TRUE, document_loader_get_raw_uri (doc));
-    } else if (docdet->type == TAB_PREVIEW) {
-      document_create_webkit(document, document_loader_get_file_contents (doc), FALSE, NULL);
-    }
-    }
-  g_signal_emit (G_OBJECT (document), signals[LOAD_COMPLETE], 0, result);
-}
-
-static void document_create_new(Document *doc, gchar *filename, gint goto_line)
+void document_create_scintilla (Document *document, gchar *contents, gsize size)
 {
-  gphpedit_debug_message (DEBUG_DOCUMENT, "filename:%s", filename?filename:"null");
-  DocumentDetails *docdet;
-	docdet = DOCUMENT_GET_PRIVATE(doc);
-  g_print("type es %d\n", docdet->type);
-  docdet->file = NULL;
-  docdet->current_line = goto_line;
-  gchar *abs_path = NULL;
-  gchar *cwd;
-  if (filename != NULL) {
-    if (strstr(filename, ":")==NULL && !g_str_has_prefix (filename, "file://")) {
-      cwd = g_get_current_dir();
-      abs_path = get_absolute_from_relative(filename, cwd);
-      g_free(cwd);
-    } else {
-      abs_path = g_strdup(filename);
-    }
-    docdet->file= get_gfile_from_filename(abs_path);
-    g_free(abs_path);
-  }
-  if (docdet->type==TAB_HELP) docdet->help_function= g_strdup(filename);
-  docdet->load = document_loader_new (doc, GTK_WINDOW(main_window.window));
-  g_signal_connect(G_OBJECT(docdet->load), "done_loading", G_CALLBACK(document_done_loading_cb), NULL);
-  g_signal_connect(G_OBJECT(docdet->load), "done_navigate", G_CALLBACK(document_done_navigate_cb), doc);
-  g_signal_connect(G_OBJECT(docdet->load), "done_refresh", G_CALLBACK(document_done_refresh_cb), NULL);
-}
-
-void document_load(Document *document) {
   gphpedit_debug (DEBUG_DOCUMENT);
-  g_return_if_fail(document);
   DocumentDetails *docdet = DOCUMENT_GET_PRIVATE(document);
-  document_loader_load_document(docdet->load);
+
+  create_new_document(document);
+  set_document_to_type(document, docdet->type);
+  if (size > 0)
+  {
+    // Clear scintilla buffer
+    gtk_scintilla_clear_all(GTK_SCINTILLA (docdet->scintilla));
+    gtk_scintilla_add_text(GTK_SCINTILLA (docdet->scintilla), size, contents);
+    tab_reset_scintilla_after_open(GTK_SCINTILLA (docdet->scintilla), docdet->current_line);
+    tab_check_type_file(document);
+    document_add_recent(document);
+   }
+   gtk_widget_show (docdet->container);
+   gtk_scintilla_set_save_point(GTK_SCINTILLA(docdet->scintilla));
+   tab_set_event_handlers(document);
+   gtk_scintilla_goto_pos(GTK_SCINTILLA(docdet->scintilla), 0);
 }
 
-static void register_autoc_images(GtkScintilla *sci){
+void register_autoc_images(GtkScintilla *sci){
   gtk_scintilla_register_image(sci, 1, (const gchar *) function_xpm);
   gtk_scintilla_register_image(sci, 2, (const gchar *) bullet_blue_xpm);
   gtk_scintilla_register_image(sci, 3, (const gchar *) variable_xpm);
@@ -837,7 +804,7 @@ static void save_point_reached(GtkWidget *scintilla, gpointer user_data)
   if (docdet->short_filename != NULL) {
     gtk_label_set_text(GTK_LABEL (docdet->label), docdet->short_filename);
     /*emit save update signal*/
-    g_signal_emit (G_OBJECT (doc), signals[SAVE_UPDATE], 0); 
+    g_signal_emit (G_OBJECT (doc), signals[SAVE_UPDATE], 0);
   }
 }
 
@@ -1381,28 +1348,12 @@ static void notify_title_cb (WebKitWebView* web_view, GParamSpec* pspec, Documen
    } else {
      docdet->short_filename = g_strconcat(_("Preview: "), main_title, NULL);
    }
-#ifdef PHP_DOC_DIR
-//   if (docdet->help_function) g_free(docdet->help_function);
-//     docdet->help_function = main_title;
-#endif
      gtk_label_set_text(GTK_LABEL(docdet->label), docdet->short_filename);
      g_signal_emit (G_OBJECT (document), signals[SAVE_UPDATE], 0);  /* emito señal */
      g_free(main_title);
    }
 }
 
-void document_done_navigate_cb (DocumentLoader *doclod, gboolean result, gpointer user_data){
-  if (result){
-   DocumentDetails *docdet = DOCUMENT_GET_PRIVATE(user_data);
-      docdet->help_function = document_get_filename(DOCUMENT(user_data));
-      if (docdet->type==TAB_HELP){
-        docdet->short_filename = g_strdup_printf("%s%s",_("Help: "), docdet->help_function);
-      } else {
-        docdet->short_filename = g_strdup_printf("%s%s",_("Preview: "), docdet->help_function);
-      }
-      webkit_web_view_load_string (WEBKIT_WEB_VIEW(docdet->help_view), document_loader_get_file_contents (doclod), "text/html", "UTF-8", document_loader_get_raw_uri (doclod));
-    }
-}
 /*
 */
 gboolean webkit_link_clicked (WebKitWebView *web_view, WebKitWebFrame *frame, WebKitNetworkRequest *request,
@@ -1410,27 +1361,12 @@ gboolean webkit_link_clicked (WebKitWebView *web_view, WebKitWebFrame *frame, We
                                                         WebKitWebPolicyDecision   *policy_decision,
                                                         Document *document)
 {
-  DocumentDetails *docdet = DOCUMENT_GET_PRIVATE(document);
-  if (webkit_web_navigation_action_get_reason (navigation_action) !=WEBKIT_WEB_NAVIGATION_REASON_LINK_CLICKED) return FALSE;
-  gchar *uri= (gchar *)webkit_network_request_get_uri(request);
-  if (uri){
-    //if it's a direction like filename.html#refpoint skips refpoint part
-    uri=trunc_on_char(uri, '#');
-    if (docdet->type!=TAB_HELP){ 
-      if (g_str_has_suffix(uri,".htm")) return TRUE;
-    } else {
-      gchar *filename = document_get_filename(document);
-      gchar *parent = filename_parent_uri(filename);
-      g_free(filename);
-      gchar *nav_uri = get_absolute_from_relative(uri, parent);
-      g_free(parent);
-      document_navigate_url(docdet->load, document, nav_uri);
-      g_free(nav_uri);
-    }
-    }
+  if (webkit_web_navigation_action_get_reason (navigation_action) != WEBKIT_WEB_NAVIGATION_REASON_LINK_CLICKED) return FALSE;
+  webkit_web_view_load_request (web_view, request);
   return TRUE;
 }
-static void tab_set_folding(Document *document, gint folding)
+
+ void tab_set_folding(Document *document, gint folding)
 {
   if (folding) {
     DocumentDetails *docdet = DOCUMENT_GET_PRIVATE(document);
@@ -1639,6 +1575,8 @@ void set_document_to_type(Document *document, gint type)
           tab_set_folding(document, TRUE);
           break;
         case TAB_CXX:
+          tab_cxx_set_lexer(document);
+          tab_set_folding(document, TRUE);
           break;
         case TAB_PYTHON:
           tab_python_set_lexer(document);
@@ -2569,21 +2507,18 @@ void document_add_text(Document *document, const gchar *text)
   }
 }
 
-void document_done_refresh_cb (DocumentLoader *doclod, gboolean result, gpointer user_data){
-  Document *document = document_loader_get_document(doclod);
+void document_replace_text (Document *document, gchar *new_text)
+{
   DocumentDetails *docdet = DOCUMENT_GET_PRIVATE(document);
-  if (result!=FALSE){
-    if (docdet->type==TAB_FILE){
-      if (document_loader_get_file_content_lenght (doclod)!=0){
-      // Clear scintilla buffer
-      gtk_scintilla_clear_all(GTK_SCINTILLA (docdet->scintilla));
-      gtk_scintilla_add_text(GTK_SCINTILLA (docdet->scintilla), document_loader_get_file_content_lenght (doclod), document_loader_get_file_contents (doclod));
-      }
-    tab_reset_scintilla_after_open(GTK_SCINTILLA (docdet->scintilla), docdet->current_line);
-    tab_check_type_file(document);
-    gtk_scintilla_set_save_point(GTK_SCINTILLA(docdet->scintilla));
-    }
-    }
+  gsize size = strlen(new_text);
+  if (size!=0){
+    // Clear scintilla buffer
+    gtk_scintilla_clear_all(GTK_SCINTILLA (docdet->scintilla));
+    gtk_scintilla_add_text(GTK_SCINTILLA (docdet->scintilla), size, new_text);
+  }
+  tab_reset_scintilla_after_open(GTK_SCINTILLA (docdet->scintilla), 0);
+  tab_check_type_file(document);
+  gtk_scintilla_set_save_point(GTK_SCINTILLA(docdet->scintilla));
 }
 
 void document_reload(Document *document)
@@ -2591,11 +2526,10 @@ void document_reload(Document *document)
   gphpedit_debug (DEBUG_DOCUMENT);
   g_return_if_fail(document);
   DocumentDetails *docdet = DOCUMENT_GET_PRIVATE(document);
-  if (GTK_IS_SCINTILLA(docdet->scintilla)){
-    docdet->type = TAB_FILE;
-    document_loader_reload_file(docdet->load, document);
-  } else if (WEBKIT_IS_WEB_VIEW(docdet->help_view)){
+  if (WEBKIT_IS_WEB_VIEW(docdet->help_view)){
     webkit_web_view_reload (docdet->help_view);
+  } else {
+    g_signal_emit (G_OBJECT (document), signals[NEED_RELOAD], 0);
   }
 }
 

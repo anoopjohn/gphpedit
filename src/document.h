@@ -75,7 +75,8 @@ TAB_PREVIEW
 
 /* Basic GObject requirements. */
 GType document_get_type (void);
-Document *document_new (gint type, const gchar *filename, gint goto_line);
+Document *document_scintilla_new (gint type, GFile *file, gint goto_line, gchar *contents, gsize size, gboolean untitled);
+Document *document_webkit_new (gint type, GFile *file, gchar *raw_uri);
 void document_load(Document *document);
 void document_save(Document *doc);
 void document_reload(Document *document);
@@ -127,6 +128,7 @@ gchar *document_get_current_word(Document *doc);
 gint document_get_current_position(Document *doc);
 void document_show_calltip_at_current_pos(Document *document);
 void document_add_text(Document *document, const gchar *text);
+void document_replace_text (Document *document, gchar *new_text);
 void document_force_autocomplete(Document *document);
 void document_insert_template(Document *document, gchar *template);
 void document_incremental_search(Document *document, gchar *current_text, gboolean advancing);

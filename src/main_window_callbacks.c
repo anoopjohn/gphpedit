@@ -347,23 +347,7 @@ void on_save_as1_activate(GtkWidget *widget)
 }
 void on_reload1_activate(GtkWidget *widget)
 {
-  Document *document = document_manager_get_current_document(main_window.docmg);
-  gboolean saved;
-  g_object_get(document, "saved", &saved, NULL);
-  if (!saved) {
-    gint result = yes_no_dialog (_("Question"), _("Are you sure you wish to reload the current file, losing your changes?"));
-    if (result==GTK_RESPONSE_YES) {
-      const gchar *short_filename;
-      g_object_get(document, "short_filename", &short_filename, NULL);
-      gphpedit_statusbar_flash_message (GPHPEDIT_STATUSBAR(main_window.appbar),0,_("Opening %s"), short_filename);
-      document_reload(document);
-    }
-  } else {
-    const gchar *short_filename;
-    g_object_get(document, "short_filename", &short_filename, NULL);
-    gphpedit_statusbar_flash_message (GPHPEDIT_STATUSBAR(main_window.appbar),0,_("Opening %s"), short_filename);
-    document_reload(document);
-  }
+  document_manager_document_reload(main_window.docmg);
 }
 
 void on_tab_close_activate(GtkWidget *widget, Document *document)

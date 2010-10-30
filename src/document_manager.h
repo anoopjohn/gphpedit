@@ -2,7 +2,7 @@
 
    Copyright (C) 2003, 2004, 2005 Andy Jeffries <andy at gphpedit.org>
    Copyright (C) 2009 Anoop John <anoop dot john at zyxware.com>
-   Copyright (C) 2009 José Rostagno (for vijona.com.ar) 
+   Copyright (C) 2009, 2010 José Rostagno (for vijona.com.ar) 
 
    For more information or to find the latest release, visit our 
    website at http://www.gphpedit.org/
@@ -60,6 +60,7 @@ GType document_manager_get_type (void);
 DocumentManager *document_manager_new (void);
 DocumentManager *document_manager_new_full (char **argv, gint argc);
 void document_manager_add_new_document(DocumentManager *docmg, gint type, const gchar *filename, gint goto_line);
+void document_manager_document_reload(DocumentManager *docmg);
 Document *document_manager_find_document_from_widget (DocumentManager *docmg, void *widget);
 Document *document_manager_find_document_from_filename (DocumentManager *docmg, gchar *filename);
 Document *document_manager_get_current_document (DocumentManager *docmg);
