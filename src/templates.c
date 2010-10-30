@@ -139,7 +139,7 @@ static void template_db_save(TemplatesManagerDetails *tempmgdet)
       
   g_hash_table_foreach(tempmgdet->templates, template_save_entry, file_contents);
   if (file_contents){
-    GFile *file=get_gfile_from_filename(template_filename->str);
+    GFile *file=g_file_new_for_commandline_arg(template_filename->str);
     GError *error=NULL;
     if(!g_file_replace_contents (file, file_contents->str, file_contents->len,NULL,FALSE,G_FILE_CREATE_NONE,NULL,NULL,&error)){
       g_print(_("CANNOT Create templates file:: %s\n"), error->message);
@@ -205,7 +205,7 @@ static gboolean template_db_create(gchar *filename)
   contents = g_string_append(contents,"switch\tswitch(|) {\\n\\tcase ():;break;\\n\\tcase ():;break;\\n}\n#");
   contents = g_string_append(contents,"while\twhile (|)\\n{\\n\\t\\n}\n#");
   contents = g_string_append(contents,"declare\tdeclare(|);\n#");
-  GFile *file =get_gfile_from_filename(filename);
+  GFile *file =g_file_new_for_commandline_arg(filename);
   if(!g_file_replace_contents (file,contents->str,contents->len,NULL,FALSE,G_FILE_CREATE_NONE,NULL,NULL,&error)){
     g_error_free (error);
     result=FALSE;

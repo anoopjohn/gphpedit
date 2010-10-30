@@ -560,7 +560,7 @@ static void force_config_folder(void)
   GFile *config;
   gchar *uri=g_strdup_printf("%s/%s",g_get_home_dir(),".gphpedit");
   if (!filename_file_exist(uri)){
-    config=get_gfile_from_filename (uri);
+    config=g_file_new_for_commandline_arg (uri);
     if (!g_file_make_directory (config, NULL, &error)){
       if (error->code !=G_IO_ERROR_EXISTS){
         g_print(_("Unable to create ~/.gphpedit/ (%d) %s"), error->code, error->message);

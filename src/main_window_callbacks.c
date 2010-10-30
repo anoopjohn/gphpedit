@@ -365,7 +365,7 @@ void rename_file(GString *newfilename)
   gchar *filename = document_get_filename(document);
   if (filename_rename(filename, basename)){
   // Set the filename of the current document to be that
-  g_object_set(document, "GFile", get_gfile_from_filename(newfilename->str), NULL);
+  g_object_set(document, "GFile", g_file_new_for_commandline_arg(newfilename->str), NULL);
   g_object_set(document, "untitled", FALSE, "short_filename", basename, NULL);
   g_free(basename);
   // save as new filename
@@ -381,7 +381,7 @@ void rename_file_ok(GtkFileChooser *file_selection)
   gchar *fileuri=gtk_file_chooser_get_uri(file_selection);
   filename = g_string_new(fileuri);
   g_free(fileuri);
-  GFile *file = get_gfile_from_filename(filename->str);
+  GFile *file = g_file_new_for_commandline_arg(filename->str);
   if (g_file_query_exists (file,NULL)) {
     gint result = yes_no_dialog (_("gPHPEdit"), _("This file already exists, are you sure you want to overwrite it?"));
     if (result==GTK_RESPONSE_YES) {

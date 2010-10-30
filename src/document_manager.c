@@ -341,7 +341,7 @@ void document_manager_session_save(DocumentManager *docmg)
   session_file = g_string_new(g_get_home_dir());
   session_file = g_string_append(session_file, "/.gphpedit/session");
   
-  GFile *file=get_gfile_from_filename(session_file->str);
+  GFile *file = g_file_new_for_commandline_arg(session_file->str);
   g_string_free(session_file,TRUE);
   GError *error=NULL;
 
@@ -406,8 +406,9 @@ void document_manager_session_reopen(DocumentManager *docmg)
   gboolean focus_this_one = FALSE;
   session_file = g_string_new( g_get_home_dir());
   session_file = g_string_append(session_file, "/.gphpedit/session");
+  GFile *file = g_file_new_for_commandline_arg(session_file->str);
 
-  if (filename_file_exist(session_file->str)){
+  if(g_file_query_exists(file,NULL)){
     int number =0;
     gchar *content=read_text_file_sync(session_file->str);
     gchar **strings;
@@ -463,7 +464,6 @@ void document_manager_session_reopen(DocumentManager *docmg)
     document_manager_add_new_document(docmg, TAB_FILE, NULL, 0);
   }
 
-  GFile *file=get_gfile_from_filename(session_file->str);
   GError *error=NULL;
   if (!g_file_delete (file,NULL,&error)){
       if (error->code!=G_FILE_ERROR_NOENT && error->code!=1){

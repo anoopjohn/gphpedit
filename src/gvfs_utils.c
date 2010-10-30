@@ -6,20 +6,10 @@
 
 void unquote(char *s);
 
-GFile *get_gfile_from_filename(gchar *filename){
-  GFile *file;
-  if (strstr(filename, "://") != NULL) {
-    file=g_file_new_for_uri (filename);
-  } else {
-    file=g_file_new_for_path (filename);  
-  }
-  return file;
-}
-
 gboolean filename_file_exist(gchar *filename)
 {
   if (!filename) return FALSE;
-  GFile *file= get_gfile_from_filename(filename);
+  GFile *file= g_file_new_for_commandline_arg(filename);
   gboolean hr= g_file_query_exists (file,NULL);
   g_object_unref(file);
   return hr;
@@ -30,7 +20,7 @@ gboolean filename_file_exist(gchar *filename)
 */
 gchar *filename_parent_uri(gchar *filename){
     if (!filename) return NULL;
-    GFile *file= get_gfile_from_filename(filename);
+    GFile *file= g_file_new_for_commandline_arg(filename);
     if (!g_file_query_exists (file,NULL)){
      g_object_unref(file);
      return NULL;
@@ -46,8 +36,8 @@ gchar *filename_parent_uri(gchar *filename){
 */
 gchar *filename_get_relative_path(gchar *filename){
   if (!filename || strlen(filename)==0) return g_strdup(".");
-  GFile *file= get_gfile_from_filename(filename);
-  GFile *home= get_gfile_from_filename((gchar *) g_get_home_dir());
+  GFile *file= g_file_new_for_commandline_arg(filename);
+  GFile *home= g_file_new_for_commandline_arg((gchar *) g_get_home_dir());
   gchar *rel =g_file_get_relative_path (home,file);
   g_object_unref(file);
   g_object_unref(home);
@@ -75,7 +65,7 @@ gchar *filename_get_scaped_path(gchar *filename){
 * return a gchar with the basename of the Gfile
 */
 gchar *filename_get_basename (gchar *filename){
-    GFile *file= get_gfile_from_filename(filename);
+    GFile *file= g_file_new_for_commandline_arg(filename);
     gchar *basename= g_file_get_basename (file);
     g_object_unref(file);
     return basename;
@@ -88,7 +78,7 @@ gchar *filename_get_basename (gchar *filename){
 */
 gchar *filename_get_uri(gchar *filename){
     if (!filename) return NULL;
-    GFile *file= get_gfile_from_filename(filename);
+    GFile *file= g_file_new_for_commandline_arg(filename);
     if (!g_file_query_exists (file,NULL)) return NULL;
     gchar *file_uri= g_file_get_uri (file);
     g_object_unref(file);
@@ -100,7 +90,7 @@ gchar *filename_get_uri(gchar *filename){
 */
 gchar *filename_get_path(gchar *filename){
     if (!filename) return NULL;
-    GFile *file= get_gfile_from_filename(filename);
+    GFile *file= g_file_new_for_commandline_arg(filename);
     gchar *file_path= g_file_get_path (file);
     g_object_unref(file);
     return file_path;
@@ -116,7 +106,7 @@ gchar *read_text_file_sync( gchar *filename )
   gchar *buffer=NULL;
   gsize nchars;
 
-  file=get_gfile_from_filename(filename);
+  file=g_file_new_for_commandline_arg(filename);
   if (!g_file_load_contents (file,NULL,&buffer, &nchars,NULL,&error)){
       g_print(_("Error reading file sync '%s'. GIO error:%s\n"),filename,error->message);
     }
@@ -161,7 +151,7 @@ gboolean GFile_get_modified(GFile *file,GTimeVal *act, gboolean update_mark){
 gboolean get_file_modified(gchar *filename,GTimeVal *act, gboolean update_mark){
   GFile *file;
   if (!filename) return FALSE;
-  file= get_gfile_from_filename (filename);
+  file= g_file_new_for_commandline_arg (filename);
   gboolean hr=GFile_get_modified(file, act, update_mark);
   g_object_unref(file);
   return hr;
@@ -178,7 +168,7 @@ gboolean GFile_is_local_or_http(GFile *file){
 gboolean filename_is_local_or_http(gchar *filename){
   GFile *file;
   if (!filename) return TRUE;
-  file= get_gfile_from_filename (filename);
+  file= g_file_new_for_commandline_arg (filename);
   gboolean result= GFile_is_local_or_http(file);
   g_object_unref(file);
   return result;
@@ -203,7 +193,7 @@ gchar *filename_get_display_name(gchar *filename)
   if (!filename) return NULL;
   GFile *fi;
   GError *error=NULL;
-  fi=get_gfile_from_filename(filename);
+  fi=g_file_new_for_commandline_arg(filename);
   GFileInfo *info= g_file_query_info (fi, "standard::display-name",G_FILE_QUERY_INFO_NOFOLLOW_SYMLINKS, NULL,&error);
   if (!info){
     g_print(_("Error renaming file. GIO Error:%s\n"),error->message);
@@ -221,7 +211,7 @@ gboolean filename_rename(gchar *filename, gchar *new_name)
   gboolean result=FALSE;
   if (!filename || !new_name) return result;
   GError *error=NULL;
-  GFile *fi= get_gfile_from_filename(filename);
+  GFile *fi= g_file_new_for_commandline_arg(filename);
   fi=g_file_set_display_name (fi,new_name,NULL,&error);
   if (error){
     g_print(_("Error renaming file. GIO Error:%s\n"),error->message);
@@ -236,7 +226,7 @@ gboolean filename_delete_file(gchar *filename)
 {
   GFile *fi;
   GError *error=NULL;
-  fi=get_gfile_from_filename(filename);
+  fi=g_file_new_for_commandline_arg(filename);
   if (!g_file_trash (fi,NULL,&error)){
     if (error->code == G_IO_ERROR_NOT_SUPPORTED){
       if (!g_file_delete (fi,NULL,&error)){
@@ -263,9 +253,9 @@ gchar *get_absolute_from_relative(gchar *path, gchar *base){
   if (!path) return NULL;
   GFile *parent=NULL;
   if (!base){
-    parent= get_gfile_from_filename((gchar *) g_get_home_dir());
+    parent= g_file_new_for_commandline_arg((gchar *) g_get_home_dir());
   }else{
-    parent= get_gfile_from_filename (base);
+    parent= g_file_new_for_commandline_arg (base);
   }
   GFile *result= g_file_resolve_relative_path (parent,path);
   gchar *file_uri= g_file_get_uri (result);
