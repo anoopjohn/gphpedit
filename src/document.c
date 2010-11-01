@@ -34,6 +34,7 @@
 
 #include "debug.h"
 #include "document.h"
+#include "document_saver.h"
 #include "main_window.h"
 #include "main_window_callbacks.h"
 #include "gvfs_utils.h"
@@ -88,8 +89,6 @@ struct DocumentDetails
 	guint current_line;
   gchar *contenttype;
 
-  gchar *write_buffer; /*needed for save buffer*/  
-
   /* external modified check widget */
   GtkWidget *container;
   GtkWidget *infobar;
@@ -101,6 +100,8 @@ struct DocumentDetails
   /*completion stuff*/
   guint completion_timer_id;
   gboolean completion_timer_set;
+
+  DocumentSaver *saver;
 };
 
 typedef struct
@@ -141,7 +142,7 @@ void scintilla_modified (GtkWidget *w);
 void document_add_recent(Document *document);
 static void document_create_webkit(Document *doc, gboolean is_help, const gchar *raw_uri);
 void document_create_scintilla (Document *document, gchar *contents, gsize size);
-
+void document_saver_done_saving_cb (DocumentSaver *docsav, Document *document, gpointer user_data);
 /*
  * register Document type and returns a new GType
 */
@@ -466,8 +467,10 @@ document_class_init (DocumentClass *klass)
 static void
 document_init (Document * object)
 {
-//	DocumentDetails *docdet;
-//	docdet = DOCUMENT_GET_PRIVATE(object);
+	DocumentDetails *docdet;
+	docdet = DOCUMENT_GET_PRIVATE(object);
+  docdet->saver = document_saver_new ();
+  g_signal_connect(G_OBJECT(docdet->saver), "done_saving", G_CALLBACK(document_saver_done_saving_cb), NULL);
 }
 
 /*
@@ -484,6 +487,7 @@ static void document_dispose (GObject *object)
 	if (docdet->file) g_object_unref(docdet->file);
 	if (docdet->file_icon) g_object_unref(docdet->file_icon);
   if (docdet->contenttype) g_free(docdet->contenttype);
+  g_object_unref(docdet->saver);
   /* Chain up to the parent class */
   G_OBJECT_CLASS (document_parent_class)->dispose (object);
 }
@@ -2225,31 +2229,12 @@ void document_update_modified_mark(Document *doc)
   g_get_current_time (&docdet->file_mtime); /*set current time*/
 }
 
-void document_file_write (GObject *source_object, GAsyncResult *res, gpointer user_data)
+void document_saver_done_saving_cb (DocumentSaver *docsav, Document *document, gpointer user_data)
 {
-  Document *document = DOCUMENT(user_data);
   DocumentDetails *docdet = DOCUMENT_GET_PRIVATE(document);
-  GError *error=NULL;
-  if(!g_file_replace_contents_finish ((GFile *)source_object,res,NULL,&error)){
-    g_print(_("GIO Error: %s saving file:%s\n"),error->message,docdet->short_filename);
-    g_free(docdet->write_buffer);
-    g_error_free(error);
-    return;
-  }
-  g_free(docdet->write_buffer);
   gtk_scintilla_set_save_point (GTK_SCINTILLA(docdet->scintilla));
-  GFileInfo *info;
-  info= g_file_query_info ((GFile *)source_object,"time::modified,time::modified-usec",G_FILE_QUERY_INFO_NONE, NULL,&error);
-  if (!info){
-    g_warning (_("Could not get the file modification time for file: '%s'. GIO error: %s \n"), docdet->short_filename,error->message);
-    g_get_current_time (&docdet->file_mtime); /*set current time*/
-  } else {
-  /* update modification time */  
-    g_file_info_get_modification_time (info,&docdet->file_mtime);
-    g_object_unref(info);  
-  }
-  gchar *filename = document_get_filename(document);
   tab_check_type_file(document);
+  gchar *filename = document_get_filename(document);
   register_file_opened(filename);
   g_free(filename);
 }
@@ -2260,26 +2245,7 @@ void document_save(Document *doc)
   g_return_if_fail(doc);
   DocumentDetails *docdet = DOCUMENT_GET_PRIVATE(doc);
   if (GTK_IS_SCINTILLA(docdet->scintilla)){
-  GError *error = NULL;
-  gchar *converted_text = NULL;
-  gsize utf8_size;
-  docdet->write_buffer = document_get_text(doc);
-  g_return_if_fail(docdet->write_buffer);
-  gsize text_length = strlen(docdet->write_buffer);
-  // If we converted to UTF-8 when loading, convert back to the locale to save
-  if (docdet->converted_to_utf8) {
-    converted_text = g_locale_from_utf8(docdet->write_buffer, text_length, NULL, &utf8_size, &error);
-    if (error != NULL) {
-      g_print(_("UTF-8 Error: %s\n"), error->message);
-      g_error_free(error);      
-    } else {
-      gphpedit_debug_message (DEBUG_DOCUMENT,"Converted size: %d\n", utf8_size);
-      g_free(docdet->write_buffer);
-      docdet->write_buffer = converted_text;
-      text_length = utf8_size;
-    }
-  }
-  g_file_replace_contents_async (docdet->file,docdet->write_buffer,text_length,NULL,FALSE,G_FILE_CREATE_NONE,NULL,document_file_write,doc);
+  document_saver_save_document(docdet->saver, doc);
   }
 }
 
