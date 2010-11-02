@@ -298,10 +298,6 @@ void on_save1_activate(GtkWidget *widget)
     if (untitled) {
       on_save_as1_activate(widget);
     } else {
-      /* show status in statusbar */
-      const gchar *short_filename;
-      g_object_get(document, "short_filename", &short_filename, NULL);
-      gphpedit_statusbar_flash_message (GPHPEDIT_STATUSBAR(main_window.appbar),0,_("Saving %s"), short_filename);
       document_save(document);
     }
   }

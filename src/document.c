@@ -55,8 +55,9 @@
 
 /* object signal enumeration */
 enum {
-	LOAD_COMPLETE,
-	SAVE_UPDATE,
+  LOAD_COMPLETE,
+  SAVE_UPDATE,
+  SAVE_START,
 	TYPE_CHANGED,
 	NEED_RELOAD,
 	LAST_SIGNAL
@@ -341,6 +342,15 @@ document_class_init (DocumentClass *klass)
 
 	signals[SAVE_UPDATE] =
 		g_signal_new ("save_update",
+		              G_TYPE_FROM_CLASS (object_class),
+		              G_SIGNAL_RUN_LAST,
+		              G_STRUCT_OFFSET (DocumentClass, save_update),
+		              NULL, NULL,
+		               g_cclosure_marshal_VOID__VOID,
+		               G_TYPE_NONE, 0);
+
+	signals[SAVE_START] =
+		g_signal_new ("save_start",
 		              G_TYPE_FROM_CLASS (object_class),
 		              G_SIGNAL_RUN_LAST,
 		              G_STRUCT_OFFSET (DocumentClass, save_update),
@@ -1353,7 +1363,7 @@ static void notify_title_cb (WebKitWebView* web_view, GParamSpec* pspec, Documen
      docdet->short_filename = g_strconcat(_("Preview: "), main_title, NULL);
    }
      gtk_label_set_text(GTK_LABEL(docdet->label), docdet->short_filename);
-     g_signal_emit (G_OBJECT (document), signals[SAVE_UPDATE], 0);  /* emito señal */
+     g_signal_emit (G_OBJECT (document), signals[SAVE_UPDATE], 0);
      g_free(main_title);
    }
 }
@@ -1604,7 +1614,7 @@ void set_document_to_type(Document *document, gint type)
         default:
           break;
       }
-      g_signal_emit (G_OBJECT (document), signals[TYPE_CHANGED], 0, type);  /* emito señal */
+      g_signal_emit (G_OBJECT (document), signals[TYPE_CHANGED], 0, type);
     }
   }
 }
@@ -2245,6 +2255,7 @@ void document_save(Document *doc)
   g_return_if_fail(doc);
   DocumentDetails *docdet = DOCUMENT_GET_PRIVATE(doc);
   if (GTK_IS_SCINTILLA(docdet->scintilla)){
+  g_signal_emit (G_OBJECT (doc), signals[SAVE_START], 0);
   document_saver_save_document(docdet->saver, doc);
   }
 }

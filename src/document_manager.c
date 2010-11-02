@@ -175,6 +175,13 @@ void document_save_update_cb (Document *doc, gpointer user_data){
   classbrowser_update(GPHPEDIT_CLASSBROWSER(main_window.classbrowser));
 }
 
+void document_save_start_cb (Document *doc, gpointer user_data){
+  /* show status in statusbar */
+  const gchar *short_filename;
+  g_object_get(doc, "short_filename", &short_filename, NULL);
+  gphpedit_statusbar_flash_message (GPHPEDIT_STATUSBAR(main_window.appbar),0,_("Saving %s"), short_filename);
+}
+
 void document_type_changed_cb (Document *doc, gint type, gpointer user_data)
 {
 	DocumentManager *docmg = DOCUMENT_MANAGER(user_data);
@@ -211,6 +218,7 @@ void document_loader_done_loading_cb (DocumentLoader *doclod, gboolean result, D
     if (!untitled) document_manager_session_save(docmg);
     classbrowser_update(GPHPEDIT_CLASSBROWSER(main_window.classbrowser));
     g_signal_connect(G_OBJECT(doc), "save_update", G_CALLBACK(document_save_update_cb), docmg);
+    g_signal_connect(G_OBJECT(doc), "save_start", G_CALLBACK(document_save_start_cb), NULL);
     g_signal_connect(G_OBJECT(doc), "type_changed", G_CALLBACK(document_type_changed_cb), docmg);
     g_signal_connect(G_OBJECT(doc), "need_reload", G_CALLBACK(document_need_reload_cb), docmg);
   }
