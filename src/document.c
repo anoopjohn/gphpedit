@@ -2260,6 +2260,20 @@ void document_save(Document *doc)
   }
 }
 
+void document_save_as(Document *doc, GFile *file)
+{
+  gphpedit_debug (DEBUG_DOCUMENT);
+  g_return_if_fail(doc);
+  DocumentDetails *docdet = DOCUMENT_GET_PRIVATE(doc);
+  if (GTK_IS_SCINTILLA(docdet->scintilla)){
+  g_object_set(doc, "GFile", file, NULL);
+  gchar *basename = g_file_get_basename (file);
+  g_object_set(doc, "untitled", FALSE, "short_filename", basename, NULL);
+  /* Call Save method to actually save it now it has a filename */
+  document_save(doc);
+  }
+}
+
 char *macro_message_to_string(gint message)
 {
   switch (message) {

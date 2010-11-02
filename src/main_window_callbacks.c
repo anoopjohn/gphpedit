@@ -276,16 +276,8 @@ void on_open1_activate(GtkWidget *widget)
 
 void save_file_as_ok(GtkFileChooser *file_selection_box)
 {
-  gchar *uri=gtk_file_chooser_get_uri(file_selection_box);
-  // Set the filename of the current document to be that
   Document *document = document_manager_get_current_document(main_window.docmg);
-  g_object_set(document, "GFile", gtk_file_chooser_get_file(file_selection_box), NULL);
-  gchar *basename = filename_get_basename(uri);
-  g_free(uri);
-  g_object_set(document, "untitled", FALSE,"short_filename", basename, NULL);
-
-  // Call Save method to actually save it now it has a filename
-  on_save1_activate(NULL);
+  document_save_as(document, gtk_file_chooser_get_file(file_selection_box));
 }
 
 void on_save1_activate(GtkWidget *widget)

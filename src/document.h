@@ -79,6 +79,7 @@ Document *document_scintilla_new (gint type, GFile *file, gint goto_line, gchar 
 Document *document_webkit_new (gint type, GFile *file, gchar *raw_uri);
 void document_load(Document *document);
 void document_save(Document *doc);
+void document_save_as(Document *doc, GFile *file);
 void document_reload(Document *document);
 void document_refresh_properties(Document *doc);
 gchar *document_get_filename(Document *doc) G_GNUC_WARN_UNUSED_RESULT G_GNUC_MALLOC;
