@@ -462,17 +462,6 @@ void close_page(Document *document)
   gtk_notebook_remove_page(GTK_NOTEBOOK(main_window.notebook_editor), page_num_closing);
 }
 
-/**
- * get_window_icon
- * returns a pixbuf with gphpedit icon
- * @return GdkPixbuf
- */
-
-GdkPixbuf *get_window_icon (void){
-  GdkPixbuf *pixbuf = gdk_pixbuf_new_from_file (GPHPEDIT_PIXMAP_FULL_PATH, NULL);
-  return pixbuf;
-}
-
 void on_close1_activate(GtkWidget *widget)
 {
   document_manager_try_close_current_document(main_window.docmg);
@@ -582,7 +571,7 @@ void on_about1_activate(GtkWidget *widget)
   const gchar *authors[] = {
                 "Current Maintainers",
                 "Anoop John <anoop.john@zyxware.com>",
-                "Jose Rostagno <rostagnojose@yahoo.com>",
+                "Jose Rostagno <joserostagno@vijona.com.ar>",
                 "",
                 "Original Developer",
                 "Andy Jeffries <andy@gphpedit.org>",
@@ -595,36 +584,33 @@ void on_about1_activate(GtkWidget *widget)
                };
   gchar *translator_credits = _("translator_credits");
   const gchar *documenters[] = {NULL};
-  GtkWidget *dialog = NULL;
-  dialog=gtk_about_dialog_new();
-  gtk_about_dialog_set_program_name(GTK_ABOUT_DIALOG(dialog), PACKAGE_NAME);
-  gtk_about_dialog_set_version(GTK_ABOUT_DIALOG(dialog), VERSION);
-  gtk_about_dialog_set_copyright(GTK_ABOUT_DIALOG(dialog),
+  GtkWidget *dialog = gtk_about_dialog_new();
+  GtkAboutDialog *about = GTK_ABOUT_DIALOG(dialog);
+  gtk_about_dialog_set_program_name(about, PACKAGE_NAME);
+  gtk_about_dialog_set_version(about, VERSION);
+  gtk_about_dialog_set_copyright(about,
       _("Copyright \xc2\xa9 2003-2006 Andy Jeffries, 2009-2010 Anoop John"));
-  gtk_about_dialog_set_comments(GTK_ABOUT_DIALOG(dialog),
+  gtk_about_dialog_set_comments(about,
      _("gPHPEdit is a GNOME2 editor specialised for editing PHP "
                "scripts and related files (HTML/CSS/JS)."));
   #ifdef PACKAGE_URL
-    gtk_about_dialog_set_website(GTK_ABOUT_DIALOG(dialog),PACKAGE_URL);
+    gtk_about_dialog_set_website(about,PACKAGE_URL);
   #endif
-  GdkPixbuf *logo = NULL;
-  logo=get_window_icon ();
-  gtk_about_dialog_set_logo(GTK_ABOUT_DIALOG(dialog),logo);
-  if (logo != NULL) {
-  g_object_unref (logo);
-  }
-  gtk_about_dialog_set_authors(GTK_ABOUT_DIALOG(dialog),(const gchar **) authors);
-  gtk_about_dialog_set_translator_credits(GTK_ABOUT_DIALOG(dialog),translator_credits);
-  gtk_about_dialog_set_documenters (GTK_ABOUT_DIALOG(dialog),(const gchar **) documenters);
+
+  gtk_about_dialog_set_logo_icon_name (about, "gphpedit");
+  gtk_about_dialog_set_authors(about,(const gchar **) authors);
+  gtk_about_dialog_set_translator_credits(about,translator_credits);
+  gtk_about_dialog_set_documenters (about,(const gchar **) documenters);
   /* 
      http://library.gnome.org/devel/gtk/stable/GtkWindow.html#gtk-window-set-transient-for
      Dialog windows should be set transient for the main application window they were spawned from. 
      This allows window managers  to e.g. keep the dialog on top of the main window, or center the dialog over the main window.
   */
-  gtk_window_set_transient_for (GTK_WINDOW(dialog),GTK_WINDOW(main_window.window));
+  gtk_window_set_transient_for (GTK_WINDOW(dialog), GTK_WINDOW(main_window.window));
   gtk_dialog_run(GTK_DIALOG (dialog));
   gtk_widget_destroy(dialog);
 }
+
 void update_status_combobox(Document *document)
 {
       if (is_app_closing) return ;
