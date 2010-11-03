@@ -153,7 +153,10 @@ void add_file_filters(GtkFileChooser *chooser){
   caption = g_string_new(_("PHP files ("));
   gchar **php_file_extensions;
   gint i;
-  php_file_extensions = g_strsplit(get_preferences_manager_php_file_extensions(main_window.prefmg),",",-1);
+  const gchar *php_extensions;
+  g_object_get(main_window.prefmg, "php_file_extensions", &php_extensions, NULL);
+
+  php_file_extensions = g_strsplit(php_extensions, ",", -1);
 
   for (i = 0; php_file_extensions[i] != NULL; i++) {
     //make file pattern
@@ -250,14 +253,18 @@ void on_open1_activate(GtkWidget *widget)
 
   //Add filters to the open dialog
   add_file_filters(GTK_FILE_CHOOSER(file_selection_box));
-  gchar *filename = (gchar *)document_get_filename(document_manager_get_current_document(main_window.docmg));
-  if (filename && !document_get_untitled(document_manager_get_current_document(main_window.docmg))) {
+  Document *document = document_manager_get_current_document(main_window.docmg);
+  gchar *filename = (gchar *)document_get_filename(document);
+  gboolean untitled;
+  g_object_get(document, "untitled", &untitled, NULL);
+
+  if (filename && !untitled) {
     folder = filename_parent_uri(filename);
     gphpedit_debug_message(DEBUG_MAIN_WINDOW,"folder: %s", folder);
     gtk_file_chooser_set_current_folder_uri(GTK_FILE_CHOOSER(file_selection_box),  folder);
     g_free(folder);
   } else {
-    last_opened_folder = get_preferences_manager_last_opened_folder(main_window.prefmg);
+    g_object_get (main_window.prefmg, "last_opened_folder", &last_opened_folder, NULL);
     gphpedit_debug_message(DEBUG_MAIN_WINDOW,"last_opened_folder: %s", last_opened_folder);
     gtk_file_chooser_set_current_folder_uri(GTK_FILE_CHOOSER(file_selection_box), last_opened_folder);
   }
@@ -269,29 +276,20 @@ void on_open1_activate(GtkWidget *widget)
 
 void save_file_as_ok(GtkFileChooser *file_selection_box)
 {
-  gchar *uri=gtk_file_chooser_get_uri(file_selection_box);
-  // Set the filename of the current document to be that
   Document *document = document_manager_get_current_document(main_window.docmg);
-  document_set_GFile(document, gtk_file_chooser_get_file(file_selection_box));
-  document_set_untitled(document, FALSE);
-  gchar *basename = filename_get_basename(uri);
-  g_free(uri);
-  document_set_shortfilename(document, basename);
-
-  // Call Save method to actually save it now it has a filename
-  on_save1_activate(NULL);
+  document_save_as(document, gtk_file_chooser_get_file(file_selection_box));
 }
 
 void on_save1_activate(GtkWidget *widget)
 {
   Document *document = document_manager_get_current_document(main_window.docmg);
   if (document) {
+    gboolean untitled;
+    g_object_get(document, "untitled", &untitled, NULL);
     //if document is Untitled
-    if (document_get_untitled(document)) {
+    if (untitled) {
       on_save_as1_activate(widget);
     } else {
-      /* show status in statusbar */
-      gphpedit_statusbar_flash_message (GPHPEDIT_STATUSBAR(main_window.appbar),0,_("Saving %s"), document_get_shortfilename(document));
       document_save(document);
     }
   }
@@ -319,12 +317,14 @@ void on_save_as1_activate(GtkWidget *widget)
   gtk_file_chooser_set_do_overwrite_confirmation (GTK_FILE_CHOOSER(file_selection_box), TRUE);
   gtk_dialog_set_default_response (GTK_DIALOG(file_selection_box), GTK_RESPONSE_ACCEPT);
 
-  if (!document_get_untitled(document)) {
+  gboolean untitled;
+  g_object_get(document, "untitled", &untitled, NULL);
+  if (!untitled) {
     filename = document_get_filename(document);
     gtk_file_chooser_set_uri(GTK_FILE_CHOOSER(file_selection_box), filename);
     g_free(filename);
   } else {
-    last_opened_folder = get_preferences_manager_last_opened_folder(main_window.prefmg);
+    g_object_get (main_window.prefmg, "last_opened_folder", &last_opened_folder, NULL);
     gphpedit_debug_message(DEBUG_MAIN_WINDOW, "Setting current_folder_uri to %s", last_opened_folder);
     gtk_file_chooser_set_current_folder_uri(GTK_FILE_CHOOSER(file_selection_box), last_opened_folder);
   }
@@ -335,19 +335,7 @@ void on_save_as1_activate(GtkWidget *widget)
 }
 void on_reload1_activate(GtkWidget *widget)
 {
-  Document *document = document_manager_get_current_document(main_window.docmg);
-  if (!document_get_saved_status(document)) {
-    gint result = yes_no_dialog (_("Question"), _("Are you sure you wish to reload the current file, losing your changes?"));
-    if (result==GTK_RESPONSE_YES) {
-      gphpedit_statusbar_flash_message (GPHPEDIT_STATUSBAR(main_window.appbar),0,_("Opening %s"), 
-       document_get_shortfilename(document));
-      document_reload(document);
-    }
-  } else {
-    gphpedit_statusbar_flash_message (GPHPEDIT_STATUSBAR(main_window.appbar),0,_("Opening %s"), 
-      document_get_shortfilename(document));
-    document_reload(document);
-  }
+  document_manager_document_reload(main_window.docmg);
 }
 
 void on_tab_close_activate(GtkWidget *widget, Document *document)
@@ -365,9 +353,8 @@ void rename_file(GString *newfilename)
   gchar *filename = document_get_filename(document);
   if (filename_rename(filename, basename)){
   // Set the filename of the current document to be that
-  document_set_GFile(document, get_gfile_from_filename(newfilename->str));
-  document_set_untitled(document, FALSE);
-  document_set_shortfilename(document, basename);
+  g_object_set(document, "GFile", g_file_new_for_commandline_arg(newfilename->str), NULL);
+  g_object_set(document, "untitled", FALSE, "short_filename", basename, NULL);
   g_free(basename);
   // save as new filename
   on_save1_activate(NULL);
@@ -382,7 +369,7 @@ void rename_file_ok(GtkFileChooser *file_selection)
   gchar *fileuri=gtk_file_chooser_get_uri(file_selection);
   filename = g_string_new(fileuri);
   g_free(fileuri);
-  GFile *file = get_gfile_from_filename(filename->str);
+  GFile *file = g_file_new_for_commandline_arg(filename->str);
   if (g_file_query_exists (file,NULL)) {
     gint result = yes_no_dialog (_("gPHPEdit"), _("This file already exists, are you sure you want to overwrite it?"));
     if (result==GTK_RESPONSE_YES) {
@@ -431,7 +418,13 @@ void set_active_tab(page_num)
 
 void update_zoom_level(void){
   gphpedit_debug(DEBUG_MAIN_WINDOW);
-  gphpedit_statusbar_set_zoom_level((GphpeditStatusbar *)main_window.appbar, document_get_zoom_level(document_manager_get_current_document(main_window.docmg)));
+  Document *doc = document_manager_get_current_document(main_window.docmg);
+  guint zoom_level;
+  if (doc)
+    g_object_get(document_manager_get_current_document(main_window.docmg), "zoom_level", &zoom_level, NULL);
+  else
+    zoom_level = 100;
+  gphpedit_statusbar_set_zoom_level((GphpeditStatusbar *)main_window.appbar, zoom_level);
 }
 
 /**
@@ -448,14 +441,15 @@ void close_page(Document *document)
   gint page_num;
   gint page_num_closing;
   gint current_active_tab;
+  GtkWidget *document_widget;
 
-  page_num_closing = gtk_notebook_page_num(GTK_NOTEBOOK(main_window.notebook_editor), document_get_editor_widget(document));
+  g_object_get(document, "editor_widget", &document_widget, NULL);
+  page_num_closing = gtk_notebook_page_num(GTK_NOTEBOOK(main_window.notebook_editor), document_widget);
   current_active_tab = gtk_notebook_get_current_page(GTK_NOTEBOOK(main_window.notebook_editor));
   
   if (page_num_closing != current_active_tab) {
     page_num = current_active_tab;
-  }
-  else {
+  } else {
     // If there is a tab before the current one then set it as the active tab.
     page_num = page_num_closing - 1;
     // If the current tab is the 0th tab then set the current tab as 0 itself.
@@ -468,25 +462,13 @@ void close_page(Document *document)
   gtk_notebook_remove_page(GTK_NOTEBOOK(main_window.notebook_editor), page_num_closing);
 }
 
-/**
- * get_window_icon
- * returns a pixbuf with gphpedit icon
- * @return GdkPixbuf
- */
-
-GdkPixbuf *get_window_icon (void){
-  GdkPixbuf *pixbuf = gdk_pixbuf_new_from_file (GPHPEDIT_PIXMAP_FULL_PATH, NULL);
-  return pixbuf;
-}
-
 void on_close1_activate(GtkWidget *widget)
 {
   document_manager_try_close_current_document(main_window.docmg);
-    if(document_manager_get_document_count(main_window.docmg)!=0){
+  if(document_manager_get_document_count(main_window.docmg)!=0){
     classbrowser_update(GPHPEDIT_CLASSBROWSER(main_window.classbrowser));
     update_app_title(document_manager_get_current_document(main_window.docmg));
     update_zoom_level();
-    classbrowser_force_label_update(GPHPEDIT_CLASSBROWSER(main_window.classbrowser));
   }
 }
 
@@ -589,7 +571,7 @@ void on_about1_activate(GtkWidget *widget)
   const gchar *authors[] = {
                 "Current Maintainers",
                 "Anoop John <anoop.john@zyxware.com>",
-                "Jose Rostagno <rostagnojose@yahoo.com>",
+                "Jose Rostagno <joserostagno@vijona.com.ar>",
                 "",
                 "Original Developer",
                 "Andy Jeffries <andy@gphpedit.org>",
@@ -602,40 +584,40 @@ void on_about1_activate(GtkWidget *widget)
                };
   gchar *translator_credits = _("translator_credits");
   const gchar *documenters[] = {NULL};
-  GtkWidget *dialog = NULL;
-  dialog=gtk_about_dialog_new();
-  gtk_about_dialog_set_program_name(GTK_ABOUT_DIALOG(dialog), PACKAGE_NAME);
-  gtk_about_dialog_set_version(GTK_ABOUT_DIALOG(dialog), VERSION);
-  gtk_about_dialog_set_copyright(GTK_ABOUT_DIALOG(dialog),
+  GtkWidget *dialog = gtk_about_dialog_new();
+  GtkAboutDialog *about = GTK_ABOUT_DIALOG(dialog);
+  gtk_about_dialog_set_program_name(about, PACKAGE_NAME);
+  gtk_about_dialog_set_version(about, VERSION);
+  gtk_about_dialog_set_copyright(about,
       _("Copyright \xc2\xa9 2003-2006 Andy Jeffries, 2009-2010 Anoop John"));
-  gtk_about_dialog_set_comments(GTK_ABOUT_DIALOG(dialog),
+  gtk_about_dialog_set_comments(about,
      _("gPHPEdit is a GNOME2 editor specialised for editing PHP "
                "scripts and related files (HTML/CSS/JS)."));
   #ifdef PACKAGE_URL
-    gtk_about_dialog_set_website(GTK_ABOUT_DIALOG(dialog),PACKAGE_URL);
+    gtk_about_dialog_set_website(about,PACKAGE_URL);
   #endif
-  GdkPixbuf *logo = NULL;
-  logo=get_window_icon ();
-  gtk_about_dialog_set_logo(GTK_ABOUT_DIALOG(dialog),logo);
-  if (logo != NULL) {
-  g_object_unref (logo);
-  }
-  gtk_about_dialog_set_authors(GTK_ABOUT_DIALOG(dialog),(const gchar **) authors);
-  gtk_about_dialog_set_translator_credits(GTK_ABOUT_DIALOG(dialog),translator_credits);
-  gtk_about_dialog_set_documenters (GTK_ABOUT_DIALOG(dialog),(const gchar **) documenters);
+
+  gtk_about_dialog_set_logo_icon_name (about, "gphpedit");
+  gtk_about_dialog_set_authors(about,(const gchar **) authors);
+  gtk_about_dialog_set_translator_credits(about,translator_credits);
+  gtk_about_dialog_set_documenters (about,(const gchar **) documenters);
   /* 
      http://library.gnome.org/devel/gtk/stable/GtkWindow.html#gtk-window-set-transient-for
      Dialog windows should be set transient for the main application window they were spawned from. 
      This allows window managers  to e.g. keep the dialog on top of the main window, or center the dialog over the main window.
   */
-  gtk_window_set_transient_for (GTK_WINDOW(dialog),GTK_WINDOW(main_window.window));
+  gtk_window_set_transient_for (GTK_WINDOW(dialog), GTK_WINDOW(main_window.window));
   gtk_dialog_run(GTK_DIALOG (dialog));
   gtk_widget_destroy(dialog);
 }
-void update_status_combobox(Document *document){
+
+void update_status_combobox(Document *document)
+{
       if (is_app_closing) return ;
+      gint type = -1;
+      if (document) g_object_get(document, "type", &type, NULL);
       /* set statuscombo */
-      switch(document_get_document_type(document)) {
+      switch(type) {
         case(TAB_PHP):   
          set_status_combo_item (GPHPEDIT_STATUSBAR(main_window.appbar),_("PHP/HTML/XML"));          
          break;
@@ -707,7 +689,7 @@ void add_to_search_history(const gchar *current_text){
     /* add text to search history*/
     GSList *walk;
     gint i=0;
-    for (walk = get_preferences_manager_php_search_history(main_window.prefmg); walk!=NULL; walk = g_slist_next(walk)) {
+    for (walk = get_preferences_manager_search_history(main_window.prefmg); walk!=NULL; walk = g_slist_next(walk)) {
       i++;
       if (g_strcmp0((gchar *) walk->data,current_text)==0){
         return;  /* already in the list */
@@ -764,13 +746,17 @@ void goto_line_activate(GtkEntry *entry,gpointer user_data)
 
 void block_indent(GtkWidget *widget)
 {
-  document_block_indent(document_manager_get_current_document(main_window.docmg), get_preferences_manager_indentation_size(main_window.prefmg));
+  gint indentation_size;
+  g_object_get(main_window.prefmg, "indentation_size", &indentation_size, NULL);
+  document_block_indent(document_manager_get_current_document(main_window.docmg), indentation_size);
 }
 
 
 void block_unindent(GtkWidget *widget)
 {
-  document_block_unindent(document_manager_get_current_document(main_window.docmg), get_preferences_manager_indentation_size(main_window.prefmg));
+  gint indentation_size;
+  g_object_get(main_window.prefmg, "indentation_size", &indentation_size, NULL);
+  document_block_unindent(document_manager_get_current_document(main_window.docmg), indentation_size);
 }
 
 //zoom in
@@ -808,8 +794,10 @@ void syntax_check_clear(GtkWidget *widget)
 void classbrowser_show(void)
 {
   gphpedit_debug(DEBUG_MAIN_WINDOW);
-  gtk_paned_set_position(GTK_PANED(main_window.main_horizontal_pane), get_preferences_manager_side_panel_get_size(main_window.prefmg));
-  set_preferences_manager_parse_side_panel_status(main_window.prefmg, FALSE);
+  gint size;
+  g_object_get(main_window.prefmg, "side_panel_size", &size, NULL);
+  gtk_paned_set_position(GTK_PANED(main_window.main_horizontal_pane), size);
+  g_object_set(main_window.prefmg, "side_panel_hidden", FALSE, NULL);
   classbrowser_update(GPHPEDIT_CLASSBROWSER(main_window.classbrowser));
 }
 
@@ -818,12 +806,13 @@ void classbrowser_hide(void)
 {
   gphpedit_debug(DEBUG_MAIN_WINDOW);
   gtk_paned_set_position(GTK_PANED(main_window.main_horizontal_pane), 0);
-  set_preferences_manager_parse_side_panel_status(main_window.prefmg, TRUE);
+  g_object_set(main_window.prefmg, "side_panel_hidden", TRUE, NULL);
 }
 
 void classbrowser_show_hide(GtkWidget *widget)
 {
-  gboolean hidden = get_preferences_manager_side_panel_status(main_window.prefmg);
+  gboolean hidden;
+  g_object_get(main_window.prefmg, "side_panel_hidden", &hidden, NULL);
   menubar_set_classbrowser_status(MENUBAR(main_window.menu), hidden);
   if (hidden)
     classbrowser_show();
@@ -833,36 +822,36 @@ void classbrowser_show_hide(GtkWidget *widget)
 
 void force_php(GtkWidget *widget)
 {
-    set_document_to_php(document_manager_get_current_document(main_window.docmg));
+    set_document_to_type(document_manager_get_current_document(main_window.docmg), TAB_PHP);
 }
 
 void force_css(GtkWidget *widget)
 {
-    set_document_to_css(document_manager_get_current_document(main_window.docmg));
+    set_document_to_type(document_manager_get_current_document(main_window.docmg), TAB_CSS);
 }
 
 void force_sql(GtkWidget *widget)
 {
-  set_document_to_sql(document_manager_get_current_document(main_window.docmg));
+  set_document_to_type(document_manager_get_current_document(main_window.docmg), TAB_SQL);
 }
 
 void force_cxx(GtkWidget *widget)
 {
-  set_document_to_cxx(document_manager_get_current_document(main_window.docmg));
+  set_document_to_type(document_manager_get_current_document(main_window.docmg), TAB_CXX);
 }
 
 void force_perl(GtkWidget *widget)
 {
-    set_document_to_perl(document_manager_get_current_document(main_window.docmg));
+    set_document_to_type(document_manager_get_current_document(main_window.docmg), TAB_PERL);
 }
 
 void force_cobol(GtkWidget *widget)
 {
-  set_document_to_cobol(document_manager_get_current_document(main_window.docmg));
+  set_document_to_type(document_manager_get_current_document(main_window.docmg), TAB_COBOL);
 }
 void force_python(GtkWidget *widget)
 {
-  set_document_to_python(document_manager_get_current_document(main_window.docmg));
+  set_document_to_type(document_manager_get_current_document(main_window.docmg), TAB_PYTHON);
 }
 
 //function to refresh treeview when the current tab changes 

@@ -176,7 +176,7 @@ gint str_sec_print(gchar *label, gchar *pstart, gchar *pend, guint line_number) 
   return 0;
 }
 
-void classbrowser_parse_file(Classbrowser_Backend *classback, gchar *filename)
+void classbrowser_parse_file(ClassbrowserBackend *classback, gchar *filename)
 {
   gchar *file_contents;
   gchar *o; // original pointer to start of contents
@@ -487,7 +487,7 @@ void classbrowser_parse_file(Classbrowser_Backend *classback, gchar *filename)
                     #ifdef DEBUG
                     gphpedit_debug_message(DEBUG_CLASSBROWSER_PARSE, "Classbrowser var added:%s",varname);
                     #endif
-                    classbrowser_varlist_add(classback, varname, within_function, filename);
+                    classbrowser_varlist_add(classback, varname, within_function, filename, TAB_PHP);
                     g_free(beforevarname);
                     beforevarname=g_strdup(varname);
                   }

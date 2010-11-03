@@ -80,7 +80,7 @@ void register_file_opened(gchar *filename)
 {
   gphpedit_debug_message(DEBUG_DOC_MANAGER,"filename: %s\n", filename);
   gchar *folder = filename_parent_uri(filename);
-  set_preferences_manager_last_opened_folder(main_window.prefmg, folder);
+  g_object_set (main_window.prefmg, "last_opened_folder", folder, NULL);
   g_free(folder);
 }
 

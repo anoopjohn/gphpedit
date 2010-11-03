@@ -27,6 +27,6 @@
 #include <gtk/gtk.h>
 #include "classbrowser_backend.h"
 
-void classbrowser_parse_file(Classbrowser_Backend *classback, gchar *filename);
+void classbrowser_parse_file(ClassbrowserBackend *classback, gchar *filename);
 gboolean check_php_variable_before(const gchar *line_text);
 #endif

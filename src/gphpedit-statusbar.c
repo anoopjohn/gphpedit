@@ -131,23 +131,25 @@ set_statusbar_width_chars (GtkWidget *statusbar,
 
 void set_higthlight (GphpeditStatusComboBox *combo, GtkMenuItem *item){
   const gchar *label =gtk_menu_item_get_label (item);
+  gint type;
   if (g_strcmp0(label,_("Cobol"))==0){
-    set_document_to_cobol(document_manager_get_current_document(main_window.docmg));
+    type = TAB_COBOL;
   } else if (g_strcmp0(label,_("C/C++"))==0){
-    set_document_to_cxx(document_manager_get_current_document(main_window.docmg));
+    type = TAB_CXX;
   } else if (g_strcmp0(label,_("CSS"))==0){
-    set_document_to_css(document_manager_get_current_document(main_window.docmg));
+    type = TAB_CSS;
   } else if (g_strcmp0(label,_("PHP/HTML/XML"))==0){
-    set_document_to_php(document_manager_get_current_document(main_window.docmg));
+    type = TAB_PHP;
   } else if (g_strcmp0(label,_("Perl"))==0){
-    set_document_to_perl(document_manager_get_current_document(main_window.docmg));
+    type = TAB_PERL;
   } else if (g_strcmp0(label,_("SQL"))==0){
-    set_document_to_sql(document_manager_get_current_document(main_window.docmg));
+    type = TAB_SQL;
   } else if (g_strcmp0(label,_("Python"))==0){
-    set_document_to_python(document_manager_get_current_document(main_window.docmg));
+    type = TAB_PYTHON;
   } else {
-    set_document_to_text_plain(document_manager_get_current_document(main_window.docmg));
+    type = TAB_FILE;
   }
+  set_document_to_type(document_manager_get_current_document(main_window.docmg), type);
 }
 
 void set_status_combo_item (GphpeditStatusbar *statusbar,const gchar *label)

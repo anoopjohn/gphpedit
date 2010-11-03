@@ -597,7 +597,9 @@ void plugin_run(Plugin *plugin, Document *document)
   command_line = g_string_append(command_line, "' \"");
 
   if (plugdet->type == GPHPEDIT_PLUGIN_TYPE_SELECTION) {
-    if (!document_get_is_empty(document)){
+    gboolean is_empty;
+    g_object_get(document, "is_empty", &is_empty, NULL);
+    if (!is_empty){
     current_selection = document_get_current_selected_text(document);
     gchar *escape= g_strescape(current_selection,"");
     command_line = g_string_append(command_line, escape);
@@ -606,7 +608,9 @@ void plugin_run(Plugin *plugin, Document *document)
     }
   }
   else if (plugdet->type == GPHPEDIT_PLUGIN_TYPE_FILENAME || plugdet->type == GPHPEDIT_PLUGIN_TYPE_SYNTAX) {
-    if (document_get_saved_status(document)){
+    gboolean saved;
+    g_object_get(document, "saved", &saved, NULL);
+    if (saved){
     gchar *filename = document_get_filename(document);
     gchar *temp_path=filename_get_path(filename); /* remove escaped chars*/
     g_free(filename);

@@ -184,7 +184,7 @@ gboolean init_filebrowser(FilebrowserBackend *filebackend){
 
   directory->cancellable = g_cancellable_new ();
   gphpedit_debug_message(DEBUG_FILEBROWSER, "init with :%s\n",directory->current_folder);
-  GFile *file = get_gfile_from_filename (directory->current_folder);
+  GFile *file = g_file_new_for_commandline_arg (directory->current_folder);
   //file don't exist?
   if (!g_file_query_exists (file,directory->cancellable)){
     gphpedit_debug_message(DEBUG_FILEBROWSER, "file '%s' don't exist?\n",directory->current_folder);
@@ -222,7 +222,7 @@ void init_enumeration( FilebrowserBackend *filebackend)
 {
   FilebrowserBackendDetails *directory = FILEBROWSER_BACKEND_GET_PRIVATE(filebackend);
   if (g_cancellable_is_cancelled (directory->cancellable)) return ; /* remove source */
-  GFile *file = get_gfile_from_filename (directory->current_folder);
+  GFile *file = g_file_new_for_commandline_arg (directory->current_folder);
   GError *error=NULL;
   directory->enumerator =  g_file_enumerate_children (file,FOLDER_INFOFLAGS,G_FILE_QUERY_INFO_NOFOLLOW_SYMLINKS, directory->cancellable,&error);
   if (!directory->enumerator){
@@ -393,7 +393,7 @@ void filebrowser_backend_create_dir(FilebrowserBackend *filebackend, gchar *file
       gchar *parent=filename_parent_uri(filename);
       filename_int= g_strdup_printf("%s/%s",parent,name);
       g_free(parent);
-      config= get_gfile_from_filename(filename_int);
+      config= g_file_new_for_commandline_arg(filename_int);
   } else {
       gchar *parent;
       if (filename) {
@@ -403,7 +403,7 @@ void filebrowser_backend_create_dir(FilebrowserBackend *filebackend, gchar *file
       }
       filename_int= g_build_path (G_DIR_SEPARATOR_S, parent, name, NULL);
       g_free(parent);
-      config=get_gfile_from_filename(filename_int);
+      config=g_file_new_for_commandline_arg(filename_int);
   }
   gphpedit_debug_message(DEBUG_FILEBROWSER, "New directory:%s",filename_int);
 
@@ -431,8 +431,8 @@ static inline void change_current_folder(FilebrowserBackend *filebackend, const 
   directory = FILEBROWSER_BACKEND_GET_PRIVATE(filebackend);
   if (!new_folder && *(new_folder)!=0) return;
   directory->current_folder= g_strdup(new_folder);
-  Preferences_Manager *prefmg = preferences_manager_new ();
-  set_preferences_manager_filebrowser_last_folder(prefmg, directory->current_folder);
+  PreferencesManager *prefmg = preferences_manager_new ();
+  g_object_set(prefmg, "filebrowser_last_folder", directory->current_folder,NULL);
   g_object_unref(prefmg);
   gchar *real_path=filename_get_relative_path((gchar *)new_folder);
   if (!real_path) real_path=g_strdup(DEFAULT_DIR);
@@ -557,7 +557,7 @@ gboolean filebrowser_backend_process_drag_drop(FilebrowserBackend *filebackend, 
 {
   FilebrowserBackendDetails *directory;
   directory = FILEBROWSER_BACKEND_GET_PRIVATE(filebackend);
-  GFile *destdir = get_gfile_from_filename (directory->current_folder);
+  GFile *destdir = g_file_new_for_commandline_arg (directory->current_folder);
   g_object_ref(destdir);
 
   if (destdir) {

@@ -1,0 +1,216 @@
+abs|absolute value function
+accept|accept an incoming socket connect
+alarm|schedule a SIGALRM
+atan2|arctangent of Y/X in the range -PI to PI 
+bind|binds an address to a socket
+binmode|prepare binary files for I/O
+bless|create an object
+break|break out of a "given" block 
+caller|get context of the current subroutine call
+chdir|change your current working directory
+chmod|changes the permissions on a list of files
+chomp|remove a trailing record separator from a string
+chop|remove the last character from a string
+chown|change the owership on a list of files
+chr|get character this number represents
+chroot|make directory new root for path lookups
+close|close file (or pipe or socket) handle
+closedir|close directory handle
+connect|connect to a remote socket
+continue|optional trailing block in a while or foreach
+cos|cosine function
+crypt|one-way passwd-style encryption 
+dbmclose|breaks binding on a tied dbm file
+dbmopen|create binding on a tied dbm file
+defined|test whether a value, variable, or function is defined
+delete|deletes a value from a hash
+die|raise an exception or bail out
+do|turn a BLOCK into a TERM
+dump|create an immediate core dump 
+each|retrieve the next key/value pair from a hash
+endgrent|be done using group file
+endhostent|be done using hosts file
+endnetent|be done using networks file
+endprotoent|be done using protocols file
+endpwent|be done using passwd file
+endservent|be done using services file
+eof|test a filehandle for its end
+eval|catch exceptions or compile and run code
+exec|abandon this program to run another
+exists|test whether a hash key is present
+exit|terminate this program
+exp|raise I to a power 
+fcntl|file control system call
+fileno|return file descriptor from filehandle
+flock|lock an entire file with an advisory lock
+fork|create a new process just like this one
+format|declare a picture format with use by the write() function
+formline|internal function used for formats 
+getc|get the next character from the filehandle
+getgrent|get next group record
+getgrgid|get group record given group user ID
+getgrnam|get group record given group name
+gethostbyaddr|get host record given its address
+gethostbyname|get host record given name
+gethostent|get next hosts record
+getlogin|return who logged in at this tty
+getnetbyaddr|get network record given its address
+getnetbyname|get networks record given name
+getnetent|get next networks record
+getpeername|find the other end of a socket connection
+getpgrp|get process group
+getppid|get parent process ID
+getpriority|get current nice value
+getprotobyname|get protocol record given name
+getprotobynumber|get protocol record numeric protocol
+getprotoent|get next protocols record
+getpwent|get next passwd record
+getpwnam|get passwd record given user login name
+getpwuid|get passwd record given user ID
+getservbyname|get services record given its name
+getservbyport|get services record given numeric port
+getservent|get next services record
+getsockname|retrieve the sockaddr for a given socket
+getsockopt|get socket options on a given socket
+glob|expand filenames using wildcards
+gmtime|convert UNIX time into record or string using Greenwich time
+goto|create spaghetti code
+grep|locate elements in a list test true against a given criterion 
+hex|convert a string to a hexadecimal number 
+import|patch a module's namespace into your own
+index|find a substring within a string
+int|get the integer portion of a number
+ioctl|system-dependent device control system call 
+join|join a list into a string using a separator 
+keys|retrieve list of indices from a hash
+kill|send a signal to a process or process group 
+last|exit a block prematurely
+lc|return lower-case version of a string
+lcfirst|return a string with just the next letter in lower case
+length|return the number of bytes in a string
+link|create a hard link in the filesytem
+listen|register your socket as a server
+local|create a temporary value for a global variable (dynamic scoping)
+localtime|convert UNIX time into record or string using local time
+lock|get a thread lock on a variable, subroutine, or method
+log|retrieve the natural logarithm for a number
+lstat|stat a symbolic link 
+m|match a string with a regular expression pattern
+map|apply a change to a list to get back a new list with the changes
+mkdir|create a directory
+msgctl|SysV IPC message control operations
+msgget|get SysV IPC message queue
+msgrcv|receive a SysV IPC message from a message queue
+msgsnd|send a SysV IPC message to a message queue
+my|declare and assign a local variable (lexical scoping) 
+next|iterate a block prematurely
+no|unimport some module symbols or semantics at compile time 
+oct|convert a string to an octal number
+open|open a file, pipe, or descriptor
+opendir|open a directory
+ord|find a character's numeric representation
+our|declare and assign a package variable (lexical scoping) 
+pack|convert a list into a binary representation
+package|declare a separate global namespace
+pipe|open a pair of connected filehandles
+pop|remove the last element from an array and return it
+pos|find or set the offset for the last/next m//g search
+print|output a list to a filehandle
+printf|output a formatted list to a filehandle
+prototype|get the prototype (if any) of a subroutine
+push|append one or more elements to an array 
+q|singly quote a string
+qq|doubly quote a string
+qr|Compile pattern
+quotemeta|quote regular expression magic characters
+qw|quote a list of words
+qx|backquote quote a string 
+rand|retrieve the next pseudorandom number
+read|fixed-length buffered input from a filehandle
+readdir|get a directory from a directory handle
+readline|fetch a record from a file
+readlink|determine where a symbolic link is pointing
+readpipe|execute a system command and collect standard output
+recv|receive a message over a Socket
+redo|start this loop iteration over again
+ref|find out the type of thing being referenced
+rename|change a filename
+require|load in external functions from a library at runtime
+reset|clear all variables of a given name
+return|get out of a function early
+reverse|flip a string or a list
+rewinddir|reset directory handle
+rindex|right-to-left substring search
+rmdir|remove a directory 
+s|replace a pattern with a string
+say|print with newline
+scalar|force a scalar context
+seek|reposition file pointer for random-access I/O
+seekdir|reposition directory pointer
+select|reset default output or do I/O multiplexing
+semctl|SysV semaphore control operations
+semget|get set of SysV semaphores
+semop|SysV semaphore operations
+send|send a message over a socket
+setgrent|prepare group file for use
+sethostent|prepare hosts file for use
+setnetent|prepare networks file for use
+setpgrp|set the process group of a process
+setpriority|set a process's nice value
+setprotoent|prepare protocols file for use
+setpwent|prepare passwd file for use
+setservent|prepare services file for use
+setsockopt|set some socket options
+shift|remove the first element of an array, and return it
+shmctl|SysV shared memory operations
+shmget|get SysV shared memory segment identifier
+shmread|read SysV shared memory
+shmwrite|write SysV shared memory
+shutdown|close down just half of a socket connection
+sin|return the sine of a number
+sleep|block for some number of seconds
+socket|create a socket
+socketpair|create a pair of sockets
+sort|sort a list of values
+splice|add or remove elements anywhere in an array
+split|split up a string using a regexp delimiter
+sprintf|formatted print into a string
+sqrt|square root function
+srand|seed the random number generator
+stat|get a file's status information
+state|declare and assign a state variable (persistent lexical scoping)
+study|optimize input data for repeated searches
+sub|declare a subroutine, possibly anonymously
+substr|get or alter a portion of a stirng
+symlink|create a symbolic link to a file
+syscall|execute an arbitrary system call
+sysopen|open a file, pipe, or descriptor
+sysread|fixed-length unbuffered input from a filehandle
+sysseek|position I/O pointer on handle used with sysread and syswrite
+system|run a separate program
+syswrite|fixed-length unbuffered output to a filehandle 
+tell|get current seekpointer on a filehandle
+telldir|get current seekpointer on a directory handle
+tie|bind a variable to an object class
+tied|get a reference to the object underlying a tied variable
+time|return number of seconds since 1970
+times|return elapsed time for self and child processes
+tr|transliterate a string
+truncate|shorten a file 
+uc|return upper-case version of a string
+ucfirst|return a string with just the next letter in upper case
+umask|set file creation mode mask
+undef|remove a variable or function definition
+unlink|remove one link to a file
+unpack|convert binary structure into normal perl variables
+unshift|prepend more elements to the beginning of a list
+untie|break a tie binding to a variable
+use|load in a module at compile time
+utime|set a file's last access and modify times 
+values|return a list of the values in a hash
+vec|test or set particular bits in a string 
+wait|wait for any child process to die
+waitpid|wait for a particular child process to die
+wantarray|get void vs scalar vs list context of current subroutine call
+warn|print debugging info
+write|print a picture record 

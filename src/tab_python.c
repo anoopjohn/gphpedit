@@ -31,7 +31,7 @@
 
 void scintilla_python_set_lexer(GtkScintilla *scintilla)
 {
-  Preferences_Manager *prefmg = preferences_manager_new ();
+  PreferencesManager *prefmg = preferences_manager_new ();
   gtk_scintilla_clear_document_style (scintilla);
   gtk_scintilla_set_lexer(scintilla, SCLEX_PYTHON);
   gtk_scintilla_set_style_bits(scintilla, 8);
@@ -41,10 +41,14 @@ void scintilla_python_set_lexer(GtkScintilla *scintilla)
 
   gtk_scintilla_set_keywords(scintilla, 1, "Ellipsis NotImplemented ArithmeticError AssertionError AttributeError EnvironmentError EOFError Exception FloatingPointError ImportError IndentationError IndexError IOError KeyboardInterrupt KeyError LookupError MemoryError NameError NotImplementedError OSError OverflowError ReferenceError RuntimeError StandardError StopIteration SyntaxError SystemError SystemExit TabError TypeError UnboundLocalError UnicodeDecodeError UnicodeEncodeError UnicodeError UnicodeTranslateError ValueError WindowsError ZeroDivisionError Warning UserWarning DeprecationWarning PendingDeprecationWarning SyntaxWarning OverflowWarning RuntimeWarning FutureWarning basestring bool buffer callable chr classmethod cmp coerce compile complex delattr divmod enumerate eval execfile file filter float frozenset getattr globals hasattr hash hex id input int  isinstance issubclass iter  list locals long map max min object oct ord pow property range raw_input reduce reload repr reversed round setattr set slice sorted staticmethod str sum super tuple type unichr unicode vars xrange zip");
 
-  GtkSourceStyleScheme	*scheme = gtk_source_style_scheme_manager_get_scheme (main_window.stylemg, get_preferences_manager_style_name(prefmg));
+  const gchar *style_name;
+  g_object_get(prefmg, "style_name", &style_name, NULL);
+
+  GtkSourceStyleScheme	*scheme = gtk_source_style_scheme_manager_get_scheme (main_window.stylemg, style_name);
   /* PYTHON LEXER STYLE */
-  const gchar *font = get_preferences_manager_style_font(prefmg);
-  guint size = get_preferences_manager_style_size(prefmg);
+  const gchar *font;
+  guint size;
+  g_object_get(prefmg, "style_font_name", &font,"font_size", &size, NULL);
 
   set_scintilla_lexer_default_style(GTK_WIDGET(scintilla), scheme, SCE_P_DEFAULT, font, size);
 

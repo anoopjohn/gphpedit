@@ -337,7 +337,9 @@ gchar * gtk_scintilla_get_full_text (GtkScintilla *sci)
 
     length = scintilla_send_message(SCINTILLA(sci->scintilla),
                                       2006, 0, 0);
-    buffer = g_malloc0(length+1); /* Include terminating null */
+
+    length +=2;
+    buffer = g_malloc0(length); /* Include terminating null */
     if (!buffer) return NULL;
 
     scintilla_send_message(SCINTILLA(sci->scintilla),

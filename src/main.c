@@ -58,9 +58,11 @@ int main (int argc, char **argv)
         
   main_window.prefmg = preferences_manager_new();
 
+  gboolean single_instance;
+
+  g_object_get(main_window.prefmg, "single_instance_only", &single_instance, NULL);
   /* Start of IPC communication */
-  if (get_preferences_manager_single_instance_only(main_window.prefmg) && poke_existing_instance (argc - 1, argv + 1))
-    return 0;
+  if (single_instance && poke_existing_instance (argc - 1, argv + 1)) return 0;
 
   main_window_create();
   main_window.tempmg = templates_manager_new();

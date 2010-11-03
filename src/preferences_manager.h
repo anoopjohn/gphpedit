@@ -2,7 +2,7 @@
 
    Copyright (C) 2003, 2004, 2005 Andy Jeffries <andy at gphpedit.org>
    Copyright (C) 2009 Anoop John <anoop dot john at zyxware.com>
-   Copyright (C) 2009 José Rostagno (for vijona.com.ar) 
+   Copyright (C) 2009, 2010 José Rostagno (for vijona.com.ar) 
 
    For more information or to find the latest release, visit our 
    website at http://www.gphpedit.org/
@@ -29,112 +29,60 @@
 
 #define PREFERENCES_MANAGER_TYPE preferences_manager_get_type()
 #define PREFERENCES_MANAGER(obj) \
-  (G_TYPE_CHECK_INSTANCE_CAST ((obj), PREFERENCES_MANAGER_TYPE, Preferences_Manager))
+  (G_TYPE_CHECK_INSTANCE_CAST ((obj), PREFERENCES_MANAGER_TYPE, PreferencesManager))
 #define PREFERENCES_MANAGER_CLASS(klass) \
-  (G_TYPE_CHECK_CLASS_CAST ((klass), PREFERENCES_MANAGER_TYPE, Preferences_ManagerClass))
+  (G_TYPE_CHECK_CLASS_CAST ((klass), PREFERENCES_MANAGER_TYPE, PreferencesManagerClass))
 #define OBJECT_IS_PREFERENCES_MANAGER(obj) \
   (G_TYPE_CHECK_INSTANCE_TYPE ((obj), PREFERENCES_MANAGER_TYPE))
 #define OBJECT_IS_PREFERENCES_MANAGER_CLASS(klass) \
   (G_TYPE_CHECK_CLASS_TYPE ((klass), PREFERENCES_MANAGER_TYPE))
 #define PREFERENCES_MANAGER_GET_CLASS(obj) \
-  (G_TYPE_INSTANCE_GET_CLASS ((obj), PREFERENCES_MANAGER_TYPE, Preferences_ManagerClass))
+  (G_TYPE_INSTANCE_GET_CLASS ((obj), PREFERENCES_MANAGER_TYPE, PreferencesManagerClass))
 
-typedef struct Preferences_ManagerDetails Preferences_ManagerDetails;
+typedef struct PreferencesManagerDetails PreferencesManagerDetails;
 
 typedef struct
 {
 	GObject object;
-	Preferences_ManagerDetails *details;
-} Preferences_Manager;
+	PreferencesManagerDetails *details;
+} PreferencesManager;
 
 typedef struct
 {
 	GObjectClass parent_class;
 
-} Preferences_ManagerClass;
+} PreferencesManagerClass;
 
 /* Basic GObject requirements. */
 GType preferences_manager_get_type (void);
-Preferences_Manager *preferences_manager_new (void);
+PreferencesManager *preferences_manager_new (void);
 /*main_window session preferences*/
-void get_preferences_manager_window_size (Preferences_Manager *preferences_manager, gint *width, gint *height);
-void set_preferences_manager_window_size (Preferences_Manager *preferences_manager, gint width, gint height);
-void get_preferences_manager_window_position (Preferences_Manager *preferences_manager, gint *top, gint *left);
-void set_preferences_manager_window_position (Preferences_Manager *preferences_manager, gint top, gint left);
-gboolean get_preferences_manager_window_maximized(Preferences_Manager *preferences_manager);
-void set_preferences_manager_window_maximized(Preferences_Manager *preferences_manager, gboolean newstate);
+void get_preferences_manager_window_size (PreferencesManager *preferences_manager, gint *width, gint *height);
+void set_preferences_manager_window_size (PreferencesManager *preferences_manager, gint width, gint height);
+void get_preferences_manager_window_position (PreferencesManager *preferences_manager, gint *top, gint *left);
+void set_preferences_manager_window_position (PreferencesManager *preferences_manager, gint top, gint left);
+gboolean get_preferences_manager_window_maximized(PreferencesManager *preferences_manager);
+void set_preferences_manager_window_maximized(PreferencesManager *preferences_manager, gboolean newstate);
 /**/
-GSList *get_preferences_manager_search_history(Preferences_Manager *preferences_manager);
-gboolean get_preferences_manager_show_filebrowser(Preferences_Manager *preferences_manager);
-void set_preferences_manager_show_filebrowser(Preferences_Manager *preferences_manager, gboolean new_status);
-gboolean get_preferences_manager_show_statusbar(Preferences_Manager *preferences_manager);
-void set_preferences_manager_show_statusbar(Preferences_Manager *preferences_manager, gboolean new_status);
-gboolean get_preferences_manager_show_maintoolbar(Preferences_Manager *preferences_manager);
-void set_preferences_manager_show_maintoolbar(Preferences_Manager *preferences_manager, gboolean new_status);
-gboolean get_preferences_manager_show_findtoolbar(Preferences_Manager *preferences_manager);
-void set_preferences_manager_show_findtoolbar(Preferences_Manager *preferences_manager, gboolean new_status);
-
-gboolean get_preferences_manager_side_panel_status(Preferences_Manager *preferences_manager);
-void set_preferences_manager_parse_side_panel_status(Preferences_Manager *preferences_manager, gint new_status);
-gint get_preferences_manager_side_panel_get_size(Preferences_Manager *preferences_manager);
-void set_preferences_manager_side_panel_size(Preferences_Manager *preferences_manager, gint new_size);
+gboolean get_preferences_manager_show_filebrowser(PreferencesManager *preferences_manager);
+void set_preferences_manager_show_filebrowser(PreferencesManager *preferences_manager, gboolean new_status);
+gboolean get_preferences_manager_show_statusbar(PreferencesManager *preferences_manager);
+void set_preferences_manager_show_statusbar(PreferencesManager *preferences_manager, gboolean new_status);
+gboolean get_preferences_manager_show_maintoolbar(PreferencesManager *preferences_manager);
+void set_preferences_manager_show_maintoolbar(PreferencesManager *preferences_manager, gboolean new_status);
+gboolean get_preferences_manager_show_findtoolbar(PreferencesManager *preferences_manager);
+void set_preferences_manager_show_findtoolbar(PreferencesManager *preferences_manager, gboolean new_status);
 /**/
-gint get_preferences_manager_parse_only_current_file(Preferences_Manager *preferences_manager);
-void set_preferences_manager_parse_only_current_file(Preferences_Manager *preferences_manager, gint new_status);
-/**/
-const gchar *get_preferences_manager_last_opened_folder(Preferences_Manager *preferences_manager);
-void set_preferences_manager_last_opened_folder(Preferences_Manager *preferences_manager, const gchar *new_last_folder);
-void set_preferences_manager_filebrowser_last_folder(Preferences_Manager *preferences_manager, const gchar *new_last_folder);
-const gchar *get_preferences_manager_filebrowser_last_folder(Preferences_Manager *preferences_manager);
-gint get_preferences_manager_indentation_size (Preferences_Manager *preferences_manager);
-void set_preferences_manager_indentation_size(Preferences_Manager *preferences_manager, gint newstate);
-const gchar *get_preferences_manager_php_binary_location(Preferences_Manager *preferences_manager);
-void set_preferences_manager_php_binary_location(Preferences_Manager *preferences_manager, gchar *newstate);
-gboolean get_preferences_manager_saved_session(Preferences_Manager *preferences_manager);
-void set_preferences_manager_saved_session(Preferences_Manager *preferences_manager, gboolean newstate);
-gint get_preferences_manager_font_quality(Preferences_Manager *preferences_manager);
-gboolean get_preferences_manager_line_wrapping(Preferences_Manager *preferences_manager);
-void set_preferences_manager_line_wrapping(Preferences_Manager *preferences_manager, gboolean newstate);
-gint get_preferences_manager_calltip_delay(Preferences_Manager *preferences_manager);
-void set_preferences_manager_calltip_delay(Preferences_Manager *preferences_manager, gint newstate);
-gint get_preferences_manager_auto_complete_delay(Preferences_Manager *preferences_manager);
-void set_preferences_manager_auto_complete_delay(Preferences_Manager *preferences_manager, gint newstate);
-gboolean get_preferences_manager_use_tabs_instead_spaces(Preferences_Manager *preferences_manager);
-void set_preferences_manager_use_tabs_instead_spaces(Preferences_Manager *preferences_manager, gboolean newstate);
-gboolean get_preferences_manager_auto_complete_braces(Preferences_Manager *preferences_manager);
-void set_preferences_manager_auto_complete_braces(Preferences_Manager *preferences_manager, gboolean newstate);
-gboolean get_preferences_manager_show_folding(Preferences_Manager *preferences_manager);
-gboolean get_preferences_manager_single_instance_only(Preferences_Manager *preferences_manager);
-void set_preferences_manager_single_instance_only(Preferences_Manager *preferences_manager, gboolean newstate);
-gboolean get_preferences_manager_higthlight_caret_line(Preferences_Manager *preferences_manager);
-void set_preferences_manager_higthlight_caret_line(Preferences_Manager *preferences_manager, gboolean newstate);
-gboolean get_preferences_manager_show_indentation_guides(Preferences_Manager *preferences_manager);
-void set_preferences_manager_show_indentation_guides(Preferences_Manager *preferences_manager, gboolean newstate);
-gboolean get_preferences_manager_edge_mode(Preferences_Manager *preferences_manager);
-void set_preferences_manager_edge_mode(Preferences_Manager *preferences_manager, gboolean newstate);
-gint get_preferences_manager_edge_column(Preferences_Manager *preferences_manager);
-void set_preferences_manager_edge_column(Preferences_Manager *preferences_manager, gint newstate);
-gint get_preferences_manager_tab_size(Preferences_Manager *preferences_manager);
-void set_preferences_manager_tab_size(Preferences_Manager *preferences_manager, gint newstate);
-gchar *get_preferences_manager_shared_source_location(Preferences_Manager *preferences_manager);
-void set_preferences_manager_shared_source_location(Preferences_Manager *preferences_manager, gchar *newstate); /* */
-gchar *get_preferences_manager_php_file_extensions(Preferences_Manager *preferences_manager);
-void set_preferences_manager_php_file_extensions(Preferences_Manager *preferences_manager, gchar *newstate);
-GSList *get_preferences_manager_php_search_history(Preferences_Manager *preferences_manager);
-void set_preferences_manager_new_search_history_item(Preferences_Manager *preferences_manager, gint pos, const gchar *newtext);
+GSList *get_preferences_manager_search_history(PreferencesManager *preferences_manager);
+void set_preferences_manager_new_search_history_item(PreferencesManager *preferences_manager, gint pos, const gchar *newtext);
 /*plugins */
-gboolean get_plugin_is_active(Preferences_Manager *preferences_manager, const gchar *name);
-void set_plugin_is_active(Preferences_Manager *preferences_manager, const gchar *name, gboolean status);
+gboolean get_plugin_is_active(PreferencesManager *preferences_manager, const gchar *name);
+void set_plugin_is_active(PreferencesManager *preferences_manager, const gchar *name, gboolean status);
 /*styles */
-gchar *get_preferences_manager_style_name(Preferences_Manager *preferences_manager);
-void set_preferences_manager_style_name(Preferences_Manager *preferences_manager, gchar *newstate);
-guint get_preferences_manager_style_size(Preferences_Manager *preferences_manager);
-gchar *get_preferences_manager_style_font(Preferences_Manager *preferences_manager);
-void set_font_settings (Preferences_Manager *preferences_manager, gchar *font_desc);
-void set_style_name (Preferences_Manager *preferences_manager, gchar *newstyle);
+void set_font_settings (PreferencesManager *preferences_manager, gchar *font_desc);
 
-void preferences_manager_save_data(Preferences_Manager *preferences_manager);
-void preferences_manager_save_data_full(Preferences_Manager *preferences_manager);
-void preferences_manager_restore_data(Preferences_Manager *preferences_manager);
+void preferences_manager_save_data(PreferencesManager *preferences_manager);
+void preferences_manager_save_data_full(PreferencesManager *preferences_manager);
+void preferences_manager_restore_data(PreferencesManager *preferences_manager);
 #endif /* PREFERENCES_MANAGER_H */
 

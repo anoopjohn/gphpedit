@@ -24,7 +24,7 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-#include <stdlib.h>
+
 #include "main_window.h"
 #include "debug.h"
 #include "tab.h"
@@ -60,7 +60,7 @@ void main_window_resize(GtkWidget *widget, GtkAllocation *allocation, gpointer u
 gboolean classbrowser_accept_size(GtkPaned *paned, gpointer user_data)
 {
   if (gtk_paned_get_position(GTK_PANED(main_window.main_horizontal_pane)) != 0) {
-    set_preferences_manager_side_panel_size(main_window.prefmg, gtk_paned_get_position(GTK_PANED(main_window.main_horizontal_pane)));
+    g_object_set(main_window.prefmg, "side_panel_size", gtk_paned_get_position(GTK_PANED(main_window.main_horizontal_pane)), NULL);
   }
   return TRUE;
 }
@@ -117,9 +117,12 @@ static void main_window_create_panes(void)
   gtk_widget_show (main_window.main_vertical_pane);
   gtk_paned_pack1 (GTK_PANED (main_window.main_horizontal_pane), main_window.main_vertical_pane, FALSE, TRUE);
   g_signal_connect (G_OBJECT (main_window.window), "size_allocate", G_CALLBACK (classbrowser_accept_size), NULL);
-  gtk_paned_set_position(GTK_PANED(main_window.main_horizontal_pane),get_preferences_manager_side_panel_get_size(main_window.prefmg));
-    
-  if (get_preferences_manager_side_panel_status(main_window.prefmg)) classbrowser_hide();
+  gboolean hidden;
+  gint size;
+  g_object_get(main_window.prefmg, "side_panel_hidden", &hidden,"side_panel_size", &size, NULL);
+
+  gtk_paned_set_position(GTK_PANED(main_window.main_horizontal_pane), size);
+  if (hidden) classbrowser_hide();
 
   main_window.prin_hbox = gtk_vbox_new(FALSE, 0);
   gtk_widget_show(main_window.prin_hbox);
@@ -253,13 +256,13 @@ void main_window_create(void){
   gtk_box_pack_start (GTK_BOX (main_window.prinbox), main_window.menu, FALSE, FALSE, 0);
   gtk_widget_show_all (main_window.menu);
 
-  main_window.toolbar_main= toolbar_new (FALSE, NULL);
+  main_window.toolbar_main= toolbar_new ();
   gtk_box_pack_start (GTK_BOX (main_window.prinbox), main_window.toolbar_main, FALSE, FALSE, 0);
-  if (toolbar_is_visible(TOOLBAR(main_window.toolbar_main))) gtk_widget_show (main_window.toolbar_main);
+  if (get_preferences_manager_show_maintoolbar(main_window.prefmg)) gtk_widget_show (main_window.toolbar_main);
 
-  main_window.toolbar_find= toolbar_new (TRUE, menubar_get_accel_group(MENUBAR(main_window.menu)));
+  main_window.toolbar_find = toolbar_find_new(menubar_get_accel_group(MENUBAR(main_window.menu)));
   gtk_box_pack_start (GTK_BOX (main_window.prinbox), main_window.toolbar_find, FALSE, FALSE, 0);
-  if (toolbar_is_visible(TOOLBAR(main_window.toolbar_find))) gtk_widget_show (main_window.toolbar_find);
+  if (get_preferences_manager_show_findtoolbar(main_window.prefmg)) gtk_widget_show (main_window.toolbar_find);
 
 
   main_window_create_panes();
@@ -289,7 +292,10 @@ void main_window_create(void){
 
 void update_controls(Document *document){
   gphpedit_debug(DEBUG_MAIN_WINDOW);
-  menubar_update_controls(MENUBAR(main_window.menu), document_is_scintilla_based(document), document_get_can_preview(document), document_get_readonly(document));
-  toolbar_update_controls(TOOLBAR(main_window.toolbar_main), document_is_scintilla_based(document), document_get_readonly(document));
-  toolbar_update_controls(TOOLBAR(main_window.toolbar_find), document_is_scintilla_based(document), document_get_readonly(document));
+  if (!document) return ;
+  gboolean read_only, can_modify, preview;
+  g_object_get(document, "read_only", &read_only, "can_modify", &can_modify, "can_preview", &preview, NULL);
+  menubar_update_controls(MENUBAR(main_window.menu), can_modify, preview, read_only);
+  toolbar_update_controls(TOOLBAR(main_window.toolbar_main), can_modify, read_only);
+  toolbar_update_controls(TOOLBAR(main_window.toolbar_find), can_modify, read_only);
 }

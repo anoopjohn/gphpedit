@@ -109,44 +109,44 @@ void preferences_dialog_process_response (GtkDialog *dialog, gint response_id, g
 
 void on_tab_size_changed(GtkSpinButton *spinbutton, gpointer user_data)
 {
-  set_preferences_manager_tab_size(main_window.prefmg, gtk_spin_button_get_value_as_int(spinbutton));
-  set_preferences_manager_indentation_size(main_window.prefmg, gtk_spin_button_get_value_as_int(spinbutton));
+  g_object_set(main_window.prefmg,"indentation_size",gtk_spin_button_get_value_as_int(spinbutton), 
+    "tab_size",gtk_spin_button_get_value_as_int(spinbutton), NULL);
 }
 
 void on_calltip_delay_changed(GtkSpinButton *spinbutton, gpointer user_data)
 {
-  set_preferences_manager_calltip_delay(main_window.prefmg, gtk_spin_button_get_value_as_int(spinbutton));
-  set_preferences_manager_auto_complete_delay(main_window.prefmg, gtk_spin_button_get_value_as_int(spinbutton));
+  g_object_set(main_window.prefmg,"calltip_delay",gtk_spin_button_get_value_as_int(spinbutton), 
+    "autocomplete_delay", gtk_spin_button_get_value_as_int(spinbutton),NULL);
 }
 
 void on_edge_column_changed(GtkSpinButton *spinbutton, gpointer user_data)
 {
-  set_preferences_manager_edge_column(main_window.prefmg, gtk_spin_button_get_value_as_int(spinbutton));
+  g_object_set(main_window.prefmg, "edge_column", gtk_spin_button_get_value_as_int(spinbutton), NULL);
 }
 
 void on_show_indentation_guides_toggle(GtkToggleButton *togglebutton, gpointer user_data)
 {
-  set_preferences_manager_show_indentation_guides(main_window.prefmg, gtk_toggle_button_get_active(togglebutton));  
+  g_object_set(main_window.prefmg, "show_indentation_guides", gtk_toggle_button_get_active(togglebutton), NULL);
 }
 
 void on_edge_mode_toggle(GtkToggleButton *togglebutton, gpointer user_data)
 {
-  set_preferences_manager_edge_mode(main_window.prefmg, gtk_toggle_button_get_active(togglebutton));  
+  g_object_set(main_window.prefmg, "edge_mode", gtk_toggle_button_get_active(togglebutton), NULL);
 }
 
 void on_line_wrapping_toggle(GtkToggleButton *togglebutton, gpointer user_data)
 {
-  set_preferences_manager_line_wrapping(main_window.prefmg, gtk_toggle_button_get_active(togglebutton));
+  g_object_set(main_window.prefmg, "line_wrapping", gtk_toggle_button_get_active(togglebutton), NULL);
 }
 
 void on_use_tabs_instead_spaces_toggle(GtkToggleButton *togglebutton, gpointer user_data)
 {
-  set_preferences_manager_use_tabs_instead_spaces(main_window.prefmg, gtk_toggle_button_get_active(togglebutton));
+  g_object_set(main_window.prefmg, "tabs_instead_spaces", gtk_toggle_button_get_active(togglebutton), NULL);
 }
 
 void on_save_session_toggle(GtkToggleButton *togglebutton, gpointer user_data)
 {
- set_preferences_manager_saved_session(main_window.prefmg, gtk_toggle_button_get_active(togglebutton));
+ g_object_set (main_window.prefmg, "save_session", gtk_toggle_button_get_active(togglebutton), NULL);
 }
 
 void on_save_folderbrowser_toggle(GtkToggleButton *togglebutton, gpointer user_data)
@@ -156,32 +156,32 @@ void on_save_folderbrowser_toggle(GtkToggleButton *togglebutton, gpointer user_d
 
 void on_save_autobrace_toggle(GtkToggleButton *togglebutton, gpointer user_data)
 {
-  set_preferences_manager_auto_complete_braces(main_window.prefmg, gtk_toggle_button_get_active(togglebutton));
+  g_object_set (main_window.prefmg, "auto_complete_braces", gtk_toggle_button_get_active(togglebutton), NULL);
 }
 
 void on_save_higthlightcaretline_toggle(GtkToggleButton *togglebutton, gpointer user_data)
 {
-  set_preferences_manager_higthlight_caret_line(main_window.prefmg, gtk_toggle_button_get_active(togglebutton));
+  g_object_set (main_window.prefmg, "higthlight_caret_line", gtk_toggle_button_get_active(togglebutton), NULL);
 }
 
 void on_single_instance_only_toggle(GtkToggleButton *togglebutton, gpointer user_data)
 {
-  set_preferences_manager_single_instance_only(main_window.prefmg, gtk_toggle_button_get_active(togglebutton));
+  g_object_set (main_window.prefmg, "single_instance_only", gtk_toggle_button_get_active(togglebutton), NULL);
 }
 
 void on_php_binary_location_changed (GtkEntry *entry, gpointer user_data)
 {
-  set_preferences_manager_php_binary_location(main_window.prefmg, g_strdup(gtk_entry_get_text(entry)));
+  g_object_set (main_window.prefmg, "php_binary_location", gtk_entry_get_text(entry), NULL);
 }
 
 void on_php_file_extensions_changed (GtkEntry *entry, gpointer user_data)
 {
-  set_preferences_manager_php_file_extensions(main_window.prefmg, g_strdup(gtk_entry_get_text(entry)));
+  g_object_set (main_window.prefmg, "php_file_extensions", gtk_entry_get_text(entry), NULL);
 }
 
 void on_shared_source_changed (GtkEntry *entry, gpointer user_data)
 {
-  set_preferences_manager_shared_source_location(main_window.prefmg, g_strdup(gtk_entry_get_text(entry)));
+  g_object_set (main_window.prefmg, "shared_source_location", gtk_entry_get_text(entry), NULL);
 }
 
 void on_font_settings_toggle(GtkFontButton *widget, gpointer user_data){
@@ -276,7 +276,8 @@ populate_color_scheme_list (PreferencesDialog *dlg, const gchar *def_id)
 	
 	gtk_list_store_clear (priv->list_store);
 	
-	def_id = get_preferences_manager_style_name(main_window.prefmg);
+  g_object_get(main_window.prefmg, "style_name", &def_id, NULL);
+
 	if (def_id == NULL) 
 	{
 		g_warning ("Cannot build the list of available color schemes.\n"
@@ -341,7 +342,7 @@ style_scheme_changed (GtkWidget *treeview,
 	gtk_tree_model_get (GTK_TREE_MODEL (priv->list_store),
 			    &iter, ID_COLUMN, &id, -1);
 
-  set_style_name (main_window.prefmg, id);
+  g_object_set(main_window.prefmg, "style_name", id, NULL);
   document_manager_refresh_properties_all(main_window.docmg);
 
 	g_free (id);
@@ -372,18 +373,22 @@ PREFERENCES_DIALOG_init (PreferencesDialog *dialog)
   gtk_widget_show(sessionlabel);
   gtk_container_add (GTK_CONTAINER (adj), sessionlabel);
 
+  gboolean save_session, single_instance;
+  g_object_get (main_window.prefmg, "save_session", &save_session, "single_instance_only", &single_instance, NULL);
+
+
   priv->save_session = gtk_check_button_new_with_mnemonic (_("Save session (including open files) on exit"));
   gtk_widget_show (priv->save_session);
   gtk_box_pack_start (GTK_BOX (prinbox), priv->save_session, FALSE, FALSE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (priv->save_session), 8);
-  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(priv->save_session), get_preferences_manager_saved_session(main_window.prefmg));
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(priv->save_session), save_session);
   g_signal_connect(G_OBJECT(GTK_CHECK_BUTTON(priv->save_session)), "toggled", G_CALLBACK(on_save_session_toggle), NULL);
 
   priv->single_instance_only = gtk_check_button_new_with_mnemonic (_("Only ever run 1 copy of gPHPEdit at a time"));
   gtk_widget_show (priv->single_instance_only);
   gtk_box_pack_start (GTK_BOX (prinbox), priv->single_instance_only, FALSE, FALSE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (priv->single_instance_only), 8);
-  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(priv->single_instance_only), get_preferences_manager_single_instance_only(main_window.prefmg));
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(priv->single_instance_only), single_instance);
   g_signal_connect(G_OBJECT(GTK_CHECK_BUTTON(priv->single_instance_only)), "toggled", G_CALLBACK(on_single_instance_only_toggle), NULL);
   /*end session*/
 
@@ -396,11 +401,15 @@ PREFERENCES_DIALOG_init (PreferencesDialog *dialog)
   gtk_widget_show(label);
   gtk_container_add (GTK_CONTAINER (adj), label);
 
+  gboolean edge_mode;
+  gint edge_column;
+  g_object_get (main_window.prefmg, "edge_mode", &edge_mode, "edge_column",&edge_column, NULL);
+
   priv->edge_mode = gtk_check_button_new_with_mnemonic (_("Show right hand edge guide"));
   gtk_widget_show (priv->edge_mode);
   gtk_box_pack_start(GTK_BOX(prinbox), priv->edge_mode, FALSE, FALSE, 6);
   gtk_container_set_border_width (GTK_CONTAINER (priv->edge_mode), 8);
-  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(priv->edge_mode), get_preferences_manager_edge_mode(main_window.prefmg));
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(priv->edge_mode), edge_mode);
   g_signal_connect(G_OBJECT(GTK_CHECK_BUTTON(priv->edge_mode)), "toggled", G_CALLBACK(on_edge_mode_toggle), NULL);
 
 /*Begin: Right Hand Edge */
@@ -413,7 +422,7 @@ PREFERENCES_DIALOG_init (PreferencesDialog *dialog)
   gtk_box_pack_start (GTK_BOX (hbox15), label, FALSE, FALSE, 8);
   
   priv->edge_column = gtk_spin_button_new_with_range(0, 160, 1);
-  gtk_spin_button_set_value (GTK_SPIN_BUTTON(priv->edge_column), get_preferences_manager_edge_column(main_window.prefmg));
+  gtk_spin_button_set_value (GTK_SPIN_BUTTON(priv->edge_column), edge_column);
   gtk_widget_show (priv->edge_column);
   gtk_box_pack_start (GTK_BOX (hbox15), priv->edge_column, FALSE, TRUE, 0);
   g_signal_connect (G_OBJECT (priv->edge_column), "value_changed", G_CALLBACK (on_edge_column_changed), NULL);
@@ -455,7 +464,10 @@ PREFERENCES_DIALOG_init (PreferencesDialog *dialog)
   gtk_widget_show (priv->autobrace);
   gtk_container_add (GTK_CONTAINER (prinbox), priv->autobrace);
   gtk_container_set_border_width (GTK_CONTAINER (priv->autobrace), 8);
-  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(priv->autobrace), get_preferences_manager_auto_complete_braces(main_window.prefmg));
+  gboolean auto_brace;
+  gint delay;
+  g_object_get(main_window.prefmg, "auto_complete_braces", &auto_brace, "calltip_delay", &delay, NULL);
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(priv->autobrace), auto_brace);
   g_signal_connect(G_OBJECT(GTK_CHECK_BUTTON(priv->autobrace)), "toggled", G_CALLBACK(on_save_autobrace_toggle), NULL);
 
   hbox15 = gtk_hbox_new (FALSE, 0);
@@ -467,7 +479,7 @@ PREFERENCES_DIALOG_init (PreferencesDialog *dialog)
   gtk_box_pack_start (GTK_BOX (hbox15), label37, FALSE, FALSE, 8);
   
   priv->delay = gtk_spin_button_new_with_range(0, 2500, 10);
-  gtk_spin_button_set_value (GTK_SPIN_BUTTON(priv->delay), get_preferences_manager_calltip_delay(main_window.prefmg));
+  gtk_spin_button_set_value (GTK_SPIN_BUTTON(priv->delay), delay);
   gtk_widget_show (priv->delay);
   gtk_box_pack_start (GTK_BOX (hbox15), priv->delay, FALSE, FALSE, 0);
   g_signal_connect (G_OBJECT (priv->delay), "value_changed", G_CALLBACK (on_calltip_delay_changed), NULL);
@@ -505,23 +517,29 @@ PREFERENCES_DIALOG_init (PreferencesDialog *dialog)
   gtk_box_pack_start (GTK_BOX (hbox15), label32, FALSE, FALSE, 8);
 
   priv->tab_size = gtk_spin_button_new_with_range(1, 16, 1);
-  gtk_spin_button_set_value (GTK_SPIN_BUTTON(priv->tab_size), get_preferences_manager_tab_size(main_window.prefmg));
+  gint tab_size;
+  g_object_get(main_window.prefmg, "tab_size", &tab_size, NULL);
+  gtk_spin_button_set_value (GTK_SPIN_BUTTON(priv->tab_size), tab_size);
   gtk_widget_show (priv->tab_size);
   gtk_box_pack_start (GTK_BOX (hbox15), priv->tab_size, FALSE, TRUE, 0);
   g_signal_connect (G_OBJECT (priv->tab_size), "value_changed", G_CALLBACK (on_tab_size_changed), NULL);
+
+  gboolean show_indent_guides, higthlight_caret_line, line_wrapping, tabs_spaces;
+  g_object_get(main_window.prefmg, "show_indentation_guides", &show_indent_guides, "higthlight_caret_line", &higthlight_caret_line,
+    "line_wrapping",&line_wrapping,"tabs_instead_spaces", &tabs_spaces, NULL);
 
   priv->use_tabs_instead_spaces = gtk_check_button_new_with_mnemonic (_("Use tabs instead of spaces for indentation"));
   gtk_widget_show (priv->use_tabs_instead_spaces);
   gtk_box_pack_start (GTK_BOX (edgebox), priv->use_tabs_instead_spaces, FALSE, FALSE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (priv->use_tabs_instead_spaces), 8);
-  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(priv->use_tabs_instead_spaces), get_preferences_manager_use_tabs_instead_spaces(main_window.prefmg));
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(priv->use_tabs_instead_spaces), tabs_spaces);
   g_signal_connect(G_OBJECT(GTK_CHECK_BUTTON(priv->use_tabs_instead_spaces)), "toggled", G_CALLBACK(on_use_tabs_instead_spaces_toggle), NULL);
 
   priv->show_indentation_guides = gtk_check_button_new_with_mnemonic (_("Show indentation guides"));
   gtk_widget_show (priv->show_indentation_guides);
   gtk_box_pack_start (GTK_BOX (edgebox), priv->show_indentation_guides, FALSE, FALSE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (priv->show_indentation_guides), 8);
-  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(priv->show_indentation_guides), get_preferences_manager_show_indentation_guides(main_window.prefmg));
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(priv->show_indentation_guides), show_indent_guides);
   g_signal_connect(G_OBJECT(GTK_CHECK_BUTTON(priv->show_indentation_guides)), "toggled", G_CALLBACK(on_show_indentation_guides_toggle), NULL);
 
   adj= gtk_alignment_new (0.00, 0.50, 0, 0);
@@ -541,7 +559,7 @@ PREFERENCES_DIALOG_init (PreferencesDialog *dialog)
   gtk_widget_show (priv->line_wrapping);
   gtk_container_add (GTK_CONTAINER (hbox15), priv->line_wrapping);
   gtk_container_set_border_width (GTK_CONTAINER (priv->line_wrapping), 8);
-  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(priv->line_wrapping), get_preferences_manager_line_wrapping(main_window.prefmg));
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(priv->line_wrapping), line_wrapping);
   g_signal_connect(G_OBJECT(GTK_CHECK_BUTTON(priv->line_wrapping)), "toggled", G_CALLBACK(on_line_wrapping_toggle), NULL);
 
   priv->higthlightcaretline = gtk_check_button_new_with_mnemonic (_("Highlight Caret Line"));
@@ -549,7 +567,7 @@ PREFERENCES_DIALOG_init (PreferencesDialog *dialog)
   gtk_widget_show (priv->higthlightcaretline);
   gtk_box_pack_start (GTK_BOX (prinboxed), priv->higthlightcaretline, FALSE, FALSE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (priv->higthlightcaretline), 8);
-  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(priv->higthlightcaretline), get_preferences_manager_higthlight_caret_line(main_window.prefmg));
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(priv->higthlightcaretline), higthlight_caret_line);
   g_signal_connect(G_OBJECT(GTK_CHECK_BUTTON(priv->higthlightcaretline)), "toggled", G_CALLBACK(on_save_higthlightcaretline_toggle), NULL);
 
 
@@ -575,10 +593,16 @@ PREFERENCES_DIALOG_init (PreferencesDialog *dialog)
   gtk_widget_show (label40);
   gtk_box_pack_start (GTK_BOX (hbox17), label40, FALSE, FALSE, 8);
   
+  const gchar *shared_source_location;
+  const gchar *php_binary_location;
+  const gchar *php_file_extensions;
+  g_object_get(main_window.prefmg, "shared_source_location", &shared_source_location, 
+    "php_binary_location", &php_binary_location,"php_file_extensions", &php_file_extensions, NULL);
+
   priv->php_file_entry = gtk_entry_new();
   gtk_widget_show (priv->php_file_entry);
   gtk_box_pack_start (GTK_BOX (hbox17), priv->php_file_entry, TRUE, TRUE, 0);
-  gtk_entry_set_text(GTK_ENTRY(priv->php_file_entry), get_preferences_manager_php_binary_location(main_window.prefmg));
+  gtk_entry_set_text(GTK_ENTRY(priv->php_file_entry), php_binary_location);
   g_signal_connect(G_OBJECT(priv->php_file_entry), "changed", G_CALLBACK(on_php_binary_location_changed), NULL);
 
   GtkWidget *hbox18 = gtk_hbox_new (FALSE, 0);
@@ -592,7 +616,7 @@ PREFERENCES_DIALOG_init (PreferencesDialog *dialog)
   priv->file_extensions = gtk_entry_new ();
   gtk_widget_show (priv->file_extensions);
   gtk_box_pack_start (GTK_BOX (hbox18), priv->file_extensions, TRUE, TRUE, 0);
-  gtk_entry_set_text(GTK_ENTRY(priv->file_extensions), get_preferences_manager_php_file_extensions(main_window.prefmg));
+  gtk_entry_set_text(GTK_ENTRY(priv->file_extensions), php_file_extensions);
   g_signal_connect(G_OBJECT(priv->file_extensions), "changed", G_CALLBACK(on_php_file_extensions_changed), NULL);
 
   GtkWidget *hbox26 = gtk_hbox_new (FALSE, 0);
@@ -606,7 +630,7 @@ PREFERENCES_DIALOG_init (PreferencesDialog *dialog)
   priv->shared_source = gtk_entry_new ();
   gtk_widget_show (priv->shared_source);
   gtk_box_pack_start (GTK_BOX (hbox26), priv->shared_source, TRUE, TRUE, 0);
-  gtk_entry_set_text(GTK_ENTRY(priv->shared_source), get_preferences_manager_shared_source_location(main_window.prefmg));
+  gtk_entry_set_text(GTK_ENTRY(priv->shared_source), shared_source_location);
   g_signal_connect(G_OBJECT(priv->shared_source), "changed", G_CALLBACK(on_shared_source_changed), NULL);
 
 /*end editor page */
@@ -639,7 +663,10 @@ PREFERENCES_DIALOG_init (PreferencesDialog *dialog)
   gtk_widget_show(label);
   gtk_box_pack_start(GTK_BOX(cont), label, FALSE, FALSE, 6);
 
-  gchar *font_setting = g_strdup_printf("%s %d", get_preferences_manager_style_font(main_window.prefmg) + 1, get_preferences_manager_style_size(main_window.prefmg));
+  gchar *style_font_name;
+  guint size;
+  g_object_get(main_window.prefmg, "style_font_name", &style_font_name,"font_size", &size, NULL);
+  gchar *font_setting = g_strdup_printf("%s %d", style_font_name + 1, size);
   priv->font_settings = gtk_font_button_new_with_font (font_setting);
   g_free(font_setting);
   gtk_widget_show(priv->font_settings);

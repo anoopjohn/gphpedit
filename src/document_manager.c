@@ -34,7 +34,7 @@
 #include "gphpedit-close-button.h"
 #include "gphpedit-statusbar.h"
 #include "classbrowser_ui.h"
-#include "classbrowser_parse.h"
+#include "document_loader.h"
 
 /*
 * document_manager private struct
@@ -50,9 +50,8 @@ struct DocumentManagerDetails
 					    DocumentManagerDetails))
 
 static void document_manager_finalize (GObject *object);
-static void document_manager_dispose (GObject *gobject);
-
 void document_manager_create_new(void);
+void document_loader_done_refresh_cb (DocumentLoader *doclod, gboolean result, gpointer user_data);
 
 /*
  * register DocumentManager type and returns a new GType
@@ -85,31 +84,22 @@ document_manager_constructor (GType type,
 static void
 document_manager_class_init (DocumentManagerClass *klass)
 {
-	GObjectClass *object_class;
+  GObjectClass *object_class;
 
-	object_class = G_OBJECT_CLASS (klass);
-	object_class->finalize = document_manager_finalize;
-  object_class->dispose = document_manager_dispose;
+  object_class = G_OBJECT_CLASS (klass);
+  object_class->finalize = document_manager_finalize;
   object_class->constructor = document_manager_constructor;
-	g_type_class_add_private (klass, sizeof (DocumentManagerDetails));
+  g_type_class_add_private (klass, sizeof (DocumentManagerDetails));
 }
 
 static void
 document_manager_init (DocumentManager * object)
 {
-}
-
-/*
-* disposes the Gobject
-*/
-static void document_manager_dispose (GObject *object)
-{
-  DocumentManager *doc = DOCUMENT_MANAGER(object);
+  gphpedit_debug(DEBUG_DOC_MANAGER);
   DocumentManagerDetails *docdet;
-	docdet = DOCUMENT_MANAGER_GET_PRIVATE(doc);
-  /* dispose object data */
-  /* Chain up to the parent class */
-  G_OBJECT_CLASS (document_manager_parent_class)->dispose (object);
+  docdet = DOCUMENT_MANAGER_GET_PRIVATE(object);
+  docdet->current_document = NULL;
+  docdet->editors = NULL;
 }
 
 static void
@@ -163,36 +153,17 @@ GtkWidget *get_close_tab_widget(Document *document) {
 
   g_signal_connect(G_OBJECT(close_button), "clicked", G_CALLBACK(on_tab_close_activate), document);
   /* load file icon */
-  GtkWidget *icon= gtk_image_new_from_pixbuf (document_get_document_icon(document));
+  GtkWidget *label;
+  GdkPixbuf *file_icon;
+  g_object_get(document, "editor_label", &label, "file_icon", &file_icon, NULL);
+  GtkWidget *icon= gtk_image_new_from_pixbuf (file_icon);
   gtk_widget_show (icon);
   gtk_box_pack_start(GTK_BOX(hbox), icon, FALSE, FALSE, 0);
-  gtk_box_pack_start(GTK_BOX(hbox), document_get_editor_label(document), FALSE, FALSE, 0);
+  gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 0);
   gtk_box_pack_end(GTK_BOX(hbox), close_button, FALSE, FALSE, 0);
   gtk_widget_show(close_button);
   gtk_widget_show(hbox);
   return hbox;
-}
-
-/* internal */
-void document_load_complete_cb (Document *doc, gboolean result, gpointer user_data){
-  DocumentManager *docmg = DOCUMENT_MANAGER(user_data);
-  DocumentManagerDetails *docmgdet;
-	docmgdet = DOCUMENT_MANAGER_GET_PRIVATE(docmg);
-
-  if (result) {
-    docmgdet->editors = g_slist_append(docmgdet->editors, doc);
-    GtkWidget *document_tab;
-    document_tab = get_close_tab_widget(doc);
-    GtkWidget *document_widget = document_get_editor_widget(doc);
-    gtk_widget_show(document_widget);
-    gtk_notebook_append_page (GTK_NOTEBOOK (main_window.notebook_editor), document_widget, document_tab);
-    gtk_notebook_set_current_page (GTK_NOTEBOOK (main_window.notebook_editor), -1);
-    docmgdet->current_document = doc;
-    document_grab_focus(doc);
-    update_app_title(docmgdet->current_document);
-    if (!document_get_untitled(doc)) document_manager_session_save(docmg);
-    classbrowser_update(GPHPEDIT_CLASSBROWSER(main_window.classbrowser));
-    }
 }
 
 /* internal */
@@ -201,15 +172,81 @@ void document_save_update_cb (Document *doc, gpointer user_data){
   DocumentManagerDetails *docmgdet;
 	docmgdet = DOCUMENT_MANAGER_GET_PRIVATE(docmg);
   update_app_title(docmgdet->current_document);
+  classbrowser_update(GPHPEDIT_CLASSBROWSER(main_window.classbrowser));
 }
 
-void document_manager_add_new_document(DocumentManager *docmg, gint type, const gchar *filename, gint goto_line){
-  if (!docmg) return ;
+void document_save_start_cb (Document *doc, gpointer user_data){
+  /* show status in statusbar */
+  const gchar *short_filename;
+  g_object_get(doc, "short_filename", &short_filename, NULL);
+  gphpedit_statusbar_flash_message (GPHPEDIT_STATUSBAR(main_window.appbar),0,_("Saving %s"), short_filename);
+}
+
+void document_type_changed_cb (Document *doc, gint type, gpointer user_data)
+{
+	DocumentManager *docmg = DOCUMENT_MANAGER(user_data);
+	DocumentManagerDetails *docmgdet = DOCUMENT_MANAGER_GET_PRIVATE(docmg);
+	/* only process if document is current_document */
+	if (doc==docmgdet->current_document) update_status_combobox(docmgdet->current_document);
+}
+
+void document_need_reload_cb (Document *doc, gpointer user_data)
+{
   gphpedit_debug(DEBUG_DOC_MANAGER);
-  Document *doc = document_new (type, filename, goto_line);
-  g_signal_connect(G_OBJECT(doc), "load_complete", G_CALLBACK(document_load_complete_cb), docmg);
-  g_signal_connect(G_OBJECT(doc), "save_update", G_CALLBACK(document_save_update_cb), docmg);
-  document_load(doc);
+  DocumentLoader *loader = document_loader_new (GTK_WINDOW(main_window.window));
+  g_signal_connect(G_OBJECT(loader), "done_refresh", G_CALLBACK(document_loader_done_refresh_cb), user_data);
+  document_loader_reload_file(loader, doc);
+}
+
+void document_loader_done_loading_cb (DocumentLoader *doclod, gboolean result, Document *doc, gpointer user_data)
+{
+	DocumentManager *docmg = DOCUMENT_MANAGER(user_data);
+	DocumentManagerDetails *docmgdet = DOCUMENT_MANAGER_GET_PRIVATE(docmg);
+  if (result) {
+    gboolean untitled;
+    docmgdet->editors = g_slist_append(docmgdet->editors, doc);
+    GtkWidget *document_tab;
+    document_tab = get_close_tab_widget(doc);
+    GtkWidget *document_widget;
+    g_object_get(doc, "untitled", &untitled, "editor_widget", &document_widget, NULL);
+    gtk_widget_show(document_widget);
+    gtk_notebook_append_page (GTK_NOTEBOOK (main_window.notebook_editor), document_widget, document_tab);
+    gtk_notebook_set_current_page (GTK_NOTEBOOK (main_window.notebook_editor), -1);
+    docmgdet->current_document = doc;
+    document_grab_focus(doc);
+    update_app_title(doc);
+    if (!untitled) document_manager_session_save(docmg);
+    classbrowser_update(GPHPEDIT_CLASSBROWSER(main_window.classbrowser));
+    g_signal_connect(G_OBJECT(doc), "save_update", G_CALLBACK(document_save_update_cb), docmg);
+    g_signal_connect(G_OBJECT(doc), "save_start", G_CALLBACK(document_save_start_cb), NULL);
+    g_signal_connect(G_OBJECT(doc), "type_changed", G_CALLBACK(document_type_changed_cb), docmg);
+    g_signal_connect(G_OBJECT(doc), "need_reload", G_CALLBACK(document_need_reload_cb), docmg);
+  }
+  g_object_unref(doclod);
+}
+
+void document_loader_need_mounting_cb (DocumentLoader *doclod, gpointer user_data)
+{
+  gphpedit_statusbar_flash_message (GPHPEDIT_STATUSBAR(main_window.appbar),0,"%s", 
+    _("Error filesystem not mounted. Mounting filesystem, this will take a few seconds..."));
+}
+
+void document_loader_help_file_not_found_cb (DocumentLoader *doclod, gpointer user_data)
+{
+  gphpedit_statusbar_flash_message (GPHPEDIT_STATUSBAR(main_window.appbar),0,"%s",_("Could not find the required command in the online help"));
+  g_object_unref(doclod);
+}
+
+void document_manager_add_new_document(DocumentManager *docmg, gint type, const gchar *filename, gint goto_line)
+{
+  gphpedit_debug(DEBUG_DOC_MANAGER);
+  if (!docmg) return ;
+
+  DocumentLoader *loader = document_loader_new (GTK_WINDOW(main_window.window));
+  g_signal_connect(G_OBJECT(loader), "done_loading", G_CALLBACK(document_loader_done_loading_cb), docmg);
+  g_signal_connect(G_OBJECT(loader), "need_mounting", G_CALLBACK(document_loader_need_mounting_cb), docmg);
+  g_signal_connect(G_OBJECT(loader), "help_file_not_found", G_CALLBACK(document_loader_help_file_not_found_cb), docmg);
+  document_loader_load (loader, type, (gchar *) filename, goto_line);
 }
 
 Document *document_manager_find_document_from_widget (DocumentManager *docmg, void *widget)
@@ -219,12 +256,11 @@ Document *document_manager_find_document_from_widget (DocumentManager *docmg, vo
   DocumentManagerDetails *docmgdet = DOCUMENT_MANAGER_GET_PRIVATE(docmg);
   GSList *walk;
   Document *document;
-
+  GtkWidget *document_widget;
   for (walk = docmgdet->editors; walk != NULL; walk = g_slist_next (walk)) {
     document = walk->data;
-    if (document_get_editor_widget(document) == GTK_WIDGET(widget)) {
-      return walk->data;
-    }
+    g_object_get(document, "editor_widget", &document_widget, NULL);
+    if (document_widget == GTK_WIDGET(widget)) return walk->data;
   }
   return NULL;
 }
@@ -307,22 +343,25 @@ void document_manager_session_save(DocumentManager *docmg)
   Document *current_focus_editor;
   GString *session_file;
   GString *session_file_contents;
+  gboolean save_session, untitled;
+  gint type;
 
   session_file = g_string_new(g_get_home_dir());
   session_file = g_string_append(session_file, "/.gphpedit/session");
   
-  GFile *file=get_gfile_from_filename(session_file->str);
+  GFile *file = g_file_new_for_commandline_arg(session_file->str);
   g_string_free(session_file,TRUE);
   GError *error=NULL;
 
-
-  if (get_preferences_manager_saved_session(main_window.prefmg) && (g_slist_length(docmgdet->editors) > 0)) { 
+  g_object_get (main_window.prefmg, "save_session", &save_session, NULL);
+  if (save_session && (g_slist_length(docmgdet->editors) > 0)) {
     current_focus_editor = docmgdet->current_document;
     session_file_contents=g_string_new(NULL);
     for(walk = docmgdet->editors; walk!= NULL; walk = g_slist_next(walk)) {
       document = walk->data;
       if (document) {
-        if (!document_get_untitled(document)) {
+        g_object_get(document, "untitled", &untitled, "type", &type, NULL);
+        if (!untitled) {
           if (document == current_focus_editor) {
             session_file_contents = g_string_append(session_file_contents,"*");
           }
@@ -331,18 +370,16 @@ void document_manager_session_save(DocumentManager *docmg)
             g_string_append_printf (session_file_contents,"%s\n",docfilename);
             g_free(docfilename);
           } else {
-            if (document_get_document_type(document)==TAB_HELP){
+            if (type==TAB_HELP){
               /* it's a help page */
               g_string_append_printf (session_file_contents,"phphelp:%s\n", document_get_help_function(document));
-            } else if (document_get_document_type(document)==TAB_PREVIEW){
+            } else if (type==TAB_PREVIEW){
               /* it's a preview page */
               gchar *prevfilename = document_get_filename(document);
-              gchar *temp= prevfilename;
-              temp+=9;
-              g_string_append_printf (session_file_contents,"preview:%s\n",temp);
+              g_string_append_printf (session_file_contents,"preview:%s\n",prevfilename);
               g_free(prevfilename);
             } else {
-               gphpedit_debug_message(DEBUG_MAIN_WINDOW, "Type not found:%d", document_get_document_type(document));
+               gphpedit_debug_message(DEBUG_MAIN_WINDOW, "Type not found:%d", type);
             }
           }
         }
@@ -354,7 +391,7 @@ void document_manager_session_save(DocumentManager *docmg)
       }
      if (session_file_contents) g_string_free(session_file_contents,TRUE);
   } else {
-      if (get_preferences_manager_saved_session(main_window.prefmg)){
+      if (save_session){
         if (!g_file_delete (file,NULL,&error)){
           if (error->code!=G_FILE_ERROR_NOENT && error->code!=1){
             g_print(_("GIO Error deleting file: %s, code %d\n"), error->message,error->code);
@@ -377,8 +414,9 @@ void document_manager_session_reopen(DocumentManager *docmg)
   gboolean focus_this_one = FALSE;
   session_file = g_string_new( g_get_home_dir());
   session_file = g_string_append(session_file, "/.gphpedit/session");
+  GFile *file = g_file_new_for_commandline_arg(session_file->str);
 
-  if (filename_file_exist(session_file->str)){
+  if(g_file_query_exists(file,NULL)){
     int number =0;
     gchar *content=read_text_file_sync(session_file->str);
     gchar **strings;
@@ -414,7 +452,9 @@ void document_manager_session_reopen(DocumentManager *docmg)
           }
         }
         if (focus_this_one && (docmgdet->current_document)) {
-            focus_tab = gtk_notebook_page_num(GTK_NOTEBOOK(main_window.notebook_editor), document_get_editor_widget(docmgdet->current_document));
+            GtkWidget *document_widget;
+            g_object_get(docmgdet->current_document, "editor_widget", &document_widget, NULL);
+            focus_tab = gtk_notebook_page_num(GTK_NOTEBOOK(main_window.notebook_editor), document_widget);
         }
         focus_this_one=FALSE;
         i++;    
@@ -432,7 +472,6 @@ void document_manager_session_reopen(DocumentManager *docmg)
     document_manager_add_new_document(docmg, TAB_FILE, NULL, 0);
   }
 
-  GFile *file=get_gfile_from_filename(session_file->str);
   GError *error=NULL;
   if (!g_file_delete (file,NULL,&error)){
       if (error->code!=G_FILE_ERROR_NOENT && error->code!=1){
@@ -451,15 +490,19 @@ void document_manager_switch_to_file_or_open(DocumentManager *docmg, gchar *file
   DocumentManagerDetails *docmgdet = DOCUMENT_MANAGER_GET_PRIVATE(docmg);
   Document *document;
   GSList *walk;
-  GString *tmp_filename;
   // need to check if filename is local before adding to the listen
   filename = g_strdup(filename);
   for (walk = docmgdet->editors; walk!=NULL; walk = g_slist_next(walk)) {
     document = walk->data;
-    gchar *docfilename = document_get_filename(document);
+    gchar *docfilename;
+    GFile *file;
+    g_object_get(document, "GFile", &file, NULL);
+    docfilename = g_file_get_uri(file);
     gchar *filename_uri = filename_get_uri(filename);
     if (g_strcmp0(docfilename, filename_uri)==0) {
-      gtk_notebook_set_current_page( GTK_NOTEBOOK(main_window.notebook_editor), gtk_notebook_page_num(GTK_NOTEBOOK(main_window.notebook_editor),document_get_editor_widget(document)));
+      GtkWidget *document_widget;
+      g_object_get(document, "editor_widget", &document_widget, NULL);
+      gtk_notebook_set_current_page( GTK_NOTEBOOK(main_window.notebook_editor), gtk_notebook_page_num(GTK_NOTEBOOK(main_window.notebook_editor),document_widget));
       docmgdet->current_document = document;
       document_goto_line(docmgdet->current_document, line_number);
       g_free(docfilename);
@@ -468,12 +511,32 @@ void document_manager_switch_to_file_or_open(DocumentManager *docmg, gchar *file
     g_free(filename_uri);
     g_free(docfilename);
   }
-  tmp_filename = g_string_new(filename);
   document_manager_add_new_document(docmg, TAB_FILE, filename, line_number);
-  g_string_free(tmp_filename, TRUE);
   register_file_opened(filename);
   g_free(filename);
   return ;
+}
+
+void document_loader_done_refresh_cb (DocumentLoader *doclod, gboolean result, gpointer user_data)
+{
+  g_object_unref(doclod);
+}
+
+void document_manager_document_reload(DocumentManager *docmg)
+{
+  gphpedit_debug(DEBUG_DOC_MANAGER);
+  if (!docmg) return ;
+  DocumentManagerDetails *docmgdet = DOCUMENT_MANAGER_GET_PRIVATE(docmg);
+  gboolean saved;
+  g_object_get(docmgdet->current_document, "saved", &saved, NULL);
+  if (!saved) {
+    gint result = yes_no_dialog (_("Question"), _("Are you sure you wish to reload the current file, losing your changes?"));
+    if (result==GTK_RESPONSE_NO) return ;
+  }
+  const gchar *short_filename;
+  g_object_get(docmgdet->current_document, "short_filename", &short_filename, NULL);
+  gphpedit_statusbar_flash_message (GPHPEDIT_STATUSBAR(main_window.appbar),0,_("Reloading %s"), short_filename);
+  document_reload(docmgdet->current_document);
 }
 
 void document_manager_open_selected(DocumentManager *docmg)
@@ -563,12 +626,14 @@ gboolean document_manager_can_all_tabs_be_saved(DocumentManager *docmg)
 
   for(walk = docmgdet->editors; walk!= NULL; walk = g_slist_next(walk)) {
     document = walk->data;
-    if (document_get_editor_widget(document)) {
-      if (!document_get_saved_status(document) && document_get_can_save(document)) {
+    GtkWidget *document_widget;
+    g_object_get(document, "editor_widget", &document_widget, NULL);
+    if (document_widget) {
+      gboolean read_only, saved_status;
+      g_object_get(document, "read_only", &read_only, "saved", &saved_status, NULL);
+      if (!saved_status && !read_only) {
         saved = document_manager_try_save_page(docmg, document, FALSE);
-        if (saved==FALSE) {
-          return FALSE;
-        }
+        if (saved==FALSE) return FALSE;
       }
     }
   }
@@ -593,14 +658,19 @@ gboolean document_manager_try_save_page(DocumentManager *docmg, Document *docume
   gphpedit_debug(DEBUG_DOC_MANAGER);
   if (!docmg) return TRUE;
   gint ret;
+  const gchar *short_filename;
+  g_object_get(document, "short_filename", &short_filename, NULL);
+
   GtkWidget *confirm_dialog = gtk_message_dialog_new_with_markup (GTK_WINDOW(main_window.window),
     GTK_DIALOG_DESTROY_WITH_PARENT, GTK_MESSAGE_WARNING, GTK_BUTTONS_NONE,
       /*TRANSLATORS: this is a pango markup string you must keep the format tags. */
     _("<b>The file '%s' has not been saved since your last changes.</b>\n<small>Are you sure you want to close it and lose these changes?</small>"),
-     document_get_shortfilename(document));
+     short_filename);
 
   gtk_dialog_add_button (GTK_DIALOG(confirm_dialog),_("Close and _lose changes"), 0);
-  if (document_get_untitled(document)){
+  gboolean untitled;
+  g_object_get(document, "untitled", &untitled, NULL);
+  if (untitled){
     gtk_dialog_add_button (GTK_DIALOG(confirm_dialog), GTK_STOCK_SAVE_AS, 1);
   } else {
     gtk_dialog_add_button (GTK_DIALOG(confirm_dialog), GTK_STOCK_SAVE, 1);
@@ -633,7 +703,9 @@ void document_manager_save_all(DocumentManager *docmg)
   Document *doc;
   for(li = docmgdet->editors; li!= NULL; li = g_slist_next(li)) {
     doc = li->data;
-    if (document_get_untitled(doc)){
+    gboolean untitled;
+    g_object_get(doc, "untitled", &untitled, NULL);
+    if (untitled){
       gphpedit_debug_message(DEBUG_MAIN_WINDOW,"%s","Untitled found. Save not implemented"); //FIXME:
     } else {
       document_save(doc);
@@ -657,7 +729,10 @@ gboolean document_manager_set_current_document_from_position(DocumentManager *do
 gboolean document_manager_try_close_document(DocumentManager *docmg, Document *document)
 {
   gphpedit_debug(DEBUG_DOC_MANAGER);
-  if (document_get_can_save(document) && !document_get_saved_status(document) && !document_get_is_empty(document)) {
+  gboolean read_only, is_empty, saved_status;
+  g_object_get(document, "read_only", &read_only, "is_empty", &is_empty, "saved", &saved_status, NULL);
+
+  if (!read_only && !saved_status && !is_empty) {
     return document_manager_try_save_page(main_window.docmg, document, TRUE);
   }
   document_manager_close_page(main_window.docmg, document);
@@ -674,6 +749,7 @@ gboolean document_manager_try_close_current_document(DocumentManager *docmg)
 
 void document_manager_refresh_properties_all(DocumentManager *docmg)
 {
+  gint type;
   gphpedit_debug(DEBUG_DOC_MANAGER);
   if (!docmg) return ;
   DocumentManagerDetails *docmgdet = DOCUMENT_MANAGER_GET_PRIVATE(docmg);
@@ -681,15 +757,8 @@ void document_manager_refresh_properties_all(DocumentManager *docmg)
   for (walk = docmgdet->editors; walk!=NULL; walk = g_slist_next(walk)) {
     Document *document = walk->data;
     document_refresh_properties(document);
-    tab_check_php_file(document);
-    tab_check_css_file(document);
-    tab_check_cxx_file(document);
-    tab_check_perl_file(document);
-    tab_check_cobol_file(document);
-    tab_check_python_file(document);
-    tab_check_sql_file(document);
-    if (document_get_document_type(document)==TAB_FILE){
-      set_document_to_text_plain(document);
-    }
+    tab_check_type_file(document);
+    g_object_get(document, "type", &type, NULL);
+    if (type==TAB_FILE) set_document_to_type(document, type);
   }
 }

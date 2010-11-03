@@ -69,6 +69,7 @@ struct _ToolBarPrivate
   GtkWidget *button_zoom_100;
 
 /* find toolbar widgets */
+  GtkAccelGroup *accel_group;
   GtkWidget *toolbar_find;
   GtkWidget *search_label;
   GtkWidget *search_entry;
@@ -81,12 +82,77 @@ struct _ToolBarPrivate
 
 G_DEFINE_TYPE(ToolBar, TOOLBAR, GTK_TYPE_TOOLBAR)
 
+enum
+{
+  PROP_0,
+  PROP_TOOLBAR_TYPE,
+  PROP_ACCEL_GROUP
+};
+
+static void
+TOOLBAR_set_property (GObject      *object,
+			      guint         prop_id,
+			      const GValue *value,
+			      GParamSpec   *pspec)
+{
+  ToolBarPrivate *priv = TOOLBAR_GET_PRIVATE(object);
+
+	switch (prop_id)
+	{
+		case PROP_TOOLBAR_TYPE:
+			priv->type = g_value_get_int (value);
+			break;
+		case PROP_ACCEL_GROUP:
+			priv->accel_group = g_value_get_object (value);
+			break;
+ 		default:
+			G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
+			break;
+	}
+}
+
+static void
+TOOLBAR_get_property (GObject    *object,
+			      guint       prop_id,
+			      GValue     *value,
+			      GParamSpec *pspec)
+{
+  ToolBarPrivate *priv = TOOLBAR_GET_PRIVATE(object);
+
+	switch (prop_id)
+	{
+		case PROP_TOOLBAR_TYPE:
+			g_value_set_int (value, priv->type);
+			break;
+		case PROP_ACCEL_GROUP:
+			g_value_set_object (value, priv->accel_group);
+			break;
+		default:
+			G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
+			break;
+	}
+}
+
 static void
 TOOLBAR_class_init (ToolBarClass *klass)
 {
 	GObjectClass *object_class;
 
 	object_class = G_OBJECT_CLASS (klass);
+  object_class->set_property = TOOLBAR_set_property;
+  object_class->get_property = TOOLBAR_get_property;
+
+  g_object_class_install_property (object_class,
+                              PROP_TOOLBAR_TYPE,
+                              g_param_spec_int ("toolbar_type",
+                              NULL, NULL, 0, G_MAXINT, 
+                              MAIN_TOOLBAR, G_PARAM_CONSTRUCT_ONLY | G_PARAM_READWRITE));
+
+  g_object_class_install_property (object_class,
+                              PROP_ACCEL_GROUP,
+                              g_param_spec_object ("accel_group",
+                              NULL, NULL, GTK_TYPE_ACCEL_GROUP,
+                              G_PARAM_CONSTRUCT_ONLY | G_PARAM_READWRITE));
 
 	g_type_class_add_private (klass, sizeof (ToolBarPrivate));
 }
@@ -101,19 +167,6 @@ static void sincronice_menu_items_size (GtkToolbar *toolbar){
   }else {
     menubar_set_toolbar_size(MENUBAR(main_window.menu), FALSE);
   }
-}
-
-static void
-TOOLBAR_init (ToolBar *toolbar)
-{
-//  ToolBarPrivate *priv = TOOLBAR_GET_PRIVATE(toolbar);
- /* set toolbar style */
-  gtk_container_set_border_width (GTK_CONTAINER (toolbar), 0);
-  gtk_toolbar_set_style (GTK_TOOLBAR(toolbar), GTK_TOOLBAR_ICONS);
-  gtk_toolbar_set_show_arrow (GTK_TOOLBAR(toolbar), TRUE);
-
-  /* sincronice toolbar icon size */
-  sincronice_menu_items_size (GTK_TOOLBAR (toolbar));
 }
 
 /**
@@ -134,8 +187,6 @@ main_toolbar_init (ToolBar *toolbar)
 {
   ToolBarPrivate *priv = TOOLBAR_GET_PRIVATE(toolbar);
 
-  priv->type = MAIN_TOOLBAR;
-      
   /* Add the File operations to the Main Toolbar */
   create_toolbar_stock_item(&priv->button_new,toolbar,GTK_STOCK_NEW, _("New File"));
 
@@ -260,11 +311,12 @@ GtkTreeModel *create_completion_model (void)
 }
 
 static void
-find_toolbar_init (ToolBar *toolbar, GtkAccelGroup *accel_group)
+find_toolbar_init (ToolBar *toolbar)
 {
   ToolBarPrivate *priv = TOOLBAR_GET_PRIVATE(toolbar);
-  
-  priv->type = FIND_TOOLBAR;
+  GtkAccelGroup *accel_group;
+  g_object_get(toolbar, "accel_group", &accel_group, NULL);
+
   priv->search_label = gtk_label_new(_("Search for: "));
   gtk_widget_show(priv->search_label);
   create_custom_toolbar_item (GTK_TOOLBAR(toolbar), priv->search_label);
@@ -317,21 +369,36 @@ find_toolbar_init (ToolBar *toolbar, GtkAccelGroup *accel_group)
   create_custom_toolbar_item (GTK_TOOLBAR(toolbar), priv->goto_entry);
 
 }
+
+static void
+TOOLBAR_init (ToolBar *toolbar)
+{
+//  ToolBarPrivate *priv = TOOLBAR_GET_PRIVATE(toolbar);
+ /* set toolbar style */
+  gtk_container_set_border_width (GTK_CONTAINER (toolbar), 0);
+  gtk_toolbar_set_style (GTK_TOOLBAR(toolbar), GTK_TOOLBAR_ICONS);
+  gtk_toolbar_set_show_arrow (GTK_TOOLBAR(toolbar), TRUE);
+
+  /* sincronice toolbar icon size */
+  sincronice_menu_items_size (GTK_TOOLBAR (toolbar));
+}
+
 GtkWidget *
-toolbar_new (gboolean type, GtkAccelGroup *accel_group)
+toolbar_new (void)
 {
   ToolBar *toolbar = g_object_new (GOBJECT_TYPE_TOOLBAR, NULL);
-  if (type==MAIN_TOOLBAR)  main_toolbar_init (toolbar);
-  else find_toolbar_init (toolbar, accel_group);
+  main_toolbar_init (toolbar);
 
 	return GTK_WIDGET(toolbar);
 }
 
-gboolean toolbar_is_visible(ToolBar *toolbar){
- ToolBarPrivate *priv = TOOLBAR_GET_PRIVATE(toolbar);
- if (priv->type==MAIN_TOOLBAR) return get_preferences_manager_show_maintoolbar(main_window.prefmg);
- if (priv->type==FIND_TOOLBAR) return get_preferences_manager_show_findtoolbar(main_window.prefmg);
- return FALSE;
+GtkWidget *toolbar_find_new (GtkAccelGroup *accel_group)
+{
+  ToolBar *toolbar = g_object_new (GOBJECT_TYPE_TOOLBAR, "toolbar_type", FIND_TOOLBAR, 
+    "accel_group", accel_group, NULL);
+  find_toolbar_init (toolbar);
+
+	return GTK_WIDGET(toolbar);
 }
 
 void toolbar_set_search_text(ToolBar *toolbar, gchar *text){

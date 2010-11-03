@@ -2,7 +2,7 @@
 
    Copyright (C) 2003, 2004, 2005 Andy Jeffries <andy at gphpedit.org>
    Copyright (C) 2009 Anoop John <anoop dot john at zyxware.com>
-   Copyright (C) 2009 José Rostagno (for vijona.com.ar) 
+   Copyright (C) 2009, 2010 José Rostagno (for vijona.com.ar) 
 
    For more information or to find the latest release, visit our 
    website at http://www.gphpedit.org/
@@ -54,6 +54,7 @@ typedef struct
 
 	void (* load_complete) (Document *doc, gboolean result, gpointer user_data);
 	void (* save_update) (Document *doc, gpointer user_data); /* emited when document save state change*/
+	void (* type_changed) (Document *doc, gint type, gpointer user_data);
 
 } DocumentClass;
 
@@ -74,34 +75,16 @@ TAB_PREVIEW
 
 /* Basic GObject requirements. */
 GType document_get_type (void);
+Document *document_scintilla_new (gint type, GFile *file, gint goto_line, gchar *contents, gsize size, gboolean untitled);
+Document *document_webkit_new (gint type, GFile *file, gchar *raw_uri);
 void document_load(Document *document);
 void document_save(Document *doc);
+void document_save_as(Document *doc, GFile *file);
 void document_reload(Document *document);
-void document_set_GFile(Document *doc, GFile *newfile);
-Document *document_new (gint type, const gchar *filename, gint goto_line);
 void document_refresh_properties(Document *doc);
-GFile *document_get_GFile(Document *doc);
-void document_set_untitled(Document *doc, gboolean value);
-gboolean document_get_untitled(Document *doc);
-gboolean document_get_is_empty(Document *doc);
-const gchar *document_get_shortfilename(Document *doc);
-void document_set_shortfilename(Document *doc, gchar *value);
 gchar *document_get_filename(Document *doc) G_GNUC_WARN_UNUSED_RESULT G_GNUC_MALLOC;
-gint document_get_document_type(Document *doc);
-gboolean document_get_can_save(Document *doc);
-gboolean document_get_saved_status(Document *doc);
-gboolean document_get_readonly(Document *doc);
-void document_set_readonly(Document *doc, gboolean value, gboolean strict);
-gboolean document_get_converted_to_utf8(Document *doc);
-void document_set_content_type(Document *doc, const gchar *value);
-const gchar *document_get_content_type(Document *doc);
 const gchar *document_get_help_function(Document *doc);
 void document_set_mtime(Document *doc, GTimeVal value);
-void document_set_file_icon(Document *doc, GdkPixbuf *value);
-GdkPixbuf *document_get_document_icon(Document *doc);
-GtkWidget *document_get_editor_label(Document *doc);
-gboolean document_get_can_preview(Document *doc);
-GtkWidget *document_get_editor_widget(Document *doc);
 void document_grab_focus(Document *doc);
 gchar *document_get_current_selected_text(Document *doc) G_GNUC_WARN_UNUSED_RESULT G_GNUC_MALLOC;
 gboolean document_is_scintilla_based(Document *doc);
@@ -113,7 +96,6 @@ void document_cut(Document *doc, GtkClipboard* clipboard);
 void document_paste(Document *doc, GtkClipboard* clipboard);
 void document_undo(Document *doc);
 void document_redo(Document *doc);
-gint document_get_zoom_level(Document *doc);
 void document_zoom_in(Document *doc);
 void document_zoom_out(Document *doc);
 void document_zoom_restore(Document *doc);
@@ -122,21 +104,8 @@ void document_block_unindent(Document *doc, gint indentation_size);
 void document_marker_modify(Document *doc, gint line);
 void document_modify_current_line_marker(Document *doc);
 void document_find_next_marker(Document *doc);
-void set_document_to_php(Document *document);
-void set_document_to_css(Document *document);
-void set_document_to_cobol(Document *document);
-void set_document_to_python(Document *document);
-void set_document_to_cxx(Document *document);
-void set_document_to_sql(Document *document);
-void set_document_to_perl(Document *document);
-void set_document_to_text_plain(Document *document);
-void tab_check_php_file(Document *document);
-void tab_check_css_file(Document *document);
-void tab_check_cxx_file(Document *document);
-void tab_check_perl_file(Document *document);
-void tab_check_cobol_file(Document *document);
-void tab_check_python_file(Document *document);
-void tab_check_sql_file(Document *document);
+void set_document_to_type(Document *document, gint type);
+void tab_check_type_file(Document *document);
 GtkScintilla *document_get_scintilla(Document *document);
 void document_insert_text(Document *doc, gchar *data);
 void document_replace_current_selection(Document *doc, gchar *data);
@@ -148,7 +117,7 @@ void document_set_sintax_annotation(Document *doc);
 void document_set_sintax_line(Document *doc, guint current_line_number);
 void document_add_sintax_annotation(Document *doc, guint current_line_number, gchar *token, gint style);
 void document_goto_pos(Document *doc, glong pos);
-void document_goto_line(Document *doc,gint line);
+void document_goto_line(Document *doc, gint line);
 void document_scroll_to_current_pos(Document *document);
 gboolean document_search_text(Document *doc, const gchar *text, gboolean checkwholedoc, gboolean checkcase, gboolean checkwholeword, gboolean checkregex);
 gboolean document_search_replace_text(Document *doc, const gchar *text, const gchar *replace, gboolean checkwholedoc, gboolean checkcase, gboolean checkwholeword, gboolean checkregex, gboolean ask_replace);
@@ -160,6 +129,7 @@ gchar *document_get_current_word(Document *doc);
 gint document_get_current_position(Document *doc);
 void document_show_calltip_at_current_pos(Document *document);
 void document_add_text(Document *document, const gchar *text);
+void document_replace_text (Document *document, gchar *new_text);
 void document_force_autocomplete(Document *document);
 void document_insert_template(Document *document, gchar *template);
 void document_incremental_search(Document *document, gchar *current_text, gboolean advancing);
