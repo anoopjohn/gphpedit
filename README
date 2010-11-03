@@ -1,10 +1,10 @@
 Introduction to gPHPedit:
 ========================
 The gPHPedit package contains a lightweight UTF-8 text editor based in 
-scintilla component for the GNOME desktop.
-gPHPEdit support PHP/HTML/CSS files and also support C/C++, Python and 
+scintilla component for the GNOME desktop. 
+gPHPEdit supports PHP/HTML/CSS files and also supports C/C++, Python and 
 Perl Files.
-gPHPedit is currently maintained by Anoop John.
+gPHPedit is currently maintained by Anoop John and Jose Rostagno.
 
 Installation of gPHPEdit: (UBUNTU AND DEBIAN USERS)
 ===================================================
@@ -130,7 +130,7 @@ the patch to that bug report.
 
 Patches should be in unified diff form. (The -u option to GNU diff.)
 
-If you are interested in helping us to develop gphpedit, please see the 
+If you are interested in helping us to develop gPHPEdit, please see the 
 file 'AUTHORS' for contact information. 
 
 Translations
@@ -141,13 +141,14 @@ It aims in making it dead-simple for content providers to receive quality
 translations from big translation communities, no matter where the project 
 is hosted.
 
-In order to translate gphpedit on transifex or upload translations here you 
+In order to translate gPHPEdit on transifex or upload translations here you 
 need to:
 
-   1. create a (free) account in the Transifex server;
-   2. associate yourself with the gphpedit project and the specific language 
+   1. Create a (free) account in the Transifex server;
+   2. Associate yourself with the gPHPEdit project and the specific language 
 you want to work on;
-   3. use the web interface to reserve a file for translation. 
+   3. Use the web interface to reserve a file for translation. 
+   
 This file can then be downloaded and translated offline and then submitted back
 via the same interface. The translation is then validated and committed 
 upstream into the official repository. 
@@ -163,7 +164,7 @@ Best of all, since your work can be committed automatically when you upload
 your translation, you can see in real time your progress and 
 that of your teammates.
 
-gphpedit in Transifex: http://www.transifex.net/projects/p/gphpedit/c/main/
+gPHPEdit in Transifex: http://www.transifex.net/projects/p/gphpedit/c/main/
 
   b) Current translations:
       gPHPEdit is currently translated to:
@@ -175,7 +176,7 @@ gphpedit in Transifex: http://www.transifex.net/projects/p/gphpedit/c/main/
 Shortcuts
 =========
 Shortcut keys enable you to perform tasks more quickly than if you use a mouse.
-The following list all gphpedit’s shortcut keys.
+The following list all gPHPEdit’s shortcut keys.
 
  1) File:
 
@@ -269,19 +270,25 @@ $ 	This matches the end of a line.
 =======
 Themes (New in 0.9.98)
 =======
-GPHPEdit has support for GtkSourceView's Themes. These are feature rich themes supported by many Gnome applications 
-like Gedit and Anjuta. 
-This implies don't  configure each languaje item in the preferences dialog, never more.  Now you could set a theme and editor will load its color scheme also you can easily change between themes.
-The main advantage of choose this theme system it's a lot of themes already exist, along with good documentation
-about how to write a new one, making transition more easy, between this and the old system.
-You can get some examples at: http://live.gnome.org/GtkSourceView/StyleSchemes
-also You may want to visit http://library.gnome.org/devel/gtksourceview/stable/style-reference.html
-if you want to create a new theme.
-To put a gphpedit's specific theme or if you don't have gtksourceview installed, 
+GPHPEdit has support for GtkSourceView's Themes. These are feature rich 
+themes supported by many Gnome applications like Gedit and Anjuta. 
+This implies that you don't have to configure each language in the 
+preferences dialog anymore.  Now you can set a theme and editor will 
+load its color scheme. You can also easily change between themes.
+
+The main advantage of choosing this theme system is that a lot of themes
+already exist, along with good documentation about how to write a new one.
+
+You can get some examples at: 
+http://live.gnome.org/GtkSourceView/StyleSchemes
+
+If you want to create a new theme you may also want to visit 
+http://library.gnome.org/devel/gtksourceview/stable/style-reference.html
+
+To put a gPHPEdit's specific theme or if you don't have gtksourceview installed, 
 you should put the new theme in /usr/share/gphpedit/themes 
 or in /usr/local/share/gphpedit/themes 
 depending on instalation prefix.
 
-
-	The gphpedit team.
+	The gPHPEdit team.
 
