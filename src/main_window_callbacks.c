@@ -346,67 +346,6 @@ void on_tab_close_activate(GtkWidget *widget, Document *document)
   update_app_title(document_manager_get_current_document(main_window.docmg));
 }
 
-void rename_file(GString *newfilename)
-{
-  Document *document = document_manager_get_current_document(main_window.docmg);
-  gchar *basename=filename_get_basename(newfilename->str);
-  gchar *filename = document_get_filename(document);
-  if (filename_rename(filename, basename)){
-  // Set the filename of the current document to be that
-  g_object_set(document, "GFile", g_file_new_for_commandline_arg(newfilename->str), NULL);
-  g_object_set(document, "untitled", FALSE, "short_filename", basename, NULL);
-  g_free(basename);
-  // save as new filename
-  on_save1_activate(NULL);
-  }
-  g_free(filename);
-}
-
-void rename_file_ok(GtkFileChooser *file_selection)
-{
-  GString *filename;
-  // Extract filename from the file chooser dialog
-  gchar *fileuri=gtk_file_chooser_get_uri(file_selection);
-  filename = g_string_new(fileuri);
-  g_free(fileuri);
-  GFile *file = g_file_new_for_commandline_arg(filename->str);
-  if (g_file_query_exists (file,NULL)) {
-    gint result = yes_no_dialog (_("gPHPEdit"), _("This file already exists, are you sure you want to overwrite it?"));
-    if (result==GTK_RESPONSE_YES) {
-      rename_file(filename);
-    }
-    } else {
-      rename_file(filename);
-    }
-  g_object_unref(file);
-  g_string_free(filename, TRUE);
-}
-
-
-void on_rename1_activate(GtkWidget *widget)
-{
-  GtkWidget *file_selection_box;
-
-  if (document_manager_get_current_document(main_window.docmg)) {
-    // Create the selector widget
-    file_selection_box = gtk_file_chooser_dialog_new(_("Please type the filename to rename this file to..."),
-      GTK_WINDOW(main_window.window), GTK_FILE_CHOOSER_ACTION_SAVE, GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
-      GTK_STOCK_SAVE, GTK_RESPONSE_ACCEPT, NULL);
-    
-    if (document_manager_get_current_document(main_window.docmg)) {
-      gchar *filename = document_get_filename(document_manager_get_current_document(main_window.docmg));
-      gtk_file_chooser_set_filename (GTK_FILE_CHOOSER(file_selection_box), filename);
-      g_free(filename);
-    }
-
-    if (gtk_dialog_run (GTK_DIALOG(file_selection_box)) == GTK_RESPONSE_ACCEPT) {
-      rename_file_ok(GTK_FILE_CHOOSER(file_selection_box));
-    }
-    gtk_widget_destroy(file_selection_box);
-  }
-}
-
-
 void set_active_tab(page_num)
 {
   gphpedit_debug(DEBUG_MAIN_WINDOW);
@@ -421,7 +360,7 @@ void update_zoom_level(void){
   Document *doc = document_manager_get_current_document(main_window.docmg);
   guint zoom_level;
   if (doc)
-    g_object_get(document_manager_get_current_document(main_window.docmg), "zoom_level", &zoom_level, NULL);
+    g_object_get(doc, "zoom_level", &zoom_level, NULL);
   else
     zoom_level = 100;
   gphpedit_statusbar_set_zoom_level((GphpeditStatusbar *)main_window.appbar, zoom_level);

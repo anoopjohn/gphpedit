@@ -59,7 +59,6 @@ struct _MenuBarPrivate
   GtkWidget *save;
   GtkWidget *saveas;
   GtkWidget *saveall;
-  GtkWidget *rename;
   GtkWidget *close;
   GtkWidget *quit;
 
@@ -357,11 +356,8 @@ static void fill_menu_file(MenuBarPrivate *priv){
   g_signal_connect(G_OBJECT(priv->saveas), "activate", G_CALLBACK(on_save_as1_activate), NULL);
   create_mnemonic_menu_item(&priv->saveall ,priv->menunew,_("Save A_ll"), _("Save all open unsaved files"),priv->accel_group, GDK_a, GDK_SHIFT_MASK | GDK_MOD1_MASK);
   g_signal_connect(G_OBJECT(priv->saveall), "activate", G_CALLBACK(on_saveall1_activate), NULL);
-  create_mnemonic_menu_item(&priv->rename ,priv->menunew,_("_Rename"), _("Rename the current file 'on-the-fly'"),priv->accel_group, GDK_r, GDK_SHIFT_MASK | GDK_MOD1_MASK);
-  g_signal_connect(G_OBJECT(priv->rename), "activate", G_CALLBACK(on_rename1_activate), NULL);
   create_stock_menu_item(&priv->close,priv->menunew,GTK_STOCK_CLOSE, _("Close the current file"),priv->accel_group, GDK_w, GDK_CONTROL_MASK);
   g_signal_connect(G_OBJECT(priv->close), "activate", G_CALLBACK(on_close1_activate), NULL);
-
   /* separator */
   _create_separator_item(priv->menunew);
 
@@ -641,7 +637,6 @@ void menubar_update_controls(MenuBar *menubar, gboolean is_scintilla, gboolean c
     }
     gtk_widget_set_sensitive (priv->saveas, TRUE);
     gtk_widget_set_sensitive (priv->reload, TRUE);
-    gtk_widget_set_sensitive (priv->rename, TRUE);
     gtk_widget_set_sensitive (priv->indent, TRUE);
     gtk_widget_set_sensitive (priv->unindent, TRUE);
     gtk_widget_set_sensitive (priv->replace, TRUE);
@@ -665,7 +660,6 @@ void menubar_update_controls(MenuBar *menubar, gboolean is_scintilla, gboolean c
       gtk_widget_set_sensitive (priv->save, FALSE);
       gtk_widget_set_sensitive (priv->saveas, FALSE);
       gtk_widget_set_sensitive (priv->reload, FALSE);
-      gtk_widget_set_sensitive (priv->rename, FALSE);
       gtk_widget_set_sensitive (priv->indent, FALSE);
       gtk_widget_set_sensitive (priv->unindent, FALSE);
       gtk_widget_set_sensitive (priv->replace, FALSE);
