@@ -169,11 +169,6 @@ void on_single_instance_only_toggle(GtkToggleButton *togglebutton, gpointer user
   g_object_set (main_window.prefmg, "single_instance_only", gtk_toggle_button_get_active(togglebutton), NULL);
 }
 
-void on_php_binary_location_changed (GtkEntry *entry, gpointer user_data)
-{
-  g_object_set (main_window.prefmg, "php_binary_location", gtk_entry_get_text(entry), NULL);
-}
-
 void on_php_file_extensions_changed (GtkEntry *entry, gpointer user_data)
 {
   g_object_set (main_window.prefmg, "php_file_extensions", gtk_entry_get_text(entry), NULL);
@@ -589,21 +584,10 @@ PREFERENCES_DIALOG_init (PreferencesDialog *dialog)
   gtk_widget_show (hbox17);
   gtk_box_pack_start (GTK_BOX (codbox), hbox17, FALSE, TRUE, 8);
   
-  GtkWidget *label40 = gtk_label_new (_("Syntax check program:"));
-  gtk_widget_show (label40);
-  gtk_box_pack_start (GTK_BOX (hbox17), label40, FALSE, FALSE, 8);
-  
   const gchar *shared_source_location;
-  const gchar *php_binary_location;
   const gchar *php_file_extensions;
   g_object_get(main_window.prefmg, "shared_source_location", &shared_source_location, 
-    "php_binary_location", &php_binary_location,"php_file_extensions", &php_file_extensions, NULL);
-
-  priv->php_file_entry = gtk_entry_new();
-  gtk_widget_show (priv->php_file_entry);
-  gtk_box_pack_start (GTK_BOX (hbox17), priv->php_file_entry, TRUE, TRUE, 0);
-  gtk_entry_set_text(GTK_ENTRY(priv->php_file_entry), php_binary_location);
-  g_signal_connect(G_OBJECT(priv->php_file_entry), "changed", G_CALLBACK(on_php_binary_location_changed), NULL);
+    "php_file_extensions", &php_file_extensions, NULL);
 
   GtkWidget *hbox18 = gtk_hbox_new (FALSE, 0);
   gtk_widget_show (hbox18);

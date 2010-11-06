@@ -75,7 +75,6 @@ struct PreferencesManagerDetails
   gboolean show_indentation_guides;
   gboolean edge_mode;
   gint edge_column;
-  gchar *php_binary_location;
   gchar *shared_source_location;
   gchar *php_file_extensions;
 
@@ -162,7 +161,6 @@ enum
   PROP_SINGLE_INSTANCE_ONLY,
   PROP_SHARED_SOURCE_LOCATION,
   PROP_FONT_QUALITY,
-  PROP_PHP_BINARY_LOCATION,
   PROP_STYLE_NAME,
   PROP_INDENTATION_SIZE,
   PROP_PHP_FILE_EXTENSIONS,
@@ -248,10 +246,6 @@ preferences_manager_set_property (GObject      *object,
 		case PROP_SHARED_SOURCE_LOCATION:
 			g_free(prefdet->shared_source_location);
 			prefdet->shared_source_location = g_value_dup_string (value);
-			break;
-		case PROP_PHP_BINARY_LOCATION:
-			g_free(prefdet->php_binary_location);
-			prefdet->php_binary_location = g_value_dup_string (value);
 			break;
 		case PROP_STYLE_NAME:
 			g_free(prefdet->style_name);
@@ -349,9 +343,6 @@ preferences_manager_get_property (GObject    *object,
 			break;
 		case PROP_SHARED_SOURCE_LOCATION:
 			g_value_set_string (value, prefdet->shared_source_location);
-			break;
-		case PROP_PHP_BINARY_LOCATION:
-			g_value_set_string (value, prefdet->php_binary_location);
 			break;
 		case PROP_STYLE_NAME:
 			g_value_set_string (value, prefdet->style_name);
@@ -513,12 +504,6 @@ preferences_manager_class_init (PreferencesManagerClass *klass)
                               "", G_PARAM_READWRITE));
 
   g_object_class_install_property (object_class,
-                              PROP_PHP_BINARY_LOCATION,
-                              g_param_spec_string ("php_binary_location",
-                              NULL, NULL,
-                              "", G_PARAM_READWRITE));
-
-  g_object_class_install_property (object_class,
                               PROP_STYLE_NAME,
                               g_param_spec_string ("style_name",
                               NULL, NULL,
@@ -549,7 +534,6 @@ void clean_default_settings(PreferencesManagerDetails *prefdet){
   /* free object resources*/
   if (prefdet->last_opened_folder) g_free(prefdet->last_opened_folder);
   if (prefdet->filebrowser_last_folder) g_free(prefdet->filebrowser_last_folder);
-  if (prefdet->php_binary_location) g_free(prefdet->php_binary_location);
   if (prefdet->shared_source_location) g_free(prefdet->shared_source_location);
   if (prefdet->php_file_extensions) g_free(prefdet->php_file_extensions);
 }
@@ -656,7 +640,7 @@ gint get_default_delay(void){
 void load_default_settings(PreferencesManagerDetails *prefdet)
 {
   gphpedit_debug(DEBUG_PREFS);
-  prefdet->php_binary_location= get_string("/gPHPEdit/locations/phpbinary", "php");
+
   prefdet->shared_source_location = get_string("/gPHPEdit/locations/shared_source", "");
 
   prefdet->indentation_size = get_uint("/gPHPEdit/defaults/indentationsize", 4); 
@@ -887,7 +871,6 @@ void preferences_manager_save_data_full(PreferencesManager *preferences_manager)
   prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
   preferences_manager_save_data(preferences_manager);  /* save session data */
 
-  set_string ("/gPHPEdit/locations/phpbinary", prefdet->php_binary_location);
   set_string ("/gPHPEdit/locations/shared_source", prefdet->shared_source_location);
   set_int ("/gPHPEdit/defaults/indentationsize", prefdet->indentation_size); 
   set_int ("/gPHPEdit/defaults/tabsize", prefdet->tab_size); 
