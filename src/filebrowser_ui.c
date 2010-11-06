@@ -45,8 +45,7 @@ File browser has the following features:
 #include "main_window.h"
 #include "debug.h"
 /* functions */
-static void gphpedit_file_browser_class_init (gphpeditFileBrowserClass *klass);
-static void gphpedit_filebrowser_init (gphpeditFileBrowser *button);
+static void gphpedit_file_browser_dispose (GObject *object);
 gint _filebrowser_sort_func(GtkTreeModel * model, GtkTreeIter * a, GtkTreeIter * b, gpointer user_data);
 void tree_double_clicked(GtkTreeView *tree_view,GtkTreePath *path,GtkTreeViewColumn *column,gpointer user_data);
 gboolean key_press (GtkWidget *widget, GdkEventKey *event, gpointer user_data);
@@ -66,8 +65,8 @@ static void on_search_press (const gchar *filename, gpointer user_data);
 static void search_typed (GtkEntry *entry, const gchar *text, gint length, gint *position, gpointer data);
 static void search_activate(GtkEntry *entry,gpointer user_data);
 void     print_files        (FilebrowserBackend         *directory, gpointer user_data);
-
 void fb_file_v_drag_data_received(GtkWidget * widget, GdkDragContext * context, gint x,  gint y, GtkSelectionData * data, guint info, guint time,gpointer user_data);
+
 #define MIME_ISDIR(string) (g_strcmp0(string, "inode/directory")==0)
 
 static gchar *get_mime_from_tree(GtkTreeView *tree_view);
@@ -116,46 +115,28 @@ typedef struct {
 } POPUPDATA;
 POPUPDATA pop;
 
-static gpointer gphpedit_file_browser_parent_class;
-
 #define FILEBROWSER_BACKEND_GET_PRIVATE(object)(G_TYPE_INSTANCE_GET_PRIVATE ((object),\
 					    GPHPEDIT_TYPE_FILEBROWSER,\
 					    gphpeditFileBrowserPrivate))
 
+G_DEFINE_TYPE(gphpeditFileBrowser, gphpedit_file_browser, GTK_TYPE_VBOX);
 
-GType
-gphpedit_filebrowser_get_type (void)
+static void 
+gphpedit_file_browser_class_init (gphpeditFileBrowserClass *klass)
 {
-    static GType our_type = 0;
-    
-    if (!our_type) {
-        static const GTypeInfo our_info =
-        {
-            sizeof (gphpeditFileBrowserClass),
-            NULL,               /* base_init */
-            NULL,               /* base_finalize */
-            (GClassInitFunc) gphpedit_file_browser_class_init,
-            NULL,               /* class_finalize */
-            NULL,               /* class_data */
-            sizeof (gphpeditFileBrowser),
-            0,                  /* n_preallocs */
-            (GInstanceInitFunc) gphpedit_filebrowser_init,
-        };
-
-        our_type = g_type_register_static (GTK_TYPE_VBOX, "gphpeditFileBrowser",
-                                           &our_info, 0);
-  }
-    
-    return our_type;
+	GObjectClass *object_class = G_OBJECT_CLASS (klass);
+  object_class->dispose = gphpedit_file_browser_dispose;
+	
+	g_type_class_add_private (object_class, sizeof(gphpeditFileBrowserPrivate));
 }
 
-static void
-gphpedit_file_browser_destroy (GtkObject *object)
+static void gphpedit_file_browser_dispose (GObject *object)
 {
 	gphpeditFileBrowserPrivate *priv;
 
 	priv = FILEBROWSER_BACKEND_GET_PRIVATE(object);
 //	gphpedit_file_browser_set_enable_completion (GPHPEDIT_FILEBROWSER (object), FALSE);
+
   if (g_signal_handler_is_connected (priv->fbbackend, priv->handlerid)){
    g_signal_handler_disconnect(priv->fbbackend, priv->handlerid);
   }
@@ -164,29 +145,8 @@ gphpedit_file_browser_destroy (GtkObject *object)
   }
   filebrowser_backend_cancel (priv->fbbackend);
 
-	GTK_OBJECT_CLASS (gphpedit_file_browser_parent_class)->destroy (object);
-}
-
-static void
-gphpedit_file_browser_finalize (GObject *object)
-{
-	gphpeditFileBrowserPrivate *priv;
-
-	priv = FILEBROWSER_BACKEND_GET_PRIVATE(object);
-
-	G_OBJECT_CLASS (gphpedit_file_browser_parent_class)->finalize (object);
-}
-
-static void 
-gphpedit_file_browser_class_init (gphpeditFileBrowserClass *klass)
-{
-	GObjectClass   *object_class = G_OBJECT_CLASS (klass);
-	GtkObjectClass *gtkobject_class = GTK_OBJECT_CLASS (klass);
-	gphpedit_file_browser_parent_class = g_type_class_peek_parent (klass);
-	object_class->finalize = gphpedit_file_browser_finalize;
-	gtkobject_class->destroy = gphpedit_file_browser_destroy;
-	
-	g_type_class_add_private (object_class, sizeof(gphpeditFileBrowserPrivate));
+  /* Chain up to the parent class */
+  G_OBJECT_CLASS (gphpedit_file_browser_parent_class)->dispose (object);
 }
 /*
 * gphpedit_filebrowser_init
@@ -194,7 +154,7 @@ gphpedit_file_browser_class_init (gphpeditFileBrowserClass *klass)
 * creates all filebrowser widgets and the filebrowser backend
 */
 static void
-gphpedit_filebrowser_init (gphpeditFileBrowser *button)
+gphpedit_file_browser_init (gphpeditFileBrowser *button)
 {
   gphpeditFileBrowserPrivate *priv = FILEBROWSER_BACKEND_GET_PRIVATE(button);
   gchar *current_dir;
@@ -202,7 +162,7 @@ gphpedit_filebrowser_init (gphpeditFileBrowser *button)
   priv->fbbackend= filebrowser_backend_new (current_dir);
   priv->handlerid = g_signal_connect(G_OBJECT(priv->fbbackend), "done_loading", G_CALLBACK(print_files), priv);
   priv->handleridchange = g_signal_connect(G_OBJECT(priv->fbbackend), "change_folder", G_CALLBACK(change_folder_cb), priv);
-  priv->folder = gtk_vbox_new(FALSE, 0);
+  priv->folder = gtk_vbox_new(FALSE, 1);
 
   GtkTreeViewColumn *pColumn;
   GtkCellRenderer  *pCellRenderer;
@@ -237,7 +197,7 @@ gphpedit_filebrowser_init (gphpeditFileBrowser *button)
   g_signal_connect(G_OBJECT(priv->button_dialog), "pressed", G_CALLBACK(pressed_button_file_chooser), priv->fbbackend);
   gtk_widget_set_size_request (priv->pListView,80,450);
 
-  /* home and up buttons*/
+  /* home and up buttons */
   GtkWidget *hbox2;
   hbox2 = gtk_hbox_new(FALSE, 0);
   /* home button */

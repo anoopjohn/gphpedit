@@ -29,7 +29,7 @@
 
 G_BEGIN_DECLS
 
-#define GPHPEDIT_TYPE_FILEBROWSER			(gphpedit_filebrowser_get_type ())
+#define GPHPEDIT_TYPE_FILEBROWSER			(gphpedit_file_browser_get_type ())
 #define GPHPEDIT_FILEBROWSER(obj)			(G_TYPE_CHECK_INSTANCE_CAST ((obj), GPHPEDIT_TYPE_FILEBROWSER, gphpeditFileBrowser))
 #define GPHPEDIT_FILEBROWSER_CONST(obj)		(G_TYPE_CHECK_INSTANCE_CAST ((obj), gphpedit_TYPE_FILEBROWSER, gphpeditFileBrowser const))
 #define GPHPEDIT_FILEBROWSER_CLASS(klass)		(G_TYPE_CHECK_CLASS_CAST ((klass), gphpedit_TYPE_FILEBROWSER, gphpeditFileBrowserClass))
