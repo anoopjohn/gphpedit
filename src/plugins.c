@@ -183,6 +183,7 @@ static inline gchar *command_spawn(const gchar* command_line)
 }
 
 gboolean is_internal_command(gchar *command){
+  if (!command) return TRUE;
   if (g_str_has_prefix(command, "INSERT")){
       return TRUE;
     }
@@ -450,8 +451,11 @@ Plugin *plugin_new (gchar *filename)
 
   /* get active status, default value TRUE */
   /* Note:: multiple plugins with the same name share the same status */
-  plugdet->active = get_plugin_is_active(main_window.prefmg, plugdet->name);
-
+  if (plugdet->name) {
+    plugdet->active = get_plugin_is_active(main_window.prefmg, plugdet->name);
+  } else {
+    plugdet->active = FALSE;
+  }
   gphpedit_debug_message(DEBUG_PLUGINS,"Name: %s(%d)\n", plugdet->name, plugdet->type);
 	return plug; /* return new object */
 }

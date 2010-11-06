@@ -177,7 +177,14 @@ static void plugin_discover_available(PluginManager *plugmg)
       for (plugin_name = g_dir_read_name(dir); plugin_name != NULL; plugin_name = g_dir_read_name(dir)) {
         filename = g_string_new(plugin_name);
         filename = g_string_prepend(filename, plugin_dir);
-        new_plugin(plugmg,filename->str);
+        GFile *file = g_file_new_for_commandline_arg (filename->str);
+        GError *error=NULL;
+        GFileInfo *info =g_file_query_info (file, G_FILE_ATTRIBUTE_ACCESS_CAN_EXECUTE, G_FILE_QUERY_INFO_NOFOLLOW_SYMLINKS, NULL,&error);
+        if (!info) continue;
+        if (g_file_info_get_attribute_boolean (info, G_FILE_ATTRIBUTE_ACCESS_CAN_EXECUTE)){
+          new_plugin(plugmg,filename->str);
+        }
+        g_object_unref(info);
         g_string_free (filename,TRUE);
       }
       g_dir_close(dir);      
