@@ -118,16 +118,16 @@ def write_fun(dict):
     sci_defs.append(fun_def + ';\n')
     sci_impl.append(fun_def + fun_body + '\n')
 
-def write_val(dict):
-    val_template = '#define %(name)s %(value)s'
+#def write_val(dict):
+#    val_template = '#define %(name)s %(value)s'
     
-    sci_defs.append(val_template % dict + '\n')
+#    sci_defs.append(val_template % dict + '\n')
 
 def main():
     iface = open('scintilla/include/Scintilla.iface', 'r')
     
     fun_re = '^(fun|get|set)\s+(?P<ret_type>\S+)\s+(?P<fun_name>\S+)=(?P<msg_num>\d+)?\(((?P<first_type>\w+)\s+(?P<first_name>\w+)\s*)?,(\s*(?P<second_type>\w+)\s+(?P<second_name>\w+))?\)'
-    val_re = '^val\s+(?P<name>\w+)\s*=\s*(?P<value>.+)$'
+#    val_re = '^val\s+(?P<name>\w+)\s*=\s*(?P<value>.+)$'
     
     line = iface.readline()
     while line != '':
@@ -137,8 +137,8 @@ def main():
         
         if re.match(fun_re, line):
             write_fun(re.match(fun_re, line).groupdict())
-        elif re.match(val_re, line):
-            write_val(re.match(val_re, line).groupdict())
+#        elif re.match(val_re, line):
+#            write_val(re.match(val_re, line).groupdict())
         
         line = iface.readline()
     

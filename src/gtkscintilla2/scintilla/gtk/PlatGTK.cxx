@@ -33,6 +33,12 @@
 
 #include "Converter.h"
 
+#if GTK_CHECK_VERSION(2,20,0)
+#define IS_WIDGET_FOCUSSED(w) (gtk_widget_has_focus(GTK_WIDGET(w)))
+#else
+#define IS_WIDGET_FOCUSSED(w) (GTK_WIDGET_HAS_FOCUS(w))
+#endif
+
 #ifdef _MSC_VER
 // Ignore unreferenced local functions in GTK+ headers
 #pragma warning(disable: 4505)
@@ -121,8 +127,10 @@ public:
 		ResetWidths(et);
 	}
 	~FontHandle() {
+#ifndef DISABLE_GDK_FONT
 		if (pfont)
-			g_object_unref(pfont);
+			gdk_font_unref(pfont);
+#endif
 		pfont = 0;
 		if (pfd)
 			pango_font_description_free(pfd);
@@ -267,6 +275,8 @@ void Palette::Allocate(Window &w) {
 	delete []successPalette;
 }
 
+#ifndef DISABLE_GDK_FONT
+
 static const char *CharacterSetName(int characterSet) {
 	switch (characterSet) {
 	case SC_CHARSET_ANSI:
@@ -373,6 +383,8 @@ static void GenerateFontSpecStrings(const char *fontName, int characterSet,
 		strncpy(charset, CharacterSetName(characterSet), charset_len - 1);
 	}
 }
+
+#endif
 
 static void SetLogFont(LOGFONT &lf, const char *faceName, int characterSet, int size, bool bold, bool italic) {
 	memset(&lf, 0, sizeof(lf));
@@ -481,6 +493,7 @@ void FontCached::ReleaseId(FontID fid_) {
 	FontMutexUnlock();
 }
 
+#ifndef DISABLE_GDK_FONT
 static GdkFont *LoadFontOrSet(const char *fontspec, int characterSet) {
 	if (IsDBCSCharacterSet(characterSet)) {
 		return gdk_fontset_load(fontspec);
@@ -488,20 +501,10 @@ static GdkFont *LoadFontOrSet(const char *fontspec, int characterSet) {
 		return gdk_font_load(fontspec);
 	}
 }
+#endif
 
 FontID FontCached::CreateNewFont(const char *fontName, int characterSet,
                                  int size, bool bold, bool italic) {
-	char fontset[1024];
-	char fontspec[300];
-	char foundary[50];
-	char faceName[100];
-	char charset[50];
-	fontset[0] = '\0';
-	fontspec[0] = '\0';
-	foundary[0] = '\0';
-	faceName[0] = '\0';
-	charset[0] = '\0';
-
 	if (fontName[0] == '!') {
 		PangoFontDescription *pfd = pango_font_description_new();
 		if (pfd) {
@@ -512,6 +515,18 @@ FontID FontCached::CreateNewFont(const char *fontName, int characterSet,
 			return new FontHandle(pfd, characterSet);
 		}
 	}
+
+#ifndef DISABLE_GDK_FONT
+	char fontset[1024];
+	char fontspec[300];
+	char foundary[50];
+	char faceName[100];
+	char charset[50];
+	fontset[0] = '\0';
+	fontspec[0] = '\0';
+	foundary[0] = '\0';
+	faceName[0] = '\0';
+	charset[0] = '\0';
 
 	GdkFont *newid = 0;
 	// If name of the font begins with a '-', assume, that it is
@@ -598,7 +613,6 @@ FontID FontCached::CreateNewFont(const char *fontName, int characterSet,
 		newid = gdk_fontset_load(fontset);
 		if (newid)
 			return new FontHandle(newid);
-
 		// if fontset load failed, fall through, we'll use
 		// the last font entry and continue to try and
 		// get something that matches
@@ -647,6 +661,9 @@ FontID FontCached::CreateNewFont(const char *fontName, int characterSet,
 			characterSet);
 	}
 	return new FontHandle(newid);
+#else
+	return new FontHandle(0);
+#endif
 }
 
 Font::Font() : fid(0) {}
@@ -746,11 +763,11 @@ const char *CharacterSetID(int characterSet) {
 	case SC_CHARSET_EASTEUROPE:
 		return "ISO-8859-2";
 	case SC_CHARSET_GB2312:
-		return "GB2312";
+		return "CP936";
 	case SC_CHARSET_GREEK:
 		return "ISO-8859-7";
 	case SC_CHARSET_HANGUL:
-		return "";
+		return "CP949";
 	case SC_CHARSET_MAC:
 		return "MACINTOSH";
 	case SC_CHARSET_OEM:
@@ -766,7 +783,7 @@ const char *CharacterSetID(int characterSet) {
 	case SC_CHARSET_TURKISH:
 		return "ISO-8859-9";
 	case SC_CHARSET_JOHAB:
-		return "JOHAB";
+		return "CP1361";
 	case SC_CHARSET_HEBREW:
 		return "ISO-8859-8";
 	case SC_CHARSET_ARABIC:
@@ -954,7 +971,7 @@ void SurfaceImpl::FillRectangle(PRectangle rc, Surface &surfacePattern) {
 			int widthx = (xTile + widthPat > rc.right) ? rc.right - xTile : widthPat;
 			for (int yTile = rc.top; yTile < rc.bottom; yTile += heightPat) {
 				int heighty = (yTile + heightPat > rc.bottom) ? rc.bottom - yTile : heightPat;
-				gdk_draw_drawable (drawable,
+				gdk_draw_drawable(drawable,
 				                gc,
 				                static_cast<SurfaceImpl &>(surfacePattern).drawable,
 				                0, 0,
@@ -1080,7 +1097,7 @@ void SurfaceImpl::Ellipse(PRectangle rc, ColourAllocated fore, ColourAllocated b
 
 void SurfaceImpl::Copy(PRectangle rc, Point from, Surface &surfaceSource) {
 	if (static_cast<SurfaceImpl &>(surfaceSource).drawable) {
-		gdk_draw_drawable (drawable,
+		gdk_draw_drawable(drawable,
 		                gc,
 		                static_cast<SurfaceImpl &>(surfaceSource).drawable,
 		                from.x, from.y,
@@ -1089,6 +1106,7 @@ void SurfaceImpl::Copy(PRectangle rc, Point from, Surface &surfaceSource) {
 	}
 }
 
+#ifndef DISABLE_GDK_FONT
 static size_t UTF8Len(char ch) {
 	unsigned char uch = static_cast<unsigned char>(ch);
 	if (uch < 0x80)
@@ -1098,6 +1116,7 @@ static size_t UTF8Len(char ch) {
 	else
 		return 3;
 }
+#endif
 
 char *UTF8FromLatin1(const char *s, int &len) {
 	char *utfForm = new char[len*2+1];
@@ -1151,6 +1170,7 @@ static size_t MultiByteLenFromIconv(const Converter &conv, const char *s, size_t
 	return 1;
 }
 
+#ifndef DISABLE_GDK_FONT
 static char *UTF8FromGdkWChar(GdkWChar *wctext, int wclen) {
 	char *utfForm = new char[wclen*3+1];	// Maximum of 3 UTF-8 bytes per character
 	size_t lenU = 0;
@@ -1170,8 +1190,10 @@ static char *UTF8FromGdkWChar(GdkWChar *wctext, int wclen) {
 	utfForm[lenU] = '\0';
 	return utfForm;
 }
+#endif
 
 static char *UTF8FromDBCS(const char *s, int &len) {
+#ifndef DISABLE_GDK_FONT
 	GdkWChar *wctext = new GdkWChar[len + 1];
 	GdkWChar *wcp = wctext;
 	int wclen = gdk_mbstowcs(wcp, s, len);
@@ -1186,6 +1208,9 @@ static char *UTF8FromDBCS(const char *s, int &len) {
 	delete []wctext;
 	len = strlen(utfForm);
 	return utfForm;
+#else
+	return 0;
+#endif
 }
 
 static size_t UTF8CharLength(const char *s) {
@@ -1244,6 +1269,7 @@ void SurfaceImpl::DrawTextBase(PRectangle rc, Font &font_, int ybase, const char
 			}
 			return;
 		}
+#ifndef DISABLE_GDK_FONT
 		// Draw text as a series of segments to avoid limitations in X servers
 		const int segmentLength = 1000;
 		bool draw8bit = true;
@@ -1291,6 +1317,7 @@ void SurfaceImpl::DrawTextBase(PRectangle rc, Font &font_, int ybase, const char
 				s += lenDraw;
 			}
 		}
+#endif
 	}
 }
 
@@ -1354,7 +1381,6 @@ public:
 
 void SurfaceImpl::MeasureWidths(Font &font_, const char *s, int len, int *positions) {
 	if (font_.GetID()) {
-		int totalWidth = 0;
 		const int lenPositions = len;
 		if (PFont(font_)->pfd) {
 			if (len == 1) {
@@ -1453,6 +1479,8 @@ void SurfaceImpl::MeasureWidths(Font &font_, const char *s, int len, int *positi
 			}
 			return;
 		}
+#ifndef DISABLE_GDK_FONT
+		int totalWidth = 0;
 		GdkFont *gf = PFont(font_)->pfont;
 		bool measure8bit = true;
 		if (et != singleByte) {
@@ -1503,6 +1531,7 @@ void SurfaceImpl::MeasureWidths(Font &font_, const char *s, int len, int *positi
 				positions[i] = totalWidth;
 			}
 		}
+#endif
 	} else {
 		// No font so return an ascending range of values
 		for (int i = 0; i < len; i++) {
@@ -1547,6 +1576,7 @@ int SurfaceImpl::WidthText(Font &font_, const char *s, int len) {
 			}
 			return PANGO_PIXELS(pos.width);
 		}
+#ifndef DISABLE_GDK_FONT
 		if (et == UTF8) {
 			GdkWChar wctext[maxLengthTextRun];
 			size_t wclen = UTF16FromUTF8(s, len, static_cast<wchar_t *>(static_cast<void *>(wctext)),
@@ -1556,6 +1586,9 @@ int SurfaceImpl::WidthText(Font &font_, const char *s, int len) {
 		} else {
 			return gdk_text_width(PFont(font_)->pfont, s, len);
 		}
+#else
+		return 1;
+#endif
 	} else {
 		return 1;
 	}
@@ -1566,7 +1599,11 @@ int SurfaceImpl::WidthChar(Font &font_, char ch) {
 		if (PFont(font_)->pfd) {
 			return WidthText(font_, &ch, 1);
 		}
+#ifndef DISABLE_GDK_FONT
 		return gdk_char_width(PFont(font_)->pfont, ch);
+#else
+		return 1;
+#endif
 	} else {
 		return 1;
 	}
@@ -1603,9 +1640,11 @@ int SurfaceImpl::Ascent(Font &font_) {
 		pango_font_metrics_unref(metrics);
 		ascent = PFont(font_)->ascent;
 	}
+#ifndef DISABLE_GDK_FONT
 	if ((ascent == 0) && (PFont(font_)->pfont)) {
 		ascent = PFont(font_)->pfont->ascent;
 	}
+#endif
 	if (ascent == 0) {
 		ascent = 1;
 	}
@@ -1637,7 +1676,11 @@ int SurfaceImpl::Descent(Font &font_) {
 		pango_font_metrics_unref(metrics);
 		return descent;
 	}
+#ifndef DISABLE_GDK_FONT
 	return PFont(font_)->pfont->descent;
+#else
+	return 0;
+#endif
 #else
 
 	gint lbearing;
@@ -1704,7 +1747,7 @@ void Window::Destroy() {
 }
 
 bool Window::HasFocus() {
-	return gtk_widget_has_focus(GTK_WIDGET(wid));
+	return IS_WIDGET_FOCUSSED(wid);
 }
 
 PRectangle Window::GetPosition() {
@@ -1821,7 +1864,7 @@ void Window::SetCursor(Cursor curs) {
 
 	if (PWidget(wid)->window)
 		gdk_window_set_cursor(PWidget(wid)->window, gdkCurs);
-	gdk_cursor_destroy(gdkCurs);
+	gdk_cursor_unref(gdkCurs);
 }
 
 void Window::SetTitle(const char *s) {
@@ -2342,7 +2385,13 @@ Menu::Menu() : mid(0) {}
 
 void Menu::CreatePopUp() {
 	Destroy();
-	mid = gtk_item_factory_new(GTK_TYPE_MENU, "<main>", NULL);
+	mid = gtk_menu_new();
+#if GLIB_CHECK_VERSION(2,10,0)
+	 g_object_ref_sink(G_OBJECT(mid));
+#else
+	g_object_ref(G_OBJECT(mid));
+	gtk_object_sink(GTK_OBJECT(G_OBJECT(mid)));
+#endif
 }
 
 void Menu::Destroy() {
@@ -2351,22 +2400,28 @@ void Menu::Destroy() {
 	mid = 0;
 }
 
+static void  MenuPositionFunc(GtkMenu *, gint *x, gint *y, gboolean *, gpointer userData) {
+	sptr_t intFromPointer = reinterpret_cast<sptr_t>(userData);
+	*x = intFromPointer & 0xffff;
+	*y = intFromPointer >> 16;
+}
+
 void Menu::Show(Point pt, Window &) {
 	int screenHeight = gdk_screen_height();
 	int screenWidth = gdk_screen_width();
-	GtkItemFactory *factory = reinterpret_cast<GtkItemFactory *>(mid);
-	GtkWidget *widget = gtk_item_factory_get_widget(factory, "<main>");
-	gtk_widget_show_all(widget);
+	GtkMenu *widget = reinterpret_cast<GtkMenu *>(mid);
+	gtk_widget_show_all(GTK_WIDGET(widget));
 	GtkRequisition requisition;
-	gtk_widget_size_request(widget, &requisition);
+	gtk_widget_size_request(GTK_WIDGET(widget), &requisition);
 	if ((pt.x + requisition.width) > screenWidth) {
 		pt.x = screenWidth - requisition.width;
 	}
 	if ((pt.y + requisition.height) > screenHeight) {
 		pt.y = screenHeight - requisition.height;
 	}
-	gtk_item_factory_popup(factory, pt.x - 4, pt.y - 4, 3,
-	gtk_get_current_event_time());
+	gtk_menu_popup(widget, NULL, NULL, MenuPositionFunc,
+		reinterpret_cast<void *>((pt.y << 16) | pt.x), 0,
+		gtk_get_current_event_time());
 }
 
 ElapsedTime::ElapsedTime() {

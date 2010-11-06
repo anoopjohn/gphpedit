@@ -20,7 +20,6 @@
 #include "gtkscintilla.h"
 #include "marshal.h"
 
-#include "scintilla/include/Scintilla.h"
 #include "scintilla/include/ScintillaWidget.h"
 #define GPOINTER_TO_LONG(p)  ((glong) (p))
 /* Handled Signals */
@@ -347,7 +346,6 @@ gchar * gtk_scintilla_get_full_text (GtkScintilla *sci)
                                       (gulong) buffer);
     return buffer;
 }
-
 
 gchar * gtk_scintilla_get_current_selected_text(GtkScintilla *sci)
 {
@@ -3056,13 +3054,13 @@ gint gtk_scintilla_find_column(GtkScintilla *sci, gint line, gint column)
         2456, (gulong) line, (gulong) column);
 }
 
-gboolean gtk_scintilla_get_caret_sticky(GtkScintilla *sci)
+gint gtk_scintilla_get_caret_sticky(GtkScintilla *sci)
 {
     return scintilla_send_message(SCINTILLA(sci->scintilla),
         2457, 0, 0);
 }
 
-void gtk_scintilla_set_caret_sticky(GtkScintilla *sci, gboolean use_caret_sticky_behaviour)
+void gtk_scintilla_set_caret_sticky(GtkScintilla *sci, gint use_caret_sticky_behaviour)
 {
     scintilla_send_message(SCINTILLA(sci->scintilla),
         2458, (gulong) use_caret_sticky_behaviour, 0);
@@ -3668,6 +3666,24 @@ void gtk_scintilla_swap_main_anchor_caret(GtkScintilla *sci)
         2607, 0, 0);
 }
 
+gint gtk_scintilla_change_lexer_state(GtkScintilla *sci, glong start, glong end)
+{
+    return scintilla_send_message(SCINTILLA(sci->scintilla),
+        2617, (gulong) start, (gulong) end);
+}
+
+gint gtk_scintilla_contracted_fold_next(GtkScintilla *sci, gint line_start)
+{
+    return scintilla_send_message(SCINTILLA(sci->scintilla),
+        2618, (gulong) line_start, 0);
+}
+
+void gtk_scintilla_vertical_centre_caret(GtkScintilla *sci)
+{
+    scintilla_send_message(SCINTILLA(sci->scintilla),
+        2619, 0, 0);
+}
+
 void gtk_scintilla_start_record(GtkScintilla *sci)
 {
     scintilla_send_message(SCINTILLA(sci->scintilla),
@@ -3750,6 +3766,36 @@ gint gtk_scintilla_get_lexer_language(GtkScintilla *sci, gchar * text)
 {
     return scintilla_send_message(SCINTILLA(sci->scintilla),
         4012, 0, (gulong) text);
+}
+
+gint gtk_scintilla_private_lexer_call(GtkScintilla *sci, gint operation, gint pointer)
+{
+    return scintilla_send_message(SCINTILLA(sci->scintilla),
+        4013, (gulong) operation, (gulong) pointer);
+}
+
+gint gtk_scintilla_property_names(GtkScintilla *sci, gchar * names)
+{
+    return scintilla_send_message(SCINTILLA(sci->scintilla),
+        4014, 0, (gulong) names);
+}
+
+gint gtk_scintilla_property_type(GtkScintilla *sci, const gchar * name)
+{
+    return scintilla_send_message(SCINTILLA(sci->scintilla),
+        4015, (gulong) name, 0);
+}
+
+gint gtk_scintilla_describe_property(GtkScintilla *sci, const gchar * name, gchar * description)
+{
+    return scintilla_send_message(SCINTILLA(sci->scintilla),
+        4016, (gulong) name, (gulong) description);
+}
+
+gint gtk_scintilla_describe_key_word_sets(GtkScintilla *sci, gchar * descriptions)
+{
+    return scintilla_send_message(SCINTILLA(sci->scintilla),
+        4017, 0, (gulong) descriptions);
 }
 
 

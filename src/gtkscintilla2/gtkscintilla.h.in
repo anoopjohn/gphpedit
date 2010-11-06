@@ -22,6 +22,8 @@
 #define __GTK_SCINTILLA_H__
 
 #include <gtk/gtk.h>
+#include "scintilla/include/Scintilla.h"
+#include "scintilla/include/SciLexer.h"
 
 G_BEGIN_DECLS /* adds extern "C" around the header */
 
