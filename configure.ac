@@ -248,6 +248,7 @@ gphpedit.spec
 data/Makefile
 doc/Makefile
 pixmaps/Makefile
+plugins/Makefile
 themes/Makefile
 po/Makefile.in
 src/Makefile

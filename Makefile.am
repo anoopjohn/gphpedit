@@ -24,6 +24,7 @@ SUBDIRS = \
 	data	\
 	doc	\
 	pixmaps	\
+	plugins	\
 	src \
 	po \
   themes
