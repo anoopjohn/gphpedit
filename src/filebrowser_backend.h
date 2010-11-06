@@ -28,18 +28,6 @@
 #include <gtk/gtk.h>
 #include <gio/gio.h>
 
-/* FilebrowserBackend is a class that manages the model for a directory,
-   real or virtual, for Nautilus, mainly the file-manager component. The directory is
-   responsible for managing both real data and cached metadata. On top of
-   the file system independence provided by gio, the directory
-   object also provides:
-  
-       1) A synchronization framework, which notifies via signals as the
-          set of known files changes.
-       2) An abstract interface for getting attributes and performing
-          operations on files.
-*/
-
 #define FILEBROWSER_TYPE_BACKEND filebrowser_backend_get_type()
 #define FILEBROWSER_BACKEND(obj) \
   (G_TYPE_CHECK_INSTANCE_CAST ((obj), FILEBROWSER_TYPE_BACKEND, FilebrowserBackend))
@@ -78,7 +66,7 @@ typedef struct
 } FilebrowserBackendClass;
 
 /* Basic GObject requirements. */
-GType              filebrowser_backend_get_type                 (void);
+GType filebrowser_backend_get_type (void);
 FilebrowserBackend *filebrowser_backend_new (const gchar *folder);
 const gchar *get_filebrowser_backend_current_folder(FilebrowserBackend *fbback);
 guint get_filebrowser_backend_number_files(FilebrowserBackend *fbback);
@@ -93,6 +81,6 @@ void filebrowser_backend_delete_file(FilebrowserBackend *filebackend, gchar *fil
 void filebrowser_backend_create_dir(FilebrowserBackend *filebackend, gchar *filename, gchar *name, gboolean isdir);
 gchar *filebrowser_backend_get_display_name(FilebrowserBackend *filebackend, gchar *filename);
 void filebrowser_backend_rename_file(FilebrowserBackend *filebackend,gchar *filename, gchar *current_name, gchar *new_name);
-gboolean  filebrowser_backend_process_drag_drop(FilebrowserBackend *filebackend, gchar *stringdata);
+gboolean filebrowser_backend_process_drag_drop(FilebrowserBackend *filebackend, gchar *stringdata);
 #endif /* FILEBROWSER_BACKEND_H */
 

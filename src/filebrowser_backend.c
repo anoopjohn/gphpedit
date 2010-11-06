@@ -63,11 +63,7 @@ struct FilebrowserBackendDetails
 static guint signals[LAST_SIGNAL];
 
 static void               filebrowser_backend_finalize         (GObject                *object);
-static void               filebrowser_backend_init             (gpointer                object,
-							       gpointer                klass);
 static void               filebrowser_backend_class_init (FilebrowserBackendClass *klass);
-static gpointer filebrowser_backend_parent_class;
-
 static inline void change_current_folder(FilebrowserBackend *filebackend, const gchar *new_folder);
 
 gboolean populate_files (gpointer data);
@@ -81,31 +77,7 @@ static FOLDERFILE *new_folderfile(void)
   return file;
 }
 
-GType
-filebrowser_backend_get_type (void)
-{
-    static GType our_type = 0;
-    
-    if (!our_type) {
-        static const GTypeInfo our_info =
-        {
-            sizeof (FilebrowserBackendClass),
-            NULL,               /* base_init */
-            NULL,               /* base_finalize */
-            (GClassInitFunc) filebrowser_backend_class_init,
-            NULL,               /* class_finalize */
-            NULL,               /* class_data */
-            sizeof (FilebrowserBackend),
-            0,                  /* n_preallocs */
-            (GInstanceInitFunc) filebrowser_backend_init,
-        };
-
-        our_type = g_type_register_static (G_TYPE_OBJECT, "FilebrowserBackend",
-                                           &our_info, 0);
-  }
-    
-    return our_type;
-}
+G_DEFINE_TYPE(FilebrowserBackend, filebrowser_backend, G_TYPE_OBJECT);
 
 static void
 filebrowser_backend_class_init (FilebrowserBackendClass *klass)
@@ -113,9 +85,7 @@ filebrowser_backend_class_init (FilebrowserBackendClass *klass)
 	GObjectClass *object_class;
 
 	object_class = G_OBJECT_CLASS (klass);
-	
 	object_class->finalize = filebrowser_backend_finalize;
-	filebrowser_backend_parent_class = g_type_class_peek_parent (klass);
 
 	signals[DONE_LOADING] =
 		g_signal_new ("done_loading",
@@ -139,7 +109,7 @@ filebrowser_backend_class_init (FilebrowserBackendClass *klass)
 }
 
 static void
-filebrowser_backend_init (gpointer object, gpointer klass)
+filebrowser_backend_init (FilebrowserBackend *object)
 {
 //	FilebrowserBackendDetails *directory;
 //	directory = FILEBROWSER_BACKEND_GET_PRIVATE(object);
