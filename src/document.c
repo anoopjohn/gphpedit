@@ -2214,6 +2214,7 @@ gboolean document_search_replace_text(Document *doc, const gchar *text, const gc
 
 void document_goto_line(Document *doc,gint line)
 {
+  gphpedit_debug (DEBUG_DOCUMENT);
   g_return_if_fail(doc);
   DocumentDetails *docdet = DOCUMENT_GET_PRIVATE(doc);
   if (GTK_IS_SCINTILLA(docdet->scintilla)){
@@ -2482,6 +2483,7 @@ gchar *document_get_current_word(Document *doc)
 
 void document_scroll_to_current_pos(Document *document)
 {
+  gphpedit_debug (DEBUG_DOCUMENT);
   g_return_if_fail(document);
   DocumentDetails *docdet = DOCUMENT_GET_PRIVATE(document);
   if (GTK_IS_SCINTILLA(docdet->scintilla)){
