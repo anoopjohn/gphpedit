@@ -54,6 +54,7 @@ SyntaxCheckManager *syntax_check_manager_new (void)
 	return g_object_new (SYNTAX_CHECK_MANAGER_TYPE, NULL); /* return new object */
 }
 
+
 /*
 * (internal)
 */
@@ -76,7 +77,52 @@ gchar *run_php_lint(gchar *command_line)
   g_free(stdout);
   return res;
 }
+/*
+* (internal)
+*/
 
+gchar *process_php_lines(gchar *output)
+{
+  gchar *copy;
+  gchar *token;
+  gchar *line_number;
+  GString *result;
+  copy = output;
+  result = g_string_new (NULL);
+  copy=g_strdup_printf("\n%s", output);
+  while ((token = strtok(copy, "\n"))) {
+      if (g_str_has_prefix(token, "PHP Warning:  ")){
+        token+=14; //skip 'PHP Warning:  '
+        line_number = strstr(token, "line ");
+        if (line_number){
+        line_number+=5; /* len of 'line '*/
+        }
+        gint num=atoi(line_number);
+        if (num>0) {
+          g_string_append_printf (result, "%d W %s\n", num, token);
+        } else {
+          g_string_append_printf (result, "%s\n", token);
+        }
+      } else if (g_str_has_prefix(token,"PHP Parse error:  syntax error, ")){
+        token+=32; // skip 'PHP Parse error:  syntax error, '
+        line_number = strrchr(token, ' ');
+        line_number++;
+        if (atoi(line_number)>0) {
+          g_string_append_printf (result, "%d E %s\n", atoi(line_number), token);
+        } else {
+          g_string_append_printf (result, "%s\n", token);
+        }
+      } else {
+         if (!g_str_has_prefix(token, "Content-type")){
+           g_string_append_printf (result, "%s\n", token);
+         } 
+      }
+      copy = NULL;
+    }
+  gphpedit_debug_message(DEBUG_SYNTAX, "result:%s\n", result->str);
+  return g_string_free (result,FALSE);
+
+}
 /*
 * (internal)
 */
@@ -164,18 +210,26 @@ GString *get_syntax_filename(Document *document, gboolean *using_temp)
   g_free(docfilename);
   return filename;
 }
-//FIXME: move perl support into a new plugin and remove this.
 gchar *syntax_check_manager_run(Document *document)
 {
   GString *command_line=NULL;
   gchar *output;
   gboolean using_temp;
   GString *filename = NULL;
+  const gchar *php_binary_location;
+  PreferencesManager *pref;
   gint type;
   g_object_get(document, "type", &type, NULL);
 
   command_line = g_string_new(NULL);
   switch(type) {
+    case TAB_PHP:
+      pref = preferences_manager_new ();
+      g_object_get(main_window.prefmg, "php_binary_location", &php_binary_location, NULL);
+      filename = get_syntax_filename(document, &using_temp);
+      g_string_append_printf (command_line, "%s -q -l -d html_errors=Off -f '%s'", php_binary_location, filename->str);
+      g_object_unref(pref);
+      break;
     case TAB_PERL:
       filename = get_syntax_filename(document, &using_temp);
       g_string_append_printf(command_line, "perl -c '%s'", filename->str);
@@ -193,6 +247,9 @@ gchar *syntax_check_manager_run(Document *document)
   gchar *result=NULL;
   if (output) {
     switch(type) {
+      case TAB_PHP:
+        result = process_php_lines(output);
+        break;
       case TAB_PERL:
         result = process_perl_lines(output);
         break;
