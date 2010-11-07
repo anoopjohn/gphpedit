@@ -341,16 +341,13 @@ void document_manager_session_save(DocumentManager *docmg)
   GSList *walk;
   Document *document;
   Document *current_focus_editor;
-  GString *session_file;
   GString *session_file_contents;
   gboolean save_session, untitled;
   gint type;
 
-  session_file = g_string_new(g_get_home_dir());
-  session_file = g_string_append(session_file, "/.gphpedit/session");
-  
-  GFile *file = g_file_new_for_commandline_arg(session_file->str);
-  g_string_free(session_file,TRUE);
+  gchar *uri = g_build_filename (g_get_user_config_dir (), "gphpedit", "session", NULL);
+  GFile *file = g_file_new_for_commandline_arg(uri);
+  g_free(uri);
   GError *error=NULL;
 
   g_object_get (main_window.prefmg, "save_session", &save_session, NULL);
@@ -408,17 +405,16 @@ void document_manager_session_reopen(DocumentManager *docmg)
   gphpedit_debug(DEBUG_DOC_MANAGER);
   if (!docmg) return ;
   DocumentManagerDetails *docmgdet = DOCUMENT_MANAGER_GET_PRIVATE(docmg);
-  GString *session_file;
   char *filename;
   int focus_tab=-1;
   gboolean focus_this_one = FALSE;
-  session_file = g_string_new( g_get_home_dir());
-  session_file = g_string_append(session_file, "/.gphpedit/session");
-  GFile *file = g_file_new_for_commandline_arg(session_file->str);
+
+  gchar *uri = g_build_filename (g_get_user_config_dir (), "gphpedit", "session", NULL);
+  GFile *file = g_file_new_for_commandline_arg(uri);
 
   if(g_file_query_exists(file,NULL)){
     int number =0;
-    gchar *content=read_text_file_sync(session_file->str);
+    gchar *content=read_text_file_sync(uri);
     gchar **strings;
     strings = g_strsplit (content,"\n",0);
       int i=0;
@@ -479,7 +475,7 @@ void document_manager_session_reopen(DocumentManager *docmg)
       }
       g_error_free (error);
   }
-  g_string_free(session_file,TRUE);
+  g_free(uri);
   g_object_unref (file);
 }
 

@@ -2,7 +2,7 @@
 
    Copyright (C) 2003, 2004, 2005 Andy Jeffries <andy at gphpedit.org>
    Copyright (C) 2009 Anoop John <anoop dot john at zyxware.com>
-   Copyright (C) 2009 José Rostagno (for vijona.com.ar) 
+   Copyright (C) 2009, 2010 José Rostagno (for vijona.com.ar) 
 
    For more information or to find the latest release, visit our 
    website at http://www.gphpedit.org/
@@ -92,13 +92,12 @@ plugin_manager_init (PluginManager  *object)
 	PluginManagerDetails *plugmgdet;
 	plugmgdet = PLUGIN_MANAGER_GET_PRIVATE(object);
   /* init plugins table*/
-  plugmgdet->plugins_table = g_hash_table_new_full (g_str_hash, g_str_equal,NULL, g_object_unref);
+  plugmgdet->plugins_table = g_hash_table_new_full (g_str_hash, g_str_equal, NULL, g_object_unref);
   /* check for plugins directory, if doesn't exist create it */
   GError *error=NULL;
-  gchar *uri;
-  uri = g_strdup_printf("%s/%s/%s",g_get_home_dir(),".gphpedit","plugins");
-  if (!filename_file_exist(uri)){
-    GFile *plugin=g_file_new_for_commandline_arg (uri);
+  gchar *uri = g_build_filename (g_get_user_config_dir (), "gphpedit", "plugins", NULL);
+  GFile *plugin = g_file_new_for_commandline_arg(uri);
+  if(!g_file_query_exists(plugin,NULL)){
     if (!g_file_make_directory_with_parents (plugin, NULL, &error)){
       if (error->code !=G_IO_ERROR_EXISTS){
         g_print(_("Unable to create ~/.gphpedit/ (%d) %s"), error->code,error->message);
@@ -145,27 +144,23 @@ static void plugin_discover_available(PluginManager *plugmg)
 {
   GDir *dir;
   const gchar *plugin_name;
-  GString *user_plugin_dir;
   GString *filename;
-  
-  user_plugin_dir = g_string_new( g_get_home_dir());
-  user_plugin_dir = g_string_append(user_plugin_dir, "/.gphpedit/plugins/");
 
-  gphpedit_debug_message(DEBUG_PLUGINS, "User plugin directory: %s\n", user_plugin_dir->str);
+  gchar *uri = g_build_filename (g_get_user_config_dir (), "gphpedit", "plugins", NULL);
+  gphpedit_debug_message(DEBUG_PLUGINS, "User plugin directory: %s\n", uri);
 
-  if (g_file_test(user_plugin_dir->str, G_FILE_TEST_IS_DIR)) {
-    dir = g_dir_open(user_plugin_dir->str, 0,NULL);
+  if (g_file_test(uri, G_FILE_TEST_IS_DIR)) {
+    dir = g_dir_open(uri, 0, NULL);
     if (dir) {
       for (plugin_name = g_dir_read_name(dir); plugin_name != NULL; plugin_name = g_dir_read_name(dir)) {
-        filename = g_string_new(plugin_name);
-        filename = g_string_prepend(filename, user_plugin_dir->str);
-        new_plugin(plugmg,filename->str);
-        g_string_free (filename,TRUE);
+        gchar *filename2 = g_strdup_printf("%s/%s", uri, plugin_name);
+        new_plugin(plugmg, filename2);
+        g_free(filename2);
       }
       g_dir_close(dir);      
     }
   }
-  g_string_free(user_plugin_dir, TRUE);
+  g_free(uri);
 
   gchar *plugin_dir = NULL;
   /* use autoconf macro to build plugins path */
@@ -183,6 +178,8 @@ static void plugin_discover_available(PluginManager *plugmg)
         if (!info) continue;
         if (g_file_info_get_attribute_boolean (info, G_FILE_ATTRIBUTE_ACCESS_CAN_EXECUTE)){
           new_plugin(plugmg,filename->str);
+        } else {
+          g_warning("Don't have execute access for: %s\n", filename->str);
         }
         g_object_unref(info);
         g_string_free (filename,TRUE);

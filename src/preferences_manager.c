@@ -558,12 +558,12 @@ static void force_config_folder(void)
 {
   GError *error=NULL;
   GFile *config;
-  gchar *uri=g_strdup_printf("%s/%s",g_get_home_dir(),".gphpedit");
-  if (!filename_file_exist(uri)){
-    config=g_file_new_for_commandline_arg (uri);
+  gchar *uri = g_build_filename (g_get_user_config_dir (), "gphpedit", NULL);
+  config=g_file_new_for_commandline_arg (uri);
+  if (!g_file_query_exists(config, NULL)){
     if (!g_file_make_directory (config, NULL, &error)){
       if (error->code !=G_IO_ERROR_EXISTS){
-        g_print(_("Unable to create ~/.gphpedit/ (%d) %s"), error->code, error->message);
+        g_print(_("Unable to create %s (%d) %s"), uri, error->code, error->message);
         }
         g_error_free(error);
       }
