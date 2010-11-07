@@ -187,7 +187,6 @@ The following list all gPHPEdit’s shortcut keys.
     * Save (Ctrl + S)
     * Save as (SHIFT + Ctrl + S)
     * Save All (SHIFT + ALT + A)
-    * Rename file (SHIFT + ALT + R)
     * Close File (Ctrl + W)
     * Exit (Ctrl + Q)
 
@@ -240,7 +239,7 @@ The following list all gPHPEdit’s shortcut keys.
  7) Autocompletion:
     * Insert template (Ctrl + j)
 
-8) folding
+ 8) folding
 	* if you hold Ctrl key pressed and you click a fold mark, all it's children will be folded. 
 	* if you hold SHIFT key pressed and you click a fold mark, all it's children will be expanded. 
 ================
@@ -289,6 +288,12 @@ To put a gPHPEdit's specific theme or if you don't have gtksourceview installed,
 you should put the new theme in /usr/share/gphpedit/themes 
 or in /usr/local/share/gphpedit/themes 
 depending on instalation prefix.
+
+========================================
+Migrating old config files to new XDG folder (Since 0.9.98)
+========================================
+If you have custom plugins and templates in ~/.gphpedit/ you must copy that files to the directory
+pointing by the environment variable $XDG_CONFIG_HOME, usually ~/.config/gphpedit
 
 	The gPHPEdit team.
 
