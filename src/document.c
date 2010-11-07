@@ -147,7 +147,7 @@ void document_saver_done_saving_cb (DocumentSaver *docsav, Document *document, g
 /*
  * register Document type and returns a new GType
 */
-G_DEFINE_TYPE(Document, document, G_TYPE_OBJECT);  
+G_DEFINE_TYPE(Document, document, G_TYPE_OBJECT);
 
 enum
 {
@@ -1950,6 +1950,8 @@ GtkScintilla *document_get_scintilla(Document *document)
 void tab_check_type_file(Document *document) {
   if (!document) return;
   gchar *filename = document_get_filename(document);
+  /* reset type */
+  g_object_set(document, "type", TAB_FILE, NULL);
 
   if (is_perl_file(filename)) {
     set_document_to_type(document, TAB_PERL);
