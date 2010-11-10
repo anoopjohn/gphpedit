@@ -76,7 +76,6 @@ struct DocumentDetails
 	WebKitWebView *help_view;
 	GtkWidget *label;
   GFile *file;
-	gchar *help_function;
   gchar *short_filename;
 	GTimeVal file_mtime;
 	gboolean isreadonly;
@@ -144,6 +143,10 @@ void document_add_recent(Document *document);
 static void document_create_webkit(Document *doc, gboolean is_help, const gchar *raw_uri);
 void document_create_scintilla (Document *document, gchar *contents, gsize size);
 void document_saver_done_saving_cb (DocumentSaver *docsav, Document *document, gpointer user_data);
+static void document_find_next_marker(Document *doc);
+static void document_marker_modify(Document *doc, gint line);
+static void document_modify_current_line_marker(Document *doc);
+static void document_show_calltip_at_current_pos(Document *document);
 /*
  * register Document type and returns a new GType
 */
@@ -492,7 +495,6 @@ static void document_dispose (GObject *object)
   DocumentDetails *docdet;
 	docdet = DOCUMENT_GET_PRIVATE(doc);
   /* free object resources*/
-	if (docdet->help_function) g_free(docdet->help_function);
 	if (docdet->short_filename) g_free(docdet->short_filename);
 	if (docdet->file) g_object_unref(docdet->file);
 	if (docdet->file_icon) g_object_unref(docdet->file_icon);
@@ -573,12 +575,10 @@ static void document_create_webkit(Document *doc, gboolean is_help, const gchar 
   GString *caption=NULL;
   gchar *filename = document_get_filename(doc);
   if (is_help){ 
-  caption = g_string_new(docdet->help_function);
-  caption = g_string_prepend(caption, _("Help: "));
+  caption = g_string_new(_("Help: "));
   } else {
   caption = g_string_new(filename);
   caption = g_string_prepend(caption, _("Preview: "));
-  docdet->help_function = filename;
   }
   docdet->help_view= WEBKIT_WEB_VIEW(webkit_web_view_new ());
   docdet->help_scrolled_window = gtk_scrolled_window_new(NULL, NULL);
@@ -973,7 +973,7 @@ gboolean calltip_callback(gpointer data)
   return FALSE;
 }
 
-void document_show_calltip_at_current_pos(Document *document)
+static void document_show_calltip_at_current_pos(Document *document)
 {
   g_return_if_fail(document);
   DocumentDetails *docdet = DOCUMENT_GET_PRIVATE(document);
@@ -1627,11 +1627,32 @@ gchar *document_get_filename(Document *doc){
   return g_file_get_uri (docdet->file);
 }
 
-const gchar *document_get_help_function(Document *doc){
+gchar *document_get_session_entry(Document *doc)
+{
+  gphpedit_debug(DEBUG_DOCUMENT);
+  gchar *result;
+  DocumentDetails *docdet;
+  gboolean untitled;
+  gchar *docfilename;
+
   if (!doc) return NULL;
-  DocumentDetails *docdet = DOCUMENT_GET_PRIVATE(doc);
-  if (docdet->type!=TAB_HELP && docdet->type!=TAB_PREVIEW) return NULL; /* always NULL for other types */
-  return docdet->help_function;
+  docdet = DOCUMENT_GET_PRIVATE(doc);
+  g_object_get(doc, "untitled", &untitled, NULL);
+  if (untitled) return NULL;
+  docfilename = document_get_filename(doc);
+  switch (docdet->type)
+  {
+    case TAB_HELP:
+      result = g_strdup_printf ("phphelp:%s\n", docfilename);
+      break;
+    case TAB_PREVIEW:
+      result = g_strdup_printf ("preview:%s\n",docfilename);
+      break;
+    default:
+      result = g_strdup_printf ("%s\n",docfilename);
+  }
+  g_free(docfilename);
+  return result;
 }
 
 void document_set_mtime(Document *doc, GTimeVal value){
@@ -1868,7 +1889,8 @@ void document_marker_delete(GtkScintilla *scintilla, gint line){
    gtk_scintilla_marker_delete(scintilla, line, 1);
 }
 
-void document_marker_modify(Document *doc, gint line){
+static void document_marker_modify(Document *doc, gint line)
+{
   g_return_if_fail(doc);
   DocumentDetails *docdet = DOCUMENT_GET_PRIVATE(doc);
   if (GTK_IS_SCINTILLA(docdet->scintilla)){
@@ -1880,7 +1902,8 @@ void document_marker_modify(Document *doc, gint line){
   }
 }
 
-void document_modify_current_line_marker(Document *doc){
+static void document_modify_current_line_marker(Document *doc)
+{
   g_return_if_fail(doc);
   DocumentDetails *docdet = DOCUMENT_GET_PRIVATE(doc);
   if (GTK_IS_SCINTILLA(docdet->scintilla)){
@@ -1893,7 +1916,7 @@ void document_modify_current_line_marker(Document *doc){
 }
 
 //circle markers
-void document_find_next_marker(Document *doc){
+static void document_find_next_marker(Document *doc){
   g_return_if_fail(doc);
   DocumentDetails *docdet = DOCUMENT_GET_PRIVATE(doc);
   if (GTK_IS_SCINTILLA(docdet->scintilla)){
@@ -2214,7 +2237,6 @@ gboolean document_search_replace_text(Document *doc, const gchar *text, const gc
 
 void document_goto_line(Document *doc,gint line)
 {
-  gphpedit_debug (DEBUG_DOCUMENT);
   g_return_if_fail(doc);
   DocumentDetails *docdet = DOCUMENT_GET_PRIVATE(doc);
   if (GTK_IS_SCINTILLA(docdet->scintilla)){
@@ -2483,7 +2505,6 @@ gchar *document_get_current_word(Document *doc)
 
 void document_scroll_to_current_pos(Document *document)
 {
-  gphpedit_debug (DEBUG_DOCUMENT);
   g_return_if_fail(document);
   DocumentDetails *docdet = DOCUMENT_GET_PRIVATE(document);
   if (GTK_IS_SCINTILLA(docdet->scintilla)){

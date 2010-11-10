@@ -340,10 +340,8 @@ void document_manager_session_save(DocumentManager *docmg)
   DocumentManagerDetails *docmgdet = DOCUMENT_MANAGER_GET_PRIVATE(docmg);
   GSList *walk;
   Document *document;
-  Document *current_focus_editor;
   GString *session_file_contents;
-  gboolean save_session, untitled;
-  gint type;
+  gboolean save_session;
 
   gchar *uri = g_build_filename (g_get_user_config_dir (), "gphpedit", "session", NULL);
   GFile *file = g_file_new_for_commandline_arg(uri);
@@ -352,41 +350,21 @@ void document_manager_session_save(DocumentManager *docmg)
 
   g_object_get (main_window.prefmg, "save_session", &save_session, NULL);
   if (save_session && (g_slist_length(docmgdet->editors) > 0)) {
-    current_focus_editor = docmgdet->current_document;
     session_file_contents=g_string_new(NULL);
     for(walk = docmgdet->editors; walk!= NULL; walk = g_slist_next(walk)) {
       document = walk->data;
-      if (document) {
-        g_object_get(document, "untitled", &untitled, "type", &type, NULL);
-        if (!untitled) {
-          if (document == current_focus_editor) {
-            session_file_contents = g_string_append(session_file_contents,"*");
-          }
-          if (document_is_scintilla_based(document)) {
-            gchar *docfilename = document_get_filename(document);
-            g_string_append_printf (session_file_contents,"%s\n",docfilename);
-            g_free(docfilename);
-          } else {
-            if (type==TAB_HELP){
-              /* it's a help page */
-              g_string_append_printf (session_file_contents,"phphelp:%s\n", document_get_help_function(document));
-            } else if (type==TAB_PREVIEW){
-              /* it's a preview page */
-              gchar *prevfilename = document_get_filename(document);
-              g_string_append_printf (session_file_contents,"preview:%s\n",prevfilename);
-              g_free(prevfilename);
-            } else {
-               gphpedit_debug_message(DEBUG_MAIN_WINDOW, "Type not found:%d", type);
-            }
-          }
-        }
+      gchar *entry = document_get_session_entry(document);
+      if (document == docmgdet->current_document) {
+        session_file_contents = g_string_append(session_file_contents,"*");
       }
+      session_file_contents = g_string_append(session_file_contents, entry);
+      g_free(entry);
     }
-      if(!g_file_replace_contents (file,session_file_contents->str,session_file_contents->len,NULL,FALSE,G_FILE_CREATE_NONE,NULL,NULL,&error)){
-        g_print(_("Error Saving session file: %s\n"),error->message);
-        g_error_free (error);
-      }
-     if (session_file_contents) g_string_free(session_file_contents,TRUE);
+    if(!g_file_replace_contents (file, session_file_contents->str, session_file_contents->len, NULL, FALSE, G_FILE_CREATE_NONE, NULL, NULL, &error)){
+      g_print(_("Error Saving session file: %s\n"),error->message);
+      g_error_free (error);
+    }
+    if (session_file_contents) g_string_free(session_file_contents, TRUE);
   } else {
       if (save_session){
         if (!g_file_delete (file,NULL,&error)){

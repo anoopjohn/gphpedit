@@ -333,6 +333,7 @@ static gboolean _document_loader_validate_and_convert_utf8_buffer (gchar *buffer
 */
 static void _document_loader_help_file_load(DocumentLoader *doclod, GFile *file)
 {
+  gphpedit_debug (DEBUG_DOCUMENT);
   DocumentLoaderDetails *docloddet = DOCUMENT_LOADER_GET_PRIVATE(doclod);
   GFileInfo *info;
   GError *error=NULL;
@@ -352,14 +353,17 @@ static void _document_loader_help_file_load(DocumentLoader *doclod, GFile *file)
   Document *document = document_webkit_new (docloddet->type, file, docloddet->raw_uri);
   g_object_set(document, "file_icon", docloddet->icon, NULL);
   g_signal_emit (G_OBJECT (doclod), signals[DONE_LOADING], 0, TRUE, document);
-
 }
 
 static void _document_loader_create_help(DocumentLoader *doclod, gchar *help_function)
 {
   DocumentLoaderDetails *docloddet = DOCUMENT_LOADER_GET_PRIVATE(doclod);
   GString *long_filename = NULL;
+  if (!g_str_has_prefix(help_function, "http") && !g_str_has_prefix(help_function, "file:")){
   long_filename = tab_help_find_helpfile(help_function);
+  } else {
+  long_filename = g_string_new(help_function);
+  }
   if (!long_filename) {
     g_signal_emit (G_OBJECT (doclod), signals[HELP_FILE_NOT_FOUND], 0);
     return ;
