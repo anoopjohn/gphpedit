@@ -1,4 +1,18 @@
 ============================
+gphpedit 0.9.98
+============================
+
+New Features and Fixes
+======================
+- Place configuration files into an XDG standard config folder
+- Classbrowser has support for all supported languages.
+- Autocompletion support for all supported languages.
+- Fix crash when a plugin don't have execute access.
+- Added autoindent code feature.
+- Added folding feature to all supported languages.
+- Misc bugfixes and code cleanups.
+
+============================
 gphpedit 0.9.98~RC2
 ============================
 
@@ -19,7 +33,7 @@ New Features and Fixes
 - New Theme system.
 - Improve syntax check plugins.
 - Added ability to enable/disable plugins.
-- Better externally mmodified notification.
+- Better externally modified notification.
 - New preferences dialog.
 - Show current line and column in statusbar.
 - Improved desktop integration.
