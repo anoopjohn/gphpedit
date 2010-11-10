@@ -158,7 +158,6 @@ void syntax_window(GtkSyntaxCheckWindow *win, Document *document, gchar *data){
   gtk_list_store_clear(priv->lint_store);
   copy = data;
 
-  document_set_sintax_indicator(document);
   document_set_sintax_annotation(document);
   /* lines has form line number space message dot like 
   * 59 invalid operator.\n

@@ -147,6 +147,7 @@ static void document_find_next_marker(Document *doc);
 static void document_marker_modify(Document *doc, gint line);
 static void document_modify_current_line_marker(Document *doc);
 static void document_show_calltip_at_current_pos(Document *document);
+static void document_force_autocomplete(Document *document);
 /*
  * register Document type and returns a new GType
 */
@@ -807,6 +808,11 @@ void tab_set_configured_scintilla_properties(GtkScintilla *scintilla)
   gtk_scintilla_style_set_fore (scintilla,  STYLE_ANNOTATION_WARNING, 2859424);
   gtk_scintilla_style_set_back (scintilla,  STYLE_ANNOTATION_WARNING, 10813438);
   
+  /* syntax check indicator setup */
+  gtk_scintilla_set_indicator_current(scintilla, 20);
+  gtk_scintilla_indic_set_style(scintilla, 20, INDIC_SQUIGGLE);
+  gtk_scintilla_indic_set_fore(scintilla, 20, 0x0000ff);
+
   g_object_unref(pref);
 }
 
@@ -2058,18 +2064,6 @@ void document_clear_sintax_style(Document *doc)
   }
 }
 
-void document_set_sintax_indicator(Document *doc)
-{
-  g_return_if_fail(doc);
-  DocumentDetails *docdet = DOCUMENT_GET_PRIVATE(doc);
-  if (GTK_IS_SCINTILLA(docdet->scintilla)){
-  gtk_scintilla_set_indicator_current(GTK_SCINTILLA(docdet->scintilla), 20);
-  gtk_scintilla_indic_set_style(GTK_SCINTILLA(docdet->scintilla), 20, INDIC_SQUIGGLE);
-  gtk_scintilla_indic_set_fore(GTK_SCINTILLA(docdet->scintilla), 20, 0x0000ff);
-  }
-}
-
-
 void document_set_sintax_annotation(Document *doc)
 {
   g_return_if_fail(doc);
@@ -2514,14 +2508,6 @@ void document_scroll_to_current_pos(Document *document)
     gtk_scintilla_grab_focus(sci);
   }
 }
-void document_add_text(Document *document, const gchar *text)
-{
-  g_return_if_fail(document);
-  DocumentDetails *docdet = DOCUMENT_GET_PRIVATE(document);
-  if (GTK_IS_SCINTILLA(docdet->scintilla)){
-      gtk_scintilla_add_text(GTK_SCINTILLA (docdet->scintilla), strlen(text), text);
-  }
-}
 
 void document_replace_text (Document *document, gchar *new_text)
 {
@@ -2549,7 +2535,7 @@ void document_reload(Document *document)
   }
 }
 
-void document_force_autocomplete(Document *document)
+static void document_force_autocomplete(Document *document)
 {
   guint current_pos;
   guint current_line;
