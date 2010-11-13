@@ -353,20 +353,26 @@ void document_manager_session_save(DocumentManager *docmg)
     session_file_contents=g_string_new(NULL);
     for(walk = docmgdet->editors; walk!= NULL; walk = g_slist_next(walk)) {
       document = walk->data;
-      gchar *entry = document_get_session_entry(document);
       if (document == docmgdet->current_document) {
         session_file_contents = g_string_append(session_file_contents,"*");
       }
-      session_file_contents = g_string_append(session_file_contents, entry);
-      g_free(entry);
+      gchar *entry = document_get_session_entry(document);
+      if (entry) {
+        session_file_contents = g_string_append(session_file_contents, entry);
+        g_free(entry);
+      }
     }
-    if(!g_file_replace_contents (file, session_file_contents->str, session_file_contents->len, NULL, FALSE, G_FILE_CREATE_NONE, NULL, NULL, &error)){
-      g_print(_("Error Saving session file: %s\n"),error->message);
-      g_error_free (error);
+    if(session_file_contents->len > 1) {
+      gboolean result = g_file_replace_contents (file, session_file_contents->str, session_file_contents->len, 
+                          NULL, FALSE, G_FILE_CREATE_NONE, NULL, NULL, &error);
+      if(!result){
+        g_print(_("Error Saving session file: %s\n"),error->message);
+        g_error_free (error);
+      }
     }
     if (session_file_contents) g_string_free(session_file_contents, TRUE);
   } else {
-      if (save_session){
+      if (save_session) {
         if (!g_file_delete (file,NULL,&error)){
           if (error->code!=G_FILE_ERROR_NOENT && error->code!=1){
             g_print(_("GIO Error deleting file: %s, code %d\n"), error->message,error->code);
