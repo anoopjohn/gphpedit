@@ -225,8 +225,8 @@ gboolean populate_files (gpointer data)     //TODO:: show an spinner while loadi
 		  FOLDERFILE *current;
 		  current=new_folderfile();
 		  current->mime=g_strdup(mime);
-    	          GIcon *icon =g_file_info_get_icon(info); 
-	          current->icon= g_icon_to_string (icon);
+      GIcon *icon =g_file_info_get_icon(info); 
+      current->icon= g_icon_to_string (icon);
 		  current->display_name=g_strdup(folder);
 		  /* add to list */
 		 directory->filesinfolder = g_slist_append(directory->filesinfolder, current);

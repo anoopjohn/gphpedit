@@ -166,10 +166,11 @@ gphpedit_file_browser_init (gphpeditFileBrowser *button)
 
   GtkTreeViewColumn *pColumn;
   GtkCellRenderer  *pCellRenderer;
-  priv->pTree = gtk_tree_store_new(N_COL, GDK_TYPE_PIXBUF, G_TYPE_STRING,G_TYPE_STRING);
+  priv->pTree = gtk_tree_store_new(N_COL, G_TYPE_ICON, G_TYPE_STRING, G_TYPE_STRING);
   priv->pListView = gtk_tree_view_new_with_model(GTK_TREE_MODEL(priv->pTree));
   pCellRenderer = gtk_cell_renderer_pixbuf_new();
-  gtk_tree_view_insert_column_with_attributes(GTK_TREE_VIEW(priv->pListView),-1,"",pCellRenderer, "pixbuf", ICON_COLUMN, NULL);
+  g_object_set (G_OBJECT (pCellRenderer), "stock-size", GTK_ICON_SIZE_SMALL_TOOLBAR, NULL);
+  gtk_tree_view_insert_column_with_attributes(GTK_TREE_VIEW(priv->pListView),-1,"", pCellRenderer, "gicon", ICON_COLUMN, NULL);
 
   GtkWidget *pScrollbar = gtk_scrolled_window_new(NULL, NULL);
   gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(pScrollbar),GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
@@ -184,10 +185,8 @@ gphpedit_file_browser_init (gphpeditFileBrowser *button)
     (GDK_ACTION_DEFAULT | GDK_ACTION_COPY));
   g_signal_connect(G_OBJECT(priv->pListView), "drag_data_received", G_CALLBACK(fb_file_v_drag_data_received), priv->fbbackend);
 
-  pCellRenderer=NULL;
   pCellRenderer = gtk_cell_renderer_text_new();
   gtk_tree_view_insert_column_with_attributes(GTK_TREE_VIEW(priv->pListView),-1,_("File"),pCellRenderer, "text", FILE_COLUMN, NULL);
-  pCellRenderer=NULL;
   pCellRenderer = gtk_cell_renderer_text_new();
   pColumn = gtk_tree_view_column_new_with_attributes(_("Mime"), pCellRenderer,"text",MIME_COLUMN,NULL);
   gtk_tree_view_append_column(GTK_TREE_VIEW(priv->pListView), pColumn);
@@ -325,7 +324,7 @@ GtkWidget *_get_image_button(const gchar *type,const gchar *tooltip)
 void _go_home_cb (GtkButton *button, gpointer   user_data) 
 {
     /*if there is a file open set file folder as home dir*/
-    gchar *folderpath= document_get_filename(document_manager_get_current_document(main_window.docmg));
+    gchar *folderpath = documentable_get_filename(DOCUMENTABLE(document_manager_get_current_document(main_window.docmg)));
     filebrowser_backend_go_folder_home (FILEBROWSER_BACKEND(user_data), folderpath);
     if (folderpath) g_free(folderpath);
 }
@@ -643,26 +642,18 @@ void print_files (FilebrowserBackend *directory, gpointer user_data){
   GtkTreeIter iter2;
   GtkTreeIter* iter=NULL;
   gtk_tree_store_clear(priv->pTree);
-  /* get default icon theme */
-  GtkIconTheme *theme= gtk_icon_theme_get_default();
-    for (l = get_filebrowser_backend_files(directory); l != NULL; l = g_slist_next (l)) {
-      FOLDERFILE *current=(FOLDERFILE *) l->data;
-      gphpedit_debug_message(DEBUG_FILEBROWSER,"File added -> name: '%s' \tmime: '%s'",current->display_name,current->mime);
-      GdkPixbuf *p_file_image = NULL;
-      /* get icon of size menu */
-      GIcon *icon= g_icon_new_for_string (current->icon,NULL);
-      GtkIconInfo *ificon= gtk_icon_theme_lookup_by_gicon (theme, icon, 24, 0);
-      g_object_unref(icon);
-      p_file_image = gtk_icon_info_load_icon (ificon, NULL);
-      gtk_tree_store_insert_with_values(GTK_TREE_STORE(priv->pTree), &iter2, iter, 0, ICON_COLUMN, p_file_image, FILE_COLUMN, current->display_name,MIME_COLUMN,current->mime,-1);
-      g_object_unref(p_file_image);
-       gtk_icon_info_free(ificon);
-    }
+  for (l = get_filebrowser_backend_files(directory); l != NULL; l = g_slist_next (l)) {
+    FOLDERFILE *current=(FOLDERFILE *) l->data;
+    gphpedit_debug_message(DEBUG_FILEBROWSER,"File added -> name: '%s' \tmime: '%s'", current->display_name, current->mime);
+    GIcon *icon= g_icon_new_for_string (current->icon,NULL);
+    gtk_tree_store_insert_with_values(GTK_TREE_STORE(priv->pTree), &iter2, iter, 0, ICON_COLUMN, icon, FILE_COLUMN, current->display_name,MIME_COLUMN,current->mime,-1);
+    g_object_unref(icon);
+  }
   if (get_filebrowser_backend_number_files(priv->fbbackend)!=0){
     priv->cache_model=gtk_tree_view_get_model (GTK_TREE_VIEW(priv->pListView));
-      search_control_sensible(priv,TRUE);
+    search_control_sensible(priv,TRUE);
   } else {
-      search_control_sensible(priv,FALSE);
+    search_control_sensible(priv,FALSE);
   }
 }
 
