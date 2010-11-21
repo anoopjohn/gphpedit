@@ -178,3 +178,14 @@ gboolean is_php_file_from_content(const gchar *content)
   }
   return is_php;
 }
+
+gboolean is_php_char_autoindent(char ch)
+{
+  return (ch == '{');
+}
+
+gboolean is_php_char_autounindent(char ch)
+{
+  return (ch == '}');
+}
+

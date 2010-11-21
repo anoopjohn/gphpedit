@@ -85,3 +85,13 @@ gboolean is_cobol_file(const gchar *filename)
   return FALSE;
 }
 
+gboolean is_cobol_char_autoindent(char ch)
+{
+  return FALSE;
+}
+
+gboolean is_cobol_char_autounindent(char ch)
+{
+  return FALSE;
+}
+

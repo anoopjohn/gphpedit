@@ -1503,15 +1503,18 @@ static void indent_line(GtkScintilla *sci, gint line, gint indent)
   gtk_scintilla_set_selection_end(sci, selEnd);
 }
 
-static void autoindent_brace_code (GtkScintilla *sci)
+static void autoindent_brace_code (GtkScintilla *sci, gboolean (*indent_char_func)(char ch), gboolean (*unindent_char_func)(char ch))
 {
   gint current_pos;
   gint current_line;
   gint previous_line;
   gint previous_line_indentation;
+  gint previous_line_start;
   gint previous_line_end;
   gchar *previous_char_buffer;
   gint previous_char_buffer_length;
+  gchar *previous_line_buffer;
+  gint previous_line_buffer_length;
 
   PreferencesManager *pref = preferences_manager_new ();
   current_pos = gtk_scintilla_get_current_pos(sci);
@@ -1526,10 +1529,30 @@ static void autoindent_brace_code (GtkScintilla *sci)
 
     previous_line_end = gtk_scintilla_get_line_end_position(sci, previous_line);
     previous_char_buffer = gtk_scintilla_get_text_range (sci, previous_line_end-1, previous_line_end, &previous_char_buffer_length);
-    if (*previous_char_buffer=='{') {
+    if (indent_char_func(*previous_char_buffer)) {
       gint indentation_size;
       g_object_get(pref, "indentation_size", &indentation_size, NULL);
       previous_line_indentation+=indentation_size;
+    } else if (unindent_char_func(*previous_char_buffer)) {
+      gint indentation_size;
+      g_object_get(pref, "indentation_size", &indentation_size, NULL);
+      previous_line_indentation-=indentation_size;
+      if (previous_line_indentation < 0) previous_line_indentation = 0;
+      previous_line_start = gtk_scintilla_position_from_line(sci, previous_line);
+      previous_line_buffer = gtk_scintilla_get_text_range (sci, previous_line_start, previous_line_end, &previous_line_buffer_length);
+      gboolean unindent = TRUE;
+      gint char_act = 0;
+      while (char_act <= previous_line_buffer_length)
+      {
+        char c = previous_line_buffer[char_act];
+        if (!(g_ascii_iscntrl(c) || g_ascii_isspace(c) || unindent_char_func(c))) {
+          unindent = FALSE;
+          break;
+        }
+        char_act++;
+      }
+      if (unindent) gtk_scintilla_set_line_indentation(sci, previous_line, previous_line_indentation);
+      g_free(previous_line_buffer);
     }
     g_free(previous_char_buffer);
     indent_line(sci, current_line, previous_line_indentation);
@@ -1651,7 +1674,7 @@ static void char_added(GtkWidget *scintilla, guint ch, gpointer user_data)
       switch(ch) {
         case ('\r'):
         case ('\n'):
-          autoindent_brace_code (sci);
+          autoindent_brace_code (sci, is_php_char_autoindent, is_php_char_autounindent);
           break;
         case (')'):
           cancel_calltip (sci);
@@ -1704,11 +1727,30 @@ static void char_added(GtkWidget *scintilla, guint ch, gpointer user_data)
         break;
       case(TAB_CXX):
       case (TAB_PERL):
+        switch(ch) {
+            case ('\r'):
+            case ('\n'):
+              autoindent_brace_code (sci, is_cxx_char_autoindent, is_cxx_char_autounindent);
+            break;
+            case (')'):
+              cancel_calltip (sci);
+            break;
+            case ('('):
+              show_calltip (docdet, current_pos);
+            break;
+            default:
+              member_function_buffer = gtk_scintilla_get_text_range (sci, wordStart-2, wordStart, &member_function_length);
+              if(current_word_length>=3){
+                show_autocompletion (docdet, current_pos);
+              }
+              g_free(member_function_buffer);
+        }
+        break;
       case (TAB_PYTHON):
         switch(ch) {
             case ('\r'):
             case ('\n'):
-              autoindent_brace_code (sci);
+              autoindent_brace_code (sci, is_python_char_autoindent, is_python_char_autounindent);
             break;
             case (')'):
               cancel_calltip (sci);
@@ -1728,7 +1770,7 @@ static void char_added(GtkWidget *scintilla, guint ch, gpointer user_data)
       switch(ch) {
           case ('\r'):
           case ('\n'):
-            autoindent_brace_code (sci);
+            autoindent_brace_code (sci, is_css_char_autoindent, is_css_char_autounindent);
           break;
         case (';'):
             cancel_calltip (sci);
@@ -1749,7 +1791,7 @@ static void char_added(GtkWidget *scintilla, guint ch, gpointer user_data)
         switch(ch) {
             case ('\r'):
             case ('\n'):
-              autoindent_brace_code (sci);
+              autoindent_brace_code (sci, is_sql_char_autoindent, is_sql_char_autounindent);
             break;
             default:
         member_function_buffer = gtk_scintilla_get_text_range (sci, wordStart-2, wordStart, &member_function_length);

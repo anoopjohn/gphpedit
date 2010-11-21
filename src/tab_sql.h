@@ -29,5 +29,7 @@
 
 void tab_sql_set_lexer(GtkScintilla *scintilla);
 gboolean is_sql_file(const gchar *filename);
+gboolean is_sql_char_autoindent(char ch);
+gboolean is_sql_char_autounindent(char ch);
 
 #endif

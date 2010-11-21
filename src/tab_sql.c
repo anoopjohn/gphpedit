@@ -82,3 +82,12 @@ if (g_str_has_suffix(filename,".sql"))
   return FALSE;
 }
 
+gboolean is_sql_char_autoindent(char ch)
+{
+  return FALSE;
+}
+
+gboolean is_sql_char_autounindent(char ch)
+{
+  return FALSE;
+}

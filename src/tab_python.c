@@ -88,3 +88,15 @@ gboolean is_python_file(const gchar *filename)
       return TRUE;
   return FALSE;
 }
+
+gboolean is_python_char_autoindent(char ch)
+{
+  return (ch==':' || ch== 92 /* / */);
+}
+
+gboolean is_python_char_autounindent(char ch)
+{
+//FIXME
+  return FALSE;
+}
+
