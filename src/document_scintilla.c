@@ -117,7 +117,6 @@ static void tab_set_general_scintilla_properties(Document_Scintilla *doc);
 static void save_point_reached(GtkWidget *scintilla, gpointer user_data);
 static void save_point_left(GtkWidget *scintilla, gpointer user_data);
 static void update_ui(GtkWidget *scintilla);
-static void indent_line(GtkScintilla *scintilla, gint line, gint indent);
 static gboolean calltip_callback(gpointer data);
 static gboolean auto_complete_callback(gpointer data);
 static void tab_set_configured_scintilla_properties(GtkScintilla *scintilla);
@@ -1378,7 +1377,7 @@ static gboolean auto_memberfunc_complete_callback(gpointer data)
     gchar *prefix = documentable_get_current_word(DOCUMENTABLE(doc));
     gchar *calltip = classbrowser_autocomplete_member_function(GPHPEDIT_CLASSBROWSER(main_window.classbrowser), prefix);
     if (calltip && strlen(calltip)!=0) gtk_scintilla_user_list_show(GTK_SCINTILLA(docdet->scintilla), 1, calltip);
-    // gtk_scintilla_autoc_show(GTK_SCINTILLA(docdet->scintilla), current_pos, calltip);
+//    gtk_scintilla_autoc_show(GTK_SCINTILLA(docdet->scintilla), current_pos, calltip);
     g_free(prefix);
   }
   docdet->completion_timer_set=FALSE;
@@ -1413,9 +1412,9 @@ static gboolean calltip_callback(gpointer data)
     gchar *calltip = calltip_manager_show_call_tip(main_window.clltipmg, docdet->type, prefix);
     if (calltip){
       gtk_scintilla_call_tip_show(GTK_SCINTILLA(docdet->scintilla), current_pos, calltip);
-      g_free(prefix);
+      g_free(calltip);
     }
-    g_free(calltip);
+    g_free(prefix);
   }
   docdet->calltip_timer_set=FALSE;
   return FALSE;
@@ -1461,6 +1460,49 @@ static void InsertCloseBrace (GtkScintilla *scintilla, gint current_pos, gchar c
   }
 }
 
+static void indent_line(GtkScintilla *sci, gint line, gint indent)
+{
+  gint selStart;
+  gint selEnd;
+  gint posBefore;
+  gint posAfter;
+  gint posDifference;
+
+  selStart = gtk_scintilla_get_selection_start(sci);
+  selEnd = gtk_scintilla_get_selection_end(sci);
+  posBefore = gtk_scintilla_get_line_indentation(sci, line);
+  gtk_scintilla_set_line_indentation(sci, line, indent);
+  posAfter = gtk_scintilla_get_line_indentation(sci, line);
+  posDifference =  posAfter - posBefore;
+
+  if (posAfter > posBefore) {
+    // Move selection on
+    if (selStart >= posBefore) {
+      selStart += posDifference;
+    }
+    if (selEnd >= posBefore) {
+      selEnd += posDifference;
+    }
+  }
+  else if (posAfter < posBefore) {
+    // Move selection back
+    if (selStart >= posAfter) {
+      if (selStart >= posBefore)
+        selStart += posDifference;
+      else
+        selStart = posAfter;
+    }
+    if (selEnd >= posAfter) {
+      if (selEnd >= posBefore)
+        selEnd += posDifference;
+      else
+        selEnd = posAfter;
+    }
+  }
+  gtk_scintilla_set_selection_start(sci, selStart);
+  gtk_scintilla_set_selection_end(sci, selEnd);
+}
+
 static void autoindent_brace_code (GtkScintilla *sci)
 {
   gint current_pos;
@@ -1496,9 +1538,9 @@ static void autoindent_brace_code (GtkScintilla *sci)
     gboolean tabs_instead_spaces;
     g_object_get(pref,"tabs_instead_spaces", &tabs_instead_spaces, NULL);
     if(tabs_instead_spaces){
-      pos= gtk_scintilla_position_from_line(sci, current_line)+(previous_line_indentation/gtk_scintilla_get_tab_width(sci));
+      pos = gtk_scintilla_position_from_line(sci, current_line)+(previous_line_indentation/gtk_scintilla_get_tab_width(sci));
     } else {
-      pos=gtk_scintilla_position_from_line(sci, current_line)+(previous_line_indentation);
+      pos = gtk_scintilla_position_from_line(sci, current_line)+(previous_line_indentation);
     }
     gtk_scintilla_goto_pos(sci, pos);
     gtk_scintilla_end_undo_action(sci);
@@ -1728,49 +1770,6 @@ static void char_added(GtkWidget *scintilla, guint ch, gpointer user_data)
             break;
     }
   g_object_unref(pref);
-}
-
-static void indent_line(GtkScintilla *sci, gint line, gint indent)
-{
-  gint selStart;
-  gint selEnd;
-  gint posBefore;
-  gint posAfter;
-  gint posDifference;
-
-  selStart = gtk_scintilla_get_selection_start(sci);
-  selEnd = gtk_scintilla_get_selection_end(sci);
-  posBefore = gtk_scintilla_get_line_indentation(sci, line);
-  gtk_scintilla_set_line_indentation(sci, line, indent);
-  posAfter = gtk_scintilla_get_line_indentation(sci, line);
-  posDifference =  posAfter - posBefore;
-
-  if (posAfter > posBefore) {
-    // Move selection on
-    if (selStart >= posBefore) {
-      selStart += posDifference;
-    }
-    if (selEnd >= posBefore) {
-      selEnd += posDifference;
-    }
-  }
-  else if (posAfter < posBefore) {
-    // Move selection back
-    if (selStart >= posAfter) {
-      if (selStart >= posBefore)
-        selStart += posDifference;
-      else
-        selStart = posAfter;
-    }
-    if (selEnd >= posAfter) {
-      if (selEnd >= posBefore)
-        selEnd += posDifference;
-      else
-        selEnd = posAfter;
-    }
-  }
-  gtk_scintilla_set_selection_start(sci, selStart);
-  gtk_scintilla_set_selection_end(sci, selEnd);
 }
 
 /*
@@ -2043,7 +2042,7 @@ static void document_scintilla_find_next_marker(Document_Scintilla *doc){
   current_line = gtk_scintilla_line_from_position(GTK_SCINTILLA(docdet->scintilla), current_pos);
   gint line;
   //skip the current line
-  line= gtk_scintilla_marker_next(GTK_SCINTILLA(docdet->scintilla),current_line + 1, 2);
+  line= gtk_scintilla_marker_next(GTK_SCINTILLA(docdet->scintilla), current_line + 1, 2);
   if (line==-1){
     //no markers in that direccion, we should go back to the first line
     line= gtk_scintilla_marker_next(GTK_SCINTILLA(docdet->scintilla),0, 2);
@@ -2231,7 +2230,6 @@ void document_scintilla_keyboard_macro_startstop(Document_Scintilla *document_sc
 {
   g_return_if_fail(document_scintilla);
   Document_ScintillaDetails *docdet = DOCUMENT_SCINTILLA_GET_PRIVATE(document_scintilla);
-  if (GTK_IS_SCINTILLA(docdet->scintilla)){
     if (docdet->is_macro_recording) {
       gtk_scintilla_stop_record(GTK_SCINTILLA(docdet->scintilla));
       docdet->is_macro_recording = FALSE;
@@ -2242,7 +2240,6 @@ void document_scintilla_keyboard_macro_startstop(Document_Scintilla *document_sc
       gtk_scintilla_start_record(GTK_SCINTILLA(docdet->scintilla));
       docdet->is_macro_recording = TRUE;
     }
-  }
 }
 
 void document_scintilla_keyboard_macro_playback(Document_Scintilla *document_scintilla)
@@ -2251,13 +2248,12 @@ void document_scintilla_keyboard_macro_playback(Document_Scintilla *document_sci
   MacroEvent *event;
   g_return_if_fail(document_scintilla);
   Document_ScintillaDetails *docdet = DOCUMENT_SCINTILLA_GET_PRIVATE(document_scintilla);
-  if (GTK_IS_SCINTILLA(docdet->scintilla)){
-    gtk_scintilla_begin_undo_action(GTK_SCINTILLA(docdet->scintilla));
-    if (docdet->keyboard_macro_list) {
-      for (current = docdet->keyboard_macro_list; current; current = g_slist_next(current)) {
-        event = current->data;
-        gphpedit_debug_message (DEBUG_DOCUMENT,"Message: %d (%s)\n", event->message, macro_message_to_string(event->message));
-        switch (event->message) {
+  gtk_scintilla_begin_undo_action(GTK_SCINTILLA(docdet->scintilla));
+  if (docdet->keyboard_macro_list) {
+    for (current = docdet->keyboard_macro_list; current; current = g_slist_next(current)) {
+      event = current->data;
+      gphpedit_debug_message (DEBUG_DOCUMENT,"Message: %d (%s)\n", event->message, macro_message_to_string(event->message));
+      switch (event->message) {
           case (2170) : gtk_scintilla_replace_sel(GTK_SCINTILLA(docdet->scintilla), (gchar *)event->lparam); break;
           case (2177) : gtk_scintilla_cut(GTK_SCINTILLA(docdet->scintilla)); break;
           case (2178) : gtk_scintilla_copy(GTK_SCINTILLA(docdet->scintilla)); break;
@@ -2314,11 +2310,10 @@ void document_scintilla_keyboard_macro_playback(Document_Scintilla *document_sci
           case (2348) : gtk_scintilla_line_end_display_extend(GTK_SCINTILLA(docdet->scintilla)); break;
           default:
             g_print(_("Unhandle keyboard macro function %d, please report\n"), event->message);
-        }
       }
     }
-    gtk_scintilla_end_undo_action(GTK_SCINTILLA(docdet->scintilla));
   }
+  gtk_scintilla_end_undo_action(GTK_SCINTILLA(docdet->scintilla));
 }
 
 
@@ -2333,27 +2328,25 @@ static void document_scintilla_force_autocomplete(Document_Scintilla *document_s
 
   g_return_if_fail(document_scintilla);
   Document_ScintillaDetails *docdet = DOCUMENT_SCINTILLA_GET_PRIVATE(document_scintilla);
-  if (GTK_IS_SCINTILLA(docdet->scintilla)){
-      GtkScintilla *sci = GTK_SCINTILLA(docdet->scintilla);
-      current_pos = gtk_scintilla_get_current_pos(sci);
-      wordStart = gtk_scintilla_word_start_position(sci, current_pos-1, TRUE);
-      wordEnd = gtk_scintilla_word_end_position(sci, current_pos-1, TRUE);
-      member_function_buffer = gtk_scintilla_get_text_range (sci, wordEnd-1, wordEnd +1, &member_function_length);
-        if (g_strcmp0(member_function_buffer, "->")==0 || g_strcmp0(member_function_buffer, "::")==0) {
-           gint line_size;
-           gint initial_pos;
-           gchar *line_text;
-           /*search back for a '$' in that line */
-           current_line = gtk_scintilla_line_from_position(sci, current_pos);
-           initial_pos= gtk_scintilla_position_from_line(sci, current_line);
-           line_text= gtk_scintilla_get_text_range (sci, initial_pos, wordStart-1, &line_size);
-            if (!check_php_variable_before(line_text)) return;
-            auto_memberfunc_complete_callback(GINT_TO_POINTER(documentable_get_current_position(DOCUMENTABLE(document_scintilla))));
-        } else {
-            auto_complete_callback(GINT_TO_POINTER(documentable_get_current_position(DOCUMENTABLE(document_scintilla))));
-        }
-      g_free(member_function_buffer);
+  GtkScintilla *sci = GTK_SCINTILLA(docdet->scintilla);
+  current_pos = gtk_scintilla_get_current_pos(sci);
+  wordStart = gtk_scintilla_word_start_position(sci, current_pos-1, TRUE);
+  wordEnd = gtk_scintilla_word_end_position(sci, current_pos-1, TRUE);
+  member_function_buffer = gtk_scintilla_get_text_range (sci, wordEnd-1, wordEnd +1, &member_function_length);
+  if (g_strcmp0(member_function_buffer, "->")==0 || g_strcmp0(member_function_buffer, "::")==0) {
+    gint line_size;
+    gint initial_pos;
+    gchar *line_text;
+    /*search back for a '$' in that line */
+    current_line = gtk_scintilla_line_from_position(sci, current_pos);
+    initial_pos= gtk_scintilla_position_from_line(sci, current_line);
+    line_text= gtk_scintilla_get_text_range (sci, initial_pos, wordStart-1, &line_size);
+    if (!check_php_variable_before(line_text)) return;
+    auto_memberfunc_complete_callback(GINT_TO_POINTER(current_pos));
+  } else {
+    auto_complete_callback(GINT_TO_POINTER(current_pos));
   }
+  g_free(member_function_buffer);
 }
 
 #define BACKSLASH 92
