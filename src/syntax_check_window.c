@@ -143,14 +143,14 @@ void lint_row_activated (GtkTreeSelection *selection, gpointer data)
 */
 void syntax_window(GtkSyntaxCheckWindow *win, Document *document, gchar *data){
   GtkSyntaxCheckWindowPrivate *priv = GTK_SYNTAX_CHECK_WINDOW_GET_PRIVATE(win);
-  if (!document) return;
+  if (!document && !OBJECT_IS_DOCUMENT_SCINTILLA(document)) return;
   if (!data) return;
   gchar *copy;
   gchar *token;
   gchar *line_number=NULL;
   gchar *first_error = NULL;
   /* clear document before start any styling action */
-  document_clear_sintax_style(document);
+  document_scintilla_clear_sintax_style(DOCUMENT_SCINTILLA(document));
   gtk_widget_show(GTK_WIDGET(win));
   GtkTreeIter iter;
   if (!priv->lint_store) priv->lint_store = gtk_list_store_new (1, G_TYPE_STRING); /* create a new one */
@@ -158,7 +158,7 @@ void syntax_window(GtkSyntaxCheckWindow *win, Document *document, gchar *data){
   gtk_list_store_clear(priv->lint_store);
   copy = data;
 
-  document_set_sintax_annotation(document);
+  document_scintilla_set_sintax_annotation(DOCUMENT_SCINTILLA(document));
   /* lines has form line number space message dot like 
   * 59 invalid operator.\n
   * lines end with \n
@@ -176,15 +176,15 @@ void syntax_window(GtkSyntaxCheckWindow *win, Document *document, gchar *data){
       first_error = line_number;
       }
       guint current_line_number=atoi(line_number)-1;
-      document_set_sintax_line(document, current_line_number);
+      document_scintilla_set_sintax_line(DOCUMENT_SCINTILLA(document), current_line_number);
       token=anotationtext + (int)(line_number-token+1);
       /* if first char is an E then set error style, else if first char is W set warning style */
       if (strncmp(token,"E",1)==0){
         token+=1;
-        document_add_sintax_annotation(document , current_line_number, token, STYLE_ANNOTATION_ERROR);
+        document_scintilla_add_sintax_annotation(DOCUMENT_SCINTILLA(document) , current_line_number, token, STYLE_ANNOTATION_ERROR);
       } else if (strncmp(token,"W",1)==0){
         token+=1;
-        document_add_sintax_annotation(document , current_line_number, token, STYLE_ANNOTATION_WARNING);
+        document_scintilla_add_sintax_annotation(DOCUMENT_SCINTILLA(document) , current_line_number, token, STYLE_ANNOTATION_WARNING);
       }
     }
     }

@@ -478,7 +478,7 @@ gint treeview_click_release(GtkWidget *widget, GdkEventButton *event, gpointer f
     }
   }
   /* go to position */
-  document_scroll_to_current_pos(document_manager_get_current_document(main_window.docmg));
+  documentable_scroll_to_current_pos(DOCUMENTABLE(document_manager_get_current_document(main_window.docmg)));
  
   return FALSE;
 }

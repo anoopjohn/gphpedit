@@ -74,8 +74,6 @@ typedef struct
   
   GtkWidget *classbrowser;
 
-  GtkClipboard* clipboard;
-
   /*filebrowser widget */
   GtkWidget *folder;
 }

@@ -66,18 +66,18 @@ SEARCH_DIALOG_class_init (SearchDialogClass *klass)
 void find_action(SearchDialogPrivate *priv)
 {
   const gchar *text;
-  
+  Documentable *doc = DOCUMENTABLE(document_manager_get_current_document(main_window.docmg));
   text = gtk_combo_box_get_active_text (GTK_COMBO_BOX(priv->findentry));
   gphpedit_history_entry_prepend_text	(GPHPEDIT_HISTORY_ENTRY(priv->findentry), text);
   gboolean checkwholedoc = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON(priv->checkwholedoc));
   if (checkwholedoc) {
-    document_goto_pos(document_manager_get_current_document(main_window.docmg), 0);
+    documentable_goto_pos(doc, 0);
     gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON(priv->checkwholedoc), FALSE);
   }
   gboolean checkcase = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON(priv->checkcase));
   gboolean checkwholeword = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON(priv->checkwholeword));
   gboolean checkregex = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON(priv->checkregex));
-  if (!document_search_text(document_manager_get_current_document(main_window.docmg), text, checkwholedoc, checkcase, checkwholeword, checkregex)){
+  if (!documentable_search_text(doc, text, checkwholedoc, checkcase, checkwholeword, checkregex)){
     // Show message saying could not be found.
     gphpedit_statusbar_flash_message (GPHPEDIT_STATUSBAR(main_window.appbar),0, _("The text \"%s\" was not found."), text);
   }
@@ -119,7 +119,7 @@ SEARCH_DIALOG_init (SearchDialog *dialog)
   /* Get selected text (Wendell) */
   gchar *buffer;
 
-  buffer = document_get_current_selected_text(document_manager_get_current_document(main_window.docmg));
+  buffer = documentable_get_current_selected_text(DOCUMENTABLE(document_manager_get_current_document(main_window.docmg)));
   if (buffer) {
       gphpedit_history_entry_prepend_text	(GPHPEDIT_HISTORY_ENTRY(priv->findentry),buffer);
       gtk_combo_box_set_active (GTK_COMBO_BOX(priv->findentry), 0);

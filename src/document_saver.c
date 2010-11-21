@@ -106,7 +106,8 @@ void _document_saver_update_modified_time(Document *doc, GFile *file)
     g_file_info_get_modification_time (info, &mtime);
     g_object_unref(info);
   }
-  document_set_mtime(doc, mtime);
+  gint64 time = (((gint64) mtime.tv_sec) * G_USEC_PER_SEC) + mtime.tv_usec;
+  g_object_set(doc, "mtime", time, NULL);
 }
 void _document_saver_file_write (GObject *source_object, GAsyncResult *res, gpointer user_data)
 {
@@ -149,7 +150,7 @@ void document_saver_save_document (DocumentSaver *docsav, Document *doc)
   DocumentSaverDetails *docsavdet = DOCUMENT_SAVER_GET_PRIVATE(docsav);
   GFile *file;
   gsize text_length;
-  gchar *text = document_get_text(doc);
+  gchar *text = documentable_get_text(DOCUMENTABLE(doc));
   if (!text) return ;
   gboolean converted_to_utf8;
   g_object_get(doc, "converted_to_utf8", &converted_to_utf8, "GFile", &file, NULL);

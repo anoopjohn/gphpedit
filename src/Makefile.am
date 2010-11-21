@@ -43,6 +43,12 @@ gphpedit_SOURCES = \
   classbrowser_ui.h \
   debug.c \
   debug.h \
+  documentable.c \
+  documentable.h \
+  document_webkit.c \
+  document_webkit.h \
+  document_scintilla.c \
+  document_scintilla.h \
   document.c \
   document.h \
   document_loader.c \

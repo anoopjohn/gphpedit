@@ -186,7 +186,7 @@ gchar *process_perl_lines(gchar *output)
 GString *save_as_temp_file(Document *document)
 {
   gphpedit_debug(DEBUG_SYNTAX);
-  gchar *write_buffer = document_get_text(document);
+  gchar *write_buffer = documentable_get_text(DOCUMENTABLE(document));
   GString *filename = text_save_as_temp_file(write_buffer);
   g_free(write_buffer);
   return filename;
@@ -195,7 +195,7 @@ GString *save_as_temp_file(Document *document)
 GString *get_syntax_filename(Document *document, gboolean *using_temp)
 {
   GString *filename = NULL;
-  gchar *docfilename = document_get_filename(document);
+  gchar *docfilename = documentable_get_filename(DOCUMENTABLE(document));
   gboolean untitled, saved;
   g_object_get(document, "untitled", &untitled, "saved", &saved, NULL);
   if (saved && filename_is_native(docfilename) && !untitled) {

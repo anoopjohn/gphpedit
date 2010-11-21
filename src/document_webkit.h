@@ -22,53 +22,43 @@
 
    The GNU General Public License is contained in the file COPYING.
 */
-#ifndef DOCUMENT_H
-#define DOCUMENT_H
+#ifndef DOCUMENT_WEBKIT_H
+#define DOCUMENT_WEBKIT_H
 
 #include <gtk/gtk.h>
 #include "documentable.h"
-#include "document_scintilla.h"
-#include "document_webkit.h"
 
-#define DOCUMENT_TYPE document_get_type()
-#define DOCUMENT(obj) \
-  (G_TYPE_CHECK_INSTANCE_CAST ((obj), DOCUMENT_TYPE, Document))
-#define DOCUMENT_CLASS(klass) \
-  (G_TYPE_CHECK_CLASS_CAST ((klass), DOCUMENT_TYPE, DocumentClass))
-#define OBJECT_IS_DOCUMENT(obj) \
-  (G_TYPE_CHECK_INSTANCE_TYPE ((obj), DOCUMENT_TYPE))
-#define OBJECT_IS_DOCUMENT_CLASS(klass) \
-  (G_TYPE_CHECK_CLASS_TYPE ((klass), DOCUMENT_TYPE))
-#define DOCUMENT_GET_CLASS(obj) \
-  (G_TYPE_INSTANCE_GET_CLASS ((obj), DOCUMENT_TYPE, DocumentClass))
+#define DOCUMENT_WEBKIT_TYPE document_webkit_get_type()
+#define DOCUMENT_WEBKIT(obj) \
+  (G_TYPE_CHECK_INSTANCE_CAST ((obj), DOCUMENT_WEBKIT_TYPE, Document_Webkit))
+#define DOCUMENT_WEBKIT_CLASS(klass) \
+  (G_TYPE_CHECK_CLASS_CAST ((klass), DOCUMENT_WEBKIT_TYPE, Document_WebkitClass))
+#define OBJECT_IS_DOCUMENT_WEBKIT(obj) \
+  (G_TYPE_CHECK_INSTANCE_TYPE ((obj), DOCUMENT_WEBKIT_TYPE))
+#define OBJECT_IS_DOCUMENT_WEBKIT_CLASS(klass) \
+  (G_TYPE_CHECK_CLASS_TYPE ((klass), DOCUMENT_WEBKIT_TYPE))
+#define DOCUMENT_WEBKIT_GET_CLASS(obj) \
+  (G_TYPE_INSTANCE_GET_CLASS ((obj), DOCUMENT_WEBKIT_TYPE, Document_WebkitClass))
+
+typedef struct Document_WebkitDetails Document_WebkitDetails;
 
 typedef struct
 {
 	GObject object;
-} Document;
+	Document_WebkitDetails *details;
+} Document_Webkit;
 
 typedef struct
 {
 	GObjectClass parent_class;
 
-} DocumentClass;
+	void (* load_complete) (Document_Webkit *doc, gboolean result, gpointer user_data);
+	void (* save_update) (Document_Webkit *doc, gpointer user_data); /* emited when document_webkit save state change*/
 
-/* document types enum */
-
-enum {
-TAB_FILE,
-TAB_PHP,
-TAB_CSS,
-TAB_SQL,
-TAB_HELP,
-TAB_CXX,
-TAB_PERL,
-TAB_PYTHON,
-TAB_COBOL,
-TAB_PREVIEW
-};
+} Document_WebkitClass;
 
 /* Basic GObject requirements. */
-GType document_get_type (void);
-#endif /* DOCUMENT_H */
+GType document_webkit_get_type (void);
+Document_Webkit *document_webkit_new (gint type, GFile *file);
+#endif /* DOCUMENT_WEBKIT_H */
 

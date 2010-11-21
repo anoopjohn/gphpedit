@@ -70,7 +70,8 @@ void replace_all_clicked(ReplaceDialogPrivate *priv)
   GString *message;
   const gchar *text;
   const gchar *replace;
-  
+  Document *doc = document_manager_get_current_document(main_window.docmg);
+
   text = gtk_combo_box_get_active_text (GTK_COMBO_BOX(priv->findentry));
   gphpedit_history_entry_prepend_text	(GPHPEDIT_HISTORY_ENTRY(priv->findentry), text);
   replace = gtk_combo_box_get_active_text (GTK_COMBO_BOX(priv->replace_entry));
@@ -78,14 +79,14 @@ void replace_all_clicked(ReplaceDialogPrivate *priv)
 
   gboolean checkwholedoc = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON(priv->checkwholedoc));
   if (checkwholedoc) {
-    document_goto_pos(document_manager_get_current_document(main_window.docmg), 0);
+    documentable_goto_pos(DOCUMENTABLE(doc), 0);
     gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON(priv->checkwholedoc), FALSE);
   }
   gboolean checkcase = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON(priv->checkcase));
   gboolean checkwholeword = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON(priv->checkwholeword));
   gboolean checkregex = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON(priv->checkregex));
   gint numfound=0;
-  while (document_search_replace_text(document_manager_get_current_document(main_window.docmg), text, replace, checkwholedoc, checkcase, checkwholeword, checkregex, FALSE)){
+  while (documentable_search_replace_text(DOCUMENTABLE(doc), text, replace, checkwholedoc, checkcase, checkwholeword, checkregex, FALSE)){
     numfound++;
   }
   message = g_string_new("");
@@ -100,7 +101,7 @@ void replace_all_clicked(ReplaceDialogPrivate *priv)
   }
 
   gphpedit_statusbar_flash_message (GPHPEDIT_STATUSBAR(main_window.appbar), 0,"%s",message->str);
-  document_goto_pos(document_manager_get_current_document(main_window.docmg), document_get_current_position(document_manager_get_current_document(main_window.docmg)));
+  documentable_goto_pos(DOCUMENTABLE(doc), documentable_get_current_position(DOCUMENTABLE(doc)));
 }
 
 void replace_clicked(GtkDialog *dialog, ReplaceDialogPrivate *priv)
@@ -108,7 +109,8 @@ void replace_clicked(GtkDialog *dialog, ReplaceDialogPrivate *priv)
   GString *message;
   const gchar *text;
   const gchar *replace;
-  
+  Document *doc = document_manager_get_current_document(main_window.docmg);
+
   text = gtk_combo_box_get_active_text (GTK_COMBO_BOX(priv->findentry));
   gphpedit_history_entry_prepend_text	(GPHPEDIT_HISTORY_ENTRY(priv->findentry), text);
   replace = gtk_combo_box_get_active_text (GTK_COMBO_BOX(priv->replace_entry));
@@ -116,7 +118,7 @@ void replace_clicked(GtkDialog *dialog, ReplaceDialogPrivate *priv)
 
   gboolean checkwholedoc = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON(priv->checkwholedoc));
   if (checkwholedoc) {
-    document_goto_pos(document_manager_get_current_document(main_window.docmg), 0);
+    documentable_goto_pos(DOCUMENTABLE(doc), 0);
     gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON(priv->checkwholedoc), FALSE);
   }
   gboolean checkcase = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON(priv->checkcase));
@@ -124,7 +126,7 @@ void replace_clicked(GtkDialog *dialog, ReplaceDialogPrivate *priv)
   gboolean checkregex = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON(priv->checkregex));
   gboolean ask_replace = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON(priv->checkpromp));
   gint numfound=0;
-  while (document_search_replace_text(document_manager_get_current_document(main_window.docmg), text, replace, checkwholedoc, checkcase, checkwholeword, checkregex, ask_replace)){
+  while (documentable_search_replace_text(DOCUMENTABLE(doc), text, replace, checkwholedoc, checkcase, checkwholeword, checkregex, ask_replace)){
     numfound++;
   }
   message = g_string_new("");
@@ -132,7 +134,7 @@ void replace_clicked(GtkDialog *dialog, ReplaceDialogPrivate *priv)
     g_string_printf(message, _("\"%s\" not found, no replacements made."), text);
   }
   gphpedit_statusbar_flash_message (GPHPEDIT_STATUSBAR(main_window.appbar), 0,"%s",message->str);
-  document_goto_pos(document_manager_get_current_document(main_window.docmg), document_get_current_position(document_manager_get_current_document(main_window.docmg)));
+  documentable_goto_pos(DOCUMENTABLE(doc), documentable_get_current_position(DOCUMENTABLE(doc)));
 }
 
 
@@ -171,7 +173,7 @@ REPLACE_DIALOG_init (ReplaceDialog *dialog)
 
   /* Get selected text (Wendell) */
   gchar *buffer;
-  buffer = document_get_current_selected_text(document_manager_get_current_document(main_window.docmg));
+  buffer = documentable_get_current_selected_text(DOCUMENTABLE(document_manager_get_current_document(main_window.docmg)));
   if (buffer) {
       gphpedit_history_entry_prepend_text	(GPHPEDIT_HISTORY_ENTRY(priv->findentry),buffer);
       gtk_combo_box_set_active (GTK_COMBO_BOX(priv->findentry), 0);

@@ -9,6 +9,7 @@ gchar *filename_get_uri(gchar *filename);
 gchar *filename_get_path(gchar *filename);
 gchar *filename_get_scaped_path(gchar *filename);
 gchar *filename_get_basename (gchar *filename);
+gboolean GFile_get_is_modified(GFile *file, gint64 *mark, gboolean update_mark);
 gboolean GFile_get_modified(GFile *file,GTimeVal *act, gboolean update_mark);
 gboolean get_file_modified(gchar *filename,GTimeVal *act, gboolean update_mark);
 gchar *filename_get_relative_path(gchar *filename);

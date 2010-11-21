@@ -204,7 +204,8 @@ static void main_window_fill_panes(void)
 void update_app_title(Document *document)
 {
   gphpedit_debug(DEBUG_MAIN_WINDOW);
-  gchar *title = document_get_title(document);
+  gchar *title = NULL;
+  if (document) g_object_get(document, "title", &title, NULL);
   update_status_combobox(document);
   update_zoom_level();
   update_controls(document);
@@ -277,8 +278,6 @@ void main_window_create(void){
   g_signal_connect (G_OBJECT (main_window.window), "size_allocate", G_CALLBACK (main_window_resize), NULL);
   g_signal_connect (G_OBJECT (main_window.window), "window-state-event", G_CALLBACK (main_window_state_changed), NULL);
   g_signal_connect (G_OBJECT (main_window.window), "focus-in-event", G_CALLBACK (main_window_activate_focus), NULL);
-
-  main_window.clipboard = gtk_clipboard_get(GDK_SELECTION_CLIPBOARD);
 
   gtk_widget_show(main_window.window);
   

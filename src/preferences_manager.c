@@ -631,10 +631,13 @@ gint preferences_manager_parse_font_quality(void){
   gchar *antialiasing = get_string("/desktop/gnome/font_rendering/antialiasing","default");
   
   if (g_strcmp0(antialiasing,"none")==0){
-      return SC_EFF_QUALITY_NON_ANTIALIASED;
+    g_free(antialiasing);
+    return SC_EFF_QUALITY_NON_ANTIALIASED;
   } else if (g_strcmp0(antialiasing,"grayscale")==0){
+    g_free(antialiasing);
     return SC_EFF_QUALITY_ANTIALIASED;
   } else if (g_strcmp0(antialiasing,"rgba")==0){
+    g_free(antialiasing);
     return SC_EFF_QUALITY_LCD_OPTIMIZED;
   }
   /* gconf key not found, try GtkSettings value */

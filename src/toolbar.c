@@ -361,7 +361,7 @@ find_toolbar_init (ToolBar *toolbar)
   gtk_widget_show(priv->goto_label);
   create_custom_toolbar_item (GTK_TOOLBAR(toolbar), priv->goto_label);
   /* create goto entry */
-  create_entry(&priv->goto_entry, _("Go to line"),8);
+  create_entry(&priv->goto_entry, _("Go to line"), 8);
   gtk_widget_add_accelerator (priv->goto_entry, "grab-focus", accel_group, GDK_g, GDK_CONTROL_MASK, 0);
   g_signal_connect (G_OBJECT (priv->goto_entry), "icon-press", G_CALLBACK (on_cleanicon_press), NULL);
   g_signal_connect_after(G_OBJECT(priv->goto_entry), "activate", G_CALLBACK(goto_line_activate), NULL);

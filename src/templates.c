@@ -108,8 +108,8 @@ templates_manager_init (TemplatesManager  *object)
 static GString *template_get_filename(void)
 {
   GString *ret;
-  ret = g_string_new( g_get_home_dir());
-  ret = g_string_append(ret, "/.gphpedit/templates.txt");
+  gchar *uri = g_build_filename (g_get_user_config_dir (), "gphpedit", "templates.txt", NULL);
+  ret = g_string_new(uri);
   
   return ret;
 }
@@ -273,10 +273,10 @@ void template_find_and_insert(TemplatesManager *tempmg, Document *doc)
   gchar *buffer = NULL;
   gchar *template = NULL;
  
-  buffer = document_get_current_word(doc);
+  buffer = documentable_get_current_word(DOCUMENTABLE(doc));
   template = template_find(tempmg, buffer);
-  if (template) {
-    document_insert_template(doc, template);
+  if (template && OBJECT_IS_DOCUMENT_SCINTILLA(doc)) {
+    document_scintilla_insert_template(DOCUMENT_SCINTILLA(doc), template);
   }
   g_free(buffer);
 }

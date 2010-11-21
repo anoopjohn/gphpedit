@@ -32,8 +32,6 @@
 #include "tab.h"
 #include "gvfs_utils.h"
 
-#define ICON_SIZE 16
-
 #define IS_MIME(stringa,stringb) (g_content_type_equals (stringa, stringb))
 #define IS_TEXT(stringa) (g_content_type_is_a (stringa, "text/*"))
 #define IS_APPLICATION(stringa) (g_content_type_is_a (stringa, "application/*") && !IS_MIME(stringa,"application/x-php") && !IS_MIME(stringa,"application/javascript") && !IS_MIME(stringa,"application/x-perl"))
@@ -46,8 +44,6 @@ struct DocumentLoaderDetails
 {
   GtkWindow *dialog_parent_window;
   GMountOperation *gmo;
-  gchar *raw_uri;
-  GdkPixbuf *icon;
   gint type;
   guint goto_line;
 
@@ -205,7 +201,6 @@ static void document_loader_dispose (GObject *object)
   /* free object resources*/
   g_object_unref(docloddet->dialog_parent_window);
   if (docloddet->gmo) g_object_unref(docloddet->gmo);
-  if (docloddet->raw_uri) g_free(docloddet->raw_uri);
 
   /* Chain up to the parent class */
   G_OBJECT_CLASS (document_loader_parent_class)->dispose (object);
@@ -220,9 +215,9 @@ DocumentLoader *document_loader_new (GtkWindow *dialog_parent_window)
 
 void _document_loader_create_untitled(DocumentLoader *doclod)
 {
-  Document *doc = document_scintilla_new (TAB_FILE, NULL, 0, NULL, 0, TRUE);
-  g_object_set(doc, "file_icon", gtk_icon_theme_load_icon (gtk_icon_theme_get_default (), "text-plain", ICON_SIZE, 0, NULL), NULL);
-  g_signal_emit (G_OBJECT (doclod), signals[DONE_LOADING], 0, TRUE, doc);
+  Document_Scintilla *doc = document_scintilla_new (TAB_FILE, NULL, 0, NULL);
+  g_object_set(doc, "icon", g_themed_icon_new ("text-plain"), NULL);
+  g_signal_emit (G_OBJECT (doclod), signals[DONE_LOADING], 0, TRUE, DOCUMENT(doc));
 }
 
 #ifdef PHP_DOC_DIR
@@ -344,20 +339,17 @@ static void _document_loader_help_file_load(DocumentLoader *doclod, GFile *file)
     return ;
   }
   GIcon *icon= g_file_info_get_icon (info); /* get Gicon for mimetype*/
-  GtkIconInfo *ificon= gtk_icon_theme_lookup_by_gicon (gtk_icon_theme_get_default (), icon, ICON_SIZE, 0);
-  docloddet->icon = gtk_icon_info_load_icon (ificon, NULL);
-  g_object_unref(info);
 
   /* Open file*/
   /*it's all ok, read file*/
-  Document *document = document_webkit_new (docloddet->type, file, docloddet->raw_uri);
-  g_object_set(document, "file_icon", docloddet->icon, NULL);
-  g_signal_emit (G_OBJECT (doclod), signals[DONE_LOADING], 0, TRUE, document);
+  Document_Webkit *document = document_webkit_new (docloddet->type, file);
+  g_object_set(document, "icon", icon, NULL);
+  g_signal_emit (G_OBJECT (doclod), signals[DONE_LOADING], 0, TRUE, DOCUMENT(document));
+  g_object_unref(info);
 }
 
 static void _document_loader_create_help(DocumentLoader *doclod, gchar *help_function)
 {
-  DocumentLoaderDetails *docloddet = DOCUMENT_LOADER_GET_PRIVATE(doclod);
   GString *long_filename = NULL;
   if (!g_str_has_prefix(help_function, "http") && !g_str_has_prefix(help_function, "file:")){
   long_filename = tab_help_find_helpfile(help_function);
@@ -369,7 +361,6 @@ static void _document_loader_create_help(DocumentLoader *doclod, gchar *help_fun
     return ;
   } else {
     gphpedit_debug_message (DEBUG_DOCUMENT,"filename:%s", long_filename->str);
-    docloddet->raw_uri = g_strdup(long_filename->str);
     GFile *file = g_file_new_for_commandline_arg(long_filename->str);
     _document_loader_help_file_load(doclod, file);
   }
@@ -377,9 +368,7 @@ static void _document_loader_create_help(DocumentLoader *doclod, gchar *help_fun
 
 static void _document_loader_create_preview(DocumentLoader *doclod, gchar *filename)
 {
-  DocumentLoaderDetails *docloddet = DOCUMENT_LOADER_GET_PRIVATE(doclod);
   gphpedit_debug_message (DEBUG_DOCUMENT,"filename:%s", filename);
-  docloddet->raw_uri = g_strdup(filename);
   GFile *file=g_file_new_for_commandline_arg(filename);
   _document_loader_help_file_load(doclod, file);
 }
@@ -495,26 +484,25 @@ static void _document_loader_load_file_finish (GObject *source_object, GAsyncRes
     emit_signal (doclod, FALSE, NULL);
     return;
   }
-  Document *doc;
+  Document_Scintilla *doc;
   if (docloddet->current_action == LOAD) {
-    doc = document_scintilla_new (docloddet->type, file, docloddet->goto_line, buffer, strlen(buffer), FALSE);
+    doc = document_scintilla_new (docloddet->type, file, docloddet->goto_line, buffer);
   } else {
-    doc = docloddet->doc;
+    doc = DOCUMENT_SCINTILLA(docloddet->doc);
     g_object_set(doc, "type", docloddet->type, "GFile", file, NULL);
-    document_replace_text (doc, buffer);
+    documentable_replace_text (DOCUMENTABLE(doc), buffer);
   }
   g_object_set(doc, "converted_to_utf8", converted_to_utf8, NULL);
   g_object_set(doc, "read_only", !g_file_info_get_attribute_boolean (info,"access::can-write"), "can_modify", TRUE, NULL);
   g_object_set(doc,"content_type", g_file_info_get_content_type (info),NULL);
   GIcon *icon= g_file_info_get_icon (info); /* get Gicon for mimetype*/
-  GtkIconInfo *ificon= gtk_icon_theme_lookup_by_gicon (gtk_icon_theme_get_default (), icon, ICON_SIZE, 0);
-  g_object_set(doc, "file_icon",gtk_icon_info_load_icon (ificon, NULL), NULL); 
+  g_object_set(doc, "icon", icon, NULL);
   GTimeVal file_mtime;
   g_file_info_get_modification_time (info,&file_mtime);
-  document_set_mtime(doc, file_mtime);
+  gint64 time = (((gint64) file_mtime.tv_sec) * G_USEC_PER_SEC) + file_mtime.tv_usec;
+  g_object_set(doc, "mtime", time, NULL);
   g_object_unref(info);
-  gtk_icon_info_free(ificon);
-  emit_signal (doclod, TRUE, doc);
+  emit_signal (doclod, TRUE, DOCUMENT(doc));
 }
 
 void _document_loader_load_file(DocumentLoader *doclod, GFile *file)
@@ -527,10 +515,9 @@ static void _document_loader_create_file(DocumentLoader *doclod, gint type, gcha
 {
   DocumentLoaderDetails *docloddet = DOCUMENT_LOADER_GET_PRIVATE(doclod);
   gphpedit_debug_message (DEBUG_DOCUMENT,"filename:%s", filename);
-  docloddet->raw_uri = g_strdup(filename);
   docloddet->goto_line = goto_line;
   docloddet->type = type;
-  GFile *file = g_file_new_for_commandline_arg(docloddet->raw_uri);
+  GFile *file = g_file_new_for_commandline_arg(filename);
 
   if (!GFile_is_local_or_http(file)){
     mount_mountable_file(doclod, file);

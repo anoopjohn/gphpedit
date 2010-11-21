@@ -82,7 +82,7 @@ gint main_window_key_press_event(GtkWidget   *widget, GdkEventKey *event,gpointe
 {
 
   if (main_window.notebook_editor != NULL) {
-    check_externally_modified(document_manager_get_current_document(main_window.docmg));
+    documentable_check_externally_modified(DOCUMENTABLE(document_manager_get_current_document(main_window.docmg)));
     if (((event->state & (GDK_CONTROL_MASK | GDK_SHIFT_MASK))==(GDK_CONTROL_MASK | GDK_SHIFT_MASK)) && (event->keyval == GDK_ISO_Left_Tab)) {
       // Hack, for some reason when shift is held down keyval comes through as GDK_ISO_Left_Tab not GDK_Tab
       if (gtk_notebook_get_current_page(GTK_NOTEBOOK(main_window.notebook_editor)) == 0) {
@@ -142,6 +142,7 @@ void on_openselected1_activate(GtkWidget *widget)
 {
   document_manager_open_selected(main_window.docmg);
 }
+
 void add_file_filters(GtkFileChooser *chooser){
   //store file filter
   GtkFileFilter *filter;
@@ -254,7 +255,7 @@ void on_open1_activate(GtkWidget *widget)
   //Add filters to the open dialog
   add_file_filters(GTK_FILE_CHOOSER(file_selection_box));
   Document *document = document_manager_get_current_document(main_window.docmg);
-  gchar *filename = (gchar *)document_get_filename(document);
+  gchar *filename = documentable_get_filename(DOCUMENTABLE(document));
   gboolean untitled;
   g_object_get(document, "untitled", &untitled, NULL);
 
@@ -277,7 +278,7 @@ void on_open1_activate(GtkWidget *widget)
 void save_file_as_ok(GtkFileChooser *file_selection_box)
 {
   Document *document = document_manager_get_current_document(main_window.docmg);
-  document_save_as(document, gtk_file_chooser_get_file(file_selection_box));
+  documentable_save_as(DOCUMENTABLE(document), gtk_file_chooser_get_file(file_selection_box));
 }
 
 void on_save1_activate(GtkWidget *widget)
@@ -290,7 +291,7 @@ void on_save1_activate(GtkWidget *widget)
     if (untitled) {
       on_save_as1_activate(widget);
     } else {
-      document_save(document);
+      documentable_save(DOCUMENTABLE(document));
     }
   }
 }
@@ -304,7 +305,6 @@ void on_saveall1_activate(GtkWidget *widget)
 void on_save_as1_activate(GtkWidget *widget)
 {
   GtkWidget *file_selection_box;
-  gchar *filename;
   const gchar *last_opened_folder;
   Document *document = document_manager_get_current_document(main_window.docmg);
   if (!document) return ;
@@ -320,13 +320,14 @@ void on_save_as1_activate(GtkWidget *widget)
   gboolean untitled;
   g_object_get(document, "untitled", &untitled, NULL);
   if (!untitled) {
-    filename = document_get_filename(document);
-    gtk_file_chooser_set_uri(GTK_FILE_CHOOSER(file_selection_box), filename);
-    g_free(filename);
+    GFile *file;
+    g_object_get(document, "GFile", &file, NULL);
+    gtk_file_chooser_set_file (GTK_FILE_CHOOSER(file_selection_box), file, NULL);
   } else {
     g_object_get (main_window.prefmg, "last_opened_folder", &last_opened_folder, NULL);
     gphpedit_debug_message(DEBUG_MAIN_WINDOW, "Setting current_folder_uri to %s", last_opened_folder);
     gtk_file_chooser_set_current_folder_uri(GTK_FILE_CHOOSER(file_selection_box), last_opened_folder);
+    gtk_file_chooser_set_current_name (GTK_FILE_CHOOSER(file_selection_box), _("Untitled"));
   }
   if (gtk_dialog_run (GTK_DIALOG(file_selection_box)) == GTK_RESPONSE_ACCEPT) {
     save_file_as_ok(GTK_FILE_CHOOSER(file_selection_box));
@@ -421,32 +422,32 @@ void on_quit1_activate(GtkWidget *widget)
 
 void on_cut1_activate(GtkWidget *widget)
 {
-  document_cut(document_manager_get_current_document(main_window.docmg), main_window.clipboard);
+  documentable_cut(DOCUMENTABLE(document_manager_get_current_document(main_window.docmg)));
 }
 
 void on_copy1_activate(GtkWidget *widget)
 {
-  document_copy(document_manager_get_current_document(main_window.docmg), main_window.clipboard);
+  documentable_copy(DOCUMENTABLE(document_manager_get_current_document(main_window.docmg)));
 }
 
 
 void selectiontoupper(void){
-  document_selection_to_upper(document_manager_get_current_document(main_window.docmg));
+ documentable_selection_to_upper(DOCUMENTABLE(document_manager_get_current_document(main_window.docmg)));
 }
 
 void selectiontolower(void){
-  document_selection_to_lower(document_manager_get_current_document(main_window.docmg));
+ documentable_selection_to_lower(DOCUMENTABLE(document_manager_get_current_document(main_window.docmg)));
 }
 
 void on_paste1_activate(GtkWidget *widget)
 {
-  document_paste(document_manager_get_current_document(main_window.docmg), main_window.clipboard);
+  documentable_paste(DOCUMENTABLE(document_manager_get_current_document(main_window.docmg)));
 }
 
 
 void on_selectall1_activate(GtkWidget *widget)
 {
-  document_select_all(document_manager_get_current_document(main_window.docmg));
+  documentable_select_all(DOCUMENTABLE(document_manager_get_current_document(main_window.docmg)));
 }
 
 
@@ -469,24 +470,30 @@ void on_replace1_activate(GtkWidget *widget)
 
 void on_undo1_activate(GtkWidget *widget)
 {
-  document_undo(document_manager_get_current_document(main_window.docmg));
+  documentable_undo(DOCUMENTABLE(document_manager_get_current_document(main_window.docmg)));
 }
 
 
 void on_redo1_activate(GtkWidget *widget)
 {
-  document_redo(document_manager_get_current_document(main_window.docmg));
+  documentable_redo(DOCUMENTABLE(document_manager_get_current_document(main_window.docmg)));
 }
 
 
 void keyboard_macro_startstop(GtkWidget *widget)
 {
-  document_keyboard_macro_startstop(document_manager_get_current_document(main_window.docmg));
+  Document *doc = document_manager_get_current_document(main_window.docmg);
+  if(OBJECT_IS_DOCUMENT_SCINTILLA(doc)) {
+  document_scintilla_keyboard_macro_startstop(DOCUMENT_SCINTILLA(doc));
+  }
 }
 
 void keyboard_macro_playback(GtkWidget *widget)
 {
-  document_keyboard_macro_playback(document_manager_get_current_document(main_window.docmg));
+  Document *doc = document_manager_get_current_document(main_window.docmg);
+  if(OBJECT_IS_DOCUMENT_SCINTILLA(doc)) {
+  document_scintilla_keyboard_macro_playback(DOCUMENT_SCINTILLA(doc));
+  }
 }
 
 
@@ -595,13 +602,16 @@ void on_notebook_switch_page (GtkNotebook *notebook, GtkNotebookPage *page,
     update_app_title(document_manager_get_current_document(main_window.docmg));
     on_tab_change_update_classbrowser(main_window.notebook_editor);
   }
-  check_externally_modified(document_manager_get_current_document(main_window.docmg));
+  documentable_check_externally_modified(DOCUMENTABLE(document_manager_get_current_document(main_window.docmg)));
 }
 
 gboolean on_notebook_focus_tab(GtkNotebook *notebook,
                  GtkNotebookTab arg1, gpointer user_data)
 {
-  document_grab_focus(document_manager_get_current_document(main_window.docmg));
+  GtkWidget *document_widget;
+  g_object_get(document_manager_get_current_document(main_window.docmg), "editor_widget", &document_widget, NULL);
+  gtk_widget_grab_focus(document_widget);
+
   return TRUE;
 }
 
@@ -610,14 +620,16 @@ void inc_search_typed (GtkEntry *entry, const gchar *text, gint length,
 {
   gchar *current_text;
   current_text = (gchar *)gtk_entry_get_text(entry);
-  document_incremental_search(document_manager_get_current_document(main_window.docmg), current_text, FALSE);
+  documentable_incremental_search(DOCUMENTABLE(document_manager_get_current_document(main_window.docmg)), current_text, FALSE);
 }
 
-gboolean inc_search_key_release_event(GtkWidget *widget,GdkEventKey *event,gpointer user_data)
+gboolean inc_search_key_release_event(GtkWidget *widget, GdkEventKey *event, gpointer user_data)
 {
   //Auto focus editor tab only if it is a scintilla tab
     if (event->keyval == GDK_Escape) {
-        document_grab_focus(document_manager_get_current_document(main_window.docmg));
+        GtkWidget *document_widget;
+        g_object_get(document_manager_get_current_document(main_window.docmg), "editor_widget", &document_widget, NULL);
+        gtk_widget_grab_focus(document_widget);
       return TRUE;
     }
 
@@ -647,7 +659,7 @@ void inc_search_activate(GtkEntry *entry,gpointer user_data)
   //Inc search only if the current tab is not a help tab
   current_text = (gchar *)gtk_entry_get_text(entry);
 
-  document_incremental_search(document_manager_get_current_document(main_window.docmg), current_text, TRUE);
+  documentable_incremental_search(DOCUMENTABLE(document_manager_get_current_document(main_window.docmg)), current_text, TRUE);
   add_to_search_history(current_text);
 
 }
@@ -670,7 +682,7 @@ void goto_line(gchar *text)
 {
   gint line;
   line = atoi(text);
-  document_goto_line(document_manager_get_current_document(main_window.docmg),line);
+  documentable_goto_line(DOCUMENTABLE(document_manager_get_current_document(main_window.docmg)), line);
 }
 
 void goto_line_activate(GtkEntry *entry,gpointer user_data)
@@ -685,36 +697,30 @@ void goto_line_activate(GtkEntry *entry,gpointer user_data)
 
 void block_indent(GtkWidget *widget)
 {
-  gint indentation_size;
-  g_object_get(main_window.prefmg, "indentation_size", &indentation_size, NULL);
-  document_block_indent(document_manager_get_current_document(main_window.docmg), indentation_size);
+  documentable_block_indent(DOCUMENTABLE(document_manager_get_current_document(main_window.docmg)));
 }
 
 
 void block_unindent(GtkWidget *widget)
 {
-  gint indentation_size;
-  g_object_get(main_window.prefmg, "indentation_size", &indentation_size, NULL);
-  document_block_unindent(document_manager_get_current_document(main_window.docmg), indentation_size);
+  documentable_block_unindent(DOCUMENTABLE(document_manager_get_current_document(main_window.docmg)));
 }
 
-//zoom in
 void zoom_in(GtkWidget *widget)
 {
-  document_zoom_in(document_manager_get_current_document(main_window.docmg));
+  documentable_zoom_in(DOCUMENTABLE(document_manager_get_current_document(main_window.docmg)));
   update_zoom_level();
 }
 
-//zoom out
 void zoom_out(GtkWidget *widget)
 {
-  document_zoom_out(document_manager_get_current_document(main_window.docmg));
+  documentable_zoom_out(DOCUMENTABLE(document_manager_get_current_document(main_window.docmg)));
   update_zoom_level();
 }
 
 void zoom_100(GtkWidget *widget)
 {
-  document_zoom_restore(document_manager_get_current_document(main_window.docmg));
+  documentable_zoom_restore(DOCUMENTABLE(document_manager_get_current_document(main_window.docmg)));
   update_zoom_level();
 }
 
@@ -761,36 +767,36 @@ void classbrowser_show_hide(GtkWidget *widget)
 
 void force_php(GtkWidget *widget)
 {
-    set_document_to_type(document_manager_get_current_document(main_window.docmg), TAB_PHP);
+  documentable_set_type(DOCUMENTABLE(document_manager_get_current_document(main_window.docmg)), TAB_PHP);
 }
 
 void force_css(GtkWidget *widget)
 {
-    set_document_to_type(document_manager_get_current_document(main_window.docmg), TAB_CSS);
+  documentable_set_type(DOCUMENTABLE(document_manager_get_current_document(main_window.docmg)), TAB_CSS);
 }
 
 void force_sql(GtkWidget *widget)
 {
-  set_document_to_type(document_manager_get_current_document(main_window.docmg), TAB_SQL);
+  documentable_set_type(DOCUMENTABLE(document_manager_get_current_document(main_window.docmg)), TAB_SQL);
 }
 
 void force_cxx(GtkWidget *widget)
 {
-  set_document_to_type(document_manager_get_current_document(main_window.docmg), TAB_CXX);
+  documentable_set_type(DOCUMENTABLE(document_manager_get_current_document(main_window.docmg)), TAB_CXX);
 }
 
 void force_perl(GtkWidget *widget)
 {
-    set_document_to_type(document_manager_get_current_document(main_window.docmg), TAB_PERL);
+  documentable_set_type(DOCUMENTABLE(document_manager_get_current_document(main_window.docmg)), TAB_PERL);
 }
 
 void force_cobol(GtkWidget *widget)
 {
-  set_document_to_type(document_manager_get_current_document(main_window.docmg), TAB_COBOL);
+  documentable_set_type(DOCUMENTABLE(document_manager_get_current_document(main_window.docmg)), TAB_COBOL);
 }
 void force_python(GtkWidget *widget)
 {
-  set_document_to_type(document_manager_get_current_document(main_window.docmg), TAB_PYTHON);
+  documentable_set_type(DOCUMENTABLE(document_manager_get_current_document(main_window.docmg)), TAB_PYTHON);
 }
 
 //function to refresh treeview when the current tab changes 
@@ -803,6 +809,6 @@ gint on_tab_change_update_classbrowser(GtkWidget *widget)
 
 gboolean main_window_activate_focus (GtkWidget *widget,GdkEventFocus *event, gpointer user_data)
 {
-  check_externally_modified(document_manager_get_current_document(main_window.docmg));
+  documentable_check_externally_modified(DOCUMENTABLE(document_manager_get_current_document(main_window.docmg)));
   return FALSE;
 }

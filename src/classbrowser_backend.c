@@ -235,11 +235,11 @@ void do_parse_file(ClassbrowserBackend *classback, Document *document){
     g_return_if_fail(document);
     gboolean untitled;
     g_object_get(document, "untitled", &untitled, NULL);
-    if (document_is_scintilla_based(document) && !untitled){
+    if (OBJECT_IS_DOCUMENT_SCINTILLA(document) && !untitled){
     const gchar *short_filename;
     g_object_get(document, "short_filename", &short_filename, NULL);
     gphpedit_debug_message(DEBUG_CLASSBROWSER, "Parsing: %s\n", short_filename);
-    gchar *filename =document_get_filename(document);;
+    gchar *filename = documentable_get_filename(DOCUMENTABLE(document));
       if (is_php_file_from_filename(filename)) {
         classbrowser_parse_file(classback, filename); 
 #ifdef HAVE_CTAGS_EXUBERANT

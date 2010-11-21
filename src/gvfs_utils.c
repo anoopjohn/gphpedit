@@ -115,6 +115,31 @@ gchar *read_text_file_sync( gchar *filename )
   return buffer;
 }
 
+/*
+* get_file_modified
+* return TRUE if the file has been modified or FALSE otherwise
+* if updatemark = TRUE, the mark parameter will be updated will lastest mark
+*/
+gboolean GFile_get_is_modified(GFile *file, gint64 *mark, gboolean update_mark)
+{
+  GFileInfo *info;
+  GError *error=NULL;
+  if (!file) return FALSE;
+  info=g_file_query_info (file,"time::modified,time::modified-usec",0,NULL,&error);
+  if (error){
+  g_error_free(error);
+  return FALSE;  
+  }
+  GTimeVal result;
+  g_file_info_get_modification_time (info, &result);
+  gboolean hr=FALSE;
+  gint64 newmark;
+  newmark = (((gint64) result.tv_sec) * G_USEC_PER_SEC) + result.tv_usec;
+  if (newmark > *mark) hr=TRUE;
+  if (update_mark) *mark = newmark;     /*make current mark as file mark*/
+  g_object_unref(info);  
+  return hr;
+}
 
 /*
 * get_file_modified

@@ -569,7 +569,7 @@ gint get_plugin_syntax_type(Plugin *plugin){
 */
 static GString *save_as_temp_file(Document *document)
 {
-  gchar *write_buffer = document_get_text(document);
+  gchar *write_buffer = documentable_get_text(DOCUMENTABLE(document));
   GString *filename = text_save_as_temp_file(write_buffer);
   g_free(write_buffer);
   return filename;
@@ -604,7 +604,7 @@ void plugin_run(Plugin *plugin, Document *document)
     gboolean is_empty;
     g_object_get(document, "is_empty", &is_empty, NULL);
     if (!is_empty){
-    current_selection = document_get_current_selected_text(document);
+    current_selection = documentable_get_current_selected_text(DOCUMENTABLE(document));
     gchar *escape= g_strescape(current_selection,"");
     command_line = g_string_append(command_line, escape);
     g_free(current_selection);
@@ -615,7 +615,7 @@ void plugin_run(Plugin *plugin, Document *document)
     gboolean saved;
     g_object_get(document, "saved", &saved, NULL);
     if (saved){
-    gchar *filename = document_get_filename(document);
+    gchar *filename = documentable_get_filename(DOCUMENTABLE(document));
     gchar *temp_path=filename_get_path(filename); /* remove escaped chars*/
     g_free(filename);
     command_line = g_string_append(command_line, temp_path);
@@ -633,10 +633,10 @@ void plugin_run(Plugin *plugin, Document *document)
   data = strstr(stdout, "\n");
   data++;
   if (g_str_has_prefix(stdout, "INSERT")){
-      document_insert_text(document, data);
+      documentable_insert_text(DOCUMENTABLE(document), data);
     }
     else if (g_str_has_prefix(stdout, "REPLACE")){
-      document_replace_current_selection(document, data);
+      documentable_replace_current_selection(DOCUMENTABLE(document), data);
     }
     else if (g_str_has_prefix(stdout, "MESSAGE")){
         if (data){

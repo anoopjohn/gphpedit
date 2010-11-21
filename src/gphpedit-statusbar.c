@@ -149,7 +149,8 @@ void set_higthlight (GphpeditStatusComboBox *combo, GtkMenuItem *item){
   } else {
     type = TAB_FILE;
   }
-  set_document_to_type(document_manager_get_current_document(main_window.docmg), type);
+  Document *doc = document_manager_get_current_document(main_window.docmg);
+  if (doc) documentable_set_type(DOCUMENTABLE(doc), type);
 }
 
 void set_status_combo_item (GphpeditStatusbar *statusbar,const gchar *label)
