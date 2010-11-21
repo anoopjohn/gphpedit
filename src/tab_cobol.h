@@ -28,7 +28,7 @@
 #include "tab.h"
 #include "document.h"
 
-void tab_cobol_set_lexer(Document *document);
+void tab_cobol_set_lexer(GtkScintilla *scintilla);
 gboolean is_cobol_file(const gchar *filename);
 
 #endif

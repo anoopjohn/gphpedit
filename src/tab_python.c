@@ -77,9 +77,9 @@ void scintilla_python_set_lexer(GtkScintilla *scintilla)
   g_object_unref(prefmg);
 }
 
-void tab_python_set_lexer(Document *document)
+void tab_python_set_lexer(GtkScintilla *scintilla)
 {
-  scintilla_python_set_lexer(document_get_scintilla(document));
+  scintilla_python_set_lexer(scintilla);
 }
 
 gboolean is_python_file(const gchar *filename)

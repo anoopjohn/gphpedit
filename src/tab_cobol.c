@@ -73,9 +73,9 @@ void scintilla_cobol_set_lexer(GtkScintilla *scintilla)
   g_object_unref(prefmg);
 }
 
-void tab_cobol_set_lexer(Document *document)
+void tab_cobol_set_lexer(GtkScintilla *scintilla)
 {
-  scintilla_cobol_set_lexer(document_get_scintilla(document));
+  scintilla_cobol_set_lexer(scintilla);
 }
 
 gboolean is_cobol_file(const gchar *filename)

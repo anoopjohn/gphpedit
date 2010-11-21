@@ -103,7 +103,6 @@ void document_block_indent(Document *doc, gint indentation_size);
 void document_block_unindent(Document *doc, gint indentation_size);
 void set_document_to_type(Document *document, gint type);
 void tab_check_type_file(Document *document);
-GtkScintilla *document_get_scintilla(Document *document);
 void document_insert_text(Document *doc, gchar *data);
 void document_replace_current_selection(Document *doc, gchar *data);
 gchar *document_get_title(Document *doc);

@@ -27,7 +27,7 @@
 
 #include "document.h"
 
-void tab_python_set_lexer(Document *document);
+void tab_python_set_lexer(GtkScintilla *scintilla);
 gboolean is_python_file(const gchar *filename);
 
 #endif

@@ -30,11 +30,10 @@
 #include "gtksourcestyleschememanager.h"
 
 
-void tab_css_set_lexer(Document *document)
+void tab_css_set_lexer(GtkScintilla *scintilla)
 {
 
   PreferencesManager *prefmg = preferences_manager_new ();
-  GtkScintilla *scintilla = document_get_scintilla(document);
   gtk_scintilla_clear_document_style (scintilla);
   gtk_scintilla_set_lexer(scintilla, SCLEX_CSS);
   gtk_scintilla_set_style_bits(scintilla, 5);

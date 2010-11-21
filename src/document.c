@@ -1583,31 +1583,31 @@ void set_document_to_type(Document *document, gint type)
       docdet->type = type;
       switch (type) {
         case TAB_PHP:
-          tab_php_set_lexer(document);
+          tab_php_set_lexer(GTK_SCINTILLA(docdet->scintilla));
           tab_set_folding(document, TRUE);
           break;
         case TAB_CSS:
-          tab_css_set_lexer(document);
+          tab_css_set_lexer(GTK_SCINTILLA(docdet->scintilla));
           tab_set_folding(document, TRUE);
           break;
         case TAB_COBOL:
-          tab_cobol_set_lexer(document);
+          tab_cobol_set_lexer(GTK_SCINTILLA(docdet->scintilla));
           tab_set_folding(document, TRUE);
           break;
         case TAB_CXX:
-          tab_cxx_set_lexer(document);
+          tab_cxx_set_lexer(GTK_SCINTILLA(docdet->scintilla));
           tab_set_folding(document, TRUE);
           break;
         case TAB_PYTHON:
-          tab_python_set_lexer(document);
+          tab_python_set_lexer(GTK_SCINTILLA(docdet->scintilla));
           tab_set_folding(document, TRUE);
           break;
         case TAB_SQL:
-          tab_sql_set_lexer(document);
+          tab_sql_set_lexer(GTK_SCINTILLA(docdet->scintilla));
           tab_set_folding(document, TRUE);
           break;
         case TAB_PERL:
-          tab_perl_set_lexer(document);
+          tab_perl_set_lexer(GTK_SCINTILLA(docdet->scintilla));
           tab_set_folding(document, TRUE);
           break;
         case TAB_FILE:
@@ -1964,16 +1964,6 @@ void document_replace_current_selection(Document *doc, gchar *data){
   if (GTK_IS_SCINTILLA(docdet->scintilla)){
     gtk_scintilla_replace_sel(GTK_SCINTILLA(docdet->scintilla), data);
   }
-}
-
-GtkScintilla *document_get_scintilla(Document *document)
-{
-  g_return_val_if_fail (document, NULL);
-  DocumentDetails *docdet = DOCUMENT_GET_PRIVATE(document);
-  if (GTK_IS_SCINTILLA(docdet->scintilla)){
-      return GTK_SCINTILLA(docdet->scintilla);
-  }
-  return NULL;
 }
 
 void tab_check_type_file(Document *document) {

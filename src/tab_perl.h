@@ -27,6 +27,6 @@
 
 #include "document.h"
 
-void tab_perl_set_lexer(Document *document);
+void tab_perl_set_lexer(GtkScintilla *scintilla);
 gboolean is_perl_file(const gchar *filename);
 #endif
