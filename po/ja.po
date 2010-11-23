@@ -1,14 +1,14 @@
 # Japanese translation of gPHPEdit.
-# Copyright © 2003-2006 Andy Jeffries, 2009-2010 Anoop John.
+# Copyright © 2003-2006 Andy Jeffries, 2009-2010 Anoop John
 # This file is distributed under the same license as the gPHPEdit.
-# Tadashi Jokagi <elf@elf.no-ip.org>, 2010.
+# Tadashi Jokagi <elf@elf.no-ip.org>.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2010-11-20 19:09+0000\n"
-"PO-Revision-Date: 2010-11-23 16:19+0900\n"
+"PO-Revision-Date: 2010-11-23 16:48+0900\n"
 "Last-Translator: Cahell Hide <cahells@gmail.com>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -70,7 +70,7 @@ msgstr "マーカーが見つかりませんでした"
 #: ../src/document.c:1998
 #: ../src/document.c:2007
 msgid " - gPHPEdit"
-msgstr " - gPHPEdit"
+msgstr " - gPHPEdit　"
 
 #: ../src/document.c:2189
 msgid "Do you want to replace this occurence?"
@@ -131,7 +131,7 @@ msgstr "ファイルの情報を取得出来ませんでした。GIO エラー: 
 #: ../gphpedit.desktop.in.h:3
 #: ../src/templates_editor.c:227
 msgid "gPHPEdit"
-msgstr "gPHPEdit"
+msgstr "gPHPEdit　"
 
 #: ../src/document_loader.c:411
 msgid "Sorry, I can open this kind of file.\n"
@@ -319,72 +319,72 @@ msgstr "ドキュメント全体"
 #: ../src/find_dialog.c:160
 #: ../src/replace_dialog.c:227
 msgid "RegExp"
-msgstr "RegExp"
+msgstr "RegExp　"
 
 #: ../src/gphpedit-statusbar.c:135
 #: ../src/gphpedit-statusbar.c:171
 #: ../src/gphpedit-statusbar.c:173
 #: ../src/main_window_callbacks.c:570
 msgid "Cobol"
-msgstr "Cobol"
+msgstr "Cobol　"
 
 #: ../src/gphpedit-statusbar.c:137
 #: ../src/gphpedit-statusbar.c:174
 #: ../src/gphpedit-statusbar.c:176
 #: ../src/main_window_callbacks.c:567
 msgid "C/C++"
-msgstr "C/C++"
+msgstr "C/C++　"
 
 #: ../src/gphpedit-statusbar.c:139
 #: ../src/gphpedit-statusbar.c:177
 #: ../src/gphpedit-statusbar.c:179
 #: ../src/main_window_callbacks.c:564
 msgid "CSS"
-msgstr "CSS"
+msgstr "CSS　"
 
 #: ../src/gphpedit-statusbar.c:141
 #: ../src/gphpedit-statusbar.c:180
 #: ../src/gphpedit-statusbar.c:182
 #: ../src/main_window_callbacks.c:561
 msgid "PHP/HTML/XML"
-msgstr "PHP/HTML/XML"
+msgstr "PHP/HTML/XML　"
 
 #: ../src/gphpedit-statusbar.c:143
 #: ../src/gphpedit-statusbar.c:183
 #: ../src/gphpedit-statusbar.c:185
 #: ../src/main_window_callbacks.c:576
 msgid "Perl"
-msgstr "Perl"
+msgstr "Perl　"
 
 #: ../src/gphpedit-statusbar.c:145
 #: ../src/gphpedit-statusbar.c:189
 #: ../src/gphpedit-statusbar.c:191
 #: ../src/main_window_callbacks.c:573
 msgid "SQL"
-msgstr "SQL"
+msgstr "SQL　"
 
 #: ../src/gphpedit-statusbar.c:147
 #: ../src/gphpedit-statusbar.c:186
 #: ../src/gphpedit-statusbar.c:188
 #: ../src/main_window_callbacks.c:579
 msgid "Python"
-msgstr "Python"
+msgstr "Python　"
 
 #: ../src/gphpedit-statusbar.c:192
 #: ../src/gphpedit-statusbar.c:194
 #: ../src/main_window_callbacks.c:582
 msgid "Text-Plain"
-msgstr "Text-Plain"
+msgstr "Text-Plain　"
 
 #: ../src/gphpedit-statusbar.c:202
 #: ../src/gphpedit-statusbar.c:208
 msgid "OVR"
-msgstr "OVR"
+msgstr "OVR　"
 
 #: ../src/gphpedit-statusbar.c:202
 #: ../src/gphpedit-statusbar.c:208
 msgid "INS"
-msgstr "INS"
+msgstr "INS　"
 
 #: ../src/gphpedit-statusbar.c:314
 #, c-format
@@ -484,7 +484,7 @@ msgstr "翻訳者クレジット(_c)"
 
 #: ../src/main_window_callbacks.c:531
 msgid "Copyright © 2003-2006 Andy Jeffries, 2009-2010 Anoop John"
-msgstr "Copyright © 2003-2006 Andy Jeffries, 2009-2010 Anoop John"
+msgstr "Copyright © 2003-2006 Andy Jeffries, 2009-2010 Anoop John　"
 
 #: ../src/main_window_callbacks.c:533
 msgid "gPHPEdit is a GNOME2 editor specialised for editing PHP scripts and related files (HTML/CSS/JS)."
@@ -743,7 +743,7 @@ msgstr "強制(_F)"
 
 #: ../src/menubar.c:535
 msgid "_PHP/HTML/XML"
-msgstr "_PHP/HTML/XML"
+msgstr "_PHP/HTML/XML　"
 
 #: ../src/menubar.c:535
 msgid "Force syntax highlighting to PHP/HTML/XML mode"
@@ -751,7 +751,7 @@ msgstr "シンタックスハイライトを PHP/HTML/XML モードに強制す�
 
 #: ../src/menubar.c:537
 msgid "_CSS"
-msgstr "_CSS"
+msgstr "_CSS　"
 
 #: ../src/menubar.c:537
 msgid "Force syntax highlighting to CSS mode"
@@ -759,7 +759,7 @@ msgstr "シンタックスハイライトを CSS モードに強制する"
 
 #: ../src/menubar.c:539
 msgid "C/C_++"
-msgstr "C/C_++"
+msgstr "C/C_++　"
 
 #: ../src/menubar.c:539
 msgid "Force syntax highlighting to C/C++ mode"
@@ -767,7 +767,7 @@ msgstr "シンタックスハイライトを C/C++ モードに強制する"
 
 #: ../src/menubar.c:541
 msgid "_SQL"
-msgstr "_SQL"
+msgstr "_SQL　"
 
 #: ../src/menubar.c:541
 msgid "Force syntax highlighting to SQL mode"
@@ -775,7 +775,7 @@ msgstr "シンタックスハイライトを SQL モードに強制する"
 
 #: ../src/menubar.c:543
 msgid "_Perl"
-msgstr "_Perl"
+msgstr "_Perl　"
 
 #: ../src/menubar.c:543
 msgid "Force syntax highlighting to Perl mode"
@@ -783,7 +783,7 @@ msgstr "シンタックスハイライトを Perl モードに強制する"
 
 #: ../src/menubar.c:545
 msgid "_Cobol"
-msgstr "_Cobol"
+msgstr "_Cobol　"
 
 #: ../src/menubar.c:545
 msgid "Force syntax highlighting to Cobol mode"
@@ -791,7 +791,7 @@ msgstr "シンタックスハイライトを Cobol モードに強制する"
 
 #: ../src/menubar.c:547
 msgid "P_ython"
-msgstr "P_ython"
+msgstr "P_ython　"
 
 #: ../src/menubar.c:547
 msgid "Force syntax highlighting to Python mode"
