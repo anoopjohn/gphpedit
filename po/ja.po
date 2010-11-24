@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2010-11-20 19:09+0000\n"
-"PO-Revision-Date: 2010-11-23 16:19+0900\n"
+"POT-Creation-Date: 2010-11-23 21:27+0000\n"
+"PO-Revision-Date: 2010-11-24 21:57+0900\n"
 "Last-Translator: Cahell Hide <cahells@gmail.com>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -38,72 +38,23 @@ msgstr "名前"
 msgid "FILE:"
 msgstr "ファイル:"
 
-#: ../src/document.c:577
-#: ../src/document.c:1361
-msgid "Help: "
-msgstr "ヘルプ: "
-
-#: ../src/document.c:580
-#: ../src/document.c:1363
-msgid "Preview: "
-msgstr "プレビュー: "
-
-#: ../src/document.c:622
-#: ../src/document.c:655
-#, c-format
-msgid "<b>The file \"%s\" has been externally modified.</b>"
-msgstr "<b>ファイル \"%s\" が外部から変更されました。</b>"
-
-#: ../src/document.c:664
-msgid "Do you want reload it?"
-msgstr "再読み込みしますか？"
-
-#: ../src/document.c:688
-#: ../src/document.c:1626
-msgid "Untitled"
-msgstr "無題"
-
-#: ../src/document.c:1915
-msgid "No marker found"
-msgstr "マーカーが見つかりませんでした"
-
-#: ../src/document.c:1998
-#: ../src/document.c:2007
-msgid " - gPHPEdit"
-msgstr " - gPHPEdit"
-
-#: ../src/document.c:2189
-msgid "Do you want to replace this occurence?"
-msgstr "このオカレンスを置換しますか？"
-
-#: ../src/document.c:2190
-#: ../src/document_manager.c:533
-#: ../src/filebrowser_backend.c:350
-msgid "Question"
-msgstr "質問"
-
-#: ../src/document.c:2446
-#, c-format
-msgid "Unhandle keyboard macro function %d, please report\n"
-msgstr "ファンクション %d は未ハンドルのキーボードマクロです。宜しければ報告して下さい\n"
-
-#: ../src/document_loader.c:282
-#: ../src/document_loader.c:294
+#: ../src/document_loader.c:277
+#: ../src/document_loader.c:289
 #, c-format
 msgid "Help for function not found: %s"
 msgstr "ファンクションのヘルプが見つかりませんでした: %s"
 
-#: ../src/document_loader.c:316
+#: ../src/document_loader.c:311
 #, c-format
 msgid "gPHPEdit UTF-8 Error: %s"
 msgstr "gPHPEdit UTF-8 エラー: %s"
 
-#: ../src/document_loader.c:321
+#: ../src/document_loader.c:316
 #, c-format
 msgid "Converted to UTF-8 size: %u"
 msgstr "UTF-8 のサイズを変換: %u"
 
-#: ../src/document_loader.c:387
+#: ../src/document_loader.c:380
 #, c-format
 msgid ""
 "The file %s was not found.\n"
@@ -114,26 +65,26 @@ msgstr ""
 "\n"
 "白紙のドキュメントとして作成しますか？"
 
-#: ../src/document_loader.c:388
+#: ../src/document_loader.c:381
 msgid "File not found"
 msgstr "ファイルが見つかりませんでした"
 
-#: ../src/document_loader.c:404
+#: ../src/document_loader.c:397
 #, c-format
 msgid "Could not get the file info. GIO error: %s \n"
 msgstr "ファイルの情報を取得出来ませんでした。GIO エラー: %s \n"
 
 #. If there is no file opened set the name as gPHPEdit
 #. confirm deletion with dialog
-#: ../src/document_loader.c:411
-#: ../src/main_window.c:212
-#: ../src/main_window.c:251
+#: ../src/document_loader.c:404
+#: ../src/main_window.c:213
+#: ../src/main_window.c:252
 #: ../gphpedit.desktop.in.h:3
 #: ../src/templates_editor.c:227
 msgid "gPHPEdit"
 msgstr "gPHPEdit"
 
-#: ../src/document_loader.c:411
+#: ../src/document_loader.c:404
 msgid "Sorry, I can open this kind of file.\n"
 msgstr "この種類のファイルを開くことは出来ません。\n"
 
@@ -146,36 +97,41 @@ msgstr "タブを閉じる"
 msgid "Saving %s"
 msgstr "%s を保存しています"
 
-#: ../src/document_manager.c:231
+#: ../src/document_manager.c:233
 msgid "Error filesystem not mounted. Mounting filesystem, this will take a few seconds..."
 msgstr "ファイルシステムがマウントされていませんでした。マウントされるまで数秒間掛かります..."
 
-#: ../src/document_manager.c:236
+#: ../src/document_manager.c:238
 msgid "Could not find the required command in the online help"
 msgstr "必要なコマンドをオンラインヘルプの中で見つけることが出来ませんでした"
 
-#: ../src/document_manager.c:389
+#: ../src/document_manager.c:372
 #, c-format
 msgid "Error Saving session file: %s\n"
 msgstr "セッションファイルの保存時にエラー発生: %s\n"
 
-#: ../src/document_manager.c:397
-#: ../src/document_manager.c:478
+#: ../src/document_manager.c:381
+#: ../src/document_manager.c:461
 #, c-format
 msgid "GIO Error deleting file: %s, code %d\n"
 msgstr "ファイル削除時に GIO エラー発生: %s、コード %d\n"
 
-#: ../src/document_manager.c:533
+#: ../src/document_manager.c:516
+#: ../src/filebrowser_backend.c:350
+msgid "Question"
+msgstr "質問"
+
+#: ../src/document_manager.c:516
 msgid "Are you sure you wish to reload the current file, losing your changes?"
 msgstr "変更内容は失われますが、現在のファイルを再読み込みしても宜しいですか？"
 
-#: ../src/document_manager.c:538
+#: ../src/document_manager.c:521
 #, c-format
 msgid "Reloading %s"
 msgstr "%s を再読み込みしています"
 
 #. TRANSLATORS: this is a pango markup string you must keep the format tags.
-#: ../src/document_manager.c:667
+#: ../src/document_manager.c:650
 #, c-format
 msgid ""
 "<b>The file '%s' has not been saved since your last changes.</b>\n"
@@ -184,7 +140,7 @@ msgstr ""
 "<b>ファイル '%s' は最後に変更されてから保存されていません。</b>\n"
 "<small>変更内容を破棄して閉じても宜しいですか？</small>"
 
-#: ../src/document_manager.c:670
+#: ../src/document_manager.c:653
 msgid "Close and _lose changes"
 msgstr "変更内容を破棄して閉じる(_l)"
 
@@ -236,55 +192,55 @@ msgstr "ファイルを上書きしますか？"
 msgid "File"
 msgstr "ファイル"
 
-#: ../src/filebrowser_ui.c:192
+#: ../src/filebrowser_ui.c:191
 msgid "Mime"
 msgstr "MIME"
 
 #. home button
-#: ../src/filebrowser_ui.c:204
+#: ../src/filebrowser_ui.c:203
 msgid "Go Home Dir"
 msgstr "ホームへ移動"
 
 #. up button
-#: ../src/filebrowser_ui.c:210
+#: ../src/filebrowser_ui.c:209
 msgid "Go Up one level"
 msgstr "ひとつ上の階層へ移動"
 
 #. refresh button
-#: ../src/filebrowser_ui.c:216
+#: ../src/filebrowser_ui.c:215
 msgid "Refresh Filebrowser"
 msgstr "ファイルブラウザを更新する"
 
-#: ../src/filebrowser_ui.c:223
+#: ../src/filebrowser_ui.c:222
 msgid "Search Files in Folder Browser"
 msgstr "フォルダブラウザ内のファイルを検索する"
 
-#: ../src/filebrowser_ui.c:496
-#: ../src/filebrowser_ui.c:571
+#: ../src/filebrowser_ui.c:495
+#: ../src/filebrowser_ui.c:570
 msgid "Rename File"
 msgstr "ファイル名を変更する"
 
-#: ../src/filebrowser_ui.c:503
+#: ../src/filebrowser_ui.c:502
 msgid "New Filename"
 msgstr "新規ファイル名"
 
-#: ../src/filebrowser_ui.c:524
+#: ../src/filebrowser_ui.c:523
 msgid "New Dir"
 msgstr "新規ディレクトリ"
 
-#: ../src/filebrowser_ui.c:531
+#: ../src/filebrowser_ui.c:530
 msgid "Directory Name"
 msgstr "ディレクトリ名"
 
-#: ../src/filebrowser_ui.c:563
+#: ../src/filebrowser_ui.c:562
 msgid "Open file"
 msgstr "ファイルを開く"
 
-#: ../src/filebrowser_ui.c:575
+#: ../src/filebrowser_ui.c:574
 msgid "Delete file"
 msgstr "ファイルを削除する"
 
-#: ../src/filebrowser_ui.c:582
+#: ../src/filebrowser_ui.c:581
 msgid "Create New Directory"
 msgstr "新規ディレクトリを作成する"
 
@@ -296,104 +252,104 @@ msgstr "テキスト \"%s\" は見つかりませんでした。"
 
 #: ../src/find_dialog.c:103
 #: ../src/find_dialog.c:188
-#: ../src/replace_dialog.c:159
-#: ../src/replace_dialog.c:268
+#: ../src/replace_dialog.c:161
+#: ../src/replace_dialog.c:270
 msgid "Find"
 msgstr "検索"
 
 #: ../src/find_dialog.c:133
-#: ../src/replace_dialog.c:200
+#: ../src/replace_dialog.c:202
 msgid "_Match case"
 msgstr "大・小文字の区別(_M)"
 
 #: ../src/find_dialog.c:142
-#: ../src/replace_dialog.c:209
+#: ../src/replace_dialog.c:211
 msgid "Match _entire word only"
 msgstr "完全に一致する単語のみ(_e)"
 
 #: ../src/find_dialog.c:151
-#: ../src/replace_dialog.c:218
+#: ../src/replace_dialog.c:220
 msgid "Whole document"
 msgstr "ドキュメント全体"
 
 #: ../src/find_dialog.c:160
-#: ../src/replace_dialog.c:227
+#: ../src/replace_dialog.c:229
 msgid "RegExp"
 msgstr "RegExp"
 
 #: ../src/gphpedit-statusbar.c:135
-#: ../src/gphpedit-statusbar.c:171
-#: ../src/gphpedit-statusbar.c:173
-#: ../src/main_window_callbacks.c:570
+#: ../src/gphpedit-statusbar.c:172
+#: ../src/gphpedit-statusbar.c:174
+#: ../src/main_window_callbacks.c:577
 msgid "Cobol"
 msgstr "Cobol"
 
 #: ../src/gphpedit-statusbar.c:137
-#: ../src/gphpedit-statusbar.c:174
-#: ../src/gphpedit-statusbar.c:176
-#: ../src/main_window_callbacks.c:567
+#: ../src/gphpedit-statusbar.c:175
+#: ../src/gphpedit-statusbar.c:177
+#: ../src/main_window_callbacks.c:574
 msgid "C/C++"
 msgstr "C/C++"
 
 #: ../src/gphpedit-statusbar.c:139
-#: ../src/gphpedit-statusbar.c:177
-#: ../src/gphpedit-statusbar.c:179
-#: ../src/main_window_callbacks.c:564
+#: ../src/gphpedit-statusbar.c:178
+#: ../src/gphpedit-statusbar.c:180
+#: ../src/main_window_callbacks.c:571
 msgid "CSS"
 msgstr "CSS"
 
 #: ../src/gphpedit-statusbar.c:141
-#: ../src/gphpedit-statusbar.c:180
-#: ../src/gphpedit-statusbar.c:182
-#: ../src/main_window_callbacks.c:561
+#: ../src/gphpedit-statusbar.c:181
+#: ../src/gphpedit-statusbar.c:183
+#: ../src/main_window_callbacks.c:568
 msgid "PHP/HTML/XML"
 msgstr "PHP/HTML/XML"
 
 #: ../src/gphpedit-statusbar.c:143
-#: ../src/gphpedit-statusbar.c:183
-#: ../src/gphpedit-statusbar.c:185
-#: ../src/main_window_callbacks.c:576
+#: ../src/gphpedit-statusbar.c:184
+#: ../src/gphpedit-statusbar.c:186
+#: ../src/main_window_callbacks.c:583
 msgid "Perl"
 msgstr "Perl"
 
 #: ../src/gphpedit-statusbar.c:145
-#: ../src/gphpedit-statusbar.c:189
-#: ../src/gphpedit-statusbar.c:191
-#: ../src/main_window_callbacks.c:573
+#: ../src/gphpedit-statusbar.c:190
+#: ../src/gphpedit-statusbar.c:192
+#: ../src/main_window_callbacks.c:580
 msgid "SQL"
 msgstr "SQL"
 
 #: ../src/gphpedit-statusbar.c:147
-#: ../src/gphpedit-statusbar.c:186
-#: ../src/gphpedit-statusbar.c:188
-#: ../src/main_window_callbacks.c:579
+#: ../src/gphpedit-statusbar.c:187
+#: ../src/gphpedit-statusbar.c:189
+#: ../src/main_window_callbacks.c:586
 msgid "Python"
 msgstr "Python"
 
-#: ../src/gphpedit-statusbar.c:192
-#: ../src/gphpedit-statusbar.c:194
-#: ../src/main_window_callbacks.c:582
+#: ../src/gphpedit-statusbar.c:193
+#: ../src/gphpedit-statusbar.c:195
+#: ../src/main_window_callbacks.c:589
 msgid "Text-Plain"
 msgstr "Text-Plain"
 
-#: ../src/gphpedit-statusbar.c:202
-#: ../src/gphpedit-statusbar.c:208
+#: ../src/gphpedit-statusbar.c:203
+#: ../src/gphpedit-statusbar.c:209
 msgid "OVR"
 msgstr "OVR"
 
-#: ../src/gphpedit-statusbar.c:202
-#: ../src/gphpedit-statusbar.c:208
+#: ../src/gphpedit-statusbar.c:203
+#: ../src/gphpedit-statusbar.c:209
 msgid "INS"
 msgstr "INS"
 
-#: ../src/gphpedit-statusbar.c:314
+#: ../src/gphpedit-statusbar.c:315
 #, c-format
 msgid "Zoom: %d%s"
 msgstr "ズーム: %d%s"
 
 #. Translators: "Ln" is an abbreviation for "Line", Col is an abbreviation for "Column". Please,
 #. use abbreviations if possible to avoid space problems.
-#: ../src/gphpedit-statusbar.c:436
+#: ../src/gphpedit-statusbar.c:437
 #, c-format
 msgid "  Ln %d, Col %d"
 msgstr "  %d 行、%d 列"
@@ -403,19 +359,19 @@ msgstr "  %d 行、%d 列"
 msgid "Error reading file sync '%s'. GIO error:%s\n"
 msgstr "'%s' の同期でファイル読み込み時にエラー発生。GIO エラー:%s\n"
 
-#: ../src/gvfs_utils.c:199
-#: ../src/gvfs_utils.c:217
+#: ../src/gvfs_utils.c:224
+#: ../src/gvfs_utils.c:242
 #, c-format
 msgid "Error renaming file. GIO Error:%s\n"
 msgstr "ファイル読み込み時にエラー発生。GIO エラー:%s\n"
 
-#: ../src/gvfs_utils.c:233
-#: ../src/gvfs_utils.c:238
+#: ../src/gvfs_utils.c:258
+#: ../src/gvfs_utils.c:263
 #, c-format
 msgid "GIO Error deleting file: %s\n"
 msgstr "ファイル削除時に GIO エラー: %s\n"
 
-#: ../src/gvfs_utils.c:359
+#: ../src/gvfs_utils.c:384
 #, c-format
 msgid "Error saving temp file: '%s'. GIO Error:%s"
 msgstr "一時ファイルの保存時にエラー発生: '%s'. GIO エラー:%s"
@@ -429,47 +385,47 @@ msgstr "サイドパネルを閉じる"
 msgid "Class Browser"
 msgstr "クラスブラウザ"
 
-#: ../src/main_window_callbacks.c:153
+#: ../src/main_window_callbacks.c:154
 msgid "PHP files ("
 msgstr "PHP ファイル ("
 
-#: ../src/main_window_callbacks.c:177
+#: ../src/main_window_callbacks.c:178
 msgid "HTML files (*.html *.htm *.xhtml *.tpl)"
 msgstr "HTML ファイル (*.html *.htm *.xhtml *.tpl)"
 
-#: ../src/main_window_callbacks.c:184
+#: ../src/main_window_callbacks.c:185
 msgid "XML files (*.xml)"
 msgstr "XML ファイル (*.xml)"
 
-#: ../src/main_window_callbacks.c:188
+#: ../src/main_window_callbacks.c:189
 msgid "Stylesheet files (*.css)"
 msgstr "スタイルシートファイル (*.css)"
 
-#: ../src/main_window_callbacks.c:192
+#: ../src/main_window_callbacks.c:193
 msgid "SQL files (*.sql)"
 msgstr "SQL ファイル (*.sql)"
 
-#: ../src/main_window_callbacks.c:196
+#: ../src/main_window_callbacks.c:197
 msgid "Javascript files (*.js)"
 msgstr "Javascript ファイル (*.js)"
 
-#: ../src/main_window_callbacks.c:200
+#: ../src/main_window_callbacks.c:201
 msgid "C/C++ files (*.c *.h *.cpp *.hh *.cc)"
 msgstr "C/C++ ファイル (*.c *.h *.cpp *.hh *.cc)"
 
-#: ../src/main_window_callbacks.c:210
+#: ../src/main_window_callbacks.c:211
 msgid "Perl Files (*.pl *.ph *.pm)"
 msgstr "Perl ファイル (*.pl *.ph *.pm)"
 
-#: ../src/main_window_callbacks.c:218
+#: ../src/main_window_callbacks.c:219
 msgid "Cobol Files (*.cbl)"
 msgstr "Cobol ファイル (*.cbl)"
 
-#: ../src/main_window_callbacks.c:224
+#: ../src/main_window_callbacks.c:225
 msgid "Python Files (*.py *.pyd *.pyw)"
 msgstr "Python ファイル (*.py *.pyd *.pyw)"
 
-#: ../src/main_window_callbacks.c:232
+#: ../src/main_window_callbacks.c:233
 msgid "All files"
 msgstr "全てのファイル"
 
@@ -478,19 +434,23 @@ msgstr "全てのファイル"
 msgid "Please type the filename to save as..."
 msgstr "保存するファイルの名前を入力して下さい..."
 
-#: ../src/main_window_callbacks.c:524
+#: ../src/main_window_callbacks.c:330
+msgid "Untitled"
+msgstr "無題"
+
+#: ../src/main_window_callbacks.c:531
 msgid "translator_credits"
 msgstr "翻訳者クレジット(_c)"
 
-#: ../src/main_window_callbacks.c:531
+#: ../src/main_window_callbacks.c:538
 msgid "Copyright © 2003-2006 Andy Jeffries, 2009-2010 Anoop John"
 msgstr "Copyright © 2003-2006 Andy Jeffries, 2009-2010 Anoop John"
 
-#: ../src/main_window_callbacks.c:533
+#: ../src/main_window_callbacks.c:540
 msgid "gPHPEdit is a GNOME2 editor specialised for editing PHP scripts and related files (HTML/CSS/JS)."
 msgstr "gPHPEdit は PHP スクリプトのみならず関連したファイル群 (HTML/CSS/JS) の編集にも特化した GNOME2 エディタです。"
 
-#: ../src/main_window_callbacks.c:591
+#: ../src/main_window_callbacks.c:598
 #, c-format
 msgid "Unable to get data for page %d"
 msgstr "ページ %d のデータを取得出来ません"
@@ -826,8 +786,7 @@ msgstr "プラグイン(_P)"
 msgid "_Help"
 msgstr "ヘルプ(_H)"
 
-#: ../src/pluginmanager.c:104
-#: ../src/preferences_manager.c:566
+#: ../src/pluginmanager.c:103
 #, c-format
 msgid "Unable to create ~/.gphpedit/ (%d) %s"
 msgstr "~/.gphpedit/ (%d) %s を作成出来ません"
@@ -989,31 +948,36 @@ msgstr "プラグイン"
 msgid "Preferences"
 msgstr "設定"
 
-#: ../src/replace_dialog.c:93
-#: ../src/replace_dialog.c:132
+#: ../src/preferences_manager.c:566
+#, c-format
+msgid "Unable to create %s (%d) %s"
+msgstr "%s (%d) %s を作成出来ません"
+
+#: ../src/replace_dialog.c:94
+#: ../src/replace_dialog.c:134
 #, c-format
 msgid "\"%s\" not found, no replacements made."
 msgstr "\"%s\" が見つからない為、置換は行われませんでした。"
 
-#: ../src/replace_dialog.c:96
+#: ../src/replace_dialog.c:97
 #, c-format
 msgid "1 occurence of \"%s\" found, replaced."
 msgstr "オカレンス \"%s\" が１つ見つかった為、置換しました。"
 
-#: ../src/replace_dialog.c:99
+#: ../src/replace_dialog.c:100
 #, c-format
 msgid "\"%d\" occurences of \"%s\" found, all replaced."
 msgstr "\"%d\" 個のオカレンス \"%s\" が見つかった為、全て置換しました。"
 
-#: ../src/replace_dialog.c:183
+#: ../src/replace_dialog.c:185
 msgid "Replace with: "
 msgstr "置換する: "
 
-#: ../src/replace_dialog.c:237
+#: ../src/replace_dialog.c:239
 msgid "Prompt before Replace"
 msgstr "置換の前にプロンプトする"
 
-#: ../src/replace_dialog.c:243
+#: ../src/replace_dialog.c:245
 msgid "Replace _all"
 msgstr "全て置換(_a)"
 
@@ -1025,7 +989,7 @@ msgstr "PHP CLI の呼び出しエラー（PHP のコマンドラインバイナ
 msgid "Syntax Check Output"
 msgstr "シンタックスチェックの出力"
 
-#: ../src/syntax_check_window.c:212
+#: ../src/syntax_check_window.c:211
 msgid "You don't have any files open to check\n"
 msgstr "チェックするファイルが開かれていません\n"
 
@@ -1320,4 +1284,23 @@ msgstr "テンプレート:"
 #: ../themes/mixer.xml.h:1
 msgid "Mixer"
 msgstr "ミキサー"
+
+#~ msgid "Help: "
+#~ msgstr "ヘルプ: "
+#~ msgid "Preview: "
+#~ msgstr "プレビュー: "
+#~ msgid "<b>The file \"%s\" has been externally modified.</b>"
+#~ msgstr "<b>ファイル \"%s\" が外部から変更されました。</b>"
+#~ msgid "Do you want reload it?"
+#~ msgstr "再読み込みしますか？"
+#~ msgid "No marker found"
+#~ msgstr "マーカーが見つかりませんでした"
+#~ msgid " - gPHPEdit"
+#~ msgstr " - gPHPEdit"
+#~ msgid "Do you want to replace this occurence?"
+#~ msgstr "このオカレンスを置換しますか？"
+#~ msgid "Unhandle keyboard macro function %d, please report\n"
+#~ msgstr ""
+#~ "ファンクション %d は未ハンドルのキーボードマクロです。宜しければ報告して下"
+#~ "さい\n"
 
