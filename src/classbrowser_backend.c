@@ -536,25 +536,28 @@ GList *classbrowser_backend_get_class_list(ClassbrowserBackend *classback)
   return g_hash_table_get_values (classbackdet->php_class_tree);
 }
 
-static void make_class_completion_string (gpointer key, gpointer value, gpointer data){
-  GString *completion_result= (GString *) data;
+static void make_class_completion_string (gpointer key, gpointer value, gpointer data) {
+  ClassbrowserBackendDetails *classbackdet = (ClassbrowserBackendDetails *)data;
   ClassBrowserClass *class;
   class=(ClassBrowserClass *)value;
-  if (!completion_result) {
-    completion_result = g_string_new(g_strchug(class->classname));
-    completion_result = g_string_append(completion_result, "?4"); /* add corresponding image*/
+  if (class->file_type != classbackdet->file_type) return ;
+  if (!classbackdet->completion_string) {
+    classbackdet->completion_string = g_string_new(g_strchug(class->classname));
+    classbackdet->completion_string = g_string_append(classbackdet->completion_string, "?4"); /* add corresponding image*/
   } else {
-    g_string_append_printf (completion_result," %s?4", g_strchug(class->classname)); /* add corresponding image*/
+    g_string_append_printf (classbackdet->completion_string," %s?4", g_strchug(class->classname)); /* add corresponding image*/
   }
 }
 
-GString *classbrowser_backend_get_autocomplete_php_classes_string(ClassbrowserBackend *classback){
+gchar *classbrowser_backend_get_autocomplete_php_classes_string(ClassbrowserBackend *classback){
   ClassbrowserBackendDetails *classbackdet;
 	classbackdet = CLASSBROWSER_BACKEND_GET_PRIVATE(classback);
-  GString *completion_result = NULL;
-  g_hash_table_foreach (classbackdet->php_class_tree, make_class_completion_string, completion_result);
+  classbackdet->completion_string = NULL;
+  classbackdet->file_type = TAB_PHP;
 
-  return completion_result;
+  g_hash_table_foreach (classbackdet->php_class_tree, make_class_completion_string, classbackdet);
+
+  return g_string_free(classbackdet->completion_string, FALSE);
 }
 
 typedef struct {
@@ -610,9 +613,9 @@ void make_result_member_string (gpointer key, gpointer value, gpointer user_data
   if ((g_str_has_prefix(function->functionname, classbackdet->completion_prefix) && function->file_type==classbackdet->file_type)) {
     if (!classbackdet->completion_string) {
       classbackdet->completion_string = g_string_new(function->functionname);
+      classbackdet->completion_string = g_string_append(classbackdet->completion_string, "?1");
     } else {
-      classbackdet->completion_string = g_string_append(classbackdet->completion_string, " ");
-      classbackdet->completion_string = g_string_append(classbackdet->completion_string, function->functionname);
+       g_string_append_printf(classbackdet->completion_string, " %s?1", function->functionname);
     }
   }
 }

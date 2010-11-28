@@ -91,7 +91,7 @@ void classbrowser_functionlist_add(ClassbrowserBackend *classback, gchar *classn
 void classbrowser_classlist_add(ClassbrowserBackend *classback, gchar *classname, gchar *filename, gint line_number,gint file_type);
 void classbrowser_varlist_add(ClassbrowserBackend *classback, gchar *varname, gchar *funcname, gchar *filename, gint file_type);
 /* autocomplete */
-GString *classbrowser_backend_get_autocomplete_php_classes_string(ClassbrowserBackend *classback);
+gchar *classbrowser_backend_get_autocomplete_php_classes_string(ClassbrowserBackend *classback);
 gchar *classbrowser_backend_autocomplete_php_variables(ClassbrowserBackend *classback, gchar *buffer);
 gchar *classbrowser_backend_autocomplete_member_function(ClassbrowserBackend *classback, gchar *prefix);
 gchar *classbrowser_backend_add_custom_autocompletion(ClassbrowserBackend *classback, gchar *prefix, gint file_type, GSList *list);

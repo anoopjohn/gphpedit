@@ -531,7 +531,7 @@ void classbrowser_update_selected_label(gphpeditClassBrowserPrivate *priv, gchar
 * classbrowser_get_autocomplete_php_classes_string
 * return a new string with posibly classes matches
 */
-GString *classbrowser_get_autocomplete_php_classes_string(gphpeditClassBrowser *classbrowser){
+gchar *classbrowser_get_autocomplete_php_classes_string(gphpeditClassBrowser *classbrowser){
 	gphpeditClassBrowserPrivate *priv;
 	priv = CLASSBROWSER_BACKEND_GET_PRIVATE(classbrowser);
   return classbrowser_backend_get_autocomplete_php_classes_string(priv->classbackend);

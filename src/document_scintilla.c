@@ -1432,11 +1432,16 @@ static void document_scintilla_show_calltip_at_current_pos(Document_Scintilla *d
 static void process_user_list_selection (GtkWidget *w, gint type, gchar *text, gpointer user_data){
   GtkScintilla *sci = GTK_SCINTILLA(w);
   Document_Scintilla *doc = DOCUMENT_SCINTILLA(user_data);
-  gchar *current = documentable_get_current_word(DOCUMENTABLE(doc));
   gint current_pos = gtk_scintilla_get_current_pos(sci);
+  if (type==1){
+  gchar *current = documentable_get_current_word(DOCUMENTABLE(doc));
   gtk_scintilla_insert_text(sci, current_pos, text + strlen (current));
   gtk_scintilla_goto_pos(sci, current_pos + strlen (text) - strlen (current));
   g_free(current);
+  } else {
+    gtk_scintilla_insert_text(sci, current_pos, text);
+    gtk_scintilla_goto_pos(sci, current_pos + strlen (text));
+  }
 }
 
 static gboolean IsOpenBrace(gchar ch) {
@@ -1608,9 +1613,9 @@ static gboolean auto_complete_classes_callback(gpointer data)
   gint current_pos;
   current_pos = documentable_get_current_position(DOCUMENTABLE(doc));
   if (current_pos == GPOINTER_TO_INT(data)) {
-    GString *autocomp = classbrowser_get_autocomplete_php_classes_string(GPHPEDIT_CLASSBROWSER(main_window.classbrowser)); 
-    if (autocomp) gtk_scintilla_user_list_show(GTK_SCINTILLA(docdet->scintilla), 1, autocomp->str);
-    g_string_free(autocomp,TRUE); /*release resources*/
+    gchar *autocomp = classbrowser_get_autocomplete_php_classes_string(GPHPEDIT_CLASSBROWSER(main_window.classbrowser)); 
+    if (autocomp) gtk_scintilla_user_list_show(GTK_SCINTILLA(docdet->scintilla), 2, autocomp);
+    g_free(autocomp); /*release resources*/
   }
   docdet->completion_timer_set=FALSE;
   return FALSE;
@@ -1689,7 +1694,9 @@ static void char_added(GtkWidget *scintilla, guint ch, gpointer user_data)
           gint initial_pos= gtk_scintilla_position_from_line(sci, current_line);
           gint line_size;
           gchar *line_text= gtk_scintilla_get_text_range (sci, initial_pos, wordStart-1, &line_size);
-            if (!check_php_variable_before(line_text)) break;
+            if (!check_php_variable_before(line_text)){
+             break;
+            }
             if (!docdet->completion_timer_set) {
               gint delay;
               g_object_get(pref, "autocomplete_delay", &delay, NULL);
@@ -1709,7 +1716,8 @@ static void char_added(GtkWidget *scintilla, guint ch, gpointer user_data)
         } else if (g_strcmp0(member_function_buffer,"instanceof")==0 || g_strcmp0(member_function_buffer,"is_subclass_of")==0) {
           gtk_scintilla_insert_text(sci, current_pos," ");
           gtk_scintilla_goto_pos(sci, current_pos + 1);
-          auto_complete_classes_callback(GINT_TO_POINTER(current_pos));
+          docdet->completion_timer_set=TRUE;
+          auto_complete_classes_callback(GINT_TO_POINTER(current_pos + 1));
         } else if (current_word_length>=3) {
         // check to see if they've typed <?php and if so do nothing
         if (wordStart>1) {
