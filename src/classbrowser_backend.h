@@ -2,7 +2,7 @@
 
    Copyright (C) 2003, 2004, 2005 Andy Jeffries <andy at gphpedit.org>
    Copyright (C) 2009 Anoop John <anoop dot john at zyxware.com>
-   Copyright (C) 2009 José Rostagno (for vijona.com.ar) 
+   Copyright (C) 2009, 2010 José Rostagno (for vijona.com.ar) 
 
    For more information or to find the latest release, visit our 
    website at http://www.gphpedit.org/
@@ -85,16 +85,17 @@ ClassBrowserClass;
 GType classbrowser_backend_get_type (void);
 ClassbrowserBackend *classbrowser_backend_new (void);
 void classbrowser_backend_update(ClassbrowserBackend *classback, gboolean only_current_file);
-GSList *classbrowser_backend_get_function_list(ClassbrowserBackend *classback);
-GTree *classbrowser_backend_get_class_list(ClassbrowserBackend *classback);
+GList *classbrowser_backend_get_function_list(ClassbrowserBackend *classback);
+GList *classbrowser_backend_get_class_list(ClassbrowserBackend *classback);
 void classbrowser_functionlist_add(ClassbrowserBackend *classback, gchar *classname, gchar *funcname, gchar *filename, gint file_type, guint line_number, gchar *param_list);
 void classbrowser_classlist_add(ClassbrowserBackend *classback, gchar *classname, gchar *filename, gint line_number,gint file_type);
 void classbrowser_varlist_add(ClassbrowserBackend *classback, gchar *varname, gchar *funcname, gchar *filename, gint file_type);
-GString *classbrowser_backend_get_selected_label(ClassbrowserBackend *classback, gchar *filename, gint line);
+/* autocomplete */
 GString *classbrowser_backend_get_autocomplete_php_classes_string(ClassbrowserBackend *classback);
 gchar *classbrowser_backend_autocomplete_php_variables(ClassbrowserBackend *classback, gchar *buffer);
 gchar *classbrowser_backend_autocomplete_member_function(ClassbrowserBackend *classback, gchar *prefix);
-gchar *classbrowser_backend_custom_function_calltip(ClassbrowserBackend *classback, gchar *function_name, gint file_type);
 gchar *classbrowser_backend_add_custom_autocompletion(ClassbrowserBackend *classback, gchar *prefix, gint file_type, GSList *list);
+/* calltips */
+gchar *classbrowser_backend_custom_function_calltip(ClassbrowserBackend *classback, gchar *function_name, gint file_type);
 #endif /* CLASSBROWSER_BACKEND_H */
 
