@@ -742,6 +742,7 @@ void process_cxx_word(ClassbrowserBackend *classback, gchar *name,gchar *filenam
 typedef struct {
  gint line;
  ClassBrowserClass *class;
+ gchar *filename;
  gint file_type;
 } class_find;
 
@@ -752,7 +753,7 @@ typedef struct {
 void search_class (gpointer key, gpointer value, gpointer data){
   class_find *cl = (class_find *) data;
   ClassBrowserClass *class = (ClassBrowserClass *) value;
-  if (class->line_number < cl->line) {
+  if (class->line_number < cl->line && g_strcmp0(class->filename, cl->filename)==0) {
     if (cl->class) {
       if (class->line_number > cl->class->line_number) cl->class = class;
     } else {
@@ -786,7 +787,6 @@ void process_python_word(ClassbrowserBackend *classback, gchar *name, gchar *fil
   ClassbrowserBackendDetails *classbackdet;
 	classbackdet = CLASSBROWSER_BACKEND_GET_PRIVATE(classback);
   gchar *parameters = NULL;
-
  if (g_strcmp0(type,"function")==0) {
     /* some function came with a trailing ')' we must remove it */
     parameters = get_fixed_param(param);
@@ -800,6 +800,7 @@ void process_python_word(ClassbrowserBackend *classback, gchar *name, gchar *fil
   search_data->line = atoi(line);
   search_data->class = NULL;
   search_data->file_type = TAB_PYTHON;
+  search_data->filename = filename;
   g_hash_table_foreach (classbackdet->php_class_tree, search_class, search_data);
   if (search_data->class) classname = search_data->class->classname;
   parameters = get_fixed_param(param);
