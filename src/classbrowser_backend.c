@@ -718,11 +718,6 @@ gchar *classbrowser_backend_add_custom_autocompletion(ClassbrowserBackend *class
 }
 
 #ifdef HAVE_CTAGS_EXUBERANT
-static inline gboolean is_cobol_banned_word(gchar *word)
-{
-  return (g_strcmp0(word,"AUTHOR")==0 || g_strcmp0(word,"OBJECT-COMPUTER")==0 || g_strcmp0(word,"DATE-WRITTEN")==0 || g_strcmp0(word,"PROGRAM-ID")==0 || g_strcmp0(word,"SOURCE-COMPUTER")==0 || g_strcmp0(word,"END-PERFORM")==0 || g_strcmp0(word, "END-EVALUATE")==0 || g_strcmp0(word,"FILE-CONTROL")==0 || g_strcmp0(word,"SPECIAL-NAMES")==0 || g_strcmp0(word,"END-IF")==0 || g_strcmp0(word,"END-START")==0);
-}
-
 void process_cobol_word(ClassbrowserBackend *classback, gchar *name,gchar *filename,gchar *type,gchar *line)
 {
  if (g_strcmp0(type,"paragraph")==0 && !is_cobol_banned_word(name)) {
@@ -795,18 +790,18 @@ void process_python_word(ClassbrowserBackend *classback, gchar *name, gchar *fil
  } else if (g_strcmp0(type,"class")==0){
     classbrowser_classlist_add(classback, name, filename, atoi(line), TAB_PYTHON);
  } else if (g_strcmp0(type,"member")==0){
-  gchar *classname = NULL;
-  class_find *search_data= g_slice_new(class_find);
-  search_data->line = atoi(line);
-  search_data->class = NULL;
-  search_data->file_type = TAB_PYTHON;
-  search_data->filename = filename;
-  g_hash_table_foreach (classbackdet->php_class_tree, search_class, search_data);
-  if (search_data->class) classname = search_data->class->classname;
-  parameters = get_fixed_param(param);
-  classbrowser_functionlist_add(classback, classname, name, filename, TAB_PYTHON, atoi(line), parameters);
-  g_free(parameters);
-  g_slice_free(class_find, search_data);
+    gchar *classname = NULL;
+    class_find *search_data= g_slice_new(class_find);
+    search_data->line = atoi(line);
+    search_data->class = NULL;
+    search_data->file_type = TAB_PYTHON;
+    search_data->filename = filename;
+    g_hash_table_foreach (classbackdet->php_class_tree, search_class, search_data);
+    if (search_data->class) classname = search_data->class->classname;
+    parameters = get_fixed_param(param);
+    classbrowser_functionlist_add(classback, classname, name, filename, TAB_PYTHON, atoi(line), parameters);
+    g_free(parameters);
+    g_slice_free(class_find, search_data);
  }
 }
 
