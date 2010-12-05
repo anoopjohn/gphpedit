@@ -74,9 +74,7 @@ GType 		 TOOLBAR_get_type 		(void) G_GNUC_CONST;
 
 GtkWidget *toolbar_new (void);
 GtkWidget *toolbar_find_new (GtkAccelGroup *accel_group);
-void toolbar_set_search_text(ToolBar *toolbar, gchar *text);
 void toolbar_grab_goto_focus(ToolBar *toolbar);
-void toolbar_completion_add_text(ToolBar *toolbar,const gchar *text);
 void toolbar_update_controls(ToolBar *toolbar, gboolean is_scintilla, gboolean isreadonly);
 G_END_DECLS
 

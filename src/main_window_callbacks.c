@@ -109,7 +109,7 @@ gint main_window_key_press_event(GtkWidget   *widget, GdkEventKey *event,gpointe
   else if ((event->state & GDK_CONTROL_MASK)==GDK_CONTROL_MASK && ((event->keyval == GDK_i) || (event->keyval == GDK_I)))  {
       Document *document = document_manager_get_current_document(main_window.docmg);
       if (OBJECT_IS_DOCUMENT_SCINTILLA(document)) {
-        document_scintilla_activate_incremental_search(document);
+        document_scintilla_activate_incremental_search(DOCUMENT_SCINTILLA(document));
       }
     }
   }

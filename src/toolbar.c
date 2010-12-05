@@ -71,17 +71,15 @@ struct _ToolBarPrivate
 /* find toolbar widgets */
   GtkAccelGroup *accel_group;
   GtkWidget *toolbar_find;
-  GtkWidget *search_label;
-  GtkWidget *search_entry;
   GtkWidget *goto_label;
   GtkWidget *goto_entry;
   GtkWidget *cleanimg;
-  GtkEntryCompletion *completion;
-  GtkTreeModel *completion_model;
 };
 
 G_DEFINE_TYPE(ToolBar, TOOLBAR, GTK_TYPE_TOOLBAR)
 
+static void find_toolbar_init (ToolBar *toolbar);
+static void main_toolbar_init (ToolBar *toolbar);
 enum
 {
   PROP_0,
@@ -134,6 +132,16 @@ TOOLBAR_get_property (GObject    *object,
 }
 
 static void
+TOOLBAR_constructed (GObject *toolbar)
+{
+  ToolBarPrivate *priv = TOOLBAR_GET_PRIVATE(toolbar);
+  if(priv->type == MAIN_TOOLBAR) {
+    main_toolbar_init (TOOLBAR(toolbar));
+  } else {
+    find_toolbar_init (TOOLBAR(toolbar));
+  }
+}
+static void
 TOOLBAR_class_init (ToolBarClass *klass)
 {
 	GObjectClass *object_class;
@@ -141,6 +149,7 @@ TOOLBAR_class_init (ToolBarClass *klass)
 	object_class = G_OBJECT_CLASS (klass);
   object_class->set_property = TOOLBAR_set_property;
   object_class->get_property = TOOLBAR_get_property;
+  object_class->constructed = TOOLBAR_constructed;
 
   g_object_class_install_property (object_class,
                               PROP_TOOLBAR_TYPE,
@@ -291,70 +300,12 @@ static inline void create_custom_toolbar_item (GtkToolbar *toolbar, GtkWidget *c
   gtk_widget_show(GTK_WIDGET(item));
 }
 
-/* Creates a tree model containing the completions */
-GtkTreeModel *create_completion_model (void)
-  
-{
-  GtkListStore *store;
-  GtkTreeIter iter;
-  
-  store = gtk_list_store_new (1, G_TYPE_STRING);
-  GSList *walk;
-  for (walk = get_preferences_manager_search_history(main_window.prefmg); walk!=NULL; walk = g_slist_next(walk)) {
-    /* Append one word */
-    gtk_list_store_append (store, &iter);
-    gtk_list_store_set (store, &iter, 0, (gchar *) walk->data, -1);
-    //g_print("completion added:%s\n",(gchar *) walk->data);
-   }
- 
-  return GTK_TREE_MODEL (store);
-}
-
 static void
 find_toolbar_init (ToolBar *toolbar)
 {
   ToolBarPrivate *priv = TOOLBAR_GET_PRIVATE(toolbar);
   GtkAccelGroup *accel_group;
   g_object_get(toolbar, "accel_group", &accel_group, NULL);
-
-  priv->search_label = gtk_label_new(_("Search for: "));
-  gtk_widget_show(priv->search_label);
-  create_custom_toolbar_item (GTK_TOOLBAR(toolbar), priv->search_label);
-
-  create_entry(&priv->search_entry, _("Incremental search"), 20);
-  g_signal_connect (G_OBJECT (priv->search_entry), "icon-press", G_CALLBACK (on_cleanicon_press), NULL);
-
-  /* search completion code */
-  priv->completion= gtk_entry_completion_new();
-
-  /* Create a tree model and use it as the completion model */
-  priv->completion_model = create_completion_model ();
-  gtk_entry_completion_set_model (priv->completion, priv->completion_model);
-  g_object_unref (priv->completion_model);
-    
-   /* Use model column 0 as the text column */
-  gtk_entry_completion_set_text_column (priv->completion, 0);
-  /* set autocompletion settings: complete inline and show pop-up */
-  gtk_entry_completion_set_popup_completion (priv->completion,TRUE);
-  gtk_entry_completion_set_inline_completion (priv->completion,TRUE);
-  /* set min match as 2 */
-  gtk_entry_completion_set_minimum_key_length (priv->completion,2);
-  /* Assign the completion to the entry */
-  gtk_entry_set_completion (GTK_ENTRY(priv->search_entry), priv->completion);
-  g_object_unref (priv->completion);
-
-  /* connect entry signals */
-  gtk_widget_add_accelerator (priv->search_entry, "grab-focus", accel_group, GDK_i, GDK_CONTROL_MASK, 0);
-  g_signal_connect_after(G_OBJECT(priv->search_entry), "insert_text", G_CALLBACK(inc_search_typed), NULL);
-  g_signal_connect_after(G_OBJECT(priv->search_entry), "key_release_event", G_CALLBACK(inc_search_key_release_event), NULL);
-  g_signal_connect_after(G_OBJECT(priv->search_entry), "activate", G_CALLBACK(inc_search_activate), NULL);
-
-  create_custom_toolbar_item (GTK_TOOLBAR(toolbar), priv->search_entry);
-
-  /* create a new separator */
-  priv->toolbar_separator=gtk_separator_tool_item_new();
-  gtk_toolbar_insert(GTK_TOOLBAR(toolbar), GTK_TOOL_ITEM (priv->toolbar_separator), -1);
-  gtk_widget_show (GTK_WIDGET(priv->toolbar_separator));
 
   /* goto widgets */
   priv->goto_label = gtk_label_new(_("Go to line: "));
@@ -387,8 +338,6 @@ GtkWidget *
 toolbar_new (void)
 {
   ToolBar *toolbar = g_object_new (GOBJECT_TYPE_TOOLBAR, NULL);
-  main_toolbar_init (toolbar);
-
 	return GTK_WIDGET(toolbar);
 }
 
@@ -396,24 +345,7 @@ GtkWidget *toolbar_find_new (GtkAccelGroup *accel_group)
 {
   ToolBar *toolbar = g_object_new (GOBJECT_TYPE_TOOLBAR, "toolbar_type", FIND_TOOLBAR, 
     "accel_group", accel_group, NULL);
-  find_toolbar_init (toolbar);
-
 	return GTK_WIDGET(toolbar);
-}
-
-void toolbar_set_search_text(ToolBar *toolbar, gchar *text){
- ToolBarPrivate *priv = TOOLBAR_GET_PRIVATE(toolbar);
-  if (priv->type==FIND_TOOLBAR){
-  if (text) gtk_entry_set_text(GTK_ENTRY(priv->search_entry), text);
-  gtk_widget_grab_focus(GTK_WIDGET(priv->search_entry));
-  }
-}
-
-void toolbar_completion_add_text(ToolBar *toolbar, const gchar *text){
- ToolBarPrivate *priv = TOOLBAR_GET_PRIVATE(toolbar);
-  if (priv->type==FIND_TOOLBAR){
-  if (text) gtk_entry_completion_insert_action_text (priv->completion, 0, g_strdup(text));    
-  }
 }
 
 void toolbar_grab_goto_focus(ToolBar *toolbar){
@@ -443,7 +375,6 @@ void toolbar_update_controls(ToolBar *toolbar, gboolean is_scintilla, gboolean i
       } 
       gtk_widget_set_sensitive (priv->button_save_as, TRUE);
     } else {
-      gtk_widget_set_sensitive (priv->search_entry, TRUE);
       gtk_widget_set_sensitive (priv->goto_entry, TRUE);
     }
   }else{
@@ -459,7 +390,6 @@ void toolbar_update_controls(ToolBar *toolbar, gboolean is_scintilla, gboolean i
           gtk_widget_set_sensitive (priv->button_save, FALSE);
           gtk_widget_set_sensitive (priv->button_save_as, FALSE);
         } else {
-          gtk_widget_set_sensitive (priv->search_entry, FALSE);
           gtk_widget_set_sensitive (priv->goto_entry, FALSE);
         }
   }
