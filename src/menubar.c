@@ -70,6 +70,7 @@ struct _MenuBarPrivate
   GtkWidget *selectall;
   GtkWidget *find;
   GtkWidget *replace;
+  GtkWidget *incfind;
   GtkWidget *indent;
   GtkWidget *unindent;
   GtkWidget *upper;
@@ -252,6 +253,14 @@ static void translate(void){
 }
 #endif
 
+static void on_incfind_activate (GtkWidget *widget, gpointer user_data)
+{
+  Document *document = document_manager_get_current_document(main_window.docmg);
+  if (OBJECT_IS_DOCUMENT_SCINTILLA(document)) {
+    document_scintilla_activate_incremental_search(DOCUMENT_SCINTILLA(document));
+  }
+}
+
 /*
 * create_menu
 * create a new menu and insert it in menubar
@@ -406,6 +415,9 @@ static void fill_menu_edit(MenuBarPrivate *priv){
   g_signal_connect(G_OBJECT(priv->find), "activate", G_CALLBACK(on_find1_activate), NULL);
   create_stock_menu_item(&priv->replace,priv->menuedit,GTK_STOCK_FIND_AND_REPLACE, _("Find and replace text in current file"),priv->accel_group, GDK_h, GDK_CONTROL_MASK);
   g_signal_connect(G_OBJECT(priv->replace), "activate", G_CALLBACK(on_replace1_activate), NULL);
+
+  create_mnemonic_menu_item(&priv->incfind,priv->menuedit,_("Incremental search"), _("Search as you type"), priv->accel_group, GDK_i, GDK_CONTROL_MASK);
+  g_signal_connect(G_OBJECT(priv->incfind), "activate", G_CALLBACK(on_incfind_activate), NULL);
   
   /* separator */
   _create_separator_item(priv->menuedit);
@@ -632,6 +644,7 @@ void menubar_update_controls(MenuBar *menubar, gboolean is_scintilla, gboolean c
     gtk_widget_set_sensitive (priv->phphelp, TRUE);
     gtk_widget_set_sensitive (priv->upper, TRUE);
     gtk_widget_set_sensitive (priv->lower, TRUE);
+    gtk_widget_set_sensitive (priv->incfind, TRUE);
     /* only show preview in html files */
       if (can_preview){
         gtk_widget_set_sensitive (priv->preview, TRUE);
@@ -656,5 +669,6 @@ void menubar_update_controls(MenuBar *menubar, gboolean is_scintilla, gboolean c
       gtk_widget_set_sensitive (priv->upper, FALSE);
       gtk_widget_set_sensitive (priv->lower, FALSE);
       gtk_widget_set_sensitive (priv->preview, FALSE);
+      gtk_widget_set_sensitive (priv->incfind, FALSE);
   }
 }
