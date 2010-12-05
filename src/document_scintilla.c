@@ -50,6 +50,8 @@
 #include "tab_python.h"
 #include "tab_sql.h"
 
+#include "search_infobar.h"
+
 /* object signal enumeration */
 enum {
   LOAD_COMPLETE,
@@ -88,7 +90,8 @@ struct Document_ScintillaDetails
   GtkWidget *container;
   GtkWidget *infobar;
   GtkWidget *infolabel;
-
+  /* incremental search widget */
+  GtkWidget *searchbar;
   /* calltip stuff*/
   guint calltip_timer_id;
   gboolean calltip_timer_set;
@@ -138,8 +141,9 @@ static void document_scintilla_force_autocomplete(Document_Scintilla *document_s
 static void tab_set_folding(Document_Scintilla *document_scintilla, gint folding);
 static void document_scintilla_auto_detect_file_type(Documentable *doc);
 static gchar *document_scintilla_get_title(Document_Scintilla *doc);
+
 /*
- * register Document_Scintilla type and returns a new GType
+ * Documentable iface stuff
 */
 static void document_scintilla_documentable_init(DocumentableIface *iface, gpointer user_data);
 
@@ -1016,7 +1020,7 @@ static void process_external (GtkInfoBar *info_bar, gint response_id, Document_S
   gtk_widget_hide (GTK_WIDGET(info_bar));
 }
 
-static void create_infobar(Document_Scintilla *doc){
+static void create_infobar(Document_Scintilla *doc) {
   Document_ScintillaDetails *docdet = DOCUMENT_SCINTILLA_GET_PRIVATE(doc);
 	GtkWidget *image;
 	GtkWidget *vbox;
@@ -1083,7 +1087,7 @@ static gboolean scintilla_key_press (GtkWidget *widget, GdkEventKey *event, gpoi
   else if ((event->state & GDK_CONTROL_MASK)==GDK_CONTROL_MASK && (event->keyval == GDK_space)) { 
     document_scintilla_force_autocomplete(user_data);
     return TRUE;
- }
+  }
   return FALSE;
 }
 
@@ -1097,6 +1101,11 @@ document_scintilla_init (Document_Scintilla * object)
 
   docdet->container = gtk_vbox_new (FALSE, 0);
   create_infobar(object);
+
+  /* create incremental search widget */
+  docdet->searchbar = search_infobar_new();
+  gtk_box_pack_start(GTK_BOX(docdet->container), docdet->searchbar, FALSE, FALSE, 0);
+
   docdet->scintilla = gtk_scintilla_new();
   g_signal_connect (G_OBJECT (docdet->scintilla), "char_added", G_CALLBACK (char_added), object);
   g_signal_connect (G_OBJECT (docdet->scintilla), "update_ui", G_CALLBACK (update_ui), NULL);
@@ -2498,3 +2507,9 @@ static gchar *document_scintilla_get_title(Document_Scintilla *doc)
   return NULL;
 }
 
+void document_scintilla_activate_incremental_search(Document_Scintilla *doc)
+{
+  Document_ScintillaDetails *docdet = DOCUMENT_SCINTILLA_GET_PRIVATE(doc);
+  gtk_widget_show(docdet->searchbar);
+  gtk_widget_grab_focus(docdet->searchbar);
+}
