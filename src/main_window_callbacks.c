@@ -106,6 +106,12 @@ gint main_window_key_press_event(GtkWidget   *widget, GdkEventKey *event,gpointe
       gtk_notebook_set_current_page(GTK_NOTEBOOK(main_window.notebook_editor),event->keyval - ((event->keyval == GDK_0) ? (GDK_0 - 9) : (GDK_0 + 1)));
       return TRUE;
     }
+  else if ((event->state & GDK_CONTROL_MASK)==GDK_CONTROL_MASK && ((event->keyval == GDK_i) || (event->keyval == GDK_I)))  {
+      Document *document = document_manager_get_current_document(main_window.docmg);
+      if (OBJECT_IS_DOCUMENT_SCINTILLA(document)) {
+        document_scintilla_activate_incremental_search(document);
+      }
+    }
   }
   return FALSE;
 }
@@ -613,55 +619,6 @@ gboolean on_notebook_focus_tab(GtkNotebook *notebook,
   gtk_widget_grab_focus(document_widget);
 
   return TRUE;
-}
-
-void inc_search_typed (GtkEntry *entry, const gchar *text, gint length,
-             gint *position, gpointer data)
-{
-  gchar *current_text;
-  current_text = (gchar *)gtk_entry_get_text(entry);
-  documentable_incremental_search(DOCUMENTABLE(document_manager_get_current_document(main_window.docmg)), current_text, FALSE);
-}
-
-gboolean inc_search_key_release_event(GtkWidget *widget, GdkEventKey *event, gpointer user_data)
-{
-  //Auto focus editor tab only if it is a scintilla tab
-    if (event->keyval == GDK_Escape) {
-        GtkWidget *document_widget;
-        g_object_get(document_manager_get_current_document(main_window.docmg), "editor_widget", &document_widget, NULL);
-        gtk_widget_grab_focus(document_widget);
-      return TRUE;
-    }
-
-  return FALSE;
-}
-
-void add_to_search_history(const gchar *current_text){
-    /* add text to search history*/
-    GSList *walk;
-    gint i=0;
-    for (walk = get_preferences_manager_search_history(main_window.prefmg); walk!=NULL; walk = g_slist_next(walk)) {
-      i++;
-      if (g_strcmp0((gchar *) walk->data,current_text)==0){
-        return;  /* already in the list */
-        }
-    }
-    set_preferences_manager_new_search_history_item(main_window.prefmg, i, current_text);
-    gphpedit_debug_message(DEBUG_MAIN_WINDOW,"added:%s",current_text);
-    toolbar_completion_add_text(TOOLBAR(main_window.toolbar_find), current_text);
-}
-
-
-void inc_search_activate(GtkEntry *entry,gpointer user_data)
-{
-  gchar *current_text;
-
-  //Inc search only if the current tab is not a help tab
-  current_text = (gchar *)gtk_entry_get_text(entry);
-
-  documentable_incremental_search(DOCUMENTABLE(document_manager_get_current_document(main_window.docmg)), current_text, TRUE);
-  add_to_search_history(current_text);
-
 }
 
 /*
