@@ -261,11 +261,6 @@ void main_window_create(void){
   gtk_box_pack_start (GTK_BOX (main_window.prinbox), main_window.toolbar_main, FALSE, FALSE, 0);
   if (get_preferences_manager_show_maintoolbar(main_window.prefmg)) gtk_widget_show (main_window.toolbar_main);
 
-  main_window.toolbar_find = toolbar_find_new(menubar_get_accel_group(MENUBAR(main_window.menu)));
-  gtk_box_pack_start (GTK_BOX (main_window.prinbox), main_window.toolbar_find, FALSE, FALSE, 0);
-  if (get_preferences_manager_show_findtoolbar(main_window.prefmg)) gtk_widget_show (main_window.toolbar_find);
-
-
   main_window_create_panes();
   main_window_fill_panes();
   main_window_create_appbar();
@@ -296,5 +291,4 @@ void update_controls(Document *document){
   g_object_get(document, "read_only", &read_only, "can_modify", &can_modify, "can_preview", &preview, NULL);
   menubar_update_controls(MENUBAR(main_window.menu), can_modify, preview, read_only);
   toolbar_update_controls(TOOLBAR(main_window.toolbar_main), can_modify, read_only);
-  toolbar_update_controls(TOOLBAR(main_window.toolbar_find), can_modify, read_only);
 }

@@ -2,6 +2,7 @@
  
    Copyright (C) 2003, 2004, 2005 Andy Jeffries <andy at gphpedit.org>
    Copyright (C) 2009 Anoop John <anoop dot john at zyxware.com>
+   Copyright (C) 2010 José Rostagno
 	  
    For more information or to find the latest release, visit our 
    website at http://www.gphpedit.org/
@@ -67,7 +68,6 @@ void zoom_100(GtkWidget *widget);
 void update_zoom_level(void);
 void can_undo(GtkWidget *widget);
 void on_notebook_switch_page (GtkNotebook *notebook, GtkNotebookPage *page, gint page_num, gpointer user_data);
-void goto_line_activate(GtkEntry *entry,gpointer user_data);
 void block_indent(GtkWidget *widget);
 void block_unindent(GtkWidget *widget);
 void syntax_check(GtkWidget *widget);

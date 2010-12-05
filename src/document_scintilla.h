@@ -70,5 +70,6 @@ void document_scintilla_keyboard_macro_startstop(Document_Scintilla *document_sc
 void document_scintilla_keyboard_macro_playback(Document_Scintilla *document_scintilla);
 void document_scintilla_insert_template(Document_Scintilla *document_scintilla, gchar *template);
 void document_scintilla_activate_incremental_search(Document_Scintilla *doc);
+void document_scintilla_activate_goto_line(Document_Scintilla *doc);
 #endif /* DOCUMENT_SCINTILLA_H */
 

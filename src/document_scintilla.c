@@ -51,6 +51,7 @@
 #include "tab_sql.h"
 
 #include "search_infobar.h"
+#include "goto_infobar.h"
 
 /* object signal enumeration */
 enum {
@@ -92,6 +93,7 @@ struct Document_ScintillaDetails
   GtkWidget *infolabel;
   /* incremental search widget */
   GtkWidget *searchbar;
+  GtkWidget *gotobar;
   /* calltip stuff*/
   guint calltip_timer_id;
   gboolean calltip_timer_set;
@@ -1105,6 +1107,9 @@ document_scintilla_init (Document_Scintilla * object)
   /* create incremental search widget */
   docdet->searchbar = search_infobar_new();
   gtk_box_pack_start(GTK_BOX(docdet->container), docdet->searchbar, FALSE, FALSE, 0);
+
+  docdet->gotobar = goto_infobar_new();
+  gtk_box_pack_start(GTK_BOX(docdet->container), docdet->gotobar, FALSE, FALSE, 0);
 
   docdet->scintilla = gtk_scintilla_new();
   g_signal_connect (G_OBJECT (docdet->scintilla), "char_added", G_CALLBACK (char_added), object);
@@ -2512,4 +2517,11 @@ void document_scintilla_activate_incremental_search(Document_Scintilla *doc)
   Document_ScintillaDetails *docdet = DOCUMENT_SCINTILLA_GET_PRIVATE(doc);
   gtk_widget_show(docdet->searchbar);
   gtk_widget_grab_focus(docdet->searchbar);
+}
+
+void document_scintilla_activate_goto_line(Document_Scintilla *doc)
+{
+  Document_ScintillaDetails *docdet = DOCUMENT_SCINTILLA_GET_PRIVATE(doc);
+  gtk_widget_show(docdet->gotobar);
+  gtk_widget_grab_focus(docdet->gotobar);
 }

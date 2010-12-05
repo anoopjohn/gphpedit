@@ -2,7 +2,8 @@
  
    Copyright (C) 2003, 2004, 2005 Andy Jeffries <andy at gphpedit.org>
    Copyright (C) 2009 Anoop John <anoop dot john at zyxware.com>   
-    
+   Copyright (C) 2010 José Rostagno
+
    For more information or to find the latest release, visit our 
    website at http://www.gphpedit.org/
  
@@ -110,6 +111,12 @@ gint main_window_key_press_event(GtkWidget   *widget, GdkEventKey *event,gpointe
       Document *document = document_manager_get_current_document(main_window.docmg);
       if (OBJECT_IS_DOCUMENT_SCINTILLA(document)) {
         document_scintilla_activate_incremental_search(DOCUMENT_SCINTILLA(document));
+      }
+    }
+  else if ((event->state & GDK_CONTROL_MASK)==GDK_CONTROL_MASK && ((event->keyval == GDK_g) || (event->keyval == GDK_G)))  {
+      Document *document = document_manager_get_current_document(main_window.docmg);
+      if (OBJECT_IS_DOCUMENT_SCINTILLA(document)) {
+        document_scintilla_activate_goto_line(DOCUMENT_SCINTILLA(document));
       }
     }
   }
@@ -637,20 +644,9 @@ gboolean is_valid_digits_only(gchar *text)
 
 void goto_line(gchar *text)
 {
-  gint line;
-  line = atoi(text);
-  documentable_goto_line(DOCUMENTABLE(document_manager_get_current_document(main_window.docmg)), line);
+  Documentable *doc = DOCUMENTABLE(document_manager_get_current_document(main_window.docmg));
+  if (doc) documentable_goto_line(doc, atoi(text));
 }
-
-void goto_line_activate(GtkEntry *entry,gpointer user_data)
-{
-  gchar *current_text;
-  if (document_manager_get_current_document(main_window.docmg)) {
-    current_text = (gchar *)gtk_entry_get_text(entry);
-    goto_line(current_text);
-  }
-}
-
 
 void block_indent(GtkWidget *widget)
 {
