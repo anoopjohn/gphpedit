@@ -628,20 +628,6 @@ gboolean on_notebook_focus_tab(GtkNotebook *notebook,
   return TRUE;
 }
 
-/*
-gboolean is_valid_digits_only(gchar *text)
-{
-  while (*text) {
-    if (*text < 48 || *text > 57) {
-      return FALSE;
-    }
-  }
-
-  return TRUE;
-}
-*/
-
-
 void goto_line(gchar *text)
 {
   Documentable *doc = DOCUMENTABLE(document_manager_get_current_document(main_window.docmg));

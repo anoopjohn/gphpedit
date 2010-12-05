@@ -73,6 +73,8 @@ gphpedit_SOURCES = \
   gphpedit_ipc.h \
   gvfs_utils.c \
   gvfs_utils.h \
+  goto_infobar.c \
+  goto_infobar.h \
   history-entry.c \
   history-entry.h \
   images.h \
@@ -100,6 +102,8 @@ gphpedit_SOURCES = \
   replace_dialog.h \
   status-combo-box.c \
   status-combo-box.h \
+  search_infobar.c \
+  search_infobar.h \
   syntax_check_manager.c \
   syntax_check_manager.h \
   syntax_check_window.c \
