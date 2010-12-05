@@ -2,7 +2,7 @@
 
    Copyright (C) 2003, 2004, 2005 Andy Jeffries <andy at gphpedit.org>
    Copyright (C) 2009 Anoop John <anoop dot john at zyxware.com>
-   Copyright (C) 2009 José Rostagno (for vijona.com.ar) 
+   Copyright (C) 2009, 2010 José Rostagno (for vijona.com.ar) 
 
    For more information or to find the latest release, visit our 
    website at http://www.gphpedit.org/
@@ -76,7 +76,6 @@ struct _MenuBarPrivate
   GtkWidget *lower;
 
   GtkWidget *viewmaintoolbar;
-  GtkWidget *viewfindtoolbar;
   GtkWidget *viewstatusbar;
   GtkWidget *viewfullscreen;
   GtkWidget *tog_class;
@@ -167,16 +166,6 @@ static void tog_maintoolbar(GtkWidget *widget, gpointer user_data)
   gtk_widget_set_visible(main_window.toolbar_main, state);
 }
 
-/*
- * tog_maintoolbar
- * Show/hide application findtoolbar
-*/
-static void tog_findtoolbar(GtkWidget *widget, gpointer user_data)
-{
-  gboolean state = gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(widget));
-  set_preferences_manager_show_findtoolbar( main_window.prefmg, state);
-  gtk_widget_set_visible(main_window.toolbar_find, state);
-}
 /*
  * tog_fullscreen
  * Enable/disable fullscreen mode
@@ -452,9 +441,6 @@ static void fill_menu_view(MenuBarPrivate *priv)
   gboolean showmainbar = get_preferences_manager_show_maintoolbar(main_window.prefmg);
   create_check_menu_item(&priv->viewmaintoolbar,priv->menuview,_("Main Toolbar"), _("Show/Hide Application Main Toolbar"),priv->accel_group, 0, 0, showmainbar);
   g_signal_connect(G_OBJECT(priv->viewmaintoolbar), "activate", G_CALLBACK(tog_maintoolbar),NULL);
-  gboolean showfindbar = get_preferences_manager_show_findtoolbar(main_window.prefmg);
-  create_check_menu_item(&priv->viewfindtoolbar,priv->menuview,_("Find Toolbar"), _("Show/Hide Application Find Toolbar"),priv->accel_group, 0, 0, showfindbar);
-  g_signal_connect(G_OBJECT(priv->viewfindtoolbar), "activate", G_CALLBACK(tog_findtoolbar),NULL);
   /* separator */
   _create_separator_item(priv->menuview);
 
