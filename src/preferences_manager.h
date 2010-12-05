@@ -70,8 +70,6 @@ gboolean get_preferences_manager_show_statusbar(PreferencesManager *preferences_
 void set_preferences_manager_show_statusbar(PreferencesManager *preferences_manager, gboolean new_status);
 gboolean get_preferences_manager_show_maintoolbar(PreferencesManager *preferences_manager);
 void set_preferences_manager_show_maintoolbar(PreferencesManager *preferences_manager, gboolean new_status);
-gboolean get_preferences_manager_show_findtoolbar(PreferencesManager *preferences_manager);
-void set_preferences_manager_show_findtoolbar(PreferencesManager *preferences_manager, gboolean new_status);
 /**/
 GSList *get_preferences_manager_search_history(PreferencesManager *preferences_manager);
 void set_preferences_manager_new_search_history_item(PreferencesManager *preferences_manager, gint pos, const gchar *newtext);

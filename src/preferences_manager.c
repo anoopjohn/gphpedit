@@ -68,7 +68,6 @@ struct PreferencesManagerDetails
   gboolean showfilebrowser;
   guint showstatusbar:1;
   guint showmaintoolbar:1;
-  guint showfindtoolbar:1;
   // Default settings
   gint indentation_size;
   gint tab_size;
@@ -683,7 +682,6 @@ void load_default_settings(PreferencesManagerDetails *prefdet)
   prefdet->showfilebrowser = get_bool("/gPHPEdit/defaults/showfolderbrowser", TRUE);
   prefdet->showstatusbar = get_bool("/gPHPEdit/defaults/showstatusbar", TRUE);
   prefdet->showmaintoolbar = get_bool("/gPHPEdit/defaults/showmaintoolbar", TRUE);
-  prefdet->showfindtoolbar = get_bool("/gPHPEdit/defaults/showfindtoolbar", TRUE);
 }
 
 void load_window_settings(PreferencesManagerDetails *prefdet)
@@ -744,22 +742,6 @@ void set_preferences_manager_show_statusbar(PreferencesManager *preferences_mana
   PreferencesManagerDetails *prefdet;
   prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
   prefdet->showstatusbar = newstate; 
-}
-
-gboolean get_preferences_manager_show_findtoolbar(PreferencesManager *preferences_manager)
-{
-  g_return_val_if_fail (OBJECT_IS_PREFERENCES_MANAGER (preferences_manager), 0); /**/
-  PreferencesManagerDetails *prefdet;
-  prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
-  return prefdet->showfindtoolbar;
-}
-
-void set_preferences_manager_show_findtoolbar(PreferencesManager *preferences_manager, gboolean newstate)
-{
-  if (!OBJECT_IS_PREFERENCES_MANAGER (preferences_manager)) return ;
-  PreferencesManagerDetails *prefdet;
-  prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
-  prefdet->showfindtoolbar = newstate; 
 }
 
 gboolean get_preferences_manager_show_maintoolbar(PreferencesManager *preferences_manager)
@@ -876,7 +858,6 @@ void preferences_manager_save_data(PreferencesManager *preferences_manager){
   set_bool("/gPHPEdit/defaults/showfolderbrowser", prefdet->showfilebrowser);
   set_int("/gPHPEdit/defaults/showstatusbar", prefdet->showstatusbar);
   set_int("/gPHPEdit/defaults/showmaintoolbar", prefdet->showmaintoolbar);
-  set_int("/gPHPEdit/defaults/showfindtoolbar", prefdet->showfindtoolbar);
   set_string_list ("/gPHPEdit/search_history", prefdet->search_history);
 }
 
