@@ -259,6 +259,13 @@ void document_webkit_incremental_search (Documentable  *doc, gchar *current_text
   webkit_web_view_search_text (WEBKIT_WEB_VIEW(docdet->help_view), current_text, FALSE, advancing, TRUE);
 }
 
+void document_webkit_activate_incremental_search(Documentable  *doc)
+{
+  Document_WebkitDetails *docdet = DOCUMENT_WEBKIT_GET_PRIVATE(doc);
+  gtk_widget_show(docdet->searchbar);
+  gtk_widget_grab_focus(docdet->searchbar);
+}
+
 gchar *document_webkit_get_text (Documentable  *doc)
 {
   return NULL;
@@ -320,6 +327,7 @@ static void document_webkit_documentable_init(DocumentableIface *iface, gpointer
   iface->search_text = document_webkit_search_text;
   iface->search_replace_text = document_webkit_search_replace_text;
   iface->incremental_search = document_webkit_incremental_search;
+  iface->activate_incremental_search = document_webkit_activate_incremental_search;
   iface->get_text = document_webkit_get_text;
   iface->check_externally_modified = document_webkit_check_externally_modified;
   iface->save = document_webkit_save;
@@ -715,11 +723,3 @@ static gboolean webkit_link_clicked (WebKitWebView *web_view, WebKitWebFrame *fr
   webkit_web_view_load_request (web_view, request);
   return TRUE;
 }
-
-void document_webkit_activate_incremental_search(Document_Webkit *doc)
-{
-  Document_WebkitDetails *docdet = DOCUMENT_WEBKIT_GET_PRIVATE(doc);
-  gtk_widget_show(docdet->searchbar);
-  gtk_widget_grab_focus(docdet->searchbar);
-}
-

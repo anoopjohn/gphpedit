@@ -47,18 +47,17 @@ struct _DocumentableIface
   void (*save) (Documentable *iface);
   void (*save_as) (Documentable *iface, GFile *file);
   void (*incremental_search) (Documentable *iface, gchar *current_text, gboolean advancing);
+  void (*activate_incremental_search) (Documentable *iface);
   gint (*get_current_position) (Documentable *iface);
   gboolean (*search_text) (Documentable *iface, const gchar *text, gboolean checkwholedoc, gboolean checkcase, gboolean checkwholeword, gboolean checkregex);
   gboolean (*search_replace_text) (Documentable *iface, const gchar *text, const gchar *replace, gboolean checkwholedoc, gboolean checkcase, gboolean checkwholeword, gboolean checkregex, gboolean ask_replace);
   void (*replace_text) (Documentable *iface, gchar *new_text);
   void (*insert_text) (Documentable *iface, gchar *new_text);
   void (*replace_current_selection) (Documentable *iface, gchar *new_text);
-
 };
 
 GType          documentable_get_type        (void) G_GNUC_CONST;
 
-//FIXME: poner una descripcion acerca de que hace cada metodo de la interfaz
 void           documentable_reload (Documentable  *self);
 void           documentable_zoom_in (Documentable  *self);
 void           documentable_zoom_out (Documentable  *self);
@@ -76,7 +75,7 @@ void           documentable_block_unindent (Documentable  *self);
 gchar          *documentable_get_filename (Documentable  *self) G_GNUC_WARN_UNUSED_RESULT G_GNUC_MALLOC;
 gchar          *documentable_get_current_selected_text (Documentable  *self) G_GNUC_WARN_UNUSED_RESULT G_GNUC_MALLOC;
 gchar          *documentable_get_session_entry (Documentable  *self) G_GNUC_WARN_UNUSED_RESULT G_GNUC_MALLOC;
-gchar          *documentable_get_text (Documentable  *self) G_GNUC_WARN_UNUSED_RESULT G_GNUC_MALLOC; //se puede hacer en webkit??
+gchar          *documentable_get_text (Documentable  *self) G_GNUC_WARN_UNUSED_RESULT G_GNUC_MALLOC;
 gchar          *documentable_get_current_word (Documentable  *self) G_GNUC_WARN_UNUSED_RESULT G_GNUC_MALLOC;
 void           documentable_set_type (Documentable  *self, gint type);
 void           documentable_goto_pos (Documentable  *self, glong pos);
@@ -89,6 +88,7 @@ gboolean       documentable_search_text (Documentable  *self, const gchar *text,
 gboolean       documentable_search_replace_text(Documentable  *self, const gchar *text, const gchar *replace, 
                 gboolean checkwholedoc, gboolean checkcase, gboolean checkwholeword, gboolean checkregex, gboolean ask_replace);
 void           documentable_incremental_search (Documentable  *self, gchar *current_text, gboolean advancing);
+void           documentable_activate_incremental_search (Documentable  *self);
 void           documentable_save (Documentable  *self);
 void           documentable_save_as (Documentable  *self, GFile *file);
 void           documentable_replace_text (Documentable  *self, gchar *new_text);

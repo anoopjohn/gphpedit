@@ -535,6 +535,13 @@ void document_scintilla_incremental_search (Documentable  *document_scintilla, g
   }
 }
 
+void document_scintilla_activate_incremental_search(Documentable *doc)
+{
+  Document_ScintillaDetails *docdet = DOCUMENT_SCINTILLA_GET_PRIVATE(doc);
+  gtk_widget_show(docdet->searchbar);
+  gtk_widget_grab_focus(docdet->searchbar);
+}
+
 /*
 * document_scintilla_get_text
 * Return a newly allocate string with current document_scintilla text. 
@@ -679,6 +686,7 @@ static void document_scintilla_documentable_init(DocumentableIface *iface, gpoin
   iface->search_text = document_scintilla_search_text;
   iface->search_replace_text = document_scintilla_search_replace_text;
   iface->incremental_search = document_scintilla_incremental_search;
+  iface->activate_incremental_search = document_scintilla_activate_incremental_search;
   iface->get_text = document_scintilla_get_text;
   iface->check_externally_modified = document_scintilla_check_externally_modified;
   iface->save = document_scintilla_save;
@@ -2510,13 +2518,6 @@ static gchar *document_scintilla_get_title(Document_Scintilla *doc)
   }
   if (title) return g_string_free(title, FALSE);
   return NULL;
-}
-
-void document_scintilla_activate_incremental_search(Document_Scintilla *doc)
-{
-  Document_ScintillaDetails *docdet = DOCUMENT_SCINTILLA_GET_PRIVATE(doc);
-  gtk_widget_show(docdet->searchbar);
-  gtk_widget_grab_focus(docdet->searchbar);
 }
 
 void document_scintilla_activate_goto_line(Document_Scintilla *doc)

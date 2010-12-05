@@ -59,6 +59,5 @@ typedef struct
 /* Basic GObject requirements. */
 GType document_webkit_get_type (void);
 Document_Webkit *document_webkit_new (gint type, GFile *file);
-void document_webkit_activate_incremental_search(Document_Webkit *doc);
 #endif /* DOCUMENT_WEBKIT_H */
 

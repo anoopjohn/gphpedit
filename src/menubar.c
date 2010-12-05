@@ -257,11 +257,7 @@ static void translate(void){
 static void on_incfind_activate (GtkWidget *widget, gpointer user_data)
 {
   Document *document = document_manager_get_current_document(main_window.docmg);
-  if (OBJECT_IS_DOCUMENT_SCINTILLA(document)) {
-    document_scintilla_activate_incremental_search(DOCUMENT_SCINTILLA(document));
-  } else if (OBJECT_IS_DOCUMENT_WEBKIT(document)) {
-    document_webkit_activate_incremental_search(DOCUMENT_WEBKIT(document));
-  }
+  documentable_activate_incremental_search (DOCUMENTABLE(document));
 }
 
 static void on_gotoline_activate (GtkWidget *widget, gpointer user_data)

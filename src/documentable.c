@@ -158,6 +158,12 @@ void documentable_incremental_search (Documentable  *self, gchar *current_text, 
 	DOCUMENTABLE_GET_IFACE (self)->incremental_search (self, current_text, advancing);
 }
 
+void           documentable_activate_incremental_search (Documentable  *self)
+{
+  if (!self) return ;
+	DOCUMENTABLE_GET_IFACE (self)->activate_incremental_search (self);
+}
+
 gchar *documentable_get_text (Documentable  *self)
 {
   if (!self) return NULL;
