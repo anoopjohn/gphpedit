@@ -1,4 +1,4 @@
-/* This file is part of gPHPEdit, a GNOME2 PHP Editor.
+/* This file is part of gPHPEdit, a GNOME PHP Editor.
 
    Copyright (C) 2003, 2004, 2005 Andy Jeffries <andy at gphpedit.org>
    Copyright (C) 2009 Anoop John <anoop dot john at zyxware.com>
@@ -26,7 +26,6 @@
 #define DOCUMENT_WEBKIT_H
 
 #include <gtk/gtk.h>
-#include "documentable.h"
 
 #define DOCUMENT_WEBKIT_TYPE document_webkit_get_type()
 #define DOCUMENT_WEBKIT(obj) \
@@ -60,5 +59,6 @@ typedef struct
 /* Basic GObject requirements. */
 GType document_webkit_get_type (void);
 Document_Webkit *document_webkit_new (gint type, GFile *file);
+void document_webkit_activate_incremental_search(Document_Webkit *doc);
 #endif /* DOCUMENT_WEBKIT_H */
 

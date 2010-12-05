@@ -259,6 +259,8 @@ static void on_incfind_activate (GtkWidget *widget, gpointer user_data)
   Document *document = document_manager_get_current_document(main_window.docmg);
   if (OBJECT_IS_DOCUMENT_SCINTILLA(document)) {
     document_scintilla_activate_incremental_search(DOCUMENT_SCINTILLA(document));
+  } else if (OBJECT_IS_DOCUMENT_WEBKIT(document)) {
+    document_webkit_activate_incremental_search(DOCUMENT_WEBKIT(document));
   }
 }
 
@@ -656,7 +658,6 @@ void menubar_update_controls(MenuBar *menubar, gboolean is_scintilla, gboolean c
     gtk_widget_set_sensitive (priv->phphelp, TRUE);
     gtk_widget_set_sensitive (priv->upper, TRUE);
     gtk_widget_set_sensitive (priv->lower, TRUE);
-    gtk_widget_set_sensitive (priv->incfind, TRUE);
     gtk_widget_set_sensitive (priv->gotoline, TRUE);
     /* only show preview in html files */
       if (can_preview){
@@ -682,7 +683,6 @@ void menubar_update_controls(MenuBar *menubar, gboolean is_scintilla, gboolean c
     gtk_widget_set_sensitive (priv->upper, FALSE);
     gtk_widget_set_sensitive (priv->lower, FALSE);
     gtk_widget_set_sensitive (priv->preview, FALSE);
-    gtk_widget_set_sensitive (priv->incfind, FALSE);
     gtk_widget_set_sensitive (priv->gotoline, FALSE);
   }
 }

@@ -1,4 +1,4 @@
-/* This file is part of gPHPEdit, a GNOME2 PHP Editor.
+/* This file is part of gPHPEdit, a GNOME PHP Editor.
 
    Copyright (C) 2003, 2004, 2005 Andy Jeffries <andy at gphpedit.org>
    Copyright (C) 2009 Anoop John <anoop dot john at zyxware.com>
@@ -30,7 +30,7 @@
 #include "document.h"
 #include "document_webkit.h"
 #include "gvfs_utils.h"
-
+#include "search_infobar.h"
 /* object signal enumeration */
 enum {
   LOAD_COMPLETE,
@@ -47,6 +47,7 @@ static guint signals[LAST_SIGNAL];
 struct Document_WebkitDetails
 {
 	gint type;
+  GtkWidget *container;
 	GtkWidget *help_scrolled_window;
 	WebKitWebView *help_view;
 	GtkWidget *label;
@@ -57,6 +58,9 @@ struct Document_WebkitDetails
 	gboolean isreadonly;
 	gboolean is_untitled;
   gchar *contenttype;
+
+  /* incremental search widget */
+  GtkWidget *searchbar;
 };
 
 #define DOCUMENT_WEBKIT_GET_PRIVATE(object)(G_TYPE_INSTANCE_GET_PRIVATE ((object),\
@@ -248,9 +252,11 @@ gboolean document_webkit_search_replace_text(Documentable  *doc, const gchar *te
   return FALSE;
 }
 
-void document_webkit_incremental_search (Documentable  *document_webkit, gchar *current_text, gboolean advancing)
+void document_webkit_incremental_search (Documentable  *doc, gchar *current_text, gboolean advancing)
 {
-//FIXME
+  g_return_if_fail(doc);
+  Document_WebkitDetails *docdet = DOCUMENT_WEBKIT_GET_PRIVATE(doc);
+  webkit_web_view_search_text (WEBKIT_WEB_VIEW(docdet->help_view), current_text, FALSE, advancing, TRUE);
 }
 
 gchar *document_webkit_get_text (Documentable  *doc)
@@ -456,7 +462,7 @@ document_webkit_get_property (GObject    *object,
       g_value_set_object (value, docdet->ico);
       break;
     case PROP_WIDGET:
-      g_value_set_object (value, docdet->help_scrolled_window);
+      g_value_set_object (value, docdet->container);
       break;
 		default:
 			G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -614,8 +620,16 @@ document_webkit_init (Document_Webkit * object)
   docdet->help_view= WEBKIT_WEB_VIEW(webkit_web_view_new ());
   docdet->help_scrolled_window = gtk_scrolled_window_new(NULL, NULL);
   docdet->label = gtk_label_new ("");
+
   gtk_widget_show (docdet->label);
   gtk_container_add(GTK_CONTAINER(docdet->help_scrolled_window), GTK_WIDGET(docdet->help_view));
+
+  docdet->container = gtk_vbox_new (FALSE, 0);
+
+  /* create incremental search widget */
+  docdet->searchbar = search_infobar_new();
+  gtk_box_pack_start(GTK_BOX(docdet->container), docdet->searchbar, FALSE, FALSE, 0);
+  gtk_box_pack_start(GTK_BOX(docdet->container), docdet->help_scrolled_window, TRUE, TRUE, 0);
 
   g_signal_connect(G_OBJECT(docdet->help_view), "navigation-policy-decision-requested",
        G_CALLBACK(webkit_link_clicked), object);
@@ -646,6 +660,7 @@ static void document_webkit_constructed (GObject *object)
   gphpedit_debug_message (DEBUG_DOCUMENT, "WEBKIT FILE: %s\n", caption->str);
 
   g_string_free(caption,TRUE);
+
 }
 /*
 * disposes the Gobject
@@ -700,3 +715,11 @@ static gboolean webkit_link_clicked (WebKitWebView *web_view, WebKitWebFrame *fr
   webkit_web_view_load_request (web_view, request);
   return TRUE;
 }
+
+void document_webkit_activate_incremental_search(Document_Webkit *doc)
+{
+  Document_WebkitDetails *docdet = DOCUMENT_WEBKIT_GET_PRIVATE(doc);
+  gtk_widget_show(docdet->searchbar);
+  gtk_widget_grab_focus(docdet->searchbar);
+}
+
