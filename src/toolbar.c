@@ -2,7 +2,7 @@
 
    Copyright (C) 2003, 2004, 2005 Andy Jeffries <andy at gphpedit.org>
    Copyright (C) 2009 Anoop John <anoop dot john at zyxware.com>
-   Copyright (C) 2009 José Rostagno (for vijona.com.ar) 
+   Copyright (C) 2009, 2010 José Rostagno (for vijona.com.ar) 
 
    For more information or to find the latest release, visit our 
    website at http://www.gphpedit.org/
@@ -38,17 +38,8 @@
 						GOBJECT_TYPE_TOOLBAR,              \
 						ToolBarPrivate))
 
-/* toolbar type */
-enum 
-{
-	MAIN_TOOLBAR = 0,
-	FIND_TOOLBAR = 1
-};
-
 struct _ToolBarPrivate 
 {
-  gint type; /* 0 for main toolbar 1 for find toolbar*/
-
 /* main toolbar widgets */
   GtkWidget *button_new;
   GtkWidget *button_open;
@@ -67,101 +58,18 @@ struct _ToolBarPrivate
   GtkWidget *button_zoom_in;
   GtkWidget *button_zoom_out;
   GtkWidget *button_zoom_100;
-
-/* find toolbar widgets */
-  GtkAccelGroup *accel_group;
-  GtkWidget *toolbar_find;
-  GtkWidget *goto_label;
-  GtkWidget *goto_entry;
-  GtkWidget *cleanimg;
 };
 
 G_DEFINE_TYPE(ToolBar, TOOLBAR, GTK_TYPE_TOOLBAR)
 
-static void find_toolbar_init (ToolBar *toolbar);
 static void main_toolbar_init (ToolBar *toolbar);
-enum
-{
-  PROP_0,
-  PROP_TOOLBAR_TYPE,
-  PROP_ACCEL_GROUP
-};
 
-static void
-TOOLBAR_set_property (GObject      *object,
-			      guint         prop_id,
-			      const GValue *value,
-			      GParamSpec   *pspec)
-{
-  ToolBarPrivate *priv = TOOLBAR_GET_PRIVATE(object);
-
-	switch (prop_id)
-	{
-		case PROP_TOOLBAR_TYPE:
-			priv->type = g_value_get_int (value);
-			break;
-		case PROP_ACCEL_GROUP:
-			priv->accel_group = g_value_get_object (value);
-			break;
- 		default:
-			G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
-			break;
-	}
-}
-
-static void
-TOOLBAR_get_property (GObject    *object,
-			      guint       prop_id,
-			      GValue     *value,
-			      GParamSpec *pspec)
-{
-  ToolBarPrivate *priv = TOOLBAR_GET_PRIVATE(object);
-
-	switch (prop_id)
-	{
-		case PROP_TOOLBAR_TYPE:
-			g_value_set_int (value, priv->type);
-			break;
-		case PROP_ACCEL_GROUP:
-			g_value_set_object (value, priv->accel_group);
-			break;
-		default:
-			G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
-			break;
-	}
-}
-
-static void
-TOOLBAR_constructed (GObject *toolbar)
-{
-  ToolBarPrivate *priv = TOOLBAR_GET_PRIVATE(toolbar);
-  if(priv->type == MAIN_TOOLBAR) {
-    main_toolbar_init (TOOLBAR(toolbar));
-  } else {
-    find_toolbar_init (TOOLBAR(toolbar));
-  }
-}
 static void
 TOOLBAR_class_init (ToolBarClass *klass)
 {
 	GObjectClass *object_class;
 
 	object_class = G_OBJECT_CLASS (klass);
-  object_class->set_property = TOOLBAR_set_property;
-  object_class->get_property = TOOLBAR_get_property;
-  object_class->constructed = TOOLBAR_constructed;
-
-  g_object_class_install_property (object_class,
-                              PROP_TOOLBAR_TYPE,
-                              g_param_spec_int ("toolbar_type",
-                              NULL, NULL, 0, G_MAXINT, 
-                              MAIN_TOOLBAR, G_PARAM_CONSTRUCT_ONLY | G_PARAM_READWRITE));
-
-  g_object_class_install_property (object_class,
-                              PROP_ACCEL_GROUP,
-                              g_param_spec_object ("accel_group",
-                              NULL, NULL, GTK_TYPE_ACCEL_GROUP,
-                              G_PARAM_CONSTRUCT_ONLY | G_PARAM_READWRITE));
 
 	g_type_class_add_private (klass, sizeof (ToolBarPrivate));
 }
@@ -271,56 +179,6 @@ main_toolbar_init (ToolBar *toolbar)
 
 }
 
-static inline void create_entry(GtkWidget **entry, const gchar *tooltip_text,gint max_lenght){
-  *entry = gtk_entry_new();
-  gtk_entry_set_max_length (GTK_ENTRY(*entry),max_lenght);
-  gtk_entry_set_width_chars(GTK_ENTRY(*entry),max_lenght + 1);
-  gtk_widget_set_tooltip_text (*entry,tooltip_text);
-  gtk_entry_set_icon_from_stock (GTK_ENTRY(*entry),GTK_ENTRY_ICON_SECONDARY,GTK_STOCK_CLEAR);
-  gtk_widget_show(*entry);
-}
-
-/**
-* on_cleanicon_press
-* Clear entry text 
-*/
-void on_cleanicon_press (GtkEntry *entry, GtkEntryIconPosition icon_pos, GdkEvent *event, gpointer user_data){
-    gtk_entry_set_text (entry,"");
-}
-
-/**
-* create and insert a new toolbar item with a custom widget in it
-*/
-static inline void create_custom_toolbar_item (GtkToolbar *toolbar, GtkWidget *control){
-  GtkToolItem *item;
-  item=gtk_tool_item_new();
-  gtk_tool_item_set_expand (item, FALSE);
-  gtk_container_add (GTK_CONTAINER (item), control);
-  gtk_toolbar_insert(toolbar, GTK_TOOL_ITEM (item), -1);
-  gtk_widget_show(GTK_WIDGET(item));
-}
-
-static void
-find_toolbar_init (ToolBar *toolbar)
-{
-  ToolBarPrivate *priv = TOOLBAR_GET_PRIVATE(toolbar);
-  GtkAccelGroup *accel_group;
-  g_object_get(toolbar, "accel_group", &accel_group, NULL);
-
-  /* goto widgets */
-  priv->goto_label = gtk_label_new(_("Go to line: "));
-  gtk_widget_show(priv->goto_label);
-  create_custom_toolbar_item (GTK_TOOLBAR(toolbar), priv->goto_label);
-  /* create goto entry */
-  create_entry(&priv->goto_entry, _("Go to line"), 8);
-  gtk_widget_add_accelerator (priv->goto_entry, "grab-focus", accel_group, GDK_g, GDK_CONTROL_MASK, 0);
-  g_signal_connect (G_OBJECT (priv->goto_entry), "icon-press", G_CALLBACK (on_cleanicon_press), NULL);
-  g_signal_connect_after(G_OBJECT(priv->goto_entry), "activate", G_CALLBACK(goto_line_activate), NULL);
-  /* create a new toolbar item with the entry */
-  create_custom_toolbar_item (GTK_TOOLBAR(toolbar), priv->goto_entry);
-
-}
-
 static void
 TOOLBAR_init (ToolBar *toolbar)
 {
@@ -332,6 +190,8 @@ TOOLBAR_init (ToolBar *toolbar)
 
   /* sincronice toolbar icon size */
   sincronice_menu_items_size (GTK_TOOLBAR (toolbar));
+
+  main_toolbar_init (toolbar);
 }
 
 GtkWidget *
@@ -341,56 +201,34 @@ toolbar_new (void)
 	return GTK_WIDGET(toolbar);
 }
 
-GtkWidget *toolbar_find_new (GtkAccelGroup *accel_group)
-{
-  ToolBar *toolbar = g_object_new (GOBJECT_TYPE_TOOLBAR, "toolbar_type", FIND_TOOLBAR, 
-    "accel_group", accel_group, NULL);
-	return GTK_WIDGET(toolbar);
-}
-
-void toolbar_grab_goto_focus(ToolBar *toolbar){
- ToolBarPrivate *priv = TOOLBAR_GET_PRIVATE(toolbar);
-  if (priv->type==FIND_TOOLBAR){
-      gtk_widget_grab_focus(GTK_WIDGET(priv->goto_entry));
-  }
-}
-
 void toolbar_update_controls(ToolBar *toolbar, gboolean is_scintilla, gboolean isreadonly)
 {
  ToolBarPrivate *priv = TOOLBAR_GET_PRIVATE(toolbar);
   if (is_scintilla){
     //activate toolbar items
-    if (priv->type==MAIN_TOOLBAR){
-      gtk_widget_set_sensitive (priv->button_cut, TRUE);
-      gtk_widget_set_sensitive (priv->button_paste, TRUE);
-      gtk_widget_set_sensitive (priv->button_undo, TRUE);
-      gtk_widget_set_sensitive (priv->button_redo, TRUE);
-      gtk_widget_set_sensitive (priv->button_replace, TRUE);
-      gtk_widget_set_sensitive (priv->button_indent, TRUE);
-      gtk_widget_set_sensitive (priv->button_unindent, TRUE);
-      if (isreadonly){
-        gtk_widget_set_sensitive (priv->button_save, FALSE);
-      } else {
-        gtk_widget_set_sensitive (priv->button_save, TRUE);
-      } 
-      gtk_widget_set_sensitive (priv->button_save_as, TRUE);
+    gtk_widget_set_sensitive (priv->button_cut, TRUE);
+    gtk_widget_set_sensitive (priv->button_paste, TRUE);
+    gtk_widget_set_sensitive (priv->button_undo, TRUE);
+    gtk_widget_set_sensitive (priv->button_redo, TRUE);
+    gtk_widget_set_sensitive (priv->button_replace, TRUE);
+    gtk_widget_set_sensitive (priv->button_indent, TRUE);
+    gtk_widget_set_sensitive (priv->button_unindent, TRUE);
+    gtk_widget_set_sensitive (priv->button_save_as, TRUE);
+    if (isreadonly){
+      gtk_widget_set_sensitive (priv->button_save, FALSE);
     } else {
-      gtk_widget_set_sensitive (priv->goto_entry, TRUE);
-    }
-  }else{
+      gtk_widget_set_sensitive (priv->button_save, TRUE);
+    } 
+  } else {
       //deactivate toolbar items
-        if (priv->type==MAIN_TOOLBAR){
-          gtk_widget_set_sensitive (priv->button_cut, FALSE);
-          gtk_widget_set_sensitive (priv->button_paste, FALSE);
-          gtk_widget_set_sensitive (priv->button_undo, FALSE);
-          gtk_widget_set_sensitive (priv->button_redo, FALSE);
-          gtk_widget_set_sensitive (priv->button_replace, FALSE);
-          gtk_widget_set_sensitive (priv->button_indent, FALSE);
-          gtk_widget_set_sensitive (priv->button_unindent, FALSE);
-          gtk_widget_set_sensitive (priv->button_save, FALSE);
-          gtk_widget_set_sensitive (priv->button_save_as, FALSE);
-        } else {
-          gtk_widget_set_sensitive (priv->goto_entry, FALSE);
-        }
+    gtk_widget_set_sensitive (priv->button_cut, FALSE);
+    gtk_widget_set_sensitive (priv->button_paste, FALSE);
+    gtk_widget_set_sensitive (priv->button_undo, FALSE);
+    gtk_widget_set_sensitive (priv->button_redo, FALSE);
+    gtk_widget_set_sensitive (priv->button_replace, FALSE);
+    gtk_widget_set_sensitive (priv->button_indent, FALSE);
+    gtk_widget_set_sensitive (priv->button_unindent, FALSE);
+    gtk_widget_set_sensitive (priv->button_save, FALSE);
+    gtk_widget_set_sensitive (priv->button_save_as, FALSE);
   }
 }

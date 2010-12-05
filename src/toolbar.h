@@ -2,7 +2,7 @@
 
    Copyright (C) 2003, 2004, 2005 Andy Jeffries <andy at gphpedit.org>
    Copyright (C) 2009 Anoop John <anoop dot john at zyxware.com>
-   Copyright (C) 2009 José Rostagno (for vijona.com.ar) 
+   Copyright (C) 2009, 2010 José Rostagno (for vijona.com.ar) 
 
    For more information or to find the latest release, visit our 
    website at http://www.gphpedit.org/
@@ -73,8 +73,6 @@ struct _ToolBarClass
 GType 		 TOOLBAR_get_type 		(void) G_GNUC_CONST;
 
 GtkWidget *toolbar_new (void);
-GtkWidget *toolbar_find_new (GtkAccelGroup *accel_group);
-void toolbar_grab_goto_focus(ToolBar *toolbar);
 void toolbar_update_controls(ToolBar *toolbar, gboolean is_scintilla, gboolean isreadonly);
 G_END_DECLS
 
