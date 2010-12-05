@@ -71,6 +71,7 @@ struct _MenuBarPrivate
   GtkWidget *find;
   GtkWidget *replace;
   GtkWidget *incfind;
+  GtkWidget *gotoline;
   GtkWidget *indent;
   GtkWidget *unindent;
   GtkWidget *upper;
@@ -261,6 +262,14 @@ static void on_incfind_activate (GtkWidget *widget, gpointer user_data)
   }
 }
 
+static void on_gotoline_activate (GtkWidget *widget, gpointer user_data)
+{
+  Document *document = document_manager_get_current_document(main_window.docmg);
+  if (OBJECT_IS_DOCUMENT_SCINTILLA(document)) {
+    document_scintilla_activate_goto_line(DOCUMENT_SCINTILLA(document));
+  }
+}
+
 /*
 * create_menu
 * create a new menu and insert it in menubar
@@ -418,6 +427,9 @@ static void fill_menu_edit(MenuBarPrivate *priv){
 
   create_mnemonic_menu_item(&priv->incfind,priv->menuedit,_("Incremental search"), _("Search as you type"), priv->accel_group, GDK_i, GDK_CONTROL_MASK);
   g_signal_connect(G_OBJECT(priv->incfind), "activate", G_CALLBACK(on_incfind_activate), NULL);
+
+  create_mnemonic_menu_item(&priv->gotoline,priv->menuedit,_("Go to line"), _("Go to line"), priv->accel_group, GDK_g, GDK_CONTROL_MASK);
+  g_signal_connect(G_OBJECT(priv->gotoline), "activate", G_CALLBACK(on_gotoline_activate), NULL);
   
   /* separator */
   _create_separator_item(priv->menuedit);
@@ -645,6 +657,7 @@ void menubar_update_controls(MenuBar *menubar, gboolean is_scintilla, gboolean c
     gtk_widget_set_sensitive (priv->upper, TRUE);
     gtk_widget_set_sensitive (priv->lower, TRUE);
     gtk_widget_set_sensitive (priv->incfind, TRUE);
+    gtk_widget_set_sensitive (priv->gotoline, TRUE);
     /* only show preview in html files */
       if (can_preview){
         gtk_widget_set_sensitive (priv->preview, TRUE);
@@ -652,23 +665,24 @@ void menubar_update_controls(MenuBar *menubar, gboolean is_scintilla, gboolean c
         gtk_widget_set_sensitive (priv->preview, FALSE);
       }
   }else{
-      //deactivate menu items
-      gtk_widget_set_sensitive (priv->code, FALSE);
-      gtk_widget_set_sensitive (priv->cut, FALSE);
-      gtk_widget_set_sensitive (priv->paste, FALSE);
-      gtk_widget_set_sensitive (priv->save, FALSE);
-      gtk_widget_set_sensitive (priv->saveas, FALSE);
-      gtk_widget_set_sensitive (priv->reload, FALSE);
-      gtk_widget_set_sensitive (priv->indent, FALSE);
-      gtk_widget_set_sensitive (priv->unindent, FALSE);
-      gtk_widget_set_sensitive (priv->replace, FALSE);
-      gtk_widget_set_sensitive (priv->plugin, FALSE);
-      gtk_widget_set_sensitive (priv->undo, FALSE);
-      gtk_widget_set_sensitive (priv->redo, FALSE);
-      gtk_widget_set_sensitive (priv->phphelp, FALSE);
-      gtk_widget_set_sensitive (priv->upper, FALSE);
-      gtk_widget_set_sensitive (priv->lower, FALSE);
-      gtk_widget_set_sensitive (priv->preview, FALSE);
-      gtk_widget_set_sensitive (priv->incfind, FALSE);
+    //deactivate menu items
+    gtk_widget_set_sensitive (priv->code, FALSE);
+    gtk_widget_set_sensitive (priv->cut, FALSE);
+    gtk_widget_set_sensitive (priv->paste, FALSE);
+    gtk_widget_set_sensitive (priv->save, FALSE);
+    gtk_widget_set_sensitive (priv->saveas, FALSE);
+    gtk_widget_set_sensitive (priv->reload, FALSE);
+    gtk_widget_set_sensitive (priv->indent, FALSE);
+    gtk_widget_set_sensitive (priv->unindent, FALSE);
+    gtk_widget_set_sensitive (priv->replace, FALSE);
+    gtk_widget_set_sensitive (priv->plugin, FALSE);
+    gtk_widget_set_sensitive (priv->undo, FALSE);
+    gtk_widget_set_sensitive (priv->redo, FALSE);
+    gtk_widget_set_sensitive (priv->phphelp, FALSE);
+    gtk_widget_set_sensitive (priv->upper, FALSE);
+    gtk_widget_set_sensitive (priv->lower, FALSE);
+    gtk_widget_set_sensitive (priv->preview, FALSE);
+    gtk_widget_set_sensitive (priv->incfind, FALSE);
+    gtk_widget_set_sensitive (priv->gotoline, FALSE);
   }
 }
