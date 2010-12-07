@@ -414,7 +414,7 @@ static gboolean _document_loader_check_supported_type(GFile *file)
   */
   
   if (!is_php_file_from_filename(filename) && (!IS_TEXT(contenttype) && IS_APPLICATION(contenttype))) {
-    info_dialog (_("gPHPEdit"), _("Sorry, I can open this kind of file.\n"));
+    info_dialog (_("gPHPEdit"), _("Sorry, I cannot open this kind of file.\n"));
     result = FALSE;
   }
   g_object_unref(info);
