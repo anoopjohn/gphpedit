@@ -43,6 +43,7 @@ struct _SearchDialogPrivate
   GtkWidget *findentry;
   GtkWidget *checkcase;
   GtkWidget *checkwholeword;
+  // TODO - Rename this to wrap_around
   GtkWidget *checkwholedoc;
   GtkWidget *checkregex;
 
@@ -70,17 +71,22 @@ void find_action(SearchDialogPrivate *priv)
   text = gtk_combo_box_get_active_text (GTK_COMBO_BOX(priv->findentry));
   gphpedit_history_entry_prepend_text	(GPHPEDIT_HISTORY_ENTRY(priv->findentry), text);
   gboolean checkwholedoc = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON(priv->checkwholedoc));
-  if (checkwholedoc) {
-    documentable_goto_pos(doc, 0);
-    gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON(priv->checkwholedoc), FALSE);
-  }
   gboolean checkcase = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON(priv->checkcase));
   gboolean checkwholeword = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON(priv->checkwholeword));
   gboolean checkregex = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON(priv->checkregex));
-  if (!documentable_search_text(doc, text, checkwholedoc, checkcase, checkwholeword, checkregex)){
+  gboolean found = documentable_search_text(doc, text, checkwholedoc, checkcase, checkwholeword, checkregex);
+
+  if (!found) {
+    if (checkwholedoc) {
+      documentable_goto_pos(doc, 0);
+      found = documentable_search_text(doc, text, checkwholedoc, checkcase, checkwholeword, checkregex);
+      gphpedit_statusbar_flash_message (GPHPEDIT_STATUSBAR(main_window.appbar),0, _("Resuming search from top."), text);
+    }
+  }
+  if (!found) {
     // Show message saying could not be found.
     gphpedit_statusbar_flash_message (GPHPEDIT_STATUSBAR(main_window.appbar),0, _("The text \"%s\" was not found."), text);
-  }
+  }  
 }
 
 void search_dialog_process_response (GtkDialog *dialog, gint response_id, gpointer   user_data)
@@ -148,7 +154,7 @@ SEARCH_DIALOG_init (SearchDialog *dialog)
   gtk_widget_show (hbox);
   gtk_box_pack_start(GTK_BOX(priv->diagbox), hbox, FALSE, FALSE, 0);
 
-  priv->checkwholedoc = gtk_check_button_new_with_mnemonic (_("Whole document"));
+  priv->checkwholedoc = gtk_check_button_new_with_mnemonic (_("Wrap around"));
   gtk_widget_show (priv->checkwholedoc);
   gtk_box_pack_start (GTK_BOX (hbox), priv->checkwholedoc, FALSE, FALSE, 0);
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (priv->checkwholedoc), TRUE);
