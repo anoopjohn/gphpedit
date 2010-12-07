@@ -27,6 +27,9 @@
 #include "debug.h"
 #include "filebrowser_backend.h"
 #include "tab.h"
+// TODO tab_php.h loaded for the php file type validation
+// Perhaps all mimetype/encoding validation can be done in a separate lib
+#include "tab_php.h"
 #include "preferences_manager.h"
 #include "document_manager.h"
 #include "gvfs_utils.h"
@@ -232,7 +235,8 @@ gboolean populate_files (gpointer data)     //TODO:: show an spinner while loadi
 		 directory->filesinfolder = g_slist_append(directory->filesinfolder, current);
 		  }
 	  } else {
-	    if (IS_TEXT(mime) && !IS_APPLICATION(mime)){
+	    const gchar *filename = g_file_info_get_display_name(info); 
+	    if (is_php_file_from_filename(filename) || (IS_TEXT(mime) && !IS_APPLICATION(mime))) {
 	      //files
 	      FOLDERFILE *current;
 	      current=new_folderfile();

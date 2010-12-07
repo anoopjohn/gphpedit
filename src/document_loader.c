@@ -30,7 +30,12 @@
 #include "debug.h"
 #include "document_loader.h"
 #include "tab.h"
+// TODO tab_php.h loaded for the php file type validation
+// Perhaps all mimetype/encoding validation can be done in a separate lib
+#include "tab_php.h"
 #include "gvfs_utils.h"
+#include "preferences_manager.h"
+#include "document_manager.h"
 
 #define IS_MIME(stringa,stringb) (g_content_type_equals (stringa, stringb))
 #define IS_TEXT(stringa) (g_content_type_is_a (stringa, "text/*"))
@@ -392,15 +397,23 @@ static gboolean _document_loader_check_supported_type(GFile *file)
   GError *error=NULL;
   gboolean result = TRUE;
 
-  info= g_file_query_info (file,"standard::content-type",G_FILE_QUERY_INFO_NONE, NULL,&error);
-  if (!info){
-    g_warning (_("Could not get the file info. GIO error: %s \n"), error->message);
+  info = g_file_query_info (file,"standard::content-type,standard::display-name", G_FILE_QUERY_INFO_NONE, NULL, &error);
+  if (!info) {
+    g_warning(_("Could not get the file info. GIO error: %s \n"), error->message);
     g_error_free(error);
     return FALSE;
   }
-  const char *contenttype= g_file_info_get_content_type (info); 
-  /*we could open text based types so if it not a text based content don't open and displays error*/
-  if (!IS_TEXT(contenttype) && IS_APPLICATION(contenttype)){
+  
+  const gchar *contenttype = g_file_info_get_content_type(info); 
+  const gchar *filename = g_file_info_get_display_name(info); 
+  
+  /* We could open text based types so if it not a text based 
+  content don't open and display error. We could also open files
+  with extensions added in php_file_extensions preference irrespectivee
+  of the content type
+  */
+  
+  if (!is_php_file_from_filename(filename) && (!IS_TEXT(contenttype) && IS_APPLICATION(contenttype))) {
     info_dialog (_("gPHPEdit"), _("Sorry, I can open this kind of file.\n"));
     result = FALSE;
   }
