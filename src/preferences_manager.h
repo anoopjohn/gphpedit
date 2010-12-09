@@ -78,7 +78,10 @@ gboolean get_plugin_is_active(PreferencesManager *preferences_manager, const gch
 void set_plugin_is_active(PreferencesManager *preferences_manager, const gchar *name, gboolean status);
 /*styles */
 void set_font_settings (PreferencesManager *preferences_manager, gchar *font_desc);
-
+/* session files */
+GSList *get_preferences_manager_session_files(PreferencesManager *preferences_manager);
+void set_preferences_manager_session_files(PreferencesManager *preferences_manager, GSList *files);
+/**/
 void preferences_manager_save_data(PreferencesManager *preferences_manager);
 void preferences_manager_save_data_full(PreferencesManager *preferences_manager);
 void preferences_manager_restore_data(PreferencesManager *preferences_manager);

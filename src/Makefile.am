@@ -67,6 +67,8 @@ gphpedit_SOURCES = \
   find_dialog.h \
   gphpedit-close-button.c \
   gphpedit-close-button.h \
+  gphpedit-session.c \
+  gphpedit-session.h \
   gphpedit-statusbar.c \
   gphpedit-statusbar.h \
   gphpedit_ipc.c \

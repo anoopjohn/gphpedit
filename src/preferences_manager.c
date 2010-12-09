@@ -42,6 +42,8 @@
 #include "gvfs_utils.h"
 #include "document.h"
 
+#include "gphpedit-session.h"
+
 #define MAXHISTORY 16
 
 /*
@@ -49,6 +51,8 @@
 */
 struct PreferencesManagerDetails
 {
+  /* session object */
+  GphpeditSession *session;
   /* important value */
   gboolean save_session;
 
@@ -92,6 +96,8 @@ struct PreferencesManagerDetails
   gchar *style_name;
   gint font_size;
   gchar *font_name;
+
+  GSList *session_files;
 };
 
 #define PREFERENCES_MANAGER_GET_PRIVATE(object)(G_TYPE_INSTANCE_GET_PRIVATE ((object),\
@@ -104,13 +110,10 @@ static void preferences_manager_dispose (GObject *gobject);
 void load_default_settings(PreferencesManagerDetails *prefdet);
 void load_styles(PreferencesManagerDetails *prefdet);
 void load_session_settings(PreferencesManagerDetails *prefdet);
-void load_window_settings(PreferencesManagerDetails *prefdet);
 static void set_string (const gchar *key, const gchar *string);
 static void set_int (const gchar *key, gint number);
 static void set_bool (const gchar *key, gboolean value);
-static void set_string_list (const gchar *key, GSList *value);
 
-static GSList *get_string_list(const gchar *key);
 static gchar *get_string(const gchar *key,gchar *default_string);
 static gint get_uint(const gchar *key,gint default_size);
 static gint get_int_with_default(const gchar *key,const gchar *subdir,gint default_value);
@@ -187,11 +190,9 @@ preferences_manager_set_property (GObject      *object,
 			break;
 		case PROP_PARSE_ONLY_CURRENT_FILE:
 			prefdet->parseonlycurrentfile = g_value_get_boolean (value);
-			set_bool("/gPHPEdit/classbrowser/onlycurrentfile", prefdet->parseonlycurrentfile);
 			break;
 		case PROP_SIDE_PANEL_SIZE:
 			prefdet->side_panel_size = g_value_get_int (value);
-			set_int("/gPHPEdit/main_window/classbrowser_size", prefdet->side_panel_size);
 			break;
 		case PROP_EDGE_MODE:
 			prefdet->edge_mode = g_value_get_boolean (value);
@@ -237,12 +238,10 @@ preferences_manager_set_property (GObject      *object,
 			break;
 		case PROP_SIDE_PANEL_HIDDEN:
 			prefdet->side_panel_hidden = g_value_get_boolean (value);
-			set_bool("/gPHPEdit/main_window/classbrowser_hidden", prefdet->side_panel_hidden);
 			break;
 		case PROP_LAST_OPENED_FOLDER:
 			g_free(prefdet->last_opened_folder);
 			prefdet->last_opened_folder = g_value_dup_string (value);
-			set_string ("/gPHPEdit/general/last_opened_folder", prefdet->last_opened_folder);
 			break;
 		case PROP_SHARED_SOURCE_LOCATION:
 			g_free(prefdet->shared_source_location);
@@ -267,7 +266,6 @@ preferences_manager_set_property (GObject      *object,
 		case PROP_FILEBROWSER_LAST_FOLDER:
 			g_free(prefdet->filebrowser_last_folder);
 			prefdet->filebrowser_last_folder = g_value_dup_string (value);
-			set_string ("/gPHPEdit/main_window/folderbrowser/folder", prefdet->filebrowser_last_folder);
 			break;
 
 		default:
@@ -544,7 +542,8 @@ preferences_manager_class_init (PreferencesManagerClass *klass)
   g_type_class_add_private (klass, sizeof (PreferencesManagerDetails));
 }
 
-void clean_default_settings(PreferencesManagerDetails *prefdet){
+void clean_default_settings(PreferencesManagerDetails *prefdet)
+{
   /* free object resources*/
   if (prefdet->last_opened_folder) g_free(prefdet->last_opened_folder);
   if (prefdet->filebrowser_last_folder) g_free(prefdet->filebrowser_last_folder);
@@ -583,8 +582,13 @@ preferences_manager_init (PreferencesManager *object)
 #endif
 
   force_config_folder();
+  
+  /* init session object */
+  gchar *uri = g_build_filename (g_get_user_config_dir (), "gphpedit", NULL);
+  prefdet->session = gphpedit_session_new (uri);
+  g_free(uri);
+
   load_default_settings(prefdet);
-  load_window_settings(prefdet); /* load main window settings*/
   load_session_settings(prefdet);
   load_styles(prefdet); /* load lexer styles */
 }
@@ -608,10 +612,16 @@ preferences_manager_finalize (GObject *object)
   PreferencesManager *pref = PREFERENCES_MANAGER(object);
   PreferencesManagerDetails *prefdet;
   prefdet = PREFERENCES_MANAGER_GET_PRIVATE(pref);
+
   clean_default_settings(prefdet);
 
   g_free(prefdet->font_name);
   g_free(prefdet->style_name);
+  g_object_unref(prefdet->session);
+  if (prefdet->session_files){
+   g_slist_foreach(prefdet->session_files,  (GFunc) g_free, NULL);
+   g_slist_free(prefdet->session_files);
+  }
 
   G_OBJECT_CLASS (preferences_manager_parent_class)->finalize (object);
 }
@@ -678,30 +688,31 @@ void load_default_settings(PreferencesManagerDetails *prefdet)
   prefdet->use_tabs_instead_spaces = get_bool("/gPHPEdit/defaults/use_tabs_instead_spaces", FALSE);
   prefdet->single_instance_only = get_bool("/gPHPEdit/defaults/single_instance_only", TRUE);
   prefdet->php_file_extensions = get_string("/gPHPEdit/defaults/php_file_extensions", DEFAULT_PHP_EXTENSIONS);
-  prefdet->search_history= get_string_list("/gPHPEdit/search_history");
   prefdet->showfilebrowser = get_bool("/gPHPEdit/defaults/showfolderbrowser", TRUE);
-  prefdet->showstatusbar = get_bool("/gPHPEdit/defaults/showstatusbar", TRUE);
-  prefdet->showmaintoolbar = get_bool("/gPHPEdit/defaults/showmaintoolbar", TRUE);
-}
-
-void load_window_settings(PreferencesManagerDetails *prefdet)
-{
-  gphpedit_debug(DEBUG_PREFS);
-  prefdet->left = get_int_with_default("/gPHPEdit/main_window/x","main_window",20);
-  prefdet->top = get_int_with_default("/gPHPEdit/main_window/y","main_window",20);
-  prefdet->width = get_int_with_default("/gPHPEdit/main_window/width","main_window",400);
-  prefdet->height = get_int_with_default("/gPHPEdit/main_window/height","main_window",400);
-  prefdet->maximized = get_uint("/gPHPEdit/main_window/maximized",0);
 }
 
 void load_session_settings(PreferencesManagerDetails *prefdet)
 {
   gphpedit_debug(DEBUG_PREFS);
-  prefdet->last_opened_folder = get_string("/gPHPEdit/general/last_opened_folder", (gchar *)g_get_home_dir());
-  prefdet->parseonlycurrentfile = get_bool("/gPHPEdit/classbrowser/onlycurrentfile", FALSE);
-  prefdet->side_panel_hidden = get_bool("/gPHPEdit/main_window/classbrowser_hidden", FALSE);
-  prefdet->side_panel_size = get_int_with_default("/gPHPEdit/main_window/classbrowser_size", "main_window", 100);
-  prefdet->filebrowser_last_folder=get_string("/gPHPEdit/main_window/folderbrowser/folder", (gchar *)g_get_home_dir());
+
+  /* main window settings */
+  prefdet->left = gphpedit_session_get_int_with_default (prefdet->session, "main_window", "left", 20);
+  prefdet->top = gphpedit_session_get_int_with_default (prefdet->session, "main_window", "top", 20);
+  prefdet->width = gphpedit_session_get_int_with_default (prefdet->session, "main_window", "width", 400);
+  prefdet->height = gphpedit_session_get_int_with_default (prefdet->session, "main_window", "height", 400);
+  prefdet->maximized = gphpedit_session_get_boolean (prefdet->session, "main_window", "maximized");
+
+  prefdet->showmaintoolbar = gphpedit_session_get_boolean_with_default (prefdet->session, "main_window", "showmaintoolbar", TRUE);
+  prefdet->showstatusbar = gphpedit_session_get_boolean_with_default (prefdet->session, "main_window", "showstatusbar", TRUE);
+  prefdet->search_history = gphpedit_session_get_string_list (prefdet->session, "search_history", "keys");
+  prefdet->last_opened_folder = gphpedit_session_get_string_with_default (prefdet->session, "main_window", "last_opened_folder", (gchar *)g_get_home_dir());
+  /* side panel settings */
+  prefdet->side_panel_hidden = gphpedit_session_get_boolean_with_default (prefdet->session, "side_panel", "hidden", FALSE);
+  prefdet->side_panel_size = gphpedit_session_get_int_with_default (prefdet->session, "side_panel", "size", 100);
+  prefdet->parseonlycurrentfile = gphpedit_session_get_boolean (prefdet->session, "side_panel", "check_only_current_file");
+  prefdet->filebrowser_last_folder = gphpedit_session_get_string_with_default (prefdet->session, "side_panel", "folder", (gchar *)g_get_home_dir());
+
+  prefdet->session_files = gphpedit_session_get_string_list (prefdet->session, "session","files");
 }
 
         /* accesor functions */
@@ -758,7 +769,6 @@ void set_preferences_manager_show_maintoolbar(PreferencesManager *preferences_ma
   PreferencesManagerDetails *prefdet;
   prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
   prefdet->showmaintoolbar = newstate;
-  set_int("/gPHPEdit/defaults/showmaintoolbar", prefdet->showmaintoolbar);
 }
 
 void get_preferences_manager_window_size (PreferencesManager *preferences_manager, gint *width, gint *height)
@@ -821,6 +831,7 @@ GSList *get_preferences_manager_search_history(PreferencesManager *preferences_m
   return prefdet->search_history;
 }
 
+
 void set_preferences_manager_new_search_history_item(PreferencesManager *preferences_manager, gint pos, const gchar *new_text)
 {
   if (!OBJECT_IS_PREFERENCES_MANAGER (preferences_manager)) return ;
@@ -835,6 +846,26 @@ void set_preferences_manager_new_search_history_item(PreferencesManager *prefere
     }
 }
 
+GSList *get_preferences_manager_session_files(PreferencesManager *preferences_manager)
+{
+  g_return_val_if_fail (OBJECT_IS_PREFERENCES_MANAGER (preferences_manager), 0); /**/
+  PreferencesManagerDetails *prefdet;
+  prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
+  return prefdet->session_files;
+}
+
+void set_preferences_manager_session_files(PreferencesManager *preferences_manager, GSList *files)
+{
+  if (!OBJECT_IS_PREFERENCES_MANAGER (preferences_manager)) return ;
+  PreferencesManagerDetails *prefdet;
+  prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
+  if (prefdet->session_files){
+   g_slist_foreach(prefdet->session_files,  (GFunc) g_free, NULL);
+   g_slist_free(prefdet->session_files);
+  }
+  prefdet->session_files = g_slist_copy (files);
+}
+
 /*
 * preferences_manager_save_data
 * update session preferences data in gconf with new internal data
@@ -842,30 +873,42 @@ void set_preferences_manager_new_search_history_item(PreferencesManager *prefere
 * other preferences are only save when you call "preferences_manager_save_data_full"
 * so we speed up process by not save unchanged data.
 */
-void preferences_manager_save_data(PreferencesManager *preferences_manager){
+void preferences_manager_save_data(PreferencesManager *preferences_manager)
+{
   gphpedit_debug(DEBUG_PREFS);
   PreferencesManagerDetails *prefdet;
   prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
-  /*store window  settings*/
+  /*store window settings*/
   if (!prefdet->maximized) {
-  set_int ("/gPHPEdit/main_window/x", prefdet->left);
-  set_int ("/gPHPEdit/main_window/y",prefdet->top);
-  set_int ("/gPHPEdit/main_window/width", prefdet->width);
-  set_int ("/gPHPEdit/main_window/height", prefdet->height);
+    gphpedit_session_set_int (prefdet->session, "main_window", "left", prefdet->left);
+    gphpedit_session_set_int (prefdet->session, "main_window", "top", prefdet->top);
+    gphpedit_session_set_int (prefdet->session, "main_window", "width", prefdet->width);
+    gphpedit_session_set_int (prefdet->session, "main_window", "height", prefdet->height);
   }
-  set_int ("/gPHPEdit/main_window/maximized", prefdet->maximized);
-  /**/
-  set_bool("/gPHPEdit/defaults/showfolderbrowser", prefdet->showfilebrowser);
-  set_int("/gPHPEdit/defaults/showstatusbar", prefdet->showstatusbar);
-  set_int("/gPHPEdit/defaults/showmaintoolbar", prefdet->showmaintoolbar);
-  set_string_list ("/gPHPEdit/search_history", prefdet->search_history);
+  gphpedit_session_set_boolean (prefdet->session, "main_window", "maximized", prefdet->maximized);
+  gphpedit_session_set_boolean (prefdet->session, "main_window", "showmaintoolbar", prefdet->showmaintoolbar);
+  gphpedit_session_set_boolean (prefdet->session, "main_window", "showstatusbar", prefdet->showstatusbar);
+  gphpedit_session_set_string (prefdet->session, "main_window", "last_opened_folder", prefdet->last_opened_folder);
+
+  /* side panel settings */
+  gphpedit_session_set_boolean (prefdet->session, "side_panel", "hidden", prefdet->side_panel_hidden);
+  gphpedit_session_set_int (prefdet->session, "side_panel", "size", prefdet->side_panel_size);
+  gphpedit_session_set_boolean (prefdet->session, "side_panel", "check_only_current_file", prefdet->parseonlycurrentfile);
+  gphpedit_session_set_string (prefdet->session, "side_panel", "folder", prefdet->filebrowser_last_folder);
+
+  gphpedit_session_set_string_list (prefdet->session, "search_history", "keys", prefdet->search_history);
+
+  gphpedit_session_set_string_list (prefdet->session, "session","files", prefdet->session_files);
+
+  gphpedit_session_sync(prefdet->session);
 }
 
 /*
 * preferences_manager_save_data_full
 * update all preferences data in gconf with new internal data
 */
-void preferences_manager_save_data_full(PreferencesManager *preferences_manager){
+void preferences_manager_save_data_full(PreferencesManager *preferences_manager)
+{
   gphpedit_debug(DEBUG_PREFS);
   PreferencesManagerDetails *prefdet;
   prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
@@ -894,19 +937,19 @@ void preferences_manager_save_data_full(PreferencesManager *preferences_manager)
   set_string ("/gPHPEdit/defaults/font", font_setting);
   g_free(font_setting);
   set_string ("/gPHPEdit/defaults/style", prefdet->style_name);
+  set_bool("/gPHPEdit/defaults/showfolderbrowser", prefdet->showfilebrowser);
 }
 
 /*
 * preferences_manager_restore_data
 * reload preferences data from gconf and discard internal data.
 */
-void preferences_manager_restore_data(PreferencesManager *preferences_manager){
+void preferences_manager_restore_data(PreferencesManager *preferences_manager)
+{
   gphpedit_debug(DEBUG_PREFS);
   PreferencesManagerDetails *prefdet;
   prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
   clean_default_settings(prefdet);
-  prefdet->last_opened_folder = get_string("/gPHPEdit/general/last_opened_folder", (gchar *)g_get_home_dir());
-  prefdet->filebrowser_last_folder=get_string("/gPHPEdit/main_window/folderbrowser/folder", (gchar *)g_get_home_dir());
 
   load_default_settings(prefdet);
   load_styles(prefdet); /* load lexer styles */
@@ -979,18 +1022,6 @@ static void set_bool (const gchar *key, gboolean value)
   g_object_unref (G_OBJECT (config));
 }
 
-/*
-* set_string_list (internal)
-* store a list of strings in gconf
-*/
-static void set_string_list (const gchar *key, GSList *value)
-{
-  GConfClient *config;
-  config = gconf_client_get_default ();
-  gconf_client_set_list (config, key, GCONF_VALUE_STRING, value, NULL);
-  g_object_unref (G_OBJECT (config));
-}
-
   /** internal functions to get value from gconf **/
 
 /*
@@ -998,7 +1029,8 @@ static void set_string_list (const gchar *key, GSList *value)
 * load an string value from gconf
 * if value isn't found return default_string
 */
-static gchar *get_string(const gchar *key,gchar *default_string){
+static gchar *get_string(const gchar *key,gchar *default_string)
+{
   GError *error=NULL;
   GConfClient *config = gconf_client_get_default ();
   gchar *temp= gconf_client_get_string(config,key,NULL);
@@ -1014,7 +1046,8 @@ static gchar *get_string(const gchar *key,gchar *default_string){
 * load an uint value from gconf
 * if value isn't found return default_size
 */
-static gint get_uint(const gchar *key, gint default_size){
+static gint get_uint(const gchar *key, gint default_size)
+{
   GConfClient *config = gconf_client_get_default ();
   GError *error=NULL;
   gint temp= gconf_client_get_int (config,key,&error);
@@ -1034,7 +1067,8 @@ static gint get_uint(const gchar *key, gint default_size){
 * load a boolean value from gconf
 * if value isn't found return default_value
 */
-static gboolean get_bool(const gchar *key,gboolean default_value){
+static gboolean get_bool(const gchar *key,gboolean default_value)
+{
   GConfClient *config = gconf_client_get_default ();
   GError *error=NULL;
   gboolean temp= gconf_client_get_bool (config,key,&error);
@@ -1051,7 +1085,8 @@ static gboolean get_bool(const gchar *key,gboolean default_value){
 * load an int value from gconf
 * if value isn't found return default_value
 */
-static gint get_int_with_default(const gchar *key,const gchar *subdir,gint default_value){
+static gint get_int_with_default(const gchar *key,const gchar *subdir,gint default_value)
+{
   gchar *uri= g_strdup_printf("%s/%s/%s",g_get_home_dir(),".gconf/gPHPEdit",subdir);
   if (!g_file_test (uri,G_FILE_TEST_EXISTS)){
     gphpedit_debug_message(DEBUG_PREFS, "key %s don't exist. load default value",key);
@@ -1076,23 +1111,13 @@ static gint get_int_with_default(const gchar *key,const gchar *subdir,gint defau
   }
 }
 
-/*
-* get_string_list (internal)
-* load a list of strings values from gconf
-*/
-static GSList *get_string_list(const gchar *key){
-    GConfClient *config = gconf_client_get_default ();
-    GSList *temp =  gconf_client_get_list (config,key, GCONF_VALUE_STRING, NULL);
-    g_object_unref (G_OBJECT (config));
-    return temp;
-}
-
   /**internal styles functions **/
 /*
 * get_default_font_settings
 * read default font and default font size from GtkSettings
 */
-gchar *get_default_font_settings(PreferencesManagerDetails *prefdet){
+gchar *get_default_font_settings(PreferencesManagerDetails *prefdet)
+{
   gphpedit_debug(DEBUG_PREFS);
   gchar *string=NULL;
   g_object_get(G_OBJECT(gtk_settings_get_default()), "gtk-font-name", &string, NULL);
