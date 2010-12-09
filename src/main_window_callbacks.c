@@ -55,6 +55,7 @@ void quit_application()
   is_app_closing = TRUE;
   g_object_unref(main_window.docmg);
   is_app_closing = FALSE;
+  preferences_manager_save_data(main_window.prefmg);
   g_object_unref(main_window.prefmg);
   g_object_unref(main_window.stylemg);
   g_object_unref(main_window.clltipmg);
