@@ -343,48 +343,30 @@ void document_manager_session_save(DocumentManager *docmg)
   DocumentManagerDetails *docmgdet = DOCUMENT_MANAGER_GET_PRIVATE(docmg);
   GSList *walk;
   Document *document;
-  GString *session_file_contents;
   gboolean save_session;
+  GSList *files=NULL;
+  gchar *fileentry = NULL;
 
-  gchar *uri = g_build_filename (g_get_user_config_dir (), "gphpedit", "session", NULL);
-  GFile *file = g_file_new_for_commandline_arg(uri);
-  g_free(uri);
-  GError *error=NULL;
-
+  PreferencesManager *prefmg = preferences_manager_new();
   g_object_get (main_window.prefmg, "save_session", &save_session, NULL);
-  if (save_session && (g_slist_length(docmgdet->editors) > 0)) {
-    session_file_contents=g_string_new(NULL);
+  if (save_session) {
     for(walk = docmgdet->editors; walk!= NULL; walk = g_slist_next(walk)) {
       document = walk->data;
-      if (document == docmgdet->current_document) {
-        session_file_contents = g_string_append(session_file_contents,"*");
-      }
       gchar *entry = documentable_get_session_entry(DOCUMENTABLE(document));
       if (entry) {
-        session_file_contents = g_string_append(session_file_contents, entry);
-        g_free(entry);
-      }
-    }
-    if(session_file_contents->len > 1) {
-      gboolean result = g_file_replace_contents (file, session_file_contents->str, session_file_contents->len, 
-                          NULL, FALSE, G_FILE_CREATE_NONE, NULL, NULL, &error);
-      if(!result){
-        g_print(_("Error Saving session file: %s\n"),error->message);
-        g_error_free (error);
-      }
-    }
-    if (session_file_contents) g_string_free(session_file_contents, TRUE);
-  } else {
-      if (save_session) {
-        if (!g_file_delete (file,NULL,&error)){
-          if (error->code!=G_FILE_ERROR_NOENT && error->code!=1){
-            g_print(_("GIO Error deleting file: %s, code %d\n"), error->message,error->code);
-          }
-          g_error_free (error);
+        if (document == docmgdet->current_document) {
+          fileentry = g_strdup_printf("*%s", entry);
+        } else {
+          fileentry = g_strdup (entry);
         }
+        g_free(entry);
+        files = g_slist_prepend (files, fileentry);
       }
+    }
+    files = g_slist_reverse(files);
   }
-  g_object_unref(file);
+  set_preferences_manager_session_files(prefmg, files);
+  g_object_unref(prefmg);
 }
 
 void document_manager_session_reopen(DocumentManager *docmg)
@@ -392,21 +374,20 @@ void document_manager_session_reopen(DocumentManager *docmg)
   gphpedit_debug(DEBUG_DOC_MANAGER);
   if (!docmg) return ;
   DocumentManagerDetails *docmgdet = DOCUMENT_MANAGER_GET_PRIVATE(docmg);
-  char *filename;
   int focus_tab=-1;
   gboolean focus_this_one = FALSE;
-
-  gchar *uri = g_build_filename (g_get_user_config_dir (), "gphpedit", "session", NULL);
-  GFile *file = g_file_new_for_commandline_arg(uri);
-
-  if(g_file_query_exists(file,NULL)){
-    int number =0;
-    gchar *content=read_text_file_sync(uri);
-    gchar **strings;
-    strings = g_strsplit (content,"\n",0);
-      int i=0;
-      while (strings[i]){
-        /* strings[i] contains possibly:
+  PreferencesManager *prefmg = preferences_manager_new();
+  GSList *files = get_preferences_manager_session_files(prefmg);
+  if (g_slist_length (files)==0) {
+    //session file exists but is empty
+    //add a new untitled
+    document_manager_add_new_document(docmg, TAB_FILE, NULL, 0);
+  } else {
+    GSList *walk;
+    gchar *filename;
+    for(walk = files; walk!= NULL; walk = g_slist_next(walk)) {
+        filename = (gchar *)walk->data;
+        /* filename contains possibly:
           file:///blah\n
           *file:///blah\n
           phphelp:function\n
@@ -415,11 +396,8 @@ void document_manager_session_reopen(DocumentManager *docmg)
           *preview:function\n
 
         */
-        if (strings[i][0]==0) break;
-        number++;
-        filename = strings[i];
         str_replace(filename, 10, 0);
-        if (strings[i][0]=='*') {
+        if (filename[0]=='*') {
           filename++;
           focus_this_one = TRUE;
         }
@@ -440,30 +418,10 @@ void document_manager_session_reopen(DocumentManager *docmg)
             focus_tab = gtk_notebook_page_num(GTK_NOTEBOOK(main_window.notebook_editor), document_widget);
         }
         focus_this_one=FALSE;
-        i++;    
-      }
-      g_strfreev (strings);
-    if (number==0){ 
-      //session file exists but is empty
-      //add a new untitled
-     document_manager_add_new_document(docmg, TAB_FILE, NULL, 0);
     }
-    g_free(content);
-    gtk_notebook_set_current_page( GTK_NOTEBOOK(main_window.notebook_editor), focus_tab);
-  } else {
-    //add a new untitled
-    document_manager_add_new_document(docmg, TAB_FILE, NULL, 0);
   }
-
-  GError *error=NULL;
-  if (!g_file_delete (file,NULL,&error)){
-      if (error->code!=G_FILE_ERROR_NOENT && error->code!=1){
-        g_print(_("GIO Error deleting file: %s, code %d\n"), error->message,error->code);
-      }
-      g_error_free (error);
-  }
-  g_free(uri);
-  g_object_unref (file);
+  gtk_notebook_set_current_page(GTK_NOTEBOOK(main_window.notebook_editor), focus_tab);
+  g_object_unref(prefmg);
 }
 
 void document_manager_switch_to_file_or_open(DocumentManager *docmg, gchar *filename, gint line_number)
@@ -730,17 +688,10 @@ gboolean document_manager_try_close_current_document(DocumentManager *docmg)
   return document_manager_try_close_document(docmg, docmgdet->current_document);
 }
 
-void update_func (gpointer data, gpointer user_data)
-{
-  if (OBJECT_IS_DOCUMENT_SCINTILLA(data)) {
-    document_scintilla_refresh_properties(DOCUMENT_SCINTILLA(data));
-  }
-}
-
 void document_manager_refresh_properties_all(DocumentManager *docmg)
 {
   gphpedit_debug(DEBUG_DOC_MANAGER);
   if (!docmg) return ;
   DocumentManagerDetails *docmgdet = DOCUMENT_MANAGER_GET_PRIVATE(docmg);
-  g_slist_foreach (docmgdet->editors, update_func, NULL);
+  g_slist_foreach (docmgdet->editors, (GFunc) documentable_apply_preferences, NULL);
 }

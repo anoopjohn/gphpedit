@@ -324,7 +324,6 @@ gphpedit_session_set_boolean (GphpeditSession *session, const gchar *section,
 		g_key_file_remove_key (priv->key_file, section, key, NULL);
 		return;
 	}
-	g_print("acaa estoy\n");
 	g_key_file_set_boolean (priv->key_file, section, key, value);
 }
 

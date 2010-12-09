@@ -61,7 +61,7 @@ typedef struct
 /* Basic GObject requirements. */
 GType document_scintilla_get_type (void);
 Document_Scintilla *document_scintilla_new (gint type, GFile *file, gint goto_line, gchar *contents);
-void document_scintilla_refresh_properties(Document_Scintilla *doc);
+//void document_scintilla_refresh_properties(Document_Scintilla *doc);
 void document_scintilla_clear_sintax_style(Document_Scintilla *doc);
 void document_scintilla_set_sintax_annotation(Document_Scintilla *doc);
 void document_scintilla_set_sintax_line(Document_Scintilla *doc, guint current_line_number);

@@ -300,6 +300,10 @@ void document_webkit_replace_current_selection (Documentable *doc, gchar *data)
 {
 }
 
+static void document_webkit_apply_preferences (Documentable *doc)
+{
+}
+
 static void document_webkit_documentable_init(DocumentableIface *iface, gpointer user_data)
 {
 	iface->zoom_in = document_webkit_zoom_in;
@@ -336,6 +340,7 @@ static void document_webkit_documentable_init(DocumentableIface *iface, gpointer
   iface->get_current_word = document_webkit_get_current_word;
   iface->insert_text = document_webkit_insert_text;
   iface->replace_current_selection = document_webkit_replace_current_selection;
+  iface->apply_preferences = document_webkit_apply_preferences;
 }
 
 enum

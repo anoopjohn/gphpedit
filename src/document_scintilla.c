@@ -583,7 +583,7 @@ void document_scintilla_check_externally_modified (Documentable  *doc)
   }
 }
 
-void document_scintilla_save(Documentable *doc)
+static void document_scintilla_save(Documentable *doc)
 {
   gphpedit_debug (DEBUG_DOCUMENT);
   g_return_if_fail(doc);
@@ -659,6 +659,24 @@ void document_scintilla_replace_current_selection (Documentable *doc, gchar *dat
   gtk_scintilla_replace_sel(GTK_SCINTILLA(docdet->scintilla), data);
 }
 
+static void document_scintilla_apply_preferences (Documentable *doc)
+{
+  gphpedit_debug (DEBUG_DOCUMENT);
+  g_return_if_fail(doc);
+  Document_ScintillaDetails *docdet = DOCUMENT_SCINTILLA_GET_PRIVATE(doc);
+  tab_set_configured_scintilla_properties(GTK_SCINTILLA(docdet->scintilla));
+  gint type;
+  /* reset type */
+  g_object_get(doc, "type", &type, NULL);
+  //FIXME: we set TAB_PHP style and then TAB_FILE style due to a bug, causing no style update.
+  if (type==TAB_FILE) {
+     documentable_set_type(doc, TAB_PHP);
+  } else {
+     documentable_set_type(doc, TAB_FILE);
+  }
+  documentable_set_type(doc, type);
+}
+
 static void document_scintilla_documentable_init(DocumentableIface *iface, gpointer user_data)
 {
 	iface->zoom_in = document_scintilla_zoom_in;
@@ -695,6 +713,7 @@ static void document_scintilla_documentable_init(DocumentableIface *iface, gpoin
   iface->get_current_word = document_scintilla_get_current_word;
   iface->insert_text = document_scintilla_insert_text;
   iface->replace_current_selection = document_scintilla_replace_current_selection;
+  iface->apply_preferences = document_scintilla_apply_preferences;
 
 }
 
@@ -2055,7 +2074,8 @@ static void handle_modified(GtkWidget *scintilla, gint pos,gint mtype,gchar *tex
   g_object_unref(pref);
 }
 
-void document_scintilla_refresh_properties(Document_Scintilla *doc){
+void document_scintilla_refresh_properties(Document_Scintilla *doc)
+{
   g_return_if_fail(doc);
   Document_ScintillaDetails *docdet = DOCUMENT_SCINTILLA_GET_PRIVATE(doc);
   tab_set_configured_scintilla_properties(GTK_SCINTILLA(docdet->scintilla));

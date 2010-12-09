@@ -158,7 +158,7 @@ void documentable_incremental_search (Documentable  *self, gchar *current_text, 
 	DOCUMENTABLE_GET_IFACE (self)->incremental_search (self, current_text, advancing);
 }
 
-void           documentable_activate_incremental_search (Documentable  *self)
+void documentable_activate_incremental_search (Documentable  *self)
 {
   if (!self) return ;
 	DOCUMENTABLE_GET_IFACE (self)->activate_incremental_search (self);
@@ -209,5 +209,11 @@ void documentable_replace_current_selection (Documentable  *self, gchar *new_tex
 {
   if (!self) return ;
 	DOCUMENTABLE_GET_IFACE (self)->replace_current_selection (self, new_text);
+}
+
+void documentable_apply_preferences (Documentable  *self)
+{
+  if (!self) return ;
+	DOCUMENTABLE_GET_IFACE (self)->apply_preferences (self);
 }
 
