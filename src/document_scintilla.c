@@ -153,44 +153,44 @@ G_DEFINE_TYPE_WITH_CODE(Document_Scintilla, document_scintilla, DOCUMENT_TYPE,
                         G_IMPLEMENT_INTERFACE (IFACE_TYPE_DOCUMENTABLE,
                                                  document_scintilla_documentable_init));
 
-void document_scintilla_zoom_in(Documentable *doc)
+static void document_scintilla_zoom_in(Documentable *doc)
 {
   g_return_if_fail(doc);
   Document_ScintillaDetails *docdet = DOCUMENT_SCINTILLA_GET_PRIVATE(DOCUMENT_SCINTILLA(doc));
   gtk_scintilla_zoom_in(GTK_SCINTILLA(docdet->scintilla));
 }
 
-void document_scintilla_zoom_out(Documentable *doc){
+static void document_scintilla_zoom_out(Documentable *doc){
   g_return_if_fail(doc);
   Document_ScintillaDetails *docdet = DOCUMENT_SCINTILLA_GET_PRIVATE(doc);
   gtk_scintilla_zoom_out(GTK_SCINTILLA(docdet->scintilla));
 }
 
-void document_scintilla_zoom_restore(Documentable *doc){
+static void document_scintilla_zoom_restore(Documentable *doc){
   g_return_if_fail(doc);
   Document_ScintillaDetails *docdet = DOCUMENT_SCINTILLA_GET_PRIVATE(doc);
   gtk_scintilla_set_zoom(GTK_SCINTILLA(docdet->scintilla), 0);
 }
 
-void document_scintilla_undo(Documentable *doc){
+static void document_scintilla_undo(Documentable *doc){
   g_return_if_fail(doc);
   Document_ScintillaDetails *docdet = DOCUMENT_SCINTILLA_GET_PRIVATE(doc);
   gtk_scintilla_undo(GTK_SCINTILLA(docdet->scintilla));
 }
 
-void document_scintilla_redo(Documentable *doc){
+static void document_scintilla_redo(Documentable *doc){
   g_return_if_fail(doc);
   Document_ScintillaDetails *docdet = DOCUMENT_SCINTILLA_GET_PRIVATE(doc);
   gtk_scintilla_redo(GTK_SCINTILLA(docdet->scintilla));
 }
 
-void document_scintilla_select_all(Documentable *doc){
+static void document_scintilla_select_all(Documentable *doc){
   g_return_if_fail(doc);
   Document_ScintillaDetails *docdet = DOCUMENT_SCINTILLA_GET_PRIVATE(doc);
   gtk_scintilla_select_all(GTK_SCINTILLA(docdet->scintilla));
 }
 
-void document_scintilla_selection_to_lower(Documentable *doc){
+static void document_scintilla_selection_to_lower(Documentable *doc){
   g_return_if_fail(doc);
   Document_ScintillaDetails *docdet = DOCUMENT_SCINTILLA_GET_PRIVATE(doc);
   gchar *buffer = documentable_get_current_selected_text(DOCUMENTABLE(doc));
@@ -204,7 +204,7 @@ void document_scintilla_selection_to_lower(Documentable *doc){
     }
 }
 
-void document_scintilla_selection_to_upper(Documentable *doc){
+static void document_scintilla_selection_to_upper(Documentable *doc){
   g_return_if_fail(doc);
   Document_ScintillaDetails *docdet = DOCUMENT_SCINTILLA_GET_PRIVATE(doc);
   gchar *buffer = documentable_get_current_selected_text(DOCUMENTABLE(doc));
@@ -218,7 +218,7 @@ void document_scintilla_selection_to_upper(Documentable *doc){
     }
 }
 
-void document_scintilla_copy(Documentable *doc)
+static void document_scintilla_copy(Documentable *doc)
 {
   g_return_if_fail(doc);
   Document_ScintillaDetails *docdet = DOCUMENT_SCINTILLA_GET_PRIVATE(doc);
@@ -227,7 +227,7 @@ void document_scintilla_copy(Documentable *doc)
   macro_record (docdet->scintilla, 2178, 0, 0, doc); 
 }
 
-void document_scintilla_cut(Documentable *doc) {
+static void document_scintilla_cut(Documentable *doc) {
   g_return_if_fail(doc);
   Document_ScintillaDetails *docdet = DOCUMENT_SCINTILLA_GET_PRIVATE(doc);
   gtk_scintilla_cut(GTK_SCINTILLA(docdet->scintilla));
@@ -249,7 +249,7 @@ static void on_paste_got_from_cliboard(GtkClipboard *clipboard, const gchar *tex
   gtk_scintilla_colourise(GTK_SCINTILLA(docdet->scintilla), 0, -1);
 }
 
-void document_scintilla_paste(Documentable *doc) {
+static void document_scintilla_paste(Documentable *doc) {
   g_return_if_fail(doc);
   GtkClipboard* clipboard = gtk_clipboard_get(GDK_SELECTION_CLIPBOARD);
   gtk_clipboard_request_text(clipboard, on_paste_got_from_cliboard, doc);
@@ -273,7 +273,7 @@ static void move_block(GtkScintilla *scintilla, gint indentation_size)
   gtk_scintilla_end_undo_action(scintilla);
 }
 
-void document_scintilla_block_indent(Documentable *doc){
+static void document_scintilla_block_indent(Documentable *doc){
   g_return_if_fail(doc);
   Document_ScintillaDetails *docdet = DOCUMENT_SCINTILLA_GET_PRIVATE(doc);
   gint indent_size;
@@ -281,7 +281,7 @@ void document_scintilla_block_indent(Documentable *doc){
   move_block(GTK_SCINTILLA(docdet->scintilla), indent_size);
 }
 
-void document_scintilla_block_unindent(Documentable *doc){
+static void document_scintilla_block_unindent(Documentable *doc){
   g_return_if_fail(doc);
   Document_ScintillaDetails *docdet = DOCUMENT_SCINTILLA_GET_PRIVATE(doc);
   gint indent_size;
@@ -289,7 +289,7 @@ void document_scintilla_block_unindent(Documentable *doc){
   move_block(GTK_SCINTILLA(docdet->scintilla), 0-indent_size);
 }
 
-gchar *document_scintilla_get_filename (Documentable  *doc) {
+static gchar *document_scintilla_get_filename (Documentable  *doc) {
   if (!doc) return NULL;
   Document_ScintillaDetails *docdet = DOCUMENT_SCINTILLA_GET_PRIVATE(doc);
 
@@ -297,7 +297,7 @@ gchar *document_scintilla_get_filename (Documentable  *doc) {
   return g_file_get_uri (docdet->file);
 }
 
-void document_scintilla_set_type (Documentable  *doc, gint type)
+static void document_scintilla_set_type (Documentable  *doc, gint type)
 {
   Document_Scintilla *document_scintilla = DOCUMENT_SCINTILLA(doc);
   if (!document_scintilla) return ;
@@ -347,14 +347,14 @@ void document_scintilla_set_type (Documentable  *doc, gint type)
   }
 }
 
-void document_scintilla_goto_pos(Documentable *doc, glong pos)
+static void document_scintilla_goto_pos(Documentable *doc, glong pos)
 {
   g_return_if_fail(doc);
   Document_ScintillaDetails *docdet = DOCUMENT_SCINTILLA_GET_PRIVATE(doc);
   gtk_scintilla_goto_pos(GTK_SCINTILLA(docdet->scintilla), pos);
 }
 
-void document_scintilla_goto_line(Documentable *doc, gint line)
+static void document_scintilla_goto_line(Documentable *doc, gint line)
 {
   g_return_if_fail(doc);
   Document_ScintillaDetails *docdet = DOCUMENT_SCINTILLA_GET_PRIVATE(doc);
@@ -363,7 +363,7 @@ void document_scintilla_goto_line(Documentable *doc, gint line)
   gtk_scintilla_goto_line(GTK_SCINTILLA(docdet->scintilla), line-1); // seems to be off by one...
 }
 
-void document_scintilla_scroll_to_current_pos (Documentable  *document_scintilla)
+static void document_scintilla_scroll_to_current_pos (Documentable  *document_scintilla)
 {
   g_return_if_fail(document_scintilla);
   Document_ScintillaDetails *docdet = DOCUMENT_SCINTILLA_GET_PRIVATE(document_scintilla);
@@ -373,13 +373,13 @@ void document_scintilla_scroll_to_current_pos (Documentable  *document_scintilla
   gtk_scintilla_grab_focus(sci);
 }
 
-gchar *document_scintilla_get_current_selected_text (Documentable  *doc) {
+static gchar *document_scintilla_get_current_selected_text (Documentable  *doc) {
   if (!doc) return NULL;
   Document_ScintillaDetails *docdet = DOCUMENT_SCINTILLA_GET_PRIVATE(doc);
   return gtk_scintilla_get_current_selected_text(GTK_SCINTILLA(docdet->scintilla));
 }
 
-gchar *document_scintilla_get_session_entry (Documentable  *doc)
+static gchar *document_scintilla_get_session_entry (Documentable  *doc)
 {
   gphpedit_debug(DEBUG_DOCUMENT);
   gchar *result;
@@ -397,21 +397,22 @@ gchar *document_scintilla_get_session_entry (Documentable  *doc)
   return result;
 }
 
-void document_scintilla_reload (Documentable *document_scintilla)
+static void document_scintilla_reload (Documentable *document_scintilla)
 {
   gphpedit_debug (DEBUG_DOCUMENT);
   g_return_if_fail(document_scintilla);
   g_signal_emit (G_OBJECT (document_scintilla), signals[NEED_RELOAD], 0);
 }
 
-gint document_scintilla_get_current_position(Documentable *doc)
+static gint document_scintilla_get_current_position(Documentable *doc)
 {
   g_return_val_if_fail(doc, -1);
   Document_ScintillaDetails *docdet = DOCUMENT_SCINTILLA_GET_PRIVATE(doc);
   return gtk_scintilla_get_current_pos(GTK_SCINTILLA(docdet->scintilla));
 }
 
-gboolean document_scintilla_search_text (Documentable  *doc, const gchar *text, gboolean checkwholedoc, gboolean checkcase, gboolean checkwholeword, gboolean checkregex)
+static gboolean document_scintilla_search_text (Documentable  *doc, const gchar *text, gboolean checkwholedoc, 
+                                              gboolean checkcase, gboolean checkwholeword, gboolean checkregex)
 {
   g_return_val_if_fail(doc, FALSE);
   Document_ScintillaDetails *docdet = DOCUMENT_SCINTILLA_GET_PRIVATE(doc);
@@ -452,7 +453,7 @@ gboolean document_scintilla_search_text (Documentable  *doc, const gchar *text, 
   return TRUE;
 }
 
-gboolean document_scintilla_search_replace_text(Documentable  *doc, const gchar *text, const gchar *replace, 
+static gboolean document_scintilla_search_replace_text(Documentable  *doc, const gchar *text, const gchar *replace, 
                 gboolean checkwholedoc, gboolean checkcase, gboolean checkwholeword, gboolean checkregex, gboolean ask_replace)
 {
   g_return_val_if_fail(doc, FALSE);
@@ -515,7 +516,7 @@ gboolean document_scintilla_search_replace_text(Documentable  *doc, const gchar 
   return TRUE;
 }
 
-void document_scintilla_incremental_search (Documentable  *document_scintilla, gchar *current_text, gboolean advancing)
+static void document_scintilla_incremental_search (Documentable  *document_scintilla, gchar *current_text, gboolean advancing)
 {
   g_return_if_fail(document_scintilla);
   Document_ScintillaDetails *docdet = DOCUMENT_SCINTILLA_GET_PRIVATE(document_scintilla);
@@ -535,7 +536,7 @@ void document_scintilla_incremental_search (Documentable  *document_scintilla, g
   }
 }
 
-void document_scintilla_activate_incremental_search(Documentable *doc)
+static void document_scintilla_activate_incremental_search(Documentable *doc)
 {
   Document_ScintillaDetails *docdet = DOCUMENT_SCINTILLA_GET_PRIVATE(doc);
   gtk_widget_show(docdet->searchbar);
@@ -548,7 +549,7 @@ void document_scintilla_activate_incremental_search(Documentable *doc)
 * must be free with g_free when no longer needed.
 */
 
-gchar *document_scintilla_get_text (Documentable  *doc)
+static gchar *document_scintilla_get_text (Documentable  *doc)
 {
   if (!doc) return NULL;
   Document_ScintillaDetails *docdet = DOCUMENT_SCINTILLA_GET_PRIVATE(doc);
@@ -564,7 +565,7 @@ static gboolean document_scintilla_check_externally_modified_t(Document_Scintill
   return GFile_get_is_modified(docdet->file, &docdet->mtime, FALSE);
 }
 
-void document_scintilla_check_externally_modified (Documentable  *doc)
+static void document_scintilla_check_externally_modified (Documentable  *doc)
 {
   if(!doc) return ;
   Document_ScintillaDetails *docdet = DOCUMENT_SCINTILLA_GET_PRIVATE(doc);
@@ -592,7 +593,7 @@ static void document_scintilla_save(Documentable *doc)
   document_saver_save_document(docdet->saver, DOCUMENT(doc));
 }
 
-void document_scintilla_save_as(Documentable *doc, GFile *file)
+static void document_scintilla_save_as(Documentable *doc, GFile *file)
 {
   gphpedit_debug (DEBUG_DOCUMENT);
   g_return_if_fail(doc);
@@ -614,7 +615,7 @@ static void tab_reset_scintilla_after_open(GtkScintilla *scintilla, guint curren
   gtk_scintilla_set_undo_collection(scintilla, TRUE);
 }
 
-void document_scintilla_replace_text (Documentable  *document_scintilla, gchar *new_text)
+static void document_scintilla_replace_text (Documentable  *document_scintilla, gchar *new_text)
 {
   Document_ScintillaDetails *docdet = DOCUMENT_SCINTILLA_GET_PRIVATE(document_scintilla);
   gsize size;
@@ -630,14 +631,14 @@ void document_scintilla_replace_text (Documentable  *document_scintilla, gchar *
   gtk_scintilla_set_save_point(GTK_SCINTILLA(docdet->scintilla));
 }
 
-void document_scintilla_insert_text (Documentable  *doc, gchar *data)
+static void document_scintilla_insert_text (Documentable  *doc, gchar *data)
 {
   g_return_if_fail(doc && data);
   Document_ScintillaDetails *docdet = DOCUMENT_SCINTILLA_GET_PRIVATE(doc);
   gtk_scintilla_insert_text(GTK_SCINTILLA(docdet->scintilla), gtk_scintilla_get_current_pos(GTK_SCINTILLA(docdet->scintilla)), data);
 }
 
-gchar *document_scintilla_get_current_word (Documentable  *doc)
+static gchar *document_scintilla_get_current_word (Documentable  *doc)
 {
   g_return_val_if_fail(doc, NULL);
   Document_ScintillaDetails *docdet = DOCUMENT_SCINTILLA_GET_PRIVATE(doc);
@@ -653,7 +654,7 @@ gchar *document_scintilla_get_current_word (Documentable  *doc)
   return buffer;
 }
 
-void document_scintilla_replace_current_selection (Documentable *doc, gchar *data){
+static void document_scintilla_replace_current_selection (Documentable *doc, gchar *data){
   g_return_if_fail(doc && data);
   Document_ScintillaDetails *docdet = DOCUMENT_SCINTILLA_GET_PRIVATE(doc);
   gtk_scintilla_replace_sel(GTK_SCINTILLA(docdet->scintilla), data);
@@ -2072,23 +2073,6 @@ static void handle_modified(GtkWidget *scintilla, gint pos,gint mtype,gchar *tex
     fold_changed(scintilla, line, foldNow, foldPrev);
   }
   g_object_unref(pref);
-}
-
-void document_scintilla_refresh_properties(Document_Scintilla *doc)
-{
-  g_return_if_fail(doc);
-  Document_ScintillaDetails *docdet = DOCUMENT_SCINTILLA_GET_PRIVATE(doc);
-  tab_set_configured_scintilla_properties(GTK_SCINTILLA(docdet->scintilla));
-  gint type;
-  /* reset type */
-  g_object_get(doc, "type", &type, NULL);
-  //FIXME: we set TAB_PHP style and then TAB_FILE style due to a bug, causing no style update.
-  if (type==TAB_FILE) {
-     documentable_set_type(DOCUMENTABLE(doc), TAB_PHP);
-  } else {
-     documentable_set_type(DOCUMENTABLE(doc), TAB_FILE);
-  }
-  documentable_set_type(DOCUMENTABLE(doc), type);
 }
 
 static void document_scintilla_marker_add(GtkScintilla *scintilla, gint line){
