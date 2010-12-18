@@ -76,7 +76,6 @@ struct _gphpeditFileBrowserPrivate
 {
   FilebrowserBackend *fbbackend;
 
-  GtkWidget *folder;  //filebrowser
   GtkTreeStore *pTree; 
   GtkWidget *pListView;
   GtkWidget *button_dialog;
@@ -162,19 +161,29 @@ gphpedit_file_browser_init (gphpeditFileBrowser *button)
   priv->fbbackend= filebrowser_backend_new (current_dir);
   priv->handlerid = g_signal_connect(G_OBJECT(priv->fbbackend), "done_loading", G_CALLBACK(print_files), priv);
   priv->handleridchange = g_signal_connect(G_OBJECT(priv->fbbackend), "change_folder", G_CALLBACK(change_folder_cb), priv);
-  priv->folder = gtk_vbox_new(FALSE, 1);
+
+  GtkBuilder *builder = gtk_builder_new ();
+  GError *error = NULL;
+  guint res = gtk_builder_add_from_file (builder, GPHPEDIT_UI_DIR "/filebrowser.ui", &error);
+  if (!res) {
+    g_critical ("Unable to load the UI file!");
+    g_error_free(error);
+    return ;
+  }
+
+  GtkWidget *folder = GTK_WIDGET(gtk_builder_get_object (builder, "filebrowser"));
+  gtk_widget_show (folder);
+  gtk_widget_reparent (folder, GTK_WIDGET(button));
 
   GtkTreeViewColumn *pColumn;
   GtkCellRenderer  *pCellRenderer;
   priv->pTree = gtk_tree_store_new(N_COL, G_TYPE_ICON, G_TYPE_STRING, G_TYPE_STRING);
-  priv->pListView = gtk_tree_view_new_with_model(GTK_TREE_MODEL(priv->pTree));
+  priv->pListView = GTK_WIDGET(gtk_builder_get_object (builder, "filetreeview"));
+	gtk_tree_view_set_model (GTK_TREE_VIEW (priv->pListView), GTK_TREE_MODEL (priv->pTree));
+
   pCellRenderer = gtk_cell_renderer_pixbuf_new();
   g_object_set (G_OBJECT (pCellRenderer), "stock-size", GTK_ICON_SIZE_SMALL_TOOLBAR, NULL);
   gtk_tree_view_insert_column_with_attributes(GTK_TREE_VIEW(priv->pListView),-1,"", pCellRenderer, "gicon", ICON_COLUMN, NULL);
-
-  GtkWidget *pScrollbar = gtk_scrolled_window_new(NULL, NULL);
-  gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(pScrollbar),GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
-  gtk_container_add(GTK_CONTAINER(pScrollbar), priv->pListView);
 
   //renderer for text
   g_signal_connect(G_OBJECT(priv->pListView), "row-activated", G_CALLBACK(tree_double_clicked), priv);
@@ -191,52 +200,32 @@ gphpedit_file_browser_init (gphpeditFileBrowser *button)
   pColumn = gtk_tree_view_column_new_with_attributes(_("Mime"), pCellRenderer,"text",MIME_COLUMN,NULL);
   gtk_tree_view_append_column(GTK_TREE_VIEW(priv->pListView), pColumn);
   gtk_tree_view_column_set_visible (pColumn,FALSE);
-  gtk_widget_show(priv->folder);
-  priv->button_dialog = gtk_button_new_with_label (get_filebrowser_backend_current_folder(priv->fbbackend));
-  g_signal_connect(G_OBJECT(priv->button_dialog), "pressed", G_CALLBACK(pressed_button_file_chooser), priv->fbbackend);
-  gtk_widget_set_size_request (priv->pListView,80,450);
 
-  /* home and up buttons */
-  GtkWidget *hbox2;
-  hbox2 = gtk_hbox_new(FALSE, 0);
+  priv->button_dialog = GTK_WIDGET(gtk_builder_get_object (builder, "button_dialog"));
+  gtk_button_set_label (GTK_BUTTON(priv->button_dialog), get_filebrowser_backend_current_folder(priv->fbbackend));
+  g_signal_connect(G_OBJECT(priv->button_dialog), "pressed", G_CALLBACK(pressed_button_file_chooser), priv->fbbackend);
+
   /* home button */
-  priv->button_home= _get_image_button(GTK_STOCK_HOME,_("Go Home Dir"));
-  gtk_widget_show(priv->button_home);
-  gtk_box_pack_start(GTK_BOX(hbox2), priv->button_home, TRUE, TRUE, 0);
+  priv->button_home= GTK_WIDGET(gtk_builder_get_object (builder, "button_home"));
   g_signal_connect(G_OBJECT(priv->button_home), "clicked", G_CALLBACK (_go_home_cb),priv->fbbackend);
 
   /* up button */
-  priv->button_up= _get_image_button(GTK_STOCK_GO_UP,_("Go Up one level"));
-  gtk_widget_show(priv->button_up);
-  gtk_box_pack_start(GTK_BOX(hbox2), priv->button_up, TRUE, TRUE, 0);
+  priv->button_up= GTK_WIDGET(gtk_builder_get_object (builder, "button_up"));
   g_signal_connect(G_OBJECT(priv->button_up), "clicked", G_CALLBACK (_go_up_cb), priv->fbbackend);
 
   /* refresh button */
-  priv->button_refresh= _get_image_button(GTK_STOCK_REFRESH,_("Refresh Filebrowser"));
-  gtk_widget_show(priv->button_refresh);
-  gtk_box_pack_start(GTK_BOX(hbox2), priv->button_refresh, TRUE, TRUE, 0);
+  priv->button_refresh= GTK_WIDGET(gtk_builder_get_object (builder, "button_refresh"));
   g_signal_connect(G_OBJECT(priv->button_refresh), "clicked", G_CALLBACK (_button_refresh), priv->fbbackend);
 
-  priv->searchentry = gtk_entry_new();
-  gtk_widget_show(priv->searchentry);
-  gtk_widget_set_tooltip_text (priv->searchentry,_("Search Files in Folder Browser"));
-  gtk_entry_set_icon_from_stock (GTK_ENTRY(priv->searchentry),GTK_ENTRY_ICON_SECONDARY,GTK_STOCK_CLEAR);
-  gtk_entry_set_icon_from_stock (GTK_ENTRY(priv->searchentry),GTK_ENTRY_ICON_PRIMARY,GTK_STOCK_FIND);
+  priv->searchentry = GTK_WIDGET(gtk_builder_get_object (builder, "searchentry"));
   g_signal_connect (G_OBJECT (priv->searchentry), "icon-press", G_CALLBACK (on_cleanicon_press), priv);
   g_signal_connect_after(G_OBJECT(priv->searchentry), "insert_text", G_CALLBACK(search_typed), priv);
   g_signal_connect_after(G_OBJECT(priv->searchentry), "backspace", G_CALLBACK(search_activate), priv);
   g_signal_connect_after(G_OBJECT(priv->searchentry), "activate", G_CALLBACK(search_activate), priv);
 
-  search_control_sensible(priv,TRUE);
-  gtk_box_pack_start(GTK_BOX(hbox2), priv->searchentry, TRUE, TRUE, 0);
-  gtk_box_pack_start(GTK_BOX(priv->folder), hbox2, FALSE, TRUE, 2);
-  gtk_box_pack_start(GTK_BOX(priv->folder), priv->button_dialog, FALSE, FALSE, 2);
-  gtk_box_pack_start(GTK_BOX(priv->folder), pScrollbar, TRUE, TRUE, 2);
-  gtk_widget_show(priv->button_dialog);
-  gtk_widget_show_all(priv->folder);
+  search_control_sensible(priv, TRUE);
   gtk_tree_sortable_set_sort_func(GTK_TREE_SORTABLE(priv->pTree), 1, _filebrowser_sort_func, NULL, NULL);
   gtk_tree_sortable_set_sort_column_id(GTK_TREE_SORTABLE(priv->pTree), 1, GTK_SORT_ASCENDING);
-  gtk_box_pack_start(GTK_BOX(button), priv->folder, TRUE, TRUE, 2);
 }
 /*
 * gphpedit_filebrowser_new

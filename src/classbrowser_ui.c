@@ -136,39 +136,28 @@ gphpedit_classbrowser_init (gphpeditClassBrowser *button)
   priv->classbackend= classbrowser_backend_new ();
   priv->handlerid = g_signal_connect(G_OBJECT(priv->classbackend), "done_refresh", G_CALLBACK(classbrowser_update_cb), priv);
 
-  GtkWidget *notebox;
-  notebox = gtk_vbox_new(FALSE, 0);
-  gtk_widget_show(notebox);
+  GtkBuilder *builder = gtk_builder_new ();
+  GError *error = NULL;
+  guint res = gtk_builder_add_from_file (builder, GPHPEDIT_UI_DIR "/classbrowser.ui", &error);
+  if (!res) {
+    g_critical ("Unable to load the UI file!");
+    g_error_free(error);
+    return ;
+  }
 
-  /* add checkbox to show only current file's classes
-  the signals to be checked for the check box are onclick of the checkbox
-  and the on change of the file.
-  */
-  GtkWidget *hbox = gtk_hbox_new(FALSE, 0);
-  priv->chkOnlyCurFileFuncs = gtk_check_button_new_with_label(_("Parse only current file"));
+  GtkWidget *notebox = GTK_WIDGET(gtk_builder_get_object (builder, "classbrowser"));
+  gtk_widget_show (notebox);
+  gtk_widget_reparent (notebox, GTK_WIDGET(button));
+
+  priv->chkOnlyCurFileFuncs = GTK_WIDGET(gtk_builder_get_object (builder, "only_current_file"));
+
   gboolean active;
   g_object_get (main_window.prefmg, "parse_only_current_file", &active, NULL);
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON(priv->chkOnlyCurFileFuncs), active);
-  gtk_widget_show (priv->chkOnlyCurFileFuncs);
-  gtk_widget_show (hbox);
-  gtk_box_pack_start(GTK_BOX(hbox), priv->chkOnlyCurFileFuncs, TRUE, TRUE, 10);
-  gtk_box_pack_start(GTK_BOX(notebox), hbox, FALSE, FALSE, 10);
   g_signal_connect (G_OBJECT (priv->chkOnlyCurFileFuncs), "clicked",
             G_CALLBACK (on_parse_current_click), priv->classbackend);
 
-  priv->scrolledwindow = gtk_scrolled_window_new (NULL, NULL);
-  gtk_widget_show (priv->scrolledwindow);
-  gtk_box_pack_start(GTK_BOX(notebox), priv->scrolledwindow, TRUE, TRUE, 0);
-
-  GtkWidget *box2;
-  box2 = gtk_hbox_new(FALSE, 0);
-  gtk_widget_show(box2);
-  priv->treeviewlabel = gtk_label_new(_("FILE: "));
-  gtk_label_set_justify(GTK_LABEL(priv->treeviewlabel), GTK_JUSTIFY_LEFT);
-  gtk_widget_show(priv->treeviewlabel);
-  gtk_box_pack_start(GTK_BOX(box2), priv->treeviewlabel, FALSE, FALSE, 0);
-  gtk_box_pack_end(GTK_BOX(notebox), box2, FALSE, FALSE, 4);
-  
+  priv->treeviewlabel = GTK_WIDGET(gtk_builder_get_object (builder, "treeviewlabel"));
   priv->classtreestore = gtk_tree_store_new (N_COLUMNS, G_TYPE_STRING, G_TYPE_INT, G_TYPE_STRING, G_TYPE_INT, G_TYPE_INT, G_TYPE_INT);
   /* enable sorting of the columns */
   classbrowser_set_sortable(priv->classtreestore);
@@ -179,10 +168,8 @@ gphpedit_classbrowser_init (gphpeditClassBrowser *button)
   classbrowser_set_sortable(priv->classtreestoreback);
 
   priv->front=0;
-
-  priv->classtreeview = gtk_tree_view_new_with_model (GTK_TREE_MODEL (priv->classtreestore));
-  gtk_widget_show (priv->classtreeview);
-  gtk_container_add (GTK_CONTAINER (priv->scrolledwindow), priv->classtreeview);
+  priv->classtreeview = GTK_WIDGET(gtk_builder_get_object (builder, "classtreeview"));
+	gtk_tree_view_set_model (GTK_TREE_VIEW (priv->classtreeview), GTK_TREE_MODEL (priv->classtreestore));
 
   priv->classtreeselect = gtk_tree_view_get_selection (GTK_TREE_VIEW (priv->classtreeview));
   gtk_tree_selection_set_mode (priv->classtreeselect, GTK_SELECTION_SINGLE);
@@ -190,8 +177,6 @@ gphpedit_classbrowser_init (gphpeditClassBrowser *button)
   column = gtk_tree_view_column_new_with_attributes (_("Name"), //FIXME:: add icons
            renderer, "text", NAME_COLUMN, NULL);
   gtk_tree_view_append_column (GTK_TREE_VIEW (priv->classtreeview), column);
-
-  gtk_box_pack_start(GTK_BOX(button), notebox, TRUE, TRUE, 2);
 }
 
 /*
@@ -328,6 +313,7 @@ void classbrowser_update_cb (ClassbrowserBackend *classback, gboolean result, gp
     gtk_tree_model_filter_set_visible_func ((GtkTreeModelFilter *) priv->new_model, visible_func, GUINT_TO_POINTER(doc_type), NULL);
     gtk_tree_view_set_model (GTK_TREE_VIEW( priv->classtreeview), priv->new_model);
   }
+
 
   press_event = g_signal_connect(GTK_OBJECT(priv->classtreeview), "button_press_event",
                                    G_CALLBACK(treeview_double_click), priv);
