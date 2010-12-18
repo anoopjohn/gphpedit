@@ -293,20 +293,6 @@ gint _filebrowser_sort_func(GtkTreeModel * model, GtkTreeIter * a, GtkTreeIter *
 }
 
 /*
-* _get_image_button (internal)
-* helper function to create button with an image
-*/
-GtkWidget *_get_image_button(const gchar *type,const gchar *tooltip)
-{
-  GtkWidget *button= gtk_button_new();
-  GtkWidget *image_button = gtk_image_new_from_stock (type,GTK_ICON_SIZE_BUTTON);
-  gtk_widget_show(image_button);
-  gtk_button_set_image(GTK_BUTTON(button), image_button);
-  gtk_widget_show(button);
-  gtk_widget_set_tooltip_text (button,tooltip);
-  return button;
-}
-/*
 * _go_home_cb(internal)
 * go to the current editor folder.
 */
