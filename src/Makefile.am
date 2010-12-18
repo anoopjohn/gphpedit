@@ -3,6 +3,7 @@
 ##
 ##  Copyright (C) 2003, 2004, 2005 Andy Jeffries <andy at gphpedit.org>
 ##  Copyright (C) 2009 Anoop John <anoop dot john at zyxware.com>
+##  Copyright (C) 2010 - Jose Rostagno
 ##
 ##  For more information or to find the latest release, visit our
 ##  website at http://www.gphpedit.org/
@@ -25,11 +26,15 @@
 
 bin_PROGRAMS = gphpedit
 
+uidir = $(pkgdatadir)/ui
+dist_ui_DATA = preferences_dialog.ui
+
 AM_CFLAGS = \
 	$(WEBKIT_CFLAGS) $(GTK_CFLAGS) $(GCONF_CFLAGS) $(LIBXML_CFLAGS)\
 	-I$(top_srcdir)/src/gtkscintilla2 \
 	-Wall -DGTK -DSCI_LEXER \
-	-DPIXMAP_DIR=\""$(datadir)/pixmaps"\" 
+	-DPIXMAP_DIR=\""$(datadir)/pixmaps"\" \
+  -DGPHPEDIT_UI_DIR=\""$(uidir)"\"
 
 nodist_EXTRA_gphpedit_SOURCES = dummy.cxx
 gphpedit_SOURCES = \

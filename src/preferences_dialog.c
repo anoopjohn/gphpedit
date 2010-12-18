@@ -1,8 +1,9 @@
-/* This file is part of gPHPEdit, a GNOME2 PHP Editor.
+/* This file is part of gPHPEdit, a GNOME PHP Editor.
  
    Copyright (C) 2003, 2004, 2005 Andy Jeffries <andy at gphpedit.org>
    Copyright (C) 2009 Anoop John <anoop dot john at zyxware.com>
-    
+   Copyright (C) 2009 - 2010 Jose Rostagno
+
    For more information or to find the latest release, visit our 
    website at http://www.gphpedit.org/
  
@@ -33,7 +34,6 @@
 #include "debug.h"
 #include "plugindialog.h"
 #include "templates_editor.h"
-
 #include "preferences_dialog.h"
 
 #define PREFERENCES_DIALOG_GET_PRIVATE(object)(G_TYPE_INSTANCE_GET_PRIVATE ((object), \
@@ -355,339 +355,118 @@ PREFERENCES_DIALOG_init (PreferencesDialog *dialog)
   priv->diagbox = gtk_dialog_get_content_area (GTK_DIALOG(dialog));
   gtk_box_set_spacing (GTK_BOX(priv->diagbox), 2);
 
-  GtkWidget *notebook = gtk_notebook_new ();
+  GtkBuilder *builder = gtk_builder_new ();
+  GError *error = NULL;
+  guint res = gtk_builder_add_from_file (builder, GPHPEDIT_UI_DIR "/preferences_dialog.ui", &error);
+  if (!res) {
+    g_critical ("Unable to load the UI file!");
+    g_error_free(error);
+    return ;
+  }
+
+  GtkWidget *notebook = GTK_WIDGET(gtk_builder_get_object (builder, "prefnote"));
   gtk_widget_show (notebook);
-  gtk_box_pack_start(GTK_BOX(priv->diagbox), notebook, FALSE, FALSE, 0);
-  
-  GtkWidget *prinbox = gtk_vbox_new (FALSE, 0);
-  gtk_widget_show (prinbox);
-  gtk_container_set_border_width (GTK_CONTAINER (prinbox), 8);
-
-  /* current session */  
-  GtkWidget *adj= gtk_alignment_new (0.00, 0.50, 0, 0);
-  gtk_box_pack_start(GTK_BOX(prinbox), adj, FALSE, FALSE, 6);
-
-  GtkWidget *sessionlabel = gtk_label_new(_("<b>Session:</b>"));
-  gtk_label_set_use_markup (GTK_LABEL(sessionlabel), TRUE);
-  gtk_label_set_justify(GTK_LABEL(sessionlabel), GTK_JUSTIFY_LEFT);
-  gtk_widget_show(sessionlabel);
-  gtk_container_add (GTK_CONTAINER (adj), sessionlabel);
+  gtk_widget_reparent (notebook, priv->diagbox);
 
   gboolean save_session, single_instance;
   g_object_get (main_window.prefmg, "save_session", &save_session, "single_instance_only", &single_instance, NULL);
 
-
-  priv->save_session = gtk_check_button_new_with_mnemonic (_("Save session (including open files) on exit"));
-  gtk_widget_show (priv->save_session);
-  gtk_box_pack_start (GTK_BOX (prinbox), priv->save_session, FALSE, FALSE, 0);
-  gtk_container_set_border_width (GTK_CONTAINER (priv->save_session), 8);
+  priv->save_session = GTK_WIDGET(gtk_builder_get_object (builder, "save_session"));
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(priv->save_session), save_session);
   g_signal_connect(G_OBJECT(GTK_CHECK_BUTTON(priv->save_session)), "toggled", G_CALLBACK(on_save_session_toggle), NULL);
 
-  priv->single_instance_only = gtk_check_button_new_with_mnemonic (_("Only ever run 1 copy of gPHPEdit at a time"));
-  gtk_widget_show (priv->single_instance_only);
-  gtk_box_pack_start (GTK_BOX (prinbox), priv->single_instance_only, FALSE, FALSE, 0);
-  gtk_container_set_border_width (GTK_CONTAINER (priv->single_instance_only), 8);
+  priv->single_instance_only = GTK_WIDGET(gtk_builder_get_object (builder, "single_instance_only"));
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(priv->single_instance_only), single_instance);
   g_signal_connect(G_OBJECT(GTK_CHECK_BUTTON(priv->single_instance_only)), "toggled", G_CALLBACK(on_single_instance_only_toggle), NULL);
-  /*end session*/
-
-  adj= gtk_alignment_new (0.00, 0.50, 0, 0);
-  gtk_box_pack_start(GTK_BOX(prinbox), adj, FALSE, FALSE, 6);
-
-  GtkWidget *label = gtk_label_new(_("<b>Hand edge guide:</b>"));
-  gtk_label_set_use_markup (GTK_LABEL(label), TRUE);
-  gtk_label_set_justify(GTK_LABEL(label), GTK_JUSTIFY_LEFT);
-  gtk_widget_show(label);
-  gtk_container_add (GTK_CONTAINER (adj), label);
 
   gboolean edge_mode;
   gint edge_column;
   g_object_get (main_window.prefmg, "edge_mode", &edge_mode, "edge_column",&edge_column, NULL);
 
-  priv->edge_mode = gtk_check_button_new_with_mnemonic (_("Show right hand edge guide"));
-  gtk_widget_show (priv->edge_mode);
-  gtk_box_pack_start(GTK_BOX(prinbox), priv->edge_mode, FALSE, FALSE, 6);
-  gtk_container_set_border_width (GTK_CONTAINER (priv->edge_mode), 8);
+  priv->edge_mode = GTK_WIDGET(gtk_builder_get_object (builder, "edge_mode"));
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(priv->edge_mode), edge_mode);
   g_signal_connect(G_OBJECT(GTK_CHECK_BUTTON(priv->edge_mode)), "toggled", G_CALLBACK(on_edge_mode_toggle), NULL);
 
-/*Begin: Right Hand Edge */
-  GtkWidget *hbox15 = gtk_hbox_new (FALSE, 0);
-  gtk_widget_show (hbox15);
-  gtk_box_pack_start(GTK_BOX(prinbox), hbox15, FALSE, FALSE, 6);
-    
-  label = gtk_label_new (_("Right hand edge column"));
-  gtk_widget_show (label);
-  gtk_box_pack_start (GTK_BOX (hbox15), label, FALSE, FALSE, 8);
-  
-  priv->edge_column = gtk_spin_button_new_with_range(0, 160, 1);
+  priv->edge_column = GTK_WIDGET(gtk_builder_get_object (builder, "edge_column"));
   gtk_spin_button_set_value (GTK_SPIN_BUTTON(priv->edge_column), edge_column);
-  gtk_widget_show (priv->edge_column);
-  gtk_box_pack_start (GTK_BOX (hbox15), priv->edge_column, FALSE, TRUE, 0);
   g_signal_connect (G_OBJECT (priv->edge_column), "value_changed", G_CALLBACK (on_edge_column_changed), NULL);
 
-/*end edge part*/
-/* side panel part */
-  adj= gtk_alignment_new (0.00, 0.50, 0, 0);
-  gtk_box_pack_start(GTK_BOX(prinbox), adj, FALSE, FALSE, 6);
-
-  label = gtk_label_new(_("<b>Side Panel:</b>"));
-  gtk_label_set_use_markup (GTK_LABEL(label), TRUE);
-  gtk_label_set_justify(GTK_LABEL(label), GTK_JUSTIFY_LEFT);
-  gtk_widget_show(label);
-  gtk_container_add (GTK_CONTAINER (adj), label);
-
-  priv->folderbrowser = gtk_check_button_new_with_mnemonic (_("Show file browser (need restart)"));
-  /* set tooltip */
-  gtk_widget_set_tooltip_text (priv->folderbrowser,_("Show/Hide side-panel Folder Browser"));
-  gtk_widget_show (priv->folderbrowser);
-  gtk_container_add (GTK_CONTAINER (prinbox), priv->folderbrowser);
-  gtk_container_set_border_width (GTK_CONTAINER (priv->folderbrowser), 8);
+  priv->folderbrowser = GTK_WIDGET(gtk_builder_get_object (builder, "filebrowser"));
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(priv->folderbrowser), get_preferences_manager_show_filebrowser(main_window.prefmg));
-  g_signal_connect(G_OBJECT(GTK_CHECK_BUTTON(priv->folderbrowser)), "toggled", G_CALLBACK(on_save_folderbrowser_toggle), NULL);
-  /*end side panel part*/
-/* autocompletion part */
-  adj= gtk_alignment_new (0.00, 0.50, 0, 0);
-  gtk_widget_show (adj);
-  gtk_box_pack_start(GTK_BOX(prinbox), adj, FALSE, FALSE, 6);
+  g_signal_connect(GTK_CHECK_BUTTON(priv->folderbrowser), "toggled", G_CALLBACK(on_save_folderbrowser_toggle), NULL);
 
-  label = gtk_label_new(_("<b>Auto-completion:</b>"));
-  gtk_label_set_use_markup (GTK_LABEL(label), TRUE);
-  gtk_label_set_justify(GTK_LABEL(label), GTK_JUSTIFY_LEFT);
-  gtk_widget_show(label);
-  gtk_container_add (GTK_CONTAINER (adj), label);
-
-  priv->autobrace = gtk_check_button_new_with_mnemonic (_("Auto-Completion of Brackets and Quotes"));
-  /* set tooltip */
-  gtk_widget_set_tooltip_text (priv->autobrace,_("Auto-complete the closing brackets/quotes"));
-  gtk_widget_show (priv->autobrace);
-  gtk_container_add (GTK_CONTAINER (prinbox), priv->autobrace);
-  gtk_container_set_border_width (GTK_CONTAINER (priv->autobrace), 8);
+  priv->autobrace = GTK_WIDGET(gtk_builder_get_object (builder, "autobrace"));
   gboolean auto_brace;
   gint delay;
   g_object_get(main_window.prefmg, "auto_complete_braces", &auto_brace, "calltip_delay", &delay, NULL);
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(priv->autobrace), auto_brace);
-  g_signal_connect(G_OBJECT(GTK_CHECK_BUTTON(priv->autobrace)), "toggled", G_CALLBACK(on_save_autobrace_toggle), NULL);
+  g_signal_connect(GTK_CHECK_BUTTON(priv->autobrace), "toggled", G_CALLBACK(on_save_autobrace_toggle), NULL);
 
-  hbox15 = gtk_hbox_new (FALSE, 0);
-  gtk_widget_show (hbox15);
-  gtk_container_add (GTK_CONTAINER (prinbox), hbox15);
-
-  GtkWidget *label37 = gtk_label_new (_("Delay (calltip/function list):"));
-  gtk_widget_show (label37);
-  gtk_box_pack_start (GTK_BOX (hbox15), label37, FALSE, FALSE, 8);
-  
-  priv->delay = gtk_spin_button_new_with_range(0, 2500, 10);
+  priv->delay = GTK_WIDGET(gtk_builder_get_object (builder, "delay"));
   gtk_spin_button_set_value (GTK_SPIN_BUTTON(priv->delay), delay);
-  gtk_widget_show (priv->delay);
-  gtk_box_pack_start (GTK_BOX (hbox15), priv->delay, FALSE, FALSE, 0);
   g_signal_connect (G_OBJECT (priv->delay), "value_changed", G_CALLBACK (on_calltip_delay_changed), NULL);
-/*end autocompletion part*/
-  label = gtk_label_new (_("General"));
-  gtk_widget_show (label);
-  gtk_notebook_prepend_page (GTK_NOTEBOOK (notebook), prinbox, label);
-/* end first tab */
-/*editor tab */
-
-  GtkWidget *prinboxed = gtk_vbox_new (FALSE, 0);
-  gtk_widget_show (prinboxed);
-  gtk_container_set_border_width (GTK_CONTAINER (prinboxed), 8);
-
-/* tabs part */
-  GtkWidget *edgebox = gtk_vbox_new (FALSE, 8);
-  gtk_widget_show (edgebox);
-  gtk_box_pack_start(GTK_BOX(prinboxed), edgebox, FALSE, FALSE, 6);
-
-  adj= gtk_alignment_new (0.00, 0.50, 0, 0);
-  gtk_box_pack_start(GTK_BOX(edgebox), adj, FALSE, FALSE, 6);
-
-  label = gtk_label_new(_("<b>Tabs:</b>"));
-  gtk_label_set_use_markup (GTK_LABEL(label), TRUE);
-  gtk_label_set_justify(GTK_LABEL(label), GTK_JUSTIFY_LEFT);
-  gtk_widget_show(label);
-  gtk_container_add (GTK_CONTAINER (adj), label);
-
-  hbox15 = gtk_hbox_new (FALSE, 0);
-  gtk_widget_show (hbox15);
-  gtk_box_pack_start (GTK_BOX (prinboxed), hbox15, FALSE, FALSE, 0);
-
-  GtkWidget *label32 = gtk_label_new (_("Tab size:"));
-  gtk_widget_show (label32);
-  gtk_box_pack_start (GTK_BOX (hbox15), label32, FALSE, FALSE, 8);
-
-  priv->tab_size = gtk_spin_button_new_with_range(1, 16, 1);
-  gint tab_size;
-  g_object_get(main_window.prefmg, "tab_size", &tab_size, NULL);
-  gtk_spin_button_set_value (GTK_SPIN_BUTTON(priv->tab_size), tab_size);
-  gtk_widget_show (priv->tab_size);
-  gtk_box_pack_start (GTK_BOX (hbox15), priv->tab_size, FALSE, TRUE, 0);
-  g_signal_connect (G_OBJECT (priv->tab_size), "value_changed", G_CALLBACK (on_tab_size_changed), NULL);
 
   gboolean show_indent_guides, higthlight_caret_line, line_wrapping, tabs_spaces;
   g_object_get(main_window.prefmg, "show_indentation_guides", &show_indent_guides, "higthlight_caret_line", &higthlight_caret_line,
     "line_wrapping",&line_wrapping,"tabs_instead_spaces", &tabs_spaces, NULL);
 
-  priv->use_tabs_instead_spaces = gtk_check_button_new_with_mnemonic (_("Use tabs instead of spaces for indentation"));
-  gtk_widget_show (priv->use_tabs_instead_spaces);
-  gtk_box_pack_start (GTK_BOX (edgebox), priv->use_tabs_instead_spaces, FALSE, FALSE, 0);
-  gtk_container_set_border_width (GTK_CONTAINER (priv->use_tabs_instead_spaces), 8);
+  priv->use_tabs_instead_spaces = GTK_WIDGET(gtk_builder_get_object (builder, "use_tabs_instead_spaces"));
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(priv->use_tabs_instead_spaces), tabs_spaces);
-  g_signal_connect(G_OBJECT(GTK_CHECK_BUTTON(priv->use_tabs_instead_spaces)), "toggled", G_CALLBACK(on_use_tabs_instead_spaces_toggle), NULL);
+  g_signal_connect(GTK_CHECK_BUTTON(priv->use_tabs_instead_spaces), "toggled", G_CALLBACK(on_use_tabs_instead_spaces_toggle), NULL);
 
-  priv->show_indentation_guides = gtk_check_button_new_with_mnemonic (_("Show indentation guides"));
-  gtk_widget_show (priv->show_indentation_guides);
-  gtk_box_pack_start (GTK_BOX (edgebox), priv->show_indentation_guides, FALSE, FALSE, 0);
-  gtk_container_set_border_width (GTK_CONTAINER (priv->show_indentation_guides), 8);
+  priv->show_indentation_guides = GTK_WIDGET(gtk_builder_get_object (builder, "show_indentation_guides"));
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(priv->show_indentation_guides), show_indent_guides);
-  g_signal_connect(G_OBJECT(GTK_CHECK_BUTTON(priv->show_indentation_guides)), "toggled", G_CALLBACK(on_show_indentation_guides_toggle), NULL);
+  g_signal_connect(GTK_CHECK_BUTTON(priv->show_indentation_guides), "toggled", G_CALLBACK(on_show_indentation_guides_toggle), NULL);
 
-  adj= gtk_alignment_new (0.00, 0.50, 0, 0);
-  gtk_box_pack_start(GTK_BOX(prinboxed), adj, FALSE, FALSE, 6);
+  gint tab_size;
+  g_object_get(main_window.prefmg, "tab_size", &tab_size, NULL);
 
-  label = gtk_label_new(_("<b>Line Properties:</b>"));
-  gtk_label_set_use_markup (GTK_LABEL(label), TRUE);
-  gtk_label_set_justify(GTK_LABEL(label), GTK_JUSTIFY_LEFT);
-  gtk_widget_show(label);
-  gtk_container_add (GTK_CONTAINER (adj), label);
+  priv->tab_size = GTK_WIDGET(gtk_builder_get_object (builder, "tab_size"));
+  gtk_spin_button_set_value (GTK_SPIN_BUTTON(priv->tab_size), tab_size);
+  g_signal_connect (G_OBJECT (priv->tab_size), "value_changed", G_CALLBACK (on_tab_size_changed), NULL);
 
-  hbox15 = gtk_hbox_new (FALSE, 0);
-  gtk_widget_show (hbox15);
-  gtk_box_pack_start (GTK_BOX (prinboxed), hbox15, FALSE, FALSE, 0);
-
-  priv->line_wrapping = gtk_check_button_new_with_mnemonic (_("Wrap long lines"));
-  gtk_widget_show (priv->line_wrapping);
-  gtk_container_add (GTK_CONTAINER (hbox15), priv->line_wrapping);
-  gtk_container_set_border_width (GTK_CONTAINER (priv->line_wrapping), 8);
+  priv->line_wrapping = GTK_WIDGET(gtk_builder_get_object (builder, "line_wrapping"));
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(priv->line_wrapping), line_wrapping);
-  g_signal_connect(G_OBJECT(GTK_CHECK_BUTTON(priv->line_wrapping)), "toggled", G_CALLBACK(on_line_wrapping_toggle), NULL);
+  g_signal_connect(GTK_CHECK_BUTTON(priv->line_wrapping), "toggled", G_CALLBACK(on_line_wrapping_toggle), NULL);
 
-  priv->higthlightcaretline = gtk_check_button_new_with_mnemonic (_("Highlight Caret Line"));
-  /* set tooltip */
-  gtk_widget_show (priv->higthlightcaretline);
-  gtk_box_pack_start (GTK_BOX (prinboxed), priv->higthlightcaretline, FALSE, FALSE, 0);
-  gtk_container_set_border_width (GTK_CONTAINER (priv->higthlightcaretline), 8);
+  priv->higthlightcaretline = GTK_WIDGET(gtk_builder_get_object (builder, "higthlightcaretline"));
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(priv->higthlightcaretline), higthlight_caret_line);
-  g_signal_connect(G_OBJECT(GTK_CHECK_BUTTON(priv->higthlightcaretline)), "toggled", G_CALLBACK(on_save_higthlightcaretline_toggle), NULL);
+  g_signal_connect(GTK_CHECK_BUTTON(priv->higthlightcaretline), "toggled", G_CALLBACK(on_save_higthlightcaretline_toggle), NULL);
 
-
-/*  */
-  GtkWidget *codbox = gtk_vbox_new (FALSE, 0);
-  gtk_widget_show (codbox);
-  gtk_box_pack_start(GTK_BOX(prinboxed), codbox, FALSE, FALSE, 6);
-
-  adj= gtk_alignment_new (0.00, 0.50, 0, 0);
-  gtk_box_pack_start(GTK_BOX(codbox), adj, FALSE, FALSE, 6);
-
-  label = gtk_label_new(_("<b>PHP Coding:</b>"));
-  gtk_label_set_use_markup (GTK_LABEL(label), TRUE);
-  gtk_label_set_justify(GTK_LABEL(label), GTK_JUSTIFY_LEFT);
-  gtk_widget_show(label);
-  gtk_container_add (GTK_CONTAINER (adj), label);
-
-  GtkWidget *hbox17 = gtk_hbox_new (FALSE, 0);
-  gtk_widget_show (hbox17);
-  gtk_box_pack_start (GTK_BOX (codbox), hbox17, FALSE, TRUE, 8);
-  
-  GtkWidget *label40 = gtk_label_new (_("Syntax check program:"));
-  gtk_widget_show (label40);
-  gtk_box_pack_start (GTK_BOX (hbox17), label40, FALSE, FALSE, 8);
-  
   const gchar *shared_source_location;
   const gchar *php_binary_location;
   const gchar *php_file_extensions;
   g_object_get(main_window.prefmg, "shared_source_location", &shared_source_location, 
     "php_binary_location", &php_binary_location,"php_file_extensions", &php_file_extensions, NULL);
 
-  priv->php_file_entry = gtk_entry_new();
-  gtk_widget_show (priv->php_file_entry);
-  gtk_box_pack_start (GTK_BOX (hbox17), priv->php_file_entry, TRUE, TRUE, 0);
+  priv->php_file_entry = GTK_WIDGET(gtk_builder_get_object (builder, "php_file_entry"));
   gtk_entry_set_text(GTK_ENTRY(priv->php_file_entry), php_binary_location);
   g_signal_connect(G_OBJECT(priv->php_file_entry), "changed", G_CALLBACK(on_php_binary_location_changed), NULL);
 
-  GtkWidget *hbox18 = gtk_hbox_new (FALSE, 0);
-  gtk_widget_show (hbox18);
-  gtk_box_pack_start (GTK_BOX (codbox), hbox18, FALSE, TRUE, 8);
-  
-  GtkWidget *label48 = gtk_label_new (_("Recognised PHP file extensions:"));
-  gtk_widget_show (label48);
-  gtk_box_pack_start (GTK_BOX (hbox18), label48, FALSE, FALSE, 8);
-  
-  priv->file_extensions = gtk_entry_new ();
-  gtk_widget_show (priv->file_extensions);
-  gtk_box_pack_start (GTK_BOX (hbox18), priv->file_extensions, TRUE, TRUE, 0);
+  priv->file_extensions = GTK_WIDGET(gtk_builder_get_object (builder, "file_extensions"));
   gtk_entry_set_text(GTK_ENTRY(priv->file_extensions), php_file_extensions);
   g_signal_connect(G_OBJECT(priv->file_extensions), "changed", G_CALLBACK(on_php_file_extensions_changed), NULL);
 
-  GtkWidget *hbox26 = gtk_hbox_new (FALSE, 0);
-  gtk_widget_show (hbox26);
-  gtk_box_pack_start (GTK_BOX (codbox), hbox26, FALSE, TRUE, 8);
-  
-  GtkWidget *label47 = gtk_label_new (_("Shared library path(s):"));
-  gtk_widget_show (label47);
-  gtk_box_pack_start (GTK_BOX (hbox26), label47, FALSE, FALSE, 8);
-  
-  priv->shared_source = gtk_entry_new ();
-  gtk_widget_show (priv->shared_source);
-  gtk_box_pack_start (GTK_BOX (hbox26), priv->shared_source, TRUE, TRUE, 0);
+  priv->shared_source = GTK_WIDGET(gtk_builder_get_object (builder, "shared_source"));
   gtk_entry_set_text(GTK_ENTRY(priv->shared_source), shared_source_location);
   g_signal_connect(G_OBJECT(priv->shared_source), "changed", G_CALLBACK(on_shared_source_changed), NULL);
-
-/*end editor page */
-
-  GtkWidget *label33 = gtk_label_new (_("Editor"));
-  gtk_widget_show (label33);
-  gtk_notebook_append_page (GTK_NOTEBOOK (notebook), prinboxed, label33);
-/* end second tab */
-/* color tab*/
-/*editor tab */
-  GtkWidget *princolor = gtk_vbox_new (FALSE, 8);
-  gtk_widget_show (princolor);
-  gtk_container_set_border_width (GTK_CONTAINER (princolor), 8);
-
-  adj= gtk_alignment_new (0.00, 0.50, 0, 0);
-  gtk_box_pack_start(GTK_BOX(princolor), adj, FALSE, FALSE, 6);
-
-  label = gtk_label_new(_("<b>Font:</b>"));
-  gtk_label_set_use_markup (GTK_LABEL(label), TRUE);
-  gtk_label_set_justify(GTK_LABEL(label), GTK_JUSTIFY_LEFT);
-  gtk_widget_show(label);
-  gtk_container_add (GTK_CONTAINER (adj), label);
-
-  GtkWidget *cont = gtk_hbox_new (FALSE, 12);
-  gtk_widget_show (cont);
-  gtk_box_pack_start(GTK_BOX(princolor), cont, FALSE, FALSE, 6);
-
-  label = gtk_label_new_with_mnemonic(_("Editor _font:"));
-  gtk_label_set_justify(GTK_LABEL(label), GTK_JUSTIFY_LEFT);
-  gtk_widget_show(label);
-  gtk_box_pack_start(GTK_BOX(cont), label, FALSE, FALSE, 6);
 
   gchar *style_font_name;
   guint size;
   g_object_get(main_window.prefmg, "style_font_name", &style_font_name,"font_size", &size, NULL);
   gchar *font_setting = g_strdup_printf("%s %d", style_font_name + 1, size);
-  priv->font_settings = gtk_font_button_new_with_font (font_setting);
-  g_free(font_setting);
-  gtk_widget_show(priv->font_settings);
-  gtk_widget_set_size_request (priv->font_settings, 140, -1);
-  gtk_box_pack_start(GTK_BOX(cont), priv->font_settings, FALSE, FALSE, 6);
+  priv->font_settings = GTK_WIDGET(gtk_builder_get_object (builder, "font_button"));
+  gtk_font_button_set_font_name(GTK_FONT_BUTTON(priv->font_settings), font_setting);
   g_signal_connect(G_OBJECT(priv->font_settings), "font-set", G_CALLBACK(on_font_settings_toggle), NULL);
-  gtk_font_button_set_show_style (GTK_FONT_BUTTON(priv->font_settings), FALSE);
+  g_free(font_setting);
 
-	label = gtk_label_new (_("<b>Color Scheme:</b>"));
-  gtk_label_set_use_markup (GTK_LABEL(label), TRUE);
-	gtk_label_set_justify (GTK_LABEL (label), GTK_JUSTIFY_LEFT);
-	gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
-	
-  gtk_box_pack_start(GTK_BOX(princolor), label, FALSE, FALSE, 6);
   
 	GtkCellRenderer *renderer;
 	GtkTreeViewColumn *column;
 	GtkTreeSelection *selection;
 	const gchar *def_id;
 
-  priv->size_combo = gtk_tree_view_new ();
+  priv->size_combo = GTK_WIDGET(gtk_builder_get_object (builder, "schemes_treeview"));
 
 	/* Create GtkListStore for styles & setup treeview. */
 	priv->list_store = gtk_list_store_new (NUM_COLUMNS,
@@ -724,45 +503,18 @@ PREFERENCES_DIALOG_init (PreferencesDialog *dialog)
 			  G_CALLBACK (style_scheme_changed),
 			  dialog);
 
-  GtkWidget *scrolledwindow = gtk_scrolled_window_new (NULL, NULL);
-  gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW(scrolledwindow), GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
-  gtk_scrolled_window_set_shadow_type (GTK_SCROLLED_WINDOW(scrolledwindow), GTK_SHADOW_ETCHED_IN);
-  gtk_container_add (GTK_CONTAINER (scrolledwindow), priv->size_combo);
-  gtk_widget_show(scrolledwindow);
-  gtk_widget_show(priv->size_combo);
-  gtk_box_pack_start(GTK_BOX(princolor), scrolledwindow, TRUE, TRUE, 6);
-
-  GtkWidget *label30 = gtk_label_new (_("Colour"));
-  gtk_widget_show (label30);
-  gtk_notebook_append_page (GTK_NOTEBOOK (notebook), princolor, label30);
-
-/* end color tab */
 /* coding tab */
-  GtkWidget *princod = gtk_vbox_new (FALSE, 8);
-  gtk_widget_show (princod);
-  gtk_container_set_border_width (GTK_CONTAINER (princod), 8);
-
+  GtkWidget *princod = GTK_WIDGET(gtk_builder_get_object (builder, "templates_box"));
   priv->templates_editor = templates_editor_new ();
   gtk_widget_show (priv->templates_editor);
   gtk_box_pack_start (GTK_BOX (princod), priv->templates_editor, TRUE, TRUE, 8);
 /**/
-  GtkWidget *label36 = gtk_label_new (_("Templates"));
-  gtk_widget_show (label36);
-  gtk_notebook_append_page (GTK_NOTEBOOK (notebook), princod, label36);
 
-/**/
-/*plugins tab */
-  GtkWidget *prinplug = gtk_vbox_new (FALSE, 8);
-  gtk_widget_show (prinplug);
-  gtk_container_set_border_width (GTK_CONTAINER (prinplug), 8);
-
-/*  */
+/* plugins tab */
+  GtkWidget *prinplug = GTK_WIDGET(gtk_builder_get_object (builder, "Plugin_vbox"));
   priv->plugindialog = plugin_dialog_new();
   gtk_box_pack_start (GTK_BOX (prinplug), priv->plugindialog, TRUE, TRUE, 0);
 
-  label36 = gtk_label_new (_("Plugin"));
-  gtk_widget_show (label36);
-  gtk_notebook_append_page (GTK_NOTEBOOK (notebook), prinplug, label36);
 /**/
   gtk_widget_show_all (priv->diagbox);
 
