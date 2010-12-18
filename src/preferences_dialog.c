@@ -742,12 +742,6 @@ PREFERENCES_DIALOG_init (PreferencesDialog *dialog)
   gtk_widget_show (princod);
   gtk_container_set_border_width (GTK_CONTAINER (princod), 8);
 
-	label = gtk_label_new_with_mnemonic (_("Active Templates:"));
-	gtk_label_set_justify (GTK_LABEL (label), GTK_JUSTIFY_LEFT);
-	gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
-	
-  gtk_box_pack_start(GTK_BOX(princod), label, FALSE, FALSE, 6);
-
   priv->templates_editor = templates_editor_new ();
   gtk_widget_show (priv->templates_editor);
   gtk_box_pack_start (GTK_BOX (princod), priv->templates_editor, TRUE, TRUE, 8);
