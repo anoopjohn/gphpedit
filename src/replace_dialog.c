@@ -154,92 +154,47 @@ REPLACE_DIALOG_init (ReplaceDialog *dialog)
 {
   ReplaceDialogPrivate *priv = REPLACE_DIALOG_GET_PRIVATE(dialog);
   priv->diagbox = gtk_dialog_get_content_area (GTK_DIALOG(dialog));
-  gtk_box_set_spacing (GTK_BOX(priv->diagbox), 5);
 
-  GtkWidget *box = gtk_hbox_new(FALSE, 0);
-  gtk_widget_show(box);
-  GtkWidget *findlabel = gtk_label_new(_("Find"));
-  gtk_label_set_justify(GTK_LABEL(findlabel), GTK_JUSTIFY_LEFT);
-  gtk_widget_show(findlabel);
+  GtkBuilder *builder = gtk_builder_new ();
+  GError *error = NULL;
+  guint res = gtk_builder_add_from_file (builder, GPHPEDIT_UI_DIR "/replace_dialog.ui", &error);
+  if (!res) {
+    g_critical ("Unable to load the UI file!");
+    g_error_free(error);
+    return ;
+  }
 
-  gtk_box_pack_start(GTK_BOX(box), findlabel, FALSE, FALSE, 6);
+  GtkWidget *box = GTK_WIDGET(gtk_builder_get_object (builder, "replace_dialog_content"));
+  gtk_widget_show (box);
+  gtk_widget_reparent (box, priv->diagbox);
+
+  GtkWidget *table = GTK_WIDGET(gtk_builder_get_object (builder, "table"));
+  gtk_table_set_row_spacings (GTK_TABLE (table), 12);
 
   priv->findentry = gphpedit_history_entry_new ("find", TRUE);
-	gtk_widget_set_size_request (priv->findentry, 400, -1);
+	gtk_widget_set_size_request (priv->findentry, 300, -1);
   gtk_widget_show (priv->findentry);
-
-  gtk_box_pack_end(GTK_BOX(box), priv->findentry, FALSE, FALSE, 15);
-  gtk_box_pack_start(GTK_BOX(priv->diagbox), box, FALSE, FALSE, 4);
-
-  /* Get selected text (Wendell) */
+  gtk_table_attach_defaults (GTK_TABLE (table), priv->findentry, 1, 2, 0, 1);
+  
+  /* Get selected text */
   gchar *buffer;
   buffer = documentable_get_current_selected_text(DOCUMENTABLE(document_manager_get_current_document(main_window.docmg)));
   if (buffer) {
-      gphpedit_history_entry_prepend_text	(GPHPEDIT_HISTORY_ENTRY(priv->findentry),buffer);
+      gphpedit_history_entry_prepend_text	(GPHPEDIT_HISTORY_ENTRY(priv->findentry), buffer);
       gtk_combo_box_set_active (GTK_COMBO_BOX(priv->findentry), 0);
   }
   /* End get selected text */
 
-  box = gtk_hbox_new(FALSE, 0);
-  gtk_widget_show(box);
-  GtkWidget *replacelabel = gtk_label_new(_("Replace with: "));
-  gtk_label_set_justify(GTK_LABEL(replacelabel), GTK_JUSTIFY_LEFT);
-  gtk_widget_show(replacelabel);
-
-  gtk_box_pack_start(GTK_BOX(box), replacelabel, FALSE, FALSE, 6);
-
   priv->replace_entry = gphpedit_history_entry_new ("replace",TRUE);
-	gtk_widget_set_size_request (priv->replace_entry, 400, -1);
+	gtk_widget_set_size_request (priv->replace_entry, 300, -1);
   gtk_widget_show (priv->replace_entry);
+  gtk_table_attach_defaults (GTK_TABLE (table), priv->replace_entry, 1, 2, 1, 2);
 
-  gtk_box_pack_end(GTK_BOX(box), priv->replace_entry, FALSE, FALSE, 15);
-  gtk_box_pack_start(GTK_BOX(priv->diagbox), box, FALSE, FALSE, 4);
-
-  GtkWidget *hbox = gtk_hbox_new(FALSE, 0);
-  gtk_widget_show(hbox);
-  gtk_box_pack_start(GTK_BOX(priv->diagbox), hbox, FALSE, FALSE, 0);
-
-  priv->checkcase = gtk_check_button_new_with_mnemonic (_("_Match case"));
-  gtk_widget_show (priv->checkcase);
-  gtk_box_pack_start (GTK_BOX (hbox), priv->checkcase, FALSE, FALSE, 0);
-  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (priv->checkcase), FALSE);
-
-  hbox = gtk_hbox_new (FALSE, 0);
-  gtk_widget_show (hbox);
-  gtk_box_pack_start(GTK_BOX(priv->diagbox), hbox, FALSE, FALSE, 0);
-
-  priv->checkwholeword = gtk_check_button_new_with_mnemonic (_("Match _entire word only"));
-  gtk_widget_show (priv->checkwholeword);
-  gtk_box_pack_start (GTK_BOX (hbox), priv->checkwholeword, FALSE, FALSE, 0);
-  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (priv->checkwholeword), FALSE);
-
-  hbox = gtk_hbox_new (FALSE, 0);
-  gtk_widget_show (hbox);
-  gtk_box_pack_start(GTK_BOX(priv->diagbox), hbox, FALSE, FALSE, 0);
-
-  priv->checkwholedoc = gtk_check_button_new_with_mnemonic (_("Whole document"));
-  gtk_widget_show (priv->checkwholedoc);
-  gtk_box_pack_start (GTK_BOX (hbox), priv->checkwholedoc, FALSE, FALSE, 0);
-  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (priv->checkwholedoc), TRUE);
-
-  hbox = gtk_hbox_new (FALSE, 0);
-  gtk_widget_show (hbox);
-  gtk_box_pack_start(GTK_BOX(priv->diagbox), hbox, FALSE, FALSE, 0);
-
-  priv->checkregex = gtk_check_button_new_with_mnemonic (_("RegExp"));
-  gtk_widget_show (priv->checkregex);
-  gtk_box_pack_start (GTK_BOX (hbox), priv->checkregex, FALSE, FALSE, 0);
-  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (priv->checkregex), FALSE);
-
-
-  hbox = gtk_hbox_new (FALSE, 0);
-  gtk_widget_show (hbox);
-  gtk_box_pack_start(GTK_BOX(priv->diagbox), hbox, FALSE, FALSE, 0);
-
-  priv->checkpromp = gtk_check_button_new_with_mnemonic (_("Prompt before Replace"));
-  gtk_widget_show (priv->checkpromp);
-  gtk_box_pack_start (GTK_BOX (hbox), priv->checkpromp, FALSE, FALSE, 0);
-  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (priv->checkpromp), FALSE);
+  priv->checkcase = GTK_WIDGET(gtk_builder_get_object (builder, "match_case_checkbutton"));
+  priv->checkwholeword = GTK_WIDGET(gtk_builder_get_object (builder, "entire_word_checkbutton"));
+  priv->checkwholedoc = GTK_WIDGET(gtk_builder_get_object (builder, "checkwholedoc"));
+  priv->checkregex = GTK_WIDGET(gtk_builder_get_object (builder, "regexp"));
+  priv->checkpromp = GTK_WIDGET(gtk_builder_get_object (builder, "checkpromp"));
 
   priv->close_button = gtk_dialog_add_button (GTK_DIALOG(dialog), GTK_STOCK_CLOSE, GTK_RESPONSE_DELETE_EVENT);
   priv->replaceall_button = gtk_dialog_add_button (GTK_DIALOG(dialog), _("Replace _all"), GTK_RESPONSE_APPLY);
@@ -267,7 +222,7 @@ replace_dialog_new (GtkWindow *parent)
 	}
 
   gtk_window_set_position (GTK_WINDOW(dialog), GTK_WIN_POS_CENTER);
-  gtk_window_set_title (GTK_WINDOW (dialog), _("Find"));
+  gtk_window_set_title (GTK_WINDOW (dialog), _("Replace"));
   gtk_window_set_resizable (GTK_WINDOW (dialog), FALSE);
   gtk_container_set_border_width (GTK_CONTAINER (dialog), 10);
 

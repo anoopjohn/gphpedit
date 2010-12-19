@@ -29,7 +29,8 @@ bin_PROGRAMS = gphpedit
 uidir = $(pkgdatadir)/ui
 dist_ui_DATA = preferences_dialog.ui \
   classbrowser.ui \
-  filebrowser.ui
+  filebrowser.ui  \
+  replace_dialog.ui
 
 AM_CFLAGS = \
 	$(WEBKIT_CFLAGS) $(GTK_CFLAGS) $(GCONF_CFLAGS) $(LIBXML_CFLAGS)\
