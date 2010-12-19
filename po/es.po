@@ -152,7 +152,7 @@ msgid "gPHPEdit"
 msgstr "gPHPEdit"
 
 #: ../src/document_loader.c:237
-msgid "Sorry, I can open this kind of file.\n"
+msgid "Sorry, I cannot open this kind of file.\n"
 msgstr "Lo siento, no puedo abrir esa clase de archivo.\n"
 
 #: ../src/document_loader.c:315
