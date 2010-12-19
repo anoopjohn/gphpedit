@@ -46,7 +46,6 @@ struct _ReplaceDialogPrivate
   GtkWidget *checkwholeword;
   GtkWidget *checkwholedoc;
   GtkWidget *checkregex;
-  GtkWidget *checkpromp;
 
   GtkWidget *close_button;
   GtkWidget *find_button;
@@ -109,7 +108,7 @@ void replace_clicked(GtkDialog *dialog, ReplaceDialogPrivate *priv)
   GString *message;
   const gchar *text;
   const gchar *replace;
-  Document *doc = document_manager_get_current_document(main_window.docmg);
+  Documentable *doc = DOCUMENTABLE(document_manager_get_current_document(main_window.docmg));
 
   text = gtk_combo_box_get_active_text (GTK_COMBO_BOX(priv->findentry));
   gphpedit_history_entry_prepend_text	(GPHPEDIT_HISTORY_ENTRY(priv->findentry), text);
@@ -124,17 +123,17 @@ void replace_clicked(GtkDialog *dialog, ReplaceDialogPrivate *priv)
   gboolean checkcase = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON(priv->checkcase));
   gboolean checkwholeword = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON(priv->checkwholeword));
   gboolean checkregex = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON(priv->checkregex));
-  gboolean ask_replace = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON(priv->checkpromp));
-  gint numfound=0;
-  while (documentable_search_replace_text(DOCUMENTABLE(doc), text, replace, checkwholedoc, checkcase, checkwholeword, checkregex, ask_replace)){
+
+  gint numfound = 0;
+  while (documentable_search_replace_text(doc, text, replace, checkwholedoc, checkcase, checkwholeword, checkregex, TRUE)) {
     numfound++;
   }
-  message = g_string_new("");
   if (numfound==0) {
+    message = g_string_new("");
     g_string_printf(message, _("\"%s\" not found, no replacements made."), text);
+    gphpedit_statusbar_flash_message (GPHPEDIT_STATUSBAR(main_window.appbar), 0, "%s",message->str);
   }
-  gphpedit_statusbar_flash_message (GPHPEDIT_STATUSBAR(main_window.appbar), 0,"%s",message->str);
-  documentable_goto_pos(DOCUMENTABLE(doc), documentable_get_current_position(DOCUMENTABLE(doc)));
+  documentable_goto_pos(doc, documentable_get_current_position(doc));
 }
 
 
@@ -172,7 +171,7 @@ REPLACE_DIALOG_init (ReplaceDialog *dialog)
   gtk_table_set_row_spacings (GTK_TABLE (table), 12);
 
   priv->findentry = gphpedit_history_entry_new ("find", TRUE);
-	gtk_widget_set_size_request (priv->findentry, 300, -1);
+	gtk_widget_set_size_request (priv->findentry, 200, -1);
   gtk_widget_show (priv->findentry);
   gtk_table_attach_defaults (GTK_TABLE (table), priv->findentry, 1, 2, 0, 1);
   
@@ -186,7 +185,7 @@ REPLACE_DIALOG_init (ReplaceDialog *dialog)
   /* End get selected text */
 
   priv->replace_entry = gphpedit_history_entry_new ("replace",TRUE);
-	gtk_widget_set_size_request (priv->replace_entry, 300, -1);
+	gtk_widget_set_size_request (priv->replace_entry, 200, -1);
   gtk_widget_show (priv->replace_entry);
   gtk_table_attach_defaults (GTK_TABLE (table), priv->replace_entry, 1, 2, 1, 2);
 
@@ -194,7 +193,6 @@ REPLACE_DIALOG_init (ReplaceDialog *dialog)
   priv->checkwholeword = GTK_WIDGET(gtk_builder_get_object (builder, "entire_word_checkbutton"));
   priv->checkwholedoc = GTK_WIDGET(gtk_builder_get_object (builder, "checkwholedoc"));
   priv->checkregex = GTK_WIDGET(gtk_builder_get_object (builder, "regexp"));
-  priv->checkpromp = GTK_WIDGET(gtk_builder_get_object (builder, "checkpromp"));
 
   priv->close_button = gtk_dialog_add_button (GTK_DIALOG(dialog), GTK_STOCK_CLOSE, GTK_RESPONSE_DELETE_EVENT);
   priv->replaceall_button = gtk_dialog_add_button (GTK_DIALOG(dialog), _("Replace _all"), GTK_RESPONSE_APPLY);
