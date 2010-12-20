@@ -80,7 +80,7 @@ void find_action(SearchDialogPrivate *priv)
     if (checkwholedoc) {
       documentable_goto_pos(doc, 0);
       found = documentable_search_text(doc, text, checkwholedoc, checkcase, checkwholeword, checkregex);
-      gphpedit_statusbar_flash_message (GPHPEDIT_STATUSBAR(main_window.appbar),0, _("Resuming search from top."), text);
+      gphpedit_statusbar_flash_message (GPHPEDIT_STATUSBAR(main_window.appbar),0, "%s", _("Resuming search from top."));
     }
   }
   if (!found) {
