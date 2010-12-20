@@ -24,7 +24,7 @@
 #ifndef _GPHPEDIT_SESSION_H_
 #define _GPHPEDIT_SESSION_H_
 
-#include <gtk/gtk.h>
+#include <glib-object.h>
 
 G_BEGIN_DECLS
 
