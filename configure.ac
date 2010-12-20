@@ -232,6 +232,12 @@ API_DIR=$prefix/share/gphpedit
 AC_DEFINE_UNQUOTED(API_DIR, "$API_DIR",
 	[The directory in which gphpedit's api data will be stored])
 
+dnl ================================================================
+dnl GSettings stuff
+dnl ================================================================
+
+GLIB_GSETTINGS
+
 dnl ---------------------------------------------------------------------------
 dnl check for deprecated flags
    DISABLE_DEPRECATED_CFLAGS="\
@@ -246,6 +252,7 @@ Makefile
 gphpedit.desktop
 gphpedit.spec
 data/Makefile
+data/org.gphpedit.gschema.xml.in
 doc/Makefile
 pixmaps/Makefile
 themes/Makefile

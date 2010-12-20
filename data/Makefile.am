@@ -2,6 +2,7 @@
 ##  This file is part of gPHPEdit, a GNOME2 PHP Editor.
 ##
 ##  Copyright (C) 2003-2005 Andy Jeffries <andy@gphpedit.org>
+##  Copyright (C) 2010  Jose Rostagno <joserostagno@hotmail.com>
 ##
 ##  This program is free software; you can redistribute it and/or modify
 ##  it under the terms of the GNU General Public License as published by
@@ -27,6 +28,13 @@ api_DATA = \
 apidir = \
 	$(datadir)/gphpedit
 
-EXTRA_DIST = \
-	$(api_DATA)
+gsettingsschema_in_files = org.gphpedit.gschema.xml
+gsettings_SCHEMAS = $(gsettingsschema_in_files:.xml.in=.xml)
 
+@GSETTINGS_RULES@
+
+@INTLTOOL_XML_NOMERGE_RULE@
+
+EXTRA_DIST = \
+	$(api_DATA) \
+  $(gsettingsschema_in_files)

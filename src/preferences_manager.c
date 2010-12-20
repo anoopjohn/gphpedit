@@ -1,4 +1,4 @@
-/* This file is part of gPHPEdit, a GNOME2 PHP Editor.
+/* This file is part of gPHPEdit, a GNOME PHP Editor.
 
    Copyright (C) 2003, 2004, 2005 Andy Jeffries <andy at gphpedit.org>
    Copyright (C) 2009 Anoop John <anoop dot john at zyxware.com>
@@ -33,14 +33,11 @@
 #include <config.h>
 #endif
 
-#include <gtk/gtk.h>
-#include <gconf/gconf-client.h>
 #include <glib/gi18n.h>
 
 #include "debug.h"
 #include "preferences_manager.h"
-#include "gvfs_utils.h"
-#include "document.h"
+#include "document_scintilla.h"
 
 #include "gphpedit-session.h"
 
@@ -53,6 +50,8 @@ struct PreferencesManagerDetails
 {
   /* session object */
   GphpeditSession *session;
+  /*  */
+  GSettings *gs;
   /* important value */
   gboolean save_session;
 
@@ -71,7 +70,7 @@ struct PreferencesManagerDetails
   gchar *filebrowser_last_folder;
   gboolean showfilebrowser;
   guint showstatusbar:1;
-  guint showmaintoolbar:1;
+  gboolean showmaintoolbar;
   // Default settings
   gint indentation_size;
   gint tab_size;
@@ -110,14 +109,6 @@ static void preferences_manager_dispose (GObject *gobject);
 void load_default_settings(PreferencesManagerDetails *prefdet);
 void load_styles(PreferencesManagerDetails *prefdet);
 void load_session_settings(PreferencesManagerDetails *prefdet);
-static void set_string (const gchar *key, const gchar *string);
-static void set_int (const gchar *key, gint number);
-static void set_bool (const gchar *key, gboolean value);
-
-static gchar *get_string(const gchar *key,gchar *default_string);
-static gint get_uint(const gchar *key,gint default_size);
-static gint get_int_with_default(const gchar *key,const gchar *subdir,gint default_value);
-static gboolean get_bool(const gchar *key,gboolean default_value);
 
 /* http://library.gnome.org/devel/gobject/unstable/gobject-Type-Information.html#G-DEFINE-TYPE:CAPS */
 G_DEFINE_TYPE(PreferencesManager, preferences_manager, G_TYPE_OBJECT);
@@ -172,7 +163,8 @@ enum
   PROP_FONT_SIZE,
   PROP_TAB_SIZE,
   PROP_CALLTIP_DELAY,
-  PROP_AUTOCOMPLETE_DELAY
+  PROP_AUTOCOMPLETE_DELAY,
+  PROP_SHOW_TOOLBAR
 };
 
 static void
@@ -190,6 +182,9 @@ preferences_manager_set_property (GObject      *object,
 			break;
 		case PROP_PARSE_ONLY_CURRENT_FILE:
 			prefdet->parseonlycurrentfile = g_value_get_boolean (value);
+			break;
+		case PROP_SHOW_TOOLBAR:
+			prefdet->showmaintoolbar = g_value_get_boolean (value);
 			break;
 		case PROP_SIDE_PANEL_SIZE:
 			prefdet->side_panel_size = g_value_get_int (value);
@@ -289,6 +284,9 @@ preferences_manager_get_property (GObject    *object,
 			break;
 		case PROP_PARSE_ONLY_CURRENT_FILE:
 			g_value_set_boolean (value, prefdet->parseonlycurrentfile);
+			break;
+		case PROP_SHOW_TOOLBAR:
+			g_value_set_boolean (value, prefdet->showmaintoolbar);
 			break;
 		case PROP_SIDE_PANEL_SIZE:
 			g_value_set_int (value, prefdet->side_panel_size);
@@ -394,6 +392,12 @@ preferences_manager_class_init (PreferencesManagerClass *klass)
                               g_param_spec_boolean ("parse_only_current_file",
                               NULL, NULL,
                               FALSE, G_PARAM_READWRITE));
+
+  g_object_class_install_property (object_class,
+                              PROP_SHOW_TOOLBAR,
+                              g_param_spec_boolean ("show_toolbar",
+                              NULL, NULL,
+                              TRUE, G_PARAM_READWRITE));
 
   /* return TRUE if side panel isn't visible */  
   g_object_class_install_property (object_class,
@@ -576,11 +580,6 @@ preferences_manager_init (PreferencesManager *object)
   PreferencesManagerDetails *prefdet;
   prefdet = PREFERENCES_MANAGER_GET_PRIVATE(object);
   /* create config folder if doesn't exist */
-#if !GLIB_CHECK_VERSION (2, 24, 0)
-  /* init gconf system */
-  gconf_init(0, NULL, NULL);
-#endif
-
   force_config_folder();
   
   /* init session object */
@@ -633,11 +632,13 @@ PreferencesManager *preferences_manager_new (void)
 
 /*
 * preferences_manager_parse_font_quality
-* reads font quality from gnome gconf key or from GtkSettings 
+* reads font quality from gnome or from GtkSettings
 * and return corresponding scintilla font quality
 */
-gint preferences_manager_parse_font_quality(void){
-  gchar *antialiasing = get_string("/desktop/gnome/font_rendering/antialiasing","default");
+gint preferences_manager_parse_font_quality(void) {
+#if 0
+  //FIXME: GSettings key for this??
+  gchar *antialiasing = get_string("/desktop/gnome/font_rendering/antialiasing", "default");
   
   if (g_strcmp0(antialiasing,"none")==0){
     g_free(antialiasing);
@@ -649,6 +650,7 @@ gint preferences_manager_parse_font_quality(void){
     g_free(antialiasing);
     return SC_EFF_QUALITY_LCD_OPTIMIZED;
   }
+#endif
   /* gconf key not found, try GtkSettings value */
   gint x;
   g_object_get(G_OBJECT(gtk_settings_get_default()), "gtk-xft-antialias", &x, NULL);
@@ -657,38 +659,32 @@ gint preferences_manager_parse_font_quality(void){
   return SC_EFF_QUALITY_DEFAULT;
 }
 
-gint get_default_delay(void){
-  gint delay;
-  g_object_get(G_OBJECT(gtk_settings_get_default()), "gtk-tooltip-timeout", &delay, NULL);
-  return delay;
-}
-
-#define DEFAULT_PHP_EXTENSIONS "php,inc,phtml,php3,xml,htm,html"
-
 void load_default_settings(PreferencesManagerDetails *prefdet)
 {
   gphpedit_debug(DEBUG_PREFS);
-  prefdet->php_binary_location= get_string("/gPHPEdit/locations/phpbinary", "php");
-  prefdet->shared_source_location = get_string("/gPHPEdit/locations/shared_source", "");
+  prefdet->gs = g_settings_new ("org.gphpedit.preferences.editor");
 
-  prefdet->indentation_size = get_uint("/gPHPEdit/defaults/indentationsize", 4); 
-  prefdet->tab_size = get_uint("/gPHPEdit/defaults/tabsize", 4); 
-  prefdet->auto_complete_delay = get_uint("/gPHPEdit/defaults/auto_complete_delay", get_default_delay());
-  prefdet->calltip_delay = get_uint("/gPHPEdit/defaults/calltip_delay", get_default_delay());
+  prefdet->php_binary_location= g_settings_get_string (prefdet->gs, "php-binary-location");
+  prefdet->shared_source_location = g_settings_get_string (prefdet->gs, "shared-source-location");
+  prefdet->php_file_extensions = g_settings_get_string (prefdet->gs, "php-file-extensions");
+  g_settings_get (prefdet->gs, "indentation-size", "u", &prefdet->indentation_size);
+  g_settings_get (prefdet->gs, "tabs-size", "u", &prefdet->tab_size);
+  g_settings_get (prefdet->gs, "auto-complete-delay", "u", &prefdet->auto_complete_delay);
+  g_settings_get (prefdet->gs, "calltip-delay", "u", &prefdet->calltip_delay);
 
-  prefdet->show_indentation_guides = get_bool("/gPHPEdit/defaults/showindentationguides", FALSE);
-  prefdet->edge_mode = get_bool("/gPHPEdit/defaults/edgemode", FALSE);
-  prefdet->edge_column = get_uint("/gPHPEdit/defaults/edgecolumn", 80);
-  prefdet->line_wrapping = get_bool("/gPHPEdit/defaults/linewrapping", TRUE);
+  prefdet->show_indentation_guides = g_settings_get_boolean (prefdet->gs, "show-indentation-guides");
+  prefdet->edge_mode = g_settings_get_boolean (prefdet->gs, "display-right-margin");
+  g_settings_get (prefdet->gs, "right-margin-position", "u", &prefdet->edge_column);
+
+  prefdet->line_wrapping = g_settings_get_boolean (prefdet->gs, "line-wrapping");
   /* font quality */
   prefdet->font_quality = preferences_manager_parse_font_quality();
-  prefdet->auto_complete_braces= get_bool("/gPHPEdit/defaults/autocompletebraces", FALSE);
-  prefdet->higthlightcaretline= get_bool("/gPHPEdit/defaults/higthlightcaretline", FALSE);
-  prefdet->save_session = get_bool("/gPHPEdit/defaults/save_session", TRUE);
-  prefdet->use_tabs_instead_spaces = get_bool("/gPHPEdit/defaults/use_tabs_instead_spaces", FALSE);
-  prefdet->single_instance_only = get_bool("/gPHPEdit/defaults/single_instance_only", TRUE);
-  prefdet->php_file_extensions = get_string("/gPHPEdit/defaults/php_file_extensions", DEFAULT_PHP_EXTENSIONS);
-  prefdet->showfilebrowser = get_bool("/gPHPEdit/defaults/showfolderbrowser", TRUE);
+  prefdet->auto_complete_braces = g_settings_get_boolean (prefdet->gs, "auto-complete-braces");
+  prefdet->higthlightcaretline= g_settings_get_boolean (prefdet->gs, "highlight-current-line");
+  prefdet->save_session = g_settings_get_boolean (prefdet->gs, "save-session");
+  prefdet->use_tabs_instead_spaces = g_settings_get_boolean (prefdet->gs, "use-tabs-instead-spaces");
+  prefdet->single_instance_only = g_settings_get_boolean (prefdet->gs, "single-instance-only");
+  prefdet->showfilebrowser = g_settings_get_boolean (prefdet->gs, "showfilebrowser");
 }
 
 void load_session_settings(PreferencesManagerDetails *prefdet)
@@ -711,15 +707,15 @@ void load_session_settings(PreferencesManagerDetails *prefdet)
   prefdet->side_panel_size = gphpedit_session_get_int_with_default (prefdet->session, "side_panel", "size", 100);
   prefdet->parseonlycurrentfile = gphpedit_session_get_boolean (prefdet->session, "side_panel", "check_only_current_file");
   prefdet->filebrowser_last_folder = gphpedit_session_get_string_with_default (prefdet->session, "side_panel", "folder", (gchar *)g_get_home_dir());
-
   prefdet->session_files = gphpedit_session_get_string_list (prefdet->session, "session","files");
+
 }
 
         /* accesor functions */
   /*
   * each propertly has accesor functions to get and set his corresponding value
-  * set functions don't store new value in gconf directly, instead store new value internally. 
-  * you must call "preferences_manager_save_data" in order to update values in gconf.
+  * set functions don't store new value in directly, instead store new value internally.
+  * you must call "preferences_manager_save_data" in order to update values in GSettings.
   */
 
 gboolean get_preferences_manager_show_filebrowser(PreferencesManager *preferences_manager)
@@ -868,7 +864,7 @@ void set_preferences_manager_session_files(PreferencesManager *preferences_manag
 
 /*
 * preferences_manager_save_data
-* update session preferences data in gconf with new internal data
+* update session preferences data with new internal data
 * this version only save a few preferences that can change often in the program.
 * other preferences are only save when you call "preferences_manager_save_data_full"
 * so we speed up process by not save unchanged data.
@@ -905,7 +901,7 @@ void preferences_manager_save_data(PreferencesManager *preferences_manager)
 
 /*
 * preferences_manager_save_data_full
-* update all preferences data in gconf with new internal data
+* update all preferences data with new internal data
 */
 void preferences_manager_save_data_full(PreferencesManager *preferences_manager)
 {
@@ -914,35 +910,37 @@ void preferences_manager_save_data_full(PreferencesManager *preferences_manager)
   prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
   preferences_manager_save_data(preferences_manager);  /* save session data */
 
-  set_string ("/gPHPEdit/locations/phpbinary", prefdet->php_binary_location);
-  set_string ("/gPHPEdit/locations/shared_source", prefdet->shared_source_location);
-  set_int ("/gPHPEdit/defaults/indentationsize", prefdet->indentation_size); 
-  set_int ("/gPHPEdit/defaults/tabsize", prefdet->tab_size); 
-  set_int ("/gPHPEdit/defaults/auto_complete_delay", prefdet->auto_complete_delay);
-  set_int ("/gPHPEdit/defaults/calltip_delay", prefdet->calltip_delay);
-  set_bool ("/gPHPEdit/defaults/showindentationguides", prefdet->show_indentation_guides);
-  set_bool ("/gPHPEdit/defaults/edgemode", prefdet->edge_mode);
-  set_int ("/gPHPEdit/defaults/edgecolumn", prefdet->edge_column);
-  set_bool ("/gPHPEdit/defaults/linewrapping", prefdet->line_wrapping);
-  /* font quality */
-  set_int ("/gPHPEdit/defaults/fontquality", prefdet->font_quality);
-  set_bool("/gPHPEdit/defaults/autocompletebraces", prefdet->auto_complete_braces);
-  set_bool ("/gPHPEdit/defaults/higthlightcaretline", prefdet->higthlightcaretline);
-  set_bool ("/gPHPEdit/defaults/save_session", prefdet->save_session);
-  set_bool ("/gPHPEdit/defaults/use_tabs_instead_spaces", prefdet->use_tabs_instead_spaces);
-  set_bool ("/gPHPEdit/defaults/single_instance_only", prefdet->single_instance_only);
-  set_string ("/gPHPEdit/defaults/php_file_extensions", prefdet->php_file_extensions);
+  g_settings_set (prefdet->gs, "indentation-size", "u", prefdet->indentation_size);
+  g_settings_set (prefdet->gs, "tabs-size", "u", prefdet->tab_size);
+
+  g_settings_set_boolean (prefdet->gs, "show-indentation-guides", prefdet->show_indentation_guides);
+  g_settings_set_boolean (prefdet->gs, "display-right-margin", prefdet->edge_mode);
+  g_settings_set (prefdet->gs, "right-margin-position", "u", prefdet->edge_column);
+  g_settings_set_boolean (prefdet->gs, "line-wrapping", prefdet->line_wrapping);
+
+  g_settings_set_boolean (prefdet->gs, "auto-complete-braces", prefdet->auto_complete_braces);
+  g_settings_set_boolean (prefdet->gs, "highlight-current-line", prefdet->higthlightcaretline);
+  g_settings_set_boolean (prefdet->gs, "save-session", prefdet->save_session);
+  g_settings_set_boolean (prefdet->gs, "use-tabs-instead-spaces", prefdet->use_tabs_instead_spaces);
+  g_settings_set_boolean (prefdet->gs, "single-instance-only", prefdet->single_instance_only);
+  g_settings_set_boolean (prefdet->gs, "showfilebrowser", prefdet->showfilebrowser);
+
+  g_settings_set_string (prefdet->gs, "php-binary-location", prefdet->php_binary_location);
+  g_settings_set_string (prefdet->gs, "shared-source-location", prefdet->shared_source_location);
+  g_settings_set_string (prefdet->gs, "php-file-extensions", prefdet->php_file_extensions);
+
+  g_settings_set (prefdet->gs, "auto-complete-delay", "u", &prefdet->auto_complete_delay);
+  g_settings_set (prefdet->gs, "calltip-delay", "u", &prefdet->calltip_delay);
   /* style settings */
   gchar *font_setting = g_strdup_printf("%s %d",prefdet->font_name + 1, prefdet->font_size);
-  set_string ("/gPHPEdit/defaults/font", font_setting);
+  g_settings_set_string (prefdet->gs, "editor-font", font_setting);
   g_free(font_setting);
-  set_string ("/gPHPEdit/defaults/style", prefdet->style_name);
-  set_bool("/gPHPEdit/defaults/showfolderbrowser", prefdet->showfilebrowser);
+  g_settings_set_string (prefdet->gs, "scheme", prefdet->style_name);
 }
 
 /*
 * preferences_manager_restore_data
-* reload preferences data from gconf and discard internal data.
+* reload preferences data and discard internal data.
 */
 void preferences_manager_restore_data(PreferencesManager *preferences_manager)
 {
@@ -978,134 +976,6 @@ void set_plugin_is_active(PreferencesManager *preferences_manager, const gchar *
   gphpedit_session_sync(prefdet->session);
 }
 
-/**/
-/* internal functions to store values in gconf */
-
-/*
-* set_string (internal)
-* store a string value in gconf
-*/
-static void set_string (const gchar *key, const gchar *string)
-{
-  GConfClient *config;
-  config = gconf_client_get_default ();
-  gconf_client_set_string (config,key,string,NULL);
-  g_object_unref (G_OBJECT (config));
-}
-/*
-* set_int (internal)
-* store an integer value in gconf
-*/
-static void set_int (const gchar *key, gint number)
-{
-  GConfClient *config;
-  config = gconf_client_get_default ();
-  gconf_client_set_int (config,key,number,NULL);
-  gconf_client_suggest_sync (config,NULL);
-  gconf_client_clear_cache(config);
-  g_object_unref (G_OBJECT (config));
-}
-/*
-* set_bool (internal)
-* store a boolean value in gconf
-*/
-static void set_bool (const gchar *key, gboolean value)
-{
-  GConfClient *config;
-  config = gconf_client_get_default ();
-  gconf_client_set_bool (config,key, value, NULL);
-  g_object_unref (G_OBJECT (config));
-}
-
-  /** internal functions to get value from gconf **/
-
-/*
-* get_string (internal)
-* load an string value from gconf
-* if value isn't found return default_string
-*/
-static gchar *get_string(const gchar *key,gchar *default_string)
-{
-  GError *error=NULL;
-  GConfClient *config = gconf_client_get_default ();
-  gchar *temp= gconf_client_get_string(config,key,NULL);
-  g_object_unref (G_OBJECT (config));
-  if (!temp || error){
-    if (error) g_error_free (error);
-    return g_strdup(default_string);
-  }
-  return temp;
-}
-/*
-* get_uint (internal)
-* load an uint value from gconf
-* if value isn't found return default_size
-*/
-static gint get_uint(const gchar *key, gint default_size)
-{
-  GConfClient *config = gconf_client_get_default ();
-  GError *error=NULL;
-  gint temp= gconf_client_get_int (config,key,&error);
-  g_object_unref (G_OBJECT (config));
-  if (temp==0){
-    if (error){
-     gphpedit_debug_message(DEBUG_PREFS, "%s", error->message);
-     g_error_free (error);
-    }
-    return default_size; 
-  }
-  return temp;
-}
-
-/*
-* get_bool (internal)
-* load a boolean value from gconf
-* if value isn't found return default_value
-*/
-static gboolean get_bool(const gchar *key,gboolean default_value)
-{
-  GConfClient *config = gconf_client_get_default ();
-  GError *error=NULL;
-  gboolean temp= gconf_client_get_bool (config,key,&error);
-  g_object_unref (G_OBJECT (config));
-  if (error){
-     g_error_free (error);
-    return default_value; 
-  }
-  return temp;
-}
-
-/*
-* get_int_with_default (internal)
-* load an int value from gconf
-* if value isn't found return default_value
-*/
-static gint get_int_with_default(const gchar *key,const gchar *subdir,gint default_value)
-{
-  gchar *uri= g_strdup_printf("%s/%s/%s",g_get_home_dir(),".gconf/gPHPEdit",subdir);
-  if (!g_file_test (uri,G_FILE_TEST_EXISTS)){
-    gphpedit_debug_message(DEBUG_PREFS, "key %s don't exist. load default value",key);
-    //load default value
-    g_free(uri);
-    return default_value;
-  } else {
-    g_free(uri);
-    //load key value
-    GConfClient *config = gconf_client_get_default ();
-    GError *error=NULL;
-    gint temp;
-    temp = gconf_client_get_int (config,key,&error);
-    g_object_unref (G_OBJECT (config));
-    if (error){
-      //return default value
-      g_error_free (error);
-      return default_value;
-    } else {
-      return temp;
-    }
-  }
-}
-
   /**internal styles functions **/
 /*
 * get_default_font_settings
@@ -1122,7 +992,8 @@ gchar *get_default_font_settings(PreferencesManagerDetails *prefdet)
 void load_font_settings(PreferencesManagerDetails *prefdet)
 {
   gphpedit_debug(DEBUG_PREFS);
-  gchar *font_desc= get_string("/gPHPEdit/defaults/font" , get_default_font_settings(prefdet));
+  gchar *font_desc= g_settings_get_string (prefdet->gs, "editor-font");
+  if (!font_desc) font_desc = g_strdup(get_default_font_settings(prefdet));
   PangoFontDescription *desc = pango_font_description_from_string (font_desc);
   prefdet->font_size = PANGO_PIXELS(pango_font_description_get_size (desc));
   /* add ! needed by scintilla for pango render */
@@ -1134,8 +1005,8 @@ void load_font_settings(PreferencesManagerDetails *prefdet)
 * set_font_settings
 * set a new font name and font size.
 * font_desc must be a pango font description string like "Helvetica 12"
-* this function don't save new values to gconf. 
-* you must call "preferences_manager_save_data_full" to update gconf values.
+* this function don't save new values.
+* you must call "preferences_manager_save_data_full" to update stored values.
 */
 void set_font_settings (PreferencesManager *preferences_manager, gchar *font_desc)
 {
@@ -1158,8 +1029,8 @@ void set_font_settings (PreferencesManager *preferences_manager, gchar *font_des
 * loads lexer styles
 */
 void load_styles(PreferencesManagerDetails *prefdet)
-{ 
+{
   gphpedit_debug(DEBUG_PREFS);
   load_font_settings(prefdet);
-  prefdet->style_name = get_string("/gPHPEdit/defaults/style", "mixer");
+  prefdet->style_name = g_settings_get_string (prefdet->gs, "scheme");
 }

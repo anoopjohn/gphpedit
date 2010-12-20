@@ -25,7 +25,7 @@
 #ifndef PREFERENCES_MANAGER_H
 #define PREFERENCES_MANAGER_H
 
-#include <gtk/gtk.h>
+#include <glib-object.h>
 
 #define PREFERENCES_MANAGER_TYPE preferences_manager_get_type()
 #define PREFERENCES_MANAGER(obj) \
