@@ -170,7 +170,7 @@ REPLACE_DIALOG_init (ReplaceDialog *dialog)
   GtkWidget *table = GTK_WIDGET(gtk_builder_get_object (builder, "table"));
   gtk_table_set_row_spacings (GTK_TABLE (table), 12);
 
-  priv->findentry = gphpedit_history_entry_new ("find", TRUE);
+  priv->findentry = gphpedit_history_entry_new ("search-for-entry", TRUE);
 	gtk_widget_set_size_request (priv->findentry, 200, -1);
   gtk_widget_show (priv->findentry);
   gtk_table_attach_defaults (GTK_TABLE (table), priv->findentry, 1, 2, 0, 1);
@@ -184,7 +184,7 @@ REPLACE_DIALOG_init (ReplaceDialog *dialog)
   }
   /* End get selected text */
 
-  priv->replace_entry = gphpedit_history_entry_new ("replace",TRUE);
+  priv->replace_entry = gphpedit_history_entry_new ("replace-with-entry", TRUE);
 	gtk_widget_set_size_request (priv->replace_entry, 200, -1);
   gtk_widget_show (priv->replace_entry);
   gtk_table_attach_defaults (GTK_TABLE (table), priv->replace_entry, 1, 2, 1, 2);

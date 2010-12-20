@@ -31,7 +31,6 @@
 #include <string.h>
 #include <glib/gi18n.h>
 #include <gtk/gtk.h>
-#include <gconf/gconf-client.h>
 
 #include "history-entry.h"
 
@@ -56,7 +55,7 @@ struct _GphpeditHistoryEntryPrivate
 	
 	GtkEntryCompletion *completion;
 	
-	GConfClient        *gconf_client;
+	GSettings          *settings;
 };
 
 G_DEFINE_TYPE(GphpeditHistoryEntry, gphpedit_history_entry, GTK_TYPE_COMBO_BOX_ENTRY)
@@ -128,11 +127,12 @@ gphpedit_history_entry_finalize (GObject *object)
 	
 	g_free (priv->history_id);
 
-	if (priv->gconf_client != NULL)
+	if (priv->settings != NULL)
 	{
-		g_object_unref (G_OBJECT (priv->gconf_client));
-		priv->gconf_client = NULL;
+		g_object_unref (G_OBJECT (priv->settings));
+		priv->settings = NULL;
 	}
+
 
 	G_OBJECT_CLASS (gphpedit_history_entry_parent_class)->finalize (object);
 }
@@ -184,42 +184,23 @@ get_history_store (GphpeditHistoryEntry *entry)
 	return (GtkListStore *) store;
 }
 
-static char *
-get_history_key (GphpeditHistoryEntry *entry)
-{
-	gchar *tmp;
-	gchar *key;
-
-	/*
-	 * We store the data under /apps/gnome-settings/
-	 * like the old GnomeEntry did. Maybe we should
-	 * consider moving it to the /gphpedit GConf prefix...
-	 * Or maybe we should just switch away from GConf.
-	 */
-
-	tmp = gconf_escape_key (entry->priv->history_id, -1);
-	key = g_strconcat ("/apps/gnome-settings/",
-			   "gphpedit",
-			   "/history-",
-			   tmp,
-			   NULL);
-	g_free (tmp);
-
-	return key;
-}
-
-static GSList *
-get_history_list (GphpeditHistoryEntry *entry)
+static gchar **
+get_history_items (GphpeditHistoryEntry *entry)
 {
 	GtkListStore *store;
 	GtkTreeIter iter;
+	GPtrArray *array;
 	gboolean valid;
-	GSList *list = NULL;
+	gint n_children;
 
 	store = get_history_store (entry);
 
 	valid = gtk_tree_model_get_iter_first (GTK_TREE_MODEL (store),
 					       &iter);
+	n_children = gtk_tree_model_iter_n_children (GTK_TREE_MODEL (store),
+						     NULL);
+
+	array = g_ptr_array_sized_new (n_children + 1);
 
 	while (valid)
 	{
@@ -230,35 +211,31 @@ get_history_list (GphpeditHistoryEntry *entry)
 				    0, &str,
 				    -1);
 
-		list = g_slist_prepend (list, str);
+		g_ptr_array_add (array, str);
 
 		valid = gtk_tree_model_iter_next (GTK_TREE_MODEL (store),
 						  &iter);
 	}
 
-	return g_slist_reverse (list);
+	g_ptr_array_add (array, NULL);
+
+	return (gchar **)g_ptr_array_free (array, FALSE);
 }
 
 static void
 gphpedit_history_entry_save_history (GphpeditHistoryEntry *entry)
 {
-	GSList *gconf_items;
-	gchar *key;
+	gchar **items;
 
 	g_return_if_fail (GPHPEDIT_IS_HISTORY_ENTRY (entry));
 
-	gconf_items = get_history_list (entry);
-	key = get_history_key (entry);
+	items = get_history_items (entry);
 
-	gconf_client_set_list (entry->priv->gconf_client,
-			      key,
-			      GCONF_VALUE_STRING,
-			      gconf_items,
-			      NULL);
+	g_settings_set_strv (entry->priv->settings,
+			     entry->priv->history_id,
+			     (const gchar * const *)items);
 
-	g_slist_foreach (gconf_items, (GFunc) g_free, NULL);
-	g_slist_free (gconf_items);
-	g_free (key);
+	g_strfreev (items);
 }
 
 static gboolean
@@ -378,39 +355,36 @@ gphpedit_history_entry_append_text (GphpeditHistoryEntry *entry,
 static void
 gphpedit_history_entry_load_history (GphpeditHistoryEntry *entry)
 {
-	GSList *gconf_items, *l;
+	gchar **items;
 	GtkListStore *store;
 	GtkTreeIter iter;
-	gchar *key;
-	guint i;
+	gsize i;
 
 	g_return_if_fail (GPHPEDIT_IS_HISTORY_ENTRY (entry));
 
 	store = get_history_store (entry);
-	key = get_history_key (entry);
 
-	gconf_items = gconf_client_get_list (entry->priv->gconf_client,
-					     key,
-					     GCONF_VALUE_STRING,
-					     NULL);
+	items = g_settings_get_strv (entry->priv->settings,
+				     entry->priv->history_id);
+	i = 0;
 
 	gtk_list_store_clear (store);
 
-	for (l = gconf_items, i = 0;
-	     l != NULL && i < entry->priv->history_length;
-	     l = l->next, i++)
+	/* Now the default value is an empty string so we have to take care
+	   of it to not add the empty string in the search list */
+	while (items[i] != NULL && *items[i] != '\0' &&
+	       i < entry->priv->history_length)
 	{
 		gtk_list_store_append (store, &iter);
-		gtk_list_store_set (store, 
+		gtk_list_store_set (store,
 				    &iter,
 				    0,
-				    l->data,
+				    items[i],
 				    -1);
+		i++;
 	}
 
-	g_slist_foreach (gconf_items, (GFunc) g_free, NULL);
-	g_slist_free (gconf_items);
-	g_free (key);
+	g_strfreev (items);
 }
 
 void
@@ -439,7 +413,7 @@ gphpedit_history_entry_init (GphpeditHistoryEntry *entry)
 
 	priv->completion = NULL;
 	
-	priv->gconf_client = gconf_client_get_default ();
+	priv->settings = g_settings_new ("org.gphpedit.history-entry");
 }
 
 void

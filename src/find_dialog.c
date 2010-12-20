@@ -112,7 +112,7 @@ SEARCH_DIALOG_init (SearchDialog *dialog)
 
   gtk_box_pack_start(GTK_BOX(box), findlabel, FALSE, FALSE, 0);
 
-  priv->findentry = gphpedit_history_entry_new ("find", TRUE);
+  priv->findentry = gphpedit_history_entry_new ("search-for-entry", TRUE);
 	gtk_widget_set_size_request (priv->findentry, 300, -1);
   // Set enter key in the text box to activate find
   gtk_entry_set_activates_default (GTK_ENTRY (gtk_bin_get_child (GTK_BIN (priv->findentry))), TRUE);

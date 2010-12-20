@@ -1,6 +1,7 @@
 <schemalist>
   <schema gettext-domain="@GETTEXT_PACKAGE@" id="org.gphpedit" path="/apps/gphpedit/">
     <child name="preferences" schema="org.gphpedit.preferences"/>
+    <child name="history-entry" schema="org.gphpedit.history-entry"/>
   </schema>
   <schema gettext-domain="@GETTEXT_PACKAGE@" id="org.gphpedit.preferences" path="/apps/gphpedit/preferences/">
     <child name="editor" schema="org.gphpedit.preferences.editor"/>
@@ -105,6 +106,14 @@
       <default>'php,inc,phtml,php3,xml,htm,html'</default>
       <_summary>php file extensions</_summary>
       <_description>Supported php file extensions.</_description>
+    </key>
+  </schema>
+  <schema id="org.gphpedit.history-entry" path="/apps/gphpedit/history-entry/">
+    <key name="search-for-entry" type="as">
+      <default>['']</default>
+    </key>
+    <key name="replace-with-entry" type="as">
+      <default>['']</default>
     </key>
   </schema>
 </schemalist>
