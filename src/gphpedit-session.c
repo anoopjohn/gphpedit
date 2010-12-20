@@ -311,19 +311,14 @@ gphpedit_session_set_int (GphpeditSession *session, const gchar *section,
  */
 void
 gphpedit_session_set_boolean (GphpeditSession *session, const gchar *section,
-						const gchar *key, gint value)
+						const gchar *key, gboolean value)
 {
 	g_return_if_fail (GPHPEDIT_IS_SESSION (session));
 	g_return_if_fail (section != NULL);
 	g_return_if_fail (key != NULL);
 
 	GphpeditSessionPriv *priv = GPHPEDIT_SESSION_GET_PRIVATE(session);
-	
-	if (!value)
-	{
-		g_key_file_remove_key (priv->key_file, section, key, NULL);
-		return;
-	}
+
 	g_key_file_set_boolean (priv->key_file, section, key, value);
 }
 
@@ -637,7 +632,7 @@ gphpedit_session_get_string_with_default (GphpeditSession *session, const gchar 
 	value = g_key_file_get_string (priv->key_file, section, key, &error);
 	if (error)
 	{
-		value = default_value;
+		value = (gchar *) default_value;
 		g_error_free(error);
 	}
 	

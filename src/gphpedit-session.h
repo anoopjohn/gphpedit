@@ -61,7 +61,7 @@ void gphpedit_session_clear_section (GphpeditSession *session,
 void gphpedit_session_set_int (GphpeditSession *session, const gchar *section,
 							 const gchar *key, gint value);
 void gphpedit_session_set_boolean (GphpeditSession *session, const gchar *section,
-							 const gchar *key, gint value);
+							 const gchar *key, gboolean value);
 void gphpedit_session_set_float (GphpeditSession *session, const gchar *section,
 							   const gchar *key, gfloat value);
 void gphpedit_session_set_string (GphpeditSession *session, const gchar *section,
