@@ -959,15 +959,12 @@ void preferences_manager_restore_data(PreferencesManager *preferences_manager)
 
 gboolean get_plugin_is_active(PreferencesManager *preferences_manager, const gchar *name)
 {
+  if(!preferences_manager || !name) return FALSE;
   gphpedit_debug(DEBUG_PREFS);
   PreferencesManagerDetails *prefdet;
   prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
   
-  gchar *key = g_strdup_printf("/gPHPEdit/plugins/%s/active", name);
-  gchar *subdir = g_strdup_printf("plugins/%s", name);
-  gboolean result = get_int_with_default(key, subdir, TRUE);
-  g_free(subdir);
-  g_free(key);
+  gboolean result = gphpedit_session_get_boolean_with_default (prefdet->session,"plugins", name, TRUE);
   return result;
 }
 
@@ -977,10 +974,8 @@ void set_plugin_is_active(PreferencesManager *preferences_manager, const gchar *
   gphpedit_debug(DEBUG_PREFS);
   PreferencesManagerDetails *prefdet;
   prefdet = PREFERENCES_MANAGER_GET_PRIVATE(preferences_manager);
-  
-  gchar *key = g_strdup_printf("/gPHPEdit/plugins/%s/active", name);
-  set_int (key, status);
-  g_free(key);
+  gphpedit_session_set_boolean (prefdet->session,"plugins", name, status);
+  gphpedit_session_sync(prefdet->session);
 }
 
 /**/
