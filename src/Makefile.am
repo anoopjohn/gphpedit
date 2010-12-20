@@ -33,7 +33,7 @@ dist_ui_DATA = preferences_dialog.ui \
   replace_dialog.ui
 
 AM_CFLAGS = \
-	$(WEBKIT_CFLAGS) $(GTK_CFLAGS) $(GCONF_CFLAGS) $(LIBXML_CFLAGS)\
+	$(WEBKIT_CFLAGS) $(GTK_CFLAGS) $(GLIB_CFLAGS) $(LIBXML_CFLAGS)\
 	-I$(top_srcdir)/src/gtkscintilla2 \
 	-Wall -DGTK -DSCI_LEXER \
 	-DPIXMAP_DIR=\""$(datadir)/pixmaps"\" \
@@ -157,6 +157,6 @@ gtkscintilla2/libgtkscintilla2.a:
 	cd gtkscintilla2 && $(MAKE) libgtkscintilla2.a && cd ..
 
 gphpedit_LDADD = \
-	$(WEBKIT_LIBS) $(GTK_LIBS) $(GCONF_LIBS) $(LIBXML_LIBS)\
+	$(WEBKIT_LIBS) $(GTK_LIBS) $(GLIB_LIBS) $(LIBXML_LIBS)\
 	gtkscintilla2/libgtkscintilla2.a\
 	gtkscintilla2/scintilla/bin/scintilla.a
