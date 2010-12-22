@@ -104,27 +104,31 @@ SEARCH_DIALOG_init (SearchDialog *dialog)
   SearchDialogPrivate *priv = SEARCH_DIALOG_GET_PRIVATE(dialog);
   priv->diagbox = gtk_dialog_get_content_area (GTK_DIALOG(dialog));
   gtk_box_set_spacing (GTK_BOX(priv->diagbox), 5);
-  GtkWidget *box = gtk_hbox_new(FALSE, 0);
-  gtk_widget_show(box);
-  GtkWidget *findlabel = gtk_label_new(_("Find"));
-  gtk_label_set_justify(GTK_LABEL(findlabel), GTK_JUSTIFY_LEFT);
-  gtk_widget_show(findlabel);
 
-  gtk_box_pack_start(GTK_BOX(box), findlabel, FALSE, FALSE, 0);
+  GtkBuilder *builder = gtk_builder_new ();
+  GError *error = NULL;
+  guint res = gtk_builder_add_from_file (builder, GPHPEDIT_UI_DIR "/find_dialog.ui", &error);
+  if (!res) {
+    g_critical ("Unable to load the UI file!");
+    g_error_free(error);
+    return ;
+  }
 
+  GtkWidget *box = GTK_WIDGET(gtk_builder_get_object (builder, "find_dialog_content"));
+  gtk_widget_show (box);
+  gtk_widget_reparent (box, priv->diagbox);
+
+  GtkWidget *findbox = GTK_WIDGET(gtk_builder_get_object (builder, "findbox"));
   priv->findentry = gphpedit_history_entry_new ("search-for-entry", TRUE);
 	gtk_widget_set_size_request (priv->findentry, 300, -1);
-  // Set enter key in the text box to activate find
+  /* Set enter key in the text box to activate find */
   gtk_entry_set_activates_default (GTK_ENTRY (gtk_bin_get_child (GTK_BIN (priv->findentry))), TRUE);
   gtk_widget_show (priv->findentry);
 
-  gtk_box_pack_start(GTK_BOX(box), priv->findentry, FALSE, FALSE, 6);
+  gtk_box_pack_start(GTK_BOX(findbox), priv->findentry, FALSE, FALSE, 6);
 
-  gtk_box_pack_start(GTK_BOX(priv->diagbox), box, FALSE, FALSE, 4);
-
-  /* Get selected text (Wendell) */
+  /* Get selected text */
   gchar *buffer;
-
   buffer = documentable_get_current_selected_text(DOCUMENTABLE(document_manager_get_current_document(main_window.docmg)));
   if (buffer) {
       gphpedit_history_entry_prepend_text	(GPHPEDIT_HISTORY_ENTRY(priv->findentry),buffer);
@@ -132,41 +136,10 @@ SEARCH_DIALOG_init (SearchDialog *dialog)
   }
   /* End get selected text */
 
-  GtkWidget *hbox = gtk_hbox_new(FALSE, 0);
-  gtk_widget_show(hbox);
-  gtk_box_pack_start(GTK_BOX(priv->diagbox), hbox, FALSE, FALSE, 0);
-
-  priv->checkcase = gtk_check_button_new_with_mnemonic (_("_Match case"));
-  gtk_widget_show (priv->checkcase);
-  gtk_box_pack_start (GTK_BOX (hbox), priv->checkcase, FALSE, FALSE, 0);
-  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (priv->checkcase), FALSE);
-
-  hbox = gtk_hbox_new (FALSE, 0);
-  gtk_widget_show (hbox);
-  gtk_box_pack_start(GTK_BOX(priv->diagbox), hbox, FALSE, FALSE, 0);
-
-  priv->checkwholeword = gtk_check_button_new_with_mnemonic (_("Match _entire word only"));
-  gtk_widget_show (priv->checkwholeword);
-  gtk_box_pack_start (GTK_BOX (hbox), priv->checkwholeword, FALSE, FALSE, 0);
-  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (priv->checkwholeword), FALSE);
-
-  hbox = gtk_hbox_new (FALSE, 0);
-  gtk_widget_show (hbox);
-  gtk_box_pack_start(GTK_BOX(priv->diagbox), hbox, FALSE, FALSE, 0);
-
-  priv->checkwholedoc = gtk_check_button_new_with_mnemonic (_("Wrap around"));
-  gtk_widget_show (priv->checkwholedoc);
-  gtk_box_pack_start (GTK_BOX (hbox), priv->checkwholedoc, FALSE, FALSE, 0);
-  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (priv->checkwholedoc), TRUE);
-
-  hbox = gtk_hbox_new (FALSE, 0);
-  gtk_widget_show (hbox);
-  gtk_box_pack_start(GTK_BOX(priv->diagbox), hbox, FALSE, FALSE, 0);
-
-  priv->checkregex = gtk_check_button_new_with_mnemonic (_("RegExp"));
-  gtk_widget_show (priv->checkregex);
-  gtk_box_pack_start (GTK_BOX (hbox), priv->checkregex, FALSE, FALSE, 0);
-  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (priv->checkregex), FALSE);
+  priv->checkcase = GTK_WIDGET(gtk_builder_get_object (builder, "match_case_checkbutton"));
+  priv->checkwholeword = GTK_WIDGET(gtk_builder_get_object (builder, "entire_word_checkbutton"));
+  priv->checkwholedoc = GTK_WIDGET(gtk_builder_get_object (builder, "wrapdoc"));
+  priv->checkregex = GTK_WIDGET(gtk_builder_get_object (builder, "regexp"));
 
   priv->close_button = gtk_dialog_add_button (GTK_DIALOG(dialog), GTK_STOCK_CLOSE, GTK_RESPONSE_DELETE_EVENT);
   priv->find_button = gtk_dialog_add_button (GTK_DIALOG(dialog), GTK_STOCK_FIND, GTK_RESPONSE_OK);

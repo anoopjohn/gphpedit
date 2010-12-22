@@ -30,6 +30,7 @@ uidir = $(pkgdatadir)/ui
 dist_ui_DATA = preferences_dialog.ui \
   classbrowser.ui \
   filebrowser.ui  \
+  find_dialog.ui \
   replace_dialog.ui
 
 AM_CFLAGS = \
