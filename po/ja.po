@@ -1,5 +1,5 @@
 # Japanese translation of gPHPEdit.
-# Copyright © 2003-2006 Andy Jeffries, 2009-2010 Anoop John.
+# Copyright © 2003-2006 Andy Jeffries, 2009-2010 Anoop John
 # This file is distributed under the same license as the gPHPEdit.
 # Tadashi Jokagi <elf@elf.no-ip.org>, 2010.
 #
@@ -38,8 +38,57 @@ msgstr "名前"
 msgid "FILE:"
 msgstr "ファイル:"
 
-#: ../src/document_loader.c:277
-#: ../src/document_loader.c:289
+#: ../src/document.c:577
+#: ../src/document.c:1361
+msgid "Help: "
+msgstr "ヘルプ: "
+
+#: ../src/document.c:580
+#: ../src/document.c:1363
+msgid "Preview: "
+msgstr "プレビュー: "
+
+#: ../src/document.c:622
+#: ../src/document.c:655
+#, c-format
+msgid "<b>The file \"%s\" has been externally modified.</b>"
+msgstr "<b>ファイル \"%s\" が外部から変更されました。</b>"
+
+#: ../src/document.c:664
+msgid "Do you want reload it?"
+msgstr "再読み込みしますか？"
+
+#: ../src/document.c:688
+#: ../src/document.c:1626
+msgid "Untitled"
+msgstr "無題"
+
+#: ../src/document.c:1915
+msgid "No marker found"
+msgstr "マーカーが見つかりませんでした"
+
+#: ../src/document.c:1998
+#: ../src/document.c:2007
+msgid " - gPHPEdit"
+msgstr " - gPHPEdit　"
+
+#: ../src/document.c:2189
+msgid "Do you want to replace this occurence?"
+msgstr "このオカレンスを置換しますか？"
+
+#: ../src/document.c:2190
+#: ../src/document_manager.c:533
+#: ../src/filebrowser_backend.c:350
+msgid "Question"
+msgstr "質問"
+
+#: ../src/document.c:2446
+#, c-format
+msgid "Unhandle keyboard macro function %d, please report\n"
+msgstr "ファンクション %d は未ハンドルのキーボードマクロです。宜しければ報告して下さい\n"
+
+#: ../src/document_loader.c:282
+#: ../src/document_loader.c:294
 #, c-format
 msgid "Help for function not found: %s"
 msgstr "ファンクションのヘルプが見つかりませんでした: %s"
@@ -49,7 +98,7 @@ msgstr "ファンクションのヘルプが見つかりませんでした: %s"
 msgid "gPHPEdit UTF-8 Error: %s"
 msgstr "gPHPEdit UTF-8 エラー: %s"
 
-#: ../src/document_loader.c:316
+#: ../src/document_loader.c:321
 #, c-format
 msgid "Converted to UTF-8 size: %u"
 msgstr "UTF-8 のサイズを変換: %u"
@@ -82,7 +131,7 @@ msgstr "ファイルの情報を取得出来ませんでした。GIO エラー: 
 #: ../gphpedit.desktop.in.h:3
 #: ../src/templates_editor.c:227
 msgid "gPHPEdit"
-msgstr "gPHPEdit"
+msgstr "gPHPEdit　"
 
 #: ../src/document_loader.c:404
 msgid "Sorry, I cannot open this kind of file.\n"
@@ -125,7 +174,7 @@ msgstr "質問"
 msgid "Are you sure you wish to reload the current file, losing your changes?"
 msgstr "変更内容は失われますが、現在のファイルを再読み込みしても宜しいですか？"
 
-#: ../src/document_manager.c:521
+#: ../src/document_manager.c:538
 #, c-format
 msgid "Reloading %s"
 msgstr "%s を再読み込みしています"
@@ -421,6 +470,10 @@ msgstr "Perl ファイル (*.pl *.ph *.pm)"
 msgid "Cobol Files (*.cbl)"
 msgstr "Cobol ファイル (*.cbl)"
 
+#: ../src/main_window_callbacks.c:224
+msgid "Python Files (*.py *.pyd *.pyw)"
+msgstr "Python ファイル (*.py *.pyd *.pyw)"
+
 #: ../src/main_window_callbacks.c:225
 msgid "Python Files (*.py *.pyd *.pyw)"
 msgstr "Python ファイル (*.py *.pyd *.pyw)"
@@ -703,7 +756,7 @@ msgstr "強制(_F)"
 
 #: ../src/menubar.c:535
 msgid "_PHP/HTML/XML"
-msgstr "_PHP/HTML/XML"
+msgstr "_PHP/HTML/XML　"
 
 #: ../src/menubar.c:535
 msgid "Force syntax highlighting to PHP/HTML/XML mode"
@@ -711,7 +764,7 @@ msgstr "シンタックスハイライトを PHP/HTML/XML モードに強制す�
 
 #: ../src/menubar.c:537
 msgid "_CSS"
-msgstr "_CSS"
+msgstr "_CSS　"
 
 #: ../src/menubar.c:537
 msgid "Force syntax highlighting to CSS mode"
@@ -719,7 +772,7 @@ msgstr "シンタックスハイライトを CSS モードに強制する"
 
 #: ../src/menubar.c:539
 msgid "C/C_++"
-msgstr "C/C_++"
+msgstr "C/C_++　"
 
 #: ../src/menubar.c:539
 msgid "Force syntax highlighting to C/C++ mode"
@@ -727,7 +780,7 @@ msgstr "シンタックスハイライトを C/C++ モードに強制する"
 
 #: ../src/menubar.c:541
 msgid "_SQL"
-msgstr "_SQL"
+msgstr "_SQL　"
 
 #: ../src/menubar.c:541
 msgid "Force syntax highlighting to SQL mode"
@@ -735,7 +788,7 @@ msgstr "シンタックスハイライトを SQL モードに強制する"
 
 #: ../src/menubar.c:543
 msgid "_Perl"
-msgstr "_Perl"
+msgstr "_Perl　"
 
 #: ../src/menubar.c:543
 msgid "Force syntax highlighting to Perl mode"
@@ -743,7 +796,7 @@ msgstr "シンタックスハイライトを Perl モードに強制する"
 
 #: ../src/menubar.c:545
 msgid "_Cobol"
-msgstr "_Cobol"
+msgstr "_Cobol　"
 
 #: ../src/menubar.c:545
 msgid "Force syntax highlighting to Cobol mode"
@@ -751,7 +804,7 @@ msgstr "シンタックスハイライトを Cobol モードに強制する"
 
 #: ../src/menubar.c:547
 msgid "P_ython"
-msgstr "P_ython"
+msgstr "P_ython　"
 
 #: ../src/menubar.c:547
 msgid "Force syntax highlighting to Python mode"
@@ -786,7 +839,8 @@ msgstr "プラグイン(_P)"
 msgid "_Help"
 msgstr "ヘルプ(_H)"
 
-#: ../src/pluginmanager.c:103
+#: ../src/pluginmanager.c:104
+#: ../src/preferences_manager.c:566
 #, c-format
 msgid "Unable to create ~/.gphpedit/ (%d) %s"
 msgstr "~/.gphpedit/ (%d) %s を作成出来ません"
@@ -969,7 +1023,7 @@ msgstr "オカレンス \"%s\" が１つ見つかった為、置換しました�
 msgid "\"%d\" occurences of \"%s\" found, all replaced."
 msgstr "\"%d\" 個のオカレンス \"%s\" が見つかった為、全て置換しました。"
 
-#: ../src/replace_dialog.c:185
+#: ../src/replace_dialog.c:183
 msgid "Replace with: "
 msgstr "置換する: "
 
@@ -989,7 +1043,7 @@ msgstr "PHP CLI の呼び出しエラー（PHP のコマンドラインバイナ
 msgid "Syntax Check Output"
 msgstr "シンタックスチェックの出力"
 
-#: ../src/syntax_check_window.c:211
+#: ../src/syntax_check_window.c:212
 msgid "You don't have any files open to check\n"
 msgstr "チェックするファイルが開かれていません\n"
 
@@ -1303,4 +1357,3 @@ msgstr "ミキサー"
 #~ msgstr ""
 #~ "ファンクション %d は未ハンドルのキーボードマクロです。宜しければ報告して下"
 #~ "さい\n"
-
