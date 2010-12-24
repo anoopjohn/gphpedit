@@ -217,3 +217,9 @@ void documentable_apply_preferences (Documentable  *self)
 	DOCUMENTABLE_GET_IFACE (self)->apply_preferences (self);
 }
 
+void documentable_grab_focus (Documentable  *self)
+{
+  if (!self) return ;
+	DOCUMENTABLE_GET_IFACE (self)->grab_focus (self);
+}
+

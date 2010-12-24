@@ -154,7 +154,7 @@ static gboolean incremental_search_key_release_event(GtkWidget *widget, GdkEvent
         DocumentManager *docmg = document_manager_new ();
         g_object_get(document_manager_get_current_document(docmg), "editor_widget", &document_widget, NULL);
         gtk_widget_hide(user_data);
-        gtk_widget_grab_focus(document_widget);
+        documentable_grab_focus(DOCUMENTABLE(document_manager_get_current_document(docmg)));
         g_object_unref(docmg);
       return TRUE;
     }

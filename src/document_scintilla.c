@@ -492,7 +492,7 @@ static gboolean document_scintilla_search_replace_text(Documentable  *doc, const
     if (ask_replace) {
       // Prompt for replace?
       GtkWidget *replace_prompt_dialog;
-      replace_prompt_dialog = gtk_message_dialog_new(GTK_WINDOW(main_window.window),GTK_DIALOG_DESTROY_WITH_PARENT,
+      replace_prompt_dialog = gtk_message_dialog_new(GTK_WINDOW(main_window.window), GTK_DIALOG_DESTROY_WITH_PARENT,
       GTK_MESSAGE_QUESTION,GTK_BUTTONS_YES_NO,
             _("Do you want to replace this occurence?"));
       gtk_window_set_title(GTK_WINDOW(replace_prompt_dialog), _("Question"));
@@ -505,8 +505,8 @@ static gboolean document_scintilla_search_replace_text(Documentable  *doc, const
         gtk_scintilla_set_selection_start(GTK_SCINTILLA(docdet->scintilla), selection_start);
         gtk_scintilla_set_selection_end(GTK_SCINTILLA(docdet->scintilla), selection_start + strlen(replace));
         }
-      gtk_widget_destroy(replace_prompt_dialog);
-      last_found++;
+        gtk_widget_destroy(replace_prompt_dialog);
+        last_found++;
     } else {
     gtk_scintilla_replace_sel(GTK_SCINTILLA(docdet->scintilla), replace);
     gtk_scintilla_set_selection_start(GTK_SCINTILLA(docdet->scintilla), start_found);
@@ -654,7 +654,7 @@ static gchar *document_scintilla_get_current_word (Documentable  *doc)
   return buffer;
 }
 
-static void document_scintilla_replace_current_selection (Documentable *doc, gchar *data){
+static void document_scintilla_replace_current_selection (Documentable *doc, gchar *data) {
   g_return_if_fail(doc && data);
   Document_ScintillaDetails *docdet = DOCUMENT_SCINTILLA_GET_PRIVATE(doc);
   gtk_scintilla_replace_sel(GTK_SCINTILLA(docdet->scintilla), data);
@@ -676,6 +676,14 @@ static void document_scintilla_apply_preferences (Documentable *doc)
      documentable_set_type(doc, TAB_FILE);
   }
   documentable_set_type(doc, type);
+}
+
+static void document_scintilla_grab_focus (Documentable *doc)
+{
+  gphpedit_debug (DEBUG_DOCUMENT);
+  g_return_if_fail(doc);
+  Document_ScintillaDetails *docdet = DOCUMENT_SCINTILLA_GET_PRIVATE(doc);
+  gtk_widget_grab_focus(docdet->scintilla);
 }
 
 static void document_scintilla_documentable_init(DocumentableIface *iface, gpointer user_data)
@@ -715,7 +723,7 @@ static void document_scintilla_documentable_init(DocumentableIface *iface, gpoin
   iface->insert_text = document_scintilla_insert_text;
   iface->replace_current_selection = document_scintilla_replace_current_selection;
   iface->apply_preferences = document_scintilla_apply_preferences;
-
+  iface->grab_focus = document_scintilla_grab_focus;
 }
 
 enum
