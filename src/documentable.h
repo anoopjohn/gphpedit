@@ -55,6 +55,7 @@ struct _DocumentableIface
   void (*insert_text) (Documentable *iface, gchar *new_text);
   void (*replace_current_selection) (Documentable *iface, gchar *new_text);
   void (*apply_preferences) (Documentable *iface);
+  void (*grab_focus) (Documentable *iface);
 };
 
 GType          documentable_get_type        (void) G_GNUC_CONST;
@@ -96,6 +97,7 @@ void           documentable_replace_text (Documentable  *self, gchar *new_text);
 void           documentable_insert_text (Documentable  *self, gchar *new_text);
 void           documentable_replace_current_selection (Documentable  *self, gchar *new_text);
 void           documentable_apply_preferences (Documentable  *self);
+void           documentable_grab_focus (Documentable  *self);
 
 G_END_DECLS
 
