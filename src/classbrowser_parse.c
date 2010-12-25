@@ -28,7 +28,8 @@
 #include "classbrowser_parse.h"
 #include "gvfs_utils.h"
 #include "document_manager.h"
-static gchar *read_text_file(gchar *filename){
+
+static gchar *read_text_file(gchar *filename) {
 
   gchar *buffer=NULL;
 
@@ -539,29 +540,4 @@ void classbrowser_parse_file(ClassbrowserBackend *classback, gchar *filename)
   if (within_function) g_free(within_function);
   if (beforevarname) g_free(beforevarname);
   g_free(file_contents);
-}
-/*
- * gboolean check_variable_before(const gchar *line_text)
- * check if there is a valid php variable has suffix in the gchar input
- * something like this "p$sk->" return FALSE
- * $this-> return TRUE
- * $var($this-> return TRUE
- * $var[$this-> return TRUE
- */
-gboolean check_php_variable_before(const gchar *line_text){
-
-  gphpedit_debug(DEBUG_CLASSBROWSER_PARSE);
-
-  gboolean r=FALSE;
-  int i;
-  if (!strchr(line_text,'$')) return r;
-  for (i=strlen(line_text)-1;i>=0;i--){
-    if (*(line_text+i)==';') break;
-    if (*(line_text+i)==' ') break;
-    if (*(line_text+i)=='$' && (*(line_text+i-1)==' ' || *(line_text+i-1)=='(' || *(line_text+i-1)=='[' || i==0)){  
-    r=TRUE; 
-    break;
-    }
-  }
-  return r;
 }

@@ -39,7 +39,6 @@
 #include "gvfs_utils.h"
 #include "gphpedit-statusbar.h"
 #include "classbrowser_ui.h"
-#include "classbrowser_parse.h"
 #include "images.h"
 /* lexer headers */
 #include "tab_cobol.h"
@@ -1466,7 +1465,7 @@ static gboolean calltip_callback(gpointer data)
     }
     g_free(prefix);
   }
-  docdet->calltip_timer_set=FALSE;
+  docdet->calltip_timer_set = FALSE;
   return FALSE;
 }
 
