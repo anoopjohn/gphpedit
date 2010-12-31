@@ -23,6 +23,7 @@
 */
 
 #include "config.h"
+#include <glib/gi18n.h>
 #include "main_window.h"
 #include "templates.h"
 #include "edit_template.h"

@@ -52,7 +52,8 @@ typedef struct
 {
 	GObjectClass parent_class;
 
-	void (* load_complete) (DocumentManager *doc, gboolean result, gpointer user_data);
+  void (* new_document) (DocumentManager *docmg, Document *doc, gpointer user_data);
+
 } DocumentManagerClass;
 
 /* Basic GObject requirements. */
@@ -64,6 +65,7 @@ void document_manager_document_reload(DocumentManager *docmg);
 Document *document_manager_find_document_from_widget (DocumentManager *docmg, void *widget);
 Document *document_manager_find_document_from_filename (DocumentManager *docmg, gchar *filename);
 Document *document_manager_get_current_document (DocumentManager *docmg);
+Documentable *document_manager_get_current_documentable (DocumentManager *docmg);
 void document_manager_get_context_help(DocumentManager *docmg);
 gboolean document_manager_set_current_document_from_widget (DocumentManager *docmg, GtkWidget *child);
 void document_manager_get_document_preview(DocumentManager *docmg);

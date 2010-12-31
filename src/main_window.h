@@ -25,17 +25,15 @@
 #ifndef MAIN_WINDOW_H
 #define MAIN_WINDOW_H
 
-#include "main.h"
-#include "document.h"
+#include <gtk/gtk.h>
+
 #include "document_manager.h"
-#include "calltip.h"
-#include "tab.h"
 #include "menubar.h"
 #include "toolbar.h"
 #include "preferences_manager.h"
 #include "templates.h"
 #include "gtksourcestyleschememanager.h"
-
+#include "symbol_manager.h"
 
 typedef struct
 {
@@ -45,7 +43,7 @@ typedef struct
 
   GtkSourceStyleSchemeManager *stylemg;
 
-  CalltipManager *clltipmg;
+  SymbolManager *symbolmg;
 
   GtkWidget *window;
   GtkWidget *prinbox;

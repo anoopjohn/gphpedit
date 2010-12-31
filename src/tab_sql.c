@@ -41,10 +41,10 @@ void tab_sql_set_lexer(GtkScintilla *scintilla)
 
 gtk_scintilla_set_keywords(scintilla, 1, "all alter and any array as asc at authid avg begin between binary_integer body boolean bulk by char char_base check close cluster collect comment commit compress connect constant create current currval cursor date day declare decimal default delete desc distinct do drop else elsif end exception exclusive execute exists exit extends false fetch float for forall from function goto group having heap hour if immediate in index indicator insert integer interface intersect interval into is isolation java level like limited lock long loop max min minus minute mlslabel mod mode month natural naturaln new nextval nocopy not nowait null number number_base ocirowid of on opaque open operator option or order organization others out package partition pctfree pls_integer positive positiven pragma prior private procedure public raise range raw real record ref release return reverse rollback row rowid rownum rowtype savepoint second select separate set share smallint space sql sqlcode sqlerrm start stddev subtype successful sum synonym sysdate table then time timestamp to trigger true type uid union unique update use user validate values varchar varchar2 variance view when whenever where while with work write year zone");
 
-  const gchar *font;
+  gchar *font;
   guint size;
-  g_object_get(prefmg, "style_font_name", &font,"font_size", &size, NULL);
-  const gchar *style_name;
+  g_object_get(prefmg, "style_font_name", &font, "font_size", &size, NULL);
+  gchar *style_name;
   g_object_get(prefmg, "style_name", &style_name, NULL);
 
   GtkSourceStyleScheme	*scheme = gtk_source_style_scheme_manager_get_scheme (main_window.stylemg, style_name);
@@ -72,6 +72,8 @@ gtk_scintilla_set_keywords(scintilla, 1, "all alter and any array as asc at auth
   set_scintilla_lexer_default_style(GTK_WIDGET(scintilla), scheme, SCE_SQL_USER4, font, size);
 
   gtk_scintilla_colourise(scintilla, 0, -1);
+  g_free(font);
+  g_free(style_name);
   g_object_unref(prefmg);
 }
 

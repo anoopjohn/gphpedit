@@ -1,4 +1,4 @@
-/* This file is part of gPHPEdit, a GNOME2 PHP Editor.
+/* This file is part of gPHPEdit, a GNOME PHP Editor.
 
    Copyright (C) 2003, 2004, 2005 Andy Jeffries <andy at gphpedit.org>
    Copyright (C) 2009 Anoop John <anoop dot john at zyxware.com>
@@ -68,7 +68,7 @@ gboolean get_preferences_manager_show_filebrowser(PreferencesManager *preference
 void set_preferences_manager_show_filebrowser(PreferencesManager *preferences_manager, gboolean new_status);
 gboolean get_preferences_manager_show_statusbar(PreferencesManager *preferences_manager);
 void set_preferences_manager_show_statusbar(PreferencesManager *preferences_manager, gboolean new_status);
-gboolean get_preferences_manager_show_maintoolbar(PreferencesManager *preferences_manager);
+gboolean get_preferences_manager_show_maintoolbar(PreferencesManager *preferences_manager); //FIXME
 void set_preferences_manager_show_maintoolbar(PreferencesManager *preferences_manager, gboolean new_status);
 /**/
 GSList *get_preferences_manager_search_history(PreferencesManager *preferences_manager);

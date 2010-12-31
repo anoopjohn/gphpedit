@@ -22,21 +22,22 @@
    The GNU General Public License is contained in the file COPYING.
 */
 #include <stdlib.h>
+#include <string.h>
 
 #include "debug.h"
-#include "tab.h"
 #include "classbrowser_parse.h"
 #include "gvfs_utils.h"
 #include "document_manager.h"
 
-static gchar *read_text_file(gchar *filename) {
-
+static gchar *read_text_file(gchar *filename) 
+{
   gchar *buffer=NULL;
 
   Document *document;
   gphpedit_debug(DEBUG_CLASSBROWSER);
   DocumentManager *docmg = document_manager_new();
-  document = document_manager_find_document_from_filename (docmg, filename);  
+  document = document_manager_find_document_from_filename (docmg, filename);
+  if (document) buffer = documentable_get_text (DOCUMENTABLE(document));
   g_object_unref(docmg);
   if (!buffer){
     buffer = read_text_file_sync(filename);
@@ -177,7 +178,7 @@ gint str_sec_print(gchar *label, gchar *pstart, gchar *pend, guint line_number) 
   return 0;
 }
 
-void classbrowser_parse_file(ClassbrowserBackend *classback, gchar *filename)
+void classbrowser_parse_file(SymbolBdPHP *symbolbd, gchar *filename)
 {
   gchar *file_contents;
   gchar *o; // original pointer to start of contents
@@ -392,7 +393,7 @@ void classbrowser_parse_file(ClassbrowserBackend *classback, gchar *filename)
             #ifdef DEBUG
               gphpedit_debug_message(DEBUG_CLASSBROWSER_PARSE, "%s(%d): Class '%s'", filename, line_number, within_class);
             #endif
-            classbrowser_classlist_add(classback, within_class, filename, line_number,TAB_PHP);
+            symbol_bd_php_classlist_add(symbolbd, within_class, filename, line_number);
             within_class_name = FALSE;
           }
           else if (check_previous(o, c, "function ") && non_letter_before(o, c, "function ")) {
@@ -428,13 +429,13 @@ void classbrowser_parse_file(ClassbrowserBackend *classback, gchar *filename)
           if ( function_awaiting_brace_or_parenthesis && is_opening_brace(*c)) {
             function_awaiting_brace_or_parenthesis = FALSE;
             if (within_class) {
-              classbrowser_functionlist_add(classback,within_class, within_function, filename, TAB_PHP, line_number, NULL);
+              symbol_bd_php_functionlist_add(symbolbd,within_class, within_function, filename, line_number, NULL);
               #ifdef DEBUG
                 gphpedit_debug_message(DEBUG_CLASSBROWSER_PARSE, "%s(%d): Class method %s::%s", filename, line_number, within_class, within_function);
               #endif
             }
             else {
-              classbrowser_functionlist_add(classback,NULL, within_function, filename, TAB_PHP, line_number, NULL);
+              symbol_bd_php_functionlist_add(symbolbd,NULL, within_function, filename, line_number, NULL);
               #ifdef DEBUG
                 gphpedit_debug_message(DEBUG_CLASSBROWSER_PARSE, "%s(%d): Function %s", filename, line_number, within_function);
               #endif
@@ -454,13 +455,13 @@ void classbrowser_parse_file(ClassbrowserBackend *classback, gchar *filename)
             strncpy(param_list, start_param_list, param_list_length);
             param_list[param_list_length]='\0';
             if (within_class) {
-              classbrowser_functionlist_add(classback, within_class, within_function, filename, TAB_PHP, line_number, param_list);
+              symbol_bd_php_functionlist_add(symbolbd, within_class, within_function, filename, line_number, param_list);
               #ifdef DEBUG
                 gphpedit_debug_message(DEBUG_CLASSBROWSER_PARSE, "%s(%d): Class method %s::%s(%s)", filename, line_number, within_class, within_function, param_list);
               #endif
             }
             else {
-              classbrowser_functionlist_add(classback, NULL, within_function, filename, TAB_PHP,line_number, param_list);
+              symbol_bd_php_functionlist_add(symbolbd, NULL, within_function, filename,line_number, param_list);
               #ifdef DEBUG
                 gphpedit_debug_message(DEBUG_CLASSBROWSER_PARSE, "%s(%d): Function %s(%s)", filename, line_number, within_function, param_list);
               #endif
@@ -471,7 +472,6 @@ void classbrowser_parse_file(ClassbrowserBackend *classback, gchar *filename)
             if (is_identifier_char(*c)){
               posvarname=c;
             } else {
-              //g_print("char:%c ret:false\n",*c);
               posiblevar=FALSE;
             int len=posvarname - startvarname +1; /*include initial $*/
               if (len>1){ /*only if we have $ and something more */
@@ -488,7 +488,7 @@ void classbrowser_parse_file(ClassbrowserBackend *classback, gchar *filename)
                     #ifdef DEBUG
                     gphpedit_debug_message(DEBUG_CLASSBROWSER_PARSE, "Classbrowser var added:%s",varname);
                     #endif
-                    classbrowser_varlist_add(classback, varname, within_function, filename, TAB_PHP);
+                    symbol_bd_php_varlist_add(symbolbd, varname, within_function, filename);
                     g_free(beforevarname);
                     beforevarname=g_strdup(varname);
                   }

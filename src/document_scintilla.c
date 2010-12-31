@@ -38,8 +38,9 @@
 #include "main_window_callbacks.h"
 #include "gvfs_utils.h"
 #include "gphpedit-statusbar.h"
-#include "classbrowser_ui.h"
+//#include "classbrowser_ui.h"
 #include "images.h"
+
 /* lexer headers */
 #include "tab_cobol.h"
 #include "tab_css.h"
@@ -1252,10 +1253,10 @@ static void tab_set_configured_scintilla_properties(GtkScintilla *scintilla)
   PreferencesManager *pref = preferences_manager_new ();
   gboolean edge_mode, show_indent_guides, higthlight_caret_line, line_wrapping, tabs_instead_spaces;
   gint edge_column, font_quality;
-  const gchar *font;
+  gchar *font;
   g_object_get(pref, "edge_mode", &edge_mode,"edge_column", &edge_column, "show_indentation_guides", &show_indent_guides,
        "higthlight_caret_line", &higthlight_caret_line, "line_wrapping",&line_wrapping,
-        "tabs_instead_spaces",&tabs_instead_spaces,"font_quality", &font_quality, "style_font_name", &font, NULL);
+        "tabs_instead_spaces", &tabs_instead_spaces,"font_quality", &font_quality, "style_font_name", &font, NULL);
   
   gtk_scintilla_set_wrap_mode(scintilla, line_wrapping);
   gtk_scintilla_set_h_scroll_bar(scintilla, !line_wrapping); /* if line wrapping is ON disable hscrollbar*/
@@ -1263,12 +1264,14 @@ static void tab_set_configured_scintilla_properties(GtkScintilla *scintilla)
   gtk_scintilla_style_clear_all(scintilla);
 
   guint size;
-  const gchar *style_name;
+  gchar *style_name;
   gint indentation_size, tab_size;
   g_object_get(pref, "style_name", &style_name, "indentation_size", &indentation_size, 
     "font_size", &size, "tab_size", &tab_size, NULL);
   GtkSourceStyleScheme	*scheme = gtk_source_style_scheme_manager_get_scheme (main_window.stylemg, style_name);
+  g_free(style_name);
   gtk_source_style_scheme_apply (scheme, GTK_WIDGET(scintilla), font, size);
+  g_free(font);
   /* set font quality */
   gtk_scintilla_set_font_quality(scintilla, font_quality);
   gtk_scintilla_set_caret_line_visible(scintilla, higthlight_caret_line);
@@ -1424,7 +1427,8 @@ static gboolean auto_memberfunc_complete_callback(gpointer data)
   current_pos = documentable_get_current_position(DOCUMENTABLE(doc));
   if (current_pos == GPOINTER_TO_INT(data)) {
     gchar *prefix = documentable_get_current_word(DOCUMENTABLE(doc));
-    gchar *calltip = classbrowser_autocomplete_member_function(GPHPEDIT_CLASSBROWSER(main_window.classbrowser), prefix);
+//    gchar *calltip = classbrowser_autocomplete_member_function(GPHPEDIT_CLASSBROWSER(main_window.classbrowser), prefix);
+    gchar *calltip = symbol_manager_get_symbols_matches (main_window.symbolmg, prefix, SYMBOL_FUNCTION, docdet->type);
     if (calltip && strlen(calltip)!=0) gtk_scintilla_user_list_show(GTK_SCINTILLA(docdet->scintilla), 1, calltip);
 //    gtk_scintilla_autoc_show(GTK_SCINTILLA(docdet->scintilla), current_pos, calltip);
     g_free(prefix);
@@ -1441,7 +1445,8 @@ static gboolean auto_complete_callback(gpointer data)
   current_pos = documentable_get_current_position(DOCUMENTABLE(doc));
   if (current_pos == GPOINTER_TO_INT(data)) {
     gchar *prefix = documentable_get_current_word(DOCUMENTABLE(doc));
-    gchar *calltip = calltip_manager_autocomplete_word(main_window.clltipmg, docdet->type, prefix);
+    gchar *calltip = symbol_manager_get_symbols_matches (main_window.symbolmg, prefix, SYMBOL_FUNCTION | SYMBOL_CLASS | SYMBOL_VAR, docdet->type);
+//    gchar *calltip = calltip_manager_autocomplete_word(main_window.clltipmg, docdet->type, prefix);
     if (calltip && strlen(calltip)!=0) gtk_scintilla_user_list_show(GTK_SCINTILLA(docdet->scintilla), 1, calltip);
     g_free(prefix);
     g_free(calltip);
@@ -1458,7 +1463,8 @@ static gboolean calltip_callback(gpointer data)
   current_pos = documentable_get_current_position(DOCUMENTABLE(doc));
   if (current_pos == GPOINTER_TO_INT(data)) {
     gchar *prefix = documentable_get_current_word(DOCUMENTABLE(doc));
-    gchar *calltip = calltip_manager_show_call_tip(main_window.clltipmg, docdet->type, prefix);
+    gchar *calltip = symbol_manager_get_calltip (main_window.symbolmg, prefix, docdet->type);
+//    gchar *calltip = calltip_manager_show_call_tip(main_window.clltipmg, docdet->type, prefix);
     if (calltip){
       gtk_scintilla_call_tip_show(GTK_SCINTILLA(docdet->scintilla), current_pos, calltip);
       g_free(calltip);
@@ -1639,7 +1645,7 @@ static void show_calltip (Document_ScintillaDetails *docdet, gint pos)
     g_object_get(pref, "calltip_delay", &delay, NULL);
     g_object_unref(pref);
     docdet->calltip_timer_id = g_timeout_add(delay, calltip_callback, GINT_TO_POINTER(pos));
-    docdet->calltip_timer_set=TRUE;
+    docdet->calltip_timer_set = TRUE;
   }
 }
 
@@ -1662,7 +1668,8 @@ static gboolean auto_complete_classes_callback(gpointer data)
   gint current_pos;
   current_pos = documentable_get_current_position(DOCUMENTABLE(doc));
   if (current_pos == GPOINTER_TO_INT(data)) {
-    gchar *autocomp = classbrowser_get_autocomplete_php_classes_string(GPHPEDIT_CLASSBROWSER(main_window.classbrowser)); 
+    gchar *autocomp = symbol_manager_get_classes (main_window.symbolmg, docdet->type);
+//classbrowser_get_autocomplete_php_classes_string(GPHPEDIT_CLASSBROWSER(main_window.classbrowser)); 
     if (autocomp) gtk_scintilla_user_list_show(GTK_SCINTILLA(docdet->scintilla), 2, autocomp);
     g_free(autocomp); /*release resources*/
   }
@@ -1678,7 +1685,8 @@ static gboolean auto_complete_php_variables_callback(gpointer data)
   current_pos = documentable_get_current_position(DOCUMENTABLE(doc));
   if (current_pos == GPOINTER_TO_INT(data)) {
     gchar *prefix = documentable_get_current_word(DOCUMENTABLE(doc));
-    gchar *result = classbrowser_autocomplete_php_variables(GPHPEDIT_CLASSBROWSER(main_window.classbrowser), prefix);
+    gchar *result = symbol_manager_get_symbols_matches (main_window.symbolmg, prefix, SYMBOL_VAR, docdet->type);
+//    gchar *result = classbrowser_autocomplete_php_variables(GPHPEDIT_CLASSBROWSER(main_window.classbrowser), prefix);
     if (result) gtk_scintilla_user_list_show(GTK_SCINTILLA(docdet->scintilla), 1, result);
     g_free(prefix);
   }
@@ -2518,7 +2526,7 @@ static gchar *document_scintilla_get_title(Document_Scintilla *doc)
   g_free(filename);
   dir = filename_get_relative_path(tmp);
   g_free(tmp);
-  g_string_printf (title,"%s (%s)", docdet->short_filename,dir);
+  g_string_printf (title,"%s (%s)", docdet->short_filename, dir);
   g_free(dir);
   g_string_append(title, _(" - gPHPEdit"));
   gboolean saved_status;

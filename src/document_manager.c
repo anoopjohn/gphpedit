@@ -35,6 +35,7 @@
 #include "gphpedit-statusbar.h"
 #include "classbrowser_ui.h"
 #include "document_loader.h"
+#include "tab.h"
 
 /*
 * document_manager private struct
@@ -44,6 +45,15 @@ struct DocumentManagerDetails
   Document *current_document;
   GSList *editors;
 };
+
+/* object signal enumeration */
+enum {
+	NEW_DOCUMENT,
+	LAST_SIGNAL
+};
+
+static guint signals[LAST_SIGNAL];
+
 
 #define DOCUMENT_MANAGER_GET_PRIVATE(object)(G_TYPE_INSTANCE_GET_PRIVATE ((object),\
 					    DOCUMENT_MANAGER_TYPE,\
@@ -89,6 +99,17 @@ document_manager_class_init (DocumentManagerClass *klass)
   object_class = G_OBJECT_CLASS (klass);
   object_class->finalize = document_manager_finalize;
   object_class->constructor = document_manager_constructor;
+
+	signals[NEW_DOCUMENT] =
+		g_signal_new ("new_document",
+		              G_TYPE_FROM_CLASS (object_class),
+		              G_SIGNAL_RUN_LAST,
+		              G_STRUCT_OFFSET (DocumentManagerClass, new_document),
+		              NULL, NULL,
+		               g_cclosure_marshal_VOID__OBJECT,
+		               G_TYPE_NONE, 1, G_TYPE_OBJECT, NULL);
+
+
   g_type_class_add_private (klass, sizeof (DocumentManagerDetails));
 }
 
@@ -167,15 +188,21 @@ GtkWidget *get_close_tab_widget(Document *document) {
 }
 
 /* internal */
-void document_save_update_cb (Document *doc, gpointer user_data){
+void document_save_update_cb (Document *doc, gpointer user_data)
+{
   DocumentManager *docmg = DOCUMENT_MANAGER(user_data);
   DocumentManagerDetails *docmgdet;
 	docmgdet = DOCUMENT_MANAGER_GET_PRIVATE(docmg);
   update_app_title(docmgdet->current_document);
-  classbrowser_update(GPHPEDIT_CLASSBROWSER(main_window.classbrowser));
+  gint ftype;
+  g_object_get(doc, "type", &ftype, NULL);
+  gchar *filename = documentable_get_filename(DOCUMENTABLE(doc));
+  symbol_manager_add_file (main_window.symbolmg, filename, ftype);
+  g_free(filename);
 }
 
-void document_save_start_cb (Document *doc, gpointer user_data){
+void document_save_start_cb (Document *doc, gpointer user_data)
+{
   /* show status in statusbar */
   const gchar *short_filename;
   g_object_get(doc, "short_filename", &short_filename, NULL);
@@ -215,13 +242,13 @@ void document_loader_done_loading_cb (DocumentLoader *doclod, gboolean result, D
     docmgdet->current_document = doc;
     update_app_title(doc);
     if (!untitled) document_manager_session_save(docmg);
-    classbrowser_update(GPHPEDIT_CLASSBROWSER(main_window.classbrowser));
     g_signal_connect(G_OBJECT(doc), "save_update", G_CALLBACK(document_save_update_cb), docmg);
     if (OBJECT_IS_DOCUMENT_SCINTILLA(doc)) {
       g_signal_connect(G_OBJECT(doc), "save_start", G_CALLBACK(document_save_start_cb), NULL);
       g_signal_connect(G_OBJECT(doc), "type_changed", G_CALLBACK(document_type_changed_cb), docmg);
       g_signal_connect(G_OBJECT(doc), "need_reload", G_CALLBACK(document_need_reload_cb), docmg);
     }
+    g_signal_emit (G_OBJECT (docmg), signals[NEW_DOCUMENT], 0, doc);
     gtk_widget_grab_focus(document_widget);
   }
   g_object_unref(doclod);
@@ -295,6 +322,14 @@ Document *document_manager_get_current_document (DocumentManager *docmg)
   return docmgdet->current_document;
 }
 
+Documentable *document_manager_get_current_documentable (DocumentManager *docmg)
+{
+  gphpedit_debug(DEBUG_DOC_MANAGER);
+  if (!docmg) return NULL;
+  DocumentManagerDetails *docmgdet = DOCUMENT_MANAGER_GET_PRIVATE(docmg);
+  return DOCUMENTABLE(docmgdet->current_document);
+}
+
 gboolean document_manager_set_current_document_from_widget (DocumentManager *docmg, GtkWidget *child)
 {
   gphpedit_debug(DEBUG_DOC_MANAGER);
@@ -305,7 +340,6 @@ gboolean document_manager_set_current_document_from_widget (DocumentManager *doc
     // Store it in the global main_window.current_editor value
     docmgdet->current_document = data;
     gtk_widget_grab_focus(child);
-//    document_grab_focus(data);
   } else {
     return FALSE;
   }
@@ -587,6 +621,11 @@ void document_manager_close_page(DocumentManager *docmg, Document *document)
   if (!docmg) return ;
   DocumentManagerDetails *docmgdet = DOCUMENT_MANAGER_GET_PRIVATE(docmg);
   close_page(document);
+  gchar *filename = documentable_get_filename (DOCUMENTABLE(document));
+  gint ftype;
+  g_object_get(document, "type", &ftype, NULL);
+  symbol_manager_purge_file (main_window.symbolmg, filename, ftype);
+  g_free(filename);
   g_object_unref(document);
   docmgdet->editors = g_slist_remove(docmgdet->editors, document);
   if (!docmgdet->editors) {
@@ -652,7 +691,6 @@ void document_manager_save_all(DocumentManager *docmg)
       documentable_save(DOCUMENTABLE(doc));
     }
   }
-  classbrowser_update(GPHPEDIT_CLASSBROWSER(main_window.classbrowser));
 }
 
 gboolean document_manager_set_current_document_from_position(DocumentManager *docmg, gint page_num)

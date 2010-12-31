@@ -1,4 +1,4 @@
-/* This file is part of gPHPEdit, a GNOME2 PHP Editor.
+/* This file is part of gPHPEdit, a GNOME PHP Editor.
 
    Copyright (C) 2003, 2004, 2005 Andy Jeffries <andy at gphpedit.org>
    Copyright (C) 2009 Anoop John <anoop dot john at zyxware.com>
@@ -22,25 +22,30 @@
    The GNU General Public License is contained in the file COPYING.
 */
 /* ******* CLASSBROWSER DESIGN ********
-* classbrowser widget has two part. UI and backend. the Backend process open files and return a list of classes and functions in files.
+* classbrowser widget has two part. UI and backend. the Backend process open files and 
+* return a list of classes and functions in files.
 * UI process backend signal and fill the classbrowser Tree.
 */
 #include "debug.h"
 
-#include "classbrowser_ui.h"
-#include "classbrowser_backend.h"
+#include <glib/gi18n.h>
 #include <gdk/gdkkeysyms.h>
+
+#include "classbrowser_ui.h"
 #include "main_window.h"
 #include "gvfs_utils.h"
+#include "symbol_manager.h"
+
+
 /* functions */
 static void gphpedit_classbrowser_class_init (gphpeditClassBrowserClass *klass);
 static void gphpedit_classbrowser_init (gphpeditClassBrowser *button);
 
 struct _gphpeditClassBrowserPrivate
 {
-  ClassbrowserBackend *classbackend;
-
   GtkWidget *classbrowser;
+  GtkBuilder *builder;
+
   //Checkbox above treeview to parse only the current tab  
   GtkWidget *chkOnlyCurFileFuncs;
 
@@ -66,7 +71,6 @@ enum {
   FILENAME_COLUMN,
   TYPE_COLUMN,
   ID_COLUMN,
-  FILE_TYPE,
   N_COLUMNS
 };
 /*
@@ -78,7 +82,7 @@ enum {
 
 void classbrowser_set_sortable(GtkTreeStore *classtreestore);
 gint on_parse_current_click (GtkWidget *widget, gpointer user_data);
-void classbrowser_update_cb (ClassbrowserBackend *classback, gboolean result, gpointer user_data);
+void sdb_update_cb (SymbolManager *symbolmg, gpointer user_data);
 
 void classbrowser_function_add (gpointer data, gpointer user_data);
 void classbrowser_class_add (gpointer data, gpointer user_data);
@@ -102,11 +106,7 @@ gphpedit_classbrowser_destroy (GtkObject *object)
 
 	priv = CLASSBROWSER_BACKEND_GET_PRIVATE(object);
 
-  if (g_signal_handler_is_connected (priv->classbackend, priv->handlerid)){
-   g_signal_handler_disconnect(priv->classbackend, priv->handlerid);
-  }
-
-  if (G_IS_OBJECT(priv->classbackend)) g_object_unref(priv->classbackend);
+  if (priv->builder) g_object_unref(priv->builder);
 
 	GTK_OBJECT_CLASS (gphpedit_classbrowser_parent_class)->destroy (object);
 }
@@ -133,42 +133,42 @@ gphpedit_classbrowser_init (gphpeditClassBrowser *button)
   GtkTreeViewColumn *column;
 
   gphpeditClassBrowserPrivate *priv = CLASSBROWSER_BACKEND_GET_PRIVATE(button);
-  priv->classbackend= classbrowser_backend_new ();
-  priv->handlerid = g_signal_connect(G_OBJECT(priv->classbackend), "done_refresh", G_CALLBACK(classbrowser_update_cb), priv);
+ 
+  g_signal_connect(main_window.symbolmg, "update", G_CALLBACK(sdb_update_cb), priv);
 
-  GtkBuilder *builder = gtk_builder_new ();
+  priv->builder = gtk_builder_new ();
   GError *error = NULL;
-  guint res = gtk_builder_add_from_file (builder, GPHPEDIT_UI_DIR "/classbrowser.ui", &error);
+  guint res = gtk_builder_add_from_file (priv->builder, GPHPEDIT_UI_DIR "/classbrowser.ui", &error);
   if (!res) {
     g_critical ("Unable to load the UI file!");
     g_error_free(error);
     return ;
   }
 
-  GtkWidget *notebox = GTK_WIDGET(gtk_builder_get_object (builder, "classbrowser"));
+  GtkWidget *notebox = GTK_WIDGET(gtk_builder_get_object (priv->builder, "classbrowser"));
   gtk_widget_show (notebox);
   gtk_widget_reparent (notebox, GTK_WIDGET(button));
 
-  priv->chkOnlyCurFileFuncs = GTK_WIDGET(gtk_builder_get_object (builder, "only_current_file"));
+  priv->chkOnlyCurFileFuncs = GTK_WIDGET(gtk_builder_get_object (priv->builder, "only_current_file"));
 
   gboolean active;
   g_object_get (main_window.prefmg, "parse_only_current_file", &active, NULL);
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON(priv->chkOnlyCurFileFuncs), active);
   g_signal_connect (G_OBJECT (priv->chkOnlyCurFileFuncs), "clicked",
-            G_CALLBACK (on_parse_current_click), priv->classbackend);
+            G_CALLBACK (on_parse_current_click), priv);
 
-  priv->treeviewlabel = GTK_WIDGET(gtk_builder_get_object (builder, "treeviewlabel"));
-  priv->classtreestore = gtk_tree_store_new (N_COLUMNS, G_TYPE_STRING, G_TYPE_INT, G_TYPE_STRING, G_TYPE_INT, G_TYPE_INT, G_TYPE_INT);
+  priv->treeviewlabel = GTK_WIDGET(gtk_builder_get_object (priv->builder, "treeviewlabel"));
+  priv->classtreestore = gtk_tree_store_new (N_COLUMNS, G_TYPE_STRING, G_TYPE_INT, G_TYPE_STRING, G_TYPE_INT, G_TYPE_INT);
   /* enable sorting of the columns */
   classbrowser_set_sortable(priv->classtreestore);
 
   /* second model stuff */
-  priv->classtreestoreback = gtk_tree_store_new (N_COLUMNS, G_TYPE_STRING, G_TYPE_INT, G_TYPE_STRING, G_TYPE_INT, G_TYPE_INT, G_TYPE_INT);
+  priv->classtreestoreback = gtk_tree_store_new (N_COLUMNS, G_TYPE_STRING, G_TYPE_INT, G_TYPE_STRING, G_TYPE_INT, G_TYPE_INT);
   /* enable sorting of the columns */
   classbrowser_set_sortable(priv->classtreestoreback);
 
   priv->front=0;
-  priv->classtreeview = GTK_WIDGET(gtk_builder_get_object (builder, "classtreeview"));
+  priv->classtreeview = GTK_WIDGET(gtk_builder_get_object (priv->builder, "classtreeview"));
 	gtk_tree_view_set_model (GTK_TREE_VIEW (priv->classtreeview), GTK_TREE_MODEL (priv->classtreestore));
 
   priv->classtreeselect = gtk_tree_view_get_selection (GTK_TREE_VIEW (priv->classtreeview));
@@ -200,7 +200,7 @@ gphpedit_classbrowser_new (void)
 gint on_parse_current_click (GtkWidget *widget, gpointer user_data)
 {
   g_object_set (main_window.prefmg, "parse_only_current_file", gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget)), NULL);
-  classbrowser_backend_update(user_data, gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget)));
+  sdb_update_cb (main_window.symbolmg, user_data);
   return 0;
 }
 
@@ -242,19 +242,7 @@ void classbrowser_set_sortable(GtkTreeStore *classtreestore)
     GTK_SORT_ASCENDING);
 }
 
-static gboolean visible_func (GtkTreeModel *model, GtkTreeIter  *iter, gpointer data)
-{
-  /* Visible if row is non-empty and name column contain filename as prefix */
-  guint file_type;
-  gboolean visible = FALSE;
-  guint data_type = GPOINTER_TO_UINT(data);
-  gtk_tree_model_get (model, iter, FILE_TYPE, &file_type, -1);
-  if (data_type==file_type) visible = TRUE;
- // g_print("%d -> %d (%s)\n",data_type,file_type,main_window.current_editor->filename->str);
-  return visible;
-}
-
-void classbrowser_clear_model (gphpeditClassBrowserPrivate *priv)
+static void classbrowser_clear_model (gphpeditClassBrowserPrivate *priv)
 {
   if (priv->front==0) {
     gtk_tree_store_clear(priv->classtreestore); /* clear tree */
@@ -272,18 +260,21 @@ GtkTreeModel *classbrowser_get_model(gphpeditClassBrowserPrivate *priv)
   }
 }
 /*
-* classbrowser_update_cb (internal)
+* sdb_update_cb (internal)
 * process description:
 * we process the backend signal and we load classes and function data to a model. 
 * Then when load is finished we change the current model for the new one.
 * doing this we avoid flicker when we update the classbrowser.
 */
-void classbrowser_update_cb (ClassbrowserBackend *classback, gboolean result, gpointer user_data)
+void sdb_update_cb (SymbolManager *symbolmg, gpointer user_data)
 {
   gphpeditClassBrowserPrivate *priv= (gphpeditClassBrowserPrivate *) user_data;
   static guint press_event = 0;
   static guint release_event = 0;
   gboolean hidden;
+  GList *class_list = NULL;
+  GList *func_list = NULL;
+
   g_object_get(main_window.prefmg, "side_panel_hidden", &hidden, NULL);
   if(hidden) return ;
   if (press_event && g_signal_handler_is_connected (priv->classtreeview, press_event)) {
@@ -292,28 +283,32 @@ void classbrowser_update_cb (ClassbrowserBackend *classback, gboolean result, gp
   if (release_event && g_signal_handler_is_connected (priv->classtreeview, release_event)) {
     g_signal_handler_disconnect(priv->classtreeview,release_event);
   }
-
   classbrowser_clear_model (priv);
-
-  GList *class_list = classbrowser_backend_get_class_list(classback);
-  g_list_foreach (class_list, classbrowser_class_add, classbrowser_get_model(priv));
-
-  GList *func_list = classbrowser_backend_get_function_list(classback);
-  g_list_foreach (func_list, classbrowser_function_add, classbrowser_get_model(priv));
 
   Document *doc = document_manager_get_current_document(main_window.docmg);
   guint doc_type;
-  if (doc) {
-    if (priv->front==0){
-      priv->new_model= gtk_tree_model_filter_new (GTK_TREE_MODEL(priv->classtreestore), NULL);
-    } else {
-      priv->new_model= gtk_tree_model_filter_new (GTK_TREE_MODEL(priv->classtreestoreback), NULL);
-    }
-    g_object_get(doc, "type", &doc_type, NULL);
-    gtk_tree_model_filter_set_visible_func ((GtkTreeModelFilter *) priv->new_model, visible_func, GUINT_TO_POINTER(doc_type), NULL);
-    gtk_tree_view_set_model (GTK_TREE_VIEW( priv->classtreeview), priv->new_model);
-  }
+  g_object_get(doc, "type", &doc_type, NULL);
 
+  gboolean active;
+  g_object_get (main_window.prefmg, "parse_only_current_file", &active, NULL);
+
+  if (active) {
+    gchar *filename = documentable_get_filename(DOCUMENTABLE(doc));
+    class_list = symbol_manager_get_custom_symbols_list_by_filename (symbolmg, SYMBOL_CLASS, filename, doc_type);
+    func_list = symbol_manager_get_custom_symbols_list_by_filename (symbolmg, SYMBOL_FUNCTION, filename, doc_type);
+    g_free(filename);
+  } else {
+    class_list = symbol_manager_get_custom_symbols_list (symbolmg, SYMBOL_CLASS, doc_type);
+    func_list = symbol_manager_get_custom_symbols_list (symbolmg, SYMBOL_FUNCTION, doc_type);
+  }
+  g_list_foreach (class_list, classbrowser_class_add, classbrowser_get_model(priv));
+  g_list_foreach (func_list, classbrowser_function_add, classbrowser_get_model(priv));
+
+  g_list_free(class_list);
+  g_list_free(func_list);
+
+  priv->new_model = classbrowser_get_model(priv);
+  gtk_tree_view_set_model (GTK_TREE_VIEW( priv->classtreeview), priv->new_model);
 
   press_event = g_signal_connect(GTK_OBJECT(priv->classtreeview), "button_press_event",
                                    G_CALLBACK(treeview_double_click), priv);
@@ -344,13 +339,13 @@ GString *get_function_decl(ClassBrowserFunction *function)
 {
   GString *function_decl;
   function_decl = g_string_new(function->functionname);
-  if (function->file_type!=TAB_COBOL) { /* cobol paragraph don't have params */
+//  if (function->file_type!=TAB_COBOL) { /* cobol paragraph don't have params */
     if (function->paramlist) {
       g_string_append_printf(function_decl, "(%s)", function->paramlist);
     } else {
       function_decl = g_string_append(function_decl, "()");
     }
-  }
+//  }
   return function_decl;
 }
 
@@ -380,8 +375,8 @@ void classbrowser_function_add (gpointer data, gpointer user_data)
 
     gtk_tree_store_set (store, &iter,
                         NAME_COLUMN, function_decl->str, LINE_NUMBER_COLUMN, function->line_number, 
-                        FILENAME_COLUMN, function->filename, TYPE_COLUMN, type, ID_COLUMN, function->identifierid,
-                        FILE_TYPE, function->file_type,-1);
+                        FILENAME_COLUMN, function->filename, TYPE_COLUMN, type, 
+                        ID_COLUMN, function->identifierid,-1);
     g_string_free(function_decl, TRUE);
 }
 
@@ -431,8 +426,8 @@ void classbrowser_class_add (gpointer data, gpointer user_data)
 
   gtk_tree_store_set (GTK_TREE_STORE(store), &iter,
                    NAME_COLUMN, (class->classname), FILENAME_COLUMN, (class->filename),
-                   LINE_NUMBER_COLUMN, class->line_number, TYPE_COLUMN, CB_ITEM_TYPE_CLASS, ID_COLUMN, (class->identifierid), 
-                   FILE_TYPE, class->file_type,-1);
+                   LINE_NUMBER_COLUMN, class->line_number, TYPE_COLUMN, CB_ITEM_TYPE_CLASS, 
+                   ID_COLUMN, (class->identifierid),-1);
 }
 
 /*
@@ -493,11 +488,8 @@ void classbrowser_update(gphpeditClassBrowser *classbrowser)
   if (!gtk_tree_selection_get_selected (priv->classtreeselect, NULL, &iter)) {
       gtk_label_set_text(GTK_LABEL(priv->treeviewlabel), _("FILE:"));
   }
-
-  if (document_manager_get_document_count (main_window.docmg)){
-  gboolean active;
-  g_object_get (main_window.prefmg, "parse_only_current_file", &active, NULL);
-  classbrowser_backend_update(priv->classbackend, active);
+  if (document_manager_get_document_count (main_window.docmg)) {
+    sdb_update_cb (main_window.symbolmg, priv);
   }
 }
 
@@ -512,41 +504,3 @@ void classbrowser_update_selected_label(gphpeditClassBrowserPrivate *priv, gchar
     g_free(caption);
   }
 }
-
-/*
-* classbrowser_get_autocomplete_php_classes_string
-* return a new string with posibly classes matches
-*/
-gchar *classbrowser_get_autocomplete_php_classes_string(gphpeditClassBrowser *classbrowser){
-	gphpeditClassBrowserPrivate *priv;
-	priv = CLASSBROWSER_BACKEND_GET_PRIVATE(classbrowser);
-  return classbrowser_backend_get_autocomplete_php_classes_string(priv->classbackend);
-}
-
-/*
-* classbrowser_autocomplete_php_variables
-* return a new string with posibly variable matches. 
-*/
-gchar *classbrowser_autocomplete_php_variables(gphpeditClassBrowser *classbrowser, gchar *prefix){
-	gphpeditClassBrowserPrivate *priv;
-	priv = CLASSBROWSER_BACKEND_GET_PRIVATE(classbrowser);
-  return classbrowser_backend_autocomplete_php_variables(priv->classbackend, prefix);
-}
-
-gchar *classbrowser_autocomplete_member_function(gphpeditClassBrowser *classbrowser, gchar *prefix){
-	gphpeditClassBrowserPrivate *priv;
-	priv = CLASSBROWSER_BACKEND_GET_PRIVATE(classbrowser);
-  return classbrowser_backend_autocomplete_member_function(priv->classbackend, prefix);
-}
-
-gchar *classbrowser_custom_function_calltip(gphpeditClassBrowser *classbrowser, gchar *function_name, gint file_type)
-{
-	gphpeditClassBrowserPrivate *priv = CLASSBROWSER_BACKEND_GET_PRIVATE(classbrowser);
-  return classbrowser_backend_custom_function_calltip(priv->classbackend, function_name, file_type);
-}
-
-gchar *classbrowser_add_custom_autocompletion(gphpeditClassBrowser *classbrowser, gchar *prefix, gint file_type, GSList *list)
-{
-	gphpeditClassBrowserPrivate *priv = CLASSBROWSER_BACKEND_GET_PRIVATE(classbrowser);
-  return classbrowser_backend_add_custom_autocompletion(priv->classbackend, prefix, file_type, list);
-} 

@@ -36,6 +36,7 @@
 #include "syntax_check_window.h"
 #include "filebrowser_ui.h"
 #include "classbrowser_ui.h"
+#include "document.h"
 
 void update_controls(Document *document);
 
@@ -103,7 +104,7 @@ static void main_window_create_appbar(void)
 {
   main_window.appbar = gphpedit_statusbar_new ();
   gtk_box_pack_start(GTK_BOX(main_window.prinbox), main_window.appbar, FALSE, TRUE, 1);
-  gphpedit_statusbar_set_zoom_level(GPHPEDIT_STATUSBAR(main_window.appbar),100);
+  gphpedit_statusbar_set_zoom_level(GPHPEDIT_STATUSBAR(main_window.appbar), 100);
   if (get_preferences_manager_show_statusbar(main_window.prefmg)) gtk_widget_show (main_window.appbar);
 }
 
@@ -253,7 +254,7 @@ void main_window_create(void){
   main_window_create_prinbox();
 
   /* add menu bar to main window */
-  main_window.menu=menubar_new ();
+  main_window.menu = menubar_new ();
   gtk_box_pack_start (GTK_BOX (main_window.prinbox), main_window.menu, FALSE, FALSE, 0);
   gtk_widget_show_all (main_window.menu);
 
@@ -261,12 +262,12 @@ void main_window_create(void){
   gtk_box_pack_start (GTK_BOX (main_window.prinbox), main_window.toolbar_main, FALSE, FALSE, 0);
   if (get_preferences_manager_show_maintoolbar(main_window.prefmg)) gtk_widget_show (main_window.toolbar_main);
 
+  main_window.symbolmg = symbol_manager_new();
+
   main_window_create_panes();
   main_window_fill_panes();
   main_window_create_appbar();
   
-  main_window.clltipmg = calltip_manager_new();
-
   g_signal_connect (G_OBJECT (main_window.window), "delete_event", G_CALLBACK(main_window_delete_event), NULL);
   g_signal_connect (G_OBJECT (main_window.window), "destroy", G_CALLBACK (main_window_destroy_event), NULL);
   g_signal_connect (G_OBJECT (main_window.window), "key_press_event", G_CALLBACK (main_window_key_press_event), NULL);
@@ -284,7 +285,8 @@ void main_window_create(void){
   g_free(theme_dir);
 }
 
-void update_controls(Document *document){
+void update_controls(Document *document)
+{
   gphpedit_debug(DEBUG_MAIN_WINDOW);
   if (!document) return ;
   gboolean read_only, can_modify, preview;
@@ -292,3 +294,5 @@ void update_controls(Document *document){
   menubar_update_controls(MENUBAR(main_window.menu), can_modify, preview, read_only);
   toolbar_update_controls(TOOLBAR(main_window.toolbar_main), can_modify, read_only);
 }
+
+

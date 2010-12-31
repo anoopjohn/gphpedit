@@ -999,6 +999,7 @@ void load_font_settings(PreferencesManagerDetails *prefdet)
   /* add ! needed by scintilla for pango render */
   prefdet->font_name = g_strdup_printf("!%s",pango_font_description_get_family (desc));
   pango_font_description_free (desc);
+  g_free(font_desc);
 }
 
 /**

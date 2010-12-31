@@ -67,6 +67,7 @@ int main (int argc, char **argv)
   main_window_create();
   main_window.tempmg = templates_manager_new();
   main_window.docmg = document_manager_new_full(argv, argc);
+  g_signal_connect (G_OBJECT (main_window.docmg), "new_document", G_CALLBACK(document_manager_new_document_cb), NULL);
   gtk_main();
         
   /* it makes sense to install sigterm handler that would call this too */

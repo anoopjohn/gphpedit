@@ -156,7 +156,7 @@ plugin_finalize (GObject *object)
 	G_OBJECT_CLASS (plugin_parent_class)->finalize (object);
 }
 
-
+#if 0
 /*
  * internal function
  * execute a command in a command line
@@ -167,7 +167,7 @@ static inline gchar *command_spawn(const gchar* command_line)
   GError *error = NULL;
   gint exit_status;
   gchar *ret=NULL;
-  if (g_spawn_command_line_sync(command_line,&stdout,NULL, &exit_status,&error)) {
+  if (g_spawn_command_line_sync(command_line, &stdout, NULL, &exit_status,&error)) {
     #ifdef DEBUG
     guint stdout_len = strlen(stdout);
     gphpedit_debug_message(DEBUG_PLUGINS, "COMMAND: %s\nOUTPUT: %s (%d)\n", command_line, stdout, stdout_len);
@@ -181,6 +181,7 @@ static inline gchar *command_spawn(const gchar* command_line)
   
   return ret;
 }
+#endif
 
 gboolean is_internal_command(gchar *command){
   if (!command) return TRUE;

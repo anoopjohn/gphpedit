@@ -24,8 +24,8 @@
 
 #ifndef CLASSBROWSER_PARSE_H
 #define CLASSBROWSER_PARSE_H
-#include <gtk/gtk.h>
-#include "classbrowser_backend.h"
 
-void classbrowser_parse_file(ClassbrowserBackend *classback, gchar *filename);
+#include "symbol_bd_php.h"
+
+void classbrowser_parse_file(SymbolBdPHP *symbolbd, gchar *filename);
 #endif

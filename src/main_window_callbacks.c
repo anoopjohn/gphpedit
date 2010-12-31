@@ -58,7 +58,7 @@ void quit_application()
   preferences_manager_save_data(main_window.prefmg);
   g_object_unref(main_window.prefmg);
   g_object_unref(main_window.stylemg);
-  g_object_unref(main_window.clltipmg);
+  g_object_unref(main_window.symbolmg);
 }
 
 
@@ -156,7 +156,7 @@ void add_file_filters(GtkFileChooser *chooser){
   caption = g_string_new(_("PHP files ("));
   gchar **php_file_extensions;
   gint i;
-  const gchar *php_extensions;
+  gchar *php_extensions;
   g_object_get(main_window.prefmg, "php_file_extensions", &php_extensions, NULL);
 
   php_file_extensions = g_strsplit(php_extensions, ",", -1);
@@ -171,6 +171,7 @@ void add_file_filters(GtkFileChooser *chooser){
   }
 
   g_strfreev(php_file_extensions);
+  g_free(php_extensions);
   caption =g_string_append(caption, ")");
   gtk_file_filter_set_name (filter, caption->str);
   //add a pattern to the filter
@@ -274,6 +275,7 @@ void on_open1_activate(GtkWidget *widget)
   if (gtk_dialog_run(GTK_DIALOG(file_selection_box)) == GTK_RESPONSE_ACCEPT) {
     open_file_ok(GTK_FILE_CHOOSER(file_selection_box));
   }
+  g_free(filename);
   gtk_widget_destroy(file_selection_box);
 }
 
@@ -358,7 +360,8 @@ void set_active_tab(page_num)
   update_app_title(document_manager_get_current_document(main_window.docmg));
 }
 
-void update_zoom_level(void){
+void update_zoom_level(void)
+{
   gphpedit_debug(DEBUG_MAIN_WINDOW);
   Document *doc = document_manager_get_current_document(main_window.docmg);
   guint zoom_level;
@@ -739,4 +742,13 @@ gboolean main_window_activate_focus (GtkWidget *widget,GdkEventFocus *event, gpo
 {
   documentable_check_externally_modified(DOCUMENTABLE(document_manager_get_current_document(main_window.docmg)));
   return FALSE;
+}
+
+void document_manager_new_document_cb (DocumentManager *docmg, Document *doc, gpointer user_data)
+{
+  gint ftype;
+  g_object_get(doc, "type", &ftype, NULL);
+  gchar *filename = documentable_get_filename(DOCUMENTABLE(doc));
+  symbol_manager_add_file (main_window.symbolmg, filename, ftype);
+  g_free(filename);
 }

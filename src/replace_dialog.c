@@ -27,6 +27,8 @@
 #include <config.h>
 #endif
 
+#include <glib/gi18n.h>
+
 #include "main_window.h"
 #include "gphpedit-statusbar.h"
 #include "history-entry.h"
