@@ -28,7 +28,7 @@
 #include "main.h"
 #include "main_window.h"
 
-void update_status_combobox(Document *document);
+void update_status_combobox(Documentable *document);
 void main_window_destroy_event(GtkWidget *widget, gpointer data);
 gboolean main_window_delete_event(GtkWidget *widget, GdkEvent *event, gpointer user_data);
 gint main_window_key_press_event(GtkWidget   *widget, GdkEventKey *event,gpointer user_data);

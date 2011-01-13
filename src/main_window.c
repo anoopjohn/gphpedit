@@ -38,7 +38,7 @@
 #include "classbrowser.h"
 #include "document.h"
 
-void update_controls(Document *document);
+void update_controls(Documentable *document);
 
 MainWindow main_window;
 GIOChannel* inter_gphpedit_io;
@@ -277,7 +277,7 @@ void main_window_create(void){
 
   gtk_widget_show(main_window.window);
   
-  update_app_title(document_manager_get_current_document(main_window.docmg));
+  update_app_title(document_manager_get_current_documentable(main_window.docmg));
 
   main_window.stylemg = gtk_source_style_scheme_manager_new ();
   gchar *theme_dir = g_build_path (G_DIR_SEPARATOR_S, API_DIR, "themes", NULL);
@@ -285,7 +285,7 @@ void main_window_create(void){
   g_free(theme_dir);
 }
 
-void update_controls(Document *document)
+void update_controls(Documentable *document)
 {
   gphpedit_debug(DEBUG_MAIN_WINDOW);
   if (!document) return ;

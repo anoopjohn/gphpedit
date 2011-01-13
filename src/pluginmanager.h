@@ -62,6 +62,6 @@ Plugin *get_plugin_by_name(PluginManager *plugmg, gchar *name);
 guint get_plugin_manager_items_count(PluginManager *plugmg);
 GList *get_plugin_manager_items(PluginManager *plugmg);
 Plugin *get_plugin_by_num(PluginManager *plugmg, gint num);
-gboolean run_syntax_plugin_by_ftype(PluginManager *plugmg, Document *document);
+gboolean run_syntax_plugin_by_ftype(PluginManager *plugmg, Documentable *document);
 #endif /* PLUGIN_MANAGER_MANAGER_H */
 

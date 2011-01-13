@@ -310,7 +310,7 @@ void on_save_as1_activate(GtkWidget *widget)
 {
   GtkWidget *file_selection_box;
   const gchar *last_opened_folder;
-  Document *document = document_manager_get_current_document(main_window.docmg);
+  Documentable *document = document_manager_get_current_documentable(main_window.docmg);
   if (!document) return ;
   // Create the selector widget
   file_selection_box = gtk_file_chooser_dialog_new (_("Please type the filename to save as..."),
@@ -363,7 +363,7 @@ void set_active_tab(page_num)
 void update_zoom_level(void)
 {
   gphpedit_debug(DEBUG_MAIN_WINDOW);
-  Document *doc = document_manager_get_current_document(main_window.docmg);
+  Documentable *doc = document_manager_get_current_documentable(main_window.docmg);
   guint zoom_level = 100;
   if (doc) g_object_get(doc, "zoom_level", &zoom_level, NULL);
   gphpedit_statusbar_set_zoom_level((GphpeditStatusbar *)main_window.appbar, zoom_level);
@@ -454,7 +454,7 @@ void on_selectall1_activate(GtkWidget *widget)
 
 void on_find1_activate(GtkWidget *widget)
 {
-  if (document_manager_get_current_document(main_window.docmg)) {
+  if (document_manager_get_current_documentable(main_window.docmg)) {
     GtkWidget *find_dialog = search_dialog_new (GTK_WINDOW(main_window.window));
     gtk_widget_show(find_dialog);    
   }
@@ -463,7 +463,7 @@ void on_find1_activate(GtkWidget *widget)
 
 void on_replace1_activate(GtkWidget *widget)
 {
-  if (document_manager_get_current_document(main_window.docmg)) {
+  if (document_manager_get_current_documentable(main_window.docmg)) {
     GtkWidget *replace_dialog = replace_dialog_new (GTK_WINDOW(main_window.window));
     gtk_widget_show(replace_dialog);    
   }
@@ -483,7 +483,7 @@ void on_redo1_activate(GtkWidget *widget)
 
 void keyboard_macro_startstop(GtkWidget *widget)
 {
-  Document *doc = document_manager_get_current_document(main_window.docmg);
+  Documentable *doc = document_manager_get_current_documentable(main_window.docmg);
   if(OBJECT_IS_DOCUMENT_SCINTILLA(doc)) {
   document_scintilla_keyboard_macro_startstop(DOCUMENT_SCINTILLA(doc));
   }
@@ -491,7 +491,7 @@ void keyboard_macro_startstop(GtkWidget *widget)
 
 void keyboard_macro_playback(GtkWidget *widget)
 {
-  Document *doc = document_manager_get_current_document(main_window.docmg);
+  Documentable *doc = document_manager_get_current_documentable(main_window.docmg);
   if(OBJECT_IS_DOCUMENT_SCINTILLA(doc)) {
   document_scintilla_keyboard_macro_playback(DOCUMENT_SCINTILLA(doc));
   }
@@ -558,7 +558,7 @@ void on_about1_activate(GtkWidget *widget)
   gtk_widget_destroy(dialog);
 }
 
-void update_status_combobox(Document *document)
+void update_status_combobox(Documentable *document)
 {
       if (is_app_closing) return ;
       gint type = -1;
@@ -605,7 +605,7 @@ gboolean on_notebook_focus_tab(GtkNotebook *notebook,
                  GtkNotebookTab arg1, gpointer user_data)
 {
   GtkWidget *document_widget;
-  g_object_get(document_manager_get_current_document(main_window.docmg), "editor_widget", &document_widget, NULL);
+  g_object_get(document_manager_get_current_documentable(main_window.docmg), "editor_widget", &document_widget, NULL);
   gtk_widget_grab_focus(document_widget);
   return TRUE;
 }
@@ -647,7 +647,7 @@ void zoom_100(GtkWidget *widget)
 
 void syntax_check(GtkWidget *widget)
 {
-   gtk_syntax_check_window_run_check(GTK_SYNTAX_CHECK_WINDOW(main_window.win), document_manager_get_current_document(main_window.docmg));
+   gtk_syntax_check_window_run_check(GTK_SYNTAX_CHECK_WINDOW(main_window.win), document_manager_get_current_documentable(main_window.docmg));
 }
 
 

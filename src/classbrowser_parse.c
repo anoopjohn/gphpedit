@@ -33,11 +33,11 @@ static gchar *read_text_file(gchar *filename)
 {
   gchar *buffer=NULL;
 
-  Document *document;
+  Documentable *document;
   gphpedit_debug(DEBUG_CLASSBROWSER);
   DocumentManager *docmg = document_manager_new();
-  document = document_manager_find_document_from_filename (docmg, filename);
-  if (document) buffer = documentable_get_text (DOCUMENTABLE(document));
+  document = document_manager_find_documentable_from_filename (docmg, filename);
+  if (document) buffer = documentable_get_text (document);
   g_object_unref(docmg);
   if (!buffer){
     buffer = read_text_file_sync(filename);

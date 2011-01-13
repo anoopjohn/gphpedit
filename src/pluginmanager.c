@@ -234,7 +234,7 @@ gboolean get_syntax_plugin_by_ftype (gpointer key, gpointer value, gpointer user
   return FALSE;
 }
 
-gboolean run_syntax_plugin_by_ftype(PluginManager *plugmg, Document *document){
+gboolean run_syntax_plugin_by_ftype(PluginManager *plugmg, Documentable *document){
   g_return_val_if_fail (OBJECT_IS_PLUGIN_MANAGER(plugmg), FALSE);
   PluginManagerDetails *plugmgdet;
 	plugmgdet = PLUGIN_MANAGER_GET_PRIVATE(plugmg);

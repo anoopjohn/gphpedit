@@ -297,33 +297,33 @@ void document_manager_add_new_document(DocumentManager *docmg, gint type, const 
   document_loader_load (loader, type, (gchar *) filename, goto_line);
 }
 
-Document *document_manager_find_document_from_widget (DocumentManager *docmg, void *widget)
+Documentable *document_manager_find_documentable_from_widget (DocumentManager *docmg, void *widget)
 {
   gphpedit_debug(DEBUG_DOC_MANAGER);
   if (!docmg) return NULL;
   DocumentManagerDetails *docmgdet = DOCUMENT_MANAGER_GET_PRIVATE(docmg);
   GSList *walk;
-  Document *document;
+  Documentable *document;
   GtkWidget *document_widget;
   for (walk = docmgdet->editors; walk != NULL; walk = g_slist_next (walk)) {
-    document = walk->data;
+    document = DOCUMENTABLE(walk->data);
     g_object_get(document, "editor_widget", &document_widget, NULL);
     if (document_widget == GTK_WIDGET(widget)) return walk->data;
   }
   return NULL;
 }
 
-Document *document_manager_find_document_from_filename (DocumentManager *docmg, gchar *filename)
+Documentable *document_manager_find_documentable_from_filename (DocumentManager *docmg, gchar *filename)
 {
   gphpedit_debug(DEBUG_DOC_MANAGER);
   if (!docmg) return NULL;
   DocumentManagerDetails *docmgdet = DOCUMENT_MANAGER_GET_PRIVATE(docmg);
   GSList *walk;
-  Document *document;
+  Documentable *document;
 
   for (walk = docmgdet->editors; walk != NULL; walk = g_slist_next (walk)) {
-    document = walk->data;
-    gchar *doc_filename = documentable_get_filename(DOCUMENTABLE(document));
+    document = DOCUMENTABLE(walk->data);
+    gchar *doc_filename = documentable_get_filename(document);
     if (g_strcmp0(doc_filename,filename)==0) {
       g_free(doc_filename);
       return document;
@@ -331,14 +331,6 @@ Document *document_manager_find_document_from_filename (DocumentManager *docmg, 
     g_free(doc_filename);
   }
   return NULL;
-}
-
-Document *document_manager_get_current_document (DocumentManager *docmg)
-{
-  gphpedit_debug(DEBUG_DOC_MANAGER);
-  if (!docmg) return NULL;
-  DocumentManagerDetails *docmgdet = DOCUMENT_MANAGER_GET_PRIVATE(docmg);
-  return docmgdet->current_document;
 }
 
 Documentable *document_manager_get_current_documentable (DocumentManager *docmg)
@@ -353,7 +345,7 @@ gboolean document_manager_set_current_document_from_widget (DocumentManager *doc
 {
   gphpedit_debug(DEBUG_DOC_MANAGER);
   if (!docmg) return FALSE;
-  Document *data = document_manager_find_document_from_widget (docmg, (void *) child);
+  Document *data = DOCUMENT(document_manager_find_documentable_from_widget (docmg, (void *) child));
   if (data){
     _document_manager_set_current_document(docmg, data);
     gtk_widget_grab_focus(child);

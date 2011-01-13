@@ -256,13 +256,13 @@ static void translate(void){
 
 static void on_incfind_activate (GtkWidget *widget, gpointer user_data)
 {
-  Document *document = document_manager_get_current_document(main_window.docmg);
-  documentable_activate_incremental_search (DOCUMENTABLE(document));
+  Documentable *document = document_manager_get_current_documentable(main_window.docmg);
+  documentable_activate_incremental_search (document);
 }
 
 static void on_gotoline_activate (GtkWidget *widget, gpointer user_data)
 {
-  Document *document = document_manager_get_current_document(main_window.docmg);
+  Documentable *document = document_manager_get_current_documentable(main_window.docmg);
   if (OBJECT_IS_DOCUMENT_SCINTILLA(document)) {
     document_scintilla_activate_goto_line(DOCUMENT_SCINTILLA(document));
   }
