@@ -285,7 +285,7 @@ void sdb_update_cb (SymbolManager *symbolmg, gpointer user_data)
   }
   classbrowser_clear_model (priv);
 
-  Document *doc = document_manager_get_current_document(main_window.docmg);
+  Documentable *doc = document_manager_get_current_documentable(main_window.docmg);
   guint doc_type;
   g_object_get(doc, "type", &doc_type, NULL);
 
@@ -293,7 +293,7 @@ void sdb_update_cb (SymbolManager *symbolmg, gpointer user_data)
   g_object_get (main_window.prefmg, "parse_only_current_file", &active, NULL);
 
   if (active) {
-    gchar *filename = documentable_get_filename(DOCUMENTABLE(doc));
+    gchar *filename = documentable_get_filename(doc);
     class_list = symbol_manager_get_custom_symbols_list_by_filename (symbolmg, SYMBOL_CLASS, filename, doc_type);
     func_list = symbol_manager_get_custom_symbols_list_by_filename (symbolmg, SYMBOL_FUNCTION, filename, doc_type);
     g_free(filename);
@@ -469,7 +469,7 @@ gint treeview_click_release(GtkWidget *widget, GdkEventButton *event, gpointer f
     }
   }
   /* go to position */
-  documentable_scroll_to_current_pos(DOCUMENTABLE(document_manager_get_current_document(main_window.docmg)));
+  documentable_scroll_to_current_pos(document_manager_get_current_documentable(main_window.docmg));
  
   return FALSE;
 }

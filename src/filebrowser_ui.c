@@ -304,7 +304,7 @@ gint _filebrowser_sort_func(GtkTreeModel * model, GtkTreeIter * a, GtkTreeIter *
 void _go_home_cb (GtkButton *button, gpointer   user_data) 
 {
     /*if there is a file open set file folder as home dir*/
-    gchar *folderpath = documentable_get_filename(DOCUMENTABLE(document_manager_get_current_document(main_window.docmg)));
+    gchar *folderpath = documentable_get_filename(document_manager_get_current_documentable(main_window.docmg));
     filebrowser_backend_go_folder_home (FILEBROWSER_BACKEND(user_data), folderpath);
     if (folderpath) g_free(folderpath);
 }

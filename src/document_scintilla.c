@@ -1421,13 +1421,13 @@ static void update_ui(GtkWidget *scintilla)
 
 static gboolean auto_memberfunc_complete_callback(gpointer data)
 {
-  Document_Scintilla *doc = DOCUMENT_SCINTILLA(document_manager_get_current_document(main_window.docmg));
+  Documentable *document = document_manager_get_current_documentable(main_window.docmg);
+  Document_Scintilla *doc = DOCUMENT_SCINTILLA(document);
   Document_ScintillaDetails *docdet = DOCUMENT_SCINTILLA_GET_PRIVATE(doc);
   gint current_pos;
-  current_pos = documentable_get_current_position(DOCUMENTABLE(doc));
+  current_pos = documentable_get_current_position(document);
   if (current_pos == GPOINTER_TO_INT(data)) {
-    gchar *prefix = documentable_get_current_word(DOCUMENTABLE(doc));
-//    gchar *calltip = classbrowser_autocomplete_member_function(GPHPEDIT_CLASSBROWSER(main_window.classbrowser), prefix);
+    gchar *prefix = documentable_get_current_word(document);
     gchar *calltip = symbol_manager_get_symbols_matches (main_window.symbolmg, prefix, SYMBOL_FUNCTION, docdet->type);
     if (calltip && strlen(calltip)!=0) gtk_scintilla_user_list_show(GTK_SCINTILLA(docdet->scintilla), 1, calltip);
 //    gtk_scintilla_autoc_show(GTK_SCINTILLA(docdet->scintilla), current_pos, calltip);
@@ -1439,14 +1439,14 @@ static gboolean auto_memberfunc_complete_callback(gpointer data)
 
 static gboolean auto_complete_callback(gpointer data)
 {
-  Document_Scintilla *doc = DOCUMENT_SCINTILLA(document_manager_get_current_document(main_window.docmg));
+  Documentable *document = document_manager_get_current_documentable(main_window.docmg);
+  Document_Scintilla *doc = DOCUMENT_SCINTILLA(document);
   Document_ScintillaDetails *docdet = DOCUMENT_SCINTILLA_GET_PRIVATE(doc);
   gint current_pos;
-  current_pos = documentable_get_current_position(DOCUMENTABLE(doc));
+  current_pos = documentable_get_current_position(document);
   if (current_pos == GPOINTER_TO_INT(data)) {
-    gchar *prefix = documentable_get_current_word(DOCUMENTABLE(doc));
+    gchar *prefix = documentable_get_current_word(document);
     gchar *calltip = symbol_manager_get_symbols_matches (main_window.symbolmg, prefix, SYMBOL_FUNCTION | SYMBOL_CLASS | SYMBOL_VAR, docdet->type);
-//    gchar *calltip = calltip_manager_autocomplete_word(main_window.clltipmg, docdet->type, prefix);
     if (calltip && strlen(calltip)!=0) gtk_scintilla_user_list_show(GTK_SCINTILLA(docdet->scintilla), 1, calltip);
     g_free(prefix);
     g_free(calltip);
@@ -1457,14 +1457,14 @@ static gboolean auto_complete_callback(gpointer data)
 
 static gboolean calltip_callback(gpointer data)
 {
-  Document_Scintilla *doc =  DOCUMENT_SCINTILLA(document_manager_get_current_document(main_window.docmg));
+  Documentable *document = document_manager_get_current_documentable(main_window.docmg);
+  Document_Scintilla *doc = DOCUMENT_SCINTILLA(document);
   Document_ScintillaDetails *docdet = DOCUMENT_SCINTILLA_GET_PRIVATE(doc);
   gint current_pos;
-  current_pos = documentable_get_current_position(DOCUMENTABLE(doc));
+  current_pos = documentable_get_current_position(document);
   if (current_pos == GPOINTER_TO_INT(data)) {
-    gchar *prefix = documentable_get_current_word(DOCUMENTABLE(doc));
+    gchar *prefix = documentable_get_current_word(document);
     gchar *calltip = symbol_manager_get_calltip (main_window.symbolmg, prefix, docdet->type);
-//    gchar *calltip = calltip_manager_show_call_tip(main_window.clltipmg, docdet->type, prefix);
     if (calltip){
       gtk_scintilla_call_tip_show(GTK_SCINTILLA(docdet->scintilla), current_pos, calltip);
       g_free(calltip);
@@ -1663,13 +1663,13 @@ static void show_autocompletion (Document_ScintillaDetails *docdet, gint pos)
 
 static gboolean auto_complete_classes_callback(gpointer data)
 {
-  Document_Scintilla *doc =  DOCUMENT_SCINTILLA(document_manager_get_current_document(main_window.docmg));
+  Documentable *document = document_manager_get_current_documentable(main_window.docmg);
+  Document_Scintilla *doc =  DOCUMENT_SCINTILLA(document);
   Document_ScintillaDetails *docdet = DOCUMENT_SCINTILLA_GET_PRIVATE(doc);
   gint current_pos;
-  current_pos = documentable_get_current_position(DOCUMENTABLE(doc));
+  current_pos = documentable_get_current_position(document);
   if (current_pos == GPOINTER_TO_INT(data)) {
     gchar *autocomp = symbol_manager_get_classes (main_window.symbolmg, docdet->type);
-//classbrowser_get_autocomplete_php_classes_string(GPHPEDIT_CLASSBROWSER(main_window.classbrowser)); 
     if (autocomp) gtk_scintilla_user_list_show(GTK_SCINTILLA(docdet->scintilla), 2, autocomp);
     g_free(autocomp); /*release resources*/
   }
@@ -1679,14 +1679,14 @@ static gboolean auto_complete_classes_callback(gpointer data)
 
 static gboolean auto_complete_php_variables_callback(gpointer data)
 {
-  Document_Scintilla *doc =  DOCUMENT_SCINTILLA(document_manager_get_current_document(main_window.docmg));
+  Documentable *document = document_manager_get_current_documentable(main_window.docmg);
+  Document_Scintilla *doc =  DOCUMENT_SCINTILLA(document);
   Document_ScintillaDetails *docdet = DOCUMENT_SCINTILLA_GET_PRIVATE(doc);
   gint current_pos;
-  current_pos = documentable_get_current_position(DOCUMENTABLE(doc));
+  current_pos = documentable_get_current_position(document);
   if (current_pos == GPOINTER_TO_INT(data)) {
-    gchar *prefix = documentable_get_current_word(DOCUMENTABLE(doc));
+    gchar *prefix = documentable_get_current_word(document);
     gchar *result = symbol_manager_get_symbols_matches (main_window.symbolmg, prefix, SYMBOL_VAR, docdet->type);
-//    gchar *result = classbrowser_autocomplete_php_variables(GPHPEDIT_CLASSBROWSER(main_window.classbrowser), prefix);
     if (result) gtk_scintilla_user_list_show(GTK_SCINTILLA(docdet->scintilla), 1, result);
     g_free(prefix);
   }
