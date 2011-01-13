@@ -79,7 +79,7 @@ MainWindow;
 extern MainWindow main_window;
 
 void main_window_create(void);
-void update_app_title(Document *document);
+void update_app_title(Documentable *document);
 void main_window_pass_command_line_files(char **argv);
 gboolean channel_pass_filename_callback(GIOChannel *source, GIOCondition condition, gpointer data );
 extern GIOChannel* inter_gphpedit_io;

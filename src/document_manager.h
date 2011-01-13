@@ -52,7 +52,7 @@ typedef struct
 {
 	GObjectClass parent_class;
 
-  void (* new_document) (DocumentManager *docmg, Document *doc, gpointer user_data);
+  void (* new_document) (DocumentManager *docmg, Documentable *doc, gpointer user_data);
 
 } DocumentManagerClass;
 

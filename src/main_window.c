@@ -202,7 +202,7 @@ static void main_window_fill_panes(void)
  * Update the application title when switching tabs, closing or opening
  * or opening new tabs or opening new files.
  */
-void update_app_title(Document *document)
+void update_app_title(Documentable *document)
 {
   gphpedit_debug(DEBUG_MAIN_WINDOW);
   gchar *title = NULL;

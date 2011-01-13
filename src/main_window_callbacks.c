@@ -75,7 +75,7 @@ gboolean main_window_delete_event(GtkWidget *widget, GdkEvent *event, gpointer u
   is_app_closing = FALSE;
 
   if (cancel_quit) {
-    update_app_title(document_manager_get_current_document(main_window.docmg));
+    update_app_title(document_manager_get_current_documentable(main_window.docmg));
   }
   return cancel_quit;
 }
@@ -84,7 +84,7 @@ gint main_window_key_press_event(GtkWidget   *widget, GdkEventKey *event,gpointe
 {
 
   if (main_window.notebook_editor != NULL) {
-    documentable_check_externally_modified(DOCUMENTABLE(document_manager_get_current_document(main_window.docmg)));
+    documentable_check_externally_modified(document_manager_get_current_documentable(main_window.docmg));
     if (((event->state & (GDK_CONTROL_MASK | GDK_SHIFT_MASK))==(GDK_CONTROL_MASK | GDK_SHIFT_MASK)) && (event->keyval == GDK_ISO_Left_Tab)) {
       // Hack, for some reason when shift is held down keyval comes through as GDK_ISO_Left_Tab not GDK_Tab
       if (gtk_notebook_get_current_page(GTK_NOTEBOOK(main_window.notebook_editor)) == 0) {
@@ -257,8 +257,8 @@ void on_open1_activate(GtkWidget *widget)
 
   //Add filters to the open dialog
   add_file_filters(GTK_FILE_CHOOSER(file_selection_box));
-  Document *document = document_manager_get_current_document(main_window.docmg);
-  gchar *filename = documentable_get_filename(DOCUMENTABLE(document));
+  Documentable *document = document_manager_get_current_documentable(main_window.docmg);
+  gchar *filename = documentable_get_filename(document);
   gboolean untitled;
   g_object_get(document, "untitled", &untitled, NULL);
 
@@ -281,13 +281,13 @@ void on_open1_activate(GtkWidget *widget)
 
 void save_file_as_ok(GtkFileChooser *file_selection_box)
 {
-  Document *document = document_manager_get_current_document(main_window.docmg);
-  documentable_save_as(DOCUMENTABLE(document), gtk_file_chooser_get_file(file_selection_box));
+  Documentable *document = document_manager_get_current_documentable(main_window.docmg);
+  documentable_save_as(document, gtk_file_chooser_get_file(file_selection_box));
 }
 
 void on_save1_activate(GtkWidget *widget)
 {
-  Document *document = document_manager_get_current_document(main_window.docmg);
+  Documentable *document = document_manager_get_current_documentable(main_window.docmg);
   if (document) {
     gboolean untitled;
     g_object_get(document, "untitled", &untitled, NULL);
@@ -295,7 +295,7 @@ void on_save1_activate(GtkWidget *widget)
     if (untitled) {
       on_save_as1_activate(widget);
     } else {
-      documentable_save(DOCUMENTABLE(document));
+      documentable_save(document);
     }
   }
 }
@@ -348,7 +348,7 @@ void on_tab_close_activate(GtkWidget *widget, Document *document)
   gphpedit_debug(DEBUG_MAIN_WINDOW);
   document_manager_try_close_document(main_window.docmg, document);
   classbrowser_update(GPHPEDIT_CLASSBROWSER(main_window.classbrowser));
-  update_app_title(document_manager_get_current_document(main_window.docmg));
+  update_app_title(document_manager_get_current_documentable(main_window.docmg));
 }
 
 void set_active_tab(page_num)
@@ -357,18 +357,15 @@ void set_active_tab(page_num)
   if(document_manager_set_current_document_from_position(main_window.docmg, page_num)) {
     gtk_notebook_set_current_page(GTK_NOTEBOOK(main_window.notebook_editor), page_num);
   }
-  update_app_title(document_manager_get_current_document(main_window.docmg));
+  update_app_title(document_manager_get_current_documentable(main_window.docmg));
 }
 
 void update_zoom_level(void)
 {
   gphpedit_debug(DEBUG_MAIN_WINDOW);
   Document *doc = document_manager_get_current_document(main_window.docmg);
-  guint zoom_level;
-  if (doc)
-    g_object_get(doc, "zoom_level", &zoom_level, NULL);
-  else
-    zoom_level = 100;
+  guint zoom_level = 100;
+  if (doc) g_object_get(doc, "zoom_level", &zoom_level, NULL);
   gphpedit_statusbar_set_zoom_level((GphpeditStatusbar *)main_window.appbar, zoom_level);
 }
 
@@ -412,8 +409,7 @@ void on_close1_activate(GtkWidget *widget)
   document_manager_try_close_current_document(main_window.docmg);
   if(document_manager_get_document_count(main_window.docmg)!=0){
     classbrowser_update(GPHPEDIT_CLASSBROWSER(main_window.classbrowser));
-    update_app_title(document_manager_get_current_document(main_window.docmg));
-    update_zoom_level();
+    update_app_title(document_manager_get_current_documentable(main_window.docmg));
   }
 }
 
@@ -427,32 +423,32 @@ void on_quit1_activate(GtkWidget *widget)
 
 void on_cut1_activate(GtkWidget *widget)
 {
-  documentable_cut(DOCUMENTABLE(document_manager_get_current_document(main_window.docmg)));
+  documentable_cut(document_manager_get_current_documentable(main_window.docmg));
 }
 
 void on_copy1_activate(GtkWidget *widget)
 {
-  documentable_copy(DOCUMENTABLE(document_manager_get_current_document(main_window.docmg)));
+  documentable_copy(document_manager_get_current_documentable(main_window.docmg));
 }
 
 
 void selectiontoupper(void){
- documentable_selection_to_upper(DOCUMENTABLE(document_manager_get_current_document(main_window.docmg)));
+ documentable_selection_to_upper(document_manager_get_current_documentable(main_window.docmg));
 }
 
 void selectiontolower(void){
- documentable_selection_to_lower(DOCUMENTABLE(document_manager_get_current_document(main_window.docmg)));
+ documentable_selection_to_lower(document_manager_get_current_documentable(main_window.docmg));
 }
 
 void on_paste1_activate(GtkWidget *widget)
 {
-  documentable_paste(DOCUMENTABLE(document_manager_get_current_document(main_window.docmg)));
+  documentable_paste(document_manager_get_current_documentable(main_window.docmg));
 }
 
 
 void on_selectall1_activate(GtkWidget *widget)
 {
-  documentable_select_all(DOCUMENTABLE(document_manager_get_current_document(main_window.docmg)));
+  documentable_select_all(document_manager_get_current_documentable(main_window.docmg));
 }
 
 
@@ -475,13 +471,13 @@ void on_replace1_activate(GtkWidget *widget)
 
 void on_undo1_activate(GtkWidget *widget)
 {
-  documentable_undo(DOCUMENTABLE(document_manager_get_current_document(main_window.docmg)));
+  documentable_undo(document_manager_get_current_documentable(main_window.docmg));
 }
 
 
 void on_redo1_activate(GtkWidget *widget)
 {
-  documentable_redo(DOCUMENTABLE(document_manager_get_current_document(main_window.docmg)));
+  documentable_redo(document_manager_get_current_documentable(main_window.docmg));
 }
 
 
@@ -611,42 +607,41 @@ gboolean on_notebook_focus_tab(GtkNotebook *notebook,
   GtkWidget *document_widget;
   g_object_get(document_manager_get_current_document(main_window.docmg), "editor_widget", &document_widget, NULL);
   gtk_widget_grab_focus(document_widget);
-
   return TRUE;
 }
 
 void goto_line(gchar *text)
 {
-  Documentable *doc = DOCUMENTABLE(document_manager_get_current_document(main_window.docmg));
+  Documentable *doc = document_manager_get_current_documentable(main_window.docmg);
   if (doc) documentable_goto_line(doc, atoi(text));
 }
 
 void block_indent(GtkWidget *widget)
 {
-  documentable_block_indent(DOCUMENTABLE(document_manager_get_current_document(main_window.docmg)));
+  documentable_block_indent(document_manager_get_current_documentable(main_window.docmg));
 }
 
 
 void block_unindent(GtkWidget *widget)
 {
-  documentable_block_unindent(DOCUMENTABLE(document_manager_get_current_document(main_window.docmg)));
+  documentable_block_unindent(document_manager_get_current_documentable(main_window.docmg));
 }
 
 void zoom_in(GtkWidget *widget)
 {
-  documentable_zoom_in(DOCUMENTABLE(document_manager_get_current_document(main_window.docmg)));
+  documentable_zoom_in(document_manager_get_current_documentable(main_window.docmg));
   update_zoom_level();
 }
 
 void zoom_out(GtkWidget *widget)
 {
-  documentable_zoom_out(DOCUMENTABLE(document_manager_get_current_document(main_window.docmg)));
+  documentable_zoom_out(document_manager_get_current_documentable(main_window.docmg));
   update_zoom_level();
 }
 
 void zoom_100(GtkWidget *widget)
 {
-  documentable_zoom_restore(DOCUMENTABLE(document_manager_get_current_document(main_window.docmg)));
+  documentable_zoom_restore(document_manager_get_current_documentable(main_window.docmg));
   update_zoom_level();
 }
 
@@ -693,58 +688,58 @@ void classbrowser_show_hide(GtkWidget *widget)
 
 void force_php(GtkWidget *widget)
 {
-  documentable_set_type(DOCUMENTABLE(document_manager_get_current_document(main_window.docmg)), TAB_PHP);
+  documentable_set_type(document_manager_get_current_documentable(main_window.docmg), TAB_PHP);
 }
 
 void force_css(GtkWidget *widget)
 {
-  documentable_set_type(DOCUMENTABLE(document_manager_get_current_document(main_window.docmg)), TAB_CSS);
+  documentable_set_type(document_manager_get_current_documentable(main_window.docmg), TAB_CSS);
 }
 
 void force_sql(GtkWidget *widget)
 {
-  documentable_set_type(DOCUMENTABLE(document_manager_get_current_document(main_window.docmg)), TAB_SQL);
+  documentable_set_type(document_manager_get_current_documentable(main_window.docmg), TAB_SQL);
 }
 
 void force_cxx(GtkWidget *widget)
 {
-  documentable_set_type(DOCUMENTABLE(document_manager_get_current_document(main_window.docmg)), TAB_CXX);
+  documentable_set_type(document_manager_get_current_documentable(main_window.docmg), TAB_CXX);
 }
 
 void force_perl(GtkWidget *widget)
 {
-  documentable_set_type(DOCUMENTABLE(document_manager_get_current_document(main_window.docmg)), TAB_PERL);
+  documentable_set_type(document_manager_get_current_documentable(main_window.docmg), TAB_PERL);
 }
 
 void force_cobol(GtkWidget *widget)
 {
-  documentable_set_type(DOCUMENTABLE(document_manager_get_current_document(main_window.docmg)), TAB_COBOL);
+  documentable_set_type(document_manager_get_current_documentable(main_window.docmg), TAB_COBOL);
 }
 void force_python(GtkWidget *widget)
 {
-  documentable_set_type(DOCUMENTABLE(document_manager_get_current_document(main_window.docmg)), TAB_PYTHON);
+  documentable_set_type(document_manager_get_current_documentable(main_window.docmg), TAB_PYTHON);
 }
 
 gboolean main_window_activate_focus (GtkWidget *widget,GdkEventFocus *event, gpointer user_data)
 {
-  documentable_check_externally_modified(DOCUMENTABLE(document_manager_get_current_document(main_window.docmg)));
+  documentable_check_externally_modified(document_manager_get_current_documentable(main_window.docmg));
   return FALSE;
 }
 
-void document_manager_new_document_cb (DocumentManager *docmg, Document *doc, gpointer user_data)
+void document_manager_new_document_cb (DocumentManager *docmg, Documentable *doc, gpointer user_data)
 {
   gint ftype;
   g_object_get(doc, "type", &ftype, NULL);
-  gchar *filename = documentable_get_filename(DOCUMENTABLE(doc));
+  gchar *filename = documentable_get_filename(doc);
   symbol_manager_add_file (main_window.symbolmg, filename, ftype);
   g_free(filename);
 }
 
-void document_manager_change_document_cb (DocumentManager *docmg, Document *doc, gpointer user_data)
+void document_manager_change_document_cb (DocumentManager *docmg, Documentable *doc, gpointer user_data)
 {
   if (!is_app_closing) {
     update_app_title(doc);
     classbrowser_update(GPHPEDIT_CLASSBROWSER(main_window.classbrowser));
-    documentable_check_externally_modified(DOCUMENTABLE(doc));
+    documentable_check_externally_modified(doc);
   }
 }
