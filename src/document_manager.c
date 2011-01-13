@@ -48,6 +48,7 @@ struct DocumentManagerDetails
 /* object signal enumeration */
 enum {
 	NEW_DOCUMENT,
+	CHANGE_DOCUMENT,
 	LAST_SIGNAL
 };
 
@@ -101,6 +102,15 @@ document_manager_class_init (DocumentManagerClass *klass)
 
 	signals[NEW_DOCUMENT] =
 		g_signal_new ("new_document",
+		              G_TYPE_FROM_CLASS (object_class),
+		              G_SIGNAL_RUN_LAST,
+		              G_STRUCT_OFFSET (DocumentManagerClass, new_document),
+		              NULL, NULL,
+		               g_cclosure_marshal_VOID__OBJECT,
+		               G_TYPE_NONE, 1, G_TYPE_OBJECT, NULL);
+
+	signals[CHANGE_DOCUMENT] =
+		g_signal_new ("change_document",
 		              G_TYPE_FROM_CLASS (object_class),
 		              G_SIGNAL_RUN_LAST,
 		              G_STRUCT_OFFSET (DocumentManagerClass, new_document),
@@ -163,6 +173,15 @@ DocumentManager *document_manager_new_full (char **argv, gint argc)
  	return docmg; /* return new object */
 }
 
+void _document_manager_set_current_document(DocumentManager *docmg, Document *document)
+{
+  gphpedit_debug(DEBUG_DOC_MANAGER);
+  if (!docmg) return ;
+  DocumentManagerDetails *docmgdet = DOCUMENT_MANAGER_GET_PRIVATE(docmg);
+  docmgdet->current_document = document;
+  g_signal_emit (G_OBJECT (docmg), signals[CHANGE_DOCUMENT], 0, docmgdet->current_document);
+}
+
 /* internal */
 GtkWidget *get_close_tab_widget(Document *document) {
   GtkWidget *hbox;
@@ -192,7 +211,9 @@ void document_save_update_cb (Document *doc, gpointer user_data)
   DocumentManager *docmg = DOCUMENT_MANAGER(user_data);
   DocumentManagerDetails *docmgdet;
 	docmgdet = DOCUMENT_MANAGER_GET_PRIVATE(docmg);
-  update_app_title(docmgdet->current_document);
+  if (doc==docmgdet->current_document){
+    g_signal_emit (G_OBJECT (docmg), signals[CHANGE_DOCUMENT], 0, docmgdet->current_document);
+  }
   gint ftype;
   g_object_get(doc, "type", &ftype, NULL);
   gchar *filename = documentable_get_filename(DOCUMENTABLE(doc));
@@ -213,7 +234,7 @@ void document_type_changed_cb (Document *doc, gint type, gpointer user_data)
 	DocumentManager *docmg = DOCUMENT_MANAGER(user_data);
 	DocumentManagerDetails *docmgdet = DOCUMENT_MANAGER_GET_PRIVATE(docmg);
 	/* only process if document is current_document */
-	if (doc==docmgdet->current_document) update_status_combobox(docmgdet->current_document);
+	if (doc==docmgdet->current_document) g_signal_emit (G_OBJECT (docmg), signals[CHANGE_DOCUMENT], 0, docmgdet->current_document);
 }
 
 void document_need_reload_cb (Document *doc, gpointer user_data)
@@ -238,9 +259,7 @@ void document_loader_done_loading_cb (DocumentLoader *doclod, gboolean result, D
     gtk_widget_show(document_widget);
     gtk_notebook_append_page (GTK_NOTEBOOK (main_window.notebook_editor), document_widget, document_tab);
     gtk_notebook_set_current_page (GTK_NOTEBOOK (main_window.notebook_editor), -1);
-    docmgdet->current_document = doc;
-    update_app_title(doc);
-    if (!untitled) document_manager_session_save(docmg);
+    _document_manager_set_current_document(docmg, doc);
     g_signal_connect(G_OBJECT(doc), "save_update", G_CALLBACK(document_save_update_cb), docmg);
     if (OBJECT_IS_DOCUMENT_SCINTILLA(doc)) {
       g_signal_connect(G_OBJECT(doc), "save_start", G_CALLBACK(document_save_start_cb), NULL);
@@ -249,6 +268,7 @@ void document_loader_done_loading_cb (DocumentLoader *doclod, gboolean result, D
     }
     g_signal_emit (G_OBJECT (docmg), signals[NEW_DOCUMENT], 0, doc);
     gtk_widget_grab_focus(document_widget);
+    if (!untitled) document_manager_session_save(docmg);
   }
   g_object_unref(doclod);
 }
@@ -333,11 +353,9 @@ gboolean document_manager_set_current_document_from_widget (DocumentManager *doc
 {
   gphpedit_debug(DEBUG_DOC_MANAGER);
   if (!docmg) return FALSE;
-  DocumentManagerDetails *docmgdet = DOCUMENT_MANAGER_GET_PRIVATE(docmg);
   Document *data = document_manager_find_document_from_widget (docmg, (void *) child);
   if (data){
-    // Store it in the global main_window.current_editor value
-    docmgdet->current_document = data;
+    _document_manager_set_current_document(docmg, data);
     gtk_widget_grab_focus(child);
   } else {
     return FALSE;
@@ -365,10 +383,11 @@ void document_manager_get_document_preview(DocumentManager *docmg)
   document_manager_add_new_document(docmg, TAB_PREVIEW, filename, 0);
   g_free(filename);
 }
-
-// session_save relies on the fact that all tabs can be closed without 
-// prompting, they should already be saved.  Also, the title won't be set
-// afterwards.
+/*
+* session_save relies on the fact that all tabs can be closed without 
+* prompting, they should already be saved.  Also, the title won't be set
+* afterwards.
+*/
 void document_manager_session_save(DocumentManager *docmg)
 {
   gphpedit_debug(DEBUG_DOC_MANAGER);
@@ -381,7 +400,7 @@ void document_manager_session_save(DocumentManager *docmg)
   gchar *fileentry = NULL;
 
   PreferencesManager *prefmg = preferences_manager_new();
-  g_object_get (main_window.prefmg, "save_session", &save_session, NULL);
+  g_object_get (prefmg, "save_session", &save_session, NULL);
   if (save_session) {
     for(walk = docmgdet->editors; walk!= NULL; walk = g_slist_next(walk)) {
       document = walk->data;
@@ -464,7 +483,7 @@ void document_manager_switch_to_file_or_open(DocumentManager *docmg, gchar *file
   DocumentManagerDetails *docmgdet = DOCUMENT_MANAGER_GET_PRIVATE(docmg);
   Document *document;
   GSList *walk;
-  // need to check if filename is local before adding to the listen
+  /* need to check if filename is local before adding to the list */
   filename = g_strdup(filename);
   for (walk = docmgdet->editors; walk!=NULL; walk = g_slist_next(walk)) {
     document = walk->data;
@@ -476,8 +495,7 @@ void document_manager_switch_to_file_or_open(DocumentManager *docmg, gchar *file
     if (g_strcmp0(docfilename, filename_uri)==0) {
       GtkWidget *document_widget;
       g_object_get(document, "editor_widget", &document_widget, NULL);
-      gtk_notebook_set_current_page( GTK_NOTEBOOK(main_window.notebook_editor), gtk_notebook_page_num(GTK_NOTEBOOK(main_window.notebook_editor),document_widget));
-      docmgdet->current_document = document;
+      gtk_notebook_set_current_page( GTK_NOTEBOOK(main_window.notebook_editor), gtk_notebook_page_num(GTK_NOTEBOOK(main_window.notebook_editor), document_widget));
       documentable_goto_line(DOCUMENTABLE(docmgdet->current_document), line_number);
       g_free(docfilename);
       return ;
@@ -699,8 +717,10 @@ gboolean document_manager_set_current_document_from_position(DocumentManager *do
   DocumentManagerDetails *docmgdet = DOCUMENT_MANAGER_GET_PRIVATE(docmg);
   Document *new_current_editor;
   new_current_editor = DOCUMENT(g_slist_nth_data(docmgdet->editors, page_num));
-  docmgdet->current_document = new_current_editor;
-  if (new_current_editor) return TRUE;
+  if (new_current_editor){
+   _document_manager_set_current_document(docmg, new_current_editor);
+   return TRUE;
+  }
   return FALSE;
 }
 

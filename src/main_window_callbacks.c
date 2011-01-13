@@ -594,20 +594,15 @@ void update_status_combobox(Document *document)
           set_status_combo_item (GPHPEDIT_STATUSBAR(main_window.appbar),_("Text-Plain"));
       }
 }
+
 void on_notebook_switch_page (GtkNotebook *notebook, GtkNotebookPage *page,
                 gint page_num, gpointer user_data)
 {
   GtkWidget *child;
   child = gtk_notebook_get_nth_page(GTK_NOTEBOOK(main_window.notebook_editor), page_num);
-  if(!document_manager_set_current_document_from_widget (main_window.docmg, child)){
+  if(!document_manager_set_current_document_from_widget (main_window.docmg, child)) {
     gphpedit_debug_message(DEBUG_MAIN_WINDOW,_("Unable to get data for page %d"), page_num);
   }
-  if (!is_app_closing) {
-    // Change the title of the main application window to the full filename
-    update_app_title(document_manager_get_current_document(main_window.docmg));
-    on_tab_change_update_classbrowser(main_window.notebook_editor);
-  }
-  documentable_check_externally_modified(DOCUMENTABLE(document_manager_get_current_document(main_window.docmg)));
 }
 
 gboolean on_notebook_focus_tab(GtkNotebook *notebook,
@@ -730,14 +725,6 @@ void force_python(GtkWidget *widget)
   documentable_set_type(DOCUMENTABLE(document_manager_get_current_document(main_window.docmg)), TAB_PYTHON);
 }
 
-//function to refresh treeview when the current tab changes 
-//view is refreshed only if the parse only current file parameter is set
-gint on_tab_change_update_classbrowser(GtkWidget *widget)
-{
-  classbrowser_update(GPHPEDIT_CLASSBROWSER(main_window.classbrowser));
-  return FALSE;
-}
-
 gboolean main_window_activate_focus (GtkWidget *widget,GdkEventFocus *event, gpointer user_data)
 {
   documentable_check_externally_modified(DOCUMENTABLE(document_manager_get_current_document(main_window.docmg)));
@@ -751,4 +738,13 @@ void document_manager_new_document_cb (DocumentManager *docmg, Document *doc, gp
   gchar *filename = documentable_get_filename(DOCUMENTABLE(doc));
   symbol_manager_add_file (main_window.symbolmg, filename, ftype);
   g_free(filename);
+}
+
+void document_manager_change_document_cb (DocumentManager *docmg, Document *doc, gpointer user_data)
+{
+  if (!is_app_closing) {
+    update_app_title(doc);
+    classbrowser_update(GPHPEDIT_CLASSBROWSER(main_window.classbrowser));
+    documentable_check_externally_modified(DOCUMENTABLE(doc));
+  }
 }
