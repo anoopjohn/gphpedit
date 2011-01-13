@@ -282,10 +282,6 @@ static gchar *symbol_bd_perl_get_calltip (Symbolizable *self, const gchar *symbo
   SymbolBdPERLDetails *symbolbddet;
 	symbolbddet = SYMBOL_BD_PERL_GET_PRIVATE(self);
 
-  gchar *return_value;
-  gchar *params;
-  gchar *description;
-  gchar *token_line, *copy_line;
   gchar *result = NULL;
   gchar *value = g_tree_lookup (symbolbddet->perl_api_tree, symbol_name);
   if (value){

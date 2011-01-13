@@ -38,7 +38,7 @@
 #include "gvfs_utils.h"
 #include "gphpedit-statusbar.h"
 #include "filebrowser_ui.h"
-#include "classbrowser_ui.h"
+#include "classbrowser.h"
 #include "find_dialog.h"
 #include "replace_dialog.h"
 #include "document_manager.h"

@@ -35,7 +35,7 @@
 #include "gphpedit-statusbar.h"
 #include "syntax_check_window.h"
 #include "filebrowser_ui.h"
-#include "classbrowser_ui.h"
+#include "classbrowser.h"
 #include "document.h"
 
 void update_controls(Document *document);

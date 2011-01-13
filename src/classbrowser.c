@@ -31,7 +31,7 @@
 #include <glib/gi18n.h>
 #include <gdk/gdkkeysyms.h>
 
-#include "classbrowser_ui.h"
+#include "classbrowser.h"
 #include "main_window.h"
 #include "gvfs_utils.h"
 #include "symbol_manager.h"

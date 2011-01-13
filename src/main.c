@@ -30,7 +30,6 @@
 #include "main_window_callbacks.h"
 #include "gphpedit_ipc.h"
 #include "templates.h"
-#include "classbrowser_ui.h"
 
 #include "debug.h"
 

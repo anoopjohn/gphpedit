@@ -33,7 +33,6 @@
 #include "gvfs_utils.h"
 #include "gphpedit-close-button.h"
 #include "gphpedit-statusbar.h"
-#include "classbrowser_ui.h"
 #include "document_loader.h"
 #include "tab.h"
 

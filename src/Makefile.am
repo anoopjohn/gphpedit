@@ -44,8 +44,8 @@ nodist_EXTRA_gphpedit_SOURCES = dummy.cxx
 gphpedit_SOURCES = \
   classbrowser_parse.c \
   classbrowser_parse.h \
-  classbrowser_ui.c \
-  classbrowser_ui.h \
+  classbrowser.c \
+  classbrowser.h \
   debug.c \
   debug.h \
   documentable.c \
