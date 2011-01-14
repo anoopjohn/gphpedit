@@ -1428,7 +1428,7 @@ static gboolean auto_memberfunc_complete_callback(gpointer data)
   current_pos = documentable_get_current_position(document);
   if (current_pos == GPOINTER_TO_INT(data)) {
     gchar *prefix = documentable_get_current_word(document);
-    gchar *calltip = symbol_manager_get_symbols_matches (main_window.symbolmg, prefix, SYMBOL_FUNCTION, docdet->type);
+    gchar *calltip = symbol_manager_get_symbols_matches (main_window.symbolmg, prefix, SYMBOL_MEMBER, docdet->type);
     if (calltip && strlen(calltip)!=0) gtk_scintilla_user_list_show(GTK_SCINTILLA(docdet->scintilla), 1, calltip);
 //    gtk_scintilla_autoc_show(GTK_SCINTILLA(docdet->scintilla), current_pos, calltip);
     g_free(prefix);
@@ -1729,7 +1729,7 @@ static void char_added(GtkWidget *scintilla, guint ch, gpointer user_data)
   if (gtk_scintilla_autoc_active(sci)==1) {
     style = 0; // Hack to get around the drop-down not showing in comments, but if it's been forced...  
   }
-
+  gint prev_char;
   switch(docdet->type) {
     case(TAB_PHP):
       if ((style != SCE_HPHP_SIMPLESTRING) && (style != SCE_HPHP_HSTRING) && (style != SCE_HPHP_COMMENTLINE) && (style !=SCE_HPHP_COMMENT)) {
@@ -1744,24 +1744,24 @@ static void char_added(GtkWidget *scintilla, guint ch, gpointer user_data)
         case ('('):
           show_calltip (docdet, current_pos);
           break;
-        default:
-        member_function_buffer = gtk_scintilla_get_text_range (sci, wordEnd-1, wordEnd +1, &member_function_length);
-        if (strcmp(member_function_buffer, "->")==0 || strcmp(member_function_buffer, "::")==0) {
-          /*search back for a '$' in that line */
-          gint initial_pos= gtk_scintilla_position_from_line(sci, current_line);
-          gint line_size;
-          gchar *line_text= gtk_scintilla_get_text_range (sci, initial_pos, wordStart-1, &line_size);
-            if (!check_php_variable_before(line_text)){
-             break;
-            }
+        case ('>'):
+        case (':'):
+          prev_char = gtk_scintilla_get_char_at(sci, current_pos-2);
+          if ((prev_char=='-' && ch =='>') || (prev_char==':' && ch ==':')) {
+            /*search back for a '$' in that line */
+            gint initial_pos= gtk_scintilla_position_from_line(sci, current_line);
+            gint line_size;
+            gchar *line_text = gtk_scintilla_get_text_range (sci, initial_pos, wordStart-1, &line_size);
+            if (!check_php_variable_before(line_text)) break;
             if (!docdet->completion_timer_set) {
               gint delay;
               g_object_get(pref, "autocomplete_delay", &delay, NULL);
               docdet->completion_timer_id = g_timeout_add(delay, auto_memberfunc_complete_callback, GINT_TO_POINTER(current_pos));
               docdet->completion_timer_set=TRUE;
             }
-        }
-        g_free(member_function_buffer);
+          }
+          break;
+        default:
         member_function_buffer = gtk_scintilla_get_text_range (sci, wordStart, wordEnd, &member_function_length);
         if (g_str_has_prefix(member_function_buffer,"$") || g_str_has_prefix(member_function_buffer,"__")) {
             if (!docdet->completion_timer_set) {
@@ -1803,13 +1803,28 @@ static void char_added(GtkWidget *scintilla, guint ch, gpointer user_data)
             case ('('):
               show_calltip (docdet, current_pos);
             break;
-            default:
-              member_function_buffer = gtk_scintilla_get_text_range (sci, wordStart-2, wordStart, &member_function_length);
-              if(current_word_length>=3){
-                show_autocompletion (docdet, current_pos);
+            case ('>'):
+            case (':'):
+              prev_char = gtk_scintilla_get_char_at(sci, current_pos-2);
+              if ((prev_char=='-' && ch =='>') || (prev_char==':' && ch ==':')) {
+                /*search back for a '$' in that line */
+                gint initial_pos= gtk_scintilla_position_from_line(sci, current_line);
+                gint line_size;
+                gchar *line_text = gtk_scintilla_get_text_range (sci, initial_pos, wordStart-1, &line_size);
+                if (!check_php_variable_before(line_text)) break;
+                if (!docdet->completion_timer_set) {
+                  gint delay;
+                  g_object_get(pref, "autocomplete_delay", &delay, NULL);
+                  docdet->completion_timer_id = g_timeout_add(delay, auto_memberfunc_complete_callback, GINT_TO_POINTER(current_pos));
+                  docdet->completion_timer_set=TRUE;
+                }
               }
-              g_free(member_function_buffer);
-        }
+              break;
+            default:
+            member_function_buffer = gtk_scintilla_get_text_range (sci, wordStart-2, wordStart, &member_function_length);
+            if(current_word_length>=3) show_autocompletion (docdet, current_pos);
+            }
+            g_free(member_function_buffer);
         break;
       case (TAB_PYTHON):
         switch(ch) {

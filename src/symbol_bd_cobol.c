@@ -57,6 +57,7 @@ struct SymbolBdCOBOLDetails
   gchar *completion_prefix;
   GString *completion_string;
   GHashTable *completion_list;
+  GTree *completion_tree;
 
   /* cache items */
   char cache_str[200]; /* cached value */
@@ -86,7 +87,7 @@ G_DEFINE_TYPE_WITH_CODE(SymbolBdCOBOL, symbol_bd_cobol, G_TYPE_OBJECT,
                         G_IMPLEMENT_INTERFACE (IFACE_TYPE_SYMBOLIZABLE,
                                                  symbol_bd_cobol_symbolizable_init));
 
-static void make_result_string (gpointer key, gpointer value, gpointer user_data)
+static gboolean make_result_string (gpointer key, gpointer value, gpointer user_data)
 {
   gchar *function_name = (gchar *)value;
   SymbolBdCOBOLDetails *symbolbddet = (SymbolBdCOBOLDetails *) user_data;
@@ -96,6 +97,7 @@ static void make_result_string (gpointer key, gpointer value, gpointer user_data
     symbolbddet->completion_string = g_string_append(symbolbddet->completion_string, " ");
     symbolbddet->completion_string = g_string_append(symbolbddet->completion_string, function_name);
   }
+  return FALSE;
 }
 
 static void add_result_item (gpointer key, gpointer value, gpointer user_data)
@@ -103,7 +105,7 @@ static void add_result_item (gpointer key, gpointer value, gpointer user_data)
   ClassBrowserFunction *function = (ClassBrowserFunction *) value;
   SymbolBdCOBOLDetails *symbolbddet = (SymbolBdCOBOLDetails *) user_data;
   if (g_str_has_prefix(function->functionname, symbolbddet->completion_prefix)) {
-    g_hash_table_insert (symbolbddet->completion_list, key, g_strdup_printf("%s?1",function->functionname));
+    g_tree_insert (symbolbddet->completion_tree, key, g_strdup_printf("%s?1",function->functionname));
   }
 }
 
@@ -111,7 +113,7 @@ static gboolean add_api_item (gpointer key, gpointer value, gpointer user_data)
 {
   SymbolBdCOBOLDetails *symbolbddet = (SymbolBdCOBOLDetails *) user_data;
   if (g_str_has_prefix(key, symbolbddet->completion_prefix)) {
-    g_hash_table_insert (symbolbddet->completion_list, key, g_strdup_printf("%s?2", (gchar *)key));
+    g_tree_insert (symbolbddet->completion_tree, key, g_strdup_printf("%s?2", (gchar *)key));
   }
   if (strncmp(key, symbolbddet->completion_prefix, MIN(strlen(key),strlen(symbolbddet->completion_prefix)))>0){
     return TRUE;
@@ -124,7 +126,7 @@ static void add_var_item (gpointer key, gpointer value, gpointer user_data)
   ClassBrowserVar *var = (ClassBrowserVar *) value;
   SymbolBdCOBOLDetails *symbolbddet = (SymbolBdCOBOLDetails *) user_data;
   if (g_str_has_prefix(var->varname, symbolbddet->completion_prefix)) {
-    g_hash_table_insert (symbolbddet->completion_list, key, g_strdup_printf("%s?3",var->varname));
+    g_tree_insert (symbolbddet->completion_tree, key, g_strdup_printf("%s?3",var->varname));
   }
 }
 
@@ -180,7 +182,7 @@ static gchar *symbol_bd_cobol_get_symbols_matches (Symbolizable *self, const gch
   if (symbol_bd_cobol_has_cache(symbolbddet->cache_str, symbolbddet->cache_completion, symbolbddet->cache_flags, symbol_prefix, flags)){
     symbolbddet->completion_string = symbol_bd_cobol_get_autocomp_from_cache(symbolbddet->cache_str, symbolbddet->cache_completion, symbol_prefix);
   } else {
-    symbolbddet->completion_list = g_hash_table_new_full (g_str_hash, g_str_equal, NULL, (GDestroyNotify) g_free);
+    symbolbddet->completion_tree = g_tree_new_full ((GCompareDataFunc) g_strcmp0, NULL, NULL,(GDestroyNotify) g_free);
 
     if (((flags & SYMBOL_ALL) == SYMBOL_ALL) || ((flags & SYMBOL_FUNCTION) == SYMBOL_FUNCTION)) {
       g_hash_table_foreach (symbolbddet->functionlist, add_result_item, symbolbddet);
@@ -191,8 +193,8 @@ static gchar *symbol_bd_cobol_get_symbols_matches (Symbolizable *self, const gch
       g_hash_table_foreach (symbolbddet->cobol_variables_tree, add_var_item, symbolbddet);
     }
 
-    g_hash_table_foreach (symbolbddet->completion_list, make_result_string, symbolbddet);
-    g_hash_table_destroy (symbolbddet->completion_list);
+    g_tree_foreach (symbolbddet->completion_tree, make_result_string, symbolbddet);
+    g_tree_destroy (symbolbddet->completion_tree);
     if (symbolbddet->completion_string) symbol_bd_cobol_save_result_in_cache(symbolbddet, symbolbddet->completion_string->str, symbol_prefix);
   }
 

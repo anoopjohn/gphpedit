@@ -46,6 +46,7 @@ struct SymbolBdSQLDetails
   gchar *completion_prefix;
   GString *completion_string;
   GHashTable *completion_list;
+  GTree *completion_tree;
 
   /* cache items */
   char cache_str[200]; /* cached value */
@@ -71,7 +72,7 @@ G_DEFINE_TYPE_WITH_CODE(SymbolBdSQL, symbol_bd_sql, G_TYPE_OBJECT,
                         G_IMPLEMENT_INTERFACE (IFACE_TYPE_SYMBOLIZABLE,
                                                  symbol_bd_sql_symbolizable_init));
 
-static void make_result_string (gpointer key, gpointer value, gpointer user_data)
+static gboolean make_result_string (gpointer key, gpointer value, gpointer user_data)
 {
   gchar *function_name = (gchar *)value;
   SymbolBdSQLDetails *symbolbddet = (SymbolBdSQLDetails *) user_data;
@@ -81,13 +82,14 @@ static void make_result_string (gpointer key, gpointer value, gpointer user_data
     symbolbddet->completion_string = g_string_append(symbolbddet->completion_string, " ");
     symbolbddet->completion_string = g_string_append(symbolbddet->completion_string, function_name);
   }
+  return FALSE;
 }
 
 static gboolean add_api_item (gpointer key, gpointer value, gpointer user_data)
 {
   SymbolBdSQLDetails *symbolbddet = (SymbolBdSQLDetails *) user_data;
   if (g_str_has_prefix(key, symbolbddet->completion_prefix)) {
-    g_hash_table_insert (symbolbddet->completion_list, key, g_strdup_printf("%s?2", (gchar *)key));
+    g_tree_insert (symbolbddet->completion_tree, key, g_strdup_printf("%s?2", (gchar *)key));
   }
   if (strncmp(key, symbolbddet->completion_prefix, MIN(strlen(key),strlen(symbolbddet->completion_prefix)))>0){
     return TRUE;
@@ -147,14 +149,14 @@ static gchar *symbol_bd_sql_get_symbols_matches (Symbolizable *self, const gchar
   if (symbol_bd_sql_has_cache(symbolbddet->cache_str, symbolbddet->cache_completion, symbolbddet->cache_flags, symbol_prefix, flags)){
     symbolbddet->completion_string = symbol_bd_sql_get_autocomp_from_cache(symbolbddet->cache_str, symbolbddet->cache_completion, symbol_prefix);
   } else {
-    symbolbddet->completion_list = g_hash_table_new_full (g_str_hash, g_str_equal, NULL, (GDestroyNotify) g_free);
+    symbolbddet->completion_tree = g_tree_new_full ((GCompareDataFunc) g_strcmp0, NULL, NULL,(GDestroyNotify) g_free);
 
     if (((flags & SYMBOL_ALL) == SYMBOL_ALL) || ((flags & SYMBOL_FUNCTION) == SYMBOL_FUNCTION)) {
       /* add api functions */
       g_tree_foreach (symbolbddet->sql_api_tree, add_api_item, symbolbddet);
     }
-    g_hash_table_foreach (symbolbddet->completion_list, make_result_string, symbolbddet);
-    g_hash_table_destroy (symbolbddet->completion_list);
+    g_tree_foreach (symbolbddet->completion_tree, make_result_string, symbolbddet);
+    g_tree_destroy (symbolbddet->completion_tree);
     if (symbolbddet->completion_string) symbol_bd_sql_save_result_in_cache(symbolbddet, symbolbddet->completion_string->str, symbol_prefix);
   }
 

@@ -41,17 +41,19 @@ typedef struct _SymbolizableIface  SymbolizableInterface;
 
 enum 
 {
-  SYMBOL_ALL            = 0,
-  SYMBOL_FUNCTION       = 1 << 0,
-  SYMBOL_CLASS          = 2 << 1,
-  SYMBOL_VAR            = 4 << 2,
+  SYMBOL_ALL            = 1 << 0,
+  SYMBOL_FUNCTION       = 1 << 1,
+  SYMBOL_CLASS          = 1 << 2,
+  SYMBOL_VAR            = 1 << 3,
+  SYMBOL_MEMBER         = 1 << 4
 };
 /*
-symbol_type
+* symbol_type:
 * SYMBOL_ALL
 * SYMBOL_FUNCTION
 * SYMBOL_CLASS
 * SYMBOL_VAR
+* SYMBOL_MEMBER
 */
 struct _SymbolizableIface
 {
@@ -82,7 +84,6 @@ typedef struct
   gchar *filename;
   gboolean remove;
   guint identifierid;
-//  gint file_type;
 }
 ClassBrowserVar;
 
@@ -96,7 +97,6 @@ typedef struct
   gchar *classname;
   gboolean remove;
   guint identifierid;
-//  gint file_type;
 }
 ClassBrowserFunction;
 
@@ -107,7 +107,6 @@ typedef struct
   guint line_number;
   gboolean remove;
   guint identifierid;
-//  gint file_type;
 }
 ClassBrowserClass;
 
