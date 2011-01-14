@@ -21,11 +21,6 @@
 
    The GNU General Public License is contained in the file COPYING.
 */
-/* ******* CLASSBROWSER DESIGN ********
-* classbrowser widget has two part. UI and backend. the Backend process open files and 
-* return a list of classes and functions in files.
-* UI process backend signal and fill the classbrowser Tree.
-*/
 #include "debug.h"
 
 #include <glib/gi18n.h>
@@ -236,7 +231,7 @@ void classbrowser_set_sortable(GtkTreeStore *classtreestore)
     classbrowser_compare_function_names, NULL,NULL);
   gtk_tree_sortable_set_sort_func(GTK_TREE_SORTABLE(classtreestore), 
     0, classbrowser_compare_function_names, 
-    NULL,NULL);
+    NULL, NULL);
   gtk_tree_sortable_set_sort_column_id(GTK_TREE_SORTABLE(classtreestore),
     0,
     GTK_SORT_ASCENDING);
@@ -268,6 +263,7 @@ GtkTreeModel *classbrowser_get_model(gphpeditClassBrowserPrivate *priv)
 */
 void sdb_update_cb (SymbolManager *symbolmg, gpointer user_data)
 {
+  gphpedit_debug(DEBUG_CLASSBROWSER);
   gphpeditClassBrowserPrivate *priv= (gphpeditClassBrowserPrivate *) user_data;
   static guint press_event = 0;
   static guint release_event = 0;
@@ -480,6 +476,7 @@ gint treeview_click_release(GtkWidget *widget, GdkEventButton *event, gpointer f
 */
 void classbrowser_update(gphpeditClassBrowser *classbrowser)
 {
+  gphpedit_debug(DEBUG_CLASSBROWSER);
   if (!classbrowser) return ;
 	gphpeditClassBrowserPrivate *priv;
 	priv = CLASSBROWSER_BACKEND_GET_PRIVATE(classbrowser);
@@ -492,7 +489,6 @@ void classbrowser_update(gphpeditClassBrowser *classbrowser)
     sdb_update_cb (main_window.symbolmg, priv);
   }
 }
-
 
 void classbrowser_update_selected_label(gphpeditClassBrowserPrivate *priv, gchar *filename, gint line)
 {

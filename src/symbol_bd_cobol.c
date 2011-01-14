@@ -146,6 +146,7 @@ static void symbol_bd_cobol_save_result_in_cache(SymbolBdCOBOLDetails *symbolbdd
 
 static gchar *symbol_bd_cobol_get_symbols_matches (Symbolizable *self, const gchar *symbol_prefix, gint flags)
 {
+  gphpedit_debug (DEBUG_SYMBOLIZABLE);
   SymbolBdCOBOLDetails *symbolbddet;
 	symbolbddet = SYMBOL_BD_COBOL_GET_PRIVATE(self);
   symbolbddet->completion_prefix = (gchar *) symbol_prefix;
@@ -181,21 +182,25 @@ static gchar *symbol_bd_cobol_get_symbols_matches (Symbolizable *self, const gch
 
 static gchar *symbol_bd_cobol_get_class_symbols (Symbolizable *self, const gchar *class_name)
 {
+  gphpedit_debug (DEBUG_SYMBOLIZABLE);
   return NULL;
 }
 
 static gchar *symbol_bd_cobol_get_classes (Symbolizable *self)
 {
+  gphpedit_debug (DEBUG_SYMBOLIZABLE);
   return NULL;
 }
 
 static gchar *symbol_bd_cobol_get_calltip (Symbolizable *self, const gchar *symbol_name)
 {
+  gphpedit_debug (DEBUG_SYMBOLIZABLE);
   return NULL;
 }
 
 static GList *symbol_bd_cobol_get_custom_symbols_list (Symbolizable *self, gint flags)
 {
+  gphpedit_debug (DEBUG_SYMBOLIZABLE);
   SymbolBdCOBOLDetails *symbolbddet;
 	symbolbddet = SYMBOL_BD_COBOL_GET_PRIVATE(self);
   if (((flags & SYMBOL_FUNCTION) == SYMBOL_FUNCTION)) {
@@ -239,6 +244,7 @@ static void add_custom_var_item (gpointer key, gpointer value, gpointer user_dat
 
 static GList *symbol_bd_cobol_get_custom_symbols_list_by_filename (Symbolizable *self, gint symbol_type, gchar *filename)
 {
+  gphpedit_debug (DEBUG_SYMBOLIZABLE);
   SymbolBdCOBOLDetails *symbolbddet;
 	symbolbddet = SYMBOL_BD_COBOL_GET_PRIVATE(self);
   if(!filename) return NULL;
@@ -264,6 +270,7 @@ static GList *symbol_bd_cobol_get_custom_symbols_list_by_filename (Symbolizable 
 
 static void symbol_bd_cobol_rescan_file (Symbolizable *self, gchar *filename)
 {
+  gphpedit_debug (DEBUG_SYMBOLIZABLE);
 }
 
 static void remove_custom_function_item (gpointer key, gpointer value, gpointer user_data)
@@ -295,6 +302,7 @@ static void remove_custom_var_item (gpointer key, gpointer value, gpointer user_
 
 static void symbol_bd_cobol_purge_file (Symbolizable *self, gchar *filename)
 {
+  gphpedit_debug (DEBUG_SYMBOLIZABLE);
   SymbolBdCOBOLDetails *symbolbddet;
 	symbolbddet = SYMBOL_BD_COBOL_GET_PRIVATE(self);
   if(!filename) return ;
@@ -316,6 +324,7 @@ static void symbol_bd_cobol_purge_file (Symbolizable *self, gchar *filename)
 */
 static void symbol_bd_cobol_add_file (Symbolizable *self, gchar *filename)
 {
+  gphpedit_debug (DEBUG_SYMBOLIZABLE);
   SymbolBdCOBOLDetails *symbolbddet;
 	symbolbddet = SYMBOL_BD_COBOL_GET_PRIVATE(self);
   if(!filename) return ;
@@ -414,7 +423,7 @@ symbol_bd_cobol_init (SymbolBdCOBOL *symbolbd)
 
   /* init API tables */
   symbol_bd_function_list_from_array_prepare(cobol_keyword, &symbolbddet->cobol_api_tree);
-  /*init file table */
+  /* init file table */
   symbolbddet->db_file_table = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, g_free);
 
   /* custom symbols tables */

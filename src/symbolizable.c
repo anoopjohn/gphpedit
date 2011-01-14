@@ -63,6 +63,7 @@ symbolizable_default_init (SymbolizableIface *iface)
 */
 gchar *symbolizable_get_symbols_matches (Symbolizable *self, const gchar *symbol_prefix, gint flags)
 {
+  gphpedit_debug (DEBUG_SYMBOLIZABLE);
   if (!self) return NULL;
 	return SYMBOLIZABLE_GET_IFACE (self)->get_symbols_matches (self, symbol_prefix, flags);
 }
@@ -74,6 +75,7 @@ gchar *symbolizable_get_symbols_matches (Symbolizable *self, const gchar *symbol
 */
 gchar *symbolizable_get_class_symbols (Symbolizable *self, const gchar *class_name)
 {
+  gphpedit_debug (DEBUG_SYMBOLIZABLE);
   if (!self) return NULL;
 	return SYMBOLIZABLE_GET_IFACE (self)->get_class_symbols (self, class_name);
 }
@@ -85,6 +87,7 @@ gchar *symbolizable_get_class_symbols (Symbolizable *self, const gchar *class_na
 */
 gchar *symbolizable_get_classes (Symbolizable *self)
 {
+  gphpedit_debug (DEBUG_SYMBOLIZABLE);
   if (!self) return NULL;
 	return SYMBOLIZABLE_GET_IFACE (self)->get_classes (self);
 }
@@ -110,6 +113,7 @@ gchar *symbolizable_get_calltip (Symbolizable *self, const gchar *symbol_name)
 */
 GList *symbolizable_get_custom_symbols_list (Symbolizable *self, gint symbol_type)
 {
+  gphpedit_debug (DEBUG_SYMBOLIZABLE);
   if (!self) return NULL;
 	return SYMBOLIZABLE_GET_IFACE (self)->get_custom_symbols_list (self, symbol_type);
 }
@@ -123,6 +127,7 @@ GList *symbolizable_get_custom_symbols_list (Symbolizable *self, gint symbol_typ
 */
 GList *symbolizable_get_custom_symbols_list_by_filename (Symbolizable *self, gint symbol_type, gchar *filename)
 {
+  gphpedit_debug (DEBUG_SYMBOLIZABLE);
   if (!self) return NULL;
 	return SYMBOLIZABLE_GET_IFACE (self)->get_custom_symbols_list_by_filename (self, symbol_type, filename);
 }
@@ -132,6 +137,7 @@ GList *symbolizable_get_custom_symbols_list_by_filename (Symbolizable *self, gin
 */
 void symbolizable_rescan_file (Symbolizable *self, gchar *filename)
 {
+  gphpedit_debug (DEBUG_SYMBOLIZABLE);
   g_return_if_fail (self);
   g_return_if_fail (filename);
 	SYMBOLIZABLE_GET_IFACE (self)->rescan_file (self, filename);
@@ -144,6 +150,7 @@ void symbolizable_rescan_file (Symbolizable *self, gchar *filename)
 */
 void symbolizable_add_file (Symbolizable *self, gchar *filename)
 {
+  gphpedit_debug (DEBUG_SYMBOLIZABLE);
   g_return_if_fail (self);
   g_return_if_fail (filename);
 	SYMBOLIZABLE_GET_IFACE (self)->add_file (self, filename);
@@ -156,6 +163,7 @@ void symbolizable_add_file (Symbolizable *self, gchar *filename)
 */
 void symbolizable_purge_file (Symbolizable *self, gchar *filename)
 {
+  gphpedit_debug (DEBUG_SYMBOLIZABLE);
   g_return_if_fail (self);
   g_return_if_fail (filename);
 	SYMBOLIZABLE_GET_IFACE (self)->purge_file (self, filename);

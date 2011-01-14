@@ -154,6 +154,7 @@ static void symbol_bd_python_save_result_in_cache(SymbolBdPYTHONDetails *symbolb
 
 static gchar *symbol_bd_python_get_symbols_matches (Symbolizable *self, const gchar *symbol_prefix, gint flags)
 {
+  gphpedit_debug (DEBUG_SYMBOLIZABLE);
   SymbolBdPYTHONDetails *symbolbddet;
 	symbolbddet = SYMBOL_BD_PYTHON_GET_PRIVATE(self);
   symbolbddet->completion_prefix = (gchar *) symbol_prefix;
@@ -207,6 +208,7 @@ static void make_result_member_string (gpointer key, gpointer value, gpointer us
 
 static gchar *symbol_bd_python_get_class_symbols (Symbolizable *self, const gchar *class_name)
 {
+  gphpedit_debug (DEBUG_SYMBOLIZABLE);
   SymbolBdPYTHONDetails *symbolbddet;
 	symbolbddet = SYMBOL_BD_PYTHON_GET_PRIVATE(self);
   symbolbddet->completion_string = NULL;
@@ -238,6 +240,7 @@ static void make_class_completion_string (gpointer key, gpointer value, gpointer
 
 static gchar *symbol_bd_python_get_classes (Symbolizable *self)
 {
+  gphpedit_debug (DEBUG_SYMBOLIZABLE);
   SymbolBdPYTHONDetails *symbolbddet;
 	symbolbddet = SYMBOL_BD_PYTHON_GET_PRIVATE(self);
   symbolbddet->completion_string = NULL;
@@ -250,6 +253,7 @@ static gchar *symbol_bd_python_get_classes (Symbolizable *self)
 
 static gchar *symbol_bd_python_get_calltip (Symbolizable *self, const gchar *symbol_name)
 {
+  gphpedit_debug (DEBUG_SYMBOLIZABLE);
   SymbolBdPYTHONDetails *symbolbddet;
 	symbolbddet = SYMBOL_BD_PYTHON_GET_PRIVATE(self);
 
@@ -276,6 +280,7 @@ static gchar *symbol_bd_python_get_calltip (Symbolizable *self, const gchar *sym
 
 static GList *symbol_bd_python_get_custom_symbols_list (Symbolizable *self, gint flags)
 {
+  gphpedit_debug (DEBUG_SYMBOLIZABLE);
   SymbolBdPYTHONDetails *symbolbddet;
 	symbolbddet = SYMBOL_BD_PYTHON_GET_PRIVATE(self);
   if (((flags & SYMBOL_FUNCTION) == SYMBOL_FUNCTION)) {
@@ -319,6 +324,7 @@ static void add_custom_var_item (gpointer key, gpointer value, gpointer user_dat
 
 static GList *symbol_bd_python_get_custom_symbols_list_by_filename (Symbolizable *self, gint symbol_type, gchar *filename)
 {
+  gphpedit_debug (DEBUG_SYMBOLIZABLE);
   SymbolBdPYTHONDetails *symbolbddet;
 	symbolbddet = SYMBOL_BD_PYTHON_GET_PRIVATE(self);
   if(!filename) return NULL;
@@ -344,6 +350,7 @@ static GList *symbol_bd_python_get_custom_symbols_list_by_filename (Symbolizable
 
 static void symbol_bd_python_rescan_file (Symbolizable *self, gchar *filename)
 {
+  gphpedit_debug (DEBUG_SYMBOLIZABLE);
 }
 
 static void remove_custom_function_item (gpointer key, gpointer value, gpointer user_data)
@@ -375,6 +382,7 @@ static void remove_custom_var_item (gpointer key, gpointer value, gpointer user_
 
 static void symbol_bd_python_purge_file (Symbolizable *self, gchar *filename)
 {
+  gphpedit_debug (DEBUG_SYMBOLIZABLE);
   SymbolBdPYTHONDetails *symbolbddet;
 	symbolbddet = SYMBOL_BD_PYTHON_GET_PRIVATE(self);
   if(!filename) return ;
@@ -396,6 +404,7 @@ static void symbol_bd_python_purge_file (Symbolizable *self, gchar *filename)
 */
 static void symbol_bd_python_add_file (Symbolizable *self, gchar *filename)
 {
+  gphpedit_debug (DEBUG_SYMBOLIZABLE);
   SymbolBdPYTHONDetails *symbolbddet;
 	symbolbddet = SYMBOL_BD_PYTHON_GET_PRIVATE(self);
   if(!filename) return ;

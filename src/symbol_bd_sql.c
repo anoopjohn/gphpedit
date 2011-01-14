@@ -113,6 +113,7 @@ static void symbol_bd_sql_save_result_in_cache(SymbolBdSQLDetails *symbolbddet, 
 
 static gchar *symbol_bd_sql_get_symbols_matches (Symbolizable *self, const gchar *symbol_prefix, gint flags)
 {
+  gphpedit_debug (DEBUG_SYMBOLIZABLE);
   SymbolBdSQLDetails *symbolbddet;
 	symbolbddet = SYMBOL_BD_SQL_GET_PRIVATE(self);
   symbolbddet->completion_prefix = (gchar *) symbol_prefix;
@@ -143,39 +144,47 @@ static gchar *symbol_bd_sql_get_symbols_matches (Symbolizable *self, const gchar
 
 static gchar *symbol_bd_sql_get_class_symbols (Symbolizable *self, const gchar *class_name)
 {
+  gphpedit_debug (DEBUG_SYMBOLIZABLE);
   return NULL;
 }
 
 static gchar *symbol_bd_sql_get_classes (Symbolizable *self)
 {
+  gphpedit_debug (DEBUG_SYMBOLIZABLE);
   return NULL;
 }
 
 static gchar *symbol_bd_sql_get_calltip (Symbolizable *self, const gchar *symbol_name)
 {
+  gphpedit_debug (DEBUG_SYMBOLIZABLE);
   return NULL;
 }
 
 static GList *symbol_bd_sql_get_custom_symbols_list (Symbolizable *self, gint flags)
 {
+  gphpedit_debug (DEBUG_SYMBOLIZABLE);
   return NULL;
 }
 
 static GList *symbol_bd_sql_get_custom_symbols_list_by_filename (Symbolizable *self, gint symbol_type, gchar *filename)
 {
+  gphpedit_debug (DEBUG_SYMBOLIZABLE);
   return NULL;
 }
 
 static void symbol_bd_sql_rescan_file (Symbolizable *self, gchar *filename)
 {
+  gphpedit_debug (DEBUG_SYMBOLIZABLE);
 }
 
 static void symbol_bd_sql_purge_file (Symbolizable *self, gchar *filename)
 {
+  gphpedit_debug (DEBUG_SYMBOLIZABLE);
 }
 
 static void symbol_bd_sql_add_file (Symbolizable *self, gchar *filename)
 {
+  gphpedit_debug (DEBUG_SYMBOLIZABLE);
 }
 
 static void symbol_bd_sql_symbolizable_init(SymbolizableIface *iface, gpointer user_data)

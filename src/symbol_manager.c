@@ -218,6 +218,7 @@ static Symbolizable *symbol_manager_get_symbolizable_for_type(SymbolManager *sym
 */
 gchar *symbol_manager_get_symbols_matches (SymbolManager *symbolmg, const gchar *symbol_prefix, gint flags, gint ftype)
 {
+  gphpedit_debug (DEBUG_SYMBOLIZABLE);
   if(!symbolmg || !symbol_prefix) return NULL;
   Symbolizable *result = symbol_manager_get_symbolizable_for_type(symbolmg, ftype);
   if (!result) return NULL;
@@ -231,6 +232,7 @@ gchar *symbol_manager_get_symbols_matches (SymbolManager *symbolmg, const gchar 
 */
 gchar *symbol_manager_get_class_symbols (SymbolManager *symbolmg, const gchar *class_name, gint ftype)
 {
+  gphpedit_debug (DEBUG_SYMBOLIZABLE);
   if(!symbolmg || !class_name) return NULL;
   Symbolizable *result = symbol_manager_get_symbolizable_for_type(symbolmg, ftype);
   if (!result) return NULL;
@@ -244,6 +246,7 @@ gchar *symbol_manager_get_class_symbols (SymbolManager *symbolmg, const gchar *c
 */
 gchar *symbol_manager_get_classes (SymbolManager *symbolmg, gint ftype)
 {
+  gphpedit_debug (DEBUG_SYMBOLIZABLE);
   if(!symbolmg) return NULL;
   Symbolizable *result = symbol_manager_get_symbolizable_for_type(symbolmg, ftype);
   if (!result) return NULL;
@@ -258,6 +261,7 @@ gchar *symbol_manager_get_classes (SymbolManager *symbolmg, gint ftype)
 */
 gchar *symbol_manager_get_calltip (SymbolManager *symbolmg, const gchar *symbol_name, gint ftype)
 {
+  gphpedit_debug (DEBUG_SYMBOLIZABLE);
   if(!symbolmg || !symbol_name) return NULL;
   Symbolizable *result = symbol_manager_get_symbolizable_for_type(symbolmg, ftype);
   if (!result) return NULL;
@@ -273,6 +277,7 @@ gchar *symbol_manager_get_calltip (SymbolManager *symbolmg, const gchar *symbol_
 */
 GList *symbol_manager_get_custom_symbols_list (SymbolManager *symbolmg, gint symbol_type, gint ftype)
 {
+  gphpedit_debug (DEBUG_SYMBOLIZABLE);
   if(!symbolmg) return NULL;
   Symbolizable *result = symbol_manager_get_symbolizable_for_type(symbolmg, ftype);
   if (!result) return NULL;
@@ -288,6 +293,7 @@ GList *symbol_manager_get_custom_symbols_list (SymbolManager *symbolmg, gint sym
 */
 GList *symbol_manager_get_custom_symbols_list_by_filename (SymbolManager *symbolmg, gint symbol_type, gchar *filename, gint ftype)
 {
+  gphpedit_debug (DEBUG_SYMBOLIZABLE);
   if(!symbolmg || !filename) return NULL;
   Symbolizable *result = symbol_manager_get_symbolizable_for_type(symbolmg, ftype);
   if (!result) return NULL;
@@ -296,6 +302,7 @@ GList *symbol_manager_get_custom_symbols_list_by_filename (SymbolManager *symbol
 
 void symbol_manager_rescan_file (SymbolManager *symbolmg, gchar *filename, gint ftype)
 {
+  gphpedit_debug_message (DEBUG_SYMBOLIZABLE, "filename: %s\n", filename);
   if(!symbolmg || !filename) return ;
   Symbolizable *result = symbol_manager_get_symbolizable_for_type(symbolmg, ftype);
   if (!result) return ;
@@ -308,6 +315,7 @@ void symbol_manager_rescan_file (SymbolManager *symbolmg, gchar *filename, gint 
 */
 void symbol_manager_purge_file (SymbolManager *symbolmg, gchar *filename, gint ftype)
 {
+  gphpedit_debug_message (DEBUG_SYMBOLIZABLE, "filename: %s\n", filename);
   if(!symbolmg || !filename) return ;
   Symbolizable *result = symbol_manager_get_symbolizable_for_type(symbolmg, ftype);
   if (!result) return ;
@@ -320,6 +328,7 @@ void symbol_manager_purge_file (SymbolManager *symbolmg, gchar *filename, gint f
 */
 void symbol_manager_add_file (SymbolManager *symbolmg, gchar *filename, gint ftype)
 {
+  gphpedit_debug_message (DEBUG_SYMBOLIZABLE, "filename: %s\n", filename);
   if(!symbolmg || !filename) return ;
   Symbolizable *result = symbol_manager_get_symbolizable_for_type(symbolmg, ftype);
   if (!result) return ;

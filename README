@@ -80,7 +80,7 @@ will activate plugins and document chanel.
 
 * The following list contains the avariable debug chanels:
    - GPHPEDIT_NO_DEBUG (disable debug output)
-   - GPHPEDIT_DEBUG_CALLTIP
+   - GPHPEDIT_DEBUG_SYMBOLIZABLE
    - GPHPEDIT_DEBUG_CLASSBROWSER
    - GPHPEDIT_DEBUG_CLASSBROWSER_PARSE
    - GPHPEDIT_DEBUG_DOCUMENT
