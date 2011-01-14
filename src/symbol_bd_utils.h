@@ -39,4 +39,5 @@ void symbol_bd_varlist_add(GHashTable **variables_table, gchar *varname, gchar *
 void symbol_bd_classlist_add(GHashTable **class_table, gchar *classname, const gchar *filename, gint line_number, guint *identifierid);
 void symbol_bd_functionlist_add(GHashTable **function_table, GHashTable **class_table, gchar *classname, gchar *funcname, const gchar *filename, 
                                       guint line_number, gchar *param_list, guint *identifierid);
+GString *symbol_bd_get_autocomp_from_cache(gchar *cache_str, gchar *cache_completion, const gchar *symbol_prefix);
 #endif /* SYMBOL_BD_UTILS_H */

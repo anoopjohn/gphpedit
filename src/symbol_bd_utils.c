@@ -297,3 +297,32 @@ void symbol_bd_functionlist_add(GHashTable **function_table, GHashTable **class_
     g_hash_table_insert (*function_table, key, function);
   }
 }
+
+GString *symbol_bd_get_autocomp_from_cache(gchar *cache_str, gchar *cache_completion, const gchar *symbol_prefix)
+{
+  GString *result=NULL;
+
+  /*  Autocompletion optimization:
+  *   we store last text typed and we compare with actual text. If current text typed
+  *   refine last search we take that search and remove words that don't match new text
+  *   so we improve performance a lot because we don't make another full search.
+  */
+  gchar **strings;
+  strings = g_strsplit (cache_completion," ",0);
+  int i=0;
+  result = g_string_new(NULL);
+  while (strings[i]!=0){
+    if (g_str_has_prefix(strings[i], symbol_prefix)){
+       result = g_string_append(result, strings[i]);
+       result = g_string_append(result, " ");
+    }    
+    i++;    
+  }
+  g_strfreev (strings);
+  g_free(cache_completion);
+  cache_completion = g_strdup(result->str);
+  strncpy(cache_str,symbol_prefix,MIN(strlen(symbol_prefix),200));
+
+  return result;
+}
+
