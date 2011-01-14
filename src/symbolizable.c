@@ -22,7 +22,7 @@
 */
 
 #include "symbolizable.h"
-
+#include "debug.h"
 G_DEFINE_INTERFACE(Symbolizable, symbolizable, G_TYPE_INVALID)
 
 /* signal enumeration */

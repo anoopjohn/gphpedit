@@ -278,7 +278,7 @@ static gchar *symbol_bd_php_get_calltip (Symbolizable *self, const gchar *symbol
     description = strtok(NULL, "|");
     /* make calltip */
     result = g_strdup_printf ("%s %s %s\n%s", return_value, symbol_name, params, description);
-    gphpedit_debug_message(DEBUG_CALLTIP, "calltip: %s\n",result);
+    gphpedit_debug_message(DEBUG_SYMBOLIZABLE, "calltip: %s\n",result);
     g_free(copy_line);	
   } else {
     /*maybe a custom function*/

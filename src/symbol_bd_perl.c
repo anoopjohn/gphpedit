@@ -277,7 +277,7 @@ static gchar *symbol_bd_perl_get_calltip (Symbolizable *self, const gchar *symbo
   if (value){
     /* make calltip */
     result = g_strdup_printf ("%s\n%s", symbol_name, value);
-    gphpedit_debug_message(DEBUG_CALLTIP, "calltip: %s\n",result);
+    gphpedit_debug_message(DEBUG_SYMBOLIZABLE, "calltip: %s\n",result);
   } else {
     /*maybe a custom function*/
     result = symbol_bd_perl_custom_function_calltip(symbolbddet, symbol_name);
