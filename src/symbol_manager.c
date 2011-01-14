@@ -121,6 +121,11 @@ symbol_manager_class_init (SymbolManagerClass *klass)
   object_class->constructor = symbol_manager_constructor;
 	object_class->finalize = symbol_manager_finalize;
 
+  /*
+  * UPDATE:
+  * Emited when symbols are added or deleted.
+  * When a file is added, rescaned or purged this signal is emited.
+  */
 	signals[UPDATE] =
 		g_signal_new ("update",
 		              G_TYPE_FROM_CLASS (object_class),
@@ -144,6 +149,7 @@ symbol_manager_init (SymbolManager *symbolmg)
   SymbolManagerDetails *symbolmgdet;
 	symbolmgdet = SYMBOL_MANAGER_GET_PRIVATE(symbolmg);
 
+  /* add symbol_bd objects */
   symbolmgdet->sbd_php = symbol_bd_php_new ();
   g_signal_connect(SYMBOLIZABLE(symbolmgdet->sbd_php), "update", G_CALLBACK(sdb_symbolizable_update_cb), symbolmg);
   symbolmgdet->sbd_cobol = symbol_bd_cobol_new ();
@@ -203,6 +209,13 @@ static Symbolizable *symbol_manager_get_symbolizable_for_type(SymbolManager *sym
   return result;
 }
 
+/*
+* symbol_manager_get_symbols_matches
+* return a string with all symbol that starts with @symbol_prefix, 
+* following the symbol types from @flags parameter for the corresponding @ftype.
+* will retreive all classes and functions that start with "str".
+* NOTE: return value must be free with g_free when no longer needed.
+*/
 gchar *symbol_manager_get_symbols_matches (SymbolManager *symbolmg, const gchar *symbol_prefix, gint flags, gint ftype)
 {
   if(!symbolmg || !symbol_prefix) return NULL;
@@ -211,6 +224,11 @@ gchar *symbol_manager_get_symbols_matches (SymbolManager *symbolmg, const gchar 
   return symbolizable_get_symbols_matches (result, symbol_prefix, flags);
 }
 
+/*
+* symbol_manager_get_class_symbols
+* return a string with symbol members for @class_name for the corresponding @ftype.
+* NOTE: return value must be free with g_free when no longer needed.
+*/
 gchar *symbol_manager_get_class_symbols (SymbolManager *symbolmg, const gchar *class_name, gint ftype)
 {
   if(!symbolmg || !class_name) return NULL;
@@ -219,6 +237,11 @@ gchar *symbol_manager_get_class_symbols (SymbolManager *symbolmg, const gchar *c
   return symbolizable_get_class_symbols (result, class_name);
 }
 
+/*
+* symbol_manager_get_classes
+* return a string containing all classes for the corresponding @ftype.
+* NOTE: return value must be free with g_free when no longer needed.
+*/
 gchar *symbol_manager_get_classes (SymbolManager *symbolmg, gint ftype)
 {
   if(!symbolmg) return NULL;
@@ -227,6 +250,12 @@ gchar *symbol_manager_get_classes (SymbolManager *symbolmg, gint ftype)
   return symbolizable_get_classes (result);
 }
 
+/*
+* symbol_manager_get_calltip
+* return a string containing the calltip for @symbol_name for the corresponding @ftype.
+* @symbol_name must be a function name.
+* NOTE: return value must be free with g_free when no longer needed.
+*/
 gchar *symbol_manager_get_calltip (SymbolManager *symbolmg, const gchar *symbol_name, gint ftype)
 {
   if(!symbolmg || !symbol_name) return NULL;
@@ -235,6 +264,13 @@ gchar *symbol_manager_get_calltip (SymbolManager *symbolmg, const gchar *symbol_
   return symbolizable_get_calltip (result, symbol_name);
 }
 
+/*
+* symbol_manager_get_custom_symbols_list
+* return the list of symbols that match @symbol_type for the corresponding @ftype.
+* Only one kind of symbol are allowed at a time.
+* NOTE: the returned items are owned by the object and must not be freed.
+* the return value must be free with g_list_free when no longer needed.
+*/
 GList *symbol_manager_get_custom_symbols_list (SymbolManager *symbolmg, gint symbol_type, gint ftype)
 {
   if(!symbolmg) return NULL;
@@ -243,6 +279,13 @@ GList *symbol_manager_get_custom_symbols_list (SymbolManager *symbolmg, gint sym
   return symbolizable_get_custom_symbols_list (result, symbol_type);
 }
 
+/*
+* symbol_manager_get_custom_symbols_list_by_filename
+* return the list of symbols that match @symbol_type for a filename for the corresponding @ftype.
+* Only one kind of symbol are allowed at a time.
+* NOTE: the returned items are owned by the object and must not be freed.
+* the return value must be free with g_list_free when no longer needed.
+*/
 GList *symbol_manager_get_custom_symbols_list_by_filename (SymbolManager *symbolmg, gint symbol_type, gchar *filename, gint ftype)
 {
   if(!symbolmg || !filename) return NULL;
@@ -259,6 +302,10 @@ void symbol_manager_rescan_file (SymbolManager *symbolmg, gchar *filename, gint 
   symbolizable_rescan_file (result, filename);
 }
 
+/*
+* symbol_manager_add_file
+* Add a new file into the DB for the corresponding @ftype.
+*/
 void symbol_manager_purge_file (SymbolManager *symbolmg, gchar *filename, gint ftype)
 {
   if(!symbolmg || !filename) return ;
@@ -267,6 +314,10 @@ void symbol_manager_purge_file (SymbolManager *symbolmg, gchar *filename, gint f
   symbolizable_purge_file (result, filename);
 }
 
+/*
+* symbol_manager_purge_file
+* Remove a file and it's symbols from the DB for the corresponding @ftype.
+*/
 void symbol_manager_add_file (SymbolManager *symbolmg, gchar *filename, gint ftype)
 {
   if(!symbolmg || !filename) return ;

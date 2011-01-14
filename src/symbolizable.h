@@ -48,7 +48,7 @@ enum
   SYMBOL_MEMBER         = 1 << 4
 };
 /*
-* symbol_type:
+* symbol_types:
 * SYMBOL_ALL
 * SYMBOL_FUNCTION
 * SYMBOL_CLASS
