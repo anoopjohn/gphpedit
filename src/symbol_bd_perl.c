@@ -358,6 +358,8 @@ static GList *symbol_bd_perl_get_custom_symbols_list_by_filename (Symbolizable *
 static void symbol_bd_perl_rescan_file (Symbolizable *self, gchar *filename)
 {
   gphpedit_debug (DEBUG_SYMBOLIZABLE);
+  symbolizable_purge_file (self, filename);
+  symbolizable_add_file (self, filename);
 }
 
 static void remove_custom_function_item (gpointer key, gpointer value, gpointer user_data)
