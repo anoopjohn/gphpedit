@@ -66,6 +66,7 @@ enum {
   FILENAME_COLUMN,
   TYPE_COLUMN,
   ID_COLUMN,
+  PIXBUF_COLUMN,
   N_COLUMNS
 };
 /*
@@ -153,12 +154,12 @@ gphpedit_classbrowser_init (gphpeditClassBrowser *button)
             G_CALLBACK (on_parse_current_click), priv);
 
   priv->treeviewlabel = GTK_WIDGET(gtk_builder_get_object (priv->builder, "treeviewlabel"));
-  priv->classtreestore = gtk_tree_store_new (N_COLUMNS, G_TYPE_STRING, G_TYPE_INT, G_TYPE_STRING, G_TYPE_INT, G_TYPE_INT);
+  priv->classtreestore = gtk_tree_store_new (N_COLUMNS, G_TYPE_STRING, G_TYPE_INT, G_TYPE_STRING, G_TYPE_INT, G_TYPE_INT, GDK_TYPE_PIXBUF);
   /* enable sorting of the columns */
   classbrowser_set_sortable(priv->classtreestore);
 
   /* second model stuff */
-  priv->classtreestoreback = gtk_tree_store_new (N_COLUMNS, G_TYPE_STRING, G_TYPE_INT, G_TYPE_STRING, G_TYPE_INT, G_TYPE_INT);
+  priv->classtreestoreback = gtk_tree_store_new (N_COLUMNS, G_TYPE_STRING, G_TYPE_INT, G_TYPE_STRING, G_TYPE_INT, G_TYPE_INT, GDK_TYPE_PIXBUF);
   /* enable sorting of the columns */
   classbrowser_set_sortable(priv->classtreestoreback);
 
@@ -168,6 +169,13 @@ gphpedit_classbrowser_init (gphpeditClassBrowser *button)
 
   priv->classtreeselect = gtk_tree_view_get_selection (GTK_TREE_VIEW (priv->classtreeview));
   gtk_tree_selection_set_mode (priv->classtreeselect, GTK_SELECTION_SINGLE);
+
+  renderer =  gtk_cell_renderer_pixbuf_new ();
+  column = gtk_tree_view_column_new_with_attributes ("", renderer,
+                               "pixbuf", PIXBUF_COLUMN,
+                                NULL);
+  gtk_tree_view_append_column (GTK_TREE_VIEW (priv->classtreeview), column);
+
   renderer = gtk_cell_renderer_text_new ();
   column = gtk_tree_view_column_new_with_attributes (_("Name"), //FIXME:: add icons
            renderer, "text", NAME_COLUMN, NULL);
@@ -368,11 +376,14 @@ void classbrowser_function_add (gpointer data, gpointer user_data)
       gtk_tree_store_append (store, &iter, NULL);
     }
     function_decl = get_function_decl(function);
+    GdkPixbuf *pixbuf;
+    pixbuf = gdk_pixbuf_new_from_file(PIXMAP_DIR "/function.png", NULL);
 
     gtk_tree_store_set (store, &iter,
                         NAME_COLUMN, function_decl->str, LINE_NUMBER_COLUMN, function->line_number, 
                         FILENAME_COLUMN, function->filename, TYPE_COLUMN, type, 
-                        ID_COLUMN, function->identifierid,-1);
+                        ID_COLUMN, function->identifierid, PIXBUF_COLUMN, pixbuf,-1);
+    g_object_unref(pixbuf);
     g_string_free(function_decl, TRUE);
 }
 
@@ -420,10 +431,14 @@ void classbrowser_class_add (gpointer data, gpointer user_data)
     gtk_tree_store_append (store, &iter, NULL);
   }
 
+  GdkPixbuf *pixbuf;
+  pixbuf = gdk_pixbuf_new_from_file(PIXMAP_DIR "/class.png", NULL);
+
   gtk_tree_store_set (GTK_TREE_STORE(store), &iter,
                    NAME_COLUMN, (class->classname), FILENAME_COLUMN, (class->filename),
                    LINE_NUMBER_COLUMN, class->line_number, TYPE_COLUMN, CB_ITEM_TYPE_CLASS, 
-                   ID_COLUMN, (class->identifierid),-1);
+                   ID_COLUMN, (class->identifierid),PIXBUF_COLUMN, pixbuf,-1);
+  g_object_unref(pixbuf);
 }
 
 /*
