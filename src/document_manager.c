@@ -217,7 +217,7 @@ void document_save_update_cb (Document *doc, gpointer user_data)
   gint ftype;
   g_object_get(doc, "type", &ftype, NULL);
   gchar *filename = documentable_get_filename(DOCUMENTABLE(doc));
-  symbol_manager_add_file (main_window.symbolmg, filename, ftype);
+  symbol_manager_rescan_file (main_window.symbolmg, filename, ftype);
   g_free(filename);
 }
 
