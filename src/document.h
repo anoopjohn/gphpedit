@@ -42,9 +42,12 @@
 #define DOCUMENT_GET_CLASS(obj) \
   (G_TYPE_INSTANCE_GET_CLASS ((obj), DOCUMENT_TYPE, DocumentClass))
 
+typedef struct DocumentDetails DocumentDetails;
+
 typedef struct
 {
 	GObject object;
+	DocumentDetails *details;
 } Document;
 
 typedef struct
