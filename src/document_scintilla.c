@@ -1,8 +1,8 @@
-/* This file is part of gPHPEdit, a GNOME2 PHP Editor.
+/* This file is part of gPHPEdit, a GNOME PHP Editor.
 
    Copyright (C) 2003, 2004, 2005 Andy Jeffries <andy at gphpedit.org>
    Copyright (C) 2009 Anoop John <anoop dot john at zyxware.com>
-   Copyright (C) 2009, 2010 José Rostagno (for vijona.com.ar) 
+   Copyright (C) 2009, 2011 José Rostagno (for vijona.com.ar) 
 
    For more information or to find the latest release, visit our 
    website at http://www.gphpedit.org/
@@ -38,9 +38,8 @@
 #include "main_window_callbacks.h"
 #include "gvfs_utils.h"
 #include "gphpedit-statusbar.h"
-#include "classbrowser_ui.h"
-#include "classbrowser_parse.h"
 #include "images.h"
+
 /* lexer headers */
 #include "tab_cobol.h"
 #include "tab_css.h"
@@ -58,9 +57,9 @@ enum {
   LOAD_COMPLETE,
   SAVE_UPDATE,
   SAVE_START,
-	TYPE_CHANGED,
-	NEED_RELOAD,
-	LAST_SIGNAL
+  TYPE_CHANGED,
+  NEED_RELOAD,
+  LAST_SIGNAL
 };
 
 static guint signals[LAST_SIGNAL];
@@ -70,21 +69,15 @@ static guint signals[LAST_SIGNAL];
 */
 struct Document_ScintillaDetails
 {
-	gint type;
-	GtkWidget *scintilla;
-	GtkWidget *label;
-  GFile *file;
-  GIcon *ico;
-  gchar *short_filename;
-  gint64 mtime;
-	gboolean isreadonly;
-	GSList *keyboard_macro_list;
-	gboolean is_macro_recording;
-	gboolean is_pasting;
-	gboolean converted_to_utf8;
-	gboolean is_untitled;
-	guint current_pos;
-	guint current_line;
+  gint type;
+  GtkWidget *scintilla;
+  GtkWidget *label;
+  GSList *keyboard_macro_list;
+  gboolean is_macro_recording;
+  gboolean is_pasting;
+  gboolean converted_to_utf8;
+  guint current_pos;
+  guint current_line;
   gchar *contenttype;
 
   /* external modified check widget */
@@ -291,10 +284,11 @@ static void document_scintilla_block_unindent(Documentable *doc){
 
 static gchar *document_scintilla_get_filename (Documentable  *doc) {
   if (!doc) return NULL;
-  Document_ScintillaDetails *docdet = DOCUMENT_SCINTILLA_GET_PRIVATE(doc);
-
-  if (docdet->is_untitled || !docdet->file) return g_strdup(_("Untitled"));
-  return g_file_get_uri (docdet->file);
+  gboolean untitled;
+  GFile *file = NULL;
+  g_object_get(doc,"untitled", &untitled, "GFile", &file, NULL);
+  if (untitled || !file) return g_strdup(_("Untitled"));
+  return g_file_get_uri (file);
 }
 
 static void document_scintilla_set_type (Documentable  *doc, gint type)
@@ -559,10 +553,14 @@ static gchar *document_scintilla_get_text (Documentable  *doc)
 static gboolean document_scintilla_check_externally_modified_t(Document_Scintilla *doc)
 {
   if (!doc) return FALSE;
-  Document_ScintillaDetails *docdet = DOCUMENT_SCINTILLA_GET_PRIVATE(doc);
-  if (docdet->is_untitled) return FALSE;
+  gboolean untitled;
+  gint64 mtime;
+  GFile *file = NULL;
+  g_object_get(doc, "untitled", &untitled, NULL);
+  if (untitled) return FALSE;
+  g_object_get(doc, "GFile", &file, "mtime", &mtime, NULL);
   /* verify if file has been externally modified */
-  return GFile_get_is_modified(docdet->file, &docdet->mtime, FALSE);
+  return GFile_get_is_modified(file, &mtime, FALSE);
 }
 
 static void document_scintilla_check_externally_modified (Documentable  *doc)
@@ -688,12 +686,12 @@ static void document_scintilla_grab_focus (Documentable *doc)
 
 static void document_scintilla_documentable_init(DocumentableIface *iface, gpointer user_data)
 {
-	iface->zoom_in = document_scintilla_zoom_in;
-	iface->zoom_out = document_scintilla_zoom_out;
-	iface->zoom_restore = document_scintilla_zoom_restore;
-	iface->undo = document_scintilla_undo;
-	iface->redo = document_scintilla_redo;
-	iface->select_all = document_scintilla_select_all;
+  iface->zoom_in = document_scintilla_zoom_in;
+  iface->zoom_out = document_scintilla_zoom_out;
+  iface->zoom_restore = document_scintilla_zoom_restore;
+  iface->undo = document_scintilla_undo;
+  iface->redo = document_scintilla_redo;
+  iface->select_all = document_scintilla_select_all;
   iface->selection_to_upper = document_scintilla_selection_to_upper;
   iface->selection_to_lower = document_scintilla_selection_to_lower;
   iface->copy = document_scintilla_copy;
@@ -729,22 +727,15 @@ static void document_scintilla_documentable_init(DocumentableIface *iface, gpoin
 enum
 {
   PROP_0,
-  PROP_UNTITLED,
-  PROP_READ_ONLY,
   PROP_CAN_MODIFY,
   PROP_CONVERTED_TO_UTF8,
   PROP_IS_EMPTY,
   PROP_SAVED,
   PROP_CAN_PREVIEW,
   PROP_ZOOM_LEVEL,
-  PROP_CONTENT_TYPE,
-  PROP_SHORT_FILENAME,
-  PROP_GFILE,
   PROP_TYPE,
   PROP_LABEL,
-  PROP_ICON,
   PROP_WIDGET,
-  PROP_MTIME,
   PROP_TITLE
 };
 
@@ -756,48 +747,23 @@ document_scintilla_set_property (GObject      *object,
 {
   Document_ScintillaDetails *docdet = DOCUMENT_SCINTILLA_GET_PRIVATE(object);
 
-	switch (prop_id)
-	{
-		case PROP_CAN_MODIFY:
+  switch (prop_id)
+  {
+    case PROP_CAN_MODIFY:
       gtk_scintilla_set_read_only(GTK_SCINTILLA(docdet->scintilla), 
           !g_value_get_boolean (value));
-			break;
+      break;
     case PROP_CONVERTED_TO_UTF8:
-			docdet->converted_to_utf8 = g_value_get_boolean (value);
-			break;
-    case PROP_MTIME:
-			docdet->mtime = g_value_get_int64 (value);
-			break;
-		case PROP_READ_ONLY:
-			docdet->isreadonly = g_value_get_boolean (value);
-			break;
-		case PROP_UNTITLED:
-			docdet->is_untitled = g_value_get_boolean (value);
-			break;
-		case PROP_TYPE:
+      docdet->converted_to_utf8 = g_value_get_boolean (value);
+      break;
+    case PROP_TYPE:
       docdet->type = g_value_get_int (value);
       documentable_set_type(DOCUMENTABLE(object), docdet->type);
-			break;
-    case PROP_CONTENT_TYPE:
-			g_free(docdet->contenttype);
-			docdet->contenttype = g_value_dup_string (value);
       break;
-    case PROP_SHORT_FILENAME:
-			g_free(docdet->short_filename);
-			docdet->short_filename = g_value_dup_string (value);
+    default:
+      G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
       break;
-    case PROP_GFILE:
-      if(docdet->file) g_object_unref(docdet->file);
-      docdet->file = g_value_dup_object (value);
-      break;
-    case PROP_ICON:
-      if (docdet->ico) g_object_unref(docdet->ico);
-      docdet->ico = g_value_dup_object (value);
-      break;
-		default:
-			G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
-			break;
-	}
+  }
 }
 
 static void
@@ -809,40 +775,33 @@ document_scintilla_get_property (GObject    *object,
   Document_ScintillaDetails *docdet = DOCUMENT_SCINTILLA_GET_PRIVATE(object);
   
   gboolean temp;
+  gboolean untitled;
+  gchar *content;
   gint p;
-	switch (prop_id)
-	{
-		case PROP_READ_ONLY:
-      if (docdet->is_untitled) temp = FALSE;
-      else temp = docdet->isreadonly;
-			g_value_set_boolean (value, temp);
-			break;
-    case PROP_CAN_MODIFY:
+  switch (prop_id)
+  {
+   case PROP_CAN_MODIFY:
         g_value_set_boolean (value, !gtk_scintilla_get_read_only(GTK_SCINTILLA(docdet->scintilla)));
- 			break;
-    case PROP_CONVERTED_TO_UTF8:
-			  g_value_set_boolean (value, docdet->converted_to_utf8);
-      break;
-    case PROP_MTIME:
-			  g_value_set_int64 (value, docdet->mtime);
-      break;
-		case PROP_UNTITLED:
-			g_value_set_boolean (value, docdet->is_untitled);
-			break;
-		case PROP_TYPE:
-			g_value_set_int (value, docdet->type);
-			break;
-		case PROP_IS_EMPTY:
-      temp = (docdet->is_untitled && gtk_scintilla_get_text_length(GTK_SCINTILLA(docdet->scintilla))==0);
-			g_value_set_boolean (value, temp);
-			break;
+        break;
+   case PROP_CONVERTED_TO_UTF8:
+        g_value_set_boolean (value, docdet->converted_to_utf8);
+        break;
+   case PROP_TYPE:
+         g_value_set_int (value, docdet->type);
+         break;
+     case PROP_IS_EMPTY:
+         g_object_get(object, "untitled", &untitled, NULL);
+         temp = (untitled && gtk_scintilla_get_text_length(GTK_SCINTILLA(docdet->scintilla))==0);
+         g_value_set_boolean (value, temp);
+         break;
     case PROP_SAVED:
       /* http://www.scintilla.org/ScintillaDoc.html#SCI_GETMODIFY */
        temp = !gtk_scintilla_get_modify(GTK_SCINTILLA(docdet->scintilla));
- 			g_value_set_boolean (value, temp);
-      break;
+       g_value_set_boolean (value, temp);
+       break;
     case PROP_CAN_PREVIEW:
- 			g_value_set_boolean (value, (g_strcmp0(docdet->contenttype,"text/html")==0));
+	g_object_get(object,"content_type", &content, NULL);
+        g_value_set_boolean (value, (g_strcmp0(content,"text/html")==0));
       break;
     case PROP_ZOOM_LEVEL:
       p= gtk_scintilla_get_zoom(GTK_SCINTILLA(docdet->scintilla));
@@ -852,36 +811,24 @@ document_scintilla_get_property (GObject    *object,
     case PROP_TITLE:
       g_value_set_string (value, document_scintilla_get_title(DOCUMENT_SCINTILLA(object)));
       break;
-    case PROP_CONTENT_TYPE:
-			g_value_set_string (value, docdet->contenttype);
-      break;
-    case PROP_SHORT_FILENAME:
-			g_value_set_string (value, docdet->short_filename);
-      break;
-    case PROP_GFILE:
-      g_value_set_object (value, docdet->file);
-      break;
     case PROP_LABEL:
       g_value_set_object (value, docdet->label);
-      break;
-    case PROP_ICON:
-      g_value_set_object (value, docdet->ico);
       break;
     case PROP_WIDGET:
       g_value_set_object (value, docdet->container);
       break;
-		default:
-			G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
-			break;
-	}
+    default:
+      G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
+      break;
+    }
 }
 
 static void
 document_scintilla_class_init (Document_ScintillaClass *klass)
 {
-	GObjectClass *object_class;
+  GObjectClass *object_class;
 
-	object_class = G_OBJECT_CLASS (klass);
+  object_class = G_OBJECT_CLASS (klass);
   object_class->dispose = document_scintilla_dispose;
   object_class->set_property = document_scintilla_set_property;
   object_class->get_property = document_scintilla_get_property;
@@ -933,21 +880,6 @@ document_scintilla_class_init (Document_ScintillaClass *klass)
 		               G_TYPE_NONE, 0);
 
   /*DOCUMENT_SCINTILLA PROPERTIES*/
-  g_object_class_install_property (object_class,
-                              PROP_UNTITLED,
-                              g_param_spec_boolean ("untitled",
-                              NULL, NULL,
-                              TRUE, G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
-
-  /* READ_ONLY PROPERTY:
-  * When a document_scintilla can't be saved. default value FALSE.
-  */
-  g_object_class_install_property (object_class,
-                              PROP_READ_ONLY,
-                              g_param_spec_boolean ("read_only",
-                              NULL, NULL,
-                              FALSE, G_PARAM_READWRITE));
-
   /* CAN_MODIFY PROPERTY: When a document_scintilla can be modified */
   g_object_class_install_property (object_class,
                               PROP_CAN_MODIFY,
@@ -960,15 +892,6 @@ document_scintilla_class_init (Document_ScintillaClass *klass)
                               g_param_spec_boolean ("converted_to_utf8",
                               NULL, NULL,
                               FALSE, G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
-
-  g_object_class_install_property (object_class,
-                              PROP_MTIME,
-                              g_param_spec_int64 ("mtime",
-                              NULL, NULL,
-                               G_MININT64,
-                               G_MAXINT64,
-                               0,
-                               G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
 
   g_object_class_install_property (object_class,
                               PROP_IS_EMPTY,
@@ -1001,40 +924,16 @@ document_scintilla_class_init (Document_ScintillaClass *klass)
                               TAB_FILE, G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
 
   g_object_class_install_property (object_class,
-                              PROP_CONTENT_TYPE,
-                              g_param_spec_string ("content_type",
-                              NULL, NULL,
-                              "text/plain", G_PARAM_READWRITE));
-
-  g_object_class_install_property (object_class,
-                              PROP_SHORT_FILENAME,
-                              g_param_spec_string ("short_filename",
-                              NULL, NULL,
-                              "text/plain", G_PARAM_READWRITE));
-
-  g_object_class_install_property (object_class,
                               PROP_TITLE,
                               g_param_spec_string ("title",
                               NULL, NULL,
                               "", G_PARAM_READWRITE));
 
   g_object_class_install_property (object_class,
-                              PROP_GFILE,
-                              g_param_spec_object ("GFile",
-                              NULL, NULL,
-                              G_TYPE_FILE, G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
-
-  g_object_class_install_property (object_class,
                               PROP_LABEL,
                               g_param_spec_object ("editor_label",
                               NULL, NULL,
                               GTK_TYPE_WIDGET, G_PARAM_READABLE));
-
-  g_object_class_install_property (object_class,
-                              PROP_ICON,
-                              g_param_spec_object ("icon",
-                              NULL, NULL,
-                              G_TYPE_ICON, G_PARAM_READWRITE));
 
   g_object_class_install_property (object_class,
                               PROP_WIDGET,
@@ -1045,26 +944,26 @@ document_scintilla_class_init (Document_ScintillaClass *klass)
 	g_type_class_add_private (klass, sizeof (Document_ScintillaDetails));
 }
 
-static void process_external (GtkInfoBar *info_bar, gint response_id, Document_Scintilla *document_scintilla)
+static void process_external (GtkInfoBar *info_bar, gint response_id, Document_Scintilla *doc)
 {
   if (response_id!=GTK_RESPONSE_CANCEL){
-    g_signal_emit (G_OBJECT (document_scintilla), signals[NEED_RELOAD], 0);
+    g_signal_emit (G_OBJECT (doc), signals[NEED_RELOAD], 0);
   } else { 
-  Document_ScintillaDetails *docdet = DOCUMENT_SCINTILLA_GET_PRIVATE(document_scintilla);
   GTimeVal file_mtime;
   g_get_current_time (&file_mtime); /*set current time*/
-  docdet->mtime = (((gint64) file_mtime.tv_sec) * G_USEC_PER_SEC) + file_mtime.tv_usec;
+  gint64 mtime = (((gint64) file_mtime.tv_sec) * G_USEC_PER_SEC) + file_mtime.tv_usec;
+  g_object_set(doc, "mtime", mtime, NULL);
   }
   gtk_widget_hide (GTK_WIDGET(info_bar));
 }
 
 static void create_infobar(Document_Scintilla *doc) {
   Document_ScintillaDetails *docdet = DOCUMENT_SCINTILLA_GET_PRIVATE(doc);
-	GtkWidget *image;
-	GtkWidget *vbox;
-	gchar *primary_markup;
-	gchar *secondary_markup;
-	GtkWidget *secondary_label; 
+  GtkWidget *image;
+  GtkWidget *vbox;
+  gchar *primary_markup;
+  gchar *secondary_markup;
+  GtkWidget *secondary_label; 
 
   /* set up info bar */
   docdet->infobar= gtk_info_bar_new_with_buttons(GTK_STOCK_REFRESH, 1, GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL, NULL);
@@ -1172,12 +1071,8 @@ static void document_scintilla_dispose (GObject *object)
 {
   Document_Scintilla *doc = DOCUMENT_SCINTILLA(object);
   Document_ScintillaDetails *docdet;
-	docdet = DOCUMENT_SCINTILLA_GET_PRIVATE(doc);
+  docdet = DOCUMENT_SCINTILLA_GET_PRIVATE(doc);
   /* free object resources*/
-	if (docdet->short_filename) g_free(docdet->short_filename);
-	if (docdet->file) g_object_unref(docdet->file);
-	if (docdet->ico) g_object_unref(docdet->ico);
-  if (docdet->contenttype) g_free(docdet->contenttype);
   g_object_unref(docdet->saver);
   /* Chain up to the parent class */
   G_OBJECT_CLASS (document_scintilla_parent_class)->dispose (object);
@@ -1196,22 +1091,28 @@ static void document_scintilla_add_recent(Document_Scintilla *document_scintilla
 static void document_scintilla_constructed (GObject *object)
 {
   Document_ScintillaDetails *docdet = DOCUMENT_SCINTILLA_GET_PRIVATE(object);
-  if (docdet->is_untitled){
-    docdet->short_filename = g_strdup(_("Untitled"));
+  gchar *short_filename;
+  gboolean untitled;
+  GFile *file;
+  g_object_get(object, "untitled", &untitled, NULL);
+  if (untitled){
+    short_filename = g_strdup(_("Untitled"));
   } else {
-    docdet->short_filename = g_file_get_basename (docdet->file);
+    g_object_get(object, "GFile", &file, NULL);
+    short_filename = g_file_get_basename (file);
     document_scintilla_add_recent(DOCUMENT_SCINTILLA(object));
   }
-  gtk_label_set_text(GTK_LABEL(docdet->label), docdet->short_filename);
+  g_object_set(object, "short_filename", short_filename, NULL);
+  gtk_label_set_text(GTK_LABEL(docdet->label), short_filename);
   gtk_widget_show (docdet->label);
 }
 Document_Scintilla *document_scintilla_new (gint type, GFile *file, gint goto_line, gchar *contents)
 {
-	Document_Scintilla *doc;
+  Document_Scintilla *doc;
   doc = g_object_new (DOCUMENT_SCINTILLA_TYPE, "type", type, "GFile", file, "untitled", !file, NULL);
   documentable_replace_text(DOCUMENTABLE(doc), contents);
 
-	return doc; /* return new object */
+  return doc; /* return new object */
 }
 
 static void register_autoc_images(GtkScintilla *sci) {
@@ -1224,7 +1125,7 @@ static void register_autoc_images(GtkScintilla *sci) {
 static void tab_set_general_scintilla_properties(Document_Scintilla *doc)
 {
   Document_ScintillaDetails *docdet;
-	docdet = DOCUMENT_SCINTILLA_GET_PRIVATE(doc);
+  docdet = DOCUMENT_SCINTILLA_GET_PRIVATE(doc);
   GtkScintilla *scintilla = GTK_SCINTILLA(docdet->scintilla);
   gtk_scintilla_set_backspace_unindents(scintilla, 1);
   gtk_scintilla_autoc_set_choose_single(scintilla, FALSE);
@@ -1253,10 +1154,10 @@ static void tab_set_configured_scintilla_properties(GtkScintilla *scintilla)
   PreferencesManager *pref = preferences_manager_new ();
   gboolean edge_mode, show_indent_guides, higthlight_caret_line, line_wrapping, tabs_instead_spaces;
   gint edge_column, font_quality;
-  const gchar *font;
+  gchar *font;
   g_object_get(pref, "edge_mode", &edge_mode,"edge_column", &edge_column, "show_indentation_guides", &show_indent_guides,
        "higthlight_caret_line", &higthlight_caret_line, "line_wrapping",&line_wrapping,
-        "tabs_instead_spaces",&tabs_instead_spaces,"font_quality", &font_quality, "style_font_name", &font, NULL);
+        "tabs_instead_spaces", &tabs_instead_spaces,"font_quality", &font_quality, "style_font_name", &font, NULL);
   
   gtk_scintilla_set_wrap_mode(scintilla, line_wrapping);
   gtk_scintilla_set_h_scroll_bar(scintilla, !line_wrapping); /* if line wrapping is ON disable hscrollbar*/
@@ -1264,12 +1165,14 @@ static void tab_set_configured_scintilla_properties(GtkScintilla *scintilla)
   gtk_scintilla_style_clear_all(scintilla);
 
   guint size;
-  const gchar *style_name;
+  gchar *style_name;
   gint indentation_size, tab_size;
   g_object_get(pref, "style_name", &style_name, "indentation_size", &indentation_size, 
     "font_size", &size, "tab_size", &tab_size, NULL);
   GtkSourceStyleScheme	*scheme = gtk_source_style_scheme_manager_get_scheme (main_window.stylemg, style_name);
+  g_free(style_name);
   gtk_source_style_scheme_apply (scheme, GTK_WIDGET(scintilla), font, size);
+  g_free(font);
   /* set font quality */
   gtk_scintilla_set_font_quality(scintilla, font_quality);
   gtk_scintilla_set_caret_line_visible(scintilla, higthlight_caret_line);
@@ -1314,8 +1217,10 @@ static void save_point_reached(GtkWidget *scintilla, gpointer user_data)
   Document_Scintilla *doc = DOCUMENT_SCINTILLA(user_data);
   g_return_if_fail(doc);
   Document_ScintillaDetails *docdet = DOCUMENT_SCINTILLA_GET_PRIVATE(doc);
-  if (docdet->short_filename != NULL) {
-    gtk_label_set_text(GTK_LABEL (docdet->label), docdet->short_filename);
+  gchar *short_filename;
+  g_object_get(doc, "short_filename", &short_filename, NULL);
+  if (short_filename != NULL) {
+    gtk_label_set_text(GTK_LABEL (docdet->label), short_filename);
     /*emit save update signal*/
     g_signal_emit (G_OBJECT (doc), signals[SAVE_UPDATE], 0);
   }
@@ -1327,8 +1232,10 @@ static void save_point_left(GtkWidget *scintilla, gpointer user_data)
   g_return_if_fail(doc);
   Document_ScintillaDetails *docdet = DOCUMENT_SCINTILLA_GET_PRIVATE(doc);
   gchar *caption;
-  if (docdet->short_filename != NULL) {
-    caption= g_strdup_printf("*%s",docdet->short_filename);
+  gchar *short_filename;
+  g_object_get(doc, "short_filename", &short_filename, NULL);
+  if (short_filename != NULL) {
+    caption= g_strdup_printf("*%s",short_filename);
     gtk_label_set_text(GTK_LABEL (docdet->label), caption);
     g_free(caption);
 
@@ -1419,13 +1326,14 @@ static void update_ui(GtkWidget *scintilla)
 
 static gboolean auto_memberfunc_complete_callback(gpointer data)
 {
-  Document_Scintilla *doc = DOCUMENT_SCINTILLA(document_manager_get_current_document(main_window.docmg));
+  Documentable *document = document_manager_get_current_documentable(main_window.docmg);
+  Document_Scintilla *doc = DOCUMENT_SCINTILLA(document);
   Document_ScintillaDetails *docdet = DOCUMENT_SCINTILLA_GET_PRIVATE(doc);
   gint current_pos;
-  current_pos = documentable_get_current_position(DOCUMENTABLE(doc));
+  current_pos = documentable_get_current_position(document);
   if (current_pos == GPOINTER_TO_INT(data)) {
-    gchar *prefix = documentable_get_current_word(DOCUMENTABLE(doc));
-    gchar *calltip = classbrowser_autocomplete_member_function(GPHPEDIT_CLASSBROWSER(main_window.classbrowser), prefix);
+    gchar *prefix = documentable_get_current_word(document);
+    gchar *calltip = symbol_manager_get_symbols_matches (main_window.symbolmg, prefix, SYMBOL_MEMBER, docdet->type);
     if (calltip && strlen(calltip)!=0) gtk_scintilla_user_list_show(GTK_SCINTILLA(docdet->scintilla), 1, calltip);
 //    gtk_scintilla_autoc_show(GTK_SCINTILLA(docdet->scintilla), current_pos, calltip);
     g_free(prefix);
@@ -1436,13 +1344,14 @@ static gboolean auto_memberfunc_complete_callback(gpointer data)
 
 static gboolean auto_complete_callback(gpointer data)
 {
-  Document_Scintilla *doc = DOCUMENT_SCINTILLA(document_manager_get_current_document(main_window.docmg));
+  Documentable *document = document_manager_get_current_documentable(main_window.docmg);
+  Document_Scintilla *doc = DOCUMENT_SCINTILLA(document);
   Document_ScintillaDetails *docdet = DOCUMENT_SCINTILLA_GET_PRIVATE(doc);
   gint current_pos;
-  current_pos = documentable_get_current_position(DOCUMENTABLE(doc));
+  current_pos = documentable_get_current_position(document);
   if (current_pos == GPOINTER_TO_INT(data)) {
-    gchar *prefix = documentable_get_current_word(DOCUMENTABLE(doc));
-    gchar *calltip = calltip_manager_autocomplete_word(main_window.clltipmg, docdet->type, prefix);
+    gchar *prefix = documentable_get_current_word(document);
+    gchar *calltip = symbol_manager_get_symbols_matches (main_window.symbolmg, prefix, SYMBOL_FUNCTION | SYMBOL_CLASS | SYMBOL_VAR, docdet->type);
     if (calltip && strlen(calltip)!=0) gtk_scintilla_user_list_show(GTK_SCINTILLA(docdet->scintilla), 1, calltip);
     g_free(prefix);
     g_free(calltip);
@@ -1453,20 +1362,21 @@ static gboolean auto_complete_callback(gpointer data)
 
 static gboolean calltip_callback(gpointer data)
 {
-  Document_Scintilla *doc =  DOCUMENT_SCINTILLA(document_manager_get_current_document(main_window.docmg));
+  Documentable *document = document_manager_get_current_documentable(main_window.docmg);
+  Document_Scintilla *doc = DOCUMENT_SCINTILLA(document);
   Document_ScintillaDetails *docdet = DOCUMENT_SCINTILLA_GET_PRIVATE(doc);
   gint current_pos;
-  current_pos = documentable_get_current_position(DOCUMENTABLE(doc));
+  current_pos = documentable_get_current_position(document);
   if (current_pos == GPOINTER_TO_INT(data)) {
-    gchar *prefix = documentable_get_current_word(DOCUMENTABLE(doc));
-    gchar *calltip = calltip_manager_show_call_tip(main_window.clltipmg, docdet->type, prefix);
+    gchar *prefix = documentable_get_current_word(document);
+    gchar *calltip = symbol_manager_get_calltip (main_window.symbolmg, prefix, docdet->type);
     if (calltip){
       gtk_scintilla_call_tip_show(GTK_SCINTILLA(docdet->scintilla), current_pos, calltip);
       g_free(calltip);
     }
     g_free(prefix);
   }
-  docdet->calltip_timer_set=FALSE;
+  docdet->calltip_timer_set = FALSE;
   return FALSE;
 }
 
@@ -1640,7 +1550,7 @@ static void show_calltip (Document_ScintillaDetails *docdet, gint pos)
     g_object_get(pref, "calltip_delay", &delay, NULL);
     g_object_unref(pref);
     docdet->calltip_timer_id = g_timeout_add(delay, calltip_callback, GINT_TO_POINTER(pos));
-    docdet->calltip_timer_set=TRUE;
+    docdet->calltip_timer_set = TRUE;
   }
 }
 
@@ -1658,12 +1568,13 @@ static void show_autocompletion (Document_ScintillaDetails *docdet, gint pos)
 
 static gboolean auto_complete_classes_callback(gpointer data)
 {
-  Document_Scintilla *doc =  DOCUMENT_SCINTILLA(document_manager_get_current_document(main_window.docmg));
+  Documentable *document = document_manager_get_current_documentable(main_window.docmg);
+  Document_Scintilla *doc =  DOCUMENT_SCINTILLA(document);
   Document_ScintillaDetails *docdet = DOCUMENT_SCINTILLA_GET_PRIVATE(doc);
   gint current_pos;
-  current_pos = documentable_get_current_position(DOCUMENTABLE(doc));
+  current_pos = documentable_get_current_position(document);
   if (current_pos == GPOINTER_TO_INT(data)) {
-    gchar *autocomp = classbrowser_get_autocomplete_php_classes_string(GPHPEDIT_CLASSBROWSER(main_window.classbrowser)); 
+    gchar *autocomp = symbol_manager_get_classes (main_window.symbolmg, docdet->type);
     if (autocomp) gtk_scintilla_user_list_show(GTK_SCINTILLA(docdet->scintilla), 2, autocomp);
     g_free(autocomp); /*release resources*/
   }
@@ -1673,13 +1584,14 @@ static gboolean auto_complete_classes_callback(gpointer data)
 
 static gboolean auto_complete_php_variables_callback(gpointer data)
 {
-  Document_Scintilla *doc =  DOCUMENT_SCINTILLA(document_manager_get_current_document(main_window.docmg));
+  Documentable *document = document_manager_get_current_documentable(main_window.docmg);
+  Document_Scintilla *doc =  DOCUMENT_SCINTILLA(document);
   Document_ScintillaDetails *docdet = DOCUMENT_SCINTILLA_GET_PRIVATE(doc);
   gint current_pos;
-  current_pos = documentable_get_current_position(DOCUMENTABLE(doc));
+  current_pos = documentable_get_current_position(document);
   if (current_pos == GPOINTER_TO_INT(data)) {
-    gchar *prefix = documentable_get_current_word(DOCUMENTABLE(doc));
-    gchar *result = classbrowser_autocomplete_php_variables(GPHPEDIT_CLASSBROWSER(main_window.classbrowser), prefix);
+    gchar *prefix = documentable_get_current_word(document);
+    gchar *result = symbol_manager_get_symbols_matches (main_window.symbolmg, prefix, SYMBOL_VAR, docdet->type);
     if (result) gtk_scintilla_user_list_show(GTK_SCINTILLA(docdet->scintilla), 1, result);
     g_free(prefix);
   }
@@ -1718,11 +1630,12 @@ static void char_added(GtkWidget *scintilla, guint ch, gpointer user_data)
   g_object_get(pref, "auto_complete_braces", &auto_brace, NULL);
   if (IsOpenBrace(ch) && auto_brace) {
       InsertCloseBrace (sci, current_pos, ch);
+      return;
     }
   if (gtk_scintilla_autoc_active(sci)==1) {
     style = 0; // Hack to get around the drop-down not showing in comments, but if it's been forced...  
   }
-
+  gint prev_char;
   switch(docdet->type) {
     case(TAB_PHP):
       if ((style != SCE_HPHP_SIMPLESTRING) && (style != SCE_HPHP_HSTRING) && (style != SCE_HPHP_COMMENTLINE) && (style !=SCE_HPHP_COMMENT)) {
@@ -1737,24 +1650,24 @@ static void char_added(GtkWidget *scintilla, guint ch, gpointer user_data)
         case ('('):
           show_calltip (docdet, current_pos);
           break;
-        default:
-        member_function_buffer = gtk_scintilla_get_text_range (sci, wordEnd-1, wordEnd +1, &member_function_length);
-        if (strcmp(member_function_buffer, "->")==0 || strcmp(member_function_buffer, "::")==0) {
-          /*search back for a '$' in that line */
-          gint initial_pos= gtk_scintilla_position_from_line(sci, current_line);
-          gint line_size;
-          gchar *line_text= gtk_scintilla_get_text_range (sci, initial_pos, wordStart-1, &line_size);
-            if (!check_php_variable_before(line_text)){
-             break;
-            }
+        case ('>'):
+        case (':'):
+          prev_char = gtk_scintilla_get_char_at(sci, current_pos-2);
+          if ((prev_char=='-' && ch =='>') || (prev_char==':' && ch ==':')) {
+            /*search back for a '$' in that line */
+            gint initial_pos= gtk_scintilla_position_from_line(sci, current_line);
+            gint line_size;
+            gchar *line_text = gtk_scintilla_get_text_range (sci, initial_pos, wordStart-1, &line_size);
+            if (!check_php_variable_before(line_text)) break;
             if (!docdet->completion_timer_set) {
               gint delay;
               g_object_get(pref, "autocomplete_delay", &delay, NULL);
               docdet->completion_timer_id = g_timeout_add(delay, auto_memberfunc_complete_callback, GINT_TO_POINTER(current_pos));
               docdet->completion_timer_set=TRUE;
             }
-        }
-        g_free(member_function_buffer);
+          }
+          break;
+        default:
         member_function_buffer = gtk_scintilla_get_text_range (sci, wordStart, wordEnd, &member_function_length);
         if (g_str_has_prefix(member_function_buffer,"$") || g_str_has_prefix(member_function_buffer,"__")) {
             if (!docdet->completion_timer_set) {
@@ -1796,13 +1709,28 @@ static void char_added(GtkWidget *scintilla, guint ch, gpointer user_data)
             case ('('):
               show_calltip (docdet, current_pos);
             break;
-            default:
-              member_function_buffer = gtk_scintilla_get_text_range (sci, wordStart-2, wordStart, &member_function_length);
-              if(current_word_length>=3){
-                show_autocompletion (docdet, current_pos);
+            case ('>'):
+            case (':'):
+              prev_char = gtk_scintilla_get_char_at(sci, current_pos-2);
+              if ((prev_char=='-' && ch =='>') || (prev_char==':' && ch ==':')) {
+                /*search back for a '$' in that line */
+                gint initial_pos= gtk_scintilla_position_from_line(sci, current_line);
+                gint line_size;
+                gchar *line_text = gtk_scintilla_get_text_range (sci, initial_pos, wordStart-1, &line_size);
+                if (!check_php_variable_before(line_text)) break;
+                if (!docdet->completion_timer_set) {
+                  gint delay;
+                  g_object_get(pref, "autocomplete_delay", &delay, NULL);
+                  docdet->completion_timer_id = g_timeout_add(delay, auto_memberfunc_complete_callback, GINT_TO_POINTER(current_pos));
+                  docdet->completion_timer_set=TRUE;
+                }
               }
-              g_free(member_function_buffer);
-        }
+              break;
+            default:
+            member_function_buffer = gtk_scintilla_get_text_range (sci, wordStart-2, wordStart, &member_function_length);
+            if(current_word_length>=3) show_autocompletion (docdet, current_pos);
+            }
+            g_free(member_function_buffer);
         break;
       case (TAB_PYTHON):
         switch(ch) {
@@ -1876,7 +1804,8 @@ static void char_added(GtkWidget *scintilla, guint ch, gpointer user_data)
 * process_drag_uri
 * send open signal for uris dropped in scintilla widget
 */
-static void process_drag_uri(GtkWidget *scintilla, gpointer data) {
+static void process_drag_uri(GtkWidget *scintilla, gpointer data)
+{
   if (data){
     gchar **uris= g_strsplit (data,"\n",0);
     int i=0;
@@ -2509,7 +2438,6 @@ static gchar *document_scintilla_get_title(Document_Scintilla *doc)
 {
   gphpedit_debug (DEBUG_DOCUMENT);
   if (!doc) return NULL;
-  Document_ScintillaDetails *docdet = DOCUMENT_SCINTILLA_GET_PRIVATE(doc);
   GString *title= NULL;
   gchar *dir;
   char *str = NULL;
@@ -2519,7 +2447,9 @@ static gchar *document_scintilla_get_title(Document_Scintilla *doc)
   g_free(filename);
   dir = filename_get_relative_path(tmp);
   g_free(tmp);
-  g_string_printf (title,"%s (%s)", docdet->short_filename,dir);
+  gchar *short_filename;
+  g_object_get(doc, "short_filename", &short_filename, NULL);
+  g_string_printf (title,"%s (%s)", short_filename, dir);
   g_free(dir);
   g_string_append(title, _(" - gPHPEdit"));
   gboolean saved_status;

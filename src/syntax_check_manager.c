@@ -183,19 +183,19 @@ gchar *process_perl_lines(gchar *output)
 * save_as_temp_file (internal)
 * save the content of an editor and return the filename of the temp file or NULL on error.
 */
-GString *save_as_temp_file(Document *document)
+GString *save_as_temp_file(Documentable *document)
 {
   gphpedit_debug(DEBUG_SYNTAX);
-  gchar *write_buffer = documentable_get_text(DOCUMENTABLE(document));
+  gchar *write_buffer = documentable_get_text(document);
   GString *filename = text_save_as_temp_file(write_buffer);
   g_free(write_buffer);
   return filename;
 }
 
-GString *get_syntax_filename(Document *document, gboolean *using_temp)
+GString *get_syntax_filename(Documentable *document, gboolean *using_temp)
 {
   GString *filename = NULL;
-  gchar *docfilename = documentable_get_filename(DOCUMENTABLE(document));
+  gchar *docfilename = documentable_get_filename(document);
   gboolean untitled, saved;
   g_object_get(document, "untitled", &untitled, "saved", &saved, NULL);
   if (saved && filename_is_native(docfilename) && !untitled) {
@@ -210,7 +210,7 @@ GString *get_syntax_filename(Document *document, gboolean *using_temp)
   g_free(docfilename);
   return filename;
 }
-gchar *syntax_check_manager_run(Document *document)
+gchar *syntax_check_manager_run(Documentable *document)
 {
   GString *command_line=NULL;
   gchar *output;

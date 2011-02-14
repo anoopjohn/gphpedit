@@ -141,7 +141,7 @@ void lint_row_activated (GtkTreeSelection *selection, gpointer data)
 * lines end with \n 
 * if data hasn't got that format it'll be shown be error will not be styled.
 */
-void syntax_window(GtkSyntaxCheckWindow *win, Document *document, gchar *data){
+void syntax_window(GtkSyntaxCheckWindow *win, Documentable *document, gchar *data){
   GtkSyntaxCheckWindowPrivate *priv = GTK_SYNTAX_CHECK_WINDOW_GET_PRIVATE(win);
   if (!document && !OBJECT_IS_DOCUMENT_SCINTILLA(document)) return;
   if (!data) return;
@@ -204,7 +204,7 @@ gtk_syntax_check_window_new (void)
   return g_object_new (GTK_TYPE_SYNTAX_CHECK_WINDOW, NULL);
 }
 
-void gtk_syntax_check_window_run_check(GtkSyntaxCheckWindow *win, Document *document)
+void gtk_syntax_check_window_run_check(GtkSyntaxCheckWindow *win, Documentable *document)
 {
   g_return_if_fail(win);
   if (!document){

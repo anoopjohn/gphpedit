@@ -88,7 +88,7 @@ gchar *filename_get_uri(gchar *filename){
 * filename_get_path
 * return a gchar with the local pathname for filename, if one exists
 */
-gchar *filename_get_path(gchar *filename){
+gchar *filename_get_path(const gchar *filename){
     if (!filename) return NULL;
     GFile *file= g_file_new_for_commandline_arg(filename);
     gchar *file_path= g_file_get_path (file);
@@ -395,4 +395,24 @@ GString *text_save_as_temp_file(gchar *text)
 
 void release_temp_file (const gchar *filename){
     g_unlink(filename);
+}
+
+/*
+ * execute a command in a command line
+ */
+gchar *command_spawn(const gchar* command_line)
+{
+  gchar *stdout = NULL;
+  GError *error = NULL;
+  gint exit_status;
+  gchar *ret=NULL;
+  if (g_spawn_command_line_sync(command_line, &stdout, NULL, &exit_status,&error)) {
+    ret = g_strdup(stdout);
+    g_free(stdout);
+  } else {
+    g_print("Command %s gave error %s\n", command_line, error->message);
+    g_error_free (error);
+  }
+
+  return ret;
 }

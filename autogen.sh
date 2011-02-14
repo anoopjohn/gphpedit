@@ -29,7 +29,13 @@ find -type f \( -name missing -o -name install-sh -o -name mkinstalldirs \
 	-o -name Makefile.in \) -print0 | xargs -0 rm -f
 
 echo Running autoreconf...
-autoreconf -v -i -f
+AUTORECONF=`which autoreconf`
+if test -z $AUTORECONF; then
+        echo "*** No autoreconf found, please install it ***"
+        exit 1
+else
+        autoreconf --force --install --verbose || exit $?
+fi
 echo Running intltoolize
 intltoolize --copy --force --automake
 

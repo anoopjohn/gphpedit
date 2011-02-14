@@ -30,12 +30,7 @@
 #include "debug.h"
 #include "document_loader.h"
 #include "tab.h"
-// TODO tab_php.h loaded for the php file type validation
-// Perhaps all mimetype/encoding validation can be done in a separate lib
-#include "tab_php.h"
 #include "gvfs_utils.h"
-#include "preferences_manager.h"
-#include "document_manager.h"
 
 #define IS_MIME(stringa,stringb) (g_content_type_equals (stringa, stringb))
 #define IS_TEXT(stringa) (g_content_type_is_a (stringa, "text/*"))
@@ -297,31 +292,31 @@ static GString *tab_help_find_helpfile(gchar *command)
 #endif
 }
 
-static gboolean _document_loader_validate_and_convert_utf8_buffer (gchar *buffer) //FIXME: multiple enconding support
+static gboolean _document_loader_validate_and_convert_utf8_buffer (gchar **buffer) //FIXME: multiple enconding support
 {
   gboolean result;
-  if (g_utf8_validate(buffer, -1, NULL)) {
+  if (g_utf8_validate(*buffer, -1, NULL)) {
     gphpedit_debug_message (DEBUG_DOCUMENT,"%s", "Valid UTF8");
     result = FALSE;
   } else {
     gchar *converted_text;
     gsize utf8_size;
     GError *error = NULL;      
-    converted_text = g_locale_to_utf8(buffer, -1, NULL, &utf8_size, &error); 
+    converted_text = g_locale_to_utf8(*buffer, -1, NULL, &utf8_size, &error); 
     if (error != NULL) {
       /* if locale isn't set */
       g_error_free(error);
-      converted_text = g_convert(buffer, -1, "UTF-8", "ISO-8859-15", NULL, &utf8_size, &error);
-      if (error!=NULL){
+      error = NULL;
+      converted_text = g_convert(*buffer, -1, "UTF-8", "ISO-8859-15", NULL, &utf8_size, &error);
+      if (error!= NULL) {
         gphpedit_debug_message (DEBUG_DOCUMENT,_("gPHPEdit UTF-8 Error: %s"), error->message);
         g_error_free(error);
         return FALSE;
       }
     }
     gphpedit_debug_message (DEBUG_DOCUMENT,_("Converted to UTF-8 size: %u"), utf8_size);
-    g_free(buffer);
-    buffer = g_strdup(converted_text);
-    g_free(converted_text);
+    g_free(*buffer);
+    *buffer = converted_text;
     result = TRUE;
   }
   return result;
@@ -349,8 +344,8 @@ static void _document_loader_help_file_load(DocumentLoader *doclod, GFile *file)
   /*it's all ok, read file*/
   Document_Webkit *document = document_webkit_new (docloddet->type, file);
   g_object_set(document, "icon", icon, NULL);
-  g_signal_emit (G_OBJECT (doclod), signals[DONE_LOADING], 0, TRUE, DOCUMENT(document));
   g_object_unref(info);
+  g_signal_emit (G_OBJECT (doclod), signals[DONE_LOADING], 0, TRUE, DOCUMENT(document));
 }
 
 static void _document_loader_create_help(DocumentLoader *doclod, gchar *help_function)
@@ -397,24 +392,16 @@ static gboolean _document_loader_check_supported_type(GFile *file)
   GError *error=NULL;
   gboolean result = TRUE;
 
-  info = g_file_query_info (file,"standard::content-type,standard::display-name", G_FILE_QUERY_INFO_NONE, NULL, &error);
-  if (!info) {
-    g_warning(_("Could not get the file info. GIO error: %s \n"), error->message);
+  info= g_file_query_info (file,"standard::content-type",G_FILE_QUERY_INFO_NONE, NULL,&error);
+  if (!info){
+    g_warning (_("Could not get the file info. GIO error: %s \n"), error->message);
     g_error_free(error);
     return FALSE;
   }
-  
-  const gchar *contenttype = g_file_info_get_content_type(info); 
-  const gchar *filename = g_file_info_get_display_name(info); 
-  
-  /* We could open text based types so if it not a text based 
-  content don't open and display error. We could also open files
-  with extensions added in php_file_extensions preference irrespectivee
-  of the content type
-  */
-  
-  if (!is_php_file_from_filename(filename) && (!IS_TEXT(contenttype) && IS_APPLICATION(contenttype))) {
-    info_dialog (_("gPHPEdit"), _("Sorry, I cannot open this kind of file.\n"));
+  const char *contenttype= g_file_info_get_content_type (info); 
+  /*we could open text based types so if it not a text based content don't open and displays error*/
+  if (!IS_TEXT(contenttype) && IS_APPLICATION(contenttype)){
+    info_dialog (_("gPHPEdit"), _("Sorry, I can open this kind of file.\n"));
     result = FALSE;
   }
   g_object_unref(info);
@@ -489,7 +476,7 @@ static void _document_loader_load_file_finish (GObject *source_object, GAsyncRes
   gphpedit_debug_message (DEBUG_DOCUMENT,"Loaded %u bytes",size);
   gphpedit_debug_message (DEBUG_DOCUMENT,"BUFFER=\n%s\n-------------------------------------------", buffer);
 
-  converted_to_utf8 = _document_loader_validate_and_convert_utf8_buffer(buffer);
+  converted_to_utf8 = _document_loader_validate_and_convert_utf8_buffer(&buffer);
 
   info= g_file_query_info (file, INFO_FLAGS,G_FILE_QUERY_INFO_NONE, NULL, &error);
   if (!info){

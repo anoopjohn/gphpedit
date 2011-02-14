@@ -110,7 +110,7 @@ static void incremental_search_typed (GtkEntry *entry, const gchar *text, gint l
   gchar *current_text;
   current_text = (gchar *)gtk_entry_get_text(entry);
   DocumentManager *docmg = document_manager_new ();
-  documentable_incremental_search(DOCUMENTABLE(document_manager_get_current_document(docmg)), current_text, FALSE);
+  documentable_incremental_search(document_manager_get_current_documentable(docmg), current_text, FALSE);
   g_object_unref(docmg);
 }
 
@@ -141,7 +141,7 @@ static void incremental_search_activate(GtkEntry *entry, gpointer user_data)
   current_text = (gchar *)gtk_entry_get_text(entry);
 
   DocumentManager *docmg = document_manager_new ();
-  documentable_incremental_search(DOCUMENTABLE(document_manager_get_current_document(docmg)), current_text, TRUE);
+  documentable_incremental_search(document_manager_get_current_documentable(docmg), current_text, TRUE);
   g_object_unref(docmg);
 
   add_to_search_history(current_text, priv->completion);
@@ -152,9 +152,10 @@ static gboolean incremental_search_key_release_event(GtkWidget *widget, GdkEvent
     if (event->keyval == GDK_Escape) {
         GtkWidget *document_widget;
         DocumentManager *docmg = document_manager_new ();
-        g_object_get(document_manager_get_current_document(docmg), "editor_widget", &document_widget, NULL);
+        Documentable *doc = document_manager_get_current_documentable(docmg);
+        g_object_get(doc, "editor_widget", &document_widget, NULL);
         gtk_widget_hide(user_data);
-        documentable_grab_focus(DOCUMENTABLE(document_manager_get_current_document(docmg)));
+        documentable_grab_focus(doc);
         g_object_unref(docmg);
       return TRUE;
     }

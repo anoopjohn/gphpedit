@@ -42,14 +42,10 @@ AM_CFLAGS = \
 
 nodist_EXTRA_gphpedit_SOURCES = dummy.cxx
 gphpedit_SOURCES = \
-  calltip.c \
-  calltip.h \
-  classbrowser_backend.c \
-  classbrowser_backend.h \
   classbrowser_parse.c \
   classbrowser_parse.h \
-  classbrowser_ui.c \
-  classbrowser_ui.h \
+  classbrowser.c \
+  classbrowser.h \
   debug.c \
   debug.h \
   documentable.c \
@@ -115,6 +111,26 @@ gphpedit_SOURCES = \
   status-combo-box.h \
   search_infobar.c \
   search_infobar.h \
+  symbolizable.c \
+  symbolizable.h \
+  symbol_bd_utils.c \
+  symbol_bd_utils.h \
+  symbol_bd_php.c \
+  symbol_bd_php.h \
+  symbol_bd_cobol.c \
+  symbol_bd_cobol.h \
+  symbol_bd_css.c \
+  symbol_bd_css.h \
+  symbol_bd_cxx.c \
+  symbol_bd_cxx.h \
+  symbol_bd_python.c \
+  symbol_bd_python.h \
+  symbol_bd_perl.c \
+  symbol_bd_perl.h \
+  symbol_bd_sql.c \
+  symbol_bd_sql.h \
+  symbol_manager.c \
+  symbol_manager.h \
   syntax_check_manager.c \
   syntax_check_manager.h \
   syntax_check_window.c \

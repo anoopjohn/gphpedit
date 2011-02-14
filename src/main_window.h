@@ -25,17 +25,15 @@
 #ifndef MAIN_WINDOW_H
 #define MAIN_WINDOW_H
 
-#include "main.h"
-#include "document.h"
+#include <gtk/gtk.h>
+
 #include "document_manager.h"
-#include "calltip.h"
-#include "tab.h"
 #include "menubar.h"
 #include "toolbar.h"
 #include "preferences_manager.h"
 #include "templates.h"
 #include "gtksourcestyleschememanager.h"
-
+#include "symbol_manager.h"
 
 typedef struct
 {
@@ -45,7 +43,7 @@ typedef struct
 
   GtkSourceStyleSchemeManager *stylemg;
 
-  CalltipManager *clltipmg;
+  SymbolManager *symbolmg;
 
   GtkWidget *window;
   GtkWidget *prinbox;
@@ -81,7 +79,7 @@ MainWindow;
 extern MainWindow main_window;
 
 void main_window_create(void);
-void update_app_title(Document *document);
+void update_app_title(Documentable *document);
 void main_window_pass_command_line_files(char **argv);
 gboolean channel_pass_filename_callback(GIOChannel *source, GIOCondition condition, gpointer data );
 extern GIOChannel* inter_gphpedit_io;

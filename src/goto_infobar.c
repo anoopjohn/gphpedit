@@ -89,7 +89,7 @@ static gboolean goto_key_release_event(GtkWidget *widget, GdkEventKey *event, gp
     if (event->keyval == GDK_Escape) {
         GtkWidget *document_widget;
         DocumentManager *docmg = document_manager_new ();
-        g_object_get(document_manager_get_current_document(docmg), "editor_widget", &document_widget, NULL);
+        g_object_get(document_manager_get_current_documentable(docmg), "editor_widget", &document_widget, NULL);
         gtk_widget_hide(user_data);
         gtk_widget_grab_focus(document_widget);
         g_object_unref(docmg);
@@ -102,7 +102,7 @@ static void goto_line_activate(GtkEntry *entry, gpointer user_data)
 {
   gchar *current_text;
   DocumentManager *docmg = document_manager_new ();
-  Documentable *doc = DOCUMENTABLE(document_manager_get_current_document(docmg));
+  Documentable *doc = document_manager_get_current_documentable(docmg);
   if (doc) {
     current_text = (gchar *)gtk_entry_get_text(entry);
     documentable_goto_line(doc, atoi(current_text));

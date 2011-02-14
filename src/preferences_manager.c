@@ -84,8 +84,8 @@ struct PreferencesManagerDetails
   gboolean auto_complete_braces;
   gboolean higthlightcaretline;
   //gint auto_indent_after_brace;
-  gint auto_complete_delay;
-  gint calltip_delay;
+  guint auto_complete_delay;
+  guint calltip_delay;
   gboolean line_wrapping;
   gboolean use_tabs_instead_spaces;
   gboolean single_instance_only;
@@ -205,10 +205,10 @@ preferences_manager_set_property (GObject      *object,
 			prefdet->font_size = g_value_get_uint (value);
 			break;
 		case PROP_CALLTIP_DELAY:
-			prefdet->calltip_delay = g_value_get_int (value);
+			prefdet->calltip_delay = g_value_get_uint (value);
 			break;
 		case PROP_AUTOCOMPLETE_DELAY:
-			prefdet->auto_complete_delay = g_value_get_int (value);
+			prefdet->auto_complete_delay = g_value_get_uint (value);
 			break;
 		case PROP_FONT_QUALITY:
 			prefdet->font_quality = g_value_get_int (value);
@@ -310,10 +310,10 @@ preferences_manager_get_property (GObject    *object,
 			g_value_set_uint (value, prefdet->font_size);
 			break;
 		case PROP_CALLTIP_DELAY:
-			g_value_set_int (value, prefdet->calltip_delay);
+			g_value_set_uint (value, prefdet->calltip_delay);
 			break;
 		case PROP_AUTOCOMPLETE_DELAY:
-			g_value_set_int (value, prefdet->auto_complete_delay);
+			g_value_set_uint (value, prefdet->auto_complete_delay);
 			break;
 		case PROP_SINGLE_INSTANCE_ONLY:
 			g_value_set_boolean (value, prefdet->single_instance_only);
@@ -444,13 +444,13 @@ preferences_manager_class_init (PreferencesManagerClass *klass)
 
   g_object_class_install_property (object_class,
                               PROP_CALLTIP_DELAY,
-                              g_param_spec_int ("calltip_delay",
+                              g_param_spec_uint ("calltip_delay",
                               NULL, NULL, 0, G_MAXINT, 
                               0, G_PARAM_READWRITE));
 
   g_object_class_install_property (object_class,
                               PROP_AUTOCOMPLETE_DELAY,
-                              g_param_spec_int ("autocomplete_delay",
+                              g_param_spec_uint ("autocomplete_delay",
                               NULL, NULL, 0, G_MAXINT, 
                               0, G_PARAM_READWRITE));
 
@@ -929,8 +929,8 @@ void preferences_manager_save_data_full(PreferencesManager *preferences_manager)
   g_settings_set_string (prefdet->gs, "shared-source-location", prefdet->shared_source_location);
   g_settings_set_string (prefdet->gs, "php-file-extensions", prefdet->php_file_extensions);
 
-  g_settings_set (prefdet->gs, "auto-complete-delay", "u", &prefdet->auto_complete_delay);
-  g_settings_set (prefdet->gs, "calltip-delay", "u", &prefdet->calltip_delay);
+  g_settings_set (prefdet->gs, "auto-complete-delay", "u", prefdet->auto_complete_delay);
+  g_settings_set (prefdet->gs, "calltip-delay", "u", prefdet->calltip_delay);
   /* style settings */
   gchar *font_setting = g_strdup_printf("%s %d",prefdet->font_name + 1, prefdet->font_size);
   g_settings_set_string (prefdet->gs, "editor-font", font_setting);
@@ -999,6 +999,7 @@ void load_font_settings(PreferencesManagerDetails *prefdet)
   /* add ! needed by scintilla for pango render */
   prefdet->font_name = g_strdup_printf("!%s",pango_font_description_get_family (desc));
   pango_font_description_free (desc);
+  g_free(font_desc);
 }
 
 /**

@@ -213,25 +213,22 @@ gtk_plugin_manager_menu_populate (GtkPluginManagerMenu *menu)
 static void plugin_exec (GtkWidget *widget, gpointer user_data)
 {
   Plugin *plugin;
-  if (!document_manager_get_current_document(main_window.docmg)) {
-    return;
-  }
+  Documentable *doc = document_manager_get_current_documentable(main_window.docmg);
+  if (!doc) return;
   GtkPluginManagerMenu *menu= GTK_PLUGIN_MANAGER_MENU (user_data);
   
   plugin = get_plugin_by_name(menu->priv->plugmg, (gchar *) gtk_menu_item_get_label (GTK_MENU_ITEM(widget)));
-  plugin_run(plugin, document_manager_get_current_document(main_window.docmg));
+  plugin_run(plugin, doc);
 }
 
 void plugin_exec_with_num(GtkWidget *widget, gint num){
   Plugin *plugin;
- 
-  if (!document_manager_get_current_document(main_window.docmg)) {
-    return;
-  }
+  Documentable *doc = document_manager_get_current_documentable(main_window.docmg); 
+  if (!doc) return;
   GtkPluginManagerMenu *menu= GTK_PLUGIN_MANAGER_MENU (widget);
-  if (get_plugin_manager_items_count(menu->priv->plugmg) < num) return;   
+  if (get_plugin_manager_items_count(menu->priv->plugmg) < num) return;
   plugin = get_plugin_by_num(menu->priv->plugmg, num);
-  plugin_run(plugin, document_manager_get_current_document(main_window.docmg));
+  plugin_run(plugin, doc);
 }
 /*
  * Public API

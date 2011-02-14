@@ -130,7 +130,7 @@ set_statusbar_width_chars (GtkWidget *statusbar,
 }
 
 void set_higthlight (GphpeditStatusComboBox *combo, GtkMenuItem *item){
-  const gchar *label =gtk_menu_item_get_label (item);
+  const gchar *label = gtk_menu_item_get_label (item);
   gint type;
   if (g_strcmp0(label,_("Cobol"))==0){
     type = TAB_COBOL;
@@ -149,8 +149,8 @@ void set_higthlight (GphpeditStatusComboBox *combo, GtkMenuItem *item){
   } else {
     type = TAB_FILE;
   }
-  Document *doc = document_manager_get_current_document(main_window.docmg);
-  if (doc) documentable_set_type(DOCUMENTABLE(doc), type);
+  Documentable *doc = document_manager_get_current_documentable(main_window.docmg);
+  if (doc) documentable_set_type(doc, type);
 }
 
 void set_status_combo_item (GphpeditStatusbar *statusbar,const gchar *label)

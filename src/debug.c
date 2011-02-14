@@ -48,8 +48,8 @@ gphpedit_debug_init (void)
 		return;
 	}
 
-	if (g_getenv ("GPHPEDIT_DEBUG_CALLTIP") != NULL)
-		debug = debug | GPHPEDIT_DEBUG_CALLTIP;
+	if (g_getenv ("GPHPEDIT_DEBUG_SYMBOLIZABLE") != NULL)
+		debug = debug | GPHPEDIT_DEBUG_SYMBOLIZABLE;
 	if (g_getenv ("GPHPEDIT_DEBUG_CLASSBROWSER") != NULL)
 		debug = debug | GPHPEDIT_DEBUG_CLASSBROWSER;
 	if (g_getenv ("GPHPEDIT_DEBUG_DOCUMENT") != NULL)

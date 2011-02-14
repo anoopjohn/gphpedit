@@ -2,7 +2,7 @@
 
    Copyright (C) 2003, 2004, 2005 Andy Jeffries <andy at gphpedit.org>
    Copyright (C) 2009 Anoop John <anoop dot john at zyxware.com>
-   Copyright (C) 2009, 2010 José Rostagno (for vijona.com.ar) 
+   Copyright (C) 2009, 2011 José Rostagno (for vijona.com.ar) 
 
    For more information or to find the latest release, visit our 
    website at http://www.gphpedit.org/
@@ -35,8 +35,8 @@
 enum {
   LOAD_COMPLETE,
   SAVE_UPDATE,
-	NEED_RELOAD,
-	LAST_SIGNAL
+  NEED_RELOAD,
+  LAST_SIGNAL
 };
 
 static guint signals[LAST_SIGNAL];
@@ -46,18 +46,11 @@ static guint signals[LAST_SIGNAL];
 */
 struct Document_WebkitDetails
 {
-	gint type;
+  gint type;
   GtkWidget *container;
-	GtkWidget *help_scrolled_window;
-	WebKitWebView *help_view;
-	GtkWidget *label;
-  GFile *file;
-  GIcon *ico;
-  gchar *short_filename;
-  gint64 mtime;
-	gboolean isreadonly;
-	gboolean is_untitled;
-  gchar *contenttype;
+  GtkWidget *help_scrolled_window;
+  WebKitWebView *help_view;
+  GtkWidget *label;
 
   /* incremental search widget */
   GtkWidget *searchbar;
@@ -67,17 +60,16 @@ struct Document_WebkitDetails
 					    DOCUMENT_WEBKIT_TYPE,\
 					    Document_WebkitDetails))
 
-static void document_webkit_dispose (GObject *gobject);
 static void notify_title_cb (WebKitWebView* web_view, GParamSpec* pspec, Document_Webkit *document_webkit);
 static gboolean webkit_link_clicked (WebKitWebView *web_view, WebKitWebFrame *frame, WebKitNetworkRequest *request,
                                                         WebKitWebNavigationAction *navigation_action,
                                                         WebKitWebPolicyDecision   *policy_decision,
                                                         Document_Webkit *document_webkit);
 static void document_webkit_constructed (GObject *object);
+
 /*
  * register Document_Webkit type and returns a new GType
 */
-
 static void document_webkit_documentable_init(DocumentableIface *iface, gpointer user_data);
 
 G_DEFINE_TYPE_WITH_CODE(Document_Webkit, document_webkit, DOCUMENT_TYPE,
@@ -91,13 +83,15 @@ void document_webkit_zoom_in(Documentable *doc)
   webkit_web_view_zoom_in (docdet->help_view);
 }
 
-void document_webkit_zoom_out(Documentable *doc){
+void document_webkit_zoom_out(Documentable *doc)
+{
   g_return_if_fail(doc);
   Document_WebkitDetails *docdet = DOCUMENT_WEBKIT_GET_PRIVATE(doc);
   webkit_web_view_zoom_out (docdet->help_view);
 }
 
-void document_webkit_zoom_restore(Documentable *doc){
+void document_webkit_zoom_restore(Documentable *doc)
+{
   g_return_if_fail(doc);
   Document_WebkitDetails *docdet = DOCUMENT_WEBKIT_GET_PRIVATE(doc);
   webkit_web_view_set_zoom_level (docdet->help_view, 1);
@@ -156,11 +150,16 @@ void document_webkit_block_unindent(Documentable *doc)
 {
 }
 
-gchar *document_webkit_get_filename (Documentable  *doc) {
+gchar *document_webkit_get_filename (Documentable  *doc)
+{
   if (!doc) return NULL;
   Document_WebkitDetails *docdet = DOCUMENT_WEBKIT_GET_PRIVATE(doc);
+  GFile *file = NULL;
   gchar *uri = g_strdup(webkit_web_view_get_uri (WEBKIT_WEB_VIEW(docdet->help_view)));
-  if (!uri) uri = g_file_get_uri(docdet->file);
+  if (!uri){
+    g_object_get(doc, "GFile", &file, NULL);
+    uri = g_file_get_uri(file);
+  }
   return uri;
 }
 
@@ -180,7 +179,8 @@ void document_webkit_scroll_to_current_pos (Documentable  *document_webkit)
 {
 }
 
-gchar *document_webkit_get_current_selected_text (Documentable  *doc) {
+gchar *document_webkit_get_current_selected_text (Documentable  *doc) 
+{
   return NULL;
 }
 
@@ -227,7 +227,9 @@ gchar *document_webkit_get_title(Document_Webkit *doc)
   Document_WebkitDetails *docdet = DOCUMENT_WEBKIT_GET_PRIVATE(doc);
   GString *title= NULL;
   if( WEBKIT_IS_WEB_VIEW(docdet->help_view)){
-      title = g_string_new(docdet->short_filename);
+      gchar *short_filename;
+      g_object_get(doc, "short_filename", &short_filename, NULL);
+      title = g_string_new(short_filename);
       g_string_append(title, _(" - gPHPEdit"));
   }
   if (title) return g_string_free(title, FALSE);
@@ -312,12 +314,12 @@ static void document_webkit_grab_focus (Documentable *doc)
 
 static void document_webkit_documentable_init(DocumentableIface *iface, gpointer user_data)
 {
-	iface->zoom_in = document_webkit_zoom_in;
-	iface->zoom_out = document_webkit_zoom_out;
-	iface->zoom_restore = document_webkit_zoom_restore;
-	iface->undo = document_webkit_undo;
-	iface->redo = document_webkit_redo;
-	iface->select_all = document_webkit_select_all;
+  iface->zoom_in = document_webkit_zoom_in;
+  iface->zoom_out = document_webkit_zoom_out;
+  iface->zoom_restore = document_webkit_zoom_restore;
+  iface->undo = document_webkit_undo;
+  iface->redo = document_webkit_redo;
+  iface->select_all = document_webkit_select_all;
   iface->selection_to_upper = document_webkit_selection_to_upper;
   iface->selection_to_lower = document_webkit_selection_to_lower;
   iface->copy = document_webkit_copy;
@@ -353,22 +355,15 @@ static void document_webkit_documentable_init(DocumentableIface *iface, gpointer
 enum
 {
   PROP_0,
-  PROP_UNTITLED,
-  PROP_READ_ONLY,
   PROP_CAN_MODIFY,
   PROP_CONVERTED_TO_UTF8,
   PROP_IS_EMPTY,
   PROP_SAVED,
   PROP_CAN_PREVIEW,
   PROP_ZOOM_LEVEL,
-  PROP_CONTENT_TYPE,
-  PROP_SHORT_FILENAME,
-  PROP_GFILE,
   PROP_TYPE,
   PROP_LABEL,
-  PROP_ICON,
   PROP_WIDGET,
-  PROP_MTIME,
   PROP_TITLE
 };
 
@@ -380,46 +375,21 @@ document_webkit_set_property (GObject      *object,
 {
   Document_WebkitDetails *docdet = DOCUMENT_WEBKIT_GET_PRIVATE(object);
 
-	switch (prop_id)
-	{
-		case PROP_CAN_MODIFY:
+  switch (prop_id)
+  {
+    case PROP_CAN_MODIFY:
       webkit_web_view_set_editable (WEBKIT_WEB_VIEW(docdet->help_view), g_value_get_boolean (value));
-			break;
+      break;
     case PROP_CONVERTED_TO_UTF8:
-			break;
-    case PROP_MTIME:
-			docdet->mtime = g_value_get_int64 (value);
-			break;
-		case PROP_READ_ONLY:
-			docdet->isreadonly = g_value_get_boolean (value);
-			break;
-		case PROP_UNTITLED:
-			docdet->is_untitled = g_value_get_boolean (value);
-			break;
-		case PROP_TYPE:
+      break;
+    case PROP_TYPE:
       docdet->type = g_value_get_int (value);
       documentable_set_type(DOCUMENTABLE(object), docdet->type);
-			break;
-    case PROP_CONTENT_TYPE:
-			g_free(docdet->contenttype);
-			docdet->contenttype = g_value_dup_string (value);
       break;
-    case PROP_SHORT_FILENAME:
-			g_free(docdet->short_filename);
-			docdet->short_filename = g_value_dup_string (value);
+    default:
+      G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
       break;
-    case PROP_GFILE:
-      if(docdet->file) g_object_unref(docdet->file);
-      docdet->file = g_value_dup_object (value);
-      break;
-    case PROP_ICON:
-      if (docdet->ico) g_object_unref(docdet->ico);
-      docdet->ico = g_value_dup_object (value);
-      break;
-		default:
-			G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
-			break;
-	}
+  }
 }
 
 static void
@@ -431,33 +401,24 @@ document_webkit_get_property (GObject    *object,
   Document_WebkitDetails *docdet = DOCUMENT_WEBKIT_GET_PRIVATE(object);
   
   gint p;
-	switch (prop_id)
-	{
-		case PROP_READ_ONLY:
-			g_value_set_boolean (value, TRUE);
-			break;
+  switch (prop_id)
+  {
     case PROP_CAN_MODIFY:
-			  g_value_set_boolean (value, webkit_web_view_get_editable (WEBKIT_WEB_VIEW(docdet->help_view)));
- 			break;
+      g_value_set_boolean (value, webkit_web_view_get_editable (WEBKIT_WEB_VIEW(docdet->help_view)));
+      break;
     case PROP_CONVERTED_TO_UTF8:
       break;
-    case PROP_MTIME:
-			  g_value_set_int64 (value, docdet->mtime);
+    case PROP_TYPE:
+      g_value_set_int (value, docdet->type);
       break;
-		case PROP_UNTITLED:
-			g_value_set_boolean (value, docdet->is_untitled);
-			break;
-		case PROP_TYPE:
-			g_value_set_int (value, docdet->type);
-			break;
-		case PROP_IS_EMPTY:
-			g_value_set_boolean (value, FALSE);
-			break;
+    case PROP_IS_EMPTY:
+      g_value_set_boolean (value, FALSE);
+      break;
     case PROP_SAVED:
- 			g_value_set_boolean (value, TRUE);
+      g_value_set_boolean (value, TRUE);
       break;
     case PROP_CAN_PREVIEW:
- 			g_value_set_boolean (value, FALSE);
+      g_value_set_boolean (value, FALSE);
       break;
     case PROP_ZOOM_LEVEL:
       p = webkit_web_view_get_zoom_level (docdet->help_view) * 100;
@@ -466,37 +427,24 @@ document_webkit_get_property (GObject    *object,
     case PROP_TITLE:
       g_value_set_string (value, document_webkit_get_title(DOCUMENT_WEBKIT(object)));
       break;
-    case PROP_CONTENT_TYPE:
-			g_value_set_string (value, docdet->contenttype);
-      break;
-    case PROP_SHORT_FILENAME:
-			g_value_set_string (value, docdet->short_filename);
-      break;
-    case PROP_GFILE:
-      g_value_set_object (value, docdet->file);
-      break;
     case PROP_LABEL:
       g_value_set_object (value, docdet->label);
-      break;
-    case PROP_ICON:
-      g_value_set_object (value, docdet->ico);
       break;
     case PROP_WIDGET:
       g_value_set_object (value, docdet->container);
       break;
-		default:
-			G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
-			break;
-	}
+    default:
+      G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
+      break;
+  }
 }
 
 static void
 document_webkit_class_init (Document_WebkitClass *klass)
 {
-	GObjectClass *object_class;
+  GObjectClass *object_class;
 
-	object_class = G_OBJECT_CLASS (klass);
-  object_class->dispose = document_webkit_dispose;
+  object_class = G_OBJECT_CLASS (klass);
   object_class->set_property = document_webkit_set_property;
   object_class->get_property = document_webkit_get_property;
   object_class->constructed = document_webkit_constructed;
@@ -520,20 +468,6 @@ document_webkit_class_init (Document_WebkitClass *klass)
 		               G_TYPE_NONE, 0);
 
   /*DOCUMENT_WEBKIT PROPERTIES*/
-  g_object_class_install_property (object_class,
-                              PROP_UNTITLED,
-                              g_param_spec_boolean ("untitled",
-                              NULL, NULL,
-                              FALSE, G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
-
-  /* READ_ONLY PROPERTY:
-  * When a document_webkit can't be saved. default value FALSE.
-  */
-  g_object_class_install_property (object_class,
-                              PROP_READ_ONLY,
-                              g_param_spec_boolean ("read_only",
-                              NULL, NULL,
-                              FALSE, G_PARAM_READWRITE));
 
   /* CAN_MODIFY PROPERTY: When a document_webkit can be modified */
   g_object_class_install_property (object_class,
@@ -547,15 +481,6 @@ document_webkit_class_init (Document_WebkitClass *klass)
                               g_param_spec_boolean ("converted_to_utf8",
                               NULL, NULL,
                               FALSE, G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
-
-  g_object_class_install_property (object_class,
-                              PROP_MTIME,
-                              g_param_spec_int64 ("mtime",
-                              NULL, NULL,
-                               G_MININT64,
-                               G_MAXINT64,
-                               0,
-                               G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
 
   g_object_class_install_property (object_class,
                               PROP_IS_EMPTY,
@@ -588,40 +513,16 @@ document_webkit_class_init (Document_WebkitClass *klass)
                               TAB_FILE, G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
 
   g_object_class_install_property (object_class,
-                              PROP_CONTENT_TYPE,
-                              g_param_spec_string ("content_type",
-                              NULL, NULL,
-                              "text/plain", G_PARAM_READWRITE));
-
-  g_object_class_install_property (object_class,
-                              PROP_SHORT_FILENAME,
-                              g_param_spec_string ("short_filename",
-                              NULL, NULL,
-                              "", G_PARAM_READWRITE));
-
-  g_object_class_install_property (object_class,
                               PROP_TITLE,
                               g_param_spec_string ("title",
                               NULL, NULL,
                               "", G_PARAM_READWRITE));
 
   g_object_class_install_property (object_class,
-                              PROP_GFILE,
-                              g_param_spec_object ("GFile",
-                              NULL, NULL,
-                              G_TYPE_FILE, G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
-
-  g_object_class_install_property (object_class,
                               PROP_LABEL,
                               g_param_spec_object ("editor_label",
                               NULL, NULL,
                               GTK_TYPE_WIDGET, G_PARAM_READABLE));
-
-  g_object_class_install_property (object_class,
-                              PROP_ICON,
-                              g_param_spec_object ("icon",
-                              NULL, NULL,
-                              G_TYPE_ICON, G_PARAM_READWRITE));
 
   g_object_class_install_property (object_class,
                               PROP_WIDGET,
@@ -635,8 +536,8 @@ document_webkit_class_init (Document_WebkitClass *klass)
 static void
 document_webkit_init (Document_Webkit * object)
 {
-	Document_WebkitDetails *docdet;
-	docdet = DOCUMENT_WEBKIT_GET_PRIVATE(object);
+  Document_WebkitDetails *docdet;
+  docdet = DOCUMENT_WEBKIT_GET_PRIVATE(object);
   docdet->help_view= WEBKIT_WEB_VIEW(webkit_web_view_new ());
   docdet->help_scrolled_window = gtk_scrolled_window_new(NULL, NULL);
   docdet->label = gtk_label_new ("");
@@ -652,7 +553,7 @@ document_webkit_init (Document_Webkit * object)
   gtk_box_pack_start(GTK_BOX(docdet->container), docdet->help_scrolled_window, TRUE, TRUE, 0);
 
   g_signal_connect(G_OBJECT(docdet->help_view), "navigation-policy-decision-requested",
-       G_CALLBACK(webkit_link_clicked), object);
+       G_CALLBACK(webkit_link_clicked), NULL);
   g_signal_connect (G_OBJECT(docdet->help_view), "notify::title", G_CALLBACK (notify_title_cb), object);
 
   gtk_widget_show_all(docdet->help_scrolled_window);
@@ -664,15 +565,14 @@ static void document_webkit_constructed (GObject *object)
   GString *caption = NULL;
   gchar *filename = documentable_get_filename(DOCUMENTABLE(object));
   if (docdet->type==TAB_HELP){
-  caption = g_string_new(_("Help: "));
+    caption = g_string_new(_("Help: "));
   } else {
-  gchar *disp = filename_get_display_name(filename);
-  caption = g_string_new(disp);
-  g_free(disp);
-  caption = g_string_prepend(caption, _("Preview: "));
+    gchar *disp = filename_get_display_name(filename);
+    caption = g_string_new(disp);
+    g_free(disp);
+    caption = g_string_prepend(caption, _("Preview: "));
   }
-
-  docdet->short_filename = g_strdup(caption->str);
+  g_object_set(object, "short_filename", caption->str,NULL);
   gtk_label_set_text(GTK_LABEL(docdet->label), caption->str);
 
   webkit_web_view_load_uri (WEBKIT_WEB_VIEW(docdet->help_view), filename);
@@ -682,45 +582,31 @@ static void document_webkit_constructed (GObject *object)
   g_string_free(caption,TRUE);
 
 }
-/*
-* disposes the Gobject
-*/
-static void document_webkit_dispose (GObject *object)
-{
-  Document_Webkit *doc = DOCUMENT_WEBKIT(object);
-  Document_WebkitDetails *docdet;
-	docdet = DOCUMENT_WEBKIT_GET_PRIVATE(doc);
-  /* free object resources*/
-	if (docdet->short_filename) g_free(docdet->short_filename);
-	if (docdet->file) g_object_unref(docdet->file);
-	if (docdet->ico) g_object_unref(docdet->ico);
-  if (docdet->contenttype) g_free(docdet->contenttype);
-  /* Chain up to the parent class */
-  G_OBJECT_CLASS (document_webkit_parent_class)->dispose (object);
-}
 
 Document_Webkit *document_webkit_new (gint type, GFile *file)
 {
-	Document_Webkit *doc;
-  doc = g_object_new (DOCUMENT_WEBKIT_TYPE, "type", type, "GFile", file, NULL);
+  Document_Webkit *doc;
+  doc = g_object_new (DOCUMENT_WEBKIT_TYPE, "type", type, "GFile", file, "untitled", FALSE, NULL);
 
-	return doc; /* return new object */
+  return doc; /* return new object */
 }
 
-static void notify_title_cb (WebKitWebView* web_view, GParamSpec* pspec, Document_Webkit *document_webkit)
+static void notify_title_cb (WebKitWebView* web_view, GParamSpec* pspec, Document_Webkit *doc)
 {
-  Document_WebkitDetails *docdet = DOCUMENT_WEBKIT_GET_PRIVATE(document_webkit);
+  Document_WebkitDetails *docdet = DOCUMENT_WEBKIT_GET_PRIVATE(doc);
   gchar *main_title = g_strdup (webkit_web_view_get_title(web_view));
+  gchar *short_filename = NULL;
   if (main_title){
-    if (docdet->short_filename) g_free(docdet->short_filename);
     if (docdet->type==TAB_HELP){
-      docdet->short_filename = g_strconcat(_("Help: "), main_title, NULL);
+      short_filename = g_strconcat(_("Help: "), main_title, NULL);
     } else {
-      docdet->short_filename = g_strconcat(_("Preview: "), main_title, NULL);
+      short_filename = g_strconcat(_("Preview: "), main_title, NULL);
     }
-    gtk_label_set_text(GTK_LABEL(docdet->label), docdet->short_filename);
-    g_signal_emit (G_OBJECT (document_webkit), signals[SAVE_UPDATE], 0);
+    g_object_set(doc, "short_filename", short_filename, NULL);
+    gtk_label_set_text(GTK_LABEL(docdet->label), short_filename);
+    g_signal_emit (G_OBJECT (doc), signals[SAVE_UPDATE], 0);
     g_free(main_title);
+    g_free(short_filename);
   }
 }
 
@@ -729,7 +615,7 @@ static void notify_title_cb (WebKitWebView* web_view, GParamSpec* pspec, Documen
 static gboolean webkit_link_clicked (WebKitWebView *web_view, WebKitWebFrame *frame, WebKitNetworkRequest *request,
                                                         WebKitWebNavigationAction *navigation_action,
                                                         WebKitWebPolicyDecision   *policy_decision,
-                                                        Document_Webkit *document_webkit)
+                                                        Document_Webkit *doc)
 {
   if (webkit_web_navigation_action_get_reason (navigation_action) != WEBKIT_WEB_NAVIGATION_REASON_LINK_CLICKED) return FALSE;
   webkit_web_view_load_request (web_view, request);

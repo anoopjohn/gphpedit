@@ -66,7 +66,7 @@ const gchar **get_plugin_authors (Plugin *plugin);
 const gchar *get_plugin_website (Plugin *plugin);
 const gchar *get_plugin_copyright (Plugin *plugin);
 const gchar *get_plugin_version (Plugin *plugin);
-void plugin_run(Plugin *plugin, Document *document);
+void plugin_run(Plugin *plugin, Documentable *document);
 gint get_plugin_syntax_type(Plugin *plugin);
 #endif /* PLUGINS_H */
 

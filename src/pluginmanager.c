@@ -174,14 +174,15 @@ static void plugin_discover_available(PluginManager *plugmg)
         filename = g_string_prepend(filename, plugin_dir);
         GFile *file = g_file_new_for_commandline_arg (filename->str);
         GError *error=NULL;
-        GFileInfo *info =g_file_query_info (file, G_FILE_ATTRIBUTE_ACCESS_CAN_EXECUTE, G_FILE_QUERY_INFO_NOFOLLOW_SYMLINKS, NULL,&error);
+        GFileInfo *info =g_file_query_info (file, G_FILE_ATTRIBUTE_ACCESS_CAN_EXECUTE, G_FILE_QUERY_INFO_NOFOLLOW_SYMLINKS, NULL, &error);
         if (!info) continue;
-        if (g_file_info_get_attribute_boolean (info, G_FILE_ATTRIBUTE_ACCESS_CAN_EXECUTE)){
-          new_plugin(plugmg,filename->str);
+        if (g_file_info_get_attribute_boolean (info, G_FILE_ATTRIBUTE_ACCESS_CAN_EXECUTE)) {
+          new_plugin(plugmg, filename->str);
         } else {
           g_warning("Don't have execute access for: %s\n", filename->str);
         }
         g_object_unref(info);
+        g_object_unref(file);
         g_string_free (filename,TRUE);
       }
       g_dir_close(dir);      
@@ -233,7 +234,7 @@ gboolean get_syntax_plugin_by_ftype (gpointer key, gpointer value, gpointer user
   return FALSE;
 }
 
-gboolean run_syntax_plugin_by_ftype(PluginManager *plugmg, Document *document){
+gboolean run_syntax_plugin_by_ftype(PluginManager *plugmg, Documentable *document){
   g_return_val_if_fail (OBJECT_IS_PLUGIN_MANAGER(plugmg), FALSE);
   PluginManagerDetails *plugmgdet;
 	plugmgdet = PLUGIN_MANAGER_GET_PRIVATE(plugmg);

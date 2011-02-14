@@ -39,6 +39,7 @@ File browser has the following features:
 -Drag and drop: if you drop uri into the file browser these files will be copied to current file browser folder
 */
 #include <gdk/gdkkeysyms.h>
+#include <glib/gi18n.h>
 
 #include "filebrowser_ui.h"
 #include "filebrowser_backend.h"
@@ -76,6 +77,8 @@ struct _gphpeditFileBrowserPrivate
 {
   FilebrowserBackend *fbbackend;
 
+  GtkBuilder *builder;
+  
   GtkTreeStore *pTree; 
   GtkWidget *pListView;
   GtkWidget *button_dialog;
@@ -144,6 +147,7 @@ static void gphpedit_file_browser_dispose (GObject *object)
   }
   filebrowser_backend_cancel (priv->fbbackend);
 
+  if (priv->builder) g_object_unref(priv->builder);
   /* Chain up to the parent class */
   G_OBJECT_CLASS (gphpedit_file_browser_parent_class)->dispose (object);
 }
@@ -159,26 +163,27 @@ gphpedit_file_browser_init (gphpeditFileBrowser *button)
   gchar *current_dir;
   g_object_get(main_window.prefmg, "filebrowser_last_folder", &current_dir, NULL);
   priv->fbbackend= filebrowser_backend_new (current_dir);
+  g_free(current_dir);
   priv->handlerid = g_signal_connect(G_OBJECT(priv->fbbackend), "done_loading", G_CALLBACK(print_files), priv);
   priv->handleridchange = g_signal_connect(G_OBJECT(priv->fbbackend), "change_folder", G_CALLBACK(change_folder_cb), priv);
 
-  GtkBuilder *builder = gtk_builder_new ();
+  priv->builder = gtk_builder_new ();
   GError *error = NULL;
-  guint res = gtk_builder_add_from_file (builder, GPHPEDIT_UI_DIR "/filebrowser.ui", &error);
+  guint res = gtk_builder_add_from_file (priv->builder, GPHPEDIT_UI_DIR "/filebrowser.ui", &error);
   if (!res) {
     g_critical ("Unable to load the UI file!");
     g_error_free(error);
     return ;
   }
 
-  GtkWidget *folder = GTK_WIDGET(gtk_builder_get_object (builder, "filebrowser"));
+  GtkWidget *folder = GTK_WIDGET(gtk_builder_get_object (priv->builder, "filebrowser"));
   gtk_widget_show (folder);
   gtk_widget_reparent (folder, GTK_WIDGET(button));
 
   GtkTreeViewColumn *pColumn;
   GtkCellRenderer  *pCellRenderer;
   priv->pTree = gtk_tree_store_new(N_COL, G_TYPE_ICON, G_TYPE_STRING, G_TYPE_STRING);
-  priv->pListView = GTK_WIDGET(gtk_builder_get_object (builder, "filetreeview"));
+  priv->pListView = GTK_WIDGET(gtk_builder_get_object (priv->builder, "filetreeview"));
 	gtk_tree_view_set_model (GTK_TREE_VIEW (priv->pListView), GTK_TREE_MODEL (priv->pTree));
 
   pCellRenderer = gtk_cell_renderer_pixbuf_new();
@@ -201,23 +206,23 @@ gphpedit_file_browser_init (gphpeditFileBrowser *button)
   gtk_tree_view_append_column(GTK_TREE_VIEW(priv->pListView), pColumn);
   gtk_tree_view_column_set_visible (pColumn,FALSE);
 
-  priv->button_dialog = GTK_WIDGET(gtk_builder_get_object (builder, "button_dialog"));
+  priv->button_dialog = GTK_WIDGET(gtk_builder_get_object (priv->builder, "button_dialog"));
   gtk_button_set_label (GTK_BUTTON(priv->button_dialog), get_filebrowser_backend_current_folder(priv->fbbackend));
   g_signal_connect(G_OBJECT(priv->button_dialog), "pressed", G_CALLBACK(pressed_button_file_chooser), priv->fbbackend);
 
   /* home button */
-  priv->button_home= GTK_WIDGET(gtk_builder_get_object (builder, "button_home"));
+  priv->button_home= GTK_WIDGET(gtk_builder_get_object (priv->builder, "button_home"));
   g_signal_connect(G_OBJECT(priv->button_home), "clicked", G_CALLBACK (_go_home_cb),priv->fbbackend);
 
   /* up button */
-  priv->button_up= GTK_WIDGET(gtk_builder_get_object (builder, "button_up"));
+  priv->button_up= GTK_WIDGET(gtk_builder_get_object (priv->builder, "button_up"));
   g_signal_connect(G_OBJECT(priv->button_up), "clicked", G_CALLBACK (_go_up_cb), priv->fbbackend);
 
   /* refresh button */
-  priv->button_refresh= GTK_WIDGET(gtk_builder_get_object (builder, "button_refresh"));
+  priv->button_refresh= GTK_WIDGET(gtk_builder_get_object (priv->builder, "button_refresh"));
   g_signal_connect(G_OBJECT(priv->button_refresh), "clicked", G_CALLBACK (_button_refresh), priv->fbbackend);
 
-  priv->searchentry = GTK_WIDGET(gtk_builder_get_object (builder, "searchentry"));
+  priv->searchentry = GTK_WIDGET(gtk_builder_get_object (priv->builder, "searchentry"));
   g_signal_connect (G_OBJECT (priv->searchentry), "icon-press", G_CALLBACK (on_cleanicon_press), priv);
   g_signal_connect_after(G_OBJECT(priv->searchentry), "insert_text", G_CALLBACK(search_typed), priv);
   g_signal_connect_after(G_OBJECT(priv->searchentry), "backspace", G_CALLBACK(search_activate), priv);
@@ -299,7 +304,7 @@ gint _filebrowser_sort_func(GtkTreeModel * model, GtkTreeIter * a, GtkTreeIter *
 void _go_home_cb (GtkButton *button, gpointer   user_data) 
 {
     /*if there is a file open set file folder as home dir*/
-    gchar *folderpath = documentable_get_filename(DOCUMENTABLE(document_manager_get_current_document(main_window.docmg)));
+    gchar *folderpath = documentable_get_filename(document_manager_get_current_documentable(main_window.docmg));
     filebrowser_backend_go_folder_home (FILEBROWSER_BACKEND(user_data), folderpath);
     if (folderpath) g_free(folderpath);
 }
