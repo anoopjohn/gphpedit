@@ -166,11 +166,6 @@ msgid "GIO Error deleting file: %s, code %d\n"
 msgstr "ファイル削除時に GIO エラー発生: %s、コード %d\n"
 
 #: ../src/document_manager.c:516
-#: ../src/filebrowser_backend.c:350
-msgid "Question"
-msgstr "質問"
-
-#: ../src/document_manager.c:516
 msgid "Are you sure you wish to reload the current file, losing your changes?"
 msgstr "変更内容は失われますが、現在のファイルを再読み込みしても宜しいですか？"
 
@@ -474,10 +469,6 @@ msgstr "Cobol ファイル (*.cbl)"
 msgid "Python Files (*.py *.pyd *.pyw)"
 msgstr "Python ファイル (*.py *.pyd *.pyw)"
 
-#: ../src/main_window_callbacks.c:225
-msgid "Python Files (*.py *.pyd *.pyw)"
-msgstr "Python ファイル (*.py *.pyd *.pyw)"
-
 #: ../src/main_window_callbacks.c:233
 msgid "All files"
 msgstr "全てのファイル"
@@ -486,10 +477,6 @@ msgstr "全てのファイル"
 #: ../src/main_window_callbacks.c:312
 msgid "Please type the filename to save as..."
 msgstr "保存するファイルの名前を入力して下さい..."
-
-#: ../src/main_window_callbacks.c:330
-msgid "Untitled"
-msgstr "無題"
 
 #: ../src/main_window_callbacks.c:531
 msgid "translator_credits"
@@ -1338,22 +1325,3 @@ msgstr "テンプレート:"
 #: ../themes/mixer.xml.h:1
 msgid "Mixer"
 msgstr "ミキサー"
-
-#~ msgid "Help: "
-#~ msgstr "ヘルプ: "
-#~ msgid "Preview: "
-#~ msgstr "プレビュー: "
-#~ msgid "<b>The file \"%s\" has been externally modified.</b>"
-#~ msgstr "<b>ファイル \"%s\" が外部から変更されました。</b>"
-#~ msgid "Do you want reload it?"
-#~ msgstr "再読み込みしますか？"
-#~ msgid "No marker found"
-#~ msgstr "マーカーが見つかりませんでした"
-#~ msgid " - gPHPEdit"
-#~ msgstr " - gPHPEdit"
-#~ msgid "Do you want to replace this occurence?"
-#~ msgstr "このオカレンスを置換しますか？"
-#~ msgid "Unhandle keyboard macro function %d, please report\n"
-#~ msgstr ""
-#~ "ファンクション %d は未ハンドルのキーボードマクロです。宜しければ報告して下"
-#~ "さい\n"
