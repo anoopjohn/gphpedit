@@ -197,7 +197,8 @@ static void document_scintilla_selection_to_lower(Documentable *doc){
     }
 }
 
-static void document_scintilla_selection_to_upper(Documentable *doc){
+static void document_scintilla_selection_to_upper(Documentable *doc)
+{
   g_return_if_fail(doc);
   Document_ScintillaDetails *docdet = DOCUMENT_SCINTILLA_GET_PRIVATE(doc);
   gchar *buffer = documentable_get_current_selected_text(DOCUMENTABLE(doc));
@@ -220,7 +221,8 @@ static void document_scintilla_copy(Documentable *doc)
   macro_record (docdet->scintilla, 2178, 0, 0, doc); 
 }
 
-static void document_scintilla_cut(Documentable *doc) {
+static void document_scintilla_cut(Documentable *doc)
+{
   g_return_if_fail(doc);
   Document_ScintillaDetails *docdet = DOCUMENT_SCINTILLA_GET_PRIVATE(doc);
   gtk_scintilla_cut(GTK_SCINTILLA(docdet->scintilla));
@@ -242,7 +244,8 @@ static void on_paste_got_from_cliboard(GtkClipboard *clipboard, const gchar *tex
   gtk_scintilla_colourise(GTK_SCINTILLA(docdet->scintilla), 0, -1);
 }
 
-static void document_scintilla_paste(Documentable *doc) {
+static void document_scintilla_paste(Documentable *doc)
+{
   g_return_if_fail(doc);
   GtkClipboard* clipboard = gtk_clipboard_get(GDK_SELECTION_CLIPBOARD);
   gtk_clipboard_request_text(clipboard, on_paste_got_from_cliboard, doc);
@@ -367,7 +370,8 @@ static void document_scintilla_scroll_to_current_pos (Documentable  *document_sc
   gtk_scintilla_grab_focus(sci);
 }
 
-static gchar *document_scintilla_get_current_selected_text (Documentable  *doc) {
+static gchar *document_scintilla_get_current_selected_text (Documentable  *doc)
+{
   if (!doc) return NULL;
   Document_ScintillaDetails *docdet = DOCUMENT_SCINTILLA_GET_PRIVATE(doc);
   return gtk_scintilla_get_current_selected_text(GTK_SCINTILLA(docdet->scintilla));
@@ -626,7 +630,7 @@ static void document_scintilla_replace_text (Documentable  *document_scintilla, 
   }
   tab_reset_scintilla_after_open(GTK_SCINTILLA (docdet->scintilla), 0);
   document_scintilla_auto_detect_file_type(DOCUMENTABLE(document_scintilla));
-  gtk_scintilla_set_save_point(GTK_SCINTILLA(docdet->scintilla));
+//  gtk_scintilla_set_save_point(GTK_SCINTILLA(docdet->scintilla));
 }
 
 static void document_scintilla_insert_text (Documentable  *doc, gchar *data)
@@ -652,7 +656,8 @@ static gchar *document_scintilla_get_current_word (Documentable  *doc)
   return buffer;
 }
 
-static void document_scintilla_replace_current_selection (Documentable *doc, gchar *data) {
+static void document_scintilla_replace_current_selection (Documentable *doc, gchar *data)
+{
   g_return_if_fail(doc && data);
   Document_ScintillaDetails *docdet = DOCUMENT_SCINTILLA_GET_PRIVATE(doc);
   gtk_scintilla_replace_sel(GTK_SCINTILLA(docdet->scintilla), data);
@@ -736,7 +741,8 @@ enum
   PROP_TYPE,
   PROP_LABEL,
   PROP_WIDGET,
-  PROP_TITLE
+  PROP_TITLE,
+  PROP_SCINTILLA
 };
 
 static void
@@ -816,6 +822,9 @@ document_scintilla_get_property (GObject    *object,
       break;
     case PROP_WIDGET:
       g_value_set_object (value, docdet->container);
+      break;
+    case PROP_SCINTILLA:
+      g_value_set_object (value, docdet->scintilla);
       break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -941,7 +950,13 @@ document_scintilla_class_init (Document_ScintillaClass *klass)
                               NULL, NULL,
                               GTK_TYPE_WIDGET, G_PARAM_READABLE));
 
-	g_type_class_add_private (klass, sizeof (Document_ScintillaDetails));
+  g_object_class_install_property (object_class,
+                              PROP_SCINTILLA,
+                              g_param_spec_object ("scintilla",
+                              NULL, NULL,
+                              GTK_TYPE_SCINTILLA, G_PARAM_READABLE));
+
+  g_type_class_add_private (klass, sizeof (Document_ScintillaDetails));
 }
 
 static void process_external (GtkInfoBar *info_bar, gint response_id, Document_Scintilla *doc)
