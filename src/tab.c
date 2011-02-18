@@ -26,22 +26,6 @@
 #include "main_window.h"
 #include "gvfs_utils.h"
 
-/**
-* str_replace
-* replaces tpRp with withc in the string
-*/
-void str_replace(char *Str, char ToRp, char WithC)
-{
-  int i = 0;
-
-  while(i < strlen(Str)) {
-    if(Str[i] == ToRp) {
-      Str[i] = WithC;
-    }
-    i++;
-  }
-}
-
 void info_dialog (gchar *title, gchar *message)
 {
   GtkWidget *dialog;

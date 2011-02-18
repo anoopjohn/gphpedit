@@ -440,7 +440,7 @@ void document_manager_session_reopen(DocumentManager *docmg)
           *preview:function\n
 
         */
-        str_replace(filename, 10, 0);
+	filename = g_strdelimit (filename, "\n", 0);
         if (filename[0]=='*') {
           filename++;
           focus_this_one = TRUE;
