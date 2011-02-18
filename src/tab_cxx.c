@@ -24,7 +24,6 @@
 */
 
 #include "tab_cxx.h"
-#include "tab_util.h"
 #include "preferences_manager.h"
 #include "main_window.h"
 #include "gtksourcestyleschememanager.h"

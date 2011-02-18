@@ -23,10 +23,9 @@
    The GNU General Public License is contained in the file COPYING.
 */
 
-#include <stdlib.h>
+#include <string.h>
 
 #include "tab_php.h"
-#include "tab_util.h"
 #include "preferences_manager.h"
 #include "main_window.h"
 #include "gtksourcestyleschememanager.h"

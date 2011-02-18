@@ -151,8 +151,6 @@ gphpedit_SOURCES = \
   tab_python.h \
   tab_sql.c \
   tab_sql.h \
-  tab_util.c \
-  tab_util.h \
   templates.c \
   templates.h \
   templates_editor.c \

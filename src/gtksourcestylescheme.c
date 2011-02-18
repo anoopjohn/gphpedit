@@ -25,7 +25,6 @@
 #include <gtkscintilla.h>
 
 #include "gtksourcestyleschememanager.h"
-#include "tab_util.h"
 #include "gtksourcestyle-private.h"
 
 /**
