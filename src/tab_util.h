@@ -28,6 +28,5 @@
 #include "main.h"
 
 gint scintilla_color(gint red, gint green, gint blue);
-gint GdkColor_to_Int(GdkColor color);
 
 #endif

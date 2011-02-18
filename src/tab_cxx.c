@@ -67,9 +67,6 @@ void scintilla_cxx_set_lexer(GtkScintilla *scintilla)
   set_scintilla_lexer_xml_atribute_style(GTK_WIDGET(scintilla), scheme, SCE_C_VERBATIM, font, size);
   set_scintilla_lexer_xml_instruction_style(GTK_WIDGET(scintilla), scheme, SCE_C_GLOBALCLASS, font, size);
 
-  gtk_scintilla_indic_set_style(scintilla, 0, INDIC_SQUIGGLE);
-  gtk_scintilla_indic_set_fore(scintilla, 0, scintilla_color(255,0,0));
-
   gtk_scintilla_set_property(scintilla, "lexer.cpp.allow.dollars", "1");
   gtk_scintilla_set_property(scintilla, "fold.comment", "1");
   gtk_scintilla_set_property(scintilla, "fold.preprocessor", "1");
