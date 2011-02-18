@@ -32,5 +32,4 @@ void tab_cobol_set_lexer(GtkScintilla *scintilla);
 gboolean is_cobol_file(const gchar *filename);
 gboolean is_cobol_char_autoindent(char ch);
 gboolean is_cobol_char_autounindent(char ch);
-gboolean is_cobol_banned_word(gchar *word);
 #endif

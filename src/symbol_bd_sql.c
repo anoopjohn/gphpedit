@@ -31,7 +31,6 @@
 #include "symbolizable.h"
 #include "symbol_bd_sql.h"
 #include "symbol_bd_utils.h"
-#include "tab_sql.h"
 
 /*
 * symbol_bd_sql private struct
