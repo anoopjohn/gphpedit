@@ -25,7 +25,7 @@
 #ifndef DOCUMENT_WEBKIT_H
 #define DOCUMENT_WEBKIT_H
 
-#include <gtk/gtk.h>
+#include "document.h"
 
 #define DOCUMENT_WEBKIT_TYPE document_webkit_get_type()
 #define DOCUMENT_WEBKIT(obj) \
@@ -43,13 +43,13 @@ typedef struct Document_WebkitDetails Document_WebkitDetails;
 
 typedef struct
 {
-	GObject object;
+	Document object;
 	Document_WebkitDetails *details;
 } Document_Webkit;
 
 typedef struct
 {
-	GObjectClass parent_class;
+	DocumentClass parent_class;
 
 	void (* load_complete) (Document_Webkit *doc, gboolean result, gpointer user_data);
 	void (* save_update) (Document_Webkit *doc, gpointer user_data); /* emited when document_webkit save state change*/
