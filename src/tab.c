@@ -83,27 +83,3 @@ void register_file_opened(gchar *filename)
   g_object_set (main_window.prefmg, "last_opened_folder", folder, NULL);
   g_free(folder);
 }
-
-/************************/
-/**
- * trunc_on_char:
- * @string: a #gchar * to truncate
- * @which_char: a #gchar with the char to truncate on
- *
- * Returns a pointer to the same string which is truncated at the first
- * occurence of which_char
- *
- * Return value: the same gchar * as passed to the function
- **/
-gchar *trunc_on_char(gchar * string, gchar which_char)
-{
-  gchar *tmpchar = string;
-  while(*tmpchar) {
-    if (*tmpchar == which_char) {
-      *tmpchar = '\0';
-      return string;
-    }
-    tmpchar++;
-  }
-  return string;
-}

@@ -36,5 +36,4 @@ void register_file_opened(gchar *filename);
 void str_replace(char *Str, char ToRp, char WithC);
 void info_dialog (gchar *title, gchar *message);
 gint yes_no_dialog (gchar *title, gchar *message);
-//gchar *trunc_on_char(gchar * string, gchar which_char);
 #endif
