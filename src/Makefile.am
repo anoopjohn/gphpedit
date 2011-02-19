@@ -64,6 +64,8 @@ gphpedit_SOURCES = \
   document_manager.h \
   language_provider.c \
   language_provider.h \
+  language_css.c \
+  language_css.h \
   edit_template.c \
   edit_template.h \
   filebrowser_backend.c \
