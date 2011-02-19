@@ -66,6 +66,8 @@ gphpedit_SOURCES = \
   language_provider.h \
   language_css.c \
   language_css.h \
+  language_cxx.c \
+  language_cxx.h \
   language_cobol.c \
   language_cobol.h \
   language_sql.c \
