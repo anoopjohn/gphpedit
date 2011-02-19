@@ -59,7 +59,7 @@ enum
   PROP_SHORT_FILENAME,
   PROP_GFILE,
   PROP_ICON,
-  PROP_MTIME,
+  PROP_MTIME
 };
 
 static void
