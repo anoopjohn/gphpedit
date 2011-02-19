@@ -49,6 +49,11 @@
 #include "tab_python.h"
 #include "tab_sql.h"
 
+#include "language_provider.h"
+#include "language_css.h"
+#include "language_cobol.h"
+#include "language_sql.h"
+
 #include "search_infobar.h"
 #include "goto_infobar.h"
 
@@ -88,13 +93,15 @@ struct Document_ScintillaDetails
   GtkWidget *searchbar;
   GtkWidget *gotobar;
   /* calltip stuff*/
-  guint calltip_timer_id;
-  gboolean calltip_timer_set;
+//  guint calltip_timer_id;
+//  gboolean calltip_timer_set;
   /*completion stuff*/
-  guint completion_timer_id;
-  gboolean completion_timer_set;
+//  guint completion_timer_id;
+//  gboolean completion_timer_set;
 
   DocumentSaver *saver;
+
+  Language_Provider *lgcss;
 };
 
 typedef struct
@@ -115,8 +122,6 @@ static void tab_set_general_scintilla_properties(Document_Scintilla *doc);
 static void save_point_reached(GtkWidget *scintilla, gpointer user_data);
 static void save_point_left(GtkWidget *scintilla, gpointer user_data);
 static void update_ui(GtkWidget *scintilla);
-static gboolean calltip_callback(gpointer data);
-static gboolean auto_complete_callback(gpointer data);
 static void tab_set_configured_scintilla_properties(GtkScintilla *scintilla);
 static void margin_clicked (GtkWidget *scintilla, gint modifiers, gint position, gint margin, gpointer user_data);
 static void fold_clicked(GtkWidget *scintilla, guint lineClick,guint bstate);
@@ -303,30 +308,44 @@ static void document_scintilla_set_type (Documentable  *doc, gint type)
       docdet->type = type;
       switch (type) {
         case TAB_PHP:
+//          if (docdet->lgcss) g_object_unref(docdet->lgcss);
+//          docdet->lgcss = LANGUAGE_PROVIDER(language_php_new (DOCUMENT_SCINTILLA(doc)));
           tab_php_set_lexer(GTK_SCINTILLA(docdet->scintilla));
           tab_set_folding(document_scintilla, TRUE);
           break;
         case TAB_CSS:
+          if (docdet->lgcss) g_object_unref(docdet->lgcss);
+          docdet->lgcss = LANGUAGE_PROVIDER(language_css_new (DOCUMENT_SCINTILLA(doc)));
           tab_css_set_lexer(GTK_SCINTILLA(docdet->scintilla));
           tab_set_folding(document_scintilla, TRUE);
           break;
         case TAB_COBOL:
+          if (docdet->lgcss) g_object_unref(docdet->lgcss);
+          docdet->lgcss = LANGUAGE_PROVIDER(language_cobol_new (DOCUMENT_SCINTILLA(doc)));
           tab_cobol_set_lexer(GTK_SCINTILLA(docdet->scintilla));
           tab_set_folding(document_scintilla, TRUE);
           break;
         case TAB_CXX:
+//          if (docdet->lgcss) g_object_unref(docdet->lgcss);
+//          docdet->lgcss = LANGUAGE_PROVIDER(language_cxx_new (DOCUMENT_SCINTILLA(doc)));
           tab_cxx_set_lexer(GTK_SCINTILLA(docdet->scintilla));
           tab_set_folding(document_scintilla, TRUE);
           break;
         case TAB_PYTHON:
+//          if (docdet->lgcss) g_object_unref(docdet->lgcss);
+//          docdet->lgcss = LANGUAGE_PROVIDER(language_python_new (DOCUMENT_SCINTILLA(doc)));
           tab_python_set_lexer(GTK_SCINTILLA(docdet->scintilla));
           tab_set_folding(document_scintilla, TRUE);
           break;
         case TAB_SQL:
+          if (docdet->lgcss) g_object_unref(docdet->lgcss);
+          docdet->lgcss = LANGUAGE_PROVIDER(language_sql_new (DOCUMENT_SCINTILLA(doc)));
           tab_sql_set_lexer(GTK_SCINTILLA(docdet->scintilla));
           tab_set_folding(document_scintilla, TRUE);
           break;
         case TAB_PERL:
+//          if (docdet->lgcss) g_object_unref(docdet->lgcss);
+//          docdet->lgcss = LANGUAGE_PROVIDER(language_perl_new (DOCUMENT_SCINTILLA(doc)));
           tab_perl_set_lexer(GTK_SCINTILLA(docdet->scintilla));
           tab_set_folding(document_scintilla, TRUE);
           break;
@@ -1046,8 +1065,8 @@ static gboolean scintilla_key_press (GtkWidget *widget, GdkEventKey *event, gpoi
 static void
 document_scintilla_init (Document_Scintilla * object)
 {
-	Document_ScintillaDetails *docdet;
-	docdet = DOCUMENT_SCINTILLA_GET_PRIVATE(object);
+  Document_ScintillaDetails *docdet;
+  docdet = DOCUMENT_SCINTILLA_GET_PRIVATE(object);
   docdet->saver = document_saver_new ();
   g_signal_connect(G_OBJECT(docdet->saver), "done_saving", G_CALLBACK(document_scintilla_saver_done_saving_cb), NULL);
 
@@ -1120,7 +1139,9 @@ static void document_scintilla_constructed (GObject *object)
   g_object_set(object, "short_filename", short_filename, NULL);
   gtk_label_set_text(GTK_LABEL(docdet->label), short_filename);
   gtk_widget_show (docdet->label);
+
 }
+
 Document_Scintilla *document_scintilla_new (gint type, GFile *file, gint goto_line, gchar *contents)
 {
   Document_Scintilla *doc;
@@ -1338,7 +1359,7 @@ static void update_ui(GtkWidget *scintilla)
     gtk_scintilla_set_highlight_guide(sci, MIN(current_brace_column, matching_brace_pos));
   }
 }
-
+#if 0
 static gboolean auto_memberfunc_complete_callback(gpointer data)
 {
   Documentable *document = document_manager_get_current_documentable(main_window.docmg);
@@ -1394,11 +1415,13 @@ static gboolean calltip_callback(gpointer data)
   docdet->calltip_timer_set = FALSE;
   return FALSE;
 }
-
-static void document_scintilla_show_calltip_at_current_pos(Document_Scintilla *document_scintilla)
+#endif
+static void document_scintilla_show_calltip_at_current_pos(Document_Scintilla *doc)
 {
-  g_return_if_fail(document_scintilla);
-  calltip_callback(GINT_TO_POINTER(documentable_get_current_position(DOCUMENTABLE(document_scintilla))));
+  g_return_if_fail(doc);
+  Document_ScintillaDetails *docdet = DOCUMENT_SCINTILLA_GET_PRIVATE(doc);
+  language_provider_show_calltip (docdet->lgcss);
+//  calltip_callback(GINT_TO_POINTER(documentable_get_current_position(DOCUMENTABLE(document_scintilla))));
 }
 
 /*
@@ -1418,7 +1441,7 @@ static void process_user_list_selection (GtkWidget *w, gint type, gchar *text, g
     gtk_scintilla_goto_pos(sci, current_pos + strlen (text));
   }
 }
-
+#if 0
 static gboolean IsOpenBrace(gchar ch) {
 	return ch == '[' || ch == '(' || ch == '{';
 }
@@ -1613,10 +1636,16 @@ static gboolean auto_complete_php_variables_callback(gpointer data)
   docdet->completion_timer_set=FALSE;
   return FALSE;
 }
-
+#endif
 
 static void char_added(GtkWidget *scintilla, guint ch, gpointer user_data)
 {
+  gphpedit_debug_message (DEBUG_DOCUMENT, "char added:%d",ch);
+  Document_Scintilla *doc = DOCUMENT_SCINTILLA(user_data);
+  g_return_if_fail(doc);
+  Document_ScintillaDetails *docdet = DOCUMENT_SCINTILLA_GET_PRIVATE(doc);
+  if (docdet->lgcss) language_provider_trigger_completion (docdet->lgcss, ch);
+#if 0
   gphpedit_debug_message (DEBUG_DOCUMENT, "char added:%d",ch);
   Document_Scintilla *doc = DOCUMENT_SCINTILLA(user_data);
   g_return_if_fail(doc);
@@ -1813,6 +1842,7 @@ static void char_added(GtkWidget *scintilla, guint ch, gpointer user_data)
             break;
     }
   g_object_unref(pref);
+#endif
 }
 
 /*
@@ -2347,6 +2377,10 @@ void document_scintilla_keyboard_macro_playback(Document_Scintilla *document_sci
 
 static void document_scintilla_force_autocomplete(Document_Scintilla *document_scintilla)
 {
+  g_return_if_fail(document_scintilla);
+  Document_ScintillaDetails *docdet = DOCUMENT_SCINTILLA_GET_PRIVATE(document_scintilla);
+  if (docdet->lgcss) language_provider_trigger_completion (docdet->lgcss, 0);
+#if 0
   guint current_pos;
   guint current_line;
   gchar *member_function_buffer;
@@ -2375,6 +2409,7 @@ static void document_scintilla_force_autocomplete(Document_Scintilla *document_s
     auto_complete_callback(GINT_TO_POINTER(current_pos));
   }
   g_free(member_function_buffer);
+#endif
 }
 
 #define BACKSLASH 92
