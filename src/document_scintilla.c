@@ -23,12 +23,6 @@
    The GNU General Public License is contained in the file COPYING.
 */
 
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
-
-#include <stdlib.h>
-#include <gtk/gtk.h>
 #include <gdk/gdkkeysyms.h>
 #include "debug.h"
 #include "document.h"
@@ -54,6 +48,7 @@
 #include "language_cxx.h"
 #include "language_cobol.h"
 #include "language_sql.h"
+#include "language_perl.h"
 
 #include "search_infobar.h"
 #include "goto_infobar.h"
@@ -345,8 +340,8 @@ static void document_scintilla_set_type (Documentable  *doc, gint type)
           tab_set_folding(document_scintilla, TRUE);
           break;
         case TAB_PERL:
-//          if (docdet->lgcss) g_object_unref(docdet->lgcss);
-//          docdet->lgcss = LANGUAGE_PROVIDER(language_perl_new (DOCUMENT_SCINTILLA(doc)));
+          if (docdet->lgcss) g_object_unref(docdet->lgcss);
+          docdet->lgcss = LANGUAGE_PROVIDER(language_perl_new (DOCUMENT_SCINTILLA(doc)));
           tab_perl_set_lexer(GTK_SCINTILLA(docdet->scintilla));
           tab_set_folding(document_scintilla, TRUE);
           break;

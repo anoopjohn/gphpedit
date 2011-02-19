@@ -72,6 +72,8 @@ gphpedit_SOURCES = \
   language_cobol.h \
   language_sql.c \
   language_sql.h \
+  language_perl.c \
+  language_perl.h \
   edit_template.c \
   edit_template.h \
   filebrowser_backend.c \
