@@ -47,11 +47,11 @@
 
 /* object signal enumeration */
 enum {
-  LOAD_COMPLETE,
   SAVE_UPDATE,
   SAVE_START,
   TYPE_CHANGED,
   NEED_RELOAD,
+  OVR_CHANGED,
   LAST_SIGNAL
 };
 
@@ -112,7 +112,7 @@ static void fold_changed(GtkWidget *scintilla, int line,int levelNow,int levelPr
 static void handle_modified(GtkWidget *scintilla, gint pos,gint mtype,gchar *text,gint len, gint added,gint line,gint foldNow,gint foldPrev);
 static void macro_record (GtkWidget *scintilla, gint message, gulong wparam, glong lparam, gpointer user_data);
 static void process_user_list_selection (GtkWidget *w, gint type, gchar *text, gpointer user_data);
-static void scintilla_modified (GtkWidget *w);
+static void scintilla_modified (GtkWidget *w, gpointer user_data);
 static void document_scintilla_constructed (GObject *object);
 void document_scintilla_saver_done_saving_cb (DocumentSaver *docsav, Document_Scintilla *document_scintilla, gpointer user_data);
 static void document_scintilla_find_next_marker(Document_Scintilla *doc);
@@ -844,15 +844,6 @@ document_scintilla_class_init (Document_ScintillaClass *klass)
   object_class->get_property = document_scintilla_get_property;
   object_class->constructed = document_scintilla_constructed;
 
-	signals[LOAD_COMPLETE] =
-		g_signal_new ("load_complete",
-		              G_TYPE_FROM_CLASS (object_class),
-		              G_SIGNAL_RUN_LAST,
-		              G_STRUCT_OFFSET (Document_ScintillaClass, load_complete),
-		              NULL, NULL,
-		               g_cclosure_marshal_VOID__BOOLEAN,
-		               G_TYPE_NONE, 1, G_TYPE_BOOLEAN, NULL);
-
 	signals[SAVE_UPDATE] =
 		g_signal_new ("save_update",
 		              G_TYPE_FROM_CLASS (object_class),
@@ -888,6 +879,15 @@ document_scintilla_class_init (Document_ScintillaClass *klass)
 		              NULL, NULL,
 		               g_cclosure_marshal_VOID__VOID,
 		               G_TYPE_NONE, 0);
+
+	signals[OVR_CHANGED] =
+		g_signal_new ("ovr_changed",
+		              G_TYPE_FROM_CLASS (object_class),
+		              G_SIGNAL_RUN_LAST,
+		              G_STRUCT_OFFSET (Document_ScintillaClass, ovr_changed),
+		              NULL, NULL,
+		               g_cclosure_marshal_VOID__BOOLEAN,
+		               G_TYPE_NONE, 1, G_TYPE_BOOLEAN, NULL);
 
   /*DOCUMENT_SCINTILLA PROPERTIES*/
   /* CAN_MODIFY PROPERTY: When a document_scintilla can be modified */
@@ -1067,7 +1067,7 @@ document_scintilla_init (Document_Scintilla * object)
   g_signal_connect (G_OBJECT (docdet->scintilla), "update_ui", G_CALLBACK (update_ui), NULL);
   g_signal_connect (G_OBJECT (docdet->scintilla), "uri_dropped", G_CALLBACK (process_drag_uri), NULL);
   g_signal_connect (G_OBJECT (docdet->scintilla), "user_list_selection", G_CALLBACK (process_user_list_selection), object);
-  g_signal_connect (G_OBJECT (docdet->scintilla), "painted", G_CALLBACK (scintilla_modified), NULL);
+  g_signal_connect (G_OBJECT (docdet->scintilla), "painted", G_CALLBACK (scintilla_modified), object);
   g_signal_connect (G_OBJECT (docdet->scintilla), "key-press-event", G_CALLBACK (scintilla_key_press), object);
   g_signal_connect (G_OBJECT (docdet->scintilla), "save_point_reached", G_CALLBACK (save_point_reached), object);
   g_signal_connect (G_OBJECT (docdet->scintilla), "save_point_left", G_CALLBACK (save_point_left), object);
@@ -1262,13 +1262,16 @@ static void save_point_left(GtkWidget *scintilla, gpointer user_data)
   }
 }
 
-static void scintilla_modified (GtkWidget *scintilla){
+static void scintilla_modified (GtkWidget *scintilla, gpointer user_data)
+{
+  Document_Scintilla *doc = DOCUMENT_SCINTILLA(user_data);
+  g_return_if_fail(doc);
   GtkScintilla *sci = GTK_SCINTILLA(scintilla);
   gint current_pos = gtk_scintilla_get_current_pos(sci);
   gphpedit_statusbar_set_cursor_position (GPHPEDIT_STATUSBAR(main_window.appbar), 
   gtk_scintilla_line_from_position(sci, current_pos), 
   gtk_scintilla_get_column(sci, current_pos));
-  gphpedit_statusbar_set_overwrite (GPHPEDIT_STATUSBAR(main_window.appbar), gtk_scintilla_get_overtype(sci));
+  g_signal_emit (G_OBJECT (doc), signals[OVR_CHANGED], 0, gtk_scintilla_get_overtype(sci));
 }
 
 static void update_ui(GtkWidget *scintilla)
