@@ -90,12 +90,6 @@ struct Document_ScintillaDetails
   /* incremental search widget */
   GtkWidget *searchbar;
   GtkWidget *gotobar;
-  /* calltip stuff*/
-//  guint calltip_timer_id;
-//  gboolean calltip_timer_set;
-  /*completion stuff*/
-//  guint completion_timer_id;
-//  gboolean completion_timer_set;
 
   DocumentSaver *saver;
 
@@ -1357,69 +1351,12 @@ static void update_ui(GtkWidget *scintilla)
     gtk_scintilla_set_highlight_guide(sci, MIN(current_brace_column, matching_brace_pos));
   }
 }
-#if 0
-static gboolean auto_memberfunc_complete_callback(gpointer data)
-{
-  Documentable *document = document_manager_get_current_documentable(main_window.docmg);
-  Document_Scintilla *doc = DOCUMENT_SCINTILLA(document);
-  Document_ScintillaDetails *docdet = DOCUMENT_SCINTILLA_GET_PRIVATE(doc);
-  gint current_pos;
-  current_pos = documentable_get_current_position(document);
-  if (current_pos == GPOINTER_TO_INT(data)) {
-    gchar *prefix = documentable_get_current_word(document);
-    gchar *calltip = symbol_manager_get_symbols_matches (main_window.symbolmg, prefix, SYMBOL_MEMBER, docdet->type);
-    if (calltip && strlen(calltip)!=0) gtk_scintilla_user_list_show(GTK_SCINTILLA(docdet->scintilla), 1, calltip);
-//    gtk_scintilla_autoc_show(GTK_SCINTILLA(docdet->scintilla), current_pos, calltip);
-    g_free(prefix);
-  }
-  docdet->completion_timer_set=FALSE;
-  return FALSE;
-}
 
-static gboolean auto_complete_callback(gpointer data)
-{
-  Documentable *document = document_manager_get_current_documentable(main_window.docmg);
-  Document_Scintilla *doc = DOCUMENT_SCINTILLA(document);
-  Document_ScintillaDetails *docdet = DOCUMENT_SCINTILLA_GET_PRIVATE(doc);
-  gint current_pos;
-  current_pos = documentable_get_current_position(document);
-  if (current_pos == GPOINTER_TO_INT(data)) {
-    gchar *prefix = documentable_get_current_word(document);
-    gchar *calltip = symbol_manager_get_symbols_matches (main_window.symbolmg, prefix, SYMBOL_FUNCTION | SYMBOL_CLASS | SYMBOL_VAR, docdet->type);
-    if (calltip && strlen(calltip)!=0) gtk_scintilla_user_list_show(GTK_SCINTILLA(docdet->scintilla), 1, calltip);
-    g_free(prefix);
-    g_free(calltip);
-  }
-  docdet->completion_timer_set=FALSE;
-  return FALSE;
-}
-
-static gboolean calltip_callback(gpointer data)
-{
-  Documentable *document = document_manager_get_current_documentable(main_window.docmg);
-  Document_Scintilla *doc = DOCUMENT_SCINTILLA(document);
-  Document_ScintillaDetails *docdet = DOCUMENT_SCINTILLA_GET_PRIVATE(doc);
-  gint current_pos;
-  current_pos = documentable_get_current_position(document);
-  if (current_pos == GPOINTER_TO_INT(data)) {
-    gchar *prefix = documentable_get_current_word(document);
-    gchar *calltip = symbol_manager_get_calltip (main_window.symbolmg, prefix, docdet->type);
-    if (calltip){
-      gtk_scintilla_call_tip_show(GTK_SCINTILLA(docdet->scintilla), current_pos, calltip);
-      g_free(calltip);
-    }
-    g_free(prefix);
-  }
-  docdet->calltip_timer_set = FALSE;
-  return FALSE;
-}
-#endif
 static void document_scintilla_show_calltip_at_current_pos(Document_Scintilla *doc)
 {
   g_return_if_fail(doc);
   Document_ScintillaDetails *docdet = DOCUMENT_SCINTILLA_GET_PRIVATE(doc);
   language_provider_show_calltip (docdet->lgcss);
-//  calltip_callback(GINT_TO_POINTER(documentable_get_current_position(DOCUMENTABLE(document_scintilla))));
 }
 
 /*
@@ -1439,202 +1376,6 @@ static void process_user_list_selection (GtkWidget *w, gint type, gchar *text, g
     gtk_scintilla_goto_pos(sci, current_pos + strlen (text));
   }
 }
-#if 0
-static gboolean IsOpenBrace(gchar ch) {
-	return ch == '[' || ch == '(' || ch == '{';
-}
-
-static void InsertCloseBrace (GtkScintilla *scintilla, gint current_pos, gchar ch) {
-  switch (ch) {
-    case '[':
-      gtk_scintilla_insert_text(scintilla, current_pos,"]");
-      gtk_scintilla_goto_pos(scintilla, current_pos);
-      break;
-    case '{':
-      gtk_scintilla_insert_text(scintilla, current_pos,"}");
-      gtk_scintilla_goto_pos(scintilla, current_pos);
-      break;
-    case '(':
-      gtk_scintilla_insert_text(scintilla, current_pos,")");
-      gtk_scintilla_goto_pos(scintilla, current_pos);
-      break;
-  }
-}
-
-static void indent_line(GtkScintilla *sci, gint line, gint indent)
-{
-  gint selStart;
-  gint selEnd;
-  gint posBefore;
-  gint posAfter;
-  gint posDifference;
-
-  selStart = gtk_scintilla_get_selection_start(sci);
-  selEnd = gtk_scintilla_get_selection_end(sci);
-  posBefore = gtk_scintilla_get_line_indentation(sci, line);
-  gtk_scintilla_set_line_indentation(sci, line, indent);
-  posAfter = gtk_scintilla_get_line_indentation(sci, line);
-  posDifference =  posAfter - posBefore;
-
-  if (posAfter > posBefore) {
-    // Move selection on
-    if (selStart >= posBefore) {
-      selStart += posDifference;
-    }
-    if (selEnd >= posBefore) {
-      selEnd += posDifference;
-    }
-  }
-  else if (posAfter < posBefore) {
-    // Move selection back
-    if (selStart >= posAfter) {
-      if (selStart >= posBefore)
-        selStart += posDifference;
-      else
-        selStart = posAfter;
-    }
-    if (selEnd >= posAfter) {
-      if (selEnd >= posBefore)
-        selEnd += posDifference;
-      else
-        selEnd = posAfter;
-    }
-  }
-  gtk_scintilla_set_selection_start(sci, selStart);
-  gtk_scintilla_set_selection_end(sci, selEnd);
-}
-
-static void autoindent_brace_code (GtkScintilla *sci, gboolean (*indent_char_func)(char ch), gboolean (*unindent_char_func)(char ch))
-{
-  gint current_pos;
-  gint current_line;
-  gint previous_line;
-  gint previous_line_indentation;
-  gint previous_line_start;
-  gint previous_line_end;
-  gchar *previous_char_buffer;
-  gint previous_char_buffer_length;
-  gchar *previous_line_buffer;
-  gint previous_line_buffer_length;
-
-  PreferencesManager *pref = preferences_manager_new ();
-  current_pos = gtk_scintilla_get_current_pos(sci);
-  current_line = gtk_scintilla_line_from_position(sci, current_pos);
-
-  gphpedit_debug (DEBUG_DOCUMENT);
-
-  if (current_line>0) {
-    gtk_scintilla_begin_undo_action(sci);
-    previous_line = current_line-1;
-    previous_line_indentation = gtk_scintilla_get_line_indentation(sci, previous_line);
-
-    previous_line_end = gtk_scintilla_get_line_end_position(sci, previous_line);
-    previous_char_buffer = gtk_scintilla_get_text_range (sci, previous_line_end-1, previous_line_end, &previous_char_buffer_length);
-    if (indent_char_func(*previous_char_buffer)) {
-      gint indentation_size;
-      g_object_get(pref, "indentation_size", &indentation_size, NULL);
-      previous_line_indentation+=indentation_size;
-    } else if (unindent_char_func(*previous_char_buffer)) {
-      gint indentation_size;
-      g_object_get(pref, "indentation_size", &indentation_size, NULL);
-      previous_line_indentation-=indentation_size;
-      if (previous_line_indentation < 0) previous_line_indentation = 0;
-      previous_line_start = gtk_scintilla_position_from_line(sci, previous_line);
-      previous_line_buffer = gtk_scintilla_get_text_range (sci, previous_line_start, previous_line_end, &previous_line_buffer_length);
-      gboolean unindent = TRUE;
-      gint char_act = 0;
-      while (char_act <= previous_line_buffer_length)
-      {
-        char c = previous_line_buffer[char_act];
-        if (!(g_ascii_iscntrl(c) || g_ascii_isspace(c) || unindent_char_func(c))) {
-          unindent = FALSE;
-          break;
-        }
-        char_act++;
-      }
-      if (unindent) gtk_scintilla_set_line_indentation(sci, previous_line, previous_line_indentation);
-      g_free(previous_line_buffer);
-    }
-    g_free(previous_char_buffer);
-    indent_line(sci, current_line, previous_line_indentation);
-    gphpedit_debug_message (DEBUG_DOCUMENT, "previous_line=%d, previous_indent=%d\n", previous_line, previous_line_indentation);
-    gint pos;
-    gboolean tabs_instead_spaces;
-    g_object_get(pref,"tabs_instead_spaces", &tabs_instead_spaces, NULL);
-    if(tabs_instead_spaces){
-      pos = gtk_scintilla_position_from_line(sci, current_line)+(previous_line_indentation/gtk_scintilla_get_tab_width(sci));
-    } else {
-      pos = gtk_scintilla_position_from_line(sci, current_line)+(previous_line_indentation);
-    }
-    gtk_scintilla_goto_pos(sci, pos);
-    gtk_scintilla_end_undo_action(sci);
-  }
-}
-
-static void cancel_calltip (GtkScintilla *sci)
-{
-  if (gtk_scintilla_call_tip_active(sci)) {
-    gtk_scintilla_call_tip_cancel(sci);
-  }
-}
-
-static void show_calltip (Document_ScintillaDetails *docdet, gint pos)
-{
-  if (!docdet->calltip_timer_set) {
-    gint delay;
-    PreferencesManager *pref = preferences_manager_new ();
-    g_object_get(pref, "calltip_delay", &delay, NULL);
-    g_object_unref(pref);
-    docdet->calltip_timer_id = g_timeout_add(delay, calltip_callback, GINT_TO_POINTER(pos));
-    docdet->calltip_timer_set = TRUE;
-  }
-}
-
-static void show_autocompletion (Document_ScintillaDetails *docdet, gint pos)
-{
-  if (!docdet->completion_timer_set) {
-    PreferencesManager *pref = preferences_manager_new ();
-    gint delay;
-    g_object_get(pref, "autocomplete_delay", &delay, NULL);
-    g_object_unref(pref);
-    docdet->completion_timer_id = g_timeout_add(delay, auto_complete_callback, GINT_TO_POINTER(pos));
-    docdet->completion_timer_set=TRUE;
-  }
-}
-
-static gboolean auto_complete_classes_callback(gpointer data)
-{
-  Documentable *document = document_manager_get_current_documentable(main_window.docmg);
-  Document_Scintilla *doc =  DOCUMENT_SCINTILLA(document);
-  Document_ScintillaDetails *docdet = DOCUMENT_SCINTILLA_GET_PRIVATE(doc);
-  gint current_pos;
-  current_pos = documentable_get_current_position(document);
-  if (current_pos == GPOINTER_TO_INT(data)) {
-    gchar *autocomp = symbol_manager_get_classes (main_window.symbolmg, docdet->type);
-    if (autocomp) gtk_scintilla_user_list_show(GTK_SCINTILLA(docdet->scintilla), 2, autocomp);
-    g_free(autocomp); /*release resources*/
-  }
-  docdet->completion_timer_set=FALSE;
-  return FALSE;
-}
-
-static gboolean auto_complete_php_variables_callback(gpointer data)
-{
-  Documentable *document = document_manager_get_current_documentable(main_window.docmg);
-  Document_Scintilla *doc =  DOCUMENT_SCINTILLA(document);
-  Document_ScintillaDetails *docdet = DOCUMENT_SCINTILLA_GET_PRIVATE(doc);
-  gint current_pos;
-  current_pos = documentable_get_current_position(document);
-  if (current_pos == GPOINTER_TO_INT(data)) {
-    gchar *prefix = documentable_get_current_word(document);
-    gchar *result = symbol_manager_get_symbols_matches (main_window.symbolmg, prefix, SYMBOL_VAR, docdet->type);
-    if (result) gtk_scintilla_user_list_show(GTK_SCINTILLA(docdet->scintilla), 1, result);
-    g_free(prefix);
-  }
-  docdet->completion_timer_set=FALSE;
-  return FALSE;
-}
-#endif
 
 static void char_added(GtkWidget *scintilla, guint ch, gpointer user_data)
 {
@@ -1642,205 +1383,27 @@ static void char_added(GtkWidget *scintilla, guint ch, gpointer user_data)
   Document_Scintilla *doc = DOCUMENT_SCINTILLA(user_data);
   g_return_if_fail(doc);
   Document_ScintillaDetails *docdet = DOCUMENT_SCINTILLA_GET_PRIVATE(doc);
-  if (docdet->lgcss) language_provider_trigger_completion (docdet->lgcss, ch);
-#if 0
-  gphpedit_debug_message (DEBUG_DOCUMENT, "char added:%d",ch);
-  Document_Scintilla *doc = DOCUMENT_SCINTILLA(user_data);
-  g_return_if_fail(doc);
-  Document_ScintillaDetails *docdet = DOCUMENT_SCINTILLA_GET_PRIVATE(doc);
+  if (docdet->lgcss) {
+    language_provider_trigger_completion (docdet->lgcss, ch);
+  } else {
+    gint current_pos;
+    gint wordStart;
+    gint wordEnd;
+    gchar *member_function_buffer = NULL;
+    gint member_function_length;
+    GtkScintilla *sci = GTK_SCINTILLA(scintilla);
 
-  GtkScintilla *sci = GTK_SCINTILLA(scintilla);
+    current_pos = gtk_scintilla_get_current_pos(sci);
+    wordStart = gtk_scintilla_word_start_position(sci, current_pos-1, TRUE);
+    wordEnd = gtk_scintilla_word_end_position(sci, current_pos-1, TRUE);
 
-  gint current_pos;
-  gint wordStart;
-  gint wordEnd;
-  gint current_word_length;
-  gint current_line;
-  gchar *ac_buffer = NULL;
-  gint ac_length;
-  gchar *member_function_buffer = NULL;
-  gint member_function_length;
-  guint style;
-  PreferencesManager *pref = preferences_manager_new ();
-  current_pos = gtk_scintilla_get_current_pos(sci);
-  current_line = gtk_scintilla_line_from_position(sci, current_pos);
-  wordStart = gtk_scintilla_word_start_position(sci, current_pos-1, TRUE);
-  wordEnd = gtk_scintilla_word_end_position(sci, current_pos-1, TRUE);
-  current_word_length = wordEnd - wordStart;
-  style = gtk_scintilla_get_style_at(sci, current_pos);
-  gboolean auto_brace;
-  g_object_get(pref, "auto_complete_braces", &auto_brace, NULL);
-  if (IsOpenBrace(ch) && auto_brace) {
-      InsertCloseBrace (sci, current_pos, ch);
-      return;
+    member_function_buffer = gtk_scintilla_get_text_range (sci, wordStart-2, wordEnd, &member_function_length);
+    /* if we type <?php then we are in a php file so force php syntax mode */
+    if (g_strcmp0(member_function_buffer,"<?php")==0){
+      documentable_set_type(DOCUMENTABLE(doc), TAB_PHP);
     }
-  if (gtk_scintilla_autoc_active(sci)==1) {
-    style = 0; // Hack to get around the drop-down not showing in comments, but if it's been forced...  
+    g_free(member_function_buffer);
   }
-  gint prev_char;
-  switch(docdet->type) {
-    case(TAB_PHP):
-      if ((style != SCE_HPHP_SIMPLESTRING) && (style != SCE_HPHP_HSTRING) && (style != SCE_HPHP_COMMENTLINE) && (style !=SCE_HPHP_COMMENT)) {
-      switch(ch) {
-        case ('\r'):
-        case ('\n'):
-          autoindent_brace_code (sci, is_php_char_autoindent, is_php_char_autounindent);
-          break;
-        case (')'):
-          cancel_calltip (sci);
-          break;
-        case ('('):
-          show_calltip (docdet, current_pos);
-          break;
-        case ('>'):
-        case (':'):
-          prev_char = gtk_scintilla_get_char_at(sci, current_pos-2);
-          if ((prev_char=='-' && ch =='>') || (prev_char==':' && ch ==':')) {
-            /*search back for a '$' in that line */
-            gint initial_pos= gtk_scintilla_position_from_line(sci, current_line);
-            gint line_size;
-            gchar *line_text = gtk_scintilla_get_text_range (sci, initial_pos, wordStart-1, &line_size);
-            if (!check_php_variable_before(line_text)) break;
-            if (!docdet->completion_timer_set) {
-              gint delay;
-              g_object_get(pref, "autocomplete_delay", &delay, NULL);
-              docdet->completion_timer_id = g_timeout_add(delay, auto_memberfunc_complete_callback, GINT_TO_POINTER(current_pos));
-              docdet->completion_timer_set=TRUE;
-            }
-          }
-          break;
-        default:
-        member_function_buffer = gtk_scintilla_get_text_range (sci, wordStart, wordEnd, &member_function_length);
-        if (g_str_has_prefix(member_function_buffer,"$") || g_str_has_prefix(member_function_buffer,"__")) {
-            if (!docdet->completion_timer_set) {
-              gint delay;
-              g_object_get(pref, "autocomplete_delay", &delay, NULL);
-              docdet->completion_timer_id = g_timeout_add(delay, auto_complete_php_variables_callback, GINT_TO_POINTER(current_pos));
-              docdet->completion_timer_set=TRUE;
-            }
-        } else if (g_strcmp0(member_function_buffer,"instanceof")==0 || g_strcmp0(member_function_buffer,"is_subclass_of")==0) {
-          gtk_scintilla_insert_text(sci, current_pos," ");
-          gtk_scintilla_goto_pos(sci, current_pos + 1);
-          docdet->completion_timer_set=TRUE;
-          auto_complete_classes_callback(GINT_TO_POINTER(current_pos + 1));
-        } else if (current_word_length>=3) {
-        // check to see if they've typed <?php and if so do nothing
-        if (wordStart>1) {
-          ac_buffer = gtk_scintilla_get_text_range (sci, wordStart-2, wordEnd, &ac_length);
-          if (g_strcmp0(ac_buffer,"<?php")==0) {
-            g_free(ac_buffer);
-            break;
-          }
-          g_free(ac_buffer);
-        }
-        show_autocompletion (docdet, current_pos);
-        }
-        g_free(member_function_buffer);
-        }
-        break;
-      case(TAB_CXX):
-      case (TAB_PERL):
-        switch(ch) {
-            case ('\r'):
-            case ('\n'):
-              autoindent_brace_code (sci, is_cxx_char_autoindent, is_cxx_char_autounindent);
-            break;
-            case (')'):
-              cancel_calltip (sci);
-            break;
-            case ('('):
-              show_calltip (docdet, current_pos);
-            break;
-            case ('>'):
-            case (':'):
-              prev_char = gtk_scintilla_get_char_at(sci, current_pos-2);
-              if ((prev_char=='-' && ch =='>') || (prev_char==':' && ch ==':')) {
-                /*search back for a '$' in that line */
-                gint initial_pos= gtk_scintilla_position_from_line(sci, current_line);
-                gint line_size;
-                gchar *line_text = gtk_scintilla_get_text_range (sci, initial_pos, wordStart-1, &line_size);
-                if (!check_php_variable_before(line_text)) break;
-                if (!docdet->completion_timer_set) {
-                  gint delay;
-                  g_object_get(pref, "autocomplete_delay", &delay, NULL);
-                  docdet->completion_timer_id = g_timeout_add(delay, auto_memberfunc_complete_callback, GINT_TO_POINTER(current_pos));
-                  docdet->completion_timer_set=TRUE;
-                }
-              }
-              break;
-            default:
-            member_function_buffer = gtk_scintilla_get_text_range (sci, wordStart-2, wordStart, &member_function_length);
-            if(current_word_length>=3) show_autocompletion (docdet, current_pos);
-            }
-            g_free(member_function_buffer);
-        break;
-      case (TAB_PYTHON):
-        switch(ch) {
-            case ('\r'):
-            case ('\n'):
-              autoindent_brace_code (sci, is_python_char_autoindent, is_python_char_autounindent);
-            break;
-            case (')'):
-              cancel_calltip (sci);
-            break;
-            case ('('):
-              show_calltip (docdet, current_pos);
-            break;
-            default:
-              member_function_buffer = gtk_scintilla_get_text_range (sci, wordStart-2, wordStart, &member_function_length);
-              if(current_word_length>=3){
-                show_autocompletion (docdet, current_pos);
-              }
-              g_free(member_function_buffer);
-        }
-        break;
-      case(TAB_CSS):
-      switch(ch) {
-          case ('\r'):
-          case ('\n'):
-            autoindent_brace_code (sci, is_css_char_autoindent, is_css_char_autounindent);
-          break;
-        case (';'):
-            cancel_calltip (sci);
-            break;
-          case (':'):
-            show_calltip (docdet, current_pos);
-            break;
-          default:
-        member_function_buffer = gtk_scintilla_get_text_range (sci, wordStart-2, wordStart, &member_function_length);
-        if(current_word_length>=3){
-          show_autocompletion (docdet, current_pos);
-        }
-        g_free(member_function_buffer);
-        }
-        break;
-      case(TAB_COBOL):
-      case(TAB_SQL):
-        switch(ch) {
-            case ('\r'):
-            case ('\n'):
-              autoindent_brace_code (sci, is_sql_char_autoindent, is_sql_char_autounindent);
-            break;
-            default:
-        member_function_buffer = gtk_scintilla_get_text_range (sci, wordStart-2, wordStart, &member_function_length);
-        if(current_word_length>=3){
-          show_autocompletion (docdet, current_pos);
-        }
-        g_free(member_function_buffer);
-        break;
-        }
-      }
-     default:
-            member_function_buffer = gtk_scintilla_get_text_range (sci, wordStart-2, wordEnd, &member_function_length);
-            /* if we type <?php then we are in a php file so force php syntax mode */
-            if (g_strcmp0(member_function_buffer,"<?php")==0){
-                documentable_set_type(DOCUMENTABLE(doc), TAB_PHP);
-               }
-            g_free(member_function_buffer);
-            break;
-    }
-  g_object_unref(pref);
-#endif
 }
 
 /*
@@ -2378,36 +1941,6 @@ static void document_scintilla_force_autocomplete(Document_Scintilla *document_s
   g_return_if_fail(document_scintilla);
   Document_ScintillaDetails *docdet = DOCUMENT_SCINTILLA_GET_PRIVATE(document_scintilla);
   if (docdet->lgcss) language_provider_trigger_completion (docdet->lgcss, 0);
-#if 0
-  guint current_pos;
-  guint current_line;
-  gchar *member_function_buffer;
-  gint member_function_length;
-  gint wordStart;
-  gint wordEnd;
-
-  g_return_if_fail(document_scintilla);
-  Document_ScintillaDetails *docdet = DOCUMENT_SCINTILLA_GET_PRIVATE(document_scintilla);
-  GtkScintilla *sci = GTK_SCINTILLA(docdet->scintilla);
-  current_pos = gtk_scintilla_get_current_pos(sci);
-  wordStart = gtk_scintilla_word_start_position(sci, current_pos-1, TRUE);
-  wordEnd = gtk_scintilla_word_end_position(sci, current_pos-1, TRUE);
-  member_function_buffer = gtk_scintilla_get_text_range (sci, wordEnd-1, wordEnd +1, &member_function_length);
-  if (g_strcmp0(member_function_buffer, "->")==0 || g_strcmp0(member_function_buffer, "::")==0) {
-    gint line_size;
-    gint initial_pos;
-    gchar *line_text;
-    /*search back for a '$' in that line */
-    current_line = gtk_scintilla_line_from_position(sci, current_pos);
-    initial_pos= gtk_scintilla_position_from_line(sci, current_line);
-    line_text= gtk_scintilla_get_text_range (sci, initial_pos, wordStart-1, &line_size);
-    if (!check_php_variable_before(line_text)) return;
-    auto_memberfunc_complete_callback(GINT_TO_POINTER(current_pos));
-  } else {
-    auto_complete_callback(GINT_TO_POINTER(current_pos));
-  }
-  g_free(member_function_buffer);
-#endif
 }
 
 #define BACKSLASH 92
