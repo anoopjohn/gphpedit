@@ -82,7 +82,7 @@ struct Document_ScintillaDetails
   GtkWidget *gotobar;
 
   DocumentSaver *saver;
-
+  PreferencesManager *prefmg;
   Language_Provider *lgcss;
 };
 
@@ -104,12 +104,12 @@ static void tab_set_general_scintilla_properties(Document_Scintilla *doc);
 static void save_point_reached(GtkWidget *scintilla, gpointer user_data);
 static void save_point_left(GtkWidget *scintilla, gpointer user_data);
 static void update_ui(GtkWidget *scintilla);
-static void tab_set_configured_scintilla_properties(GtkScintilla *scintilla);
+static void tab_set_configured_scintilla_properties(GtkScintilla *scintilla, Documentable *doc);
 static void margin_clicked (GtkWidget *scintilla, gint modifiers, gint position, gint margin, gpointer user_data);
 static void fold_clicked(GtkWidget *scintilla, guint lineClick,guint bstate);
 static void fold_expand(GtkWidget *scintilla, gint line, gboolean doExpand, gboolean force, gint visLevels, gint level);
 static void fold_changed(GtkWidget *scintilla, int line,int levelNow,int levelPrev);
-static void handle_modified(GtkWidget *scintilla, gint pos,gint mtype,gchar *text,gint len, gint added,gint line,gint foldNow,gint foldPrev);
+static void handle_modified(GtkWidget *scintilla, gint pos,gint mtype,gchar *text,gint len, gint added,gint line,gint foldNow,gint foldPrev, gpointer user_data);
 static void macro_record (GtkWidget *scintilla, gint message, gulong wparam, glong lparam, gpointer user_data);
 static void process_user_list_selection (GtkWidget *w, gint type, gchar *text, gpointer user_data);
 static void scintilla_modified (GtkWidget *w, gpointer user_data);
@@ -260,7 +260,7 @@ static void document_scintilla_block_indent(Documentable *doc){
   g_return_if_fail(doc);
   Document_ScintillaDetails *docdet = DOCUMENT_SCINTILLA_GET_PRIVATE(doc);
   gint indent_size;
-  g_object_get(main_window.prefmg, "indentation_size", &indent_size, NULL);
+  g_object_get(docdet->prefmg, "indentation_size", &indent_size, NULL);
   move_block(GTK_SCINTILLA(docdet->scintilla), indent_size);
 }
 
@@ -268,7 +268,7 @@ static void document_scintilla_block_unindent(Documentable *doc){
   g_return_if_fail(doc);
   Document_ScintillaDetails *docdet = DOCUMENT_SCINTILLA_GET_PRIVATE(doc);
   gint indent_size;
-  g_object_get(main_window.prefmg, "indentation_size", &indent_size, NULL);
+  g_object_get(docdet->prefmg, "indentation_size", &indent_size, NULL);
   move_block(GTK_SCINTILLA(docdet->scintilla), 0-indent_size);
 }
 
@@ -334,7 +334,7 @@ static void document_scintilla_set_type (Documentable  *doc, gint type)
         case TAB_FILE:
           /* SCLEX_NULL to select no lexing action */
           gtk_scintilla_set_lexer(GTK_SCINTILLA (docdet->scintilla), SCLEX_NULL); 
-          tab_set_configured_scintilla_properties(GTK_SCINTILLA (docdet->scintilla));
+          tab_set_configured_scintilla_properties(GTK_SCINTILLA (docdet->scintilla), doc);
           gtk_scintilla_colourise(GTK_SCINTILLA (docdet->scintilla), 0, -1);
           tab_set_folding(document_scintilla, FALSE);
           break;
@@ -669,7 +669,7 @@ static void document_scintilla_apply_preferences (Documentable *doc)
   gphpedit_debug (DEBUG_DOCUMENT);
   g_return_if_fail(doc);
   Document_ScintillaDetails *docdet = DOCUMENT_SCINTILLA_GET_PRIVATE(doc);
-  tab_set_configured_scintilla_properties(GTK_SCINTILLA(docdet->scintilla));
+  tab_set_configured_scintilla_properties(GTK_SCINTILLA(docdet->scintilla), doc);
   gint type;
   /* reset type */
   g_object_get(doc, "type", &type, NULL);
@@ -1049,6 +1049,7 @@ document_scintilla_init (Document_Scintilla * object)
 {
   Document_ScintillaDetails *docdet;
   docdet = DOCUMENT_SCINTILLA_GET_PRIVATE(object);
+  docdet->prefmg = preferences_manager_new ();
   docdet->saver = document_saver_new ();
   g_signal_connect(G_OBJECT(docdet->saver), "done_saving", G_CALLBACK(document_scintilla_saver_done_saving_cb), NULL);
 
@@ -1090,6 +1091,7 @@ static void document_scintilla_dispose (GObject *object)
   docdet = DOCUMENT_SCINTILLA_GET_PRIVATE(doc);
   /* free object resources*/
   g_object_unref(docdet->saver);
+  g_object_unref(docdet->prefmg);
   /* Chain up to the parent class */
   G_OBJECT_CLASS (document_scintilla_parent_class)->dispose (object);
 }
@@ -1163,17 +1165,18 @@ static void tab_set_general_scintilla_properties(Document_Scintilla *doc)
   gtk_scintilla_set_margin_sensitive_n(scintilla, 1, 1);
   g_signal_connect (G_OBJECT (docdet->scintilla), "margin_click", G_CALLBACK (margin_clicked), doc);
   
-  tab_set_configured_scintilla_properties(scintilla);
+  tab_set_configured_scintilla_properties(scintilla, DOCUMENTABLE(doc));
   gtk_widget_show (docdet->scintilla);
 }
 
-static void tab_set_configured_scintilla_properties(GtkScintilla *scintilla)
+static void tab_set_configured_scintilla_properties(GtkScintilla *scintilla, Documentable *doc)
 {
-  PreferencesManager *pref = preferences_manager_new ();
+  Document_ScintillaDetails *docdet = DOCUMENT_SCINTILLA_GET_PRIVATE(doc);
+
   gboolean edge_mode, show_indent_guides, higthlight_caret_line, line_wrapping, tabs_instead_spaces;
   gint edge_column, font_quality;
   gchar *font;
-  g_object_get(pref, "edge_mode", &edge_mode,"edge_column", &edge_column, "show_indentation_guides", &show_indent_guides,
+  g_object_get(docdet->prefmg, "edge_mode", &edge_mode,"edge_column", &edge_column, "show_indentation_guides", &show_indent_guides,
        "higthlight_caret_line", &higthlight_caret_line, "line_wrapping",&line_wrapping,
         "tabs_instead_spaces", &tabs_instead_spaces,"font_quality", &font_quality, "style_font_name", &font, NULL);
   
@@ -1185,9 +1188,9 @@ static void tab_set_configured_scintilla_properties(GtkScintilla *scintilla)
   guint size;
   gchar *style_name;
   gint indentation_size, tab_size;
-  g_object_get(pref, "style_name", &style_name, "indentation_size", &indentation_size, 
+  g_object_get(docdet->prefmg, "style_name", &style_name, "indentation_size", &indentation_size, 
     "font_size", &size, "tab_size", &tab_size, NULL);
-  GtkSourceStyleScheme	*scheme = gtk_source_style_scheme_manager_get_scheme (main_window.stylemg, style_name);
+  GtkSourceStyleScheme *scheme = gtk_source_style_scheme_manager_get_scheme (main_window.stylemg, style_name);
   g_free(style_name);
   gtk_source_style_scheme_apply (scheme, GTK_WIDGET(scintilla), font, size);
   g_free(font);
@@ -1226,8 +1229,6 @@ static void tab_set_configured_scintilla_properties(GtkScintilla *scintilla)
   gtk_scintilla_set_indicator_current(scintilla, 20);
   gtk_scintilla_indic_set_style(scintilla, 20, INDIC_SQUIGGLE);
   gtk_scintilla_indic_set_fore(scintilla, 20, 0x0000ff);
-
-  g_object_unref(pref);
 }
 
 static void save_point_reached(GtkWidget *scintilla, gpointer user_data)
@@ -1462,22 +1463,21 @@ static void tab_set_folding(Document_Scintilla *document_scintilla, gint folding
     
     gtk_scintilla_set_margin_width_n (sci, 2, 14);
     
-    g_signal_connect (G_OBJECT (docdet->scintilla), "modified", G_CALLBACK (handle_modified), NULL);
+    g_signal_connect (G_OBJECT (docdet->scintilla), "modified", G_CALLBACK (handle_modified), document_scintilla);
   }
 }
 
 static void margin_clicked (GtkWidget *scintilla, gint modifiers, gint position, gint margin, gpointer user_data)
 {
+  Document_ScintillaDetails *docdet = DOCUMENT_SCINTILLA_GET_PRIVATE(user_data);
   if(margin!=1){
     gint line;
     gboolean show_folding;
     line = gtk_scintilla_line_from_position(GTK_SCINTILLA(scintilla), position);
-    PreferencesManager *pref = preferences_manager_new ();
-    g_object_get(pref,"show_folding", &show_folding, NULL);
+    g_object_get(docdet->prefmg,"show_folding", &show_folding, NULL);
     if (show_folding && margin == 2) {
       fold_clicked(scintilla, line, modifiers);
     }
-    g_object_unref(pref);
   }else{
     gint line;
     line = gtk_scintilla_line_from_position(GTK_SCINTILLA(scintilla), position);
@@ -1600,15 +1600,14 @@ static void fold_changed(GtkWidget *scintilla, int line,int levelNow,int levelPr
 // All the folding functions are converted from QScintilla, released under the GPLv2 by
 // Riverbank Computing Limited <info@riverbankcomputing.co.uk> and Copyright (c) 2003 by them.
 static void handle_modified(GtkWidget *scintilla, gint pos,gint mtype,gchar *text,gint len,
-           gint added,gint line,gint foldNow,gint foldPrev)
+           gint added, gint line, gint foldNow, gint foldPrev, gpointer user_data)
 {
-  PreferencesManager *pref = preferences_manager_new ();
+  Document_ScintillaDetails *docdet = DOCUMENT_SCINTILLA_GET_PRIVATE(user_data);
   gboolean show_folding;
-  g_object_get(pref,"show_folding", &show_folding, NULL);
+  g_object_get(docdet->prefmg,"show_folding", &show_folding, NULL);
   if (show_folding && (mtype & SC_MOD_CHANGEFOLD)) {
     fold_changed(scintilla, line, foldNow, foldPrev);
   }
-  g_object_unref(pref);
 }
 
 static void document_scintilla_marker_add(GtkScintilla *scintilla, gint line){
@@ -1729,9 +1728,7 @@ void document_scintilla_set_sintax_line(Document_Scintilla *doc, guint current_l
   gint line_end;
   gint indent;
   gint indentation_size;
-  PreferencesManager *pref = preferences_manager_new ();
-  g_object_get(pref, "indentation_size", &indentation_size, NULL);
-  g_object_unref(pref);
+  g_object_get(docdet->prefmg, "indentation_size", &indentation_size, NULL);
   indent = gtk_scintilla_get_line_indentation(GTK_SCINTILLA(docdet->scintilla), current_line_number);
   line_start = gtk_scintilla_position_from_line(GTK_SCINTILLA(docdet->scintilla), current_line_number);
   line_start += (indent/indentation_size);
