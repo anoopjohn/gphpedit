@@ -25,9 +25,9 @@
 #ifndef DOCUMENT_SCINTILLA_H
 #define DOCUMENT_SCINTILLA_H
 
-#include <gtk/gtk.h>
 #include <gtkscintilla.h>
 #include "document.h"
+
 #define DOCUMENT_SCINTILLA_TYPE document_scintilla_get_type()
 #define DOCUMENT_SCINTILLA(obj) \
   (G_TYPE_CHECK_INSTANCE_CAST ((obj), DOCUMENT_SCINTILLA_TYPE, Document_Scintilla))
