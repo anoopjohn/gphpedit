@@ -490,12 +490,13 @@ static gboolean document_scintilla_search_replace_text(Documentable  *doc, const
     gtk_scintilla_set_selection_end(GTK_SCINTILLA(docdet->scintilla), end_found);
     if (ask_replace) {
       // Prompt for replace?
+      GtkWidget *window = gtk_widget_get_toplevel (docdet->scintilla);
       GtkWidget *replace_prompt_dialog;
-      replace_prompt_dialog = gtk_message_dialog_new(GTK_WINDOW(main_window.window), GTK_DIALOG_DESTROY_WITH_PARENT,
+      replace_prompt_dialog = gtk_message_dialog_new(GTK_WINDOW(window), GTK_DIALOG_DESTROY_WITH_PARENT,
       GTK_MESSAGE_QUESTION,GTK_BUTTONS_YES_NO,
             _("Do you want to replace this occurence?"));
       gtk_window_set_title(GTK_WINDOW(replace_prompt_dialog), _("Question"));
-      gtk_window_set_transient_for (GTK_WINDOW(replace_prompt_dialog),GTK_WINDOW(main_window.window));
+      gtk_window_set_transient_for (GTK_WINDOW(replace_prompt_dialog), GTK_WINDOW(window));
       gint result = gtk_dialog_run (GTK_DIALOG (replace_prompt_dialog));
       gint selection_start;
       if (result==GTK_RESPONSE_YES) {
