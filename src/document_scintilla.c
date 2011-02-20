@@ -29,7 +29,6 @@
 #include "document_scintilla.h"
 #include "document_saver.h"
 #include "main_window.h"
-#include "main_window_callbacks.h"
 #include "gvfs_utils.h"
 #include "gphpedit-statusbar.h"
 #include "images.h"
