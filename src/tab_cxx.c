@@ -89,14 +89,3 @@ gboolean is_cxx_file(const gchar *filename)
       return TRUE;
   return FALSE;
 }
-
-gboolean is_cxx_char_autoindent(char ch)
-{
-  return (ch=='{');
-}
-
-gboolean is_cxx_char_autounindent(char ch)
-{
-  return (ch=='}');
-}
-

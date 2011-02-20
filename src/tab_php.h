@@ -31,7 +31,4 @@ void tab_php_set_lexer(GtkScintilla *scintilla);
 void scintilla_php_set_lexer(GtkScintilla *scintilla);
 gboolean is_php_file_from_filename(const gchar *filename);
 gboolean is_php_file_from_content(const gchar *content);
-gboolean is_php_char_autoindent(char ch);
-gboolean is_php_char_autounindent(char ch);
-gboolean check_php_variable_before(const gchar *line_text);
 #endif

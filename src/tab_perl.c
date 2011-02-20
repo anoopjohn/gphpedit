@@ -105,14 +105,3 @@ gboolean is_perl_file(const gchar *filename)
       return TRUE;
   return FALSE;
 }
-
-gboolean is_perl_char_autoindent(char ch)
-{
-  return (ch == '{');
-}
-
-gboolean is_perl_char_autounindent(char ch)
-{
-  return (ch == '}');
-}
-

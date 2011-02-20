@@ -29,7 +29,4 @@
 
 void tab_css_set_lexer(GtkScintilla *scintilla);
 gboolean is_css_file(const gchar *filename);
-gboolean is_css_char_autoindent(char ch);
-gboolean is_css_char_autounindent(char ch);
-
 #endif

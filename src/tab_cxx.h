@@ -29,7 +29,5 @@
 
 void tab_cxx_set_lexer(GtkScintilla *scintilla);
 gboolean is_cxx_file(const gchar *filename);
-gboolean is_cxx_char_autoindent(char ch);
-gboolean is_cxx_char_autounindent(char ch);
 
 #endif
