@@ -42,14 +42,7 @@
 #include "tab_python.h"
 #include "tab_sql.h"
 
-#include "language_provider.h"
-#include "language_css.h"
-#include "language_cxx.h"
-#include "language_cobol.h"
-#include "language_sql.h"
-#include "language_perl.h"
-#include "language_python.h"
-#include "language_php.h"
+#include "languages.h"
 
 #include "search_infobar.h"
 #include "goto_infobar.h"

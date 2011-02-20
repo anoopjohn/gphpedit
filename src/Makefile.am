@@ -3,7 +3,7 @@
 ##
 ##  Copyright (C) 2003, 2004, 2005 Andy Jeffries <andy at gphpedit.org>
 ##  Copyright (C) 2009 Anoop John <anoop dot john at zyxware.com>
-##  Copyright (C) 2010 - Jose Rostagno
+##  Copyright (C) 2010, 2011 - Jose Rostagno
 ##
 ##  For more information or to find the latest release, visit our
 ##  website at http://www.gphpedit.org/
@@ -78,6 +78,7 @@ gphpedit_SOURCES = \
   language_python.h \
   language_php.c \
   language_php.h \
+  languages.h \
   edit_template.c \
   edit_template.h \
   filebrowser_backend.c \
