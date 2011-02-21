@@ -245,15 +245,20 @@ void document_need_reload_cb (Document *doc, gpointer user_data)
   document_loader_reload_file(loader, doc);
 }
 
-void document_ovr_changed_cb (Document *doc, gboolean status, gpointer user_data)
+static void document_ovr_changed_cb (Document *doc, gboolean status, gpointer user_data)
 {
   gphpedit_statusbar_set_overwrite (GPHPEDIT_STATUSBAR(main_window.appbar), status);
 }
 
+static void document_marker_not_found_cb (Document *doc, gpointer user_data)
+{
+  gphpedit_statusbar_flash_message (GPHPEDIT_STATUSBAR(main_window.appbar),0 , "%s",_("No marker found"));
+}
+
 void document_loader_done_loading_cb (DocumentLoader *doclod, gboolean result, Document *doc, gpointer user_data)
 {
-	DocumentManager *docmg = DOCUMENT_MANAGER(user_data);
-	DocumentManagerDetails *docmgdet = DOCUMENT_MANAGER_GET_PRIVATE(docmg);
+  DocumentManager *docmg = DOCUMENT_MANAGER(user_data);
+  DocumentManagerDetails *docmgdet = DOCUMENT_MANAGER_GET_PRIVATE(docmg);
   if (result) {
     gboolean untitled;
     docmgdet->editors = g_slist_append(docmgdet->editors, doc);
@@ -270,7 +275,8 @@ void document_loader_done_loading_cb (DocumentLoader *doclod, gboolean result, D
       g_signal_connect(G_OBJECT(doc), "save_start", G_CALLBACK(document_save_start_cb), NULL);
       g_signal_connect(G_OBJECT(doc), "type_changed", G_CALLBACK(document_type_changed_cb), docmg);
       g_signal_connect(G_OBJECT(doc), "need_reload", G_CALLBACK(document_need_reload_cb), docmg);
-      g_signal_connect(G_OBJECT(doc), "ovr_changed", G_CALLBACK(document_ovr_changed_cb), docmg);
+      g_signal_connect(G_OBJECT(doc), "ovr_changed", G_CALLBACK(document_ovr_changed_cb), NULL);
+      g_signal_connect(G_OBJECT(doc), "marker_not_found", G_CALLBACK(document_marker_not_found_cb), NULL);
     }
     g_signal_emit (G_OBJECT (docmg), signals[NEW_DOCUMENT], 0, doc);
     gtk_widget_grab_focus(document_widget);

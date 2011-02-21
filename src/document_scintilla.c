@@ -53,6 +53,7 @@ enum {
   TYPE_CHANGED,
   NEED_RELOAD,
   OVR_CHANGED,
+  MARKER_NOT_FOUND,
   LAST_SIGNAL
 };
 
@@ -892,6 +893,15 @@ document_scintilla_class_init (Document_ScintillaClass *klass)
 		               g_cclosure_marshal_VOID__BOOLEAN,
 		               G_TYPE_NONE, 1, G_TYPE_BOOLEAN, NULL);
 
+	signals[MARKER_NOT_FOUND] =
+		g_signal_new ("marker_not_found",
+		              G_TYPE_FROM_CLASS (object_class),
+		              G_SIGNAL_RUN_LAST,
+		              G_STRUCT_OFFSET (Document_ScintillaClass, save_update),
+		              NULL, NULL,
+		               g_cclosure_marshal_VOID__VOID,
+		               G_TYPE_NONE, 0);
+
   /*DOCUMENT_SCINTILLA PROPERTIES*/
   /* CAN_MODIFY PROPERTY: When a document_scintilla can be modified */
   g_object_class_install_property (object_class,
@@ -1667,8 +1677,8 @@ static void document_scintilla_find_next_marker(Document_Scintilla *doc){
       //go back to the first marker
       //bugfix the maker is in the next line
       documentable_goto_line(DOCUMENTABLE(doc), line + 1);
-    }else{  
-      gphpedit_statusbar_flash_message (GPHPEDIT_STATUSBAR(main_window.appbar),0,"%s",_("No marker found"));
+    }else{
+      g_signal_emit (G_OBJECT (doc), signals[MARKER_NOT_FOUND], 0);
     }
   }else{
     //goto the marker posicion
