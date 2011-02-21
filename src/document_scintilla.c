@@ -32,6 +32,7 @@
 #include "gphpedit-statusbar.h"
 #include "images.h"
 #include "languages.h"
+#include "templates.h"
 
 /* lexer headers */
 #include "tab_cobol.h"
@@ -83,6 +84,7 @@ struct Document_ScintillaDetails
 
   DocumentSaver *saver;
   PreferencesManager *prefmg;
+  TemplatesManager *tempmg;
   Language_Provider *lgcss;
 };
 
@@ -1035,7 +1037,8 @@ static gboolean scintilla_key_press (GtkWidget *widget, GdkEventKey *event, gpoi
     return TRUE;
   }
   else if ((event->state & GDK_CONTROL_MASK)==GDK_CONTROL_MASK && ((event->keyval == GDK_j) || (event->keyval == GDK_J)))  {
-    template_find_and_insert(main_window.tempmg, user_data);
+    Document_ScintillaDetails *docdet = DOCUMENT_SCINTILLA_GET_PRIVATE(user_data);
+    template_find_and_insert(docdet->tempmg, user_data);
     return TRUE;
   }
   else if ((event->state & GDK_CONTROL_MASK)==GDK_CONTROL_MASK && (event->keyval == GDK_space)) { 
@@ -1051,6 +1054,7 @@ document_scintilla_init (Document_Scintilla * object)
   Document_ScintillaDetails *docdet;
   docdet = DOCUMENT_SCINTILLA_GET_PRIVATE(object);
   docdet->prefmg = preferences_manager_new ();
+  docdet->tempmg = templates_manager_new ();
   docdet->saver = document_saver_new ();
   g_signal_connect(G_OBJECT(docdet->saver), "done_saving", G_CALLBACK(document_scintilla_saver_done_saving_cb), NULL);
 
@@ -1093,6 +1097,7 @@ static void document_scintilla_dispose (GObject *object)
   /* free object resources*/
   g_object_unref(docdet->saver);
   g_object_unref(docdet->prefmg);
+  g_object_unref(docdet->tempmg);
   /* Chain up to the parent class */
   G_OBJECT_CLASS (document_scintilla_parent_class)->dispose (object);
 }
