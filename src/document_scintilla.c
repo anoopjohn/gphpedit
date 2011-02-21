@@ -33,6 +33,7 @@
 #include "images.h"
 #include "languages.h"
 #include "templates.h"
+#include "gtksourcestyleschememanager.h"
 
 /* lexer headers */
 #include "tab_cobol.h"
@@ -1214,7 +1215,8 @@ static void tab_set_configured_scintilla_properties(GtkScintilla *scintilla, Doc
   gint indentation_size, tab_size;
   g_object_get(docdet->prefmg, "style_name", &style_name, "indentation_size", &indentation_size, 
     "font_size", &size, "tab_size", &tab_size, NULL);
-  GtkSourceStyleScheme *scheme = gtk_source_style_scheme_manager_get_scheme (main_window.stylemg, style_name);
+  GtkSourceStyleSchemeManager *stylemg = gtk_source_style_scheme_manager_new ();
+  GtkSourceStyleScheme *scheme = gtk_source_style_scheme_manager_get_scheme (stylemg, style_name);
   g_free(style_name);
   gtk_source_style_scheme_apply (scheme, GTK_WIDGET(scintilla), font, size);
   g_free(font);
@@ -1253,6 +1255,7 @@ static void tab_set_configured_scintilla_properties(GtkScintilla *scintilla, Doc
   gtk_scintilla_set_indicator_current(scintilla, 20);
   gtk_scintilla_indic_set_style(scintilla, 20, INDIC_SQUIGGLE);
   gtk_scintilla_indic_set_fore(scintilla, 20, 0x0000ff);
+  g_object_unref (stylemg);
 }
 
 static void save_point_reached(GtkWidget *scintilla, gpointer user_data)

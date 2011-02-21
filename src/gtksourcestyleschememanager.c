@@ -136,6 +136,28 @@ gtk_source_style_scheme_manager_finalize (GObject *object)
 	G_OBJECT_CLASS (gtk_source_style_scheme_manager_parent_class)->finalize (object);
 }
 
+/*
+* overide default contructor to make a singleton.
+* see http://blogs.gnome.org/xclaesse/2010/02/11/how-to-make-a-gobject-singleton/
+*/
+static GObject* 
+gtk_source_style_scheme_manager_constructor (GType type,
+                 guint n_construct_params,
+                 GObjectConstructParam *construct_params)
+{
+  static GObject *self = NULL;
+
+  if (self == NULL)
+    {
+      self = G_OBJECT_CLASS (gtk_source_style_scheme_manager_parent_class)->constructor (
+          type, n_construct_params, construct_params);
+      g_object_add_weak_pointer (self, (gpointer) &self);
+      return self;
+    }
+
+  return g_object_ref (self);
+}
+
 static void
 gtk_source_style_scheme_manager_class_init (GtkSourceStyleSchemeManagerClass *klass)
 {
@@ -144,6 +166,7 @@ gtk_source_style_scheme_manager_class_init (GtkSourceStyleSchemeManagerClass *kl
 	object_class->finalize	= gtk_source_style_scheme_manager_finalize;
 	object_class->set_property = gtk_source_style_scheme_manager_set_property;
 	object_class->get_property = gtk_source_style_scheme_manager_get_property;
+	object_class->constructor = gtk_source_style_scheme_manager_constructor;
 
 	g_object_class_install_property (object_class,
 					 PROP_SEARCH_PATH,
@@ -181,8 +204,7 @@ gtk_source_style_scheme_manager_init (GtkSourceStyleSchemeManager *mgr)
 /**
  * gtk_source_style_scheme_manager_new:
  *
- * Creates a new style manager. If you do not need more than one style
- * manager then use gtk_source_style_scheme_manager_get_default() instead.
+ * Creates a new style manager.
  *
  * Returns: a new #GtkSourceStyleSchemeManager.
  */
@@ -190,29 +212,6 @@ GtkSourceStyleSchemeManager *
 gtk_source_style_scheme_manager_new (void)
 {
 	return g_object_new (GTK_TYPE_SOURCE_STYLE_SCHEME_MANAGER, NULL);
-}
-
-/**
- * gtk_source_style_scheme_manager_get_default:
- *
- * Returns the default #GtkSourceStyleSchemeManager instance.
- *
- * Returns: (transfer-none): a #GtkSourceStyleSchemeManager. Return value
- * is owned by GtkSourceView library and must not be unref'ed.
- */
-GtkSourceStyleSchemeManager *
-gtk_source_style_scheme_manager_get_default (void)
-{
-	static GtkSourceStyleSchemeManager *instance;
-
-	if (instance == NULL)
-	{
-		instance = gtk_source_style_scheme_manager_new ();
-		g_object_add_weak_pointer (G_OBJECT (instance),
-					   (gpointer) &instance);
-	}
-
-	return instance;
 }
 
 static GSList *
