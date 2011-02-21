@@ -56,6 +56,8 @@ enum {
   OVR_CHANGED,
   MARKER_NOT_FOUND,
   OPEN_REQUEST,
+  POS_CHANGED,
+  COL_CHANGED,
   LAST_SIGNAL
 };
 
@@ -877,6 +879,24 @@ document_scintilla_class_init (Document_ScintillaClass *klass)
 		               g_cclosure_marshal_VOID__INT,
 		               G_TYPE_NONE, 1, G_TYPE_INT, NULL);
 
+	signals[POS_CHANGED] =
+		g_signal_new ("pos_changed",
+		              G_TYPE_FROM_CLASS (object_class),
+		              G_SIGNAL_RUN_LAST,
+		              G_STRUCT_OFFSET (Document_ScintillaClass, save_update),
+		              NULL, NULL,
+		               g_cclosure_marshal_VOID__INT,
+		               G_TYPE_NONE, 1, G_TYPE_INT, NULL);
+
+	signals[COL_CHANGED] =
+		g_signal_new ("col_changed",
+		              G_TYPE_FROM_CLASS (object_class),
+		              G_SIGNAL_RUN_LAST,
+		              G_STRUCT_OFFSET (Document_ScintillaClass, save_update),
+		              NULL, NULL,
+		               g_cclosure_marshal_VOID__INT,
+		               G_TYPE_NONE, 1, G_TYPE_INT, NULL);
+
 	signals[NEED_RELOAD] =
 		g_signal_new ("need_reload",
 		              G_TYPE_FROM_CLASS (object_class),
@@ -1296,9 +1316,8 @@ static void scintilla_modified (GtkWidget *scintilla, gpointer user_data)
   g_return_if_fail(doc);
   GtkScintilla *sci = GTK_SCINTILLA(scintilla);
   gint current_pos = gtk_scintilla_get_current_pos(sci);
-  gphpedit_statusbar_set_cursor_position (GPHPEDIT_STATUSBAR(main_window.appbar), 
-  gtk_scintilla_line_from_position(sci, current_pos), 
-  gtk_scintilla_get_column(sci, current_pos));
+  g_signal_emit (G_OBJECT (doc), signals[POS_CHANGED], 0, gtk_scintilla_line_from_position(sci, current_pos) + 1);
+  g_signal_emit (G_OBJECT (doc), signals[COL_CHANGED], 0, gtk_scintilla_get_column(sci, current_pos) + 1);
   g_signal_emit (G_OBJECT (doc), signals[OVR_CHANGED], 0, gtk_scintilla_get_overtype(sci));
 }
 
