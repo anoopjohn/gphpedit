@@ -54,6 +54,7 @@ enum {
   NEED_RELOAD,
   OVR_CHANGED,
   MARKER_NOT_FOUND,
+  OPEN_REQUEST,
   LAST_SIGNAL
 };
 
@@ -102,7 +103,7 @@ typedef struct
 
 static void document_scintilla_dispose (GObject *gobject);
 static void char_added(GtkWidget *scintilla, guint ch, gpointer user_data);
-static void process_drag_uri(GtkWidget *scintilla, gpointer data);
+static void process_drag_uri(GtkWidget *scintilla, gpointer data, gpointer user_data);
 static void tab_set_general_scintilla_properties(Document_Scintilla *doc);
 static void save_point_reached(GtkWidget *scintilla, gpointer user_data);
 static void save_point_left(GtkWidget *scintilla, gpointer user_data);
@@ -901,7 +902,14 @@ document_scintilla_class_init (Document_ScintillaClass *klass)
 		              NULL, NULL,
 		               g_cclosure_marshal_VOID__VOID,
 		               G_TYPE_NONE, 0);
-
+	signals[OPEN_REQUEST] =
+		g_signal_new ("open_request",
+		              G_TYPE_FROM_CLASS (object_class),
+		              G_SIGNAL_RUN_LAST,
+		              G_STRUCT_OFFSET (Document_ScintillaClass, open_request),
+		              NULL, NULL,
+		               g_cclosure_marshal_VOID__STRING,
+		               G_TYPE_NONE, 1, G_TYPE_STRING);
   /*DOCUMENT_SCINTILLA PROPERTIES*/
   /* CAN_MODIFY PROPERTY: When a document_scintilla can be modified */
   g_object_class_install_property (object_class,
@@ -1081,7 +1089,7 @@ document_scintilla_init (Document_Scintilla * object)
   docdet->scintilla = gtk_scintilla_new();
   g_signal_connect (G_OBJECT (docdet->scintilla), "char_added", G_CALLBACK (char_added), object);
   g_signal_connect (G_OBJECT (docdet->scintilla), "update_ui", G_CALLBACK (update_ui), NULL);
-  g_signal_connect (G_OBJECT (docdet->scintilla), "uri_dropped", G_CALLBACK (process_drag_uri), NULL);
+  g_signal_connect (G_OBJECT (docdet->scintilla), "uri_dropped", G_CALLBACK (process_drag_uri), object);
   g_signal_connect (G_OBJECT (docdet->scintilla), "user_list_selection", G_CALLBACK (process_user_list_selection), object);
   g_signal_connect (G_OBJECT (docdet->scintilla), "painted", G_CALLBACK (scintilla_modified), object);
   g_signal_connect (G_OBJECT (docdet->scintilla), "key-press-event", G_CALLBACK (scintilla_key_press), object);
@@ -1420,7 +1428,7 @@ static void char_added(GtkWidget *scintilla, guint ch, gpointer user_data)
 * process_drag_uri
 * send open signal for uris dropped in scintilla widget
 */
-static void process_drag_uri(GtkWidget *scintilla, gpointer data)
+static void process_drag_uri(GtkWidget *scintilla, gpointer data, gpointer user_data)
 {
   if (data){
     gchar **uris= g_strsplit (data,"\n",0);
@@ -1431,7 +1439,7 @@ static void process_drag_uri(GtkWidget *scintilla, gpointer data)
           gchar *uri=g_malloc(k);
           strncpy(uri,uris[i],k); /* skip \n */
           uri[k-1]=0;
-          document_manager_switch_to_file_or_open(main_window.docmg, uri, 0);
+	  g_signal_emit (G_OBJECT (user_data), signals[OPEN_REQUEST], 0, uri);
           g_free(uri);
         }
       i++;
@@ -1669,7 +1677,7 @@ static void document_scintilla_find_next_marker(Document_Scintilla *doc){
   current_line = gtk_scintilla_line_from_position(GTK_SCINTILLA(docdet->scintilla), current_pos);
   gint line;
   //skip the current line
-  line= gtk_scintilla_marker_next(GTK_SCINTILLA(docdet->scintilla), current_line + 1, 2);
+  line = gtk_scintilla_marker_next(GTK_SCINTILLA(docdet->scintilla), current_line + 1, 2);
   if (line==-1){
     //no markers in that direccion, we should go back to the first line
     line= gtk_scintilla_marker_next(GTK_SCINTILLA(docdet->scintilla),0, 2);
@@ -1677,7 +1685,7 @@ static void document_scintilla_find_next_marker(Document_Scintilla *doc){
       //go back to the first marker
       //bugfix the maker is in the next line
       documentable_goto_line(DOCUMENTABLE(doc), line + 1);
-    }else{
+    } else {
       g_signal_emit (G_OBJECT (doc), signals[MARKER_NOT_FOUND], 0);
     }
   }else{

@@ -255,6 +255,12 @@ static void document_marker_not_found_cb (Document *doc, gpointer user_data)
   gphpedit_statusbar_flash_message (GPHPEDIT_STATUSBAR(main_window.appbar),0 , "%s",_("No marker found"));
 }
 
+static void document_open_request_cb (Document *doc, gchar *uri, gpointer user_data)
+{
+  DocumentManager *docmg = DOCUMENT_MANAGER(user_data);
+  document_manager_switch_to_file_or_open(docmg, uri, 0);
+}
+
 void document_loader_done_loading_cb (DocumentLoader *doclod, gboolean result, Document *doc, gpointer user_data)
 {
   DocumentManager *docmg = DOCUMENT_MANAGER(user_data);
@@ -277,6 +283,7 @@ void document_loader_done_loading_cb (DocumentLoader *doclod, gboolean result, D
       g_signal_connect(G_OBJECT(doc), "need_reload", G_CALLBACK(document_need_reload_cb), docmg);
       g_signal_connect(G_OBJECT(doc), "ovr_changed", G_CALLBACK(document_ovr_changed_cb), NULL);
       g_signal_connect(G_OBJECT(doc), "marker_not_found", G_CALLBACK(document_marker_not_found_cb), NULL);
+      g_signal_connect(G_OBJECT(doc), "open_request", G_CALLBACK(document_open_request_cb), docmg);
     }
     g_signal_emit (G_OBJECT (docmg), signals[NEW_DOCUMENT], 0, doc);
     gtk_widget_grab_focus(document_widget);
