@@ -27,13 +27,14 @@
 #include "debug.h"
 #include "document_scintilla.h"
 #include "document_saver.h"
-#include "main_window.h"
 #include "gvfs_utils.h"
-#include "gphpedit-statusbar.h"
 #include "images.h"
 #include "languages.h"
 #include "templates.h"
 #include "gtksourcestyleschememanager.h"
+#include "preferences_manager.h"
+#include "search_infobar.h"
+#include "goto_infobar.h"
 
 /* lexer headers */
 #include "tab_cobol.h"
@@ -43,9 +44,6 @@
 #include "tab_perl.h"
 #include "tab_python.h"
 #include "tab_sql.h"
-
-#include "search_infobar.h"
-#include "goto_infobar.h"
 
 /* object signal enumeration */
 enum {
