@@ -58,7 +58,7 @@ struct DocumentLoaderDetails
 
 static void document_loader_dispose (GObject *gobject);
 static void _document_loader_create_file(DocumentLoader *doclod, gchar *filename, gint goto_line);
-void _document_loader_load_file(DocumentLoader *doclod, GFile *file);
+static void _document_loader_load_file(DocumentLoader *doclod, GFile *file);
 /*
  * register DocumentLoader type and returns a new GType
 */
@@ -66,12 +66,12 @@ G_DEFINE_TYPE(DocumentLoader, document_loader, G_TYPE_OBJECT);
 
 /* object signal enumeration */
 enum {
-	DONE_LOADING,
-	DONE_NAVIGATE,
-	DONE_REFRESH,
+  DONE_LOADING,
+  DONE_NAVIGATE,
+  DONE_REFRESH,
   NEED_MOUNTING,
   HELP_FILE_NOT_FOUND,
-	LAST_SIGNAL
+  LAST_SIGNAL
 };
 
 static guint signals[LAST_SIGNAL];
@@ -84,9 +84,9 @@ enum
 
 /* actions */
 enum {
-LOAD,
-NAVIGATE,
-REFRESH
+  LOAD,
+  NAVIGATE,
+  REFRESH
 };
 
 static void
@@ -95,16 +95,16 @@ document_loader_set_property (GObject      *object,
 			      const GValue *value,
 			      GParamSpec   *pspec)
 {
-	DocumentLoaderDetails *docloddet = DOCUMENT_LOADER_GET_PRIVATE(object);
+  DocumentLoaderDetails *docloddet = DOCUMENT_LOADER_GET_PRIVATE(object);
 
-	switch (prop_id)
-	{
-		case PROP_PARENT_WINDOW:
+  switch (prop_id)
+  {
+    case PROP_PARENT_WINDOW:
       docloddet->dialog_parent_window = g_value_dup_object (value);
-			break;
-		default:
-			G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
-			break;
+      break;
+    default:
+      G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
+      break;
   }
 }
 
@@ -114,23 +114,21 @@ document_loader_get_property (GObject    *object,
 			      GValue     *value,
 			      GParamSpec *pspec)
 {
-//	DocumentLoaderDetails *docloddet = DOCUMENT_LOADER_GET_PRIVATE(object);
-
-	switch (prop_id)
-	{
-		case PROP_PARENT_WINDOW:
-			break;
-		default:
-			G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
-			break;
+  switch (prop_id)
+  {
+    case PROP_PARENT_WINDOW:
+      break;
+    default:
+      G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
+      break;
   }
 }
 static void
 document_loader_class_init (DocumentLoaderClass *klass)
 {
-	GObjectClass *object_class;
+  GObjectClass *object_class;
 
-	object_class = G_OBJECT_CLASS (klass);
+  object_class = G_OBJECT_CLASS (klass);
   object_class->dispose = document_loader_dispose;
   object_class->set_property = document_loader_set_property;
   object_class->get_property = document_loader_get_property;
@@ -179,14 +177,14 @@ document_loader_class_init (DocumentLoaderClass *klass)
                               GTK_TYPE_WIDGET, G_PARAM_CONSTRUCT_ONLY | G_PARAM_READWRITE));
 
 
-	g_type_class_add_private (klass, sizeof (DocumentLoaderDetails));
+  g_type_class_add_private (klass, sizeof (DocumentLoaderDetails));
 }
 
 static void
 document_loader_init (DocumentLoader * object)
 {
-	DocumentLoaderDetails *docloddet;
-	docloddet = DOCUMENT_LOADER_GET_PRIVATE(object);
+  DocumentLoaderDetails *docloddet;
+  docloddet = DOCUMENT_LOADER_GET_PRIVATE(object);
   docloddet->gmo= gtk_mount_operation_new(docloddet->dialog_parent_window);
 }
 
@@ -197,7 +195,7 @@ static void document_loader_dispose (GObject *object)
 {
   DocumentLoader *doclod = DOCUMENT_LOADER(object);
   DocumentLoaderDetails *docloddet;
-	docloddet = DOCUMENT_LOADER_GET_PRIVATE(doclod);
+  docloddet = DOCUMENT_LOADER_GET_PRIVATE(doclod);
   /* free object resources*/
   g_object_unref(docloddet->dialog_parent_window);
   if (docloddet->gmo) g_object_unref(docloddet->gmo);
@@ -208,9 +206,9 @@ static void document_loader_dispose (GObject *object)
 
 DocumentLoader *document_loader_new (GtkWindow *dialog_parent_window)
 {
-	DocumentLoader *doclod;
-  doclod = g_object_new (DOCUMENT_LOADER_TYPE, "parent_window", dialog_parent_window,NULL);
-	return doclod; /* return new object */
+  DocumentLoader *doclod;
+  doclod = g_object_new (DOCUMENT_LOADER_TYPE, "parent_window", dialog_parent_window, NULL);
+  return doclod; /* return new object */
 }
 
 static void _document_loader_create_untitled(DocumentLoader *doclod)
@@ -448,7 +446,7 @@ static gboolean mount_mountable_file(DocumentLoader *doclod, GFile *file)
 
 #define INFO_FLAGS "standard::display-name,standard::content-type,standard::edit-name,standard::size,access::can-write,standard::icon,time::modified,time::modified-usec"
 
-void emit_signal (DocumentLoader *doclod, gboolean result, Document *doc) {
+static void emit_signal (DocumentLoader *doclod, gboolean result, Document *doc) {
   DocumentLoaderDetails *docloddet = DOCUMENT_LOADER_GET_PRIVATE(doclod);
   if (docloddet->current_action == LOAD) {
    g_signal_emit (G_OBJECT (doclod), signals[DONE_LOADING], 0, result, doc);
@@ -498,7 +496,7 @@ static void _document_loader_load_file_finish (GObject *source_object, GAsyncRes
   emit_signal (doclod, TRUE, DOCUMENT(docloddet->doc));
 }
 
-void _document_loader_load_file(DocumentLoader *doclod, GFile *file)
+static void _document_loader_load_file(DocumentLoader *doclod, GFile *file)
 {
   /* Open file*/
   g_file_load_contents_async (file, NULL, _document_loader_load_file_finish, doclod); //FIXME:: cancellable???
