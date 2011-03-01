@@ -42,8 +42,6 @@ AM_CFLAGS = \
 
 nodist_EXTRA_gphpedit_SOURCES = dummy.cxx
 gphpedit_SOURCES = \
-  classbrowser_parse.c \
-  classbrowser_parse.h \
   classbrowser.c \
   classbrowser.h \
   debug.c \
@@ -134,6 +132,8 @@ gphpedit_SOURCES = \
   symbol_bd_utils.h \
   symbol_bd_php.c \
   symbol_bd_php.h \
+  symbol_bd_php_parse.c \
+  symbol_bd_php_parse.h \
   symbol_bd_cobol.c \
   symbol_bd_cobol.h \
   symbol_bd_css.c \
