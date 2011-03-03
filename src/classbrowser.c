@@ -101,8 +101,6 @@ static void gphpedit_classbrowser_dispose (GObject *object)
 
   priv = CLASSBROWSER_BACKEND_GET_PRIVATE(object);
 
-  if (priv->builder) g_object_unref(priv->builder);
-
   G_OBJECT_CLASS (gphpedit_classbrowser_parent_class)->dispose (object);
 }
 
