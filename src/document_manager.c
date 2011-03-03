@@ -90,6 +90,18 @@ document_manager_constructor (GType type,
   return g_object_ref (self);
 }
 
+static void
+document_manager_dispose (GObject *object)
+{
+  gphpedit_debug(DEBUG_DOC_MANAGER);
+  DocumentManager *doc = DOCUMENT_MANAGER(object);
+  DocumentManagerDetails *docdet;
+  docdet = DOCUMENT_MANAGER_GET_PRIVATE(doc);
+  /* save current session */
+  document_manager_session_save(DOCUMENT_MANAGER(object));
+  /* free class data */
+  G_OBJECT_CLASS (document_manager_parent_class)->dispose (object);
+}
 
 static void
 document_manager_class_init (DocumentManagerClass *klass)
@@ -98,6 +110,7 @@ document_manager_class_init (DocumentManagerClass *klass)
 
   object_class = G_OBJECT_CLASS (klass);
   object_class->finalize = document_manager_finalize;
+  object_class->dispose = document_manager_dispose;
   object_class->constructor = document_manager_constructor;
 
 	signals[NEW_DOCUMENT] =
@@ -141,16 +154,14 @@ document_manager_finalize (GObject *object)
   docdet = DOCUMENT_MANAGER_GET_PRIVATE(doc);
   /* save current session */
   document_manager_session_save(DOCUMENT_MANAGER(object));
-  document_manager_close_all_tabs(doc);  
+  document_manager_close_all_tabs(doc);
   //free class data
   G_OBJECT_CLASS (document_manager_parent_class)->finalize (object);
 }
 
 DocumentManager *document_manager_new (void)
 {
-	DocumentManager *doc;
-  doc = g_object_new (DOCUMENT_MANAGER_TYPE, NULL);
-	return doc; /* return new object */
+  return g_object_new (DOCUMENT_MANAGER_TYPE, NULL);
 }
 
 DocumentManager *document_manager_new_full (char **argv, gint argc)

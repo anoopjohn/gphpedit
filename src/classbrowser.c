@@ -101,11 +101,10 @@ static void gphpedit_classbrowser_dispose (GObject *object)
 {
   if(!object) return;
   gphpeditClassBrowserPrivate *priv;
-
   priv = CLASSBROWSER_BACKEND_GET_PRIVATE(object);
   g_object_unref(priv->symbolmg);
   g_object_unref(priv->prefmg);
-  g_object_unref(priv->docmg);
+//  g_object_unref(priv->docmg); //FIXME
 
   G_OBJECT_CLASS (gphpedit_classbrowser_parent_class)->dispose (object);
 }
@@ -115,7 +114,6 @@ gphpedit_classbrowser_class_init (gphpeditClassBrowserClass *klass)
 {
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
   object_class->dispose = gphpedit_classbrowser_dispose;
-	
   g_type_class_add_private (object_class, sizeof(gphpeditClassBrowserPrivate));
 }
 
