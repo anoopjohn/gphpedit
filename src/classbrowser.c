@@ -40,6 +40,7 @@ struct _gphpeditClassBrowserPrivate
 {
   GtkWidget *classbrowser;
   GtkBuilder *builder;
+  SymbolManager *symbolmg;
 
   //Checkbox above treeview to parse only the current tab  
   GtkWidget *chkOnlyCurFileFuncs;
@@ -56,7 +57,6 @@ struct _gphpeditClassBrowserPrivate
   GtkWidget *label1;
 
   GtkTreeModel *cache_model;
-
   gulong  handlerid;
 };
 
@@ -76,15 +76,15 @@ enum {
 #define CB_ITEM_TYPE_CLASS_METHOD 2
 #define CB_ITEM_TYPE_FUNCTION 3
 
-void classbrowser_set_sortable(GtkTreeStore *classtreestore);
-gint on_parse_current_click (GtkWidget *widget, gpointer user_data);
-void sdb_update_cb (SymbolManager *symbolmg, gpointer user_data);
+static void classbrowser_set_sortable(GtkTreeStore *classtreestore);
+static gint on_parse_current_click (GtkWidget *widget, gpointer user_data);
+static void sdb_update_cb (SymbolManager *symbolmg, gpointer user_data);
 
-void classbrowser_function_add (gpointer data, gpointer user_data);
-void classbrowser_class_add (gpointer data, gpointer user_data);
-gint treeview_double_click(GtkWidget *widget, GdkEventButton *event, gpointer func_data);
-gint treeview_click_release(GtkWidget *widget, GdkEventButton *event, gpointer func_data);
-void classbrowser_update_selected_label(gphpeditClassBrowserPrivate *priv, gchar *filename, gint line);
+static void classbrowser_function_add (gpointer data, gpointer user_data);
+static void classbrowser_class_add (gpointer data, gpointer user_data);
+static gint treeview_double_click(GtkWidget *widget, GdkEventButton *event, gpointer func_data);
+static gint treeview_click_release(GtkWidget *widget, GdkEventButton *event, gpointer func_data);
+static void classbrowser_update_selected_label(gphpeditClassBrowserPrivate *priv, gchar *filename, gint line);
 
 #define CLASSBROWSER_BACKEND_GET_PRIVATE(object)(G_TYPE_INSTANCE_GET_PRIVATE ((object),\
 					    GPHPEDIT_TYPE_CLASSBROWSER,\
@@ -100,6 +100,7 @@ static void gphpedit_classbrowser_dispose (GObject *object)
   gphpeditClassBrowserPrivate *priv;
 
   priv = CLASSBROWSER_BACKEND_GET_PRIVATE(object);
+  g_object_unref(priv->symbolmg);
 
   G_OBJECT_CLASS (gphpedit_classbrowser_parent_class)->dispose (object);
 }
@@ -125,8 +126,9 @@ gphpedit_classbrowser_init (gphpeditClassBrowser *button)
   GtkTreeViewColumn *column;
 
   gphpeditClassBrowserPrivate *priv = CLASSBROWSER_BACKEND_GET_PRIVATE(button);
- 
-  g_signal_connect(main_window.symbolmg, "update", G_CALLBACK(sdb_update_cb), priv);
+
+  priv->symbolmg = symbol_manager_new (); 
+  g_signal_connect(priv->symbolmg, "update", G_CALLBACK(sdb_update_cb), priv);
 
   priv->builder = gtk_builder_new ();
   GError *error = NULL;
@@ -185,27 +187,24 @@ gphpedit_classbrowser_init (gphpeditClassBrowser *button)
 GtkWidget *
 gphpedit_classbrowser_new (void)
 {
-	gphpeditClassBrowser *button;
-
-	button = g_object_new (GPHPEDIT_TYPE_CLASSBROWSER, NULL);
-
-	return GTK_WIDGET (button);
+  return g_object_new (GPHPEDIT_TYPE_CLASSBROWSER, NULL);
 }
 
 /*
 * function to refresh treeview when the parse only current file checkbox is clicked
 * or when the checkbox is clicked and the files tabbar is clicked
 */
-gint on_parse_current_click (GtkWidget *widget, gpointer user_data)
+static gint on_parse_current_click (GtkWidget *widget, gpointer user_data)
 {
+  gphpeditClassBrowserPrivate *priv = (gphpeditClassBrowserPrivate *) user_data;
   g_object_set (main_window.prefmg, "parse_only_current_file", gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget)), NULL);
-  sdb_update_cb (main_window.symbolmg, user_data);
+  sdb_update_cb (priv->symbolmg, priv);
   return 0;
 }
 
 
 //compare function names of the iter of the gtktreeview
-gint classbrowser_compare_function_names(GtkTreeModel *model,
+static gint classbrowser_compare_function_names(GtkTreeModel *model,
                     GtkTreeIter *a,
                     GtkTreeIter *b,
                     gpointer user_data)
@@ -229,7 +228,7 @@ gint classbrowser_compare_function_names(GtkTreeModel *model,
  *
  */
 
-void classbrowser_set_sortable(GtkTreeStore *classtreestore)
+static void classbrowser_set_sortable(GtkTreeStore *classtreestore)
 {
   gtk_tree_sortable_set_default_sort_func(GTK_TREE_SORTABLE(classtreestore), 
     classbrowser_compare_function_names, NULL,NULL);
@@ -250,7 +249,7 @@ static void classbrowser_clear_model (gphpeditClassBrowserPrivate *priv)
   }
 }
 
-GtkTreeModel *classbrowser_get_model(gphpeditClassBrowserPrivate *priv)
+static GtkTreeModel *classbrowser_get_model(gphpeditClassBrowserPrivate *priv)
 {
   if (priv->front==0) {
     return GTK_TREE_MODEL(priv->classtreestore);
@@ -265,7 +264,7 @@ GtkTreeModel *classbrowser_get_model(gphpeditClassBrowserPrivate *priv)
 * Then when load is finished we change the current model for the new one.
 * doing this we avoid flicker when we update the classbrowser.
 */
-void sdb_update_cb (SymbolManager *symbolmg, gpointer user_data)
+static void sdb_update_cb (SymbolManager *symbolmg, gpointer user_data)
 {
   gphpedit_debug(DEBUG_CLASSBROWSER);
   gphpeditClassBrowserPrivate *priv= (gphpeditClassBrowserPrivate *) user_data;
@@ -317,7 +316,7 @@ void sdb_update_cb (SymbolManager *symbolmg, gpointer user_data)
   priv->front=!priv->front; /* change model */
 }
 
-gboolean classbrowser_classid_to_iter(GtkTreeModel *model, guint classid, GtkTreeIter *iter)
+static gboolean classbrowser_classid_to_iter(GtkTreeModel *model, guint classid, GtkTreeIter *iter)
 {
   guint id;
   gboolean found;
@@ -335,7 +334,7 @@ gboolean classbrowser_classid_to_iter(GtkTreeModel *model, guint classid, GtkTre
   return FALSE;
 }
 
-GString *get_function_decl(ClassBrowserFunction *function)
+static GString *get_function_decl(ClassBrowserFunction *function)
 {
   GString *function_decl;
   function_decl = g_string_new(function->functionname);
@@ -353,7 +352,7 @@ GString *get_function_decl(ClassBrowserFunction *function)
 * classbrowser_function_add
 * add a function to the tree model
 */
-void classbrowser_function_add (gpointer data, gpointer user_data)
+static void classbrowser_function_add (gpointer data, gpointer user_data)
 {
   gphpedit_debug(DEBUG_CLASSBROWSER);
   ClassBrowserFunction *function= (ClassBrowserFunction *) data;
@@ -383,7 +382,7 @@ void classbrowser_function_add (gpointer data, gpointer user_data)
     g_string_free(function_decl, TRUE);
 }
 
-gboolean classbrowser_class_find_before_position(GtkTreeModel *model, gchar *classname, GtkTreeIter *iter)
+static gboolean classbrowser_class_find_before_position(GtkTreeModel *model, gchar *classname, GtkTreeIter *iter)
 {
   gboolean found;
   gchar *classnamefound;
@@ -413,7 +412,7 @@ gboolean classbrowser_class_find_before_position(GtkTreeModel *model, gchar *cla
 * add a class to the tree model
 */
 
-void classbrowser_class_add (gpointer data, gpointer user_data)
+static void classbrowser_class_add (gpointer data, gpointer user_data)
 {
   gphpedit_debug(DEBUG_CLASSBROWSER);
   ClassBrowserClass *class= (ClassBrowserClass *)data;
@@ -441,7 +440,7 @@ void classbrowser_class_add (gpointer data, gpointer user_data)
 * treeview_double_click (internal)
 * process double click signal
 */
-gint treeview_double_click(GtkWidget *widget, GdkEventButton *event, gpointer func_data)
+static gint treeview_double_click(GtkWidget *widget, GdkEventButton *event, gpointer func_data)
 {
   gphpeditClassBrowserPrivate *priv= (gphpeditClassBrowserPrivate *) func_data;
   GtkTreeIter iter;
@@ -461,7 +460,7 @@ gint treeview_double_click(GtkWidget *widget, GdkEventButton *event, gpointer fu
   return FALSE;
 }
 
-gint treeview_click_release(GtkWidget *widget, GdkEventButton *event, gpointer func_data)
+static gint treeview_click_release(GtkWidget *widget, GdkEventButton *event, gpointer func_data)
 {
   gphpeditClassBrowserPrivate *priv= (gphpeditClassBrowserPrivate *) func_data;
   GtkTreeIter iter;
@@ -489,19 +488,19 @@ void classbrowser_update(gphpeditClassBrowser *classbrowser)
 {
   gphpedit_debug(DEBUG_CLASSBROWSER);
   if (!classbrowser) return ;
-	gphpeditClassBrowserPrivate *priv;
-	priv = CLASSBROWSER_BACKEND_GET_PRIVATE(classbrowser);
+  gphpeditClassBrowserPrivate *priv;
+  priv = CLASSBROWSER_BACKEND_GET_PRIVATE(classbrowser);
   /* update FILE: label text */
   GtkTreeIter iter;
   if (!gtk_tree_selection_get_selected (priv->classtreeselect, NULL, &iter)) {
       gtk_label_set_text(GTK_LABEL(priv->treeviewlabel), _("FILE:"));
   }
   if (document_manager_get_document_count (main_window.docmg)) {
-    sdb_update_cb (main_window.symbolmg, priv);
+    sdb_update_cb (priv->symbolmg, priv);
   }
 }
 
-void classbrowser_update_selected_label(gphpeditClassBrowserPrivate *priv, gchar *filename, gint line)
+static void classbrowser_update_selected_label(gphpeditClassBrowserPrivate *priv, gchar *filename, gint line)
 {
   if(filename) {
     gchar *basename = filename_get_basename(filename);
