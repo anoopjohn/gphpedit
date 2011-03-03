@@ -94,27 +94,25 @@ void classbrowser_update_selected_label(gphpeditClassBrowserPrivate *priv, gchar
 G_DEFINE_TYPE(gphpeditClassBrowser, gphpedit_classbrowser, GTK_TYPE_VBOX);
 
 
-static void
-gphpedit_classbrowser_destroy (GtkObject *object)
+static void gphpedit_classbrowser_dispose (GObject *object)
 {
   if(!object) return;
-	gphpeditClassBrowserPrivate *priv;
+  gphpeditClassBrowserPrivate *priv;
 
-	priv = CLASSBROWSER_BACKEND_GET_PRIVATE(object);
+  priv = CLASSBROWSER_BACKEND_GET_PRIVATE(object);
 
   if (priv->builder) g_object_unref(priv->builder);
 
-	GTK_OBJECT_CLASS (gphpedit_classbrowser_parent_class)->destroy (object);
+  G_OBJECT_CLASS (gphpedit_classbrowser_parent_class)->dispose (object);
 }
 
 static void 
 gphpedit_classbrowser_class_init (gphpeditClassBrowserClass *klass)
 {
-	GObjectClass   *object_class = G_OBJECT_CLASS (klass);
-	GtkObjectClass *gtkobject_class = GTK_OBJECT_CLASS (klass);
-	gtkobject_class->destroy = gphpedit_classbrowser_destroy;
+  GObjectClass *object_class = G_OBJECT_CLASS (klass);
+  object_class->dispose = gphpedit_classbrowser_dispose;
 	
-	g_type_class_add_private (object_class, sizeof(gphpeditClassBrowserPrivate));
+  g_type_class_add_private (object_class, sizeof(gphpeditClassBrowserPrivate));
 }
 
 /*
