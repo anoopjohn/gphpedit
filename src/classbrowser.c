@@ -27,9 +27,10 @@
 #include <gdk/gdkkeysyms.h>
 
 #include "classbrowser.h"
-#include "main_window.h"
 #include "gvfs_utils.h"
 #include "symbol_manager.h"
+#include "preferences_manager.h"
+#include "document_manager.h"
 
 
 /* functions */
@@ -42,6 +43,7 @@ struct _gphpeditClassBrowserPrivate
   GtkBuilder *builder;
   SymbolManager *symbolmg;
   PreferencesManager *prefmg;
+  DocumentManager *docmg;
 
   //Checkbox above treeview to parse only the current tab  
   GtkWidget *chkOnlyCurFileFuncs;
@@ -103,6 +105,7 @@ static void gphpedit_classbrowser_dispose (GObject *object)
   priv = CLASSBROWSER_BACKEND_GET_PRIVATE(object);
   g_object_unref(priv->symbolmg);
   g_object_unref(priv->prefmg);
+  g_object_unref(priv->docmg);
 
   G_OBJECT_CLASS (gphpedit_classbrowser_parent_class)->dispose (object);
 }
@@ -133,7 +136,7 @@ gphpedit_classbrowser_init (gphpeditClassBrowser *button)
   g_signal_connect(priv->symbolmg, "update", G_CALLBACK(sdb_update_cb), priv);
 
   priv->prefmg = preferences_manager_new ();
-
+  priv->docmg = document_manager_new ();
   priv->builder = gtk_builder_new ();
   GError *error = NULL;
   guint res = gtk_builder_add_from_file (priv->builder, GPHPEDIT_UI_DIR "/classbrowser.ui", &error);
@@ -288,7 +291,7 @@ static void sdb_update_cb (SymbolManager *symbolmg, gpointer user_data)
   }
   classbrowser_clear_model (priv);
 
-  Documentable *doc = document_manager_get_current_documentable(main_window.docmg);
+  Documentable *doc = document_manager_get_current_documentable(priv->docmg);
   guint doc_type;
   g_object_get(doc, "type", &doc_type, NULL);
 
@@ -456,7 +459,7 @@ static gint treeview_double_click(GtkWidget *widget, GdkEventButton *event, gpoi
       if (gtk_tree_selection_get_selected (priv->classtreeselect, NULL, &iter)) {
           gtk_tree_model_get (GTK_TREE_MODEL(priv->new_model), &iter, FILENAME_COLUMN, &filename, LINE_NUMBER_COLUMN, &line_number, -1);
         if (filename) {
-          document_manager_switch_to_file_or_open(main_window.docmg, filename, line_number);
+          document_manager_switch_to_file_or_open(priv->docmg, filename, line_number);
           g_free (filename);
         }
       }
@@ -479,7 +482,7 @@ static gint treeview_click_release(GtkWidget *widget, GdkEventButton *event, gpo
     }
   }
   /* go to position */
-  documentable_scroll_to_current_pos(document_manager_get_current_documentable(main_window.docmg));
+  documentable_scroll_to_current_pos(document_manager_get_current_documentable(priv->docmg));
  
   return FALSE;
 }
@@ -499,7 +502,7 @@ void classbrowser_update(gphpeditClassBrowser *classbrowser)
   if (!gtk_tree_selection_get_selected (priv->classtreeselect, NULL, &iter)) {
       gtk_label_set_text(GTK_LABEL(priv->treeviewlabel), _("FILE:"));
   }
-  if (document_manager_get_document_count (main_window.docmg)) {
+  if (document_manager_get_document_count (priv->docmg)) {
     sdb_update_cb (priv->symbolmg, priv);
   }
 }
