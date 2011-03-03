@@ -608,6 +608,11 @@ gint document_manager_get_document_count (DocumentManager *docmg)
   return g_slist_length(docmgdet->editors);
 }
 
+static void close_tab (gpointer data, gpointer user_data)
+{
+  document_manager_close_page(DOCUMENT_MANAGER(user_data), data);
+}
+
 // This procedure relies on the fact that all tabs will be closed without prompting
 // for whether they need saving beforehand.  If in doubt, call can_all_tabs_be_saved
 // and pay attention to the return value.
@@ -616,17 +621,10 @@ void document_manager_close_all_tabs(DocumentManager *docmg)
   gphpedit_debug(DEBUG_DOC_MANAGER);
   if (!docmg) return ;
   DocumentManagerDetails *docmgdet = DOCUMENT_MANAGER_GET_PRIVATE(docmg);
-  GSList *walk;
-  Document *document;
-
-  for(walk = docmgdet->editors; walk!= NULL; walk = g_slist_next(walk)) {
-    document = walk->data;
-    if (document) {
-     document_manager_close_page(docmg, document);
-    }
-  }
+  if (!docmgdet->editors) return;
+  g_slist_foreach (docmgdet->editors, close_tab, docmg);
   docmgdet->editors = NULL;
-  docmgdet->current_document=NULL;
+  docmgdet->current_document = NULL;
 }
 
 // Returns true if all tabs are either saved or closed
