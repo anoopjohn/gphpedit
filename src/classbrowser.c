@@ -41,6 +41,7 @@ struct _gphpeditClassBrowserPrivate
   GtkWidget *classbrowser;
   GtkBuilder *builder;
   SymbolManager *symbolmg;
+  PreferencesManager *prefmg;
 
   //Checkbox above treeview to parse only the current tab  
   GtkWidget *chkOnlyCurFileFuncs;
@@ -101,6 +102,7 @@ static void gphpedit_classbrowser_dispose (GObject *object)
 
   priv = CLASSBROWSER_BACKEND_GET_PRIVATE(object);
   g_object_unref(priv->symbolmg);
+  g_object_unref(priv->prefmg);
 
   G_OBJECT_CLASS (gphpedit_classbrowser_parent_class)->dispose (object);
 }
@@ -130,6 +132,8 @@ gphpedit_classbrowser_init (gphpeditClassBrowser *button)
   priv->symbolmg = symbol_manager_new (); 
   g_signal_connect(priv->symbolmg, "update", G_CALLBACK(sdb_update_cb), priv);
 
+  priv->prefmg = preferences_manager_new ();
+
   priv->builder = gtk_builder_new ();
   GError *error = NULL;
   guint res = gtk_builder_add_from_file (priv->builder, GPHPEDIT_UI_DIR "/classbrowser.ui", &error);
@@ -146,7 +150,7 @@ gphpedit_classbrowser_init (gphpeditClassBrowser *button)
   priv->chkOnlyCurFileFuncs = GTK_WIDGET(gtk_builder_get_object (priv->builder, "only_current_file"));
 
   gboolean active;
-  g_object_get (main_window.prefmg, "parse_only_current_file", &active, NULL);
+  g_object_get (priv->prefmg, "parse_only_current_file", &active, NULL);
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON(priv->chkOnlyCurFileFuncs), active);
   g_signal_connect (G_OBJECT (priv->chkOnlyCurFileFuncs), "clicked",
             G_CALLBACK (on_parse_current_click), priv);
@@ -197,7 +201,7 @@ gphpedit_classbrowser_new (void)
 static gint on_parse_current_click (GtkWidget *widget, gpointer user_data)
 {
   gphpeditClassBrowserPrivate *priv = (gphpeditClassBrowserPrivate *) user_data;
-  g_object_set (main_window.prefmg, "parse_only_current_file", gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget)), NULL);
+  g_object_set (priv->prefmg, "parse_only_current_file", gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget)), NULL);
   sdb_update_cb (priv->symbolmg, priv);
   return 0;
 }
@@ -274,7 +278,7 @@ static void sdb_update_cb (SymbolManager *symbolmg, gpointer user_data)
   GList *class_list = NULL;
   GList *func_list = NULL;
 
-  g_object_get(main_window.prefmg, "side_panel_hidden", &hidden, NULL);
+  g_object_get(priv->prefmg, "side_panel_hidden", &hidden, NULL);
   if(hidden) return ;
   if (press_event && g_signal_handler_is_connected (priv->classtreeview, press_event)) {
     g_signal_handler_disconnect(priv->classtreeview, press_event);
@@ -289,7 +293,7 @@ static void sdb_update_cb (SymbolManager *symbolmg, gpointer user_data)
   g_object_get(doc, "type", &doc_type, NULL);
 
   gboolean active;
-  g_object_get (main_window.prefmg, "parse_only_current_file", &active, NULL);
+  g_object_get (priv->prefmg, "parse_only_current_file", &active, NULL);
 
   if (active) {
     gchar *filename = documentable_get_filename(doc);
