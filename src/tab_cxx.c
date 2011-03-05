@@ -24,7 +24,6 @@
 */
 
 #include "tab_cxx.h"
-#include "tab_util.h"
 #include "preferences_manager.h"
 #include "main_window.h"
 #include "gtksourcestyleschememanager.h"
@@ -67,9 +66,6 @@ void scintilla_cxx_set_lexer(GtkScintilla *scintilla)
   set_scintilla_lexer_xml_atribute_style(GTK_WIDGET(scintilla), scheme, SCE_C_VERBATIM, font, size);
   set_scintilla_lexer_xml_instruction_style(GTK_WIDGET(scintilla), scheme, SCE_C_GLOBALCLASS, font, size);
 
-  gtk_scintilla_indic_set_style(scintilla, 0, INDIC_SQUIGGLE);
-  gtk_scintilla_indic_set_fore(scintilla, 0, scintilla_color(255,0,0));
-
   gtk_scintilla_set_property(scintilla, "lexer.cpp.allow.dollars", "1");
   gtk_scintilla_set_property(scintilla, "fold.comment", "1");
   gtk_scintilla_set_property(scintilla, "fold.preprocessor", "1");
@@ -93,14 +89,3 @@ gboolean is_cxx_file(const gchar *filename)
       return TRUE;
   return FALSE;
 }
-
-gboolean is_cxx_char_autoindent(char ch)
-{
-  return (ch=='{');
-}
-
-gboolean is_cxx_char_autounindent(char ch)
-{
-  return (ch=='}');
-}
-

@@ -24,7 +24,6 @@
 */
 
 #include "tab_sql.h"
-#include "tab_util.h"
 #include "preferences_manager.h"
 #include "main_window.h"
 #include "gtksourcestyleschememanager.h"
@@ -81,15 +80,5 @@ gboolean is_sql_file(const gchar *filename)
 {
 if (g_str_has_suffix(filename,".sql"))
       return TRUE;
-  return FALSE;
-}
-
-gboolean is_sql_char_autoindent(char ch)
-{
-  return FALSE;
-}
-
-gboolean is_sql_char_autounindent(char ch)
-{
   return FALSE;
 }

@@ -237,6 +237,16 @@ void document_type_changed_cb (Document *doc, gint type, gpointer user_data)
 	if (doc==docmgdet->current_document) g_signal_emit (G_OBJECT (docmg), signals[CHANGE_DOCUMENT], 0, docmgdet->current_document);
 }
 
+void document_col_changed_cb (Document *doc, gint col, gpointer user_data)
+{
+  gphpedit_statusbar_set_cursor_position (GPHPEDIT_STATUSBAR(main_window.appbar), -1, col);
+}
+
+void document_pos_changed_cb (Document *doc, gint pos, gpointer user_data)
+{
+  gphpedit_statusbar_set_cursor_position (GPHPEDIT_STATUSBAR(main_window.appbar), pos, -1);
+}
+
 void document_need_reload_cb (Document *doc, gpointer user_data)
 {
   gphpedit_debug(DEBUG_DOC_MANAGER);
@@ -245,10 +255,26 @@ void document_need_reload_cb (Document *doc, gpointer user_data)
   document_loader_reload_file(loader, doc);
 }
 
+static void document_ovr_changed_cb (Document *doc, gboolean status, gpointer user_data)
+{
+  gphpedit_statusbar_set_overwrite (GPHPEDIT_STATUSBAR(main_window.appbar), status);
+}
+
+static void document_marker_not_found_cb (Document *doc, gpointer user_data)
+{
+  gphpedit_statusbar_flash_message (GPHPEDIT_STATUSBAR(main_window.appbar),0 , "%s",_("No marker found"));
+}
+
+static void document_open_request_cb (Document *doc, gchar *uri, gpointer user_data)
+{
+  DocumentManager *docmg = DOCUMENT_MANAGER(user_data);
+  document_manager_switch_to_file_or_open(docmg, uri, 0);
+}
+
 void document_loader_done_loading_cb (DocumentLoader *doclod, gboolean result, Document *doc, gpointer user_data)
 {
-	DocumentManager *docmg = DOCUMENT_MANAGER(user_data);
-	DocumentManagerDetails *docmgdet = DOCUMENT_MANAGER_GET_PRIVATE(docmg);
+  DocumentManager *docmg = DOCUMENT_MANAGER(user_data);
+  DocumentManagerDetails *docmgdet = DOCUMENT_MANAGER_GET_PRIVATE(docmg);
   if (result) {
     gboolean untitled;
     docmgdet->editors = g_slist_append(docmgdet->editors, doc);
@@ -264,7 +290,12 @@ void document_loader_done_loading_cb (DocumentLoader *doclod, gboolean result, D
     if (OBJECT_IS_DOCUMENT_SCINTILLA(doc)) {
       g_signal_connect(G_OBJECT(doc), "save_start", G_CALLBACK(document_save_start_cb), NULL);
       g_signal_connect(G_OBJECT(doc), "type_changed", G_CALLBACK(document_type_changed_cb), docmg);
+      g_signal_connect(G_OBJECT(doc), "pos_changed", G_CALLBACK(document_pos_changed_cb), docmg);
+      g_signal_connect(G_OBJECT(doc), "col_changed", G_CALLBACK(document_col_changed_cb), docmg);
       g_signal_connect(G_OBJECT(doc), "need_reload", G_CALLBACK(document_need_reload_cb), docmg);
+      g_signal_connect(G_OBJECT(doc), "ovr_changed", G_CALLBACK(document_ovr_changed_cb), NULL);
+      g_signal_connect(G_OBJECT(doc), "marker_not_found", G_CALLBACK(document_marker_not_found_cb), NULL);
+      g_signal_connect(G_OBJECT(doc), "open_request", G_CALLBACK(document_open_request_cb), docmg);
     }
     g_signal_emit (G_OBJECT (docmg), signals[NEW_DOCUMENT], 0, doc);
     gtk_widget_grab_focus(document_widget);
@@ -440,7 +471,7 @@ void document_manager_session_reopen(DocumentManager *docmg)
           *preview:function\n
 
         */
-        str_replace(filename, 10, 0);
+	filename = g_strdelimit (filename, "\n", 0);
         if (filename[0]=='*') {
           filename++;
           focus_this_one = TRUE;

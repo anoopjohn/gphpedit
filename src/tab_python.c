@@ -24,7 +24,6 @@
 */
 
 #include "tab_python.h"
-#include "tab_util.h"
 #include "preferences_manager.h"
 #include "main_window.h"
 #include "gtksourcestyleschememanager.h"
@@ -88,15 +87,3 @@ gboolean is_python_file(const gchar *filename)
       return TRUE;
   return FALSE;
 }
-
-gboolean is_python_char_autoindent(char ch)
-{
-  return (ch==':' || ch== 92 /* / */);
-}
-
-gboolean is_python_char_autounindent(char ch)
-{
-//FIXME
-  return FALSE;
-}
-

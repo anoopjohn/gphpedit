@@ -25,9 +25,9 @@
 #ifndef DOCUMENT_SCINTILLA_H
 #define DOCUMENT_SCINTILLA_H
 
-#include <gtk/gtk.h>
 #include <gtkscintilla.h>
-#include "documentable.h"
+#include "document.h"
+
 #define DOCUMENT_SCINTILLA_TYPE document_scintilla_get_type()
 #define DOCUMENT_SCINTILLA(obj) \
   (G_TYPE_CHECK_INSTANCE_CAST ((obj), DOCUMENT_SCINTILLA_TYPE, Document_Scintilla))
@@ -44,17 +44,19 @@ typedef struct Document_ScintillaDetails Document_ScintillaDetails;
 
 typedef struct
 {
-	GObject object;
+	Document parent;
 	Document_ScintillaDetails *details;
 } Document_Scintilla;
 
 typedef struct
 {
-	GObjectClass parent_class;
+	DocumentClass parent_class;
 
 	void (* load_complete) (Document_Scintilla *doc, gboolean result, gpointer user_data);
 	void (* save_update) (Document_Scintilla *doc, gpointer user_data); /* emited when document_scintilla save state change*/
 	void (* type_changed) (Document_Scintilla *doc, gint type, gpointer user_data);
+	void (* ovr_changed) (Document_Scintilla *doc, gboolean status, gpointer user_data);
+	void (* open_request) (Document_Scintilla *doc, const gchar *uri, gpointer user_data);
 
 } Document_ScintillaClass;
 

@@ -3,7 +3,7 @@
 ##
 ##  Copyright (C) 2003, 2004, 2005 Andy Jeffries <andy at gphpedit.org>
 ##  Copyright (C) 2009 Anoop John <anoop dot john at zyxware.com>
-##  Copyright (C) 2010 - Jose Rostagno
+##  Copyright (C) 2010, 2011 - Jose Rostagno
 ##
 ##  For more information or to find the latest release, visit our
 ##  website at http://www.gphpedit.org/
@@ -42,8 +42,6 @@ AM_CFLAGS = \
 
 nodist_EXTRA_gphpedit_SOURCES = dummy.cxx
 gphpedit_SOURCES = \
-  classbrowser_parse.c \
-  classbrowser_parse.h \
   classbrowser.c \
   classbrowser.h \
   debug.c \
@@ -62,6 +60,23 @@ gphpedit_SOURCES = \
   document_saver.h \
   document_manager.c \
   document_manager.h \
+  language_provider.c \
+  language_provider.h \
+  language_css.c \
+  language_css.h \
+  language_cxx.c \
+  language_cxx.h \
+  language_cobol.c \
+  language_cobol.h \
+  language_sql.c \
+  language_sql.h \
+  language_perl.c \
+  language_perl.h \
+  language_python.c \
+  language_python.h \
+  language_php.c \
+  language_php.h \
+  languages.h \
   edit_template.c \
   edit_template.h \
   filebrowser_backend.c \
@@ -117,6 +132,8 @@ gphpedit_SOURCES = \
   symbol_bd_utils.h \
   symbol_bd_php.c \
   symbol_bd_php.h \
+  symbol_bd_php_parse.c \
+  symbol_bd_php_parse.h \
   symbol_bd_cobol.c \
   symbol_bd_cobol.h \
   symbol_bd_css.c \
@@ -151,8 +168,6 @@ gphpedit_SOURCES = \
   tab_python.h \
   tab_sql.c \
   tab_sql.h \
-  tab_util.c \
-  tab_util.h \
   templates.c \
   templates.h \
   templates_editor.c \

@@ -52,8 +52,8 @@ struct SymbolManagerDetails
 
 /* object signal enumeration */
 enum {
-	UPDATE,
-	LAST_SIGNAL
+  UPDATE,
+  LAST_SIGNAL
 };
 
 static guint signals[LAST_SIGNAL];
@@ -98,7 +98,7 @@ void symbol_manager_finalize (GObject *object)
 {
   SymbolManager *symbolmg = SYMBOL_MANAGER(object);
   SymbolManagerDetails *symbolmgdet;
-	symbolmgdet = SYMBOL_MANAGER_GET_PRIVATE(symbolmg);
+  symbolmgdet = SYMBOL_MANAGER_GET_PRIVATE(symbolmg);
 
   if (symbolmgdet->sbd_php) g_object_unref(symbolmgdet->sbd_php);
   if (symbolmgdet->sbd_cobol) g_object_unref(symbolmgdet->sbd_cobol);
@@ -115,11 +115,11 @@ void symbol_manager_finalize (GObject *object)
 void
 symbol_manager_class_init (SymbolManagerClass *klass)
 {
-	GObjectClass *object_class;
+  GObjectClass *object_class;
 
-	object_class = G_OBJECT_CLASS (klass);
+  object_class = G_OBJECT_CLASS (klass);
   object_class->constructor = symbol_manager_constructor;
-	object_class->finalize = symbol_manager_finalize;
+  object_class->finalize = symbol_manager_finalize;
 
   /*
   * UPDATE:
@@ -135,7 +135,7 @@ symbol_manager_class_init (SymbolManagerClass *klass)
 		               g_cclosure_marshal_VOID__VOID ,
 		               G_TYPE_NONE, 0);
 
-	g_type_class_add_private (klass, sizeof (SymbolManagerDetails));
+  g_type_class_add_private (klass, sizeof (SymbolManagerDetails));
 }
 
 static void sdb_symbolizable_update_cb (Symbolizable *sbd, gpointer user_data)
@@ -147,7 +147,7 @@ void
 symbol_manager_init (SymbolManager *symbolmg)
 {
   SymbolManagerDetails *symbolmgdet;
-	symbolmgdet = SYMBOL_MANAGER_GET_PRIVATE(symbolmg);
+  symbolmgdet = SYMBOL_MANAGER_GET_PRIVATE(symbolmg);
 
   /* add symbol_bd objects */
   symbolmgdet->sbd_php = symbol_bd_php_new ();
@@ -168,16 +168,16 @@ symbol_manager_init (SymbolManager *symbolmg)
 
 SymbolManager *symbol_manager_new (void)
 {
-	SymbolManager *symbolmg;
+  SymbolManager *symbolmg;
   symbolmg = g_object_new (SYMBOL_MANAGER_TYPE, NULL);
 
-	return symbolmg; /* return new object */
+  return symbolmg; /* return new object */
 }
 
 static Symbolizable *symbol_manager_get_symbolizable_for_type(SymbolManager *symbolmg, gint ftype)
 {
   SymbolManagerDetails *symbolmgdet;
-	symbolmgdet = SYMBOL_MANAGER_GET_PRIVATE(symbolmg);
+  symbolmgdet = SYMBOL_MANAGER_GET_PRIVATE(symbolmg);
 
   Symbolizable *result;
   switch(ftype) {
@@ -334,4 +334,3 @@ void symbol_manager_add_file (SymbolManager *symbolmg, gchar *filename, gint fty
   if (!result) return ;
   symbolizable_add_file (result, filename);
 }
-

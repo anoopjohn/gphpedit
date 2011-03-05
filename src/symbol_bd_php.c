@@ -31,7 +31,7 @@
 #include "symbolizable.h"
 #include "symbol_bd_php.h"
 #include "symbol_bd_utils.h"
-#include "classbrowser_parse.h"
+#include "symbol_bd_php_parse.h"
 
 
 /*

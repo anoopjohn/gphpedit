@@ -23,10 +23,9 @@
    The GNU General Public License is contained in the file COPYING.
 */
 
-#include <stdlib.h>
+#include <string.h>
 
 #include "tab_php.h"
-#include "tab_util.h"
 #include "preferences_manager.h"
 #include "main_window.h"
 #include "gtksourcestyleschememanager.h"
@@ -179,38 +178,4 @@ gboolean is_php_file_from_content(const gchar *content)
     g_strfreev(lines);
   }
   return is_php;
-}
-
-gboolean is_php_char_autoindent(char ch)
-{
-  return (ch == '{');
-}
-
-gboolean is_php_char_autounindent(char ch)
-{
-  return (ch == '}');
-}
-
-/*
- * gboolean check_variable_before(const gchar *line_text)
- * check if there is a valid php variable has suffix in the gchar input
- * something like this "p$sk->" return FALSE
- * $this-> return TRUE
- * $var($this-> return TRUE
- * $var[$this-> return TRUE
- */
-gboolean check_php_variable_before(const gchar *line_text)
-{
-  gboolean r=FALSE;
-  int i;
-  if (!strchr(line_text,'$')) return r;
-  for (i=strlen(line_text)-1;i>=0;i--){
-    if (*(line_text+i)==';') break;
-    if (*(line_text+i)==' ') break;
-    if (*(line_text+i)=='$' && (*(line_text+i-1)==' ' || *(line_text+i-1)=='(' || *(line_text+i-1)=='[' || i==0)){  
-    r=TRUE; 
-    break;
-    }
-  }
-  return r;
 }

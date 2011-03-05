@@ -24,7 +24,6 @@
 */
 
 #include "tab_perl.h"
-#include "tab_util.h"
 #include "preferences_manager.h"
 #include "main_window.h"
 #include "gtksourcestyleschememanager.h"
@@ -106,14 +105,3 @@ gboolean is_perl_file(const gchar *filename)
       return TRUE;
   return FALSE;
 }
-
-gboolean is_perl_char_autoindent(char ch)
-{
-  return (ch == '{');
-}
-
-gboolean is_perl_char_autounindent(char ch)
-{
-  return (ch == '}');
-}
-

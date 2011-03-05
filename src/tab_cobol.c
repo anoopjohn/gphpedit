@@ -24,7 +24,6 @@
 */
 
 #include "tab_php.h"
-#include "tab_util.h"
 #include "preferences_manager.h"
 #include "main_window.h"
 #include "gtksourcestyleschememanager.h"
@@ -83,46 +82,4 @@ gboolean is_cobol_file(const gchar *filename)
   if (g_str_has_suffix(filename,".cbl") || g_str_has_suffix(filename,".CBL"))
       return TRUE;
   return FALSE;
-}
-
-gboolean is_cobol_char_autoindent(char ch)
-{
-  return FALSE;
-}
-
-gboolean is_cobol_char_autounindent(char ch)
-{
-  return FALSE;
-}
-
-gboolean is_cobol_banned_word(gchar *word)
-{
-  if(!word) return TRUE;
-  gboolean result = FALSE;
-  if (g_strcmp0(word,"AUTHOR")==0) {
-    result = TRUE;
-  } else if (g_strcmp0(word,"OBJECT-COMPUTER")==0) {
-    result = TRUE;
-  } else if (g_strcmp0(word,"DATE-WRITTEN")==0) {
-    result = TRUE;
-  } else if (g_strcmp0(word,"PROGRAM-ID")==0) {
-    result = TRUE;
-  } else if (g_strcmp0(word,"SOURCE-COMPUTER")==0) {
-    result = TRUE;
-  } else if (g_strcmp0(word,"END-PERFORM")==0) {
-    result = TRUE;
-  } else if (g_strcmp0(word,"END-EVALUATE")==0) {
-    result = TRUE;
-  } else if (g_strcmp0(word,"FILE-CONTROL")==0) {
-    result = TRUE;
-  } else if (g_strcmp0(word,"SPECIAL-NAMES")==0) {
-    result = TRUE;
-  } else if (g_strcmp0(word,"END-IF")==0) {
-    result = TRUE;
-  } else if (g_strcmp0(word,"END-START")==0) {
-    result = TRUE;
-  } else if (g_strcmp0(word,"REQUIRED")==0) {
-    result = TRUE;
-  }
-  return result;
 }
