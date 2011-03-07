@@ -27,7 +27,5 @@
 
 gboolean is_cobol_file(const gchar *filename)
 {
-  if (g_str_has_suffix(filename,".cbl") || g_str_has_suffix(filename,".CBL"))
-      return TRUE;
-  return FALSE;
+  return (g_str_has_suffix(filename,".cbl") || g_str_has_suffix(filename,".CBL"));
 }
