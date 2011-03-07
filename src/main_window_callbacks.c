@@ -26,7 +26,7 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-#include <stdlib.h>
+//#include <stdlib.h>
 #include <gdk/gdkkeysyms.h>
 
 #include "debug.h"
@@ -615,7 +615,6 @@ void block_indent(GtkWidget *widget)
   documentable_block_indent(document_manager_get_current_documentable(main_window.docmg));
 }
 
-
 void block_unindent(GtkWidget *widget)
 {
   documentable_block_unindent(document_manager_get_current_documentable(main_window.docmg));
@@ -643,7 +642,6 @@ void syntax_check(GtkWidget *widget)
 {
    gtk_syntax_check_window_run_check(GTK_SYNTAX_CHECK_WINDOW(main_window.win), document_manager_get_current_documentable(main_window.docmg));
 }
-
 
 void syntax_check_clear(GtkWidget *widget)
 {
