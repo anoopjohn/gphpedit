@@ -1287,6 +1287,7 @@ static void save_point_reached(GtkWidget *scintilla, gpointer user_data)
     gtk_label_set_text(GTK_LABEL (docdet->label), short_filename);
     /*emit save update signal*/
     g_signal_emit (G_OBJECT (doc), signals[SAVE_UPDATE], 0);
+    g_free(short_filename);
   }
 }
 

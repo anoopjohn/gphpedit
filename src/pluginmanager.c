@@ -89,23 +89,23 @@ plugin_manager_class_init (PluginManagerClass *klass)
 static void
 plugin_manager_init (PluginManager  *object)
 {
-	PluginManagerDetails *plugmgdet;
-	plugmgdet = PLUGIN_MANAGER_GET_PRIVATE(object);
+  PluginManagerDetails *plugmgdet;
+  plugmgdet = PLUGIN_MANAGER_GET_PRIVATE(object);
   /* init plugins table*/
   plugmgdet->plugins_table = g_hash_table_new_full (g_str_hash, g_str_equal, NULL, g_object_unref);
   /* check for plugins directory, if doesn't exist create it */
   GError *error=NULL;
   gchar *uri = g_build_filename (g_get_user_config_dir (), "gphpedit", "plugins", NULL);
   GFile *plugin = g_file_new_for_commandline_arg(uri);
-  if(!g_file_query_exists(plugin,NULL)){
+  if(!g_file_query_exists(plugin, NULL)){
     if (!g_file_make_directory_with_parents (plugin, NULL, &error)){
       if (error->code !=G_IO_ERROR_EXISTS){
         g_print(_("Unable to create ~/.gphpedit/ (%d) %s"), error->code,error->message);
       }
       g_error_free(error);
     }
-    g_object_unref(plugin);
   }
+  g_object_unref(plugin);
   g_free(uri);
 
   plugin_discover_available(object); /* fill plugin table */

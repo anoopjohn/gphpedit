@@ -610,12 +610,6 @@ gboolean on_notebook_focus_tab(GtkNotebook *notebook,
   return TRUE;
 }
 
-void goto_line(gchar *text)
-{
-  Documentable *doc = document_manager_get_current_documentable(main_window.docmg);
-  if (doc) documentable_goto_line(doc, atoi(text));
-}
-
 void block_indent(GtkWidget *widget)
 {
   documentable_block_indent(document_manager_get_current_documentable(main_window.docmg));

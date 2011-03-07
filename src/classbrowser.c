@@ -343,13 +343,11 @@ static GString *get_function_decl(ClassBrowserFunction *function)
 {
   GString *function_decl;
   function_decl = g_string_new(function->functionname);
-//  if (function->file_type!=TAB_COBOL) { /* cobol paragraph don't have params */
     if (function->paramlist) {
       g_string_append_printf(function_decl, "(%s)", function->paramlist);
     } else {
       function_decl = g_string_append(function_decl, "()");
     }
-//  }
   return function_decl;
 }
 

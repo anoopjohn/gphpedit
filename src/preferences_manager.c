@@ -561,7 +561,7 @@ static void force_config_folder(void)
   GError *error=NULL;
   GFile *config;
   gchar *uri = g_build_filename (g_get_user_config_dir (), "gphpedit", NULL);
-  config=g_file_new_for_commandline_arg (uri);
+  config = g_file_new_for_commandline_arg (uri);
   if (!g_file_query_exists(config, NULL)){
     if (!g_file_make_directory (config, NULL, &error)){
       if (error->code !=G_IO_ERROR_EXISTS){
@@ -569,8 +569,8 @@ static void force_config_folder(void)
         }
         g_error_free(error);
       }
-    g_object_unref(config);
   }
+  g_object_unref(config);
   g_free(uri);
 }
 

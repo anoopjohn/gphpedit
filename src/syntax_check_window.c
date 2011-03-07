@@ -43,7 +43,7 @@ struct _GtkSyntaxCheckWindowPrivate
   GtkTreeSelection *lint_select;
 };
 
-#define GTK_SYNTAX_CHECK_WINDOW_GET_PRIVATE(obj)	(G_TYPE_INSTANCE_GET_PRIVATE ((obj), GTK_TYPE_SYNTAX_CHECK_WINDOW, GtkSyntaxCheckWindowPrivate))
+#define GTK_SYNTAX_CHECK_WINDOW_GET_PRIVATE(obj) (G_TYPE_INSTANCE_GET_PRIVATE ((obj), GTK_TYPE_SYNTAX_CHECK_WINDOW, GtkSyntaxCheckWindowPrivate))
 static void
 gtk_syntax_check_window_class_init (GtkSyntaxCheckWindowClass *klass);
 static void
@@ -80,7 +80,7 @@ gtk_syntax_check_window_init (GtkSyntaxCheckWindow *win)
   gtk_container_add (GTK_CONTAINER (priv->scrolledwindow), priv->lint_view);
   priv->lint_renderer = gtk_cell_renderer_text_new ();
   priv->lint_column = gtk_tree_view_column_new_with_attributes (_("Syntax Check Output"),
-                priv->lint_renderer, "text", 0, NULL);
+  priv->lint_renderer, "text", 0, NULL);
   gtk_tree_view_append_column (GTK_TREE_VIEW (priv->lint_view), priv->lint_column);
   gtk_widget_set_size_request (priv->lint_view, 80,80);
   priv->lint_select = gtk_tree_view_get_selection (GTK_TREE_VIEW (priv->lint_view));
@@ -110,6 +110,12 @@ gtk_syntax_check_window_dispose (GObject *object)
   if (priv->lint_store) gtk_list_store_clear(priv->lint_store);
 
   G_OBJECT_CLASS (gtk_syntax_check_window_parent_class)->dispose (object);
+}
+
+static void goto_line(gchar *text)
+{
+  Documentable *doc = document_manager_get_current_documentable(main_window.docmg);
+  if (doc) documentable_goto_line(doc, atoi(text));
 }
 
 void lint_row_activated (GtkTreeSelection *selection, gpointer data)
