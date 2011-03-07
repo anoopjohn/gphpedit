@@ -304,7 +304,7 @@ static void document_scintilla_set_type (Documentable  *doc, gint type)
         case TAB_CSS:
           if (docdet->lgcss) g_object_unref(docdet->lgcss);
           docdet->lgcss = LANGUAGE_PROVIDER(language_css_new (DOCUMENT_SCINTILLA(doc)));
-          tab_css_set_lexer(GTK_SCINTILLA(docdet->scintilla));
+//          tab_css_set_lexer(GTK_SCINTILLA(docdet->scintilla));
           tab_set_folding(document_scintilla, TRUE);
           break;
         case TAB_COBOL:
