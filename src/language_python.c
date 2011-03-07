@@ -28,6 +28,7 @@
 #include "preferences_manager.h"
 #include "language_provider.h"
 #include "symbol_manager.h"
+#include "main_window.h"
 
 /*
 * language_python private struct
@@ -59,6 +60,7 @@ enum
 static void language_python_language_provider_init(Language_ProviderInterface *iface, gpointer user_data);
 static void language_python_trigger_completion (Language_Provider *lgpython, guint ch);
 static void show_calltip (Language_Provider *lgpython);
+static void language_python_setup_lexer(Language_Provider *lgpython);
 
 G_DEFINE_TYPE_WITH_CODE(Language_PYTHON, language_python, G_TYPE_OBJECT,
                         G_IMPLEMENT_INTERFACE (IFACE_TYPE_LANGUAGE_PROVIDER,
@@ -68,6 +70,7 @@ static void language_python_language_provider_init(Language_ProviderInterface *i
 {
   iface->trigger_completion = language_python_trigger_completion;
   iface->show_calltip = show_calltip;
+  iface->setup_lexer = language_python_setup_lexer;
 }
 
 static void
@@ -426,4 +429,52 @@ static void language_python_trigger_completion (Language_Provider *lgpython, gui
         if (member_function_buffer && strlen(member_function_buffer)>=3) show_autocompletion (LANGUAGE_PYTHON(lgpython), current_pos);
         g_free(member_function_buffer);
   }
+}
+
+static void language_python_setup_lexer(Language_Provider *lgpython)
+{
+  g_return_if_fail(lgpython);
+  Language_PYTHONDetails *lgpythondet = LANGUAGE_PYTHON_GET_PRIVATE(lgpython);
+
+  gtk_scintilla_clear_document_style (lgpythondet->sci);
+  gtk_scintilla_set_lexer(lgpythondet->sci, SCLEX_PYTHON);
+  gtk_scintilla_set_style_bits(lgpythondet->sci, 8);
+
+  // Python keywords
+  gtk_scintilla_set_keywords(lgpythondet->sci, 0, "abs all any apply and assert break class continue def del dict dir elif else except exec finally for from global if import  intern in is lambda len None not or pass print raise return try while yield from as with open __import__ self");
+
+  gtk_scintilla_set_keywords(lgpythondet->sci, 1, "Ellipsis NotImplemented ArithmeticError AssertionError AttributeError EnvironmentError EOFError Exception FloatingPointError ImportError IndentationError IndexError IOError KeyboardInterrupt KeyError LookupError MemoryError NameError NotImplementedError OSError OverflowError ReferenceError RuntimeError StandardError StopIteration SyntaxError SystemError SystemExit TabError TypeError UnboundLocalError UnicodeDecodeError UnicodeEncodeError UnicodeError UnicodeTranslateError ValueError WindowsError ZeroDivisionError Warning UserWarning DeprecationWarning PendingDeprecationWarning SyntaxWarning OverflowWarning RuntimeWarning FutureWarning basestring bool buffer callable chr classmethod cmp coerce compile complex delattr divmod enumerate eval execfile file filter float frozenset getattr globals hasattr hash hex id input int  isinstance issubclass iter  list locals long map max min object oct ord pow property range raw_input reduce reload repr reversed round setattr set slice sorted staticmethod str sum super tuple type unichr unicode vars xrange zip");
+
+  const gchar *style_name;
+  g_object_get(lgpythondet->prefmg, "style_name", &style_name, NULL);
+
+  GtkSourceStyleScheme	*scheme = gtk_source_style_scheme_manager_get_scheme (main_window.stylemg, style_name);
+  /* PYTHON LEXER STYLE */
+  const gchar *font;
+  guint size;
+  g_object_get(lgpythondet->prefmg, "style_font_name", &font,"font_size", &size, NULL);
+
+  set_scintilla_lexer_default_style(GTK_WIDGET(lgpythondet->sci), scheme, SCE_P_DEFAULT, font, size);
+
+  set_scintilla_lexer_keyword_style(GTK_WIDGET(lgpythondet->sci), scheme, SCE_P_WORD, font, size);
+  set_scintilla_lexer_type_style(GTK_WIDGET(lgpythondet->sci), scheme, SCE_P_WORD2, font, size);
+  set_scintilla_lexer_variable_style(GTK_WIDGET(lgpythondet->sci), scheme, SCE_P_IDENTIFIER, font, size);
+  set_scintilla_lexer_string_style(GTK_WIDGET(lgpythondet->sci), scheme, SCE_P_STRING, font, size);
+  set_scintilla_lexer_simple_string_style(GTK_WIDGET(lgpythondet->sci), scheme, SCE_P_TRIPLE, font, size);
+  set_scintilla_lexer_string_style(GTK_WIDGET(lgpythondet->sci), scheme, SCE_P_TRIPLEDOUBLE, font, size);
+  set_scintilla_lexer_simple_string_style(GTK_WIDGET(lgpythondet->sci), scheme, SCE_P_CHARACTER, font, size);
+  set_scintilla_lexer_operator_style(GTK_WIDGET(lgpythondet->sci), scheme, SCE_P_OPERATOR, font, size);
+  set_scintilla_lexer_number_style(GTK_WIDGET(lgpythondet->sci), scheme, SCE_P_NUMBER, font, size);
+  set_scintilla_lexer_comment_style (GTK_WIDGET(lgpythondet->sci), scheme, SCE_P_COMMENTBLOCK, font, size);
+  set_scintilla_lexer_special_constant_style (GTK_WIDGET(lgpythondet->sci), scheme, SCE_P_STRINGEOL, font, size);
+  set_scintilla_lexer_comment_style (GTK_WIDGET(lgpythondet->sci), scheme, SCE_P_COMMENTLINE, font, size);
+  set_scintilla_lexer_xml_entity_style(GTK_WIDGET(lgpythondet->sci), scheme, SCE_P_DECORATOR, font, size);
+  set_scintilla_lexer_preprocessor_style(GTK_WIDGET(lgpythondet->sci), scheme, SCE_P_DEFNAME, font, size);
+  set_scintilla_lexer_xml_instruction_style(GTK_WIDGET(lgpythondet->sci), scheme, SCE_P_CLASSNAME, font, size);
+
+  gtk_scintilla_set_property(lgpythondet->sci, "fold", "1");
+  gtk_scintilla_set_property(lgpythondet->sci, "lexer.python.strings.over.newline", "1");
+  gtk_scintilla_colourise(lgpythondet->sci, 0, -1);
+
+  gtk_scintilla_set_word_chars(lgpythondet->sci, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-");
 }
