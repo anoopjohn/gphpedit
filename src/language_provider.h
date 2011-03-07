@@ -45,12 +45,14 @@ struct _Language_ProviderIface
   GTypeInterface base_iface;
   void (*trigger_completion) (Language_Provider *iface, guint ch);
   void (*show_calltip) (Language_Provider *iface);
+  void (*setup_lexer) (Language_Provider *iface);
 };
 
 GType          language_provider_get_type        (void) G_GNUC_CONST;
 
 void           language_provider_trigger_completion (Language_Provider *self, guint ch);
 void           language_provider_show_calltip (Language_Provider *self);
+void           language_provider_setup_lexer (Language_Provider *self);
 
 G_END_DECLS
 

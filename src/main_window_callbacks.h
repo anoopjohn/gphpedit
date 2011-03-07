@@ -82,7 +82,7 @@ void classbrowser_show(void);
 void classbrowser_hide(void);
 void classbrowser_show_hide(GtkWidget *widget);
 void close_all_tabs(void);
-gboolean main_window_activate_focus (GtkWidget *widget,GdkEventFocus *event,gpointer       user_data);
+gboolean main_window_activate_focus (GtkWidget *widget,GdkEventFocus *event, gpointer user_data);
 void document_manager_new_document_cb (DocumentManager *docmg, Documentable *doc, gpointer user_data);
 void document_manager_change_document_cb (DocumentManager *docmg, Documentable *doc, gpointer user_data);
 void document_manager_close_document_cb (DocumentManager *docmg, Documentable *doc, gpointer user_data);

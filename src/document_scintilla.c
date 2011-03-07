@@ -297,7 +297,8 @@ static void document_scintilla_set_type (Documentable  *doc, gint type)
         case TAB_PHP:
           if (docdet->lgcss) g_object_unref(docdet->lgcss);
           docdet->lgcss = LANGUAGE_PROVIDER(language_php_new (DOCUMENT_SCINTILLA(doc)));
-          tab_php_set_lexer(GTK_SCINTILLA(docdet->scintilla));
+//	  language_php_setup_lexer(docdet->lgcss); //FIXME: poner en la interfaz
+//          tab_php_set_lexer(GTK_SCINTILLA(docdet->scintilla));
           tab_set_folding(document_scintilla, TRUE);
           break;
         case TAB_CSS:
@@ -309,7 +310,7 @@ static void document_scintilla_set_type (Documentable  *doc, gint type)
         case TAB_COBOL:
           if (docdet->lgcss) g_object_unref(docdet->lgcss);
           docdet->lgcss = LANGUAGE_PROVIDER(language_cobol_new (DOCUMENT_SCINTILLA(doc)));
-          tab_cobol_set_lexer(GTK_SCINTILLA(docdet->scintilla));
+//          tab_cobol_set_lexer(GTK_SCINTILLA(docdet->scintilla));
           tab_set_folding(document_scintilla, TRUE);
           break;
         case TAB_CXX:
@@ -337,6 +338,7 @@ static void document_scintilla_set_type (Documentable  *doc, gint type)
           tab_set_folding(document_scintilla, TRUE);
           break;
         case TAB_FILE:
+          if (docdet->lgcss) g_object_unref(docdet->lgcss);
           /* SCLEX_NULL to select no lexing action */
           gtk_scintilla_set_lexer(GTK_SCINTILLA (docdet->scintilla), SCLEX_NULL); 
           tab_set_configured_scintilla_properties(GTK_SCINTILLA (docdet->scintilla), doc);
@@ -346,6 +348,7 @@ static void document_scintilla_set_type (Documentable  *doc, gint type)
         default:
           break;
       }
+      if (docdet->lgcss) language_provider_setup_lexer (docdet->lgcss);
       g_signal_emit (G_OBJECT (document_scintilla), signals[TYPE_CHANGED], 0, type);
   }
 }

@@ -23,11 +23,11 @@
    The GNU General Public License is contained in the file COPYING.
 */
 
-#include "tab_php.h"
-#include "preferences_manager.h"
-#include "main_window.h"
-#include "gtksourcestyleschememanager.h"
-
+#include "tab_cobol.h"
+//#include "preferences_manager.h"
+//#include "main_window.h"
+//#include "gtksourcestyleschememanager.h"
+#if 0
 void scintilla_cobol_set_lexer(GtkScintilla *scintilla)
 {
   gtk_scintilla_clear_document_style (scintilla);
@@ -76,7 +76,7 @@ void tab_cobol_set_lexer(GtkScintilla *scintilla)
 {
   scintilla_cobol_set_lexer(scintilla);
 }
-
+#endif
 gboolean is_cobol_file(const gchar *filename)
 {
   if (g_str_has_suffix(filename,".cbl") || g_str_has_suffix(filename,".CBL"))

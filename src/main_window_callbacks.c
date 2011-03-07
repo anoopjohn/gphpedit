@@ -67,7 +67,8 @@ void main_window_destroy_event(GtkWidget *widget, gpointer data)
   gtk_main_quit();
 }
 
-gboolean main_window_delete_event(GtkWidget *widget, GdkEvent *event, gpointer user_data){
+gboolean main_window_delete_event(GtkWidget *widget, GdkEvent *event, gpointer user_data)
+{
   gboolean cancel_quit = FALSE;
   is_app_closing = TRUE;
   cancel_quit = !document_manager_can_all_tabs_be_saved(main_window.docmg);

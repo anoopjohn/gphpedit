@@ -28,9 +28,9 @@
 #include "tab_php.h"
 #include "preferences_manager.h"
 #include "main_window.h"
-#include "gtksourcestyleschememanager.h"
+//#include "gtksourcestyleschememanager.h"
 
-
+#if 0
 void scintilla_php_set_lexer(GtkScintilla *scintilla)
 {
   PreferencesManager *prefmg = preferences_manager_new ();
@@ -119,7 +119,7 @@ void tab_php_set_lexer(GtkScintilla *scintilla)
 {
   scintilla_php_set_lexer(scintilla);
 }
-
+#endif
 gboolean is_php_file_from_filename(const gchar *filename)
 {
   // New style function for configuration of what constitutes a PHP file
