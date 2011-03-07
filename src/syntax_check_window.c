@@ -44,13 +44,9 @@ struct _GtkSyntaxCheckWindowPrivate
 };
 
 #define GTK_SYNTAX_CHECK_WINDOW_GET_PRIVATE(obj) (G_TYPE_INSTANCE_GET_PRIVATE ((obj), GTK_TYPE_SYNTAX_CHECK_WINDOW, GtkSyntaxCheckWindowPrivate))
-static void
-gtk_syntax_check_window_class_init (GtkSyntaxCheckWindowClass *klass);
-static void
-gtk_syntax_check_window_init (GtkSyntaxCheckWindow *menu);
-static void     gtk_syntax_check_window_finalize    (GObject                   *object);
-static void     gtk_syntax_check_window_dispose     (GObject                   *object);
-void lint_row_activated (GtkTreeSelection *selection, gpointer data);
+static void gtk_syntax_check_window_finalize (GObject *object);
+static void gtk_syntax_check_window_dispose (GObject *object);
+static void lint_row_activated (GtkTreeSelection *selection, gpointer data);
 
 /* http://library.gnome.org/devel/gobject/unstable/gobject-Type-Information.html#G-DEFINE-TYPE:CAPS */
 G_DEFINE_TYPE(GtkSyntaxCheckWindow, gtk_syntax_check_window, GTK_TYPE_BOX);
@@ -118,7 +114,7 @@ static void goto_line(gchar *text)
   if (doc) documentable_goto_line(doc, atoi(text));
 }
 
-void lint_row_activated (GtkTreeSelection *selection, gpointer data)
+static void lint_row_activated (GtkTreeSelection *selection, gpointer data)
 {
   GtkTreeIter iter;
   GtkTreeModel *model;

@@ -49,6 +49,7 @@ struct DocumentManagerDetails
 enum {
 	NEW_DOCUMENT,
 	CHANGE_DOCUMENT,
+	CLOSE_DOCUMENT,
 	LAST_SIGNAL
 };
 
@@ -131,6 +132,14 @@ document_manager_class_init (DocumentManagerClass *klass)
 		               g_cclosure_marshal_VOID__OBJECT,
 		               G_TYPE_NONE, 1, G_TYPE_OBJECT, NULL);
 
+	signals[CLOSE_DOCUMENT] =
+		g_signal_new ("close_document",
+		              G_TYPE_FROM_CLASS (object_class),
+		              G_SIGNAL_RUN_LAST,
+		              G_STRUCT_OFFSET (DocumentManagerClass, new_document),
+		              NULL, NULL,
+		               g_cclosure_marshal_VOID__OBJECT,
+		               G_TYPE_NONE, 1, G_TYPE_OBJECT, NULL);
 
   g_type_class_add_private (klass, sizeof (DocumentManagerDetails));
 }
@@ -167,7 +176,7 @@ DocumentManager *document_manager_new (void)
 DocumentManager *document_manager_new_full (char **argv, gint argc)
 {
   gphpedit_debug(DEBUG_DOC_MANAGER);
-	DocumentManager *docmg;
+  DocumentManager *docmg;
   docmg = g_object_new (DOCUMENT_MANAGER_TYPE, NULL);
   
   /* load command line files */
@@ -181,7 +190,7 @@ DocumentManager *document_manager_new_full (char **argv, gint argc)
   } else {
   document_manager_session_reopen(docmg);
   }
- 	return docmg; /* return new object */
+  return docmg; /* return new object */
 }
 
 void _document_manager_set_current_document(DocumentManager *docmg, Document *document)
@@ -193,8 +202,16 @@ void _document_manager_set_current_document(DocumentManager *docmg, Document *do
   g_signal_emit (G_OBJECT (docmg), signals[CHANGE_DOCUMENT], 0, docmgdet->current_document);
 }
 
+static void on_tab_close_activate(GtkWidget *widget, Document *document)
+{
+  gphpedit_debug(DEBUG_DOC_MANAGER);
+  document_manager_try_close_document(main_window.docmg, document);
+  g_signal_emit (G_OBJECT (main_window.docmg), signals[CLOSE_DOCUMENT], 0, document);
+}
+
 /* internal */
-GtkWidget *get_close_tab_widget(Document *document) {
+GtkWidget *get_close_tab_widget(Document *document)
+{
   GtkWidget *hbox;
   GtkWidget *close_button;
   hbox = gtk_hbox_new(FALSE, 0);
@@ -221,7 +238,7 @@ void document_save_update_cb (Document *doc, gpointer user_data)
 {
   DocumentManager *docmg = DOCUMENT_MANAGER(user_data);
   DocumentManagerDetails *docmgdet;
-	docmgdet = DOCUMENT_MANAGER_GET_PRIVATE(docmg);
+  docmgdet = DOCUMENT_MANAGER_GET_PRIVATE(docmg);
   if (doc==docmgdet->current_document){
     g_signal_emit (G_OBJECT (docmg), signals[CHANGE_DOCUMENT], 0, docmgdet->current_document);
   }
@@ -680,6 +697,7 @@ void document_manager_close_page(DocumentManager *docmg, Document *document)
   if (!docmgdet->editors) {
     docmgdet->current_document = NULL;
   }
+  document_manager_session_save(docmg);
 }
 
 gboolean document_manager_try_save_page(DocumentManager *docmg, Document *document, gboolean close_if_can)

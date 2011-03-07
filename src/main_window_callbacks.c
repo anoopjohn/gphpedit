@@ -26,7 +26,6 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-//#include <stdlib.h>
 #include <gdk/gdkkeysyms.h>
 
 #include "debug.h"
@@ -145,7 +144,8 @@ void on_openselected1_activate(GtkWidget *widget)
   document_manager_open_selected(main_window.docmg);
 }
 
-void add_file_filters(GtkFileChooser *chooser){
+static void add_file_filters(GtkFileChooser *chooser)
+{
   //store file filter
   GtkFileFilter *filter;
   //creates a new file filter
@@ -341,14 +341,6 @@ void on_save_as1_activate(GtkWidget *widget)
 void on_reload1_activate(GtkWidget *widget)
 {
   document_manager_document_reload(main_window.docmg);
-}
-
-void on_tab_close_activate(GtkWidget *widget, Document *document)
-{
-  gphpedit_debug(DEBUG_MAIN_WINDOW);
-  document_manager_try_close_document(main_window.docmg, document);
-  classbrowser_update(GPHPEDIT_CLASSBROWSER(main_window.classbrowser));
-  update_app_title(document_manager_get_current_documentable(main_window.docmg));
 }
 
 void set_active_tab(page_num)
@@ -718,6 +710,10 @@ gboolean main_window_activate_focus (GtkWidget *widget,GdkEventFocus *event, gpo
   return FALSE;
 }
 
+void document_manager_close_document_cb (DocumentManager *docmg, Documentable *doc, gpointer user_data)
+{
+  update_app_title(document_manager_get_current_documentable(docmg));
+}
 void document_manager_new_document_cb (DocumentManager *docmg, Documentable *doc, gpointer user_data)
 {
   gint ftype;
