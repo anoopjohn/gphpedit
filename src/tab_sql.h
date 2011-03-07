@@ -27,6 +27,5 @@
 
 #include "document.h"
 
-void tab_sql_set_lexer(GtkScintilla *scintilla);
 gboolean is_sql_file(const gchar *filename);
 #endif
