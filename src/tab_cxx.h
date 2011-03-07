@@ -27,7 +27,6 @@
 
 #include "document.h"
 
-void tab_cxx_set_lexer(GtkScintilla *scintilla);
 gboolean is_cxx_file(const gchar *filename);
 
 #endif

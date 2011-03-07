@@ -316,7 +316,7 @@ static void document_scintilla_set_type (Documentable  *doc, gint type)
         case TAB_CXX:
           if (docdet->lgcss) g_object_unref(docdet->lgcss);
           docdet->lgcss = LANGUAGE_PROVIDER(language_cxx_new (DOCUMENT_SCINTILLA(doc)));
-          tab_cxx_set_lexer(GTK_SCINTILLA(docdet->scintilla));
+//          tab_cxx_set_lexer(GTK_SCINTILLA(docdet->scintilla));
           tab_set_folding(document_scintilla, TRUE);
           break;
         case TAB_PYTHON:
@@ -334,7 +334,7 @@ static void document_scintilla_set_type (Documentable  *doc, gint type)
         case TAB_PERL:
           if (docdet->lgcss) g_object_unref(docdet->lgcss);
           docdet->lgcss = LANGUAGE_PROVIDER(language_perl_new (DOCUMENT_SCINTILLA(doc)));
-          tab_perl_set_lexer(GTK_SCINTILLA(docdet->scintilla));
+//          tab_perl_set_lexer(GTK_SCINTILLA(docdet->scintilla));
           tab_set_folding(document_scintilla, TRUE);
           break;
         case TAB_FILE:
