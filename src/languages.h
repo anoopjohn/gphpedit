@@ -32,6 +32,7 @@
 #include "language_perl.h"
 #include "language_python.h"
 #include "language_php.h"
+#include "language_untitled.h"
 
 #endif /* __LANGUAGES_H__ */
 

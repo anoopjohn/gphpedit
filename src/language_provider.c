@@ -45,5 +45,5 @@ void language_provider_show_calltip (Language_Provider *self)
 void language_provider_setup_lexer (Language_Provider *self)
 {
   if (!self) return ;
-  LANGUAGE_PROVIDER_GET_IFACE (self)->show_calltip (self);
+  LANGUAGE_PROVIDER_GET_IFACE (self)->setup_lexer (self);
 }

@@ -331,17 +331,14 @@ static void document_scintilla_set_type (Documentable  *doc, gint type)
           break;
         case TAB_FILE:
           if (docdet->lgcss) g_object_unref(docdet->lgcss);
-//FIXME: add untitled provider
-          /* SCLEX_NULL to select no lexing action */
-          gtk_scintilla_set_lexer(GTK_SCINTILLA (docdet->scintilla), SCLEX_NULL); 
+          docdet->lgcss = LANGUAGE_PROVIDER(language_untitled_new (DOCUMENT_SCINTILLA(doc)));
           tab_set_configured_scintilla_properties(GTK_SCINTILLA (docdet->scintilla), doc);
-          gtk_scintilla_colourise(GTK_SCINTILLA (docdet->scintilla), 0, -1);
           tab_set_folding(document_scintilla, FALSE);
           break;
         default:
           break;
       }
-      if (docdet->lgcss) language_provider_setup_lexer (docdet->lgcss);
+      language_provider_setup_lexer (docdet->lgcss);
       g_signal_emit (G_OBJECT (document_scintilla), signals[TYPE_CHANGED], 0, type);
   }
 }
@@ -1415,30 +1412,11 @@ static void process_user_list_selection (GtkWidget *w, gint type, gchar *text, g
 static void char_added(GtkWidget *scintilla, guint ch, gpointer user_data)
 {
   gphpedit_debug_message (DEBUG_DOCUMENT, "char added:%d",ch);
+  g_print("char added:%d",ch);
   Document_Scintilla *doc = DOCUMENT_SCINTILLA(user_data);
   g_return_if_fail(doc);
   Document_ScintillaDetails *docdet = DOCUMENT_SCINTILLA_GET_PRIVATE(doc);
-  if (docdet->lgcss) {
-    language_provider_trigger_completion (docdet->lgcss, ch);
-  } else {
-    gint current_pos;
-    gint wordStart;
-    gint wordEnd;
-    gchar *member_function_buffer = NULL;
-    gint member_function_length;
-    GtkScintilla *sci = GTK_SCINTILLA(scintilla);
-
-    current_pos = gtk_scintilla_get_current_pos(sci);
-    wordStart = gtk_scintilla_word_start_position(sci, current_pos-1, TRUE);
-    wordEnd = gtk_scintilla_word_end_position(sci, current_pos-1, TRUE);
-
-    member_function_buffer = gtk_scintilla_get_text_range (sci, wordStart-2, wordEnd, &member_function_length);
-    /* if we type <?php then we are in a php file so force php syntax mode */
-    if (g_strcmp0(member_function_buffer,"<?php")==0){
-      documentable_set_type(DOCUMENTABLE(doc), TAB_PHP);
-    }
-    g_free(member_function_buffer);
-  }
+  language_provider_trigger_completion (docdet->lgcss, ch);
 }
 
 /*
@@ -1711,7 +1689,8 @@ static void document_scintilla_find_next_marker(Document_Scintilla *doc){
   }
 }
 
-static void document_scintilla_auto_detect_file_type(Documentable *doc) {
+static void document_scintilla_auto_detect_file_type(Documentable *doc)
+{
   if (!doc) return;
   gchar *filename = documentable_get_filename(doc);
   /* reset type */
@@ -1971,7 +1950,7 @@ static void document_scintilla_force_autocomplete(Document_Scintilla *document_s
 {
   g_return_if_fail(document_scintilla);
   Document_ScintillaDetails *docdet = DOCUMENT_SCINTILLA_GET_PRIVATE(document_scintilla);
-  if (docdet->lgcss) language_provider_trigger_completion (docdet->lgcss, 0);
+  language_provider_trigger_completion (docdet->lgcss, 0);
 }
 
 #define BACKSLASH 92

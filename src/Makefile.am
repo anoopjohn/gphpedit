@@ -76,6 +76,8 @@ gphpedit_SOURCES = \
   language_python.h \
   language_php.c \
   language_php.h \
+  language_untitled.c \
+  language_untitled.h \
   languages.h \
   edit_template.c \
   edit_template.h \
