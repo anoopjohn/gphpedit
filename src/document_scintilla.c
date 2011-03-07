@@ -297,48 +297,41 @@ static void document_scintilla_set_type (Documentable  *doc, gint type)
         case TAB_PHP:
           if (docdet->lgcss) g_object_unref(docdet->lgcss);
           docdet->lgcss = LANGUAGE_PROVIDER(language_php_new (DOCUMENT_SCINTILLA(doc)));
-//	  language_php_setup_lexer(docdet->lgcss); //FIXME: poner en la interfaz
-//          tab_php_set_lexer(GTK_SCINTILLA(docdet->scintilla));
           tab_set_folding(document_scintilla, TRUE);
           break;
         case TAB_CSS:
           if (docdet->lgcss) g_object_unref(docdet->lgcss);
           docdet->lgcss = LANGUAGE_PROVIDER(language_css_new (DOCUMENT_SCINTILLA(doc)));
-//          tab_css_set_lexer(GTK_SCINTILLA(docdet->scintilla));
           tab_set_folding(document_scintilla, TRUE);
           break;
         case TAB_COBOL:
           if (docdet->lgcss) g_object_unref(docdet->lgcss);
           docdet->lgcss = LANGUAGE_PROVIDER(language_cobol_new (DOCUMENT_SCINTILLA(doc)));
-//          tab_cobol_set_lexer(GTK_SCINTILLA(docdet->scintilla));
           tab_set_folding(document_scintilla, TRUE);
           break;
         case TAB_CXX:
           if (docdet->lgcss) g_object_unref(docdet->lgcss);
           docdet->lgcss = LANGUAGE_PROVIDER(language_cxx_new (DOCUMENT_SCINTILLA(doc)));
-//          tab_cxx_set_lexer(GTK_SCINTILLA(docdet->scintilla));
           tab_set_folding(document_scintilla, TRUE);
           break;
         case TAB_PYTHON:
           if (docdet->lgcss) g_object_unref(docdet->lgcss);
           docdet->lgcss = LANGUAGE_PROVIDER(language_python_new (DOCUMENT_SCINTILLA(doc)));
-//          tab_python_set_lexer(GTK_SCINTILLA(docdet->scintilla));
           tab_set_folding(document_scintilla, TRUE);
           break;
         case TAB_SQL:
           if (docdet->lgcss) g_object_unref(docdet->lgcss);
           docdet->lgcss = LANGUAGE_PROVIDER(language_sql_new (DOCUMENT_SCINTILLA(doc)));
-//          tab_sql_set_lexer(GTK_SCINTILLA(docdet->scintilla));
           tab_set_folding(document_scintilla, TRUE);
           break;
         case TAB_PERL:
           if (docdet->lgcss) g_object_unref(docdet->lgcss);
           docdet->lgcss = LANGUAGE_PROVIDER(language_perl_new (DOCUMENT_SCINTILLA(doc)));
-//          tab_perl_set_lexer(GTK_SCINTILLA(docdet->scintilla));
           tab_set_folding(document_scintilla, TRUE);
           break;
         case TAB_FILE:
           if (docdet->lgcss) g_object_unref(docdet->lgcss);
+//FIXME: add untitled provider
           /* SCLEX_NULL to select no lexing action */
           gtk_scintilla_set_lexer(GTK_SCINTILLA (docdet->scintilla), SCLEX_NULL); 
           tab_set_configured_scintilla_properties(GTK_SCINTILLA (docdet->scintilla), doc);
