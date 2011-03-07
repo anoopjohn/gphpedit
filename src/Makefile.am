@@ -60,6 +60,8 @@ gphpedit_SOURCES = \
   document_saver.h \
   document_manager.c \
   document_manager.h \
+  document_types.c \
+  document_types.h \
   language_provider.c \
   language_provider.h \
   language_css.c \
@@ -156,20 +158,6 @@ gphpedit_SOURCES = \
   syntax_check_window.h \
   tab.c \
   tab.h \
-  tab_cobol.c \
-  tab_cobol.h \
-  tab_css.c \
-  tab_css.h \
-  tab_cxx.c \
-  tab_cxx.h \
-  tab_perl.c \
-  tab_perl.h \
-  tab_php.c \
-  tab_php.h \
-  tab_python.c \
-  tab_python.h \
-  tab_sql.c \
-  tab_sql.h \
   templates.c \
   templates.h \
   templates_editor.c \

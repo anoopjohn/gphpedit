@@ -166,7 +166,6 @@ Language_Untitled *language_untitled_new (Document_Scintilla *doc)
 
 static void language_untitled_trigger_completion (Language_Provider *lguntitled, guint ch)
 {
-  g_print("pp\n");
   g_return_if_fail(lguntitled);
   Language_UntitledDetails *lguntitleddet = LANGUAGE_UNTITLED_GET_PRIVATE(lguntitled);
   gint current_pos;

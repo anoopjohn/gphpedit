@@ -1,8 +1,8 @@
-/* This file is part of gPHPEdit, a GNOME2 PHP Editor.
+/* This file is part of gPHPEdit, a GNOME PHP Editor.
 
    Copyright (C) 2003, 2004, 2005 Andy Jeffries <andy at gphpedit.org>
    Copyright (C) 2009 Anoop John <anoop dot john at zyxware.com>
-   Copyright (C) 2009 José Rostagno(for vijona.com.ar)
+   Copyright (C) 2009, 2011 José Rostagno (for vijona.com.ar) 
 
    For more information or to find the latest release, visit our 
    website at http://www.gphpedit.org/
@@ -14,20 +14,54 @@
 
    gPHPEdit is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
    GNU General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with gPHPEdit.  If not, see <http://www.gnu.org/licenses/>.
+   along with gPHPEdit. If not, see <http://www.gnu.org/licenses/>.
 
    The GNU General Public License is contained in the file COPYING.
 */
 
 #include <string.h>
-
-#include "tab_php.h"
+#include "document_types.h"
 #include "preferences_manager.h"
 #include "main_window.h"
+
+gboolean is_cobol_file(const gchar *filename)
+{
+  return (g_str_has_suffix(filename,".cbl") || g_str_has_suffix(filename,".CBL"));
+}
+
+gboolean is_css_file(const gchar *filename)
+{
+  return (g_str_has_suffix(filename,".css"));
+}
+
+gboolean is_cxx_file(const gchar *filename)
+{
+  if (g_str_has_suffix(filename,".cxx") || g_str_has_suffix(filename,".c") || g_str_has_suffix(filename,".h")
+  || g_str_has_suffix(filename,".cpp") || g_str_has_suffix(filename,".cc") || g_str_has_suffix(filename,".c++"))
+      return TRUE;
+  return FALSE;
+}
+
+gboolean is_perl_file(const gchar *filename)
+{
+  if (g_str_has_suffix(filename,".pl") || g_str_has_suffix(filename,".pm") || g_str_has_suffix(filename,".al") || g_str_has_suffix(filename,".perl"))
+      return TRUE;
+  return FALSE;
+}
+
+gboolean is_python_file(const gchar *filename)
+{
+  return (g_str_has_suffix(filename,".py"));
+}
+
+gboolean is_sql_file(const gchar *filename)
+{
+  return (g_str_has_suffix(filename,".sql"));
+}
 
 gboolean is_php_file_from_filename(const gchar *filename)
 {
