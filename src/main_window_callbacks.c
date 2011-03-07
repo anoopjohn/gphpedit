@@ -727,7 +727,6 @@ void document_manager_change_document_cb (DocumentManager *docmg, Documentable *
 {
   if (!is_app_closing) {
     update_app_title(doc);
-    classbrowser_update(GPHPEDIT_CLASSBROWSER(main_window.classbrowser));
     documentable_check_externally_modified(doc);
   }
 }

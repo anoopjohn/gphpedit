@@ -61,6 +61,8 @@ struct _gphpeditClassBrowserPrivate
 
   GtkTreeModel *cache_model;
   gulong  handlerid;
+
+  gint current_type; /* current_doc type */
 };
 
 enum {
@@ -88,6 +90,7 @@ static void classbrowser_class_add (gpointer data, gpointer user_data);
 static gint treeview_double_click(GtkWidget *widget, GdkEventButton *event, gpointer func_data);
 static gint treeview_click_release(GtkWidget *widget, GdkEventButton *event, gpointer func_data);
 static void classbrowser_update_selected_label(gphpeditClassBrowserPrivate *priv, gchar *filename, gint line);
+static void doc_manager_change_document_cb (DocumentManager *docmg, Documentable *doc, gpointer user_data);
 
 #define CLASSBROWSER_BACKEND_GET_PRIVATE(object)(G_TYPE_INSTANCE_GET_PRIVATE ((object),\
 					    GPHPEDIT_TYPE_CLASSBROWSER,\
@@ -135,6 +138,10 @@ gphpedit_classbrowser_init (gphpeditClassBrowser *button)
 
   priv->prefmg = preferences_manager_new ();
   priv->docmg = document_manager_new ();
+  g_signal_connect (G_OBJECT (priv->docmg), "change_document", G_CALLBACK(doc_manager_change_document_cb), button);
+
+  priv->current_type = -1;
+
   priv->builder = gtk_builder_new ();
   GError *error = NULL;
   guint res = gtk_builder_add_from_file (priv->builder, GPHPEDIT_UI_DIR "/classbrowser.ui", &error);
@@ -281,6 +288,7 @@ static void sdb_update_cb (SymbolManager *symbolmg, gpointer user_data)
 
   g_object_get(priv->prefmg, "side_panel_hidden", &hidden, NULL);
   if(hidden) return ;
+
   if (press_event && g_signal_handler_is_connected (priv->classtreeview, press_event)) {
     g_signal_handler_disconnect(priv->classtreeview, press_event);
   }
@@ -483,6 +491,26 @@ static gint treeview_click_release(GtkWidget *widget, GdkEventButton *event, gpo
   return FALSE;
 }
 
+/*
+* if old_current_doc has same type as new current_doc do nothing
+* else update classbrowser
+*/
+static void doc_manager_change_document_cb (DocumentManager *docmg, Documentable *doc, gpointer user_data)
+{
+  gphpedit_debug(DEBUG_CLASSBROWSER);
+  if (!user_data) return ;
+  gphpeditClassBrowserPrivate *priv = CLASSBROWSER_BACKEND_GET_PRIVATE(user_data);
+  gboolean active;
+  g_object_get (priv->prefmg, "parse_only_current_file", &active, NULL);
+
+  if (!active) {
+    guint doc_type;
+    g_object_get(doc, "type", &doc_type, NULL);
+    if (doc_type==priv->current_type) return ; /* do nothing */
+    priv->current_type = doc_type;
+  }
+  classbrowser_update(user_data);
+}
 /*
 * classbrowser_update
 * start update process
