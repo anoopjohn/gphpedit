@@ -86,9 +86,9 @@ struct Document_ScintillaDetails
 
 typedef struct
 {
-	gint message;
-	gulong wparam;
-	glong lparam;
+  gint message;
+  gulong wparam;
+  glong lparam;
 } MacroEvent;
 
 #define DOCUMENT_SCINTILLA_GET_PRIVATE(object)(G_TYPE_INSTANCE_GET_PRIVATE ((object),\
@@ -112,7 +112,7 @@ static void macro_record (GtkWidget *scintilla, gint message, gulong wparam, glo
 static void process_user_list_selection (GtkWidget *w, gint type, gchar *text, gpointer user_data);
 static void scintilla_modified (GtkWidget *w, gpointer user_data);
 static void document_scintilla_constructed (GObject *object);
-void document_scintilla_saver_done_saving_cb (DocumentSaver *docsav, Document_Scintilla *document_scintilla, gpointer user_data);
+static void document_scintilla_saver_done_saving_cb (DocumentSaver *docsav, Document_Scintilla *document_scintilla, gpointer user_data);
 static void document_scintilla_find_next_marker(Document_Scintilla *doc);
 static void document_scintilla_marker_modify(Document_Scintilla *doc, gint line);
 static void document_scintilla_modify_current_line_marker(Document_Scintilla *doc);
@@ -1405,7 +1405,6 @@ static void process_user_list_selection (GtkWidget *w, gint type, gchar *text, g
 static void char_added(GtkWidget *scintilla, guint ch, gpointer user_data)
 {
   gphpedit_debug_message (DEBUG_DOCUMENT, "char added:%d",ch);
-  g_print("char added:%d",ch);
   Document_Scintilla *doc = DOCUMENT_SCINTILLA(user_data);
   g_return_if_fail(doc);
   Document_ScintillaDetails *docdet = DOCUMENT_SCINTILLA_GET_PRIVATE(doc);
@@ -1757,7 +1756,7 @@ void document_scintilla_add_sintax_annotation(Document_Scintilla *doc, guint cur
   gtk_scintilla_annotation_set_text(GTK_SCINTILLA(docdet->scintilla), current_line_number, token);
 }
 
-void document_scintilla_saver_done_saving_cb (DocumentSaver *docsav, Document_Scintilla *document_scintilla, gpointer user_data)
+static void document_scintilla_saver_done_saving_cb (DocumentSaver *docsav, Document_Scintilla *document_scintilla, gpointer user_data)
 {
   Document_ScintillaDetails *docdet = DOCUMENT_SCINTILLA_GET_PRIVATE(document_scintilla);
   gtk_scintilla_set_save_point (GTK_SCINTILLA(docdet->scintilla));

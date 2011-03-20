@@ -26,7 +26,7 @@
 #ifndef DOCUMENT_TYPES_H
 #define DOCUMENT_TYPES_H
 
-#include <glib.h> //FIXME:
+#include <glib.h>
 
 gboolean is_cobol_file(const gchar *filename);
 gboolean is_css_file(const gchar *filename);
