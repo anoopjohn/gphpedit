@@ -682,11 +682,12 @@ static void document_scintilla_grab_focus (Documentable *doc)
   gtk_widget_grab_focus(docdet->scintilla);
 }
 
-static void document_scintilla_do_syntax_check (Documentable *doc)
+static gchar *document_scintilla_do_syntax_check (Documentable *doc)
 {
   gphpedit_debug (DEBUG_DOCUMENT);
-  g_return_if_fail(doc);
+  g_return_val_if_fail(doc, NULL);
   Document_ScintillaDetails *docdet = DOCUMENT_SCINTILLA_GET_PRIVATE(doc);
+  return language_provider_do_syntax_check (docdet->lgcss);
 }
 
 static void document_scintilla_documentable_init(DocumentableIface *iface, gpointer user_data)

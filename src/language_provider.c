@@ -50,7 +50,7 @@ void language_provider_setup_lexer (Language_Provider *self)
 
 gchar *language_provider_do_syntax_check (Language_Provider *self)
 {
-  if (!self) return ;
+  if (!self) return NULL;
   return LANGUAGE_PROVIDER_GET_IFACE (self)->do_syntax_check (self);
 }
 

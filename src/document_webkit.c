@@ -312,9 +312,10 @@ static void document_webkit_grab_focus (Documentable *doc)
   gtk_widget_grab_focus(GTK_WIDGET(docdet->help_view));
 }
 
-static void document_webkit_do_syntax_check (Documentable *doc)
+static gchar *document_webkit_do_syntax_check (Documentable *doc)
 {
   /* do nothing */
+  return NULL;
 }
 
 static void document_webkit_documentable_init(DocumentableIface *iface, gpointer user_data)

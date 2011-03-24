@@ -246,10 +246,10 @@ void documentable_grab_focus (Documentable  *self)
   DOCUMENTABLE_GET_IFACE (self)->grab_focus (self);
 }
 
-void documentable_do_syntax_check (Documentable  *self)
+gchar *documentable_do_syntax_check (Documentable  *self)
 {
-  if (!self) return ;
-  DOCUMENTABLE_GET_IFACE (self)->do_syntax_check (self);
+  if (!self) return NULL;
+  return DOCUMENTABLE_GET_IFACE (self)->do_syntax_check (self);
 }
 
 
