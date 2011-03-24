@@ -640,6 +640,19 @@ static gchar *process_php_lines(gchar *output)
 
 }
 
+/*
+* save_as_temp_file (internal)
+* save the content of an editor and return the filename of the temp file or NULL on error.
+*/
+static GString *save_as_temp_file(Documentable *document)
+{
+  gphpedit_debug(DEBUG_SYNTAX);
+  gchar *write_buffer = documentable_get_text(document);
+  GString *filename = text_save_as_temp_file(write_buffer);
+  g_free(write_buffer);
+  return filename;
+}
+
 static GString *get_syntax_filename(Documentable *document, gboolean *using_temp)
 {
   GString *filename = NULL;

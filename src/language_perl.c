@@ -22,13 +22,17 @@
    The GNU General Public License is contained in the file COPYING.
 */
 
+#include <stdlib.h>
 #include <string.h>
+#include <glib/gi18n.h>
+
 #include "debug.h"
 #include "language_perl.h"
 #include "preferences_manager.h"
 #include "language_provider.h"
 #include "symbol_manager.h"
 #include "main_window.h"
+#include "gvfs_utils.h"
 
 /*
 * language_perl private struct
@@ -505,9 +509,121 @@ static void language_perl_trigger_completion (Language_Provider *lgperl, guint c
   }
 }
 
+/*
+* (internal)
+*/
+
+static gchar *process_perl_lines(gchar *output)
+{
+  gchar *copy;
+  gchar *token;
+  gchar *line_number;
+  copy = output;
+  GString *result;
+  result = g_string_new (NULL);
+  gphpedit_debug_message(DEBUG_SYNTAX, "syntax:\n%s\n", output);
+  gint quote=0;
+  gint a=0;
+  gchar *cop=copy;
+  while (*cop!='\0'){
+      if(*cop=='"' && quote==0) quote++;
+      else if(*cop=='"' && quote!=0) quote--;
+      if (*cop=='\n' && quote==1) *(copy +a)=' ';
+      cop++;
+      a++;
+//      g_print("char:%c, quote:%d,pos:%d\n",*cop,quote,a);
+      }      
+      while ((token = strtok(copy, "\n"))) {
+        gchar number[15];  
+        int i=15;
+        line_number = strstr(token, "line ");
+        if (line_number){
+        line_number+=5;
+        while (*line_number!=',' && *line_number!='.' && i!=0){
+        number[15-i]=*line_number;
+        line_number++;
+        i--;
+        }
+        number[i]='\0';
+        }
+        gint num=atoi(number);
+        if (num>0) {
+          if (g_str_has_prefix(token, "syntax error") || g_str_has_prefix(token, "Unrecognized character")){
+            g_string_append_printf (result, "%d E %s\n", num, token);
+          } else {
+            g_string_append_printf (result, "%d %s\n", num, token);
+          }
+        }
+        else {
+           if (g_str_has_suffix(token, "syntax OK")) g_string_append_printf (result, "%s", "syntax OK\n");
+           else g_string_append_printf (result, "%s\n", token);
+        }
+      number[0]='a'; /*force new number */
+      copy = NULL;
+    }
+  return g_string_free (result,FALSE);
+}
+
+/*
+* save_as_temp_file (internal)
+* save the content of an editor and return the filename of the temp file or NULL on error.
+*/
+static GString *save_as_temp_file(Documentable *document)
+{
+  gphpedit_debug(DEBUG_SYNTAX);
+  gchar *write_buffer = documentable_get_text(document);
+  GString *filename = text_save_as_temp_file(write_buffer);
+  g_free(write_buffer);
+  return filename;
+}
+
+static GString *get_syntax_filename(Documentable *document, gboolean *using_temp)
+{
+  GString *filename = NULL;
+  gchar *docfilename = documentable_get_filename(document);
+  gboolean untitled, saved;
+  g_object_get(document, "untitled", &untitled, "saved", &saved, NULL);
+  if (saved && filename_is_native(docfilename) && !untitled) {
+    gchar *local_path = filename_get_scaped_path(docfilename);
+    filename = g_string_new(local_path);
+    g_free(local_path);
+    *using_temp = FALSE;
+  } else {
+    filename = save_as_temp_file(document);
+    *using_temp = TRUE;
+  }
+  g_free(docfilename);
+  return filename;
+}
+
 static gchar *language_perl_do_syntax_check(Language_Provider *lgperl)
 {
-  return NULL;
+  g_return_val_if_fail(lgperl, NULL);
+  Language_PERLDetails *lgperldet = LANGUAGE_PERL_GET_PRIVATE(lgperl);
+
+  GString *command_line=NULL;
+  gchar *output;
+  gboolean using_temp;
+  GString *filename = NULL;
+
+  command_line = g_string_new(NULL);
+  filename = get_syntax_filename(lgperldet->doc, &using_temp);
+  g_string_append_printf(command_line, "perl -c '%s'", filename->str);
+
+  gphpedit_debug_message(DEBUG_SYNTAX, "eject:%s\n", command_line->str);
+  if (using_temp) release_temp_file (filename->str);
+  g_string_free(filename, TRUE);
+
+  output = command_spawn (command_line->str);
+  g_string_free(command_line, TRUE);
+  gchar *result=NULL;
+  if (output) {
+    result = process_perl_lines(output);
+    g_free(output);
+  } else {
+    result = g_strdup(_("Error calling PHP CLI (is PHP command line binary installed? If so, check if it's in your path or set php_binary in Preferences)\n"));
+  }
+  return result;
 }
 
 static void language_perl_setup_lexer(Language_Provider *lgperl)
