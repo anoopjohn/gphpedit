@@ -22,13 +22,17 @@
    The GNU General Public License is contained in the file COPYING.
 */
 
+#include <stdlib.h>
 #include <string.h>
+#include <glib/gi18n.h>
+
 #include "debug.h"
 #include "language_php.h"
 #include "preferences_manager.h"
 #include "language_provider.h"
 #include "symbol_manager.h"
 #include "main_window.h"
+#include "gvfs_utils.h"
 
 /*
 * language_php private struct
@@ -60,6 +64,7 @@ static void language_php_language_provider_init(Language_ProviderInterface *ifac
 static void language_php_trigger_completion (Language_Provider *lgphp, guint ch);
 static void show_calltip (Language_Provider *lgphp);
 static void language_php_setup_lexer(Language_Provider *lgphp);
+static gchar *language_php_do_syntax_check(Language_Provider *lgphp);
 
 G_DEFINE_TYPE_WITH_CODE(Language_PHP, language_php, G_TYPE_OBJECT,
                         G_IMPLEMENT_INTERFACE (IFACE_TYPE_LANGUAGE_PROVIDER,
@@ -70,6 +75,7 @@ static void language_php_language_provider_init(Language_ProviderInterface *ifac
   iface->trigger_completion = language_php_trigger_completion;
   iface->show_calltip = show_calltip;
   iface->setup_lexer = language_php_setup_lexer;
+  iface->do_syntax_check = language_php_do_syntax_check;
 }
 
 static void
@@ -586,6 +592,103 @@ static void language_php_trigger_completion (Language_Provider *lgphp, guint ch)
         }
         g_free(member_function_buffer);
   }
+}
+
+/*
+* process_php_lines
+*/
+static gchar *process_php_lines(gchar *output)
+{
+  gchar *copy;
+  gchar *token;
+  gchar *line_number;
+  GString *result;
+  copy = output;
+  result = g_string_new (NULL);
+  copy=g_strdup_printf("\n%s", output);
+  while ((token = strtok(copy, "\n"))) {
+      if (g_str_has_prefix(token, "PHP Warning:  ")){
+        token+=14; /* skip 'PHP Warning:  '*/
+        line_number = strstr(token, "line ");
+        if (line_number){
+        line_number+=5; /* len of 'line '*/
+        }
+        gint num=atoi(line_number);
+        if (num>0) {
+          g_string_append_printf (result, "%d W %s\n", num, token);
+        } else {
+          g_string_append_printf (result, "%s\n", token);
+        }
+      } else if (g_str_has_prefix(token,"PHP Parse error:  syntax error, ")){
+        token+=32; /* skip 'PHP Parse error:  syntax error, ' */
+        line_number = strrchr(token, ' ');
+        line_number++;
+        if (atoi(line_number)>0) {
+          g_string_append_printf (result, "%d E %s\n", atoi(line_number), token);
+        } else {
+          g_string_append_printf (result, "%s\n", token);
+        }
+      } else {
+         if (!g_str_has_prefix(token, "Content-type")){
+           g_string_append_printf (result, "%s\n", token);
+         } 
+      }
+      copy = NULL;
+    }
+  gphpedit_debug_message(DEBUG_SYNTAX, "result:%s\n", result->str);
+  return g_string_free (result,FALSE);
+
+}
+
+static GString *get_syntax_filename(Documentable *document, gboolean *using_temp)
+{
+  GString *filename = NULL;
+  gchar *docfilename = documentable_get_filename(document);
+  gboolean untitled, saved;
+  g_object_get(document, "untitled", &untitled, "saved", &saved, NULL);
+  if (saved && filename_is_native(docfilename) && !untitled) {
+    gchar *local_path = filename_get_scaped_path(docfilename);
+    filename = g_string_new(local_path);
+    g_free(local_path);
+    *using_temp = FALSE;
+  } else {
+    filename = save_as_temp_file(document);
+    *using_temp = TRUE;
+  }
+  g_free(docfilename);
+  return filename;
+}
+
+static gchar *language_php_do_syntax_check(Language_Provider *lgphp)
+{
+  g_return_val_if_fail(lgphp, NULL);
+  Language_PHPDetails *lgphpdet = LANGUAGE_PHP_GET_PRIVATE(lgphp);
+
+  GString *command_line=NULL;
+  gchar *output;
+  gboolean using_temp;
+  GString *filename = NULL;
+  const gchar *php_binary_location;
+
+  command_line = g_string_new(NULL);
+  g_object_get(lgphpdet->prefmg, "php_binary_location", &php_binary_location, NULL);
+  filename = get_syntax_filename(lgphpdet->doc, &using_temp);
+  g_string_append_printf (command_line, "%s -q -l -d html_errors=Off -f '%s'", php_binary_location, filename->str);
+
+//  gphpedit_debug_message(DEBUG_SYNTAX, "eject:%s\n", command_line->str); //FIXME
+  if (using_temp) release_temp_file (filename->str);
+  g_string_free(filename, TRUE);
+
+  output = command_spawn (command_line->str);
+  g_string_free(command_line, TRUE);
+  gchar *result=NULL;
+  if (output) {
+    result = process_php_lines(output);
+    g_free(output);
+  } else {
+    result = g_strdup(_("Error calling PHP CLI (is PHP command line binary installed? If so, check if it's in your path or set php_binary in Preferences)\n"));
+  }
+  return result;
 }
 
 static void language_php_setup_lexer(Language_Provider *lgphp)
