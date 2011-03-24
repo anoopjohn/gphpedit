@@ -312,6 +312,11 @@ static void document_webkit_grab_focus (Documentable *doc)
   gtk_widget_grab_focus(GTK_WIDGET(docdet->help_view));
 }
 
+static void document_webkit_do_syntax_check (Documentable *doc)
+{
+  /* do nothing */
+}
+
 static void document_webkit_documentable_init(DocumentableIface *iface, gpointer user_data)
 {
   iface->zoom_in = document_webkit_zoom_in;
@@ -350,6 +355,7 @@ static void document_webkit_documentable_init(DocumentableIface *iface, gpointer
   iface->replace_current_selection = document_webkit_replace_current_selection;
   iface->apply_preferences = document_webkit_apply_preferences;
   iface->grab_focus = document_webkit_grab_focus;
+  iface->do_syntax_check = document_webkit_do_syntax_check;
 }
 
 enum

@@ -682,6 +682,13 @@ static void document_scintilla_grab_focus (Documentable *doc)
   gtk_widget_grab_focus(docdet->scintilla);
 }
 
+static void document_scintilla_do_syntax_check (Documentable *doc)
+{
+  gphpedit_debug (DEBUG_DOCUMENT);
+  g_return_if_fail(doc);
+  Document_ScintillaDetails *docdet = DOCUMENT_SCINTILLA_GET_PRIVATE(doc);
+}
+
 static void document_scintilla_documentable_init(DocumentableIface *iface, gpointer user_data)
 {
   iface->zoom_in = document_scintilla_zoom_in;
@@ -720,6 +727,7 @@ static void document_scintilla_documentable_init(DocumentableIface *iface, gpoin
   iface->replace_current_selection = document_scintilla_replace_current_selection;
   iface->apply_preferences = document_scintilla_apply_preferences;
   iface->grab_focus = document_scintilla_grab_focus;
+  iface->do_syntax_check = document_scintilla_do_syntax_check;
 }
 
 enum
