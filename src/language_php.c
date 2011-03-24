@@ -688,11 +688,11 @@ static gchar *language_php_do_syntax_check(Language_Provider *lgphp)
   filename = get_syntax_filename(lgphpdet->doc, &using_temp);
   g_string_append_printf (command_line, "%s -q -l -d html_errors=Off -f '%s'", php_binary_location, filename->str);
 
+  output = command_spawn_with_error (command_line->str);
+
 //  gphpedit_debug_message(DEBUG_SYNTAX, "eject:%s\n", command_line->str); //FIXME
   if (using_temp) release_temp_file (filename->str);
   g_string_free(filename, TRUE);
-
-  output = command_spawn (command_line->str);
   g_string_free(command_line, TRUE);
   gchar *result=NULL;
   if (output) {

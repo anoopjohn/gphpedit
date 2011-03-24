@@ -54,7 +54,7 @@ SyntaxCheckManager *syntax_check_manager_new (void)
 	return g_object_new (SYNTAX_CHECK_MANAGER_TYPE, NULL); /* return new object */
 }
 
-
+#if 0
 /*
 * (internal)
 */
@@ -188,8 +188,11 @@ GString *get_syntax_filename(Documentable *document, gboolean *using_temp)
   g_free(docfilename);
   return filename;
 }
+#endif
+
 gchar *syntax_check_manager_run(Documentable *document)
 {
+#if 0
   GString *command_line=NULL;
   gchar *output;
   gboolean using_temp;
@@ -239,4 +242,6 @@ gchar *syntax_check_manager_run(Documentable *document)
     result = g_strdup(_("Error calling PHP CLI (is PHP command line binary installed? If so, check if it's in your path or set php_binary in Preferences)\n"));
   }
   return result;
+#endif
+  return documentable_do_syntax_check(document);
 }

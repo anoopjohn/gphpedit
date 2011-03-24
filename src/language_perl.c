@@ -611,10 +611,10 @@ static gchar *language_perl_do_syntax_check(Language_Provider *lgperl)
   g_string_append_printf(command_line, "perl -c '%s'", filename->str);
 
   gphpedit_debug_message(DEBUG_SYNTAX, "eject:%s\n", command_line->str);
+
+  output = command_spawn_with_error (command_line->str);
   if (using_temp) release_temp_file (filename->str);
   g_string_free(filename, TRUE);
-
-  output = command_spawn (command_line->str);
   g_string_free(command_line, TRUE);
   gchar *result=NULL;
   if (output) {
