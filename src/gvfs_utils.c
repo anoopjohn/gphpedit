@@ -393,7 +393,8 @@ GString *text_save_as_temp_file(gchar *text)
   return NULL;
 }
 
-void release_temp_file (const gchar *filename){
+void release_temp_file (const gchar *filename)
+{
     g_unlink(filename);
 }
 
@@ -408,6 +409,28 @@ gchar *command_spawn(const gchar* command_line)
   gchar *ret=NULL;
   if (g_spawn_command_line_sync(command_line, &stdout, NULL, &exit_status,&error)) {
     ret = g_strdup(stdout);
+    g_free(stdout);
+  } else {
+    g_print("Command %s gave error %s\n", command_line, error->message);
+    g_error_free (error);
+  }
+
+  return ret;
+}
+
+/*
+ * execute a command in a command line
+ */
+gchar *command_spawn_with_error(const gchar* command_line)
+{
+  gchar *stdout = NULL;
+  GError *error = NULL;
+  gint exit_status;
+  gchar *ret=NULL;
+  gchar *stdouterr;
+  if (g_spawn_command_line_sync(command_line, &stdout, &stdouterr, &exit_status, &error)) {
+    ret =g_strdup_printf ("%s\n%s",stdouterr,stdout);
+    g_free(stdouterr);
     g_free(stdout);
   } else {
     g_print("Command %s gave error %s\n", command_line, error->message);

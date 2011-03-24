@@ -58,28 +58,6 @@ SyntaxCheckManager *syntax_check_manager_new (void)
 /*
 * (internal)
 */
-gchar *run_php_lint(gchar *command_line)
-{
-  gboolean result;
-  gchar *stdout;
-  gint exit_status;
-  GError *error;
-  gchar *stdouterr;
-  error = NULL;
-
-  result = g_spawn_command_line_sync (command_line,
-                                      &stdout, &stdouterr, &exit_status, &error);
-
-  if (!result) return NULL;
-
-  gchar *res =g_strdup_printf ("%s\n%s",stdouterr,stdout);
-  g_free(stdouterr);
-  g_free(stdout);
-  return res;
-}
-/*
-* (internal)
-*/
 
 gchar *process_php_lines(gchar *output)
 {
@@ -242,7 +220,7 @@ gchar *syntax_check_manager_run(Documentable *document)
   if (using_temp) release_temp_file (filename->str);
   g_string_free(filename, TRUE);
 
-  output = run_php_lint(command_line->str);
+  output = command_spawn_with_error(command_line->str);
   g_string_free(command_line, TRUE);
   gchar *result=NULL;
   if (output) {
