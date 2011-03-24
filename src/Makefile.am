@@ -152,8 +152,6 @@ gphpedit_SOURCES = \
   symbol_bd_sql.h \
   symbol_manager.c \
   symbol_manager.h \
-  syntax_check_manager.c \
-  syntax_check_manager.h \
   syntax_check_window.c \
   syntax_check_window.h \
   tab.c \
