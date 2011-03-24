@@ -4,7 +4,7 @@
    Copyright (C) 2009, 2011 José Rostagno (for vijona.com.ar)
 	  
    For more information or to find the latest release, visit our 
-   website at http://www.gphpedit.org/
+   website at http://www.gsqledit.org/
  
    gPHPEdit is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -57,6 +57,7 @@ enum
 static void language_sql_language_provider_init(Language_ProviderInterface *iface, gpointer user_data);
 static void language_sql_trigger_completion (Language_Provider *lgsql, guint ch);
 static void language_sql_setup_lexer(Language_Provider *lgsql);
+static gchar *language_sql_do_syntax_check(Language_Provider *lgsql);
 
 G_DEFINE_TYPE_WITH_CODE(Language_SQL, language_sql, G_TYPE_OBJECT,
                         G_IMPLEMENT_INTERFACE (IFACE_TYPE_LANGUAGE_PROVIDER,
@@ -72,6 +73,7 @@ static void language_sql_language_provider_init(Language_ProviderInterface *ifac
   iface->trigger_completion = language_sql_trigger_completion;
   iface->show_calltip = show_calltip;
   iface->setup_lexer = language_sql_setup_lexer;
+  iface->do_syntax_check = language_sql_do_syntax_check;
 }
 
 static void
@@ -339,6 +341,11 @@ static void language_sql_trigger_completion (Language_Provider *lgsql, guint ch)
         if (member_function_buffer && strlen(member_function_buffer)>=3) show_autocompletion (LANGUAGE_SQL(lgsql), current_pos);
         g_free(member_function_buffer);
   }
+}
+
+static gchar *language_sql_do_syntax_check(Language_Provider *lgsql)
+{
+  return NULL;
 }
 
 static void language_sql_setup_lexer(Language_Provider *lgsql)

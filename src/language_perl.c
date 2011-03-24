@@ -4,7 +4,7 @@
    Copyright (C) 2009, 2011 José Rostagno (for vijona.com.ar)
 	  
    For more information or to find the latest release, visit our 
-   website at http://www.gphpedit.org/
+   website at http://www.gperledit.org/
  
    gPHPEdit is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -60,7 +60,8 @@ enum
 static void language_perl_language_provider_init(Language_ProviderInterface *iface, gpointer user_data);
 static void language_perl_trigger_completion (Language_Provider *lgperl, guint ch);
 static void show_calltip (Language_Provider *lgperl);
-static void language_perl_setup_lexer(Language_Provider *lgcss);
+static void language_perl_setup_lexer(Language_Provider *lgperl);
+static gchar *language_perl_do_syntax_check(Language_Provider *lgperl);
 
 G_DEFINE_TYPE_WITH_CODE(Language_PERL, language_perl, G_TYPE_OBJECT,
                         G_IMPLEMENT_INTERFACE (IFACE_TYPE_LANGUAGE_PROVIDER,
@@ -71,6 +72,7 @@ static void language_perl_language_provider_init(Language_ProviderInterface *ifa
   iface->trigger_completion = language_perl_trigger_completion;
   iface->show_calltip = show_calltip;
   iface->setup_lexer = language_perl_setup_lexer;
+  iface->do_syntax_check = language_perl_do_syntax_check;
 }
 
 static void
@@ -501,6 +503,11 @@ static void language_perl_trigger_completion (Language_Provider *lgperl, guint c
         if (member_function_buffer && strlen(member_function_buffer)>=3) show_autocompletion (LANGUAGE_PERL(lgperl), current_pos);
         g_free(member_function_buffer);
   }
+}
+
+static gchar *language_perl_do_syntax_check(Language_Provider *lgperl)
+{
+  return NULL;
 }
 
 static void language_perl_setup_lexer(Language_Provider *lgperl)

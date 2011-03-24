@@ -4,7 +4,7 @@
    Copyright (C) 2009, 2011 José Rostagno (for vijona.com.ar)
 	  
    For more information or to find the latest release, visit our 
-   website at http://www.gphpedit.org/
+   website at http://www.guntitlededit.org/
  
    gPHPEdit is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -50,6 +50,7 @@ enum
 static void language_untitled_language_provider_init(Language_ProviderInterface *iface, gpointer user_data);
 static void language_untitled_trigger_completion (Language_Provider *lguntitled, guint ch);
 static void language_untitled_setup_lexer(Language_Provider *lguntitled);
+static gchar *language_untitled_do_syntax_check(Language_Provider *lguntitled);
 
 G_DEFINE_TYPE_WITH_CODE(Language_Untitled, language_untitled, G_TYPE_OBJECT,
                         G_IMPLEMENT_INTERFACE (IFACE_TYPE_LANGUAGE_PROVIDER,
@@ -65,6 +66,7 @@ static void language_untitled_language_provider_init(Language_ProviderInterface 
   iface->trigger_completion = language_untitled_trigger_completion;
   iface->show_calltip = show_calltip;
   iface->setup_lexer = language_untitled_setup_lexer;
+  iface->do_syntax_check = language_untitled_do_syntax_check;
 }
 
 static void
@@ -178,11 +180,16 @@ static void language_untitled_trigger_completion (Language_Provider *lguntitled,
   wordEnd = gtk_scintilla_word_end_position(lguntitleddet->sci, current_pos-1, TRUE);
 
   member_function_buffer = gtk_scintilla_get_text_range (lguntitleddet->sci, wordStart-2, wordEnd, &member_function_length);
-  /* if we type <?php then we are in a php file so force php syntax mode */
-  if (g_strcmp0(member_function_buffer,"<?php")==0) {
+  /* if we type <?untitled then we are in a untitled file so force untitled syntax mode */
+  if (g_strcmp0(member_function_buffer,"<?untitled")==0) {
     documentable_set_type(DOCUMENTABLE(lguntitleddet->doc), TAB_PHP);
   }
   g_free(member_function_buffer);
+}
+
+static gchar *language_untitled_do_syntax_check(Language_Provider *lguntitled)
+{
+  return NULL;
 }
 
 static void language_untitled_setup_lexer(Language_Provider *lguntitled)
