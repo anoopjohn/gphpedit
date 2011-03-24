@@ -127,7 +127,8 @@ static void lint_row_activated (GtkTreeSelection *selection, gpointer data)
 * lines end with \n 
 * if data hasn't got that format it'll be shown be error will not be styled.
 */
-void syntax_window(GtkSyntaxCheckWindow *win, Documentable *document, gchar *data){
+void syntax_window(GtkSyntaxCheckWindow *win, Documentable *document, gchar *data)
+{
   GtkSyntaxCheckWindowPrivate *priv = GTK_SYNTAX_CHECK_WINDOW_GET_PRIVATE(win);
   if (!document && !OBJECT_IS_DOCUMENT_SCINTILLA(document)) return;
   if (!data) return;
