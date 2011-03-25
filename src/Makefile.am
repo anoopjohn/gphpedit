@@ -41,7 +41,13 @@ AM_CFLAGS = \
   -DGPHPEDIT_UI_DIR=\""$(uidir)"\"
 
 nodist_EXTRA_gphpedit_SOURCES = dummy.cxx
+
+BUILT_SOURCES = 			\
+  gphpedit-marshal.c			\
+  gphpedit-marshal.h
+
 gphpedit_SOURCES = \
+  $(BUILT_SOURCES) \
   classbrowser.c \
   classbrowser.h \
   debug.c \
@@ -172,6 +178,12 @@ gphpedit_SOURCES = \
   toolbar.c \
   toolbar.h
 
+gphpedit-marshal.h: gphpedit-marshal.list $(GLIB_GENMARSHAL)
+	$(AM_V_GEN) $(GLIB_GENMARSHAL) $< --header --prefix=gphpedit_marshal > $@
+
+gphpedit-marshal.c: gphpedit-marshal.list $(GLIB_GENMARSHAL)
+	$(AM_V_GEN) echo "#include \"gphpedit-marshal.h\"" > $@ && \
+	$(GLIB_GENMARSHAL) $< --body --prefix=gphpedit_marshal >> $@
 
 gtkscintilla2/libgtkscintilla2.a:
 	cd gtkscintilla2 && $(MAKE) libgtkscintilla2.a && cd ..

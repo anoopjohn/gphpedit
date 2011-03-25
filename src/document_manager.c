@@ -265,14 +265,9 @@ void document_type_changed_cb (Document *doc, gint type, gpointer user_data)
 	if (doc==docmgdet->current_document) g_signal_emit (G_OBJECT (docmg), signals[CHANGE_DOCUMENT], 0, docmgdet->current_document);
 }
 
-void document_col_changed_cb (Document *doc, gint col, gpointer user_data)
+void document_pos_changed_cb (Document *doc, gint pos, gint col, gpointer user_data)
 {
-  gphpedit_statusbar_set_cursor_position (GPHPEDIT_STATUSBAR(main_window.appbar), -1, col);
-}
-
-void document_pos_changed_cb (Document *doc, gint pos, gpointer user_data)
-{
-  gphpedit_statusbar_set_cursor_position (GPHPEDIT_STATUSBAR(main_window.appbar), pos, -1);
+  gphpedit_statusbar_set_cursor_position (GPHPEDIT_STATUSBAR(main_window.appbar), pos, col);
 }
 
 void document_need_reload_cb (Document *doc, gpointer user_data)
@@ -319,7 +314,6 @@ void document_loader_done_loading_cb (DocumentLoader *doclod, gboolean result, D
       g_signal_connect(G_OBJECT(doc), "save_start", G_CALLBACK(document_save_start_cb), NULL);
       g_signal_connect(G_OBJECT(doc), "type_changed", G_CALLBACK(document_type_changed_cb), docmg);
       g_signal_connect(G_OBJECT(doc), "pos_changed", G_CALLBACK(document_pos_changed_cb), docmg);
-      g_signal_connect(G_OBJECT(doc), "col_changed", G_CALLBACK(document_col_changed_cb), docmg);
       g_signal_connect(G_OBJECT(doc), "need_reload", G_CALLBACK(document_need_reload_cb), docmg);
       g_signal_connect(G_OBJECT(doc), "ovr_changed", G_CALLBACK(document_ovr_changed_cb), NULL);
       g_signal_connect(G_OBJECT(doc), "marker_not_found", G_CALLBACK(document_marker_not_found_cb), NULL);

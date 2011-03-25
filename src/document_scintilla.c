@@ -24,6 +24,9 @@
 */
 
 #include <gdk/gdkkeysyms.h>
+
+#include "gphpedit-marshal.h"
+
 #include "tab.h"
 #include "debug.h"
 #include "document_scintilla.h"
@@ -48,7 +51,6 @@ enum {
   MARKER_NOT_FOUND,
   OPEN_REQUEST,
   POS_CHANGED,
-  COL_CHANGED,
   LAST_SIGNAL
 };
 
@@ -867,7 +869,7 @@ document_scintilla_class_init (Document_ScintillaClass *klass)
 		g_signal_new ("type_changed",
 		              G_TYPE_FROM_CLASS (object_class),
 		              G_SIGNAL_RUN_LAST,
-		              G_STRUCT_OFFSET (Document_ScintillaClass, save_update),
+		              G_STRUCT_OFFSET (Document_ScintillaClass, type_changed),
 		              NULL, NULL,
 		               g_cclosure_marshal_VOID__INT,
 		               G_TYPE_NONE, 1, G_TYPE_INT, NULL);
@@ -876,19 +878,10 @@ document_scintilla_class_init (Document_ScintillaClass *klass)
 		g_signal_new ("pos_changed",
 		              G_TYPE_FROM_CLASS (object_class),
 		              G_SIGNAL_RUN_LAST,
-		              G_STRUCT_OFFSET (Document_ScintillaClass, save_update),
+		              G_STRUCT_OFFSET (Document_ScintillaClass, pos_changed_cb),
 		              NULL, NULL,
-		               g_cclosure_marshal_VOID__INT,
-		               G_TYPE_NONE, 1, G_TYPE_INT, NULL);
-
-	signals[COL_CHANGED] =
-		g_signal_new ("col_changed",
-		              G_TYPE_FROM_CLASS (object_class),
-		              G_SIGNAL_RUN_LAST,
-		              G_STRUCT_OFFSET (Document_ScintillaClass, save_update),
-		              NULL, NULL,
-		               g_cclosure_marshal_VOID__INT,
-		               G_TYPE_NONE, 1, G_TYPE_INT, NULL);
+		               gphpedit_marshal_VOID__INT_INT,
+		               G_TYPE_NONE, 2, G_TYPE_INT, G_TYPE_INT, NULL);
 
 	signals[NEED_RELOAD] =
 		g_signal_new ("need_reload",
@@ -1310,8 +1303,7 @@ static void scintilla_modified (GtkWidget *scintilla, gpointer user_data)
   g_return_if_fail(doc);
   GtkScintilla *sci = GTK_SCINTILLA(scintilla);
   gint current_pos = gtk_scintilla_get_current_pos(sci);
-  g_signal_emit (G_OBJECT (doc), signals[POS_CHANGED], 0, gtk_scintilla_line_from_position(sci, current_pos) + 1);
-  g_signal_emit (G_OBJECT (doc), signals[COL_CHANGED], 0, gtk_scintilla_get_column(sci, current_pos) + 1);
+  g_signal_emit (G_OBJECT (doc), signals[POS_CHANGED], 0, gtk_scintilla_line_from_position(sci, current_pos) + 1, gtk_scintilla_get_column(sci, current_pos) + 1);
   g_signal_emit (G_OBJECT (doc), signals[OVR_CHANGED], 0, gtk_scintilla_get_overtype(sci));
 }
 
