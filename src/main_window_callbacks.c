@@ -74,10 +74,6 @@ gboolean main_window_delete_event(GtkWidget *widget, GdkEvent *event, gpointer u
   is_app_closing = TRUE;
   cancel_quit = !document_manager_can_all_tabs_be_saved(main_window.docmg);
   is_app_closing = FALSE;
-
-  if (cancel_quit) {
-    update_app_title(document_manager_get_current_documentable(main_window.docmg));
-  }
   return cancel_quit;
 }
 
