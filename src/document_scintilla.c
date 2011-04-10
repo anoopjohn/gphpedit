@@ -615,12 +615,11 @@ static void tab_reset_scintilla_after_open(GtkScintilla *scintilla, guint curren
 static void document_scintilla_replace_text (Documentable  *document_scintilla, gchar *new_text)
 {
   Document_ScintillaDetails *docdet = DOCUMENT_SCINTILLA_GET_PRIVATE(document_scintilla);
-  gsize size;
-  if (!new_text) size = 0;
-  else size = strlen(new_text);
-  if (size!=0){
+  gtk_scintilla_clear_all(GTK_SCINTILLA (docdet->scintilla));
+  if (new_text) {
+    gsize size;
+    size = strlen(new_text);
     // Clear scintilla buffer
-    gtk_scintilla_clear_all(GTK_SCINTILLA (docdet->scintilla));
     gtk_scintilla_add_text(GTK_SCINTILLA (docdet->scintilla), size, new_text);
   }
   tab_reset_scintilla_after_open(GTK_SCINTILLA (docdet->scintilla), 0);

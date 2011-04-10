@@ -235,31 +235,31 @@ preferences_manager_set_property (GObject      *object,
 			prefdet->side_panel_hidden = g_value_get_boolean (value);
 			break;
 		case PROP_LAST_OPENED_FOLDER:
-			g_free(prefdet->last_opened_folder);
+			if (prefdet->last_opened_folder) g_free(prefdet->last_opened_folder);
 			prefdet->last_opened_folder = g_value_dup_string (value);
 			break;
 		case PROP_SHARED_SOURCE_LOCATION:
-			g_free(prefdet->shared_source_location);
+			if (prefdet->shared_source_location) g_free(prefdet->shared_source_location);
 			prefdet->shared_source_location = g_value_dup_string (value);
 			break;
 		case PROP_PHP_BINARY_LOCATION:
-			g_free(prefdet->php_binary_location);
+			if (prefdet->php_binary_location) g_free(prefdet->php_binary_location);
 			prefdet->php_binary_location = g_value_dup_string (value);
 			break;
 		case PROP_STYLE_NAME:
-			g_free(prefdet->style_name);
+			if (prefdet->style_name) g_free(prefdet->style_name);
 			prefdet->style_name = g_value_dup_string (value);
 			break;
 		case PROP_PHP_FILE_EXTENSIONS:
-			g_free(prefdet->php_file_extensions);
+			if (prefdet->php_file_extensions) g_free(prefdet->php_file_extensions);
 			prefdet->php_file_extensions = g_value_dup_string (value);
 			break;
 		case PROP_FONT_NAME:
-			g_free(prefdet->font_name);
+			if (prefdet->font_name) g_free(prefdet->font_name);
 			prefdet->font_name = g_value_dup_string (value);
 			break;
 		case PROP_FILEBROWSER_LAST_FOLDER:
-			g_free(prefdet->filebrowser_last_folder);
+			if (prefdet->filebrowser_last_folder) g_free(prefdet->filebrowser_last_folder);
 			prefdet->filebrowser_last_folder = g_value_dup_string (value);
 			break;
 
@@ -568,6 +568,7 @@ static void force_config_folder(void)
         g_print(_("Unable to create %s (%d) %s"), uri, error->code, error->message);
         }
         g_error_free(error);
+        g_object_unref(config);
       }
   }
   g_object_unref(config);
