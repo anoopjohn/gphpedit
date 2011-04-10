@@ -82,7 +82,4 @@ extern MainWindow main_window;
 
 void main_window_create(char **argv, gint argc);
 void update_app_title(Documentable *document);
-extern GIOChannel* inter_gphpedit_io;
-extern guint inter_gphpedit_event_id;
-extern guint idle_id;
 #endif

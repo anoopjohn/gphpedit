@@ -336,6 +336,7 @@ void on_save_as1_activate(GtkWidget *widget)
   }
   gtk_widget_destroy(file_selection_box);
 }
+
 void on_reload1_activate(GtkWidget *widget)
 {
   document_manager_document_reload(main_window.docmg);

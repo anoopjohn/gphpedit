@@ -50,7 +50,7 @@ typedef struct
 
 typedef struct
 {
-	GObjectClass parent_class;
+  GObjectClass parent_class;
 
   void (* new_document) (DocumentManager *docmg, Documentable *doc, gpointer user_data);
 

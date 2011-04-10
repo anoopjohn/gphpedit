@@ -790,9 +790,9 @@ gboolean document_manager_try_close_document(DocumentManager *docmg, Document *d
   g_object_get(document, "read_only", &read_only, "is_empty", &is_empty, "saved", &saved_status, NULL);
 
   if (!read_only && !saved_status && !is_empty) {
-    return document_manager_try_save_page(main_window.docmg, document, TRUE);
+    return document_manager_try_save_page(docmg, document, TRUE);
   }
-  document_manager_close_page(main_window.docmg, document);
+  document_manager_close_page(docmg, document);
   return TRUE;
 }
 

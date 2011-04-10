@@ -30,7 +30,6 @@
 
 #include "main_window.h"
 #include "debug.h"
-#include "tab.h"
 #include "main_window_callbacks.h"
 #include "templates.h"
 #include "gvfs_utils.h"
@@ -44,8 +43,6 @@
 void update_controls(Documentable *document);
 
 MainWindow main_window;
-GIOChannel* inter_gphpedit_io;
-guint inter_gphpedit_event_id;
 
 void main_window_state_changed(GtkWidget *widget, GdkEventWindowState *event, gpointer user_data)
 {
