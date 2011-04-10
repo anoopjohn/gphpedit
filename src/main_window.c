@@ -1,7 +1,8 @@
-/* This file is part of gPHPEdit, a GNOME2 PHP Editor.
+/* This file is part of gPHPEdit, a GNOME PHP Editor.
 
    Copyright (C) 2003, 2004, 2005 Andy Jeffries <andy at gphpedit.org>
    Copyright (C) 2009 Anoop John <anoop dot john at zyxware.com>
+   Copyright (C) 2009, 2010, 2011 José Rostagno (for vijona.com.ar) 
 
    For more information or to find the latest release, visit our 
    website at http://www.gphpedit.org/
@@ -18,8 +19,10 @@
 
    You should have received a copy of the GNU General Public License
    along with gPHPEdit. If not, see <http://www.gnu.org/licenses/>.
+
    The GNU General Public License is contained in the file COPYING.
 */
+
 
 #ifdef HAVE_CONFIG_H
 #include <config.h>
@@ -248,7 +251,8 @@ static void create_app_main_window(const gchar *title){
   set_colormap(main_window.window);
 }
 
-void main_window_create(void){
+void main_window_create(char **argv, gint argc)
+{
 
   create_app_main_window(_("gPHPEdit"));
   main_window_create_prinbox();
@@ -283,6 +287,12 @@ void main_window_create(void){
   gchar *theme_dir = g_build_path (G_DIR_SEPARATOR_S, API_DIR, "themes", NULL);
   gtk_source_style_scheme_manager_prepend_search_path (main_window.stylemg, theme_dir);
   g_free(theme_dir);
+
+  main_window.tempmg = templates_manager_new();
+  main_window.docmg = document_manager_new_full(argv, argc);
+  g_signal_connect (G_OBJECT (main_window.docmg), "new_document", G_CALLBACK(document_manager_new_document_cb), NULL);
+  g_signal_connect (G_OBJECT (main_window.docmg), "change_document", G_CALLBACK(document_manager_change_document_cb), NULL);
+  g_signal_connect (G_OBJECT (main_window.docmg), "close_document", G_CALLBACK(document_manager_close_document_cb), NULL);
 }
 
 void update_controls(Documentable *document)
