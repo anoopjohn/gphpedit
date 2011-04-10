@@ -490,11 +490,11 @@ static void language_cxx_setup_lexer(Language_Provider *lgcxx)
   
   gtk_scintilla_set_keywords(lgcxxdet->sci, 1, "strstr strlen strcmp clrscr gotoXY FILE stat memcpy memmove memccpy memset strncpy strcpy strdup strndup fclose fopen freopen fdopen remove rename rewind tmpfile clearerr feof ferror fflush fflush fgetpos fgetc fgets fputc fputs ftell fseek fsetpos fread fwrite getc getchar gets fprintf sprintf vprintf perror putc putchar fputchar fscanf sscanf setbuf setvbuf tmpnam ungetc puts atof atoi atol strtod strtol strtoul rand srand malloc calloc realloc free abort atexit exit getenv system bsearch qsort abs div ldiv");
 
-  const gchar *font;
+  gchar *font;
   guint size;
   g_object_get(lgcxxdet->prefmg, "style_font_name", &font,"font_size", &size, NULL);
 
-  const gchar *style_name;
+  gchar *style_name;
   g_object_get(lgcxxdet->prefmg, "style_name", &style_name, NULL);
 
   GtkSourceStyleScheme	*scheme = gtk_source_style_scheme_manager_get_scheme (main_window.stylemg, style_name);
@@ -515,6 +515,9 @@ static void language_cxx_setup_lexer(Language_Provider *lgcxx)
   set_scintilla_lexer_special_constant_style (GTK_WIDGET(lgcxxdet->sci), scheme, SCE_C_REGEX, font, size);
   set_scintilla_lexer_xml_atribute_style(GTK_WIDGET(lgcxxdet->sci), scheme, SCE_C_VERBATIM, font, size);
   set_scintilla_lexer_xml_instruction_style(GTK_WIDGET(lgcxxdet->sci), scheme, SCE_C_GLOBALCLASS, font, size);
+
+  g_free(font);
+  g_free(style_name);
 
   gtk_scintilla_set_property(lgcxxdet->sci, "lexer.cpp.allow.dollars", "1");
   gtk_scintilla_set_property(lgcxxdet->sci, "fold.comment", "1");

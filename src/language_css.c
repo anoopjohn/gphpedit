@@ -476,6 +476,9 @@ static void language_css_setup_lexer(Language_Provider *lgcss)
   set_scintilla_lexer_special_constant_style (GTK_WIDGET(lgcssdet->sci), scheme, SCE_CSS_MEDIA, font, size);
   set_scintilla_lexer_xml_instruction_style(GTK_WIDGET(lgcssdet->sci), scheme, SCE_CSS_DIRECTIVE, font, size);
 
+  g_free(font);
+  g_free(style_name);
+
   gtk_scintilla_colourise(lgcssdet->sci, 0, -1);
 
   gtk_scintilla_set_property(lgcssdet->sci, "fold.comment", "1");

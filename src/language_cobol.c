@@ -384,6 +384,9 @@ static void language_cobol_setup_lexer(Language_Provider *lgcobol)
   set_scintilla_lexer_preprocessor_style(GTK_WIDGET(lgcoboldet->sci), scheme, SCE_C_PREPROCESSOR, font, size);
   set_scintilla_lexer_xml_element_style(GTK_WIDGET(lgcoboldet->sci), scheme, SCE_C_UUID, font, size);
 
+  g_free(font);
+  g_free(style_name);
+
   gtk_scintilla_set_property(lgcoboldet->sci, "fold.compact", "1");
   gtk_scintilla_set_property(lgcoboldet->sci, "fold", "1");
   gtk_scintilla_colourise(lgcoboldet->sci, 0, -1);

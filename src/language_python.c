@@ -452,12 +452,12 @@ static void language_python_setup_lexer(Language_Provider *lgpython)
 
   gtk_scintilla_set_keywords(lgpythondet->sci, 1, "Ellipsis NotImplemented ArithmeticError AssertionError AttributeError EnvironmentError EOFError Exception FloatingPointError ImportError IndentationError IndexError IOError KeyboardInterrupt KeyError LookupError MemoryError NameError NotImplementedError OSError OverflowError ReferenceError RuntimeError StandardError StopIteration SyntaxError SystemError SystemExit TabError TypeError UnboundLocalError UnicodeDecodeError UnicodeEncodeError UnicodeError UnicodeTranslateError ValueError WindowsError ZeroDivisionError Warning UserWarning DeprecationWarning PendingDeprecationWarning SyntaxWarning OverflowWarning RuntimeWarning FutureWarning basestring bool buffer callable chr classmethod cmp coerce compile complex delattr divmod enumerate eval execfile file filter float frozenset getattr globals hasattr hash hex id input int  isinstance issubclass iter  list locals long map max min object oct ord pow property range raw_input reduce reload repr reversed round setattr set slice sorted staticmethod str sum super tuple type unichr unicode vars xrange zip");
 
-  const gchar *style_name;
+  gchar *style_name;
   g_object_get(lgpythondet->prefmg, "style_name", &style_name, NULL);
 
   GtkSourceStyleScheme	*scheme = gtk_source_style_scheme_manager_get_scheme (main_window.stylemg, style_name);
   /* PYTHON LEXER STYLE */
-  const gchar *font;
+  gchar *font;
   guint size;
   g_object_get(lgpythondet->prefmg, "style_font_name", &font,"font_size", &size, NULL);
 
@@ -478,6 +478,9 @@ static void language_python_setup_lexer(Language_Provider *lgpython)
   set_scintilla_lexer_xml_entity_style(GTK_WIDGET(lgpythondet->sci), scheme, SCE_P_DECORATOR, font, size);
   set_scintilla_lexer_preprocessor_style(GTK_WIDGET(lgpythondet->sci), scheme, SCE_P_DEFNAME, font, size);
   set_scintilla_lexer_xml_instruction_style(GTK_WIDGET(lgpythondet->sci), scheme, SCE_P_CLASSNAME, font, size);
+
+  g_free(font);
+  g_free(style_name);
 
   gtk_scintilla_set_property(lgpythondet->sci, "fold", "1");
   gtk_scintilla_set_property(lgpythondet->sci, "lexer.python.strings.over.newline", "1");
