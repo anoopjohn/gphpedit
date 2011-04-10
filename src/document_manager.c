@@ -680,12 +680,6 @@ void document_manager_close_page(DocumentManager *docmg, Document *document)
   if (!docmg) return ;
   DocumentManagerDetails *docmgdet = DOCUMENT_MANAGER_GET_PRIVATE(docmg);
   close_page(document);
-  gchar *filename = documentable_get_filename (DOCUMENTABLE(document));
-//FIXME: move to close_document handler
-  gint ftype;
-  g_object_get(document, "type", &ftype, NULL);
-  symbol_manager_purge_file (main_window.symbolmg, filename, ftype);
-  g_free(filename);
   docmgdet->editors = g_slist_remove(docmgdet->editors, document);
   if (!docmgdet->editors) {
     docmgdet->current_document = NULL;

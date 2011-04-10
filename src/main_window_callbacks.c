@@ -715,6 +715,11 @@ gboolean main_window_activate_focus (GtkWidget *widget,GdkEventFocus *event, gpo
 void document_manager_close_document_cb (DocumentManager *docmg, Documentable *doc, gpointer user_data)
 {
   update_app_title(document_manager_get_current_documentable(docmg));
+  gchar *filename = documentable_get_filename (DOCUMENTABLE(doc));
+  gint ftype;
+  g_object_get(doc, "type", &ftype, NULL);
+  symbol_manager_purge_file (main_window.symbolmg, filename, ftype);
+  g_free(filename);
 }
 void document_manager_new_document_cb (DocumentManager *docmg, Documentable *doc, gpointer user_data)
 {
