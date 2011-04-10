@@ -679,7 +679,6 @@ void document_manager_close_page(DocumentManager *docmg, Document *document)
   gphpedit_debug(DEBUG_DOC_MANAGER);
   if (!docmg) return ;
   DocumentManagerDetails *docmgdet = DOCUMENT_MANAGER_GET_PRIVATE(docmg);
-  close_page(document);
   docmgdet->editors = g_slist_remove(docmgdet->editors, document);
   if (!docmgdet->editors) {
     docmgdet->current_document = NULL;
