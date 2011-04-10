@@ -395,10 +395,6 @@ void close_page(Document *document)
 void on_close1_activate(GtkWidget *widget)
 {
   document_manager_try_close_current_document(main_window.docmg);
-  if(document_manager_get_document_count(main_window.docmg)!=0){
-    classbrowser_update(GPHPEDIT_CLASSBROWSER(main_window.classbrowser));
-    update_app_title(document_manager_get_current_documentable(main_window.docmg));
-  }
 }
 
 void on_quit1_activate(GtkWidget *widget)
