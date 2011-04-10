@@ -714,6 +714,18 @@ gboolean gtk_scintilla_get_margin_sensitive_n(GtkScintilla *sci, gint margin)
         2247, (gulong) margin, 0);
 }
 
+void gtk_scintilla_set_margin_cursor_n(GtkScintilla *sci, gint margin, gint cursor)
+{
+    scintilla_send_message(SCINTILLA(sci->scintilla),
+        2248, (gulong) margin, (gulong) cursor);
+}
+
+gint gtk_scintilla_get_margin_cursor_n(GtkScintilla *sci, gint margin)
+{
+    return scintilla_send_message(SCINTILLA(sci->scintilla),
+        2249, (gulong) margin, 0);
+}
+
 void gtk_scintilla_style_clear_all(GtkScintilla *sci)
 {
     scintilla_send_message(SCINTILLA(sci->scintilla),

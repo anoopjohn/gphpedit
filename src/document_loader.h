@@ -44,18 +44,18 @@ typedef struct DocumentLoaderDetails DocumentLoaderDetails;
 
 typedef struct
 {
-	GObject object;
+  GObject object;
+  DocumentLoaderDetails *details;
 
-	DocumentLoaderDetails *details;
 } DocumentLoader;
 
 typedef struct
 {
-	GObjectClass parent_class;
+  GObjectClass parent_class;
 
-  void (*done_loading) (DocumentLoader *doclod, gboolean result, Document *doc, gpointer user_data);
-	void (* done_navigate) (DocumentLoader *doclod, gboolean result, gpointer user_data);
-	void (* need_mounting) (DocumentLoader *doclod, gpointer user_data);
+  void (* done_loading) (DocumentLoader *doclod, gboolean result, Document *doc, gpointer user_data);
+  void (* done_navigate) (DocumentLoader *doclod, gboolean result, gpointer user_data);
+  void (* need_mounting) (DocumentLoader *doclod, gpointer user_data);
 } DocumentLoaderClass;
 
 

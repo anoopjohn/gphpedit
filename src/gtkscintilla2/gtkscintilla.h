@@ -147,6 +147,8 @@ void gtk_scintilla_set_margin_mask_n(GtkScintilla *sci, gint margin, gint mask);
 gint gtk_scintilla_get_margin_mask_n(GtkScintilla *sci, gint margin);
 void gtk_scintilla_set_margin_sensitive_n(GtkScintilla *sci, gint margin, gboolean sensitive);
 gboolean gtk_scintilla_get_margin_sensitive_n(GtkScintilla *sci, gint margin);
+void gtk_scintilla_set_margin_cursor_n(GtkScintilla *sci, gint margin, gint cursor);
+gint gtk_scintilla_get_margin_cursor_n(GtkScintilla *sci, gint margin);
 void gtk_scintilla_style_clear_all(GtkScintilla *sci);
 void gtk_scintilla_style_set_fore(GtkScintilla *sci, gint style, glong fore);
 void gtk_scintilla_style_set_back(GtkScintilla *sci, gint style, glong back);
