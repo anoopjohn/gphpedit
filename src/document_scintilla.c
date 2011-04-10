@@ -1610,7 +1610,7 @@ static void fold_changed(GtkWidget *scintilla, int line,int levelNow,int levelPr
 
 // All the folding functions are converted from QScintilla, released under the GPLv2 by
 // Riverbank Computing Limited <info@riverbankcomputing.co.uk> and Copyright (c) 2003 by them.
-static void handle_modified(GtkWidget *scintilla, gint pos,gint mtype,gchar *text,gint len,
+static void handle_modified(GtkWidget *scintilla, gint pos, gint mtype, gchar *text,gint len,
            gint added, gint line, gint foldNow, gint foldPrev, gpointer user_data)
 {
   Document_ScintillaDetails *docdet = DOCUMENT_SCINTILLA_GET_PRIVATE(user_data);
