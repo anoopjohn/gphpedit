@@ -686,13 +686,13 @@ void document_manager_close_page(DocumentManager *docmg, Document *document)
   g_object_get(document, "type", &ftype, NULL);
   symbol_manager_purge_file (main_window.symbolmg, filename, ftype);
   g_free(filename);
-  g_object_unref(document);
   docmgdet->editors = g_slist_remove(docmgdet->editors, document);
   if (!docmgdet->editors) {
     docmgdet->current_document = NULL;
   }
   document_manager_session_save(docmg);
   g_signal_emit (G_OBJECT (main_window.docmg), signals[CLOSE_DOCUMENT], 0, document);
+  g_object_unref(document);
 }
 
 gboolean document_manager_try_save_page(DocumentManager *docmg, Document *document, gboolean close_if_can)
