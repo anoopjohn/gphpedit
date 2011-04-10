@@ -549,8 +549,9 @@ preferences_manager_class_init (PreferencesManagerClass *klass)
 void clean_default_settings(PreferencesManagerDetails *prefdet)
 {
   /* free object resources*/
-  if (prefdet->last_opened_folder) g_free(prefdet->last_opened_folder);
-  if (prefdet->filebrowser_last_folder) g_free(prefdet->filebrowser_last_folder);
+//FIXME: get double free error in these lines
+//  if (prefdet->last_opened_folder) g_free(prefdet->last_opened_folder);
+//  if (prefdet->filebrowser_last_folder) g_free(prefdet->filebrowser_last_folder);
   if (prefdet->php_binary_location) g_free(prefdet->php_binary_location);
   if (prefdet->shared_source_location) g_free(prefdet->shared_source_location);
   if (prefdet->php_file_extensions) g_free(prefdet->php_file_extensions);
