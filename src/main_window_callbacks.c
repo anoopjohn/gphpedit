@@ -345,15 +345,6 @@ void on_reload1_activate(GtkWidget *widget)
   document_manager_document_reload(main_window.docmg);
 }
 
-void set_active_tab(page_num)
-{
-  gphpedit_debug(DEBUG_MAIN_WINDOW);
-  if(document_manager_set_current_document_from_position(main_window.docmg, page_num)) {
-    gtk_notebook_set_current_page(GTK_NOTEBOOK(main_window.notebook_editor), page_num);
-  }
-  update_app_title(document_manager_get_current_documentable(main_window.docmg));
-}
-
 void update_zoom_level(void)
 {
   gphpedit_debug(DEBUG_MAIN_WINDOW);
@@ -394,7 +385,10 @@ void close_page(Document *document)
       page_num = 0;
     }  
   }
-  set_active_tab(page_num);
+
+  if(document_manager_set_current_document_from_position(main_window.docmg, page_num)) {
+    gtk_notebook_set_current_page(GTK_NOTEBOOK(main_window.notebook_editor), page_num);
+  }
   gtk_notebook_remove_page(GTK_NOTEBOOK(main_window.notebook_editor), page_num_closing);
 }
 

@@ -221,6 +221,7 @@ void update_app_title(Documentable *document)
   g_free(title);
 }
 
+
 static void main_window_create_prinbox(void)
 {
   main_window.prinbox = gtk_vbox_new (FALSE, 0);

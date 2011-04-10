@@ -41,7 +41,6 @@ void on_openselected1_activate(GtkWidget *widget);
 void on_save1_activate(GtkWidget *widget);
 void on_save_as1_activate(GtkWidget *widget);
 void on_saveall1_activate(GtkWidget *widget);
-void close_page(Document *document);
 void on_close1_activate(GtkWidget *widget);
 void on_quit1_activate(GtkWidget *widget);
 void on_cut1_activate(GtkWidget *widget);
