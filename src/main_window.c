@@ -70,40 +70,6 @@ gboolean classbrowser_accept_size(GtkPaned *paned, gpointer user_data)
   return TRUE;
 }
 
-
-void main_window_pass_command_line_files(char **argv)
-{
-  guint i;
-  GError *error;
-  gsize bytes_written;
-
-  error = NULL;
-  inter_gphpedit_io = g_io_channel_new_file("/tmp/gphpedit.sock","w",&error);
-  if (argv) {
-    i = 1;
-    while (argv[i] != NULL) {
-      gphpedit_debug_message(DEBUG_IPC, "%s:%d\n", argv[i], strlen(argv[i]));
-      g_io_channel_write_chars(inter_gphpedit_io, argv[i], strlen(argv[i]),
-                   &bytes_written, &error);
-      ++i;
-    }
-  }
-}
-
-
-gboolean channel_pass_filename_callback(GIOChannel *source, GIOCondition condition, gpointer data )
-{
-  gsize size;
-  gchar buf[1024];
-  GError *error=NULL;
-  if (g_io_channel_read_chars (inter_gphpedit_io,buf,sizeof(buf), &size,&error)!=G_IO_STATUS_NORMAL){
-    g_print("Error reading GIO Chanel. Error:%s\n",error->message);
-  }
-  gphpedit_debug_message(DEBUG_IPC, "Passed %s\n", buf);
-  document_manager_add_new_document(main_window.docmg, TAB_FILE, buf, 0);
-  return FALSE;
-}
-
 static void main_window_create_appbar(void)
 {
   main_window.appbar = gphpedit_statusbar_new ();

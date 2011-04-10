@@ -278,10 +278,10 @@ void document_save_start_cb (Document *doc, gpointer user_data)
 
 void document_type_changed_cb (Document *doc, gint type, gpointer user_data)
 {
-	DocumentManager *docmg = DOCUMENT_MANAGER(user_data);
-	DocumentManagerDetails *docmgdet = DOCUMENT_MANAGER_GET_PRIVATE(docmg);
-	/* only process if document is current_document */
-	if (doc==docmgdet->current_document) g_signal_emit (G_OBJECT (docmg), signals[CHANGE_DOCUMENT], 0, docmgdet->current_document);
+  DocumentManager *docmg = DOCUMENT_MANAGER(user_data);
+  DocumentManagerDetails *docmgdet = DOCUMENT_MANAGER_GET_PRIVATE(docmg);
+  /* only process if document is current_document */
+  if (doc==docmgdet->current_document) g_signal_emit (G_OBJECT (docmg), signals[CHANGE_DOCUMENT], 0, docmgdet->current_document);
 }
 
 void document_pos_changed_cb (Document *doc, gint pos, gint col, gpointer user_data)
