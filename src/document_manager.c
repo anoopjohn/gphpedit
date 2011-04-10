@@ -50,6 +50,7 @@ enum {
 	NEW_DOCUMENT,
 	CHANGE_DOCUMENT,
 	CLOSE_DOCUMENT,
+	ZOOM_CHANGE,
 	LAST_SIGNAL
 };
 
@@ -134,6 +135,15 @@ document_manager_class_init (DocumentManagerClass *klass)
 
 	signals[CLOSE_DOCUMENT] =
 		g_signal_new ("close_document",
+		              G_TYPE_FROM_CLASS (object_class),
+		              G_SIGNAL_RUN_LAST,
+		              G_STRUCT_OFFSET (DocumentManagerClass, new_document),
+		              NULL, NULL,
+		               g_cclosure_marshal_VOID__OBJECT,
+		               G_TYPE_NONE, 1, G_TYPE_OBJECT, NULL);
+
+	signals[ZOOM_CHANGE] =
+		g_signal_new ("zoom_change",
 		              G_TYPE_FROM_CLASS (object_class),
 		              G_SIGNAL_RUN_LAST,
 		              G_STRUCT_OFFSET (DocumentManagerClass, new_document),
@@ -248,6 +258,16 @@ void document_save_update_cb (Document *doc, gpointer user_data)
   g_free(filename);
 }
 
+void document_zoom_update_cb (Document *doc, gpointer user_data)
+{
+  DocumentManager *docmg = DOCUMENT_MANAGER(user_data);
+  DocumentManagerDetails *docmgdet;
+  docmgdet = DOCUMENT_MANAGER_GET_PRIVATE(docmg);
+  if (doc==docmgdet->current_document){
+    g_signal_emit (G_OBJECT (docmg), signals[ZOOM_CHANGE], 0, docmgdet->current_document);
+  }
+}
+
 void document_save_start_cb (Document *doc, gpointer user_data)
 {
   /* show status in statusbar */
@@ -309,6 +329,7 @@ void document_loader_done_loading_cb (DocumentLoader *doclod, gboolean result, D
     gtk_notebook_set_current_page (GTK_NOTEBOOK (main_window.notebook_editor), -1);
     _document_manager_set_current_document(docmg, doc);
     g_signal_connect(G_OBJECT(doc), "save_update", G_CALLBACK(document_save_update_cb), docmg);
+    g_signal_connect(G_OBJECT(doc), "zoom_update", G_CALLBACK(document_zoom_update_cb), docmg);
     if (OBJECT_IS_DOCUMENT_SCINTILLA(doc)) {
       g_signal_connect(G_OBJECT(doc), "save_start", G_CALLBACK(document_save_start_cb), NULL);
       g_signal_connect(G_OBJECT(doc), "type_changed", G_CALLBACK(document_type_changed_cb), docmg);

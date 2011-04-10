@@ -65,7 +65,7 @@ void force_python(GtkWidget *widget);
 void zoom_in(GtkWidget *widget);
 void zoom_out(GtkWidget *widget);
 void zoom_100(GtkWidget *widget);
-void update_zoom_level(void);
+void update_zoom_level(Documentable *document);
 void can_undo(GtkWidget *widget);
 void on_notebook_switch_page (GtkNotebook *notebook, GtkNotebookPage *page, gint page_num, gpointer user_data);
 void block_indent(GtkWidget *widget);
@@ -86,4 +86,5 @@ gboolean main_window_activate_focus (GtkWidget *widget,GdkEventFocus *event, gpo
 void document_manager_new_document_cb (DocumentManager *docmg, Documentable *doc, gpointer user_data);
 void document_manager_change_document_cb (DocumentManager *docmg, Documentable *doc, gpointer user_data);
 void document_manager_close_document_cb (DocumentManager *docmg, Documentable *doc, gpointer user_data);
+void document_manager_zoom_change_cb (DocumentManager *docmg, Documentable *doc, gpointer user_data);
 #endif

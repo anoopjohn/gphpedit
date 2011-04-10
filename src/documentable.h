@@ -43,6 +43,10 @@ typedef struct _DocumentableIface  DocumentableInterface;
 struct _DocumentableIface
 {
   GTypeInterface base_iface;
+  /* signal */
+  void (* zoom_update) (Documentable *iface, gpointer user_data);
+
+  /*vitual methods */
   void (*zoom_in) (Documentable *iface);
   void (*zoom_out) (Documentable *iface);
   void (*zoom_restore) (Documentable *iface);

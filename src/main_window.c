@@ -206,21 +206,19 @@ static void main_window_fill_panes(void)
  * Update the application title when switching tabs, closing or opening
  * or opening new tabs or opening new files.
  */
-
 void update_app_title(Documentable *document)
 {
   gphpedit_debug(DEBUG_MAIN_WINDOW);
   gchar *title = NULL;
   if (document) g_object_get(document, "title", &title, NULL);
   update_status_combobox(document);
-  update_zoom_level();
+  update_zoom_level(document);
   update_controls(document);
   //If there is no file opened set the name as gPHPEdit
   if (!title) title = g_strdup(_("gPHPEdit"));
   gtk_window_set_title(GTK_WINDOW(main_window.window), title);
   g_free(title);
 }
-
 
 static void main_window_create_prinbox(void)
 {
@@ -294,10 +292,11 @@ void main_window_create(char **argv, gint argc)
   g_signal_connect (G_OBJECT (main_window.docmg), "new_document", G_CALLBACK(document_manager_new_document_cb), NULL);
   g_signal_connect (G_OBJECT (main_window.docmg), "change_document", G_CALLBACK(document_manager_change_document_cb), NULL);
   g_signal_connect (G_OBJECT (main_window.docmg), "close_document", G_CALLBACK(document_manager_close_document_cb), NULL);
+  g_signal_connect (G_OBJECT (main_window.docmg), "zoom_change", G_CALLBACK(document_manager_zoom_change_cb), NULL);
+
+  update_app_title(document_manager_get_current_documentable(main_window.docmg));
 
   gtk_widget_show(main_window.window);
-  
-  update_app_title(document_manager_get_current_documentable(main_window.docmg));
 }
 
 void update_controls(Documentable *document)

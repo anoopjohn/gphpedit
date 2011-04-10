@@ -25,9 +25,29 @@
 
 G_DEFINE_INTERFACE(Documentable, documentable, G_TYPE_INVALID)
 
+/* signal enumeration */
+enum {
+  ZOOM_UPDATE,
+  LAST_SIGNAL
+};
+
+static guint signals[LAST_SIGNAL];
+
 static void
 documentable_default_init (DocumentableInterface *iface)
 {
+  /*
+  * ZOOM_UPDATE:
+  * Emited when zoom_level changed
+  */
+	signals[ZOOM_UPDATE] =
+		g_signal_new ("zoom_update",
+		              IFACE_TYPE_DOCUMENTABLE,
+		              G_SIGNAL_RUN_LAST,
+		              G_STRUCT_OFFSET (DocumentableInterface, zoom_update),
+		              NULL, NULL,
+		              g_cclosure_marshal_VOID__VOID ,
+		              G_TYPE_NONE, 0);
 }
 
 void documentable_reload (Documentable  *self)
@@ -40,18 +60,21 @@ void documentable_zoom_in (Documentable  *self)
 {
   if (!self) return ;
   DOCUMENTABLE_GET_IFACE (self)->zoom_in (self);
+  g_signal_emit (G_OBJECT (self), signals[ZOOM_UPDATE], 0);
 }
 
 void documentable_zoom_out (Documentable  *self)
 {
   if (!self) return ;
   DOCUMENTABLE_GET_IFACE (self)->zoom_out (self);
+  g_signal_emit (G_OBJECT (self), signals[ZOOM_UPDATE], 0);
 }
 
 void documentable_zoom_restore (Documentable  *self)
 {
   if (!self) return ;
   DOCUMENTABLE_GET_IFACE (self)->zoom_restore (self);
+  g_signal_emit (G_OBJECT (self), signals[ZOOM_UPDATE], 0);
 }
 
 void documentable_undo (Documentable  *self)

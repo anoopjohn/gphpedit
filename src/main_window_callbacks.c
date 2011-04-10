@@ -341,10 +341,9 @@ void on_reload1_activate(GtkWidget *widget)
   document_manager_document_reload(main_window.docmg);
 }
 
-void update_zoom_level(void)
+void update_zoom_level(Documentable *doc)
 {
   gphpedit_debug(DEBUG_MAIN_WINDOW);
-  Documentable *doc = document_manager_get_current_documentable(main_window.docmg);
   guint zoom_level = 100;
   if (doc) g_object_get(doc, "zoom_level", &zoom_level, NULL);
   gphpedit_statusbar_set_zoom_level((GphpeditStatusbar *)main_window.appbar, zoom_level);
@@ -603,19 +602,16 @@ void block_unindent(GtkWidget *widget)
 void zoom_in(GtkWidget *widget)
 {
   documentable_zoom_in(document_manager_get_current_documentable(main_window.docmg));
-  update_zoom_level();
 }
 
 void zoom_out(GtkWidget *widget)
 {
   documentable_zoom_out(document_manager_get_current_documentable(main_window.docmg));
-  update_zoom_level();
 }
 
 void zoom_100(GtkWidget *widget)
 {
   documentable_zoom_restore(document_manager_get_current_documentable(main_window.docmg));
-  update_zoom_level();
 }
 
 void syntax_check(GtkWidget *widget)
@@ -724,4 +720,9 @@ void document_manager_change_document_cb (DocumentManager *docmg, Documentable *
     update_app_title(doc);
     documentable_check_externally_modified(doc);
   }
+}
+
+void document_manager_zoom_change_cb (DocumentManager *docmg, Documentable *doc, gpointer user_data)
+{
+  update_zoom_level(doc);
 }
