@@ -188,7 +188,7 @@ DocumentManager *document_manager_new_full (char **argv, gint argc)
       ++i;
     }
   } else {
-  document_manager_session_reopen(docmg);
+    document_manager_session_reopen(docmg);
   }
   return docmg; /* return new object */
 }
@@ -206,7 +206,6 @@ static void on_tab_close_activate(GtkWidget *widget, Document *document)
 {
   gphpedit_debug(DEBUG_DOC_MANAGER);
   document_manager_try_close_document(main_window.docmg, document);
-  g_signal_emit (G_OBJECT (main_window.docmg), signals[CLOSE_DOCUMENT], 0, document);
 }
 
 /* internal */
@@ -682,6 +681,7 @@ void document_manager_close_page(DocumentManager *docmg, Document *document)
   DocumentManagerDetails *docmgdet = DOCUMENT_MANAGER_GET_PRIVATE(docmg);
   close_page(document);
   gchar *filename = documentable_get_filename (DOCUMENTABLE(document));
+//FIXME: move to close_document handler
   gint ftype;
   g_object_get(document, "type", &ftype, NULL);
   symbol_manager_purge_file (main_window.symbolmg, filename, ftype);
@@ -692,6 +692,7 @@ void document_manager_close_page(DocumentManager *docmg, Document *document)
     docmgdet->current_document = NULL;
   }
   document_manager_session_save(docmg);
+  g_signal_emit (G_OBJECT (main_window.docmg), signals[CLOSE_DOCUMENT], 0, document);
 }
 
 gboolean document_manager_try_save_page(DocumentManager *docmg, Document *document, gboolean close_if_can)

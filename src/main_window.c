@@ -52,7 +52,8 @@ void main_window_state_changed(GtkWidget *widget, GdkEventWindowState *event, gp
   set_preferences_manager_window_maximized(main_window.prefmg, GDK_WINDOW_STATE_MAXIMIZED && event->new_window_state);
 }
 
-void main_window_resize(GtkWidget *widget, GtkAllocation *allocation, gpointer user_data) {
+void main_window_resize(GtkWidget *widget, GtkAllocation *allocation, gpointer user_data) 
+{
   if (!get_preferences_manager_window_maximized(main_window.prefmg)) {
     gint left, top;
     gtk_window_get_position(GTK_WINDOW(main_window.window), &left, &top);
@@ -205,6 +206,7 @@ static void main_window_fill_panes(void)
  * Update the application title when switching tabs, closing or opening
  * or opening new tabs or opening new files.
  */
+
 void update_app_title(Documentable *document)
 {
   gphpedit_debug(DEBUG_MAIN_WINDOW);
@@ -219,13 +221,15 @@ void update_app_title(Documentable *document)
   g_free(title);
 }
 
-static void main_window_create_prinbox(void){
+static void main_window_create_prinbox(void)
+{
   main_window.prinbox = gtk_vbox_new (FALSE, 0);
   gtk_container_add (GTK_CONTAINER (main_window.window), main_window.prinbox);
   gtk_widget_show (main_window.prinbox);
 }
 
-static void set_colormap(GtkWidget *window){
+static void set_colormap(GtkWidget *window)
+{
   /*Set RGBA colormap*/
   GdkScreen *screen= gtk_widget_get_screen (window);
   GdkColormap *colormap= gdk_screen_get_rgba_colormap (screen);
@@ -279,10 +283,6 @@ void main_window_create(char **argv, gint argc)
   g_signal_connect (G_OBJECT (main_window.window), "window-state-event", G_CALLBACK (main_window_state_changed), NULL);
   g_signal_connect (G_OBJECT (main_window.window), "focus-in-event", G_CALLBACK (main_window_activate_focus), NULL);
 
-  gtk_widget_show(main_window.window);
-  
-  update_app_title(document_manager_get_current_documentable(main_window.docmg));
-
   main_window.stylemg = gtk_source_style_scheme_manager_new ();
   gchar *theme_dir = g_build_path (G_DIR_SEPARATOR_S, API_DIR, "themes", NULL);
   gtk_source_style_scheme_manager_prepend_search_path (main_window.stylemg, theme_dir);
@@ -293,6 +293,10 @@ void main_window_create(char **argv, gint argc)
   g_signal_connect (G_OBJECT (main_window.docmg), "new_document", G_CALLBACK(document_manager_new_document_cb), NULL);
   g_signal_connect (G_OBJECT (main_window.docmg), "change_document", G_CALLBACK(document_manager_change_document_cb), NULL);
   g_signal_connect (G_OBJECT (main_window.docmg), "close_document", G_CALLBACK(document_manager_close_document_cb), NULL);
+
+  gtk_widget_show(main_window.window);
+  
+  update_app_title(document_manager_get_current_documentable(main_window.docmg));
 }
 
 void update_controls(Documentable *document)
