@@ -43,6 +43,10 @@ typedef struct _DocumentableIface  DocumentableInterface;
 struct _DocumentableIface
 {
   GTypeInterface base_iface;
+  /* signal */
+  void (* zoom_update) (Documentable *iface, gpointer user_data);
+
+  /*vitual methods */
   void (*zoom_in) (Documentable *iface);
   void (*zoom_out) (Documentable *iface);
   void (*zoom_restore) (Documentable *iface);
@@ -79,6 +83,7 @@ struct _DocumentableIface
   void (*replace_current_selection) (Documentable *iface, gchar *new_text);
   void (*apply_preferences) (Documentable *iface);
   void (*grab_focus) (Documentable *iface);
+  gchar *(*do_syntax_check) (Documentable *iface);
 };
 
 GType          documentable_get_type        (void) G_GNUC_CONST;
@@ -121,6 +126,7 @@ void           documentable_insert_text (Documentable  *self, gchar *new_text);
 void           documentable_replace_current_selection (Documentable  *self, gchar *new_text);
 void           documentable_apply_preferences (Documentable  *self);
 void           documentable_grab_focus (Documentable  *self);
+gchar          *documentable_do_syntax_check (Documentable  *self);
 
 G_END_DECLS
 

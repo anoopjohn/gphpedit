@@ -5,7 +5,7 @@
    Copyright (C) 1998, 1999 Alex Roberts, Evan Lawrence
    Copyright (C) 2000, 2001 Chema Celorio, Paolo Maggi
    Copyright (C) 2002 - 2005 Paolo Maggi  
-   Copyright (C) 2010 José Rostagno (for vijona.com.ar) 
+   Copyright (C) 2010 - 2011 José Rostagno (for vijona.com.ar) 
 
    For more information or to find the latest release, visit our 
    website at http://www.gphpedit.org/

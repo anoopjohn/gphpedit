@@ -78,34 +78,34 @@ plugin_manager_constructor (GType type,
 static void
 plugin_manager_class_init (PluginManagerClass *klass)
 {
-	GObjectClass *object_class;
+  GObjectClass *object_class;
 
-	object_class = G_OBJECT_CLASS (klass);
-	object_class->finalize = plugin_manager_finalize;
+  object_class = G_OBJECT_CLASS (klass);
+  object_class->finalize = plugin_manager_finalize;
   object_class->constructor = plugin_manager_constructor;
-	g_type_class_add_private (klass, sizeof (PluginManagerDetails));
+  g_type_class_add_private (klass, sizeof (PluginManagerDetails));
 }
 
 static void
 plugin_manager_init (PluginManager  *object)
 {
-	PluginManagerDetails *plugmgdet;
-	plugmgdet = PLUGIN_MANAGER_GET_PRIVATE(object);
+  PluginManagerDetails *plugmgdet;
+  plugmgdet = PLUGIN_MANAGER_GET_PRIVATE(object);
   /* init plugins table*/
   plugmgdet->plugins_table = g_hash_table_new_full (g_str_hash, g_str_equal, NULL, g_object_unref);
   /* check for plugins directory, if doesn't exist create it */
   GError *error=NULL;
   gchar *uri = g_build_filename (g_get_user_config_dir (), "gphpedit", "plugins", NULL);
   GFile *plugin = g_file_new_for_commandline_arg(uri);
-  if(!g_file_query_exists(plugin,NULL)){
+  if(!g_file_query_exists(plugin, NULL)){
     if (!g_file_make_directory_with_parents (plugin, NULL, &error)){
       if (error->code !=G_IO_ERROR_EXISTS){
         g_print(_("Unable to create ~/.gphpedit/ (%d) %s"), error->code,error->message);
       }
       g_error_free(error);
     }
-    g_object_unref(plugin);
   }
+  g_object_unref(plugin);
   g_free(uri);
 
   plugin_discover_available(object); /* fill plugin table */
@@ -116,19 +116,19 @@ plugin_manager_finalize (GObject *object)
 {
   PluginManager *plugmg = PLUGIN_MANAGER(object);
   PluginManagerDetails *plugmgdet;
-	plugmgdet = PLUGIN_MANAGER_GET_PRIVATE(plugmg);
+  plugmgdet = PLUGIN_MANAGER_GET_PRIVATE(plugmg);
   /* free object resources*/
   g_hash_table_destroy(plugmgdet->plugins_table);
-	G_OBJECT_CLASS (plugin_manager_parent_class)->finalize (object);
+  G_OBJECT_CLASS (plugin_manager_parent_class)->finalize (object);
 }
 
 
 PluginManager *plugin_manager_new (void)
 {
-	PluginManager *plugmg;
+  PluginManager *plugmg;
   plugmg = g_object_new (PLUGIN_MANAGER_TYPE, NULL);
   
-	return plugmg; /* return new object */
+  return plugmg; /* return new object */
 }
 
 static void new_plugin(PluginManager *plugmg, gchar *filename){
@@ -191,6 +191,7 @@ static void plugin_discover_available(PluginManager *plugmg)
   g_free(plugin_dir);
   gphpedit_debug_message(DEBUG_PLUGINS,"%s","FOUND ALL PLUGINS\n");
 }
+
 /*
 *
 */
@@ -198,7 +199,7 @@ Plugin *get_plugin_by_name(PluginManager *plugmg, gchar *name){
   g_return_val_if_fail (name, NULL);
   g_return_val_if_fail (OBJECT_IS_PLUGIN_MANAGER(plugmg), NULL);
   PluginManagerDetails *plugmgdet;
-	plugmgdet = PLUGIN_MANAGER_GET_PRIVATE(plugmg);
+  plugmgdet = PLUGIN_MANAGER_GET_PRIVATE(plugmg);
   Plugin *plug= g_hash_table_lookup (plugmgdet->plugins_table,name);
   return plug;
 }
@@ -207,7 +208,7 @@ Plugin *get_plugin_by_num(PluginManager *plugmg, gint num){
   g_return_val_if_fail (num<10, NULL);
   g_return_val_if_fail (OBJECT_IS_PLUGIN_MANAGER(plugmg), NULL);
   PluginManagerDetails *plugmgdet;
-	plugmgdet = PLUGIN_MANAGER_GET_PRIVATE(plugmg);
+  plugmgdet = PLUGIN_MANAGER_GET_PRIVATE(plugmg);
   GList *pluglist = g_hash_table_get_values (plugmgdet->plugins_table);
   Plugin *plug= g_list_nth_data (pluglist,num);
   g_list_free (pluglist);
@@ -234,13 +235,14 @@ gboolean get_syntax_plugin_by_ftype (gpointer key, gpointer value, gpointer user
   return FALSE;
 }
 
-gboolean run_syntax_plugin_by_ftype(PluginManager *plugmg, Documentable *document){
+gboolean run_syntax_plugin_by_ftype(PluginManager *plugmg, Documentable *document)
+{
   g_return_val_if_fail (OBJECT_IS_PLUGIN_MANAGER(plugmg), FALSE);
   PluginManagerDetails *plugmgdet;
-	plugmgdet = PLUGIN_MANAGER_GET_PRIVATE(plugmg);
+  plugmgdet = PLUGIN_MANAGER_GET_PRIVATE(plugmg);
   gint ftype;
   g_object_get(document, "type", &ftype, NULL);
-  Plugin *plug=g_hash_table_find (plugmgdet->plugins_table, get_syntax_plugin_by_ftype, GINT_TO_POINTER(ftype));
+  Plugin *plug = g_hash_table_find (plugmgdet->plugins_table, get_syntax_plugin_by_ftype, GINT_TO_POINTER(ftype));
   if (plug){
     gphpedit_debug_message(DEBUG_PLUGINS,"%s","Plugin FOUND!!\n");
     plugin_run(plug, document);

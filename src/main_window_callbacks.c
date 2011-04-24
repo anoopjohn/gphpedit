@@ -1,12 +1,12 @@
-/* This file is part of gPHPEdit, a GNOME2 PHP Editor.
- 
+/* This file is part of gPHPEdit, a GNOME PHP Editor.
+
    Copyright (C) 2003, 2004, 2005 Andy Jeffries <andy at gphpedit.org>
-   Copyright (C) 2009 Anoop John <anoop dot john at zyxware.com>   
-   Copyright (C) 2010 José Rostagno
+   Copyright (C) 2009 Anoop John <anoop dot john at zyxware.com>
+   Copyright (C) 2009, 2010, 2011 José Rostagno (for vijona.com.ar) 
 
    For more information or to find the latest release, visit our 
    website at http://www.gphpedit.org/
- 
+
    gPHPEdit is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
    the Free Software Foundation, either version 3 of the License, or
@@ -14,19 +14,19 @@
 
    gPHPEdit is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
    GNU General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with gPHPEdit.  If not, see <http://www.gnu.org/licenses/>.
- 
+   along with gPHPEdit. If not, see <http://www.gnu.org/licenses/>.
+
    The GNU General Public License is contained in the file COPYING.
 */
+
 
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-#include <stdlib.h>
 #include <gdk/gdkkeysyms.h>
 
 #include "debug.h"
@@ -68,15 +68,12 @@ void main_window_destroy_event(GtkWidget *widget, gpointer data)
   gtk_main_quit();
 }
 
-gboolean main_window_delete_event(GtkWidget *widget, GdkEvent *event, gpointer user_data){
+gboolean main_window_delete_event(GtkWidget *widget, GdkEvent *event, gpointer user_data)
+{
   gboolean cancel_quit = FALSE;
   is_app_closing = TRUE;
   cancel_quit = !document_manager_can_all_tabs_be_saved(main_window.docmg);
   is_app_closing = FALSE;
-
-  if (cancel_quit) {
-    update_app_title(document_manager_get_current_documentable(main_window.docmg));
-  }
   return cancel_quit;
 }
 
@@ -145,7 +142,8 @@ void on_openselected1_activate(GtkWidget *widget)
   document_manager_open_selected(main_window.docmg);
 }
 
-void add_file_filters(GtkFileChooser *chooser){
+static void add_file_filters(GtkFileChooser *chooser)
+{
   //store file filter
   GtkFileFilter *filter;
   //creates a new file filter
@@ -338,32 +336,15 @@ void on_save_as1_activate(GtkWidget *widget)
   }
   gtk_widget_destroy(file_selection_box);
 }
+
 void on_reload1_activate(GtkWidget *widget)
 {
   document_manager_document_reload(main_window.docmg);
 }
 
-void on_tab_close_activate(GtkWidget *widget, Document *document)
+void update_zoom_level(Documentable *doc)
 {
   gphpedit_debug(DEBUG_MAIN_WINDOW);
-  document_manager_try_close_document(main_window.docmg, document);
-  classbrowser_update(GPHPEDIT_CLASSBROWSER(main_window.classbrowser));
-  update_app_title(document_manager_get_current_documentable(main_window.docmg));
-}
-
-void set_active_tab(page_num)
-{
-  gphpedit_debug(DEBUG_MAIN_WINDOW);
-  if(document_manager_set_current_document_from_position(main_window.docmg, page_num)) {
-    gtk_notebook_set_current_page(GTK_NOTEBOOK(main_window.notebook_editor), page_num);
-  }
-  update_app_title(document_manager_get_current_documentable(main_window.docmg));
-}
-
-void update_zoom_level(void)
-{
-  gphpedit_debug(DEBUG_MAIN_WINDOW);
-  Documentable *doc = document_manager_get_current_documentable(main_window.docmg);
   guint zoom_level = 100;
   if (doc) g_object_get(doc, "zoom_level", &zoom_level, NULL);
   gphpedit_statusbar_set_zoom_level((GphpeditStatusbar *)main_window.appbar, zoom_level);
@@ -400,17 +381,16 @@ void close_page(Document *document)
       page_num = 0;
     }  
   }
-  set_active_tab(page_num);
+
+  if(document_manager_set_current_document_from_position(main_window.docmg, page_num)) {
+    gtk_notebook_set_current_page(GTK_NOTEBOOK(main_window.notebook_editor), page_num);
+  }
   gtk_notebook_remove_page(GTK_NOTEBOOK(main_window.notebook_editor), page_num_closing);
 }
 
 void on_close1_activate(GtkWidget *widget)
 {
   document_manager_try_close_current_document(main_window.docmg);
-  if(document_manager_get_document_count(main_window.docmg)!=0){
-    classbrowser_update(GPHPEDIT_CLASSBROWSER(main_window.classbrowser));
-    update_app_title(document_manager_get_current_documentable(main_window.docmg));
-  }
 }
 
 void on_quit1_activate(GtkWidget *widget)
@@ -610,17 +590,10 @@ gboolean on_notebook_focus_tab(GtkNotebook *notebook,
   return TRUE;
 }
 
-void goto_line(gchar *text)
-{
-  Documentable *doc = document_manager_get_current_documentable(main_window.docmg);
-  if (doc) documentable_goto_line(doc, atoi(text));
-}
-
 void block_indent(GtkWidget *widget)
 {
   documentable_block_indent(document_manager_get_current_documentable(main_window.docmg));
 }
-
 
 void block_unindent(GtkWidget *widget)
 {
@@ -630,26 +603,22 @@ void block_unindent(GtkWidget *widget)
 void zoom_in(GtkWidget *widget)
 {
   documentable_zoom_in(document_manager_get_current_documentable(main_window.docmg));
-  update_zoom_level();
 }
 
 void zoom_out(GtkWidget *widget)
 {
   documentable_zoom_out(document_manager_get_current_documentable(main_window.docmg));
-  update_zoom_level();
 }
 
 void zoom_100(GtkWidget *widget)
 {
   documentable_zoom_restore(document_manager_get_current_documentable(main_window.docmg));
-  update_zoom_level();
 }
 
 void syntax_check(GtkWidget *widget)
 {
    gtk_syntax_check_window_run_check(GTK_SYNTAX_CHECK_WINDOW(main_window.win), document_manager_get_current_documentable(main_window.docmg));
 }
-
 
 void syntax_check_clear(GtkWidget *widget)
 {
@@ -726,6 +695,17 @@ gboolean main_window_activate_focus (GtkWidget *widget,GdkEventFocus *event, gpo
   return FALSE;
 }
 
+void document_manager_close_document_cb (DocumentManager *docmg, Documentable *doc, gpointer user_data)
+{
+  close_page(DOCUMENT(doc));
+  update_app_title(document_manager_get_current_documentable(docmg));
+  gchar *filename = documentable_get_filename (doc);
+  gint ftype;
+  g_object_get(doc, "type", &ftype, NULL);
+  symbol_manager_purge_file (main_window.symbolmg, filename, ftype);
+  g_free(filename);
+}
+
 void document_manager_new_document_cb (DocumentManager *docmg, Documentable *doc, gpointer user_data)
 {
   gint ftype;
@@ -739,7 +719,11 @@ void document_manager_change_document_cb (DocumentManager *docmg, Documentable *
 {
   if (!is_app_closing) {
     update_app_title(doc);
-    classbrowser_update(GPHPEDIT_CLASSBROWSER(main_window.classbrowser));
     documentable_check_externally_modified(doc);
   }
+}
+
+void document_manager_zoom_change_cb (DocumentManager *docmg, Documentable *doc, gpointer user_data)
+{
+  update_zoom_level(doc);
 }

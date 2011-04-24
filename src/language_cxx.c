@@ -4,7 +4,7 @@
    Copyright (C) 2009, 2011 José Rostagno (for vijona.com.ar)
 	  
    For more information or to find the latest release, visit our 
-   website at http://www.gphpedit.org/
+   website at http://www.gcxxedit.org/
  
    gPHPEdit is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -28,6 +28,7 @@
 #include "preferences_manager.h"
 #include "language_provider.h"
 #include "symbol_manager.h"
+#include "main_window.h"
 
 /*
 * language_cxx private struct
@@ -59,6 +60,8 @@ enum
 static void language_cxx_language_provider_init(Language_ProviderInterface *iface, gpointer user_data);
 static void language_cxx_trigger_completion (Language_Provider *lgcxx, guint ch);
 static void show_calltip (Language_Provider *lgcxx);
+static void language_cxx_setup_lexer(Language_Provider *lgcxx);
+static gchar *language_cxx_do_syntax_check(Language_Provider *lgcxx);
 
 G_DEFINE_TYPE_WITH_CODE(Language_CXX, language_cxx, G_TYPE_OBJECT,
                         G_IMPLEMENT_INTERFACE (IFACE_TYPE_LANGUAGE_PROVIDER,
@@ -68,6 +71,8 @@ static void language_cxx_language_provider_init(Language_ProviderInterface *ifac
 {
   iface->trigger_completion = language_cxx_trigger_completion;
   iface->show_calltip = show_calltip;
+  iface->setup_lexer = language_cxx_setup_lexer;
+  iface->do_syntax_check = language_cxx_do_syntax_check;
 }
 
 static void
@@ -465,4 +470,60 @@ static void language_cxx_trigger_completion (Language_Provider *lgcxx, guint ch)
         if (member_function_buffer && strlen(member_function_buffer)>=3) show_autocompletion (LANGUAGE_CXX(lgcxx), current_pos);
         g_free(member_function_buffer);
   }
+}
+
+static gchar *language_cxx_do_syntax_check(Language_Provider *lgcxx)
+{
+  return NULL;
+}
+
+static void language_cxx_setup_lexer(Language_Provider *lgcxx)
+{
+  g_return_if_fail(lgcxx);
+  Language_CXXDetails *lgcxxdet = LANGUAGE_CXX_GET_PRIVATE(lgcxx);
+
+  gtk_scintilla_clear_document_style (lgcxxdet->sci);
+  gtk_scintilla_set_lexer(lgcxxdet->sci, SCLEX_CPP);
+  gtk_scintilla_set_style_bits(lgcxxdet->sci, 5);
+
+  gtk_scintilla_set_keywords(lgcxxdet->sci, 0, "asm auto bool break case catch char class const const_cast continue default delete do double dynamic_cast else enum explicit export extern false float for friend goto if inline int long mutable namespace new operator private protected public register reinterpret_cast return short signed sizeof static static_cast struct switch template this throw true try typedef typeid typename union unsigned using virtual void volatile wchar_t while addindex addtogroup anchor arg attention author b brief bug c class code date def defgroup deprecated dontinclude e em endcode endhtmlonly endif endlatexonly endlink endverbatim enum example exception file hideinitializer htmlinclude htmlonly if image include ingroup internal invariant interface latexonly li line link mainpage name namespace nosubgrouping note overload p page par param post pre ref relates remarks return retval sa section see showinitializer since skip skipline struct subsection test throw todo typedef union until var verbatim verbinclude version warning weakgroup printf scanf");
+  
+  gtk_scintilla_set_keywords(lgcxxdet->sci, 1, "strstr strlen strcmp clrscr gotoXY FILE stat memcpy memmove memccpy memset strncpy strcpy strdup strndup fclose fopen freopen fdopen remove rename rewind tmpfile clearerr feof ferror fflush fflush fgetpos fgetc fgets fputc fputs ftell fseek fsetpos fread fwrite getc getchar gets fprintf sprintf vprintf perror putc putchar fputchar fscanf sscanf setbuf setvbuf tmpnam ungetc puts atof atoi atol strtod strtol strtoul rand srand malloc calloc realloc free abort atexit exit getenv system bsearch qsort abs div ldiv");
+
+  gchar *font;
+  guint size;
+  g_object_get(lgcxxdet->prefmg, "style_font_name", &font,"font_size", &size, NULL);
+
+  gchar *style_name;
+  g_object_get(lgcxxdet->prefmg, "style_name", &style_name, NULL);
+
+  GtkSourceStyleScheme	*scheme = gtk_source_style_scheme_manager_get_scheme (main_window.stylemg, style_name);
+  /* PYTHON LEXER STYLE */
+  set_scintilla_lexer_default_style(GTK_WIDGET(lgcxxdet->sci), scheme, SCE_C_DEFAULT, font, size);
+  set_scintilla_lexer_keyword_style(GTK_WIDGET(lgcxxdet->sci), scheme, SCE_C_WORD, font, size);
+  set_scintilla_lexer_keyword_style(GTK_WIDGET(lgcxxdet->sci), scheme, SCE_C_WORD2, font, size);
+  set_scintilla_lexer_type_style(GTK_WIDGET(lgcxxdet->sci), scheme, SCE_C_IDENTIFIER, font, size);
+  set_scintilla_lexer_string_style(GTK_WIDGET(lgcxxdet->sci), scheme, SCE_C_STRING, font, size);
+  set_scintilla_lexer_simple_string_style(GTK_WIDGET(lgcxxdet->sci), scheme, SCE_C_CHARACTER, font, size);
+  set_scintilla_lexer_operator_style(GTK_WIDGET(lgcxxdet->sci), scheme, SCE_C_OPERATOR, font, size);
+  set_scintilla_lexer_number_style(GTK_WIDGET(lgcxxdet->sci), scheme, SCE_C_NUMBER, font, size);
+  set_scintilla_lexer_doc_comment_style(GTK_WIDGET(lgcxxdet->sci), scheme, SCE_C_COMMENTDOC, font, size);
+  set_scintilla_lexer_comment_style (GTK_WIDGET(lgcxxdet->sci), scheme, SCE_C_COMMENT, font, size);
+  set_scintilla_lexer_comment_style (GTK_WIDGET(lgcxxdet->sci), scheme, SCE_C_COMMENTLINE, font, size);
+  set_scintilla_lexer_preprocessor_style(GTK_WIDGET(lgcxxdet->sci), scheme, SCE_C_PREPROCESSOR, font, size);
+  set_scintilla_lexer_xml_element_style(GTK_WIDGET(lgcxxdet->sci), scheme, SCE_C_UUID, font, size);
+  set_scintilla_lexer_special_constant_style (GTK_WIDGET(lgcxxdet->sci), scheme, SCE_C_REGEX, font, size);
+  set_scintilla_lexer_xml_atribute_style(GTK_WIDGET(lgcxxdet->sci), scheme, SCE_C_VERBATIM, font, size);
+  set_scintilla_lexer_xml_instruction_style(GTK_WIDGET(lgcxxdet->sci), scheme, SCE_C_GLOBALCLASS, font, size);
+
+  g_free(font);
+  g_free(style_name);
+
+  gtk_scintilla_set_property(lgcxxdet->sci, "lexer.cpp.allow.dollars", "1");
+  gtk_scintilla_set_property(lgcxxdet->sci, "fold.comment", "1");
+  gtk_scintilla_set_property(lgcxxdet->sci, "fold.preprocessor", "1");
+  gtk_scintilla_set_property(lgcxxdet->sci, "fold.compact", "1");
+  gtk_scintilla_set_property(lgcxxdet->sci, "fold.at.else", "1");
+  gtk_scintilla_set_property(lgcxxdet->sci, "fold", "1");
+  gtk_scintilla_colourise(lgcxxdet->sci, 0, -1);
 }

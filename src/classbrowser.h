@@ -53,7 +53,7 @@ struct _gphpeditClassBrowserClass {
 
 GType		  gphpedit_classbrowser_get_type (void) G_GNUC_CONST;
 
-GtkWidget	 *gphpedit_classbrowser_new (void);
+GtkWidget *gphpedit_classbrowser_new (void);
 void classbrowser_update(gphpeditClassBrowser *classbrowser);
 G_END_DECLS
 

@@ -49,6 +49,8 @@ struct DocumentManagerDetails
 enum {
 	NEW_DOCUMENT,
 	CHANGE_DOCUMENT,
+	CLOSE_DOCUMENT,
+	ZOOM_CHANGE,
 	LAST_SIGNAL
 };
 
@@ -90,6 +92,18 @@ document_manager_constructor (GType type,
   return g_object_ref (self);
 }
 
+static void
+document_manager_dispose (GObject *object)
+{
+  gphpedit_debug(DEBUG_DOC_MANAGER);
+  DocumentManager *doc = DOCUMENT_MANAGER(object);
+  DocumentManagerDetails *docdet;
+  docdet = DOCUMENT_MANAGER_GET_PRIVATE(doc);
+  /* save current session */
+  document_manager_session_save(DOCUMENT_MANAGER(object));
+  /* free class data */
+  G_OBJECT_CLASS (document_manager_parent_class)->dispose (object);
+}
 
 static void
 document_manager_class_init (DocumentManagerClass *klass)
@@ -98,6 +112,7 @@ document_manager_class_init (DocumentManagerClass *klass)
 
   object_class = G_OBJECT_CLASS (klass);
   object_class->finalize = document_manager_finalize;
+  object_class->dispose = document_manager_dispose;
   object_class->constructor = document_manager_constructor;
 
 	signals[NEW_DOCUMENT] =
@@ -118,6 +133,23 @@ document_manager_class_init (DocumentManagerClass *klass)
 		               g_cclosure_marshal_VOID__OBJECT,
 		               G_TYPE_NONE, 1, G_TYPE_OBJECT, NULL);
 
+	signals[CLOSE_DOCUMENT] =
+		g_signal_new ("close_document",
+		              G_TYPE_FROM_CLASS (object_class),
+		              G_SIGNAL_RUN_LAST,
+		              G_STRUCT_OFFSET (DocumentManagerClass, new_document),
+		              NULL, NULL,
+		               g_cclosure_marshal_VOID__OBJECT,
+		               G_TYPE_NONE, 1, G_TYPE_OBJECT, NULL);
+
+	signals[ZOOM_CHANGE] =
+		g_signal_new ("zoom_change",
+		              G_TYPE_FROM_CLASS (object_class),
+		              G_SIGNAL_RUN_LAST,
+		              G_STRUCT_OFFSET (DocumentManagerClass, new_document),
+		              NULL, NULL,
+		               g_cclosure_marshal_VOID__OBJECT,
+		               G_TYPE_NONE, 1, G_TYPE_OBJECT, NULL);
 
   g_type_class_add_private (klass, sizeof (DocumentManagerDetails));
 }
@@ -138,25 +170,23 @@ document_manager_finalize (GObject *object)
   gphpedit_debug(DEBUG_DOC_MANAGER);
   DocumentManager *doc = DOCUMENT_MANAGER(object);
   DocumentManagerDetails *docdet;
-	docdet = DOCUMENT_MANAGER_GET_PRIVATE(doc);
+  docdet = DOCUMENT_MANAGER_GET_PRIVATE(doc);
   /* save current session */
   document_manager_session_save(DOCUMENT_MANAGER(object));
-  document_manager_close_all_tabs(doc);  
+  document_manager_close_all_tabs(doc);
   //free class data
-	G_OBJECT_CLASS (document_manager_parent_class)->finalize (object);
+  G_OBJECT_CLASS (document_manager_parent_class)->finalize (object);
 }
 
 DocumentManager *document_manager_new (void)
 {
-	DocumentManager *doc;
-  doc = g_object_new (DOCUMENT_MANAGER_TYPE, NULL);
-	return doc; /* return new object */
+  return g_object_new (DOCUMENT_MANAGER_TYPE, NULL);
 }
 
 DocumentManager *document_manager_new_full (char **argv, gint argc)
 {
   gphpedit_debug(DEBUG_DOC_MANAGER);
-	DocumentManager *docmg;
+  DocumentManager *docmg;
   docmg = g_object_new (DOCUMENT_MANAGER_TYPE, NULL);
   
   /* load command line files */
@@ -168,9 +198,9 @@ DocumentManager *document_manager_new_full (char **argv, gint argc)
       ++i;
     }
   } else {
-  document_manager_session_reopen(docmg);
+    document_manager_session_reopen(docmg);
   }
- 	return docmg; /* return new object */
+  return docmg; /* return new object */
 }
 
 void _document_manager_set_current_document(DocumentManager *docmg, Document *document)
@@ -182,8 +212,15 @@ void _document_manager_set_current_document(DocumentManager *docmg, Document *do
   g_signal_emit (G_OBJECT (docmg), signals[CHANGE_DOCUMENT], 0, docmgdet->current_document);
 }
 
+static void on_tab_close_activate(GtkWidget *widget, Document *document)
+{
+  gphpedit_debug(DEBUG_DOC_MANAGER);
+  document_manager_try_close_document(main_window.docmg, document);
+}
+
 /* internal */
-GtkWidget *get_close_tab_widget(Document *document) {
+GtkWidget *get_close_tab_widget(Document *document)
+{
   GtkWidget *hbox;
   GtkWidget *close_button;
   hbox = gtk_hbox_new(FALSE, 0);
@@ -210,7 +247,7 @@ void document_save_update_cb (Document *doc, gpointer user_data)
 {
   DocumentManager *docmg = DOCUMENT_MANAGER(user_data);
   DocumentManagerDetails *docmgdet;
-	docmgdet = DOCUMENT_MANAGER_GET_PRIVATE(docmg);
+  docmgdet = DOCUMENT_MANAGER_GET_PRIVATE(docmg);
   if (doc==docmgdet->current_document){
     g_signal_emit (G_OBJECT (docmg), signals[CHANGE_DOCUMENT], 0, docmgdet->current_document);
   }
@@ -219,6 +256,16 @@ void document_save_update_cb (Document *doc, gpointer user_data)
   gchar *filename = documentable_get_filename(DOCUMENTABLE(doc));
   symbol_manager_rescan_file (main_window.symbolmg, filename, ftype);
   g_free(filename);
+}
+
+void document_zoom_update_cb (Document *doc, gpointer user_data)
+{
+  DocumentManager *docmg = DOCUMENT_MANAGER(user_data);
+  DocumentManagerDetails *docmgdet;
+  docmgdet = DOCUMENT_MANAGER_GET_PRIVATE(docmg);
+  if (doc==docmgdet->current_document){
+    g_signal_emit (G_OBJECT (docmg), signals[ZOOM_CHANGE], 0, docmgdet->current_document);
+  }
 }
 
 void document_save_start_cb (Document *doc, gpointer user_data)
@@ -231,20 +278,15 @@ void document_save_start_cb (Document *doc, gpointer user_data)
 
 void document_type_changed_cb (Document *doc, gint type, gpointer user_data)
 {
-	DocumentManager *docmg = DOCUMENT_MANAGER(user_data);
-	DocumentManagerDetails *docmgdet = DOCUMENT_MANAGER_GET_PRIVATE(docmg);
-	/* only process if document is current_document */
-	if (doc==docmgdet->current_document) g_signal_emit (G_OBJECT (docmg), signals[CHANGE_DOCUMENT], 0, docmgdet->current_document);
+  DocumentManager *docmg = DOCUMENT_MANAGER(user_data);
+  DocumentManagerDetails *docmgdet = DOCUMENT_MANAGER_GET_PRIVATE(docmg);
+  /* only process if document is current_document */
+  if (doc==docmgdet->current_document) g_signal_emit (G_OBJECT (docmg), signals[CHANGE_DOCUMENT], 0, docmgdet->current_document);
 }
 
-void document_col_changed_cb (Document *doc, gint col, gpointer user_data)
+void document_pos_changed_cb (Document *doc, gint pos, gint col, gpointer user_data)
 {
-  gphpedit_statusbar_set_cursor_position (GPHPEDIT_STATUSBAR(main_window.appbar), -1, col);
-}
-
-void document_pos_changed_cb (Document *doc, gint pos, gpointer user_data)
-{
-  gphpedit_statusbar_set_cursor_position (GPHPEDIT_STATUSBAR(main_window.appbar), pos, -1);
+  gphpedit_statusbar_set_cursor_position (GPHPEDIT_STATUSBAR(main_window.appbar), pos, col);
 }
 
 void document_need_reload_cb (Document *doc, gpointer user_data)
@@ -287,11 +329,11 @@ void document_loader_done_loading_cb (DocumentLoader *doclod, gboolean result, D
     gtk_notebook_set_current_page (GTK_NOTEBOOK (main_window.notebook_editor), -1);
     _document_manager_set_current_document(docmg, doc);
     g_signal_connect(G_OBJECT(doc), "save_update", G_CALLBACK(document_save_update_cb), docmg);
+    g_signal_connect(G_OBJECT(doc), "zoom_update", G_CALLBACK(document_zoom_update_cb), docmg);
     if (OBJECT_IS_DOCUMENT_SCINTILLA(doc)) {
       g_signal_connect(G_OBJECT(doc), "save_start", G_CALLBACK(document_save_start_cb), NULL);
       g_signal_connect(G_OBJECT(doc), "type_changed", G_CALLBACK(document_type_changed_cb), docmg);
       g_signal_connect(G_OBJECT(doc), "pos_changed", G_CALLBACK(document_pos_changed_cb), docmg);
-      g_signal_connect(G_OBJECT(doc), "col_changed", G_CALLBACK(document_col_changed_cb), docmg);
       g_signal_connect(G_OBJECT(doc), "need_reload", G_CALLBACK(document_need_reload_cb), docmg);
       g_signal_connect(G_OBJECT(doc), "ovr_changed", G_CALLBACK(document_ovr_changed_cb), NULL);
       g_signal_connect(G_OBJECT(doc), "marker_not_found", G_CALLBACK(document_marker_not_found_cb), NULL);
@@ -608,6 +650,11 @@ gint document_manager_get_document_count (DocumentManager *docmg)
   return g_slist_length(docmgdet->editors);
 }
 
+static void close_tab (gpointer data, gpointer user_data)
+{
+  document_manager_close_page(DOCUMENT_MANAGER(user_data), data);
+}
+
 // This procedure relies on the fact that all tabs will be closed without prompting
 // for whether they need saving beforehand.  If in doubt, call can_all_tabs_be_saved
 // and pay attention to the return value.
@@ -616,17 +663,10 @@ void document_manager_close_all_tabs(DocumentManager *docmg)
   gphpedit_debug(DEBUG_DOC_MANAGER);
   if (!docmg) return ;
   DocumentManagerDetails *docmgdet = DOCUMENT_MANAGER_GET_PRIVATE(docmg);
-  GSList *walk;
-  Document *document;
-
-  for(walk = docmgdet->editors; walk!= NULL; walk = g_slist_next(walk)) {
-    document = walk->data;
-    if (document) {
-     document_manager_close_page(docmg, document);
-    }
-  }
+  if (!docmgdet->editors) return;
+  g_slist_foreach (docmgdet->editors, close_tab, docmg);
   docmgdet->editors = NULL;
-  docmgdet->current_document=NULL;
+  docmgdet->current_document = NULL;
 }
 
 // Returns true if all tabs are either saved or closed
@@ -660,17 +700,13 @@ void document_manager_close_page(DocumentManager *docmg, Document *document)
   gphpedit_debug(DEBUG_DOC_MANAGER);
   if (!docmg) return ;
   DocumentManagerDetails *docmgdet = DOCUMENT_MANAGER_GET_PRIVATE(docmg);
-  close_page(document);
-  gchar *filename = documentable_get_filename (DOCUMENTABLE(document));
-  gint ftype;
-  g_object_get(document, "type", &ftype, NULL);
-  symbol_manager_purge_file (main_window.symbolmg, filename, ftype);
-  g_free(filename);
-  g_object_unref(document);
   docmgdet->editors = g_slist_remove(docmgdet->editors, document);
   if (!docmgdet->editors) {
     docmgdet->current_document = NULL;
   }
+  document_manager_session_save(docmg);
+  g_signal_emit (G_OBJECT (main_window.docmg), signals[CLOSE_DOCUMENT], 0, document);
+  g_object_unref(document);
 }
 
 gboolean document_manager_try_save_page(DocumentManager *docmg, Document *document, gboolean close_if_can)
@@ -754,9 +790,9 @@ gboolean document_manager_try_close_document(DocumentManager *docmg, Document *d
   g_object_get(document, "read_only", &read_only, "is_empty", &is_empty, "saved", &saved_status, NULL);
 
   if (!read_only && !saved_status && !is_empty) {
-    return document_manager_try_save_page(main_window.docmg, document, TRUE);
+    return document_manager_try_save_page(docmg, document, TRUE);
   }
-  document_manager_close_page(main_window.docmg, document);
+  document_manager_close_page(docmg, document);
   return TRUE;
 }
 

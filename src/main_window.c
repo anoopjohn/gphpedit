@@ -1,7 +1,8 @@
-/* This file is part of gPHPEdit, a GNOME2 PHP Editor.
+/* This file is part of gPHPEdit, a GNOME PHP Editor.
 
    Copyright (C) 2003, 2004, 2005 Andy Jeffries <andy at gphpedit.org>
    Copyright (C) 2009 Anoop John <anoop dot john at zyxware.com>
+   Copyright (C) 2009, 2010, 2011 José Rostagno (for vijona.com.ar) 
 
    For more information or to find the latest release, visit our 
    website at http://www.gphpedit.org/
@@ -18,8 +19,10 @@
 
    You should have received a copy of the GNU General Public License
    along with gPHPEdit. If not, see <http://www.gnu.org/licenses/>.
+
    The GNU General Public License is contained in the file COPYING.
 */
+
 
 #ifdef HAVE_CONFIG_H
 #include <config.h>
@@ -27,7 +30,6 @@
 
 #include "main_window.h"
 #include "debug.h"
-#include "tab.h"
 #include "main_window_callbacks.h"
 #include "templates.h"
 #include "gvfs_utils.h"
@@ -41,15 +43,14 @@
 void update_controls(Documentable *document);
 
 MainWindow main_window;
-GIOChannel* inter_gphpedit_io;
-guint inter_gphpedit_event_id;
 
 void main_window_state_changed(GtkWidget *widget, GdkEventWindowState *event, gpointer user_data)
 {
   set_preferences_manager_window_maximized(main_window.prefmg, GDK_WINDOW_STATE_MAXIMIZED && event->new_window_state);
 }
 
-void main_window_resize(GtkWidget *widget, GtkAllocation *allocation, gpointer user_data) {
+void main_window_resize(GtkWidget *widget, GtkAllocation *allocation, gpointer user_data) 
+{
   if (!get_preferences_manager_window_maximized(main_window.prefmg)) {
     gint left, top;
     gtk_window_get_position(GTK_WINDOW(main_window.window), &left, &top);
@@ -64,40 +65,6 @@ gboolean classbrowser_accept_size(GtkPaned *paned, gpointer user_data)
     g_object_set(main_window.prefmg, "side_panel_size", gtk_paned_get_position(GTK_PANED(main_window.main_horizontal_pane)), NULL);
   }
   return TRUE;
-}
-
-
-void main_window_pass_command_line_files(char **argv)
-{
-  guint i;
-  GError *error;
-  gsize bytes_written;
-
-  error = NULL;
-  inter_gphpedit_io = g_io_channel_new_file("/tmp/gphpedit.sock","w",&error);
-  if (argv) {
-    i = 1;
-    while (argv[i] != NULL) {
-      gphpedit_debug_message(DEBUG_IPC, "%s:%d\n", argv[i], strlen(argv[i]));
-      g_io_channel_write_chars(inter_gphpedit_io, argv[i], strlen(argv[i]),
-                   &bytes_written, &error);
-      ++i;
-    }
-  }
-}
-
-
-gboolean channel_pass_filename_callback(GIOChannel *source, GIOCondition condition, gpointer data )
-{
-  gsize size;
-  gchar buf[1024];
-  GError *error=NULL;
-  if (g_io_channel_read_chars (inter_gphpedit_io,buf,sizeof(buf), &size,&error)!=G_IO_STATUS_NORMAL){
-    g_print("Error reading GIO Chanel. Error:%s\n",error->message);
-  }
-  gphpedit_debug_message(DEBUG_IPC, "Passed %s\n", buf);
-  document_manager_add_new_document(main_window.docmg, TAB_FILE, buf, 0);
-  return FALSE;
 }
 
 static void main_window_create_appbar(void)
@@ -194,7 +161,7 @@ static void main_window_fill_panes(void)
   g_signal_connect (G_OBJECT (main_window.notebook_editor), "focus-tab", G_CALLBACK (on_notebook_focus_tab), NULL);
 
   /* add syntax check window */
-  main_window.win= gtk_syntax_check_window_new ();
+  main_window.win = gtk_syntax_check_window_new ();
   gtk_box_pack_start(GTK_BOX(main_window.prin_hbox), GTK_WIDGET(main_window.win), TRUE, TRUE, 2);
 }
 
@@ -208,7 +175,7 @@ void update_app_title(Documentable *document)
   gchar *title = NULL;
   if (document) g_object_get(document, "title", &title, NULL);
   update_status_combobox(document);
-  update_zoom_level();
+  update_zoom_level(document);
   update_controls(document);
   //If there is no file opened set the name as gPHPEdit
   if (!title) title = g_strdup(_("gPHPEdit"));
@@ -216,13 +183,15 @@ void update_app_title(Documentable *document)
   g_free(title);
 }
 
-static void main_window_create_prinbox(void){
+static void main_window_create_prinbox(void)
+{
   main_window.prinbox = gtk_vbox_new (FALSE, 0);
   gtk_container_add (GTK_CONTAINER (main_window.window), main_window.prinbox);
   gtk_widget_show (main_window.prinbox);
 }
 
-static void set_colormap(GtkWidget *window){
+static void set_colormap(GtkWidget *window)
+{
   /*Set RGBA colormap*/
   GdkScreen *screen= gtk_widget_get_screen (window);
   GdkColormap *colormap= gdk_screen_get_rgba_colormap (screen);
@@ -235,8 +204,8 @@ static void create_app_main_window(const gchar *title){
   gtk_window_set_title(GTK_WINDOW(main_window.window), title);
   gint w, h, x, y;
   if (get_preferences_manager_window_maximized(main_window.prefmg)) {
- 		gtk_window_maximize(GTK_WINDOW(main_window.window));
-	} else {
+    gtk_window_maximize(GTK_WINDOW(main_window.window));
+  } else {
     get_preferences_manager_window_size (main_window.prefmg, &w, &h);
     gtk_window_set_default_size(GTK_WINDOW(main_window.window), w, h);
     get_preferences_manager_window_position (main_window.prefmg, &y, &x);
@@ -248,7 +217,8 @@ static void create_app_main_window(const gchar *title){
   set_colormap(main_window.window);
 }
 
-void main_window_create(void){
+void main_window_create(char **argv, gint argc)
+{
 
   create_app_main_window(_("gPHPEdit"));
   main_window_create_prinbox();
@@ -258,7 +228,7 @@ void main_window_create(void){
   gtk_box_pack_start (GTK_BOX (main_window.prinbox), main_window.menu, FALSE, FALSE, 0);
   gtk_widget_show_all (main_window.menu);
 
-  main_window.toolbar_main= toolbar_new ();
+  main_window.toolbar_main = toolbar_new ();
   gtk_box_pack_start (GTK_BOX (main_window.prinbox), main_window.toolbar_main, FALSE, FALSE, 0);
   if (get_preferences_manager_show_maintoolbar(main_window.prefmg)) gtk_widget_show (main_window.toolbar_main);
 
@@ -275,14 +245,21 @@ void main_window_create(void){
   g_signal_connect (G_OBJECT (main_window.window), "window-state-event", G_CALLBACK (main_window_state_changed), NULL);
   g_signal_connect (G_OBJECT (main_window.window), "focus-in-event", G_CALLBACK (main_window_activate_focus), NULL);
 
-  gtk_widget_show(main_window.window);
-  
-  update_app_title(document_manager_get_current_documentable(main_window.docmg));
-
   main_window.stylemg = gtk_source_style_scheme_manager_new ();
   gchar *theme_dir = g_build_path (G_DIR_SEPARATOR_S, API_DIR, "themes", NULL);
   gtk_source_style_scheme_manager_prepend_search_path (main_window.stylemg, theme_dir);
   g_free(theme_dir);
+
+  main_window.tempmg = templates_manager_new();
+  main_window.docmg = document_manager_new_full(argv, argc);
+  g_signal_connect (G_OBJECT (main_window.docmg), "new_document", G_CALLBACK(document_manager_new_document_cb), NULL);
+  g_signal_connect (G_OBJECT (main_window.docmg), "change_document", G_CALLBACK(document_manager_change_document_cb), NULL);
+  g_signal_connect (G_OBJECT (main_window.docmg), "close_document", G_CALLBACK(document_manager_close_document_cb), NULL);
+  g_signal_connect (G_OBJECT (main_window.docmg), "zoom_change", G_CALLBACK(document_manager_zoom_change_cb), NULL);
+
+  update_app_title(document_manager_get_current_documentable(main_window.docmg));
+
+  gtk_widget_show(main_window.window);
 }
 
 void update_controls(Documentable *document)

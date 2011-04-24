@@ -25,10 +25,10 @@
 #include <config.h>
 #endif
 
-#include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include <glib/gi18n.h>
+#include "symbolizable.h"
 #include "symbol_bd_utils.h"
 #include "gvfs_utils.h"
 
@@ -102,7 +102,8 @@ void free_function_item (gpointer data)
   g_slice_free(ClassBrowserFunction,function);
 }
 
-gchar *get_ctags_token(gchar *text,gint *advancing){
+static gchar *get_ctags_token(gchar *text,gint *advancing)
+{
   int i;
   int k=0;
   gchar *name;
@@ -121,7 +122,8 @@ gchar *get_ctags_token(gchar *text,gint *advancing){
   return name;
 }
 
-gchar *get_ctags_param(gchar *text,gint *advancing){
+static gchar *get_ctags_param(gchar *text,gint *advancing)
+{
   int i;
   gchar *name;
   gchar *part = text;
@@ -137,28 +139,6 @@ gchar *get_ctags_param(gchar *text,gint *advancing){
   strncpy(name, part + i + 1, strlen(part) - i -2);
 //  g_print("res: %s\n", name);
   return name;
-}
-
-gchar *call_ctags(const gchar *filename)
-{
-#ifdef HAVE_CTAGS_EXUBERANT
-  if (!filename) return NULL;
-  gboolean result;
-  gchar *stdout=NULL;
-  gint exit_status;
-  GError *error=NULL;
-  gchar *stdouterr;
-  gchar *path = filename_get_path(filename);
-  gchar *command_line = g_strdup_printf("ctags --extra=+q -x '%s'",path);
-  result = g_spawn_command_line_sync (command_line, &stdout, &stdouterr, &exit_status, &error);
-  g_free(command_line);
-  g_free(path);
-  g_free(stdouterr);
-
-  return stdout;
-#else
-  return NULL;
-#endif
 }
 
 void process_ctags_custom (GObject *symbolbd, gchar *result, const gchar *filename, void (*process_func)(GObject *symbolbd, gchar *name, const gchar *filename, gchar *type, gchar *line, gchar *param)) {

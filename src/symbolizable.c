@@ -27,8 +27,8 @@ G_DEFINE_INTERFACE(Symbolizable, symbolizable, G_TYPE_INVALID)
 
 /* signal enumeration */
 enum {
-	UPDATE,
-	LAST_SIGNAL
+  UPDATE,
+  LAST_SIGNAL
 };
 
 static guint signals[LAST_SIGNAL];
@@ -65,7 +65,7 @@ gchar *symbolizable_get_symbols_matches (Symbolizable *self, const gchar *symbol
 {
   gphpedit_debug (DEBUG_SYMBOLIZABLE);
   if (!self) return NULL;
-	return SYMBOLIZABLE_GET_IFACE (self)->get_symbols_matches (self, symbol_prefix, flags);
+  return SYMBOLIZABLE_GET_IFACE (self)->get_symbols_matches (self, symbol_prefix, flags);
 }
 
 /*
@@ -77,7 +77,7 @@ gchar *symbolizable_get_class_symbols (Symbolizable *self, const gchar *class_na
 {
   gphpedit_debug (DEBUG_SYMBOLIZABLE);
   if (!self) return NULL;
-	return SYMBOLIZABLE_GET_IFACE (self)->get_class_symbols (self, class_name);
+  return SYMBOLIZABLE_GET_IFACE (self)->get_class_symbols (self, class_name);
 }
 
 /*
@@ -89,7 +89,7 @@ gchar *symbolizable_get_classes (Symbolizable *self)
 {
   gphpedit_debug (DEBUG_SYMBOLIZABLE);
   if (!self) return NULL;
-	return SYMBOLIZABLE_GET_IFACE (self)->get_classes (self);
+  return SYMBOLIZABLE_GET_IFACE (self)->get_classes (self);
 }
 
 /*
@@ -101,7 +101,7 @@ gchar *symbolizable_get_classes (Symbolizable *self)
 gchar *symbolizable_get_calltip (Symbolizable *self, const gchar *symbol_name)
 {
   if (!self) return NULL;
-	return SYMBOLIZABLE_GET_IFACE (self)->get_calltip (self, symbol_name);
+  return SYMBOLIZABLE_GET_IFACE (self)->get_calltip (self, symbol_name);
 }
 
 /*
@@ -115,7 +115,7 @@ GList *symbolizable_get_custom_symbols_list (Symbolizable *self, gint symbol_typ
 {
   gphpedit_debug (DEBUG_SYMBOLIZABLE);
   if (!self) return NULL;
-	return SYMBOLIZABLE_GET_IFACE (self)->get_custom_symbols_list (self, symbol_type);
+  return SYMBOLIZABLE_GET_IFACE (self)->get_custom_symbols_list (self, symbol_type);
 }
 
 /*
@@ -129,7 +129,7 @@ GList *symbolizable_get_custom_symbols_list_by_filename (Symbolizable *self, gin
 {
   gphpedit_debug (DEBUG_SYMBOLIZABLE);
   if (!self) return NULL;
-	return SYMBOLIZABLE_GET_IFACE (self)->get_custom_symbols_list_by_filename (self, symbol_type, filename);
+  return SYMBOLIZABLE_GET_IFACE (self)->get_custom_symbols_list_by_filename (self, symbol_type, filename);
 }
 
 /*
@@ -140,7 +140,7 @@ void symbolizable_rescan_file (Symbolizable *self, gchar *filename)
   gphpedit_debug (DEBUG_SYMBOLIZABLE);
   g_return_if_fail (self);
   g_return_if_fail (filename);
-	SYMBOLIZABLE_GET_IFACE (self)->rescan_file (self, filename);
+  SYMBOLIZABLE_GET_IFACE (self)->rescan_file (self, filename);
   g_signal_emit (G_OBJECT (self), signals[UPDATE], 0);
 }
 
@@ -153,7 +153,7 @@ void symbolizable_add_file (Symbolizable *self, gchar *filename)
   gphpedit_debug (DEBUG_SYMBOLIZABLE);
   g_return_if_fail (self);
   g_return_if_fail (filename);
-	SYMBOLIZABLE_GET_IFACE (self)->add_file (self, filename);
+  SYMBOLIZABLE_GET_IFACE (self)->add_file (self, filename);
   g_signal_emit (G_OBJECT (self), signals[UPDATE], 0);
 }
 
@@ -166,7 +166,7 @@ void symbolizable_purge_file (Symbolizable *self, gchar *filename)
   gphpedit_debug (DEBUG_SYMBOLIZABLE);
   g_return_if_fail (self);
   g_return_if_fail (filename);
-	SYMBOLIZABLE_GET_IFACE (self)->purge_file (self, filename);
+  SYMBOLIZABLE_GET_IFACE (self)->purge_file (self, filename);
   g_signal_emit (G_OBJECT (self), signals[UPDATE], 0);
 }
 

@@ -4,7 +4,7 @@
    Copyright (C) 2009, 2011 José Rostagno (for vijona.com.ar)
 	  
    For more information or to find the latest release, visit our 
-   website at http://www.gphpedit.org/
+   website at http://www.gperledit.org/
  
    gPHPEdit is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -22,12 +22,17 @@
    The GNU General Public License is contained in the file COPYING.
 */
 
+#include <stdlib.h>
 #include <string.h>
+#include <glib/gi18n.h>
+
 #include "debug.h"
 #include "language_perl.h"
 #include "preferences_manager.h"
 #include "language_provider.h"
 #include "symbol_manager.h"
+#include "main_window.h"
+#include "gvfs_utils.h"
 
 /*
 * language_perl private struct
@@ -59,6 +64,8 @@ enum
 static void language_perl_language_provider_init(Language_ProviderInterface *iface, gpointer user_data);
 static void language_perl_trigger_completion (Language_Provider *lgperl, guint ch);
 static void show_calltip (Language_Provider *lgperl);
+static void language_perl_setup_lexer(Language_Provider *lgperl);
+static gchar *language_perl_do_syntax_check(Language_Provider *lgperl);
 
 G_DEFINE_TYPE_WITH_CODE(Language_PERL, language_perl, G_TYPE_OBJECT,
                         G_IMPLEMENT_INTERFACE (IFACE_TYPE_LANGUAGE_PROVIDER,
@@ -68,6 +75,8 @@ static void language_perl_language_provider_init(Language_ProviderInterface *ifa
 {
   iface->trigger_completion = language_perl_trigger_completion;
   iface->show_calltip = show_calltip;
+  iface->setup_lexer = language_perl_setup_lexer;
+  iface->do_syntax_check = language_perl_do_syntax_check;
 }
 
 static void
@@ -498,4 +507,189 @@ static void language_perl_trigger_completion (Language_Provider *lgperl, guint c
         if (member_function_buffer && strlen(member_function_buffer)>=3) show_autocompletion (LANGUAGE_PERL(lgperl), current_pos);
         g_free(member_function_buffer);
   }
+}
+
+/*
+* (internal)
+*/
+
+static gchar *process_perl_lines(gchar *output)
+{
+  gchar *copy;
+  gchar *token;
+  gchar *line_number;
+  copy = output;
+  GString *result;
+  result = g_string_new (NULL);
+  gphpedit_debug_message(DEBUG_SYNTAX, "syntax:\n%s\n", output);
+  gint quote=0;
+  gint a=0;
+  gchar *cop=copy;
+  while (*cop!='\0'){
+      if(*cop=='"' && quote==0) quote++;
+      else if(*cop=='"' && quote!=0) quote--;
+      if (*cop=='\n' && quote==1) *(copy +a)=' ';
+      cop++;
+      a++;
+//      g_print("char:%c, quote:%d,pos:%d\n",*cop,quote,a);
+      }      
+      while ((token = strtok(copy, "\n"))) {
+        gchar number[15];  
+        int i=15;
+        line_number = strstr(token, "line ");
+        if (line_number){
+        line_number+=5;
+        while (*line_number!=',' && *line_number!='.' && i!=0){
+        number[15-i]=*line_number;
+        line_number++;
+        i--;
+        }
+        number[i]='\0';
+        }
+        gint num=atoi(number);
+        if (num>0) {
+          if (g_str_has_prefix(token, "syntax error") || g_str_has_prefix(token, "Unrecognized character")){
+            g_string_append_printf (result, "%d E %s\n", num, token);
+          } else {
+            g_string_append_printf (result, "%d %s\n", num, token);
+          }
+        }
+        else {
+           if (g_str_has_suffix(token, "syntax OK")) g_string_append_printf (result, "%s", "syntax OK\n");
+           else g_string_append_printf (result, "%s\n", token);
+        }
+      number[0]='a'; /*force new number */
+      copy = NULL;
+    }
+  return g_string_free (result,FALSE);
+}
+
+/*
+* save_as_temp_file (internal)
+* save the content of an editor and return the filename of the temp file or NULL on error.
+*/
+static GString *save_as_temp_file(Documentable *document)
+{
+  gphpedit_debug(DEBUG_SYNTAX);
+  gchar *write_buffer = documentable_get_text(document);
+  GString *filename = text_save_as_temp_file(write_buffer);
+  g_free(write_buffer);
+  return filename;
+}
+
+static GString *get_syntax_filename(Documentable *document, gboolean *using_temp)
+{
+  GString *filename = NULL;
+  gchar *docfilename = documentable_get_filename(document);
+  gboolean untitled, saved;
+  g_object_get(document, "untitled", &untitled, "saved", &saved, NULL);
+  if (saved && filename_is_native(docfilename) && !untitled) {
+    gchar *local_path = filename_get_scaped_path(docfilename);
+    filename = g_string_new(local_path);
+    g_free(local_path);
+    *using_temp = FALSE;
+  } else {
+    filename = save_as_temp_file(document);
+    *using_temp = TRUE;
+  }
+  g_free(docfilename);
+  return filename;
+}
+
+static gchar *language_perl_do_syntax_check(Language_Provider *lgperl)
+{
+  g_return_val_if_fail(lgperl, NULL);
+  Language_PERLDetails *lgperldet = LANGUAGE_PERL_GET_PRIVATE(lgperl);
+
+  GString *command_line=NULL;
+  gchar *output;
+  gboolean using_temp;
+  GString *filename = NULL;
+
+  command_line = g_string_new(NULL);
+  filename = get_syntax_filename(lgperldet->doc, &using_temp);
+  g_string_append_printf(command_line, "perl -c '%s'", filename->str);
+
+  gphpedit_debug_message(DEBUG_SYNTAX, "eject:%s\n", command_line->str);
+
+  output = command_spawn_with_error (command_line->str);
+  if (using_temp) release_temp_file (filename->str);
+  g_string_free(filename, TRUE);
+  g_string_free(command_line, TRUE);
+  gchar *result=NULL;
+  if (output) {
+    result = process_perl_lines(output);
+    g_free(output);
+  } else {
+    result = g_strdup(_("Error calling PHP CLI (is PHP command line binary installed? If so, check if it's in your path or set php_binary in Preferences)\n"));
+  }
+  return result;
+}
+
+static void language_perl_setup_lexer(Language_Provider *lgperl)
+{
+  g_return_if_fail(lgperl);
+  Language_PERLDetails *lgperldet = LANGUAGE_PERL_GET_PRIVATE(lgperl);
+
+  gtk_scintilla_clear_document_style (lgperldet->sci);
+  gtk_scintilla_set_lexer(lgperldet->sci, SCLEX_PERL);
+  gtk_scintilla_set_style_bits(lgperldet->sci, 5);
+
+  gtk_scintilla_set_keywords(lgperldet->sci, 0, "NULL __FILE__ __LINE__ __PACKAGE__ __DATA__ __END__ AUTOLOAD BEGIN CORE DESTROY END EQ GE GT INIT LE LT NE CHECK abs accept alarm and atan2 bind binmode bless caller chdir chmod chomp chop chown chr chroot close closedir cmp connect continue cos crypt dbmclose dbmopen defined delete die do dump each else elsif endgrent endhostent endnetent endprotoent endpwent endservent eof eq eval exec exists exit exp fcntl fileno flock for foreach fork format formline ge getc getgrent getgrgid getgrnam gethostbyaddr gethostbyname gethostent getlogin getnetbyaddr getnetbyname getnetent getpeername getpgrp getppid getpriority getprotobyname getprotobynumber getprotoent getpwent getpwnam getpwuid getservbyname getservbyport getservent getsockname getsockopt glob gmtime goto grep gt hex if index int ioctl join keys kill last lc lcfirst le length link listen local localtime lock log lstat lt m map mkdir msgctl msgget msgrcv msgsnd my ne next no not oct open opendir or ord our pack package pipe pop pos print printf prototype push q qq qr quotemeta qu qw qx rand read readdir readline readlink readpipe recv redo ref rename require reset return reverse rewinddir rindex rmdir s scalar seek seekdir select semctl semget semop send setgrent sethostent setnetent setpgrp setpriority setprotoent setpwent setservent setsockopt shift shmctl shmget shmread shmwrite shutdown sin sleep socket socketpair sort splice split sprintf sqrt srand stat study sub substr symlink syscall sysopen sysread sysseek system syswrite tell telldir tie tied time times tr truncate uc ucfirst umask undef unless unlink unpack unshift untie until use utime values vec wait waitpid wantarray warn while write x xor y");
+  
+  gchar *font;
+  guint size;
+  g_object_get(lgperldet->prefmg, "style_font_name", &font,"font_size", &size, NULL);
+
+  gchar *style_name;
+  g_object_get(lgperldet->prefmg, "style_name", &style_name, NULL);
+
+  GtkSourceStyleScheme	*scheme = gtk_source_style_scheme_manager_get_scheme (main_window.stylemg, style_name);
+  /* PHP LEXER STYLE */
+  set_scintilla_lexer_doc_comment_style(GTK_WIDGET(lgperldet->sci), scheme, SCE_PL_FORMAT_IDENT, font, size);
+  set_scintilla_lexer_doc_comment_style(GTK_WIDGET(lgperldet->sci), scheme, SCE_PL_FORMAT, font, size);
+  set_scintilla_lexer_default_style(GTK_WIDGET(lgperldet->sci), scheme, SCE_PL_DEFAULT, font, size);
+  set_scintilla_lexer_keyword_style(GTK_WIDGET(lgperldet->sci), scheme, SCE_PL_WORD, font, size);
+  set_scintilla_lexer_type_style(GTK_WIDGET(lgperldet->sci), scheme, SCE_PL_SUB_PROTOTYPE, font, size);
+  set_scintilla_lexer_keyword_style(GTK_WIDGET(lgperldet->sci), scheme, SCE_PL_POD_VERB, font, size);
+  set_scintilla_lexer_comment_style(GTK_WIDGET(lgperldet->sci), scheme, SCE_PL_POD, font, size);
+  set_scintilla_lexer_type_style(GTK_WIDGET(lgperldet->sci), scheme, SCE_PL_IDENTIFIER, font, size);
+  set_scintilla_lexer_variable_style(GTK_WIDGET(lgperldet->sci), scheme, SCE_PL_ARRAY, font, size);
+  set_scintilla_lexer_variable_style(GTK_WIDGET(lgperldet->sci), scheme, SCE_PL_SYMBOLTABLE, font, size);
+  set_scintilla_lexer_variable_style(GTK_WIDGET(lgperldet->sci), scheme, SCE_PL_DATASECTION, font, size);
+  set_scintilla_lexer_variable_style(GTK_WIDGET(lgperldet->sci), scheme, SCE_PL_VARIABLE_INDEXER, font, size);
+  set_scintilla_lexer_xml_atribute_style(GTK_WIDGET(lgperldet->sci), scheme, SCE_PL_STRING_Q, font, size);
+  set_scintilla_lexer_xml_atribute_style(GTK_WIDGET(lgperldet->sci), scheme, SCE_PL_STRING_QQ, font, size);
+  set_scintilla_lexer_xml_atribute_style(GTK_WIDGET(lgperldet->sci), scheme, SCE_PL_STRING_QX, font, size);
+  set_scintilla_lexer_xml_atribute_style(GTK_WIDGET(lgperldet->sci), scheme, SCE_PL_STRING_QR, font, size);
+  set_scintilla_lexer_xml_atribute_style(GTK_WIDGET(lgperldet->sci), scheme, SCE_PL_STRING_QW, font, size);
+  set_scintilla_lexer_string_style(GTK_WIDGET(lgperldet->sci), scheme, SCE_PL_LONGQUOTE, font, size);
+  set_scintilla_lexer_string_style(GTK_WIDGET(lgperldet->sci), scheme, SCE_PL_STRING, font, size);
+  set_scintilla_lexer_simple_string_style(GTK_WIDGET(lgperldet->sci), scheme, SCE_PL_BACKTICKS, font, size);
+  set_scintilla_lexer_simple_string_style(GTK_WIDGET(lgperldet->sci), scheme, SCE_PL_CHARACTER, font, size);
+  set_scintilla_lexer_preprocessor_style(GTK_WIDGET(lgperldet->sci), scheme, SCE_PL_PREPROCESSOR, font, size);
+  set_scintilla_lexer_operator_style(GTK_WIDGET(lgperldet->sci), scheme, SCE_PL_OPERATOR, font, size);
+  set_scintilla_lexer_number_style(GTK_WIDGET(lgperldet->sci), scheme, SCE_PL_SCALAR, font, size);
+  set_scintilla_lexer_number_style(GTK_WIDGET(lgperldet->sci), scheme, SCE_PL_NUMBER, font, size);
+  set_scintilla_lexer_comment_style (GTK_WIDGET(lgperldet->sci), scheme, SCE_PL_COMMENTLINE, font, size);
+  set_scintilla_lexer_xml_element_style(GTK_WIDGET(lgperldet->sci), scheme, SCE_PL_HASH, font, size);
+  set_scintilla_lexer_xml_element_style (GTK_WIDGET(lgperldet->sci), scheme, SCE_PL_REGSUBST, font, size);
+  set_scintilla_lexer_string_style(GTK_WIDGET(lgperldet->sci), scheme, SCE_PL_REGEX, font, size);
+  set_scintilla_lexer_special_constant_style (GTK_WIDGET(lgperldet->sci), scheme, SCE_PL_PUNCTUATION, font, size);
+  set_scintilla_lexer_error_style (GTK_WIDGET(lgperldet->sci), scheme, SCE_PL_ERROR, font, size);
+  set_scintilla_lexer_xml_instruction_style(GTK_WIDGET(lgperldet->sci), scheme, SCE_PL_HERE_DELIM, font, size);
+  set_scintilla_lexer_xml_instruction_style(GTK_WIDGET(lgperldet->sci), scheme, SCE_PL_HERE_Q, font, size);
+  set_scintilla_lexer_xml_instruction_style(GTK_WIDGET(lgperldet->sci), scheme, SCE_PL_HERE_QQ, font, size);
+  set_scintilla_lexer_xml_instruction_style(GTK_WIDGET(lgperldet->sci), scheme, SCE_PL_HERE_QX, font, size);
+
+  g_free(font);
+  g_free(style_name);
+
+  gtk_scintilla_set_property(lgperldet->sci, "fold", "1");
+  gtk_scintilla_set_property(lgperldet->sci, "fold.comment", "1");
+  gtk_scintilla_set_property(lgperldet->sci, "fold.compact", "1");
+  gtk_scintilla_set_property(lgperldet->sci, "fold.perl.pod", "1");
+  gtk_scintilla_set_property(lgperldet->sci, "fold.perl.package", "1");
+
+  gtk_scintilla_colourise(lgperldet->sci, 0, -1);
 }

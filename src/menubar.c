@@ -633,6 +633,7 @@ void menubar_update_controls(MenuBar *menubar, gboolean is_scintilla, gboolean c
 {
   if (!menubar) return ;
   MenuBarPrivate *priv = MENUBAR_GET_PRIVATE(menubar);
+  if (!priv) return ;
   if (is_scintilla){
     //activate menu items
     gtk_widget_set_sensitive (priv->code, TRUE);

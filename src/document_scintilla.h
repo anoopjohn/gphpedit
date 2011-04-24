@@ -55,6 +55,7 @@ typedef struct
 	void (* load_complete) (Document_Scintilla *doc, gboolean result, gpointer user_data);
 	void (* save_update) (Document_Scintilla *doc, gpointer user_data); /* emited when document_scintilla save state change*/
 	void (* type_changed) (Document_Scintilla *doc, gint type, gpointer user_data);
+	void (* pos_changed_cb) (Document_Scintilla *doc, gint pos, gint col, gpointer user_data);
 	void (* ovr_changed) (Document_Scintilla *doc, gboolean status, gpointer user_data);
 	void (* open_request) (Document_Scintilla *doc, const gchar *uri, gpointer user_data);
 

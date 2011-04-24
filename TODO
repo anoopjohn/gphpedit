@@ -8,8 +8,6 @@ Should also work for cases like: outer( inner(
 NEW FUNCTIONALITY/FEATURES
 ==========================
 
-* Memory of Incremental Search strings
-
 * Metric reporting (Function length, LOC)
 
 * Turck-mmcache integration
@@ -17,8 +15,6 @@ NEW FUNCTIONALITY/FEATURES
 * Project/Live site editing
 
 * Tabs: with context menu
-
-* Change the text on the taskbar button to be more meaningful
 
 * class view: when there are multiple files with the same class names, it
 would be nice if the file name is directly appended in the class view,
@@ -29,12 +25,13 @@ and under an All Files item
 
 * Print current PHP file, using Anjuta code.
 
-* Implement Ctrl+Space toolbar popup
+* Port plugins systems to libpeas
 
-> And it would be standard-conform (to ms visual studio and some others)
-> to have Ctrl+Shift+Space = show hint to current function [helpful if
-> your'e changing the code and not writing new calls] and Ctrl+Space =
-> Show function dropdown immediateley.
+* Port code to GTK+ 3.0
+
+* Autosave functionality
+
+* 
 
 CODE CLEANUP AND MISC CHANGES
 =============================

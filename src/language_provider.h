@@ -45,12 +45,30 @@ struct _Language_ProviderIface
   GTypeInterface base_iface;
   void (*trigger_completion) (Language_Provider *iface, guint ch);
   void (*show_calltip) (Language_Provider *iface);
+  void (*setup_lexer) (Language_Provider *iface);
+  gchar *(*do_syntax_check) (Language_Provider *iface);
 };
 
 GType          language_provider_get_type        (void) G_GNUC_CONST;
 
 void           language_provider_trigger_completion (Language_Provider *self, guint ch);
+/*
+* language_provider_show_calltip
+* search and show if found the calltip for the current word
+*/
 void           language_provider_show_calltip (Language_Provider *self);
+/*
+* language_provider_setup_lexer
+* Setups the scintilla lexer acording to the corresponding language
+* and the current theme.
+*/
+void           language_provider_setup_lexer (Language_Provider *self);
+/*
+* language_provider_do_syntax_check
+* Do the syntax check operation and return a string
+* to be processed by the syntax_window object
+*/
+gchar *        language_provider_do_syntax_check (Language_Provider *self);
 
 G_END_DECLS
 

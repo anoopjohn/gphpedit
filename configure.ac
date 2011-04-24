@@ -19,7 +19,7 @@ dnl with this program; if not, write to the Free Software Foundation, Inc.,
 dnl 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
 dnl
 AC_PREREQ([2.59])
-AC_INIT([gPHPEdit],[0.9.98],[https://savannah.nongnu.org/support/?group=gphpedit],[gphpedit],[http://www.gphpedit.org])
+AC_INIT([gPHPEdit],[0.10.00],[https://savannah.nongnu.org/support/?group=gphpedit],[gphpedit],[http://www.gphpedit.org])
 
 dnl autoconf versions before 2.64 don't have AC_PACKAGE_URL
 m4_ifdef([AC_PACKAGE_URL],,
@@ -231,6 +231,11 @@ dnl GSettings stuff
 dnl ================================================================
 
 GLIB_GSETTINGS
+
+dnl ================================================================
+dnl Misc
+dnl ================================================================
+AC_PATH_PROG(GLIB_GENMARSHAL, glib-genmarshal)
 
 dnl ---------------------------------------------------------------------------
 dnl check for deprecated flags

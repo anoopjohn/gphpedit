@@ -126,17 +126,17 @@ G_DEFINE_TYPE(gphpeditFileBrowser, gphpedit_file_browser, GTK_TYPE_VBOX);
 static void 
 gphpedit_file_browser_class_init (gphpeditFileBrowserClass *klass)
 {
-	GObjectClass *object_class = G_OBJECT_CLASS (klass);
+  GObjectClass *object_class = G_OBJECT_CLASS (klass);
   object_class->dispose = gphpedit_file_browser_dispose;
-	
-	g_type_class_add_private (object_class, sizeof(gphpeditFileBrowserPrivate));
+
+  g_type_class_add_private (object_class, sizeof(gphpeditFileBrowserPrivate));
 }
 
 static void gphpedit_file_browser_dispose (GObject *object)
 {
-	gphpeditFileBrowserPrivate *priv;
+  gphpeditFileBrowserPrivate *priv;
 
-	priv = FILEBROWSER_BACKEND_GET_PRIVATE(object);
+  priv = FILEBROWSER_BACKEND_GET_PRIVATE(object);
 //	gphpedit_file_browser_set_enable_completion (GPHPEDIT_FILEBROWSER (object), FALSE);
 
   if (g_signal_handler_is_connected (priv->fbbackend, priv->handlerid)){
@@ -147,7 +147,7 @@ static void gphpedit_file_browser_dispose (GObject *object)
   }
   filebrowser_backend_cancel (priv->fbbackend);
 
-  if (priv->builder) g_object_unref(priv->builder);
+//  if (priv->builder) g_object_unref(priv->builder);
   /* Chain up to the parent class */
   G_OBJECT_CLASS (gphpedit_file_browser_parent_class)->dispose (object);
 }

@@ -1,9 +1,10 @@
-/* This file is part of gPHPEdit, a GNOME2 PHP Editor.
+/* This file is part of gPHPEdit, a GNOME PHP Editor.
 
    Copyright (C) 2003, 2004, 2005 Andy Jeffries <andy at gphpedit.org>
    Copyright (C) 2009 Anoop John <anoop dot john at zyxware.com>
+   Copyright (C) 2009, 2010, 2011 José Rostagno (for vijona.com.ar) 
 
-   For more information or to find the latest release, visit our
+   For more information or to find the latest release, visit our 
    website at http://www.gphpedit.org/
 
    gPHPEdit is free software: you can redistribute it and/or modify
@@ -13,23 +14,19 @@
 
    gPHPEdit is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
    GNU General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with gPHPEdit.  If not, see <http://www.gnu.org/licenses/>.
+   along with gPHPEdit. If not, see <http://www.gnu.org/licenses/>.
 
    The GNU General Public License is contained in the file COPYING.
 */
 
 #include <stdlib.h>
-#include <stdarg.h>
-#include <gio/gio.h>
 #include "main.h"
 #include "main_window.h"
-#include "main_window_callbacks.h"
 #include "gphpedit_ipc.h"
-#include "templates.h"
 
 #include "debug.h"
 
@@ -63,11 +60,7 @@ int main (int argc, char **argv)
   /* Start of IPC communication */
   if (single_instance && poke_existing_instance (argc - 1, argv + 1)) return 0;
 
-  main_window_create();
-  main_window.tempmg = templates_manager_new();
-  main_window.docmg = document_manager_new_full(argv, argc);
-  g_signal_connect (G_OBJECT (main_window.docmg), "new_document", G_CALLBACK(document_manager_new_document_cb), NULL);
-  g_signal_connect (G_OBJECT (main_window.docmg), "change_document", G_CALLBACK(document_manager_change_document_cb), NULL);
+  main_window_create(argv, argc);
   gtk_main();
         
   /* it makes sense to install sigterm handler that would call this too */

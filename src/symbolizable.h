@@ -59,7 +59,7 @@ struct _SymbolizableIface
 {
   GTypeInterface base_iface;
 
-	void (* update) (Symbolizable *iface, gpointer user_data);
+  void (* update) (Symbolizable *iface, gpointer user_data);
 
   /*vitual methods */
   gchar *(*get_symbols_matches) (Symbolizable *iface, const gchar *symbol_prefix, gint flags);

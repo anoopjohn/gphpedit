@@ -463,20 +463,20 @@ static void _document_loader_load_file_finish (GObject *source_object, GAsyncRes
   gsize size;
   gchar *buffer;
   GFileInfo *info;
-  gboolean converted_to_utf8;
+  gboolean converted_to_utf8 = FALSE;
   GFile *file = (GFile *) source_object;
-  if (!g_file_load_contents_finish (file,res,&buffer, &size,NULL,&error)) {
+  if (!g_file_load_contents_finish (file, res, &buffer, &size, NULL, &error)) {
     g_print("Error reading file. Gio error:%s",error->message);
     g_error_free(error);
     emit_signal (doclod, FALSE, NULL);
     return ;
   }
-  gphpedit_debug_message (DEBUG_DOCUMENT,"Loaded %u bytes",size);
+  gphpedit_debug_message (DEBUG_DOCUMENT,"Loaded %u bytes", size);
   gphpedit_debug_message (DEBUG_DOCUMENT,"BUFFER=\n%s\n-------------------------------------------", buffer);
 
-  converted_to_utf8 = _document_loader_validate_and_convert_utf8_buffer(&buffer);
+  if (size) converted_to_utf8 = _document_loader_validate_and_convert_utf8_buffer(&buffer);
 
-  info= g_file_query_info (file, INFO_FLAGS,G_FILE_QUERY_INFO_NONE, NULL, &error);
+  info = g_file_query_info (file, INFO_FLAGS,G_FILE_QUERY_INFO_NONE, NULL, &error);
   if (!info){
     g_warning ("%s\n", error->message);
     emit_signal (doclod, FALSE, NULL);

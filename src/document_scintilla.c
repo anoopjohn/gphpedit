@@ -24,26 +24,22 @@
 */
 
 #include <gdk/gdkkeysyms.h>
+
+#include "gphpedit-marshal.h"
+
+#include "tab.h"
 #include "debug.h"
 #include "document_scintilla.h"
 #include "document_saver.h"
 #include "gvfs_utils.h"
 #include "images.h"
 #include "languages.h"
+#include "document_types.h"
 #include "templates.h"
 #include "gtksourcestyleschememanager.h"
 #include "preferences_manager.h"
 #include "search_infobar.h"
 #include "goto_infobar.h"
-
-/* lexer headers */
-#include "tab_cobol.h"
-#include "tab_css.h"
-#include "tab_cxx.h"
-#include "tab_php.h"
-#include "tab_perl.h"
-#include "tab_python.h"
-#include "tab_sql.h"
 
 /* object signal enumeration */
 enum {
@@ -55,7 +51,6 @@ enum {
   MARKER_NOT_FOUND,
   OPEN_REQUEST,
   POS_CHANGED,
-  COL_CHANGED,
   LAST_SIGNAL
 };
 
@@ -93,9 +88,9 @@ struct Document_ScintillaDetails
 
 typedef struct
 {
-	gint message;
-	gulong wparam;
-	glong lparam;
+  gint message;
+  gulong wparam;
+  glong lparam;
 } MacroEvent;
 
 #define DOCUMENT_SCINTILLA_GET_PRIVATE(object)(G_TYPE_INSTANCE_GET_PRIVATE ((object),\
@@ -119,7 +114,7 @@ static void macro_record (GtkWidget *scintilla, gint message, gulong wparam, glo
 static void process_user_list_selection (GtkWidget *w, gint type, gchar *text, gpointer user_data);
 static void scintilla_modified (GtkWidget *w, gpointer user_data);
 static void document_scintilla_constructed (GObject *object);
-void document_scintilla_saver_done_saving_cb (DocumentSaver *docsav, Document_Scintilla *document_scintilla, gpointer user_data);
+static void document_scintilla_saver_done_saving_cb (DocumentSaver *docsav, Document_Scintilla *document_scintilla, gpointer user_data);
 static void document_scintilla_find_next_marker(Document_Scintilla *doc);
 static void document_scintilla_marker_modify(Document_Scintilla *doc, gint line);
 static void document_scintilla_modify_current_line_marker(Document_Scintilla *doc);
@@ -297,55 +292,48 @@ static void document_scintilla_set_type (Documentable  *doc, gint type)
         case TAB_PHP:
           if (docdet->lgcss) g_object_unref(docdet->lgcss);
           docdet->lgcss = LANGUAGE_PROVIDER(language_php_new (DOCUMENT_SCINTILLA(doc)));
-          tab_php_set_lexer(GTK_SCINTILLA(docdet->scintilla));
           tab_set_folding(document_scintilla, TRUE);
           break;
         case TAB_CSS:
           if (docdet->lgcss) g_object_unref(docdet->lgcss);
           docdet->lgcss = LANGUAGE_PROVIDER(language_css_new (DOCUMENT_SCINTILLA(doc)));
-          tab_css_set_lexer(GTK_SCINTILLA(docdet->scintilla));
           tab_set_folding(document_scintilla, TRUE);
           break;
         case TAB_COBOL:
           if (docdet->lgcss) g_object_unref(docdet->lgcss);
           docdet->lgcss = LANGUAGE_PROVIDER(language_cobol_new (DOCUMENT_SCINTILLA(doc)));
-          tab_cobol_set_lexer(GTK_SCINTILLA(docdet->scintilla));
           tab_set_folding(document_scintilla, TRUE);
           break;
         case TAB_CXX:
           if (docdet->lgcss) g_object_unref(docdet->lgcss);
           docdet->lgcss = LANGUAGE_PROVIDER(language_cxx_new (DOCUMENT_SCINTILLA(doc)));
-          tab_cxx_set_lexer(GTK_SCINTILLA(docdet->scintilla));
           tab_set_folding(document_scintilla, TRUE);
           break;
         case TAB_PYTHON:
           if (docdet->lgcss) g_object_unref(docdet->lgcss);
           docdet->lgcss = LANGUAGE_PROVIDER(language_python_new (DOCUMENT_SCINTILLA(doc)));
-          tab_python_set_lexer(GTK_SCINTILLA(docdet->scintilla));
           tab_set_folding(document_scintilla, TRUE);
           break;
         case TAB_SQL:
           if (docdet->lgcss) g_object_unref(docdet->lgcss);
           docdet->lgcss = LANGUAGE_PROVIDER(language_sql_new (DOCUMENT_SCINTILLA(doc)));
-          tab_sql_set_lexer(GTK_SCINTILLA(docdet->scintilla));
           tab_set_folding(document_scintilla, TRUE);
           break;
         case TAB_PERL:
           if (docdet->lgcss) g_object_unref(docdet->lgcss);
           docdet->lgcss = LANGUAGE_PROVIDER(language_perl_new (DOCUMENT_SCINTILLA(doc)));
-          tab_perl_set_lexer(GTK_SCINTILLA(docdet->scintilla));
           tab_set_folding(document_scintilla, TRUE);
           break;
         case TAB_FILE:
-          /* SCLEX_NULL to select no lexing action */
-          gtk_scintilla_set_lexer(GTK_SCINTILLA (docdet->scintilla), SCLEX_NULL); 
+          if (docdet->lgcss) g_object_unref(docdet->lgcss);
+          docdet->lgcss = LANGUAGE_PROVIDER(language_untitled_new (DOCUMENT_SCINTILLA(doc)));
           tab_set_configured_scintilla_properties(GTK_SCINTILLA (docdet->scintilla), doc);
-          gtk_scintilla_colourise(GTK_SCINTILLA (docdet->scintilla), 0, -1);
           tab_set_folding(document_scintilla, FALSE);
           break;
         default:
           break;
       }
+      language_provider_setup_lexer (docdet->lgcss);
       g_signal_emit (G_OBJECT (document_scintilla), signals[TYPE_CHANGED], 0, type);
   }
 }
@@ -627,12 +615,11 @@ static void tab_reset_scintilla_after_open(GtkScintilla *scintilla, guint curren
 static void document_scintilla_replace_text (Documentable  *document_scintilla, gchar *new_text)
 {
   Document_ScintillaDetails *docdet = DOCUMENT_SCINTILLA_GET_PRIVATE(document_scintilla);
-  gsize size;
-  if (!new_text) size = 0;
-  else size = strlen(new_text);
-  if (size!=0){
+  gtk_scintilla_clear_all(GTK_SCINTILLA (docdet->scintilla));
+  if (new_text) {
+    gsize size;
+    size = strlen(new_text);
     // Clear scintilla buffer
-    gtk_scintilla_clear_all(GTK_SCINTILLA (docdet->scintilla));
     gtk_scintilla_add_text(GTK_SCINTILLA (docdet->scintilla), size, new_text);
   }
   tab_reset_scintilla_after_open(GTK_SCINTILLA (docdet->scintilla), 0);
@@ -696,6 +683,14 @@ static void document_scintilla_grab_focus (Documentable *doc)
   gtk_widget_grab_focus(docdet->scintilla);
 }
 
+static gchar *document_scintilla_do_syntax_check (Documentable *doc)
+{
+  gphpedit_debug (DEBUG_DOCUMENT);
+  g_return_val_if_fail(doc, NULL);
+  Document_ScintillaDetails *docdet = DOCUMENT_SCINTILLA_GET_PRIVATE(doc);
+  return language_provider_do_syntax_check (docdet->lgcss);
+}
+
 static void document_scintilla_documentable_init(DocumentableIface *iface, gpointer user_data)
 {
   iface->zoom_in = document_scintilla_zoom_in;
@@ -734,6 +729,7 @@ static void document_scintilla_documentable_init(DocumentableIface *iface, gpoin
   iface->replace_current_selection = document_scintilla_replace_current_selection;
   iface->apply_preferences = document_scintilla_apply_preferences;
   iface->grab_focus = document_scintilla_grab_focus;
+  iface->do_syntax_check = document_scintilla_do_syntax_check;
 }
 
 enum
@@ -872,7 +868,7 @@ document_scintilla_class_init (Document_ScintillaClass *klass)
 		g_signal_new ("type_changed",
 		              G_TYPE_FROM_CLASS (object_class),
 		              G_SIGNAL_RUN_LAST,
-		              G_STRUCT_OFFSET (Document_ScintillaClass, save_update),
+		              G_STRUCT_OFFSET (Document_ScintillaClass, type_changed),
 		              NULL, NULL,
 		               g_cclosure_marshal_VOID__INT,
 		               G_TYPE_NONE, 1, G_TYPE_INT, NULL);
@@ -881,19 +877,10 @@ document_scintilla_class_init (Document_ScintillaClass *klass)
 		g_signal_new ("pos_changed",
 		              G_TYPE_FROM_CLASS (object_class),
 		              G_SIGNAL_RUN_LAST,
-		              G_STRUCT_OFFSET (Document_ScintillaClass, save_update),
+		              G_STRUCT_OFFSET (Document_ScintillaClass, pos_changed_cb),
 		              NULL, NULL,
-		               g_cclosure_marshal_VOID__INT,
-		               G_TYPE_NONE, 1, G_TYPE_INT, NULL);
-
-	signals[COL_CHANGED] =
-		g_signal_new ("col_changed",
-		              G_TYPE_FROM_CLASS (object_class),
-		              G_SIGNAL_RUN_LAST,
-		              G_STRUCT_OFFSET (Document_ScintillaClass, save_update),
-		              NULL, NULL,
-		               g_cclosure_marshal_VOID__INT,
-		               G_TYPE_NONE, 1, G_TYPE_INT, NULL);
+		               gphpedit_marshal_VOID__INT_INT,
+		               G_TYPE_NONE, 2, G_TYPE_INT, G_TYPE_INT, NULL);
 
 	signals[NEED_RELOAD] =
 		g_signal_new ("need_reload",
@@ -1287,6 +1274,7 @@ static void save_point_reached(GtkWidget *scintilla, gpointer user_data)
     gtk_label_set_text(GTK_LABEL (docdet->label), short_filename);
     /*emit save update signal*/
     g_signal_emit (G_OBJECT (doc), signals[SAVE_UPDATE], 0);
+    g_free(short_filename);
   }
 }
 
@@ -1314,8 +1302,7 @@ static void scintilla_modified (GtkWidget *scintilla, gpointer user_data)
   g_return_if_fail(doc);
   GtkScintilla *sci = GTK_SCINTILLA(scintilla);
   gint current_pos = gtk_scintilla_get_current_pos(sci);
-  g_signal_emit (G_OBJECT (doc), signals[POS_CHANGED], 0, gtk_scintilla_line_from_position(sci, current_pos) + 1);
-  g_signal_emit (G_OBJECT (doc), signals[COL_CHANGED], 0, gtk_scintilla_get_column(sci, current_pos) + 1);
+  g_signal_emit (G_OBJECT (doc), signals[POS_CHANGED], 0, gtk_scintilla_line_from_position(sci, current_pos) + 1, gtk_scintilla_get_column(sci, current_pos) + 1);
   g_signal_emit (G_OBJECT (doc), signals[OVR_CHANGED], 0, gtk_scintilla_get_overtype(sci));
 }
 
@@ -1421,27 +1408,7 @@ static void char_added(GtkWidget *scintilla, guint ch, gpointer user_data)
   Document_Scintilla *doc = DOCUMENT_SCINTILLA(user_data);
   g_return_if_fail(doc);
   Document_ScintillaDetails *docdet = DOCUMENT_SCINTILLA_GET_PRIVATE(doc);
-  if (docdet->lgcss) {
-    language_provider_trigger_completion (docdet->lgcss, ch);
-  } else {
-    gint current_pos;
-    gint wordStart;
-    gint wordEnd;
-    gchar *member_function_buffer = NULL;
-    gint member_function_length;
-    GtkScintilla *sci = GTK_SCINTILLA(scintilla);
-
-    current_pos = gtk_scintilla_get_current_pos(sci);
-    wordStart = gtk_scintilla_word_start_position(sci, current_pos-1, TRUE);
-    wordEnd = gtk_scintilla_word_end_position(sci, current_pos-1, TRUE);
-
-    member_function_buffer = gtk_scintilla_get_text_range (sci, wordStart-2, wordEnd, &member_function_length);
-    /* if we type <?php then we are in a php file so force php syntax mode */
-    if (g_strcmp0(member_function_buffer,"<?php")==0){
-      documentable_set_type(DOCUMENTABLE(doc), TAB_PHP);
-    }
-    g_free(member_function_buffer);
-  }
+  language_provider_trigger_completion (docdet->lgcss, ch);
 }
 
 /*
@@ -1643,7 +1610,7 @@ static void fold_changed(GtkWidget *scintilla, int line,int levelNow,int levelPr
 
 // All the folding functions are converted from QScintilla, released under the GPLv2 by
 // Riverbank Computing Limited <info@riverbankcomputing.co.uk> and Copyright (c) 2003 by them.
-static void handle_modified(GtkWidget *scintilla, gint pos,gint mtype,gchar *text,gint len,
+static void handle_modified(GtkWidget *scintilla, gint pos, gint mtype, gchar *text,gint len,
            gint added, gint line, gint foldNow, gint foldPrev, gpointer user_data)
 {
   Document_ScintillaDetails *docdet = DOCUMENT_SCINTILLA_GET_PRIVATE(user_data);
@@ -1714,7 +1681,8 @@ static void document_scintilla_find_next_marker(Document_Scintilla *doc){
   }
 }
 
-static void document_scintilla_auto_detect_file_type(Documentable *doc) {
+static void document_scintilla_auto_detect_file_type(Documentable *doc)
+{
   if (!doc) return;
   gchar *filename = documentable_get_filename(doc);
   /* reset type */
@@ -1788,12 +1756,16 @@ void document_scintilla_add_sintax_annotation(Document_Scintilla *doc, guint cur
   gtk_scintilla_annotation_set_text(GTK_SCINTILLA(docdet->scintilla), current_line_number, token);
 }
 
-void document_scintilla_saver_done_saving_cb (DocumentSaver *docsav, Document_Scintilla *document_scintilla, gpointer user_data)
+static void document_scintilla_saver_done_saving_cb (DocumentSaver *docsav, Document_Scintilla *doc, gpointer user_data)
 {
-  Document_ScintillaDetails *docdet = DOCUMENT_SCINTILLA_GET_PRIVATE(document_scintilla);
+  Document_ScintillaDetails *docdet = DOCUMENT_SCINTILLA_GET_PRIVATE(doc);
   gtk_scintilla_set_save_point (GTK_SCINTILLA(docdet->scintilla));
-  document_scintilla_auto_detect_file_type(DOCUMENTABLE(document_scintilla));
-  gchar *filename = documentable_get_filename(DOCUMENTABLE(document_scintilla));
+  gint type;
+  g_object_get(doc, "type", &type, NULL);
+  if (type==TAB_FILE) {
+    document_scintilla_auto_detect_file_type(DOCUMENTABLE(doc));
+  }
+  gchar *filename = documentable_get_filename(DOCUMENTABLE(doc));
   register_file_opened(filename);
   g_free(filename);
 }
@@ -1974,7 +1946,7 @@ static void document_scintilla_force_autocomplete(Document_Scintilla *document_s
 {
   g_return_if_fail(document_scintilla);
   Document_ScintillaDetails *docdet = DOCUMENT_SCINTILLA_GET_PRIVATE(document_scintilla);
-  if (docdet->lgcss) language_provider_trigger_completion (docdet->lgcss, 0);
+  language_provider_trigger_completion (docdet->lgcss, 0);
 }
 
 #define BACKSLASH 92

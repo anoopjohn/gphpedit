@@ -4,7 +4,7 @@
    Copyright (C) 2009, 2011 José Rostagno (for vijona.com.ar)
 	  
    For more information or to find the latest release, visit our 
-   website at http://www.gphpedit.org/
+   website at http://www.gsqledit.org/
  
    gPHPEdit is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -28,6 +28,7 @@
 #include "preferences_manager.h"
 #include "language_provider.h"
 #include "symbol_manager.h"
+#include "main_window.h"
 
 /*
 * language_sql private struct
@@ -55,6 +56,8 @@ enum
 
 static void language_sql_language_provider_init(Language_ProviderInterface *iface, gpointer user_data);
 static void language_sql_trigger_completion (Language_Provider *lgsql, guint ch);
+static void language_sql_setup_lexer(Language_Provider *lgsql);
+static gchar *language_sql_do_syntax_check(Language_Provider *lgsql);
 
 G_DEFINE_TYPE_WITH_CODE(Language_SQL, language_sql, G_TYPE_OBJECT,
                         G_IMPLEMENT_INTERFACE (IFACE_TYPE_LANGUAGE_PROVIDER,
@@ -69,6 +72,8 @@ static void language_sql_language_provider_init(Language_ProviderInterface *ifac
 {
   iface->trigger_completion = language_sql_trigger_completion;
   iface->show_calltip = show_calltip;
+  iface->setup_lexer = language_sql_setup_lexer;
+  iface->do_syntax_check = language_sql_do_syntax_check;
 }
 
 static void
@@ -336,4 +341,57 @@ static void language_sql_trigger_completion (Language_Provider *lgsql, guint ch)
         if (member_function_buffer && strlen(member_function_buffer)>=3) show_autocompletion (LANGUAGE_SQL(lgsql), current_pos);
         g_free(member_function_buffer);
   }
+}
+
+static gchar *language_sql_do_syntax_check(Language_Provider *lgsql)
+{
+  return NULL;
+}
+
+static void language_sql_setup_lexer(Language_Provider *lgsql)
+{
+  g_return_if_fail(lgsql);
+  Language_SQLDetails *lgsqldet = LANGUAGE_SQL_GET_PRIVATE(lgsql);
+
+  gtk_scintilla_clear_document_style (lgsqldet->sci);
+  gtk_scintilla_set_lexer(lgsqldet->sci, SCLEX_SQL);
+  gtk_scintilla_set_style_bits(lgsqldet->sci, 5);
+
+  gtk_scintilla_set_keywords(lgsqldet->sci, 0, "absolute action add admin after aggregate alias all allocate alter and any are array as asc assertion at authorization before begin binary bit blob boolean both breadth by call cascade cascaded case cast catalog char character check class clob close collate collation column commit completion connect connection constraint constraints constructor continue corresponding create cross cube current current_date current_path current_role current_time current_timestamp current_user cursor cycle data date day deallocate dec decimal declare default deferrable deferred delete depth deref desc describe descriptor destroy destructor deterministic dictionary diagnostics disconnect distinct domain double drop dynamic each else end end-exec equals escape every except exception exec execute external false fetch first float for foreign found from free full function general get global go goto grant group grouping having host hour identity if ignore immediate in indicator initialize initially inner inout input insert int integer intersect interval into is isolation iterate join key language large last lateral leading left less level like limit local localtime localtimestamp locator map match minute modifies modify module month names national natural nchar nclob new next no none not null numeric object of off old on only open operation option or order ordinality out outer output pad parameter parameters partial path postfix precision prefix preorder prepare preserve primary prior privileges procedure public read reads real recursive ref references referencing relative restrict result return returns revoke right role rollback rollup routine row rows savepoint schema scroll scope search second section select sequence session session_user set sets size smallint some| space specific specifictype sql sqlexception sqlstate sqlwarning start state statement static structure system_user table temporary terminate than then time timestamp timezone_hour timezone_minute to trailing transaction translation treat trigger true under union unique unknown unnest update usage user using value values varchar variable varying view when whenever where with without work write year zone");
+
+gtk_scintilla_set_keywords(lgsqldet->sci, 1, "all alter and any array as asc at authid avg begin between binary_integer body boolean bulk by char char_base check close cluster collect comment commit compress connect constant create current currval cursor date day declare decimal default delete desc distinct do drop else elsif end exception exclusive execute exists exit extends false fetch float for forall from function goto group having heap hour if immediate in index indicator insert integer interface intersect interval into is isolation java level like limited lock long loop max min minus minute mlslabel mod mode month natural naturaln new nextval nocopy not nowait null number number_base ocirowid of on opaque open operator option or order organization others out package partition pctfree pls_integer positive positiven pragma prior private procedure public raise range raw real record ref release return reverse rollback row rowid rownum rowtype savepoint second select separate set share smallint space sql sqlcode sqlerrm start stddev subtype successful sum synonym sysdate table then time timestamp to trigger true type uid union unique update use user validate values varchar varchar2 variance view when whenever where while with work write year zone");
+
+  gchar *font;
+  guint size;
+  g_object_get(lgsqldet->prefmg, "style_font_name", &font, "font_size", &size, NULL);
+  gchar *style_name;
+  g_object_get(lgsqldet->prefmg, "style_name", &style_name, NULL);
+
+  GtkSourceStyleScheme	*scheme = gtk_source_style_scheme_manager_get_scheme (main_window.stylemg, style_name);
+  /* SQL LEXER STYLE */
+  set_scintilla_lexer_default_style(GTK_WIDGET(lgsqldet->sci), scheme, SCE_SQL_DEFAULT, font, size);
+  set_scintilla_lexer_keyword_style(GTK_WIDGET(lgsqldet->sci), scheme, SCE_SQL_WORD, font, size);
+  set_scintilla_lexer_xml_element_style(GTK_WIDGET(lgsqldet->sci), scheme, SCE_SQL_WORD2, font, size);
+  set_scintilla_lexer_keyword_style(GTK_WIDGET(lgsqldet->sci), scheme, SCE_SQL_SQLPLUS, font, size);
+  set_scintilla_lexer_keyword_style(GTK_WIDGET(lgsqldet->sci), scheme, SCE_SQL_SQLPLUS_PROMPT, font, size);
+  set_scintilla_lexer_string_style(GTK_WIDGET(lgsqldet->sci), scheme, SCE_SQL_STRING, font, size);
+  set_scintilla_lexer_simple_string_style(GTK_WIDGET(lgsqldet->sci), scheme, SCE_SQL_CHARACTER, font, size);
+  set_scintilla_lexer_operator_style(GTK_WIDGET(lgsqldet->sci), scheme, SCE_SQL_OPERATOR, font, size);
+  set_scintilla_lexer_number_style(GTK_WIDGET(lgsqldet->sci), scheme, SCE_SQL_NUMBER, font, size);
+  set_scintilla_lexer_comment_style (GTK_WIDGET(lgsqldet->sci), scheme, SCE_SQL_COMMENT, font, size);
+  set_scintilla_lexer_comment_style (GTK_WIDGET(lgsqldet->sci), scheme, SCE_SQL_COMMENTLINE, font, size);
+  set_scintilla_lexer_comment_style (GTK_WIDGET(lgsqldet->sci), scheme, SCE_SQL_SQLPLUS_COMMENT, font, size);
+  set_scintilla_lexer_doc_comment_style(GTK_WIDGET(lgsqldet->sci), scheme, SCE_SQL_COMMENTDOC, font, size);
+  set_scintilla_lexer_doc_comment_style(GTK_WIDGET(lgsqldet->sci), scheme, SCE_SQL_COMMENTDOCKEYWORD, font, size);
+  set_scintilla_lexer_doc_comment_style(GTK_WIDGET(lgsqldet->sci), scheme, SCE_SQL_COMMENTLINEDOC, font, size);
+  set_scintilla_lexer_variable_style(GTK_WIDGET(lgsqldet->sci), scheme, SCE_SQL_IDENTIFIER, font, size);
+  set_scintilla_lexer_special_constant_style (GTK_WIDGET(lgsqldet->sci), scheme, SCE_SQL_QUOTEDIDENTIFIER, font, size);
+  set_scintilla_lexer_default_style(GTK_WIDGET(lgsqldet->sci), scheme, SCE_SQL_USER1, font, size);
+  set_scintilla_lexer_default_style(GTK_WIDGET(lgsqldet->sci), scheme, SCE_SQL_USER2, font, size);
+  set_scintilla_lexer_default_style(GTK_WIDGET(lgsqldet->sci), scheme, SCE_SQL_USER3, font, size);
+  set_scintilla_lexer_default_style(GTK_WIDGET(lgsqldet->sci), scheme, SCE_SQL_USER4, font, size);
+
+  gtk_scintilla_colourise(lgsqldet->sci, 0, -1);
+  g_free(font);
+  g_free(style_name);
 }
