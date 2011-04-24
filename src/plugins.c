@@ -532,22 +532,22 @@ const gchar *
 get_plugin_copyright (Plugin *plugin)
 {
   gphpedit_debug(DEBUG_PLUGINS);
-	g_return_val_if_fail (plugin != NULL, NULL);
+  g_return_val_if_fail (plugin != NULL, NULL);
 
   PluginDetails *plugdet = PLUGIN_GET_PRIVATE(plugin);
 
-	return plugdet->copyright;
+  return plugdet->copyright;
 }
 
 const gchar *
 get_plugin_version (Plugin *plugin)
 {
   gphpedit_debug(DEBUG_PLUGINS);
-	g_return_val_if_fail (plugin != NULL, NULL);
+  g_return_val_if_fail (plugin != NULL, NULL);
 
   PluginDetails *plugdet = PLUGIN_GET_PRIVATE(plugin);
 
-	return plugdet->version;
+  return plugdet->version;
 }
 
 /*

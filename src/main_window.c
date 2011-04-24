@@ -194,7 +194,7 @@ static void main_window_fill_panes(void)
   g_signal_connect (G_OBJECT (main_window.notebook_editor), "focus-tab", G_CALLBACK (on_notebook_focus_tab), NULL);
 
   /* add syntax check window */
-  main_window.win= gtk_syntax_check_window_new ();
+  main_window.win = gtk_syntax_check_window_new ();
   gtk_box_pack_start(GTK_BOX(main_window.prin_hbox), GTK_WIDGET(main_window.win), TRUE, TRUE, 2);
 }
 
@@ -235,8 +235,8 @@ static void create_app_main_window(const gchar *title){
   gtk_window_set_title(GTK_WINDOW(main_window.window), title);
   gint w, h, x, y;
   if (get_preferences_manager_window_maximized(main_window.prefmg)) {
- 		gtk_window_maximize(GTK_WINDOW(main_window.window));
-	} else {
+    gtk_window_maximize(GTK_WINDOW(main_window.window));
+  } else {
     get_preferences_manager_window_size (main_window.prefmg, &w, &h);
     gtk_window_set_default_size(GTK_WINDOW(main_window.window), w, h);
     get_preferences_manager_window_position (main_window.prefmg, &y, &x);
@@ -258,7 +258,7 @@ void main_window_create(void){
   gtk_box_pack_start (GTK_BOX (main_window.prinbox), main_window.menu, FALSE, FALSE, 0);
   gtk_widget_show_all (main_window.menu);
 
-  main_window.toolbar_main= toolbar_new ();
+  main_window.toolbar_main = toolbar_new ();
   gtk_box_pack_start (GTK_BOX (main_window.prinbox), main_window.toolbar_main, FALSE, FALSE, 0);
   if (get_preferences_manager_show_maintoolbar(main_window.prefmg)) gtk_widget_show (main_window.toolbar_main);
 

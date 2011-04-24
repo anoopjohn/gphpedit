@@ -27,8 +27,6 @@
 
 #include <gtk/gtk.h>
 #include "documentable.h"
-#include "document_scintilla.h"
-#include "document_webkit.h"
 
 #define DOCUMENT_TYPE document_get_type()
 #define DOCUMENT(obj) \
@@ -55,6 +53,9 @@ typedef struct
 	GObjectClass parent_class;
 
 } DocumentClass;
+
+#include "document_scintilla.h"
+#include "document_webkit.h"
 
 /* document types enum */
 

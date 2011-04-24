@@ -110,7 +110,7 @@ static GString *template_get_filename(void)
   GString *ret;
   gchar *uri = g_build_filename (g_get_user_config_dir (), "gphpedit", "templates.txt", NULL);
   ret = g_string_new(uri);
-  
+  g_free(uri);
   return ret;
 }
 

@@ -33,10 +33,10 @@
 
 #ifdef ENABLE_NLS
 #include <glib/gi18n.h>
-#else							/* ENABLE_NLS */
+#else /* ENABLE_NLS */
 #define _(String)(String)
 #define N_(String)(String)
-#endif							/* ENABLE_NLS */
+#endif /* ENABLE_NLS */
 
 #define GPHPEDIT_PIXMAP_ICON "gphpedit.png"
 #define GPHPEDIT_PIXMAP_FULL_PATH (PIXMAP_DIR "/" GPHPEDIT_PIXMAP_ICON)

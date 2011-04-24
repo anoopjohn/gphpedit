@@ -3,7 +3,7 @@
 ##
 ##  Copyright (C) 2003, 2004, 2005 Andy Jeffries <andy at gphpedit.org>
 ##  Copyright (C) 2009 Anoop John <anoop dot john at zyxware.com>
-##  Copyright (C) 2010 - Jose Rostagno
+##  Copyright (C) 2010, 2011 - Jose Rostagno
 ##
 ##  For more information or to find the latest release, visit our
 ##  website at http://www.gphpedit.org/
@@ -41,9 +41,13 @@ AM_CFLAGS = \
   -DGPHPEDIT_UI_DIR=\""$(uidir)"\"
 
 nodist_EXTRA_gphpedit_SOURCES = dummy.cxx
+
+BUILT_SOURCES = 			\
+  gphpedit-marshal.c			\
+  gphpedit-marshal.h
+
 gphpedit_SOURCES = \
-  classbrowser_parse.c \
-  classbrowser_parse.h \
+  $(BUILT_SOURCES) \
   classbrowser.c \
   classbrowser.h \
   debug.c \
@@ -62,6 +66,27 @@ gphpedit_SOURCES = \
   document_saver.h \
   document_manager.c \
   document_manager.h \
+  document_types.c \
+  document_types.h \
+  language_provider.c \
+  language_provider.h \
+  language_css.c \
+  language_css.h \
+  language_cxx.c \
+  language_cxx.h \
+  language_cobol.c \
+  language_cobol.h \
+  language_sql.c \
+  language_sql.h \
+  language_perl.c \
+  language_perl.h \
+  language_python.c \
+  language_python.h \
+  language_php.c \
+  language_php.h \
+  language_untitled.c \
+  language_untitled.h \
+  languages.h \
   edit_template.c \
   edit_template.h \
   filebrowser_backend.c \
@@ -117,6 +142,8 @@ gphpedit_SOURCES = \
   symbol_bd_utils.h \
   symbol_bd_php.c \
   symbol_bd_php.h \
+  symbol_bd_php_parse.c \
+  symbol_bd_php_parse.h \
   symbol_bd_cobol.c \
   symbol_bd_cobol.h \
   symbol_bd_css.c \
@@ -131,28 +158,10 @@ gphpedit_SOURCES = \
   symbol_bd_sql.h \
   symbol_manager.c \
   symbol_manager.h \
-  syntax_check_manager.c \
-  syntax_check_manager.h \
   syntax_check_window.c \
   syntax_check_window.h \
   tab.c \
   tab.h \
-  tab_cobol.c \
-  tab_cobol.h \
-  tab_css.c \
-  tab_css.h \
-  tab_cxx.c \
-  tab_cxx.h \
-  tab_perl.c \
-  tab_perl.h \
-  tab_php.c \
-  tab_php.h \
-  tab_python.c \
-  tab_python.h \
-  tab_sql.c \
-  tab_sql.h \
-  tab_util.c \
-  tab_util.h \
   templates.c \
   templates.h \
   templates_editor.c \
@@ -169,6 +178,12 @@ gphpedit_SOURCES = \
   toolbar.c \
   toolbar.h
 
+gphpedit-marshal.h: gphpedit-marshal.list $(GLIB_GENMARSHAL)
+	$(AM_V_GEN) $(GLIB_GENMARSHAL) $< --header --prefix=gphpedit_marshal > $@
+
+gphpedit-marshal.c: gphpedit-marshal.list $(GLIB_GENMARSHAL)
+	$(AM_V_GEN) echo "#include \"gphpedit-marshal.h\"" > $@ && \
+	$(GLIB_GENMARSHAL) $< --body --prefix=gphpedit_marshal >> $@
 
 gtkscintilla2/libgtkscintilla2.a:
 	cd gtkscintilla2 && $(MAKE) libgtkscintilla2.a && cd ..

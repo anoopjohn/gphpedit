@@ -501,6 +501,29 @@ void filebrowser_backend_copy_uris_async(FilebrowserBackend *filebackend, GFile 
     copy_uris_process_queue(cf);
   }
 
+/**
+ * trunc_on_char:
+ * @string: a #gchar * to truncate
+ * @which_char: a #gchar with the char to truncate on
+ *
+ * Returns a pointer to the same string which is truncated at the first
+ * occurence of which_char
+ *
+ * Return value: the same gchar * as passed to the function
+ **/
+static gchar *trunc_on_char(gchar * string, gchar which_char)
+{
+  gchar *tmpchar = string;
+  while(*tmpchar) {
+    if (*tmpchar == which_char) {
+      *tmpchar = '\0';
+      return string;
+    }
+    tmpchar++;
+  }
+  return string;
+}
+
 void filebrowser_backend_copy_files_async(FilebrowserBackend *filebackend, GFile *destdir, gchar *sources) {
   Tcopyfile *cf;
   gchar **splitted, **tmp;

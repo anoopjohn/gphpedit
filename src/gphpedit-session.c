@@ -632,7 +632,7 @@ gphpedit_session_get_string_with_default (GphpeditSession *session, const gchar 
 	value = g_key_file_get_string (priv->key_file, section, key, &error);
 	if (error)
 	{
-		value = (gchar *) default_value;
+		value = g_strdup(default_value);
 		g_error_free(error);
 	}
 	

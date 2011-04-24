@@ -25,13 +25,11 @@
 #include <config.h>
 #endif
 
-#include <stdlib.h>
 #include <string.h>
 #include "debug.h"
 #include "symbolizable.h"
 #include "symbol_bd_sql.h"
 #include "symbol_bd_utils.h"
-#include "tab_sql.h"
 
 /*
 * symbol_bd_sql private struct
@@ -115,7 +113,7 @@ static gchar *symbol_bd_sql_get_symbols_matches (Symbolizable *self, const gchar
 {
   gphpedit_debug (DEBUG_SYMBOLIZABLE);
   SymbolBdSQLDetails *symbolbddet;
-	symbolbddet = SYMBOL_BD_SQL_GET_PRIVATE(self);
+  symbolbddet = SYMBOL_BD_SQL_GET_PRIVATE(self);
   symbolbddet->completion_prefix = (gchar *) symbol_prefix;
   symbolbddet->completion_string = NULL;
 
@@ -203,12 +201,12 @@ static void symbol_bd_sql_symbolizable_init(SymbolizableIface *iface, gpointer u
 void
 symbol_bd_sql_class_init (SymbolBdSQLClass *klass)
 {
-	GObjectClass *object_class;
+  GObjectClass *object_class;
 
-	object_class = G_OBJECT_CLASS (klass);
+  object_class = G_OBJECT_CLASS (klass);
   object_class->dispose = symbol_bd_sql_dispose;
 
-	g_type_class_add_private (klass, sizeof (SymbolBdSQLDetails));
+  g_type_class_add_private (klass, sizeof (SymbolBdSQLDetails));
 }
 
 static gchar *sql_keywords[] = {"ADD", "ALL", "ALTER", "ANALYZE", "AND", "AS", "ASC", "ASENSITIVE", "AUTO_INCREMENT", 
@@ -243,7 +241,7 @@ void
 symbol_bd_sql_init (SymbolBdSQL *symbolbd)
 {
   SymbolBdSQLDetails *symbolbddet;
-	symbolbddet = SYMBOL_BD_SQL_GET_PRIVATE(symbolbd);
+  symbolbddet = SYMBOL_BD_SQL_GET_PRIVATE(symbolbd);
 
   symbolbddet->identifierid = 0;
 
@@ -258,10 +256,9 @@ void symbol_bd_sql_dispose (GObject *object)
 {
   SymbolBdSQL *symbolbd = SYMBOL_BD_SQL(object);
   SymbolBdSQLDetails *symbolbddet;
-	symbolbddet = SYMBOL_BD_SQL_GET_PRIVATE(symbolbd);
+  symbolbddet = SYMBOL_BD_SQL_GET_PRIVATE(symbolbd);
 
   if (symbolbddet->sql_api_tree) g_tree_destroy(symbolbddet->sql_api_tree);
-
   if (symbolbddet->cache_completion) g_free(symbolbddet->cache_completion);
 
   /* Chain up to the parent class */
@@ -270,8 +267,5 @@ void symbol_bd_sql_dispose (GObject *object)
 
 SymbolBdSQL *symbol_bd_sql_new (void)
 {
-	SymbolBdSQL *symbolbd;
-  symbolbd = g_object_new (SYMBOL_BD_SQL_TYPE, NULL);
-
-	return symbolbd; /* return new object */
+  return g_object_new (SYMBOL_BD_SQL_TYPE, NULL);
 }

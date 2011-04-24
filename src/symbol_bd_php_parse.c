@@ -21,11 +21,10 @@
  
    The GNU General Public License is contained in the file COPYING.
 */
-#include <stdlib.h>
 #include <string.h>
 
 #include "debug.h"
-#include "classbrowser_parse.h"
+#include "symbol_bd_php_parse.h"
 #include "gvfs_utils.h"
 #include "document_manager.h"
 
@@ -57,59 +56,37 @@ static gboolean is_whitespace(gchar character)
 
 static gboolean is_identifier_char(gchar character)
 {
-  if (g_ascii_isalnum (character)) {
-    return TRUE;
-  }
-  if (character == '_') {
-    return TRUE;
-  }
-  return FALSE;
+  return (g_ascii_isalnum (character) || (character == '_'));
 }
 
 
 static gboolean is_opening_brace(gchar character)
 {
-  if (character == '{') {
-    return TRUE;
-  }
-  return FALSE;
+  return (character == '{');
 }
 
 
 static gboolean is_closing_brace(gchar character)
 {
-  if (character == '}') {
-    return TRUE;
-  }
-  return FALSE;
+  return (character == '}');
 }
 
 
 static gboolean is_opening_parenthesis(gchar character)
 {
-  if (character == '(') {
-    return TRUE;
-  }
-  return FALSE;
+  return (character == '(');
 }
 
 
 static gboolean is_closing_parenthesis(gchar character)
 {
-  if (character == ')') {
-    return TRUE;
-  }
-  return FALSE;
+  return (character == ')');
 }
 
 
 static gboolean is_newline(gchar character)
 {
-  //if (character == '\n' || character == '\r') {
-  if (character == '\n') {
-    return TRUE;
-  }
-  return FALSE;
+  return (character == '\n');
 }
 
 //Check if the search string is found from the current position backwards
@@ -166,7 +143,9 @@ static gboolean non_letter_before(gchar *original, gchar *current, gchar *search
   return FALSE;
 }
 
-gint str_sec_print(gchar *label, gchar *pstart, gchar *pend, guint line_number) {
+#ifdef DEBUG
+static void str_sec_print(gchar *label, gchar *pstart, gchar *pend, guint line_number)
+{
   gchar *teststring;
   guint length;
   length = pend - pstart + 1;
@@ -175,15 +154,14 @@ gint str_sec_print(gchar *label, gchar *pstart, gchar *pend, guint line_number) 
   teststring[length]='\0';
   gphpedit_debug_message(DEBUG_CLASSBROWSER_PARSE, "%5d:%s: %s", line_number, label, teststring);
   g_free(teststring);
-  return 0;
 }
-
+#endif
 void classbrowser_parse_file(SymbolBdPHP *symbolbd, gchar *filename)
 {
   gchar *file_contents;
   gchar *o; // original pointer to start of contents
   gchar *c; // current position within contents
-  #ifdef DEBUG  
+  #ifdef DEBUG
     //debug var
     gchar *sss, *dss, *scs, *mcs, *hss;
   #endif  

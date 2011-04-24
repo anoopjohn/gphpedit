@@ -25,7 +25,6 @@
 #include <gtkscintilla.h>
 
 #include "gtksourcestyleschememanager.h"
-#include "tab_util.h"
 #include "gtksourcestyle-private.h"
 
 /**
@@ -568,14 +567,19 @@ gboolean
 _gtk_source_style_scheme_get_current_line_color (GtkSourceStyleScheme *scheme,
 						 GdkColor             *color)
 {
-	GtkSourceStyle *style;
+  GtkSourceStyle *style;
 
-	g_return_val_if_fail (GTK_IS_SOURCE_STYLE_SCHEME (scheme), FALSE);
-	g_return_val_if_fail (color != NULL, FALSE);
+  g_return_val_if_fail (GTK_IS_SOURCE_STYLE_SCHEME (scheme), FALSE);
+  g_return_val_if_fail (color != NULL, FALSE);
 
-	style = gtk_source_style_scheme_get_style (scheme, STYLE_CURRENT_LINE);
+  style = gtk_source_style_scheme_get_style (scheme, STYLE_CURRENT_LINE);
 
-	return get_color (style, FALSE, color);
+  return get_color (style, FALSE, color);
+}
+
+static gint GdkColor_to_Int(GdkColor color)
+{
+  return color.red >> 8 | ((color.green >> 8) << 8) | ((color.blue >> 8) << 16);
 }
 
 static void

@@ -203,7 +203,9 @@ toolbar_new (void)
 
 void toolbar_update_controls(ToolBar *toolbar, gboolean is_scintilla, gboolean isreadonly)
 {
- ToolBarPrivate *priv = TOOLBAR_GET_PRIVATE(toolbar);
+  if (!toolbar) return ;
+  ToolBarPrivate *priv = TOOLBAR_GET_PRIVATE(toolbar);
+  if (!priv) return ;
   if (is_scintilla){
     //activate toolbar items
     gtk_widget_set_sensitive (priv->button_cut, TRUE);

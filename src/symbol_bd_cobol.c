@@ -31,7 +31,6 @@
 #include "symbolizable.h"
 #include "symbol_bd_cobol.h"
 #include "symbol_bd_utils.h"
-#include "tab_cobol.h"
 #include "gvfs_utils.h"
 
 /*
@@ -463,6 +462,38 @@ SymbolBdCOBOL *symbol_bd_cobol_new (void)
   symbolbd = g_object_new (SYMBOL_BD_COBOL_TYPE, NULL);
 
 	return symbolbd; /* return new object */
+}
+
+static gboolean is_cobol_banned_word(gchar *word)
+{
+  if(!word) return TRUE;
+  gboolean result = FALSE;
+  if (g_strcmp0(word,"AUTHOR")==0) {
+    result = TRUE;
+  } else if (g_strcmp0(word,"OBJECT-COMPUTER")==0) {
+    result = TRUE;
+  } else if (g_strcmp0(word,"DATE-WRITTEN")==0) {
+    result = TRUE;
+  } else if (g_strcmp0(word,"PROGRAM-ID")==0) {
+    result = TRUE;
+  } else if (g_strcmp0(word,"SOURCE-COMPUTER")==0) {
+    result = TRUE;
+  } else if (g_strcmp0(word,"END-PERFORM")==0) {
+    result = TRUE;
+  } else if (g_strcmp0(word,"END-EVALUATE")==0) {
+    result = TRUE;
+  } else if (g_strcmp0(word,"FILE-CONTROL")==0) {
+    result = TRUE;
+  } else if (g_strcmp0(word,"SPECIAL-NAMES")==0) {
+    result = TRUE;
+  } else if (g_strcmp0(word,"END-IF")==0) {
+    result = TRUE;
+  } else if (g_strcmp0(word,"END-START")==0) {
+    result = TRUE;
+  } else if (g_strcmp0(word,"REQUIRED")==0) {
+    result = TRUE;
+  }
+  return result;
 }
 
 static void process_cobol_word(GObject *symbolbd, gchar *name, const gchar *filename, gchar *type, gchar *line, gchar *param)

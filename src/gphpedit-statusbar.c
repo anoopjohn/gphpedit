@@ -423,14 +423,16 @@ gphpedit_statusbar_set_cursor_position (GphpeditStatusbar *statusbar,
 				     gint            line,
 				     gint            col)
 {
+	static gint last_line;
+	static gint last_col;
 	gchar *msg;
 
 	g_return_if_fail (GPHPEDIT_IS_STATUSBAR (statusbar));
 
 	gtk_statusbar_pop (GTK_STATUSBAR (statusbar->priv->cursor_position_statusbar), 0);
-
-	if ((line == -1) && (col == -1))
-		return;
+	
+	if (line ==-1) line = last_line;
+	if (col ==-1) col = last_col;
 
 	/* Translators: "Ln" is an abbreviation for "Line", Col is an abbreviation for "Column". Please,
 	use abbreviations if possible to avoid space problems. */
@@ -438,6 +440,8 @@ gphpedit_statusbar_set_cursor_position (GphpeditStatusbar *statusbar,
 
 	gtk_statusbar_push (GTK_STATUSBAR (statusbar->priv->cursor_position_statusbar), 0, msg);
 
-      	g_free (msg);
+	last_line = line;
+	last_col = col;
+       	g_free (msg);
 }
 

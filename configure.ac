@@ -19,7 +19,7 @@ dnl with this program; if not, write to the Free Software Foundation, Inc.,
 dnl 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
 dnl
 AC_PREREQ([2.59])
-AC_INIT([gPHPEdit],[0.9.98],[https://savannah.nongnu.org/support/?group=gphpedit],[gphpedit],[http://www.gphpedit.org])
+AC_INIT([gPHPEdit],[0.10.00],[https://savannah.nongnu.org/support/?group=gphpedit],[gphpedit],[http://www.gphpedit.org])
 
 dnl autoconf versions before 2.64 don't have AC_PACKAGE_URL
 m4_ifdef([AC_PACKAGE_URL],,
@@ -89,15 +89,6 @@ PKG_CHECK_MODULES(GLIB, 	glib-2.0 >= $GLIB_REQUIRED_VERSION
                         	gio-2.0 >= $GLIB_REQUIRED_VERSION)
 PKG_CHECK_MODULES(WEBKIT,[webkit-1.0])
 PKG_CHECK_MODULES(LIBXML, libxml-2.0 >= $LIBXML_REQUIRED_VERSION)
-
-AC_SUBST(GTK_CFLAGS)
-AC_SUBST(GTK_LIBS)
-AC_SUBST(GLIB_CFLAGS)
-AC_SUBST(GLIB_LIBS)
-AC_SUBST(WEBKIT_CFLAGS)
-AC_SUBST(WEBKIT_LIBS)
-AC_SUBST(LIBXML_CFLAGS)
-AC_SUBST(LIBXML_LIBS)
 
 AC_PATH_PROG([CTAGS_EXUBERANT], [ctags-exuberant], [/usr/bin/ctags-exuberant],
                    [$PATH$PATH_SEPARATOR/usr/bin$PATH_SEPARATOR]dnl
@@ -178,9 +169,11 @@ done
 
 IT_PROG_INTLTOOL([0.40.0])
 AC_SUBST([GETTEXT_PACKAGE], [gphpedit])
+AM_GNU_GETTEXT([external])
 AM_GNU_GETTEXT_VERSION([0.17])
-AM_GLIB_GNU_GETTEXT
+
 AC_DEFINE(GETTEXT_PACKAGE,[PACKAGE_TARNAME], [Gettext package])
+
 
 dnl AM_GLIB_GNU_GETTEXT sets $DATADIRNAME
  AC_MSG_CHECKING(locale directory)
@@ -238,6 +231,11 @@ dnl GSettings stuff
 dnl ================================================================
 
 GLIB_GSETTINGS
+
+dnl ================================================================
+dnl Misc
+dnl ================================================================
+AC_PATH_PROG(GLIB_GENMARSHAL, glib-genmarshal)
 
 dnl ---------------------------------------------------------------------------
 dnl check for deprecated flags

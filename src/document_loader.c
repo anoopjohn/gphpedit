@@ -57,8 +57,8 @@ struct DocumentLoaderDetails
 					    DocumentLoaderDetails))
 
 static void document_loader_dispose (GObject *gobject);
-static void _document_loader_create_file(DocumentLoader *doclod, gint type, gchar *filename, gint goto_line);
-void _document_loader_load_file(DocumentLoader *doclod, GFile *file);
+static void _document_loader_create_file(DocumentLoader *doclod, gchar *filename, gint goto_line);
+static void _document_loader_load_file(DocumentLoader *doclod, GFile *file);
 /*
  * register DocumentLoader type and returns a new GType
 */
@@ -66,12 +66,12 @@ G_DEFINE_TYPE(DocumentLoader, document_loader, G_TYPE_OBJECT);
 
 /* object signal enumeration */
 enum {
-	DONE_LOADING,
-	DONE_NAVIGATE,
-	DONE_REFRESH,
+  DONE_LOADING,
+  DONE_NAVIGATE,
+  DONE_REFRESH,
   NEED_MOUNTING,
   HELP_FILE_NOT_FOUND,
-	LAST_SIGNAL
+  LAST_SIGNAL
 };
 
 static guint signals[LAST_SIGNAL];
@@ -84,9 +84,9 @@ enum
 
 /* actions */
 enum {
-LOAD,
-NAVIGATE,
-REFRESH
+  LOAD,
+  NAVIGATE,
+  REFRESH
 };
 
 static void
@@ -95,16 +95,16 @@ document_loader_set_property (GObject      *object,
 			      const GValue *value,
 			      GParamSpec   *pspec)
 {
-	DocumentLoaderDetails *docloddet = DOCUMENT_LOADER_GET_PRIVATE(object);
+  DocumentLoaderDetails *docloddet = DOCUMENT_LOADER_GET_PRIVATE(object);
 
-	switch (prop_id)
-	{
-		case PROP_PARENT_WINDOW:
+  switch (prop_id)
+  {
+    case PROP_PARENT_WINDOW:
       docloddet->dialog_parent_window = g_value_dup_object (value);
-			break;
-		default:
-			G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
-			break;
+      break;
+    default:
+      G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
+      break;
   }
 }
 
@@ -114,23 +114,21 @@ document_loader_get_property (GObject    *object,
 			      GValue     *value,
 			      GParamSpec *pspec)
 {
-//	DocumentLoaderDetails *docloddet = DOCUMENT_LOADER_GET_PRIVATE(object);
-
-	switch (prop_id)
-	{
-		case PROP_PARENT_WINDOW:
-			break;
-		default:
-			G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
-			break;
+  switch (prop_id)
+  {
+    case PROP_PARENT_WINDOW:
+      break;
+    default:
+      G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
+      break;
   }
 }
 static void
 document_loader_class_init (DocumentLoaderClass *klass)
 {
-	GObjectClass *object_class;
+  GObjectClass *object_class;
 
-	object_class = G_OBJECT_CLASS (klass);
+  object_class = G_OBJECT_CLASS (klass);
   object_class->dispose = document_loader_dispose;
   object_class->set_property = document_loader_set_property;
   object_class->get_property = document_loader_get_property;
@@ -179,14 +177,14 @@ document_loader_class_init (DocumentLoaderClass *klass)
                               GTK_TYPE_WIDGET, G_PARAM_CONSTRUCT_ONLY | G_PARAM_READWRITE));
 
 
-	g_type_class_add_private (klass, sizeof (DocumentLoaderDetails));
+  g_type_class_add_private (klass, sizeof (DocumentLoaderDetails));
 }
 
 static void
 document_loader_init (DocumentLoader * object)
 {
-	DocumentLoaderDetails *docloddet;
-	docloddet = DOCUMENT_LOADER_GET_PRIVATE(object);
+  DocumentLoaderDetails *docloddet;
+  docloddet = DOCUMENT_LOADER_GET_PRIVATE(object);
   docloddet->gmo= gtk_mount_operation_new(docloddet->dialog_parent_window);
 }
 
@@ -197,7 +195,7 @@ static void document_loader_dispose (GObject *object)
 {
   DocumentLoader *doclod = DOCUMENT_LOADER(object);
   DocumentLoaderDetails *docloddet;
-	docloddet = DOCUMENT_LOADER_GET_PRIVATE(doclod);
+  docloddet = DOCUMENT_LOADER_GET_PRIVATE(doclod);
   /* free object resources*/
   g_object_unref(docloddet->dialog_parent_window);
   if (docloddet->gmo) g_object_unref(docloddet->gmo);
@@ -208,12 +206,12 @@ static void document_loader_dispose (GObject *object)
 
 DocumentLoader *document_loader_new (GtkWindow *dialog_parent_window)
 {
-	DocumentLoader *doclod;
-  doclod = g_object_new (DOCUMENT_LOADER_TYPE, "parent_window", dialog_parent_window,NULL);
-	return doclod; /* return new object */
+  DocumentLoader *doclod;
+  doclod = g_object_new (DOCUMENT_LOADER_TYPE, "parent_window", dialog_parent_window, NULL);
+  return doclod; /* return new object */
 }
 
-void _document_loader_create_untitled(DocumentLoader *doclod)
+static void _document_loader_create_untitled(DocumentLoader *doclod)
 {
   Document_Scintilla *doc = document_scintilla_new (TAB_FILE, NULL, 0, NULL);
   g_object_set(doc, "icon", g_themed_icon_new ("text-plain"), NULL);
@@ -448,7 +446,7 @@ static gboolean mount_mountable_file(DocumentLoader *doclod, GFile *file)
 
 #define INFO_FLAGS "standard::display-name,standard::content-type,standard::edit-name,standard::size,access::can-write,standard::icon,time::modified,time::modified-usec"
 
-void emit_signal (DocumentLoader *doclod, gboolean result, Document *doc) {
+static void emit_signal (DocumentLoader *doclod, gboolean result, Document *doc) {
   DocumentLoaderDetails *docloddet = DOCUMENT_LOADER_GET_PRIVATE(doclod);
   if (docloddet->current_action == LOAD) {
    g_signal_emit (G_OBJECT (doclod), signals[DONE_LOADING], 0, result, doc);
@@ -465,58 +463,50 @@ static void _document_loader_load_file_finish (GObject *source_object, GAsyncRes
   gsize size;
   gchar *buffer;
   GFileInfo *info;
-  gboolean converted_to_utf8;
+  gboolean converted_to_utf8 = FALSE;
   GFile *file = (GFile *) source_object;
-  if (!g_file_load_contents_finish (file,res,&buffer, &size,NULL,&error)) {
+  if (!g_file_load_contents_finish (file, res, &buffer, &size, NULL, &error)) {
     g_print("Error reading file. Gio error:%s",error->message);
     g_error_free(error);
     emit_signal (doclod, FALSE, NULL);
     return ;
   }
-  gphpedit_debug_message (DEBUG_DOCUMENT,"Loaded %u bytes",size);
+  gphpedit_debug_message (DEBUG_DOCUMENT,"Loaded %u bytes", size);
   gphpedit_debug_message (DEBUG_DOCUMENT,"BUFFER=\n%s\n-------------------------------------------", buffer);
 
-  converted_to_utf8 = _document_loader_validate_and_convert_utf8_buffer(&buffer);
+  if (size) converted_to_utf8 = _document_loader_validate_and_convert_utf8_buffer(&buffer);
 
-  info= g_file_query_info (file, INFO_FLAGS,G_FILE_QUERY_INFO_NONE, NULL, &error);
+  info = g_file_query_info (file, INFO_FLAGS,G_FILE_QUERY_INFO_NONE, NULL, &error);
   if (!info){
     g_warning ("%s\n", error->message);
     emit_signal (doclod, FALSE, NULL);
     return;
   }
-  Document_Scintilla *doc;
-  if (docloddet->current_action == LOAD) {
-    doc = document_scintilla_new (docloddet->type, file, docloddet->goto_line, buffer);
-  } else {
-    doc = DOCUMENT_SCINTILLA(docloddet->doc);
-    g_object_set(doc, "type", docloddet->type, "GFile", file, NULL);
-    documentable_replace_text (DOCUMENTABLE(doc), buffer);
-  }
-  g_object_set(doc, "converted_to_utf8", converted_to_utf8, NULL);
-  g_object_set(doc, "read_only", !g_file_info_get_attribute_boolean (info,"access::can-write"), "can_modify", TRUE, NULL);
-  g_object_set(doc,"content_type", g_file_info_get_content_type (info),NULL);
-  GIcon *icon= g_file_info_get_icon (info); /* get Gicon for mimetype*/
-  g_object_set(doc, "icon", icon, NULL);
+  documentable_replace_text (DOCUMENTABLE(docloddet->doc), buffer);
+  g_object_set(docloddet->doc, "converted_to_utf8", converted_to_utf8, NULL);
+  g_object_set(docloddet->doc, "read_only", !g_file_info_get_attribute_boolean (info,"access::can-write"), "can_modify", TRUE, NULL);
+  g_object_set(docloddet->doc,"content_type", g_file_info_get_content_type (info),NULL);
+  GIcon *icon = g_file_info_get_icon (info); /* get Gicon for mimetype*/
+  g_object_set(docloddet->doc, "icon", icon, NULL);
   GTimeVal file_mtime;
   g_file_info_get_modification_time (info,&file_mtime);
   gint64 time = (((gint64) file_mtime.tv_sec) * G_USEC_PER_SEC) + file_mtime.tv_usec;
-  g_object_set(doc, "mtime", time, NULL);
+  g_object_set(docloddet->doc, "mtime", time, NULL);
   g_object_unref(info);
-  emit_signal (doclod, TRUE, DOCUMENT(doc));
+  emit_signal (doclod, TRUE, DOCUMENT(docloddet->doc));
 }
 
-void _document_loader_load_file(DocumentLoader *doclod, GFile *file)
+static void _document_loader_load_file(DocumentLoader *doclod, GFile *file)
 {
   /* Open file*/
   g_file_load_contents_async (file, NULL, _document_loader_load_file_finish, doclod); //FIXME:: cancellable???
 }
 
-static void _document_loader_create_file(DocumentLoader *doclod, gint type, gchar *filename, gint goto_line)
+static void _document_loader_create_file(DocumentLoader *doclod, gchar *filename, gint goto_line)
 {
   DocumentLoaderDetails *docloddet = DOCUMENT_LOADER_GET_PRIVATE(doclod);
   gphpedit_debug_message (DEBUG_DOCUMENT,"filename:%s", filename);
   docloddet->goto_line = goto_line;
-  docloddet->type = type;
   GFile *file = g_file_new_for_commandline_arg(filename);
 
   if (!GFile_is_local_or_http(file)){
@@ -536,14 +526,15 @@ static void _document_loader_create_file(DocumentLoader *doclod, gint type, gcha
     return ;
   }
   docloddet->current_action = LOAD;
+  docloddet->doc = DOCUMENT(document_scintilla_new (docloddet->type, file, 0, NULL));
   _document_loader_load_file(doclod, file);
 }
 
 void document_loader_load (DocumentLoader *doclod, gint type, gchar *filename, gint goto_line)
 {
   if (!doclod) return;
-	DocumentLoaderDetails *docloddet = DOCUMENT_LOADER_GET_PRIVATE(doclod);
-  docloddet->type=type;
+  DocumentLoaderDetails *docloddet = DOCUMENT_LOADER_GET_PRIVATE(doclod);
+  docloddet->type = type;
   if (!filename){
      /* create a new untitled and exit */
     _document_loader_create_untitled(doclod);
@@ -557,7 +548,7 @@ void document_loader_load (DocumentLoader *doclod, gint type, gchar *filename, g
       _document_loader_create_preview(doclod, filename);
       break;
     default:
-      _document_loader_create_file(doclod, type, filename, goto_line);
+      _document_loader_create_file(doclod, filename, goto_line);
       break;
   }
 }
@@ -567,11 +558,11 @@ void document_loader_reload_file(DocumentLoader *doclod, Document *doc)
   gphpedit_debug (DEBUG_DOCUMENT);
   DocumentLoaderDetails *docloddet = DOCUMENT_LOADER_GET_PRIVATE(doclod);
 
-  docloddet->type = TAB_FILE;
   GFile *file;
   g_object_get(doc, "GFile", &file,NULL);
 
   docloddet->current_action = REFRESH;
   docloddet->doc = doc;
+  //FIXME: get current_line, store it and jump after reload
   _document_loader_load_file(doclod, file);
 }

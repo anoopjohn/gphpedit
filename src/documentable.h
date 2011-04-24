@@ -1,3 +1,26 @@
+/* This file is part of gPHPEdit, a GNOME PHP Editor.
+
+   Copyright (C) 2011 José Rostagno (for vijona.com.ar)
+
+   For more information or to find the latest release, visit our 
+   website at http://www.gphpedit.org/
+
+   gPHPEdit is free software: you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation, either version 3 of the License, or
+   (at your option) any later version.
+
+   gPHPEdit is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with gPHPEdit. If not, see <http://www.gnu.org/licenses/>.
+
+   The GNU General Public License is contained in the file COPYING.
+*/
+
 #ifndef __DOCUMENTABLE_H__
 #define __DOCUMENTABLE_H__
 
@@ -56,6 +79,7 @@ struct _DocumentableIface
   void (*replace_current_selection) (Documentable *iface, gchar *new_text);
   void (*apply_preferences) (Documentable *iface);
   void (*grab_focus) (Documentable *iface);
+  gchar *(*do_syntax_check) (Documentable *iface);
 };
 
 GType          documentable_get_type        (void) G_GNUC_CONST;
@@ -98,6 +122,7 @@ void           documentable_insert_text (Documentable  *self, gchar *new_text);
 void           documentable_replace_current_selection (Documentable  *self, gchar *new_text);
 void           documentable_apply_preferences (Documentable  *self);
 void           documentable_grab_focus (Documentable  *self);
+gchar          *documentable_do_syntax_check (Documentable  *self);
 
 G_END_DECLS
 

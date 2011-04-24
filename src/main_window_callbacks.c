@@ -26,7 +26,6 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-#include <stdlib.h>
 #include <gdk/gdkkeysyms.h>
 
 #include "debug.h"
@@ -68,7 +67,8 @@ void main_window_destroy_event(GtkWidget *widget, gpointer data)
   gtk_main_quit();
 }
 
-gboolean main_window_delete_event(GtkWidget *widget, GdkEvent *event, gpointer user_data){
+gboolean main_window_delete_event(GtkWidget *widget, GdkEvent *event, gpointer user_data)
+{
   gboolean cancel_quit = FALSE;
   is_app_closing = TRUE;
   cancel_quit = !document_manager_can_all_tabs_be_saved(main_window.docmg);
@@ -145,7 +145,8 @@ void on_openselected1_activate(GtkWidget *widget)
   document_manager_open_selected(main_window.docmg);
 }
 
-void add_file_filters(GtkFileChooser *chooser){
+static void add_file_filters(GtkFileChooser *chooser)
+{
   //store file filter
   GtkFileFilter *filter;
   //creates a new file filter
@@ -341,14 +342,6 @@ void on_save_as1_activate(GtkWidget *widget)
 void on_reload1_activate(GtkWidget *widget)
 {
   document_manager_document_reload(main_window.docmg);
-}
-
-void on_tab_close_activate(GtkWidget *widget, Document *document)
-{
-  gphpedit_debug(DEBUG_MAIN_WINDOW);
-  document_manager_try_close_document(main_window.docmg, document);
-  classbrowser_update(GPHPEDIT_CLASSBROWSER(main_window.classbrowser));
-  update_app_title(document_manager_get_current_documentable(main_window.docmg));
 }
 
 void set_active_tab(page_num)
@@ -610,17 +603,10 @@ gboolean on_notebook_focus_tab(GtkNotebook *notebook,
   return TRUE;
 }
 
-void goto_line(gchar *text)
-{
-  Documentable *doc = document_manager_get_current_documentable(main_window.docmg);
-  if (doc) documentable_goto_line(doc, atoi(text));
-}
-
 void block_indent(GtkWidget *widget)
 {
   documentable_block_indent(document_manager_get_current_documentable(main_window.docmg));
 }
-
 
 void block_unindent(GtkWidget *widget)
 {
@@ -649,7 +635,6 @@ void syntax_check(GtkWidget *widget)
 {
    gtk_syntax_check_window_run_check(GTK_SYNTAX_CHECK_WINDOW(main_window.win), document_manager_get_current_documentable(main_window.docmg));
 }
-
 
 void syntax_check_clear(GtkWidget *widget)
 {
@@ -726,6 +711,10 @@ gboolean main_window_activate_focus (GtkWidget *widget,GdkEventFocus *event, gpo
   return FALSE;
 }
 
+void document_manager_close_document_cb (DocumentManager *docmg, Documentable *doc, gpointer user_data)
+{
+  update_app_title(document_manager_get_current_documentable(docmg));
+}
 void document_manager_new_document_cb (DocumentManager *docmg, Documentable *doc, gpointer user_data)
 {
   gint ftype;
@@ -739,7 +728,6 @@ void document_manager_change_document_cb (DocumentManager *docmg, Documentable *
 {
   if (!is_app_closing) {
     update_app_title(doc);
-    classbrowser_update(GPHPEDIT_CLASSBROWSER(main_window.classbrowser));
     documentable_check_externally_modified(doc);
   }
 }

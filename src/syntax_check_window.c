@@ -2,7 +2,7 @@
 
    Copyright (C) 2003, 2004, 2005 Andy Jeffries <andy at gphpedit.org>
    Copyright (C) 2009 Anoop John <anoop dot john at zyxware.com>
-   Copyright (C) 2009 José Rostagno (for vijona.com.ar) 
+   Copyright (C) 2009, 2011 José Rostagno (for vijona.com.ar) 
 
    For more information or to find the latest release, visit our 
    website at http://www.gphpedit.org/
@@ -27,14 +27,11 @@
 
 #include "syntax_check_window.h"
 #include "main_window_callbacks.h"
-#include "syntax_check_manager.h"
 #include "pluginmanager.h"
 #include "debug.h"
 
 struct _GtkSyntaxCheckWindowPrivate
 {
-  SyntaxCheckManager *synmg;
-
   GtkWidget *scrolledwindow;
   GtkListStore *lint_store;
   GtkCellRenderer *lint_renderer;
@@ -43,14 +40,9 @@ struct _GtkSyntaxCheckWindowPrivate
   GtkTreeSelection *lint_select;
 };
 
-#define GTK_SYNTAX_CHECK_WINDOW_GET_PRIVATE(obj)	(G_TYPE_INSTANCE_GET_PRIVATE ((obj), GTK_TYPE_SYNTAX_CHECK_WINDOW, GtkSyntaxCheckWindowPrivate))
-static void
-gtk_syntax_check_window_class_init (GtkSyntaxCheckWindowClass *klass);
-static void
-gtk_syntax_check_window_init (GtkSyntaxCheckWindow *menu);
-static void     gtk_syntax_check_window_finalize    (GObject                   *object);
-static void     gtk_syntax_check_window_dispose     (GObject                   *object);
-void lint_row_activated (GtkTreeSelection *selection, gpointer data);
+#define GTK_SYNTAX_CHECK_WINDOW_GET_PRIVATE(obj) (G_TYPE_INSTANCE_GET_PRIVATE ((obj), GTK_TYPE_SYNTAX_CHECK_WINDOW, GtkSyntaxCheckWindowPrivate))
+static void gtk_syntax_check_window_dispose (GObject *object);
+static void lint_row_activated (GtkTreeSelection *selection, gpointer data);
 
 /* http://library.gnome.org/devel/gobject/unstable/gobject-Type-Information.html#G-DEFINE-TYPE:CAPS */
 G_DEFINE_TYPE(GtkSyntaxCheckWindow, gtk_syntax_check_window, GTK_TYPE_BOX);
@@ -61,7 +53,6 @@ gtk_syntax_check_window_class_init (GtkSyntaxCheckWindowClass *klass)
   GObjectClass *gobject_class = G_OBJECT_CLASS (klass);
 
   gobject_class->dispose = gtk_syntax_check_window_dispose;
-  gobject_class->finalize = gtk_syntax_check_window_finalize;
   g_type_class_add_private (klass, sizeof (GtkSyntaxCheckWindowPrivate));
 }
 
@@ -74,13 +65,12 @@ gtk_syntax_check_window_init (GtkSyntaxCheckWindow *win)
 
   win->priv = priv;
 
-  priv->synmg = syntax_check_manager_new ();
   priv->scrolledwindow = gtk_scrolled_window_new (NULL, NULL);
   priv->lint_view = gtk_tree_view_new ();
   gtk_container_add (GTK_CONTAINER (priv->scrolledwindow), priv->lint_view);
   priv->lint_renderer = gtk_cell_renderer_text_new ();
   priv->lint_column = gtk_tree_view_column_new_with_attributes (_("Syntax Check Output"),
-                priv->lint_renderer, "text", 0, NULL);
+  priv->lint_renderer, "text", 0, NULL);
   gtk_tree_view_append_column (GTK_TREE_VIEW (priv->lint_view), priv->lint_column);
   gtk_widget_set_size_request (priv->lint_view, 80,80);
   priv->lint_select = gtk_tree_view_get_selection (GTK_TREE_VIEW (priv->lint_view));
@@ -89,16 +79,6 @@ gtk_syntax_check_window_init (GtkSyntaxCheckWindow *win)
   gtk_box_pack_start(GTK_BOX(win), GTK_WIDGET(priv->scrolledwindow), TRUE, TRUE, 2);
   gtk_widget_show(priv->scrolledwindow);
   gtk_widget_show(priv->lint_view);
-}
-
-static void
-gtk_syntax_check_window_finalize (GObject *object)
-{
-  GtkSyntaxCheckWindow *menu = GTK_SYNTAX_CHECK_WINDOW (object);
-  GtkSyntaxCheckWindowPrivate *priv = menu->priv;
-  if (priv->synmg) g_object_unref(priv->synmg);
-
-  G_OBJECT_CLASS (gtk_syntax_check_window_parent_class)->finalize (object);
 }
 
 static void
@@ -112,7 +92,13 @@ gtk_syntax_check_window_dispose (GObject *object)
   G_OBJECT_CLASS (gtk_syntax_check_window_parent_class)->dispose (object);
 }
 
-void lint_row_activated (GtkTreeSelection *selection, gpointer data)
+static void goto_line(gchar *text)
+{
+  Documentable *doc = document_manager_get_current_documentable(main_window.docmg);
+  if (doc) documentable_goto_line(doc, atoi(text));
+}
+
+static void lint_row_activated (GtkTreeSelection *selection, gpointer data)
 {
   GtkTreeIter iter;
   GtkTreeModel *model;
@@ -141,7 +127,8 @@ void lint_row_activated (GtkTreeSelection *selection, gpointer data)
 * lines end with \n 
 * if data hasn't got that format it'll be shown be error will not be styled.
 */
-void syntax_window(GtkSyntaxCheckWindow *win, Documentable *document, gchar *data){
+void syntax_window(GtkSyntaxCheckWindow *win, Documentable *document, gchar *data)
+{
   GtkSyntaxCheckWindowPrivate *priv = GTK_SYNTAX_CHECK_WINDOW_GET_PRIVATE(win);
   if (!document && !OBJECT_IS_DOCUMENT_SCINTILLA(document)) return;
   if (!data) return;
@@ -211,7 +198,7 @@ void gtk_syntax_check_window_run_check(GtkSyntaxCheckWindow *win, Documentable *
    syntax_window(win, document, _("You don't have any files open to check\n"));
    return;
   }
-  gchar *res = syntax_check_manager_run(document);
+  gchar *res = documentable_do_syntax_check(document);
   if (res){
      syntax_window(win, document, res);
      g_free(res);
