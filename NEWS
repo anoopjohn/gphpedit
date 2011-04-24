@@ -1,5 +1,14 @@
 ============================
-gphpedit 0.10.00
+gphpedit 1.00 (unreleased)
+============================
+
+New Features and Fixes
+======================
+- Update to lastest scintilla.
+- Misc bugfixes and code cleanups.
+
+============================
+gphpedit 0.9.98
 ============================
 
 New Features and Fixes
