@@ -6,7 +6,7 @@
 # jose rostagno <joserostagno@hotmail.com>, 2010.
 msgid ""
 msgstr ""
-"Project-Id-Version: 0.9.96\n"
+"Project-Id-Version: 0.9.98\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2010-09-10 15:37+0000\n"
 "PO-Revision-Date: 2010-01-25 22:45-0300\n"
