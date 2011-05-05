@@ -18,7 +18,7 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: gphpedit 0.9.96-1\n"
+"Project-Id-Version: gphpedit 0.9.98\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2010-09-05 20:32-0300\n"
 "PO-Revision-Date: 2006-07-21 19:11+0200\n"
