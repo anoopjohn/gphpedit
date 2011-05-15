@@ -3,15 +3,15 @@
 NAME = GtkScintilla2
 LIB_NAME = gtkscintilla2
 VERSION = 0.2.6
-PREFIX = $(shell pkg-config --variable=prefix gtk+-2.0)
+PREFIX = $(shell pkg-config --variable=prefix gtk+-3.0)
 
 SCINTILLA_DIR = ./scintilla
 SCINTILLA_INCLUDE = $(SCINTILLA_DIR)/include
 SCINTILLA_LIB = $(SCINTILLA_DIR)/bin/scintilla.a
 SCINTILLA_IFACE = $(SCINTILLA_INCLUDE)/Scintilla.iface
 LEXERS = $(wildcard $(SCINTILLA_DIR)/gtk/Lex*.o)
-CFLAGS = $(shell pkg-config --cflags gtk+-2.0) -g -Wall -DGTK -DSCI_LEXER -fPIC
-LDFLAGS_PRE = $(shell pkg-config --libs gtk+-2.0) -DGTK2
+CFLAGS = $(shell pkg-config --cflags gtk+-3.0) -g -Wall -DGTK3 -DSCI_LEXER -fPIC
+LDFLAGS_PRE = $(shell pkg-config --libs gtk+-3.0) -DGTK3
 LDFLAGS_POST =  $(LEXERS)  $(SCINTILLA_LIB) -lstdc++
 
 ARCH=-arch i386 
@@ -44,7 +44,7 @@ marshal.c: marshal.h marshal.list
 gtkscintilla.o: gtkscintilla.h gtkscintilla.c marshal.c marshal.h
 
 $(SCINTILLA_LIB):
-	cd $(SCINTILLA_DIR)/gtk ; $(MAKE) GTK2=1
+	cd $(SCINTILLA_DIR)/gtk ; $(MAKE) GTK3=1
 
 gtkscintilla.h gtkscintilla.c: scigen.py $(SCINTILLA_IFACE)
 	python scigen.py
