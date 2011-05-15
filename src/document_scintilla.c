@@ -1048,24 +1048,24 @@ static void create_infobar(Document_Scintilla *doc) {
 
 static gboolean scintilla_key_press (GtkWidget *widget, GdkEventKey *event, gpointer user_data) 
 {
-  if ((event->state & GDK_CONTROL_MASK)==GDK_CONTROL_MASK && ((event->keyval == GDK_F2)))  {
+  if ((event->state & GDK_CONTROL_MASK)==GDK_CONTROL_MASK && ((event->keyval == GDK_KEY_F2)))  {
     document_scintilla_modify_current_line_marker(user_data);
     return TRUE;
   }
-  else if ((event->keyval == GDK_F2))  {
+  else if ((event->keyval == GDK_KEY_F2))  {
       document_scintilla_find_next_marker(user_data);
       return TRUE;
   }  
-  else if (((event->state & (GDK_CONTROL_MASK | GDK_SHIFT_MASK))==(GDK_CONTROL_MASK | GDK_SHIFT_MASK)) && (event->keyval == GDK_space)) {
+  else if (((event->state & (GDK_CONTROL_MASK | GDK_SHIFT_MASK))==(GDK_CONTROL_MASK | GDK_SHIFT_MASK)) && (event->keyval == GDK_KEY_space)) {
     document_scintilla_show_calltip_at_current_pos(user_data);
     return TRUE;
   }
-  else if ((event->state & GDK_CONTROL_MASK)==GDK_CONTROL_MASK && ((event->keyval == GDK_j) || (event->keyval == GDK_J)))  {
+  else if ((event->state & GDK_CONTROL_MASK)==GDK_CONTROL_MASK && ((event->keyval == GDK_KEY_j) || (event->keyval == GDK_KEY_J)))  {
     Document_ScintillaDetails *docdet = DOCUMENT_SCINTILLA_GET_PRIVATE(user_data);
     template_find_and_insert(docdet->tempmg, user_data);
     return TRUE;
   }
-  else if ((event->state & GDK_CONTROL_MASK)==GDK_CONTROL_MASK && (event->keyval == GDK_space)) { 
+  else if ((event->state & GDK_CONTROL_MASK)==GDK_CONTROL_MASK && (event->keyval == GDK_KEY_space)) { 
     document_scintilla_force_autocomplete(user_data);
     return TRUE;
   }

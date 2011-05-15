@@ -149,7 +149,7 @@ static void incremental_search_activate(GtkEntry *entry, gpointer user_data)
 
 static gboolean incremental_search_key_release_event(GtkWidget *widget, GdkEventKey *event, gpointer user_data)
 {
-    if (event->keyval == GDK_Escape) {
+    if (event->keyval == GDK_KEY_Escape) {
         GtkWidget *document_widget;
         DocumentManager *docmg = document_manager_new ();
         Documentable *doc = document_manager_get_current_documentable(docmg);

@@ -502,22 +502,23 @@ menu_position_under_widget (GtkMenu  *menu,
 {
 	GtkWidget *widget;
 	GtkRequisition requisition;
+    GtkAllocation allocation;
 
 	widget = GTK_WIDGET (user_data);
 	widget_get_origin (widget, x, y);
 
 	gtk_widget_size_request (GTK_WIDGET (menu), &requisition);
-
+    gtk_widget_get_allocation (GTK_WIDGET (menu), &allocation);
 	if (gtk_widget_get_direction (widget) == GTK_TEXT_DIR_RTL)
 	{
-		*x += widget->allocation.x + widget->allocation.width - requisition.width;
+		*x += allocation.x + allocation.width - requisition.width;
 	}
 	else
 	{
-		*x += widget->allocation.x;
+		*x += allocation.x;
 	}
 
-	*y += widget->allocation.y + widget->allocation.height;
+	*y += allocation.y + allocation.height;
 
 	*push_in = TRUE;
 }
