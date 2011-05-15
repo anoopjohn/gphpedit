@@ -528,7 +528,7 @@ preferences_dialog_new (GtkWindow *parent)
 {
 	PreferencesDialog *dialog;
 
-	dialog = g_object_new (GOBJECT_TYPE_PREFERENCES_DIALOG, "has-separator", FALSE, NULL);
+	dialog = g_object_new (GOBJECT_TYPE_PREFERENCES_DIALOG, NULL);
 
 	if (parent != NULL)
 	{

@@ -88,6 +88,9 @@ struct _gphpeditFileBrowserPrivate
   GtkWidget *button_refresh;
   GtkWidget *image_refresh;
 
+  GtkWidget *searchbox;
+  GtkWidget *togglesearch;
+
   GtkTreeModel *cache_model;
   gulong  handlerid;
   gulong  handleridchange;
@@ -221,6 +224,11 @@ gphpedit_file_browser_init (gphpeditFileBrowser *button)
   /* refresh button */
   priv->button_refresh= GTK_WIDGET(gtk_builder_get_object (priv->builder, "button_refresh"));
   g_signal_connect(G_OBJECT(priv->button_refresh), "clicked", G_CALLBACK (_button_refresh), priv->fbbackend);
+
+  priv->searchbox = GTK_WIDGET(gtk_builder_get_object (priv->builder, "searchbox"));
+  priv->togglesearch = GTK_WIDGET(gtk_builder_get_object (priv->builder, "togglesearch"));
+  g_object_bind_property (priv->togglesearch, "active", priv->searchbox, "visible", G_BINDING_SYNC_CREATE);
+
 
   priv->searchentry = GTK_WIDGET(gtk_builder_get_object (priv->builder, "searchentry"));
   g_signal_connect (G_OBJECT (priv->searchentry), "icon-press", G_CALLBACK (on_cleanicon_press), priv);
