@@ -561,7 +561,7 @@ MENUBAR_init (MenuBar *menubar)
 {
   MenuBarPrivate *priv = MENUBAR_GET_PRIVATE(menubar);
 
-  /* create menu accel gruop */
+  /* create menu accel group */
   priv->accel_group = gtk_accel_group_new();
   gtk_window_add_accel_group(GTK_WINDOW(main_window.window), priv->accel_group);
   /*create menus*/

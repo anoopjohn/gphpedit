@@ -188,6 +188,11 @@ TOOLBAR_init (ToolBar *toolbar)
   gtk_toolbar_set_style (GTK_TOOLBAR(toolbar), GTK_TOOLBAR_ICONS);
   gtk_toolbar_set_show_arrow (GTK_TOOLBAR(toolbar), TRUE);
 
+  GtkStyleContext *context = gtk_widget_get_style_context (GTK_WIDGET(toolbar));
+  gtk_style_context_set_junction_sides (context, GTK_JUNCTION_BOTTOM);
+  gtk_style_context_add_class (context, GTK_STYLE_CLASS_PRIMARY_TOOLBAR);
+  gtk_style_context_save (context);
+
   /* sincronice toolbar icon size */
   sincronice_menu_items_size (GTK_TOOLBAR (toolbar));
 
