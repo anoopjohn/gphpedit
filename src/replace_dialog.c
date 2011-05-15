@@ -31,7 +31,7 @@
 
 #include "main_window.h"
 #include "gphpedit-statusbar.h"
-#include "history-entry.h"
+#include "gedit-history-entry.h"
 
 #include "replace_dialog.h"
 
@@ -73,10 +73,10 @@ void replace_all_clicked(ReplaceDialogPrivate *priv)
   const gchar *replace;
   Documentable *doc = document_manager_get_current_documentable(main_window.docmg);
 
-  text = gtk_combo_box_get_active_text (GTK_COMBO_BOX(priv->findentry));
-  gphpedit_history_entry_prepend_text	(GPHPEDIT_HISTORY_ENTRY(priv->findentry), text);
-  replace = gtk_combo_box_get_active_text (GTK_COMBO_BOX(priv->replace_entry));
-  gphpedit_history_entry_prepend_text	(GPHPEDIT_HISTORY_ENTRY(priv->replace_entry), text);
+  text = gtk_combo_box_text_get_active_text (GTK_COMBO_BOX_TEXT(priv->findentry));
+  gedit_history_entry_prepend_text	(GEDIT_HISTORY_ENTRY(priv->findentry), text);
+  replace = gtk_combo_box_text_get_active_text (GTK_COMBO_BOX_TEXT(priv->replace_entry));
+  gedit_history_entry_prepend_text	(GEDIT_HISTORY_ENTRY(priv->replace_entry), text);
 
   gboolean checkwholedoc = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON(priv->checkwholedoc));
   if (checkwholedoc) {
@@ -112,10 +112,10 @@ void replace_clicked(GtkDialog *dialog, ReplaceDialogPrivate *priv)
   const gchar *replace;
   Documentable *doc = document_manager_get_current_documentable(main_window.docmg);
 
-  text = gtk_combo_box_get_active_text (GTK_COMBO_BOX(priv->findentry));
-  gphpedit_history_entry_prepend_text	(GPHPEDIT_HISTORY_ENTRY(priv->findentry), text);
-  replace = gtk_combo_box_get_active_text (GTK_COMBO_BOX(priv->replace_entry));
-  gphpedit_history_entry_prepend_text	(GPHPEDIT_HISTORY_ENTRY(priv->replace_entry), text);
+  text = gtk_combo_box_text_get_active_text (GTK_COMBO_BOX_TEXT(priv->findentry));
+  gedit_history_entry_prepend_text	(GEDIT_HISTORY_ENTRY(priv->findentry), text);
+  replace = gtk_combo_box_text_get_active_text (GTK_COMBO_BOX_TEXT(priv->replace_entry));
+  gedit_history_entry_prepend_text	(GEDIT_HISTORY_ENTRY(priv->replace_entry), text);
 
   gboolean checkwholedoc = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON(priv->checkwholedoc));
   if (checkwholedoc) {
@@ -172,7 +172,7 @@ REPLACE_DIALOG_init (ReplaceDialog *dialog)
   GtkWidget *table = GTK_WIDGET(gtk_builder_get_object (builder, "table"));
   gtk_table_set_row_spacings (GTK_TABLE (table), 12);
 
-  priv->findentry = gphpedit_history_entry_new ("search-for-entry", TRUE);
+  priv->findentry = gedit_history_entry_new ("search-for-entry", TRUE);
 	gtk_widget_set_size_request (priv->findentry, 200, -1);
   gtk_widget_show (priv->findentry);
   gtk_table_attach_defaults (GTK_TABLE (table), priv->findentry, 1, 2, 0, 1);
@@ -181,12 +181,12 @@ REPLACE_DIALOG_init (ReplaceDialog *dialog)
   gchar *buffer;
   buffer = documentable_get_current_selected_text(document_manager_get_current_documentable(main_window.docmg));
   if (buffer) {
-      gphpedit_history_entry_prepend_text	(GPHPEDIT_HISTORY_ENTRY(priv->findentry), buffer);
+      gedit_history_entry_prepend_text	(GEDIT_HISTORY_ENTRY(priv->findentry), buffer);
       gtk_combo_box_set_active (GTK_COMBO_BOX(priv->findentry), 0);
   }
   /* End get selected text */
 
-  priv->replace_entry = gphpedit_history_entry_new ("replace-with-entry", TRUE);
+  priv->replace_entry = gedit_history_entry_new ("replace-with-entry", TRUE);
 	gtk_widget_set_size_request (priv->replace_entry, 200, -1);
   gtk_widget_show (priv->replace_entry);
   gtk_table_attach_defaults (GTK_TABLE (table), priv->replace_entry, 1, 2, 1, 2);

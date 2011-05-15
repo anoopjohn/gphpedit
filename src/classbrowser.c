@@ -321,9 +321,9 @@ static void sdb_update_cb (SymbolManager *symbolmg, gpointer user_data)
   priv->new_model = classbrowser_get_model(priv);
   gtk_tree_view_set_model (GTK_TREE_VIEW( priv->classtreeview), priv->new_model);
 
-  press_event = g_signal_connect(GTK_OBJECT(priv->classtreeview), "button_press_event",
+  press_event = g_signal_connect(priv->classtreeview, "button_press_event",
                                    G_CALLBACK(treeview_double_click), priv);
-  release_event = g_signal_connect(GTK_OBJECT(priv->classtreeview), "button_release_event",
+  release_event = g_signal_connect(priv->classtreeview, "button_release_event",
                                      G_CALLBACK(treeview_click_release), priv);
   priv->front=!priv->front; /* change model */
 }

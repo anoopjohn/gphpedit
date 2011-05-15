@@ -208,9 +208,7 @@ gboolean populate_files (gpointer data)     //TODO:: show an spinner while loadi
 {
   FilebrowserBackend *filebackend= FILEBROWSER_BACKEND(data);
   FilebrowserBackendDetails *directory = FILEBROWSER_BACKEND_GET_PRIVATE(filebackend);
-  GDK_THREADS_ENTER();
   if (g_cancellable_is_cancelled (directory->cancellable)){
-  GDK_THREADS_LEAVE();
   return FALSE; /* remove source */
   }
   GError *error=NULL;

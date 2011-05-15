@@ -223,11 +223,14 @@ static void main_window_create_prinbox(void)
 
 static void set_colormap(GtkWidget *window)
 {
-  /*Set RGBA colormap*/
-  GdkScreen *screen= gtk_widget_get_screen (window);
-  GdkColormap *colormap= gdk_screen_get_rgba_colormap (screen);
-  if (colormap && gdk_screen_is_composited (screen)) gtk_widget_set_default_colormap (colormap);
-  /*End set RGBA colormap*/
+  /*Set RGBA visual*/
+  GdkScreen *screen = gtk_widget_get_screen (GTK_WIDGET (window));
+  GdkVisual *visual = gdk_screen_get_rgba_visual (screen);
+
+  if (visual == NULL)
+    visual = gdk_screen_get_system_visual (screen);
+
+  gtk_widget_set_visual (window, visual);
 }
 
 static void create_app_main_window(const gchar *title){
