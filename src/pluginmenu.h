@@ -46,7 +46,7 @@ struct _GtkPluginManagerMenu
   /*< private >*/
   GtkMenu parent_instance;
 
-  GtkPluginManagerMenuPrivate *GSEAL (priv);
+  GtkPluginManagerMenuPrivate *priv;
 };
 
 struct _GtkPluginManagerMenuClass

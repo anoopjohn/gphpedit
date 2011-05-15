@@ -571,7 +571,7 @@ void update_status_combobox(Documentable *document)
       }
 }
 
-void on_notebook_switch_page (GtkNotebook *notebook, GtkNotebookPage *page,
+void on_notebook_switch_page (GtkNotebook *notebook, GtkWidget *page,
                 gint page_num, gpointer user_data)
 {
   GtkWidget *child;

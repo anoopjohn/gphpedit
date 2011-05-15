@@ -46,7 +46,7 @@ struct _GtkSyntaxCheckWindow
   /*< private >*/
   GtkBox parent_instance;
 
-  GtkSyntaxCheckWindowPrivate *GSEAL (priv);
+  GtkSyntaxCheckWindowPrivate *priv;
 };
 
 struct _GtkSyntaxCheckWindowClass

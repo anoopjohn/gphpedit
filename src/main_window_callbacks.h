@@ -67,7 +67,7 @@ void zoom_out(GtkWidget *widget);
 void zoom_100(GtkWidget *widget);
 void update_zoom_level(Documentable *document);
 void can_undo(GtkWidget *widget);
-void on_notebook_switch_page (GtkNotebook *notebook, GtkNotebookPage *page, gint page_num, gpointer user_data);
+void on_notebook_switch_page (GtkNotebook *notebook, GtkWidget *page, gint page_num, gpointer user_data);
 void block_indent(GtkWidget *widget);
 void block_unindent(GtkWidget *widget);
 void syntax_check(GtkWidget *widget);

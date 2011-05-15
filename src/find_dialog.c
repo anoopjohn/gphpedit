@@ -31,7 +31,7 @@
 
 #include "main_window.h"
 #include "gphpedit-statusbar.h"
-#include "history-entry.h"
+#include "gedit-history-entry.h"
 
 #include "find_dialog.h"
 
@@ -70,8 +70,8 @@ void find_action(SearchDialogPrivate *priv)
 {
   const gchar *text;
   Documentable *doc = document_manager_get_current_documentable(main_window.docmg);
-  text = gtk_combo_box_get_active_text (GTK_COMBO_BOX(priv->findentry));
-  gphpedit_history_entry_prepend_text	(GPHPEDIT_HISTORY_ENTRY(priv->findentry), text);
+  text = gtk_combo_box_text_get_active_text (GTK_COMBO_BOX_TEXT(priv->findentry));
+  gedit_history_entry_prepend_text	(GEDIT_HISTORY_ENTRY(priv->findentry), text);
   gboolean checkwholedoc = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON(priv->checkwholedoc));
   gboolean checkcase = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON(priv->checkcase));
   gboolean checkwholeword = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON(priv->checkwholeword));
@@ -121,8 +121,8 @@ SEARCH_DIALOG_init (SearchDialog *dialog)
   gtk_widget_reparent (box, priv->diagbox);
 
   GtkWidget *findbox = GTK_WIDGET(gtk_builder_get_object (builder, "findbox"));
-  priv->findentry = gphpedit_history_entry_new ("search-for-entry", TRUE);
-	gtk_widget_set_size_request (priv->findentry, 300, -1);
+  priv->findentry = gedit_history_entry_new ("search-for-entry", TRUE);
+  gtk_widget_set_size_request (priv->findentry, 300, -1);
   /* Set enter key in the text box to activate find */
   gtk_entry_set_activates_default (GTK_ENTRY (gtk_bin_get_child (GTK_BIN (priv->findentry))), TRUE);
   gtk_widget_show (priv->findentry);
@@ -133,7 +133,7 @@ SEARCH_DIALOG_init (SearchDialog *dialog)
   gchar *buffer;
   buffer = documentable_get_current_selected_text(document_manager_get_current_documentable(main_window.docmg));
   if (buffer) {
-      gphpedit_history_entry_prepend_text	(GPHPEDIT_HISTORY_ENTRY(priv->findentry),buffer);
+      gedit_history_entry_prepend_text	(GEDIT_HISTORY_ENTRY(priv->findentry),buffer);
       gtk_combo_box_set_active (GTK_COMBO_BOX(priv->findentry), 0);
   }
   /* End get selected text */

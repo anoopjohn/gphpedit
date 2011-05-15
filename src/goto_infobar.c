@@ -86,7 +86,7 @@ static void on_close_button_activate(GtkWidget *widget, gpointer user_data)
 
 static gboolean goto_key_release_event(GtkWidget *widget, GdkEventKey *event, gpointer user_data)
 {
-    if (event->keyval == GDK_Escape) {
+    if (event->keyval == GDK_KEY_Escape) {
         GtkWidget *document_widget;
         DocumentManager *docmg = document_manager_new ();
         g_object_get(document_manager_get_current_documentable(docmg), "editor_widget", &document_widget, NULL);

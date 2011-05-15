@@ -36,7 +36,7 @@ dist_ui_DATA = preferences_dialog.ui \
 AM_CFLAGS = \
 	$(WEBKIT_CFLAGS) $(GTK_CFLAGS) $(GLIB_CFLAGS) $(LIBXML_CFLAGS)\
 	-I$(top_srcdir)/src/gtkscintilla2 \
-	-Wall -DGTK -DSCI_LEXER \
+	-Wall -DGTK -DSCI_LEXER\
 	-DPIXMAP_DIR=\""$(datadir)/pixmaps"\" \
   -DGPHPEDIT_UI_DIR=\""$(uidir)"\"
 
@@ -107,8 +107,8 @@ gphpedit_SOURCES = \
   gvfs_utils.h \
   goto_infobar.c \
   goto_infobar.h \
-  history-entry.c \
-  history-entry.h \
+  gedit-history-entry.c \
+  gedit-history-entry.h \
   images.h \
   main.c \
   main.h \
@@ -132,8 +132,8 @@ gphpedit_SOURCES = \
   preferences_manager.h \
   replace_dialog.c \
   replace_dialog.h \
-  status-combo-box.c \
-  status-combo-box.h \
+  gedit-status-combo-box.c \
+  gedit-status-combo-box.h \
   search_infobar.c \
   search_infobar.h \
   symbolizable.c \
