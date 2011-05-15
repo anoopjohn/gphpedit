@@ -69,12 +69,12 @@ typedef struct
   DocumentManager *docmg;
 
   //widget for close side bar button
-  GtkWidget *close_sidebar_button;
+  GtkWidget *pclose_sidebar_button;
   
-  GtkWidget *classbrowser;
+  GtkWidget *pclassbrowser;
 
   /*filebrowser widget */
-  GtkWidget *folder;
+  GtkWidget *pfolder;
 }
 MainWindow;
 

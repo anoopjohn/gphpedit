@@ -75,6 +75,35 @@ static void main_window_create_appbar(void)
   if (get_preferences_manager_show_statusbar(main_window.prefmg)) gtk_widget_show (main_window.appbar);
 }
 
+static void classbrowser_show(void)
+{
+  gphpedit_debug(DEBUG_MAIN_WINDOW);
+  gint size;
+  g_object_get(main_window.prefmg, "side_panel_size", &size, NULL);
+  gtk_paned_set_position(GTK_PANED(main_window.main_horizontal_pane), size);
+  g_object_set(main_window.prefmg, "side_panel_hidden", FALSE, NULL);
+  classbrowser_update(GPHPEDIT_CLASSBROWSER(main_window.pclassbrowser));
+}
+
+
+static void classbrowser_hide(void)
+{
+  gphpedit_debug(DEBUG_MAIN_WINDOW);
+  gtk_paned_set_position(GTK_PANED(main_window.main_horizontal_pane), 0);
+  g_object_set(main_window.prefmg, "side_panel_hidden", TRUE, NULL);
+}
+
+void classbrowser_show_hide(GtkWidget *widget)
+{
+  gboolean hidden;
+  g_object_get(main_window.prefmg, "side_panel_hidden", &hidden, NULL);
+  menubar_set_classbrowser_status(MENUBAR(main_window.menu), hidden);
+  if (hidden)
+    classbrowser_show();
+  else
+    classbrowser_hide();
+}
+
 static void main_window_create_panes(void)
 {
   main_window.main_horizontal_pane = gtk_hpaned_new ();
@@ -110,11 +139,11 @@ static void create_side_panel(void){
 
   close_box = gtk_hbox_new(FALSE, 0);
   gtk_container_set_border_width(GTK_CONTAINER(close_box), 0);
-  main_window.close_sidebar_button = gphpedit_close_button_new();
-  gtk_widget_set_tooltip_text(main_window.close_sidebar_button, _("Close side panel"));
-  g_signal_connect(G_OBJECT(main_window.close_sidebar_button), "clicked", G_CALLBACK (classbrowser_show_hide),NULL);
-  gtk_widget_show(main_window.close_sidebar_button);
-  gtk_box_pack_end(GTK_BOX(close_box), main_window.close_sidebar_button, FALSE, FALSE, 0);
+  main_window.pclose_sidebar_button = gphpedit_close_button_new();
+  gtk_widget_set_tooltip_text(main_window.pclose_sidebar_button, _("Close side panel"));
+  g_signal_connect(G_OBJECT(main_window.pclose_sidebar_button), "clicked", G_CALLBACK (classbrowser_show_hide),NULL);
+  gtk_widget_show(main_window.pclose_sidebar_button);
+  gtk_box_pack_end(GTK_BOX(close_box), main_window.pclose_sidebar_button, FALSE, FALSE, 0);
   gtk_widget_show(close_box);
 
   /* add close button */
@@ -128,21 +157,21 @@ static void create_side_panel(void){
   gtk_box_pack_start(GTK_BOX(prin_sidebox), main_window.notebook_manager, TRUE, TRUE, 2);
   
   /* Classbrowser stuff creation */  
-  main_window.classbrowser = gphpedit_classbrowser_new (); 
-  gtk_widget_show(main_window.classbrowser);
+  main_window.pclassbrowser = gphpedit_classbrowser_new (); 
+  gtk_widget_show(main_window.pclassbrowser);
   GtkWidget *classlabel;
   classlabel = gtk_image_new_from_file (PIXMAP_DIR "/classbrowser.png");
   /*set tooltip*/
   gtk_widget_set_tooltip_text (classlabel,_("Class Browser"));
   gtk_widget_show(classlabel);
-  gtk_notebook_insert_page (GTK_NOTEBOOK(main_window.notebook_manager), main_window.classbrowser, classlabel, 0);
+  gtk_notebook_insert_page (GTK_NOTEBOOK(main_window.notebook_manager), main_window.pclassbrowser, classlabel, 0);
   /* File browser stuff creation */
   if (get_preferences_manager_show_filebrowser(main_window.prefmg)){
-  main_window.folder= gphpedit_filebrowser_new();
-  gtk_widget_show(main_window.folder);
+  main_window.pfolder= gphpedit_filebrowser_new();
+  gtk_widget_show(main_window.pfolder);
   GtkWidget *label= gtk_image_new_from_icon_name ("file-manager", GTK_ICON_SIZE_SMALL_TOOLBAR);
   gtk_widget_show(label);
-  gtk_notebook_insert_page (GTK_NOTEBOOK(main_window.notebook_manager), main_window.folder, label, 1);
+  gtk_notebook_insert_page (GTK_NOTEBOOK(main_window.notebook_manager), main_window.pfolder, label, 1);
   }
 }
 
@@ -271,5 +300,3 @@ void update_controls(Documentable *document)
   menubar_update_controls(MENUBAR(main_window.menu), can_modify, preview, read_only);
   toolbar_update_controls(TOOLBAR(main_window.toolbar_main), can_modify, read_only);
 }
-
-

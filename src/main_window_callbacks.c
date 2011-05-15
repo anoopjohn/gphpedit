@@ -625,36 +625,6 @@ void syntax_check_clear(GtkWidget *widget)
   gtk_widget_hide(GTK_WIDGET(main_window.win));
 }
 
-
-void classbrowser_show(void)
-{
-  gphpedit_debug(DEBUG_MAIN_WINDOW);
-  gint size;
-  g_object_get(main_window.prefmg, "side_panel_size", &size, NULL);
-  gtk_paned_set_position(GTK_PANED(main_window.main_horizontal_pane), size);
-  g_object_set(main_window.prefmg, "side_panel_hidden", FALSE, NULL);
-  classbrowser_update(GPHPEDIT_CLASSBROWSER(main_window.classbrowser));
-}
-
-
-void classbrowser_hide(void)
-{
-  gphpedit_debug(DEBUG_MAIN_WINDOW);
-  gtk_paned_set_position(GTK_PANED(main_window.main_horizontal_pane), 0);
-  g_object_set(main_window.prefmg, "side_panel_hidden", TRUE, NULL);
-}
-
-void classbrowser_show_hide(GtkWidget *widget)
-{
-  gboolean hidden;
-  g_object_get(main_window.prefmg, "side_panel_hidden", &hidden, NULL);
-  menubar_set_classbrowser_status(MENUBAR(main_window.menu), hidden);
-  if (hidden)
-    classbrowser_show();
-  else
-    classbrowser_hide();
-}
-
 void force_php(GtkWidget *widget)
 {
   documentable_set_type(document_manager_get_current_documentable(main_window.docmg), TAB_PHP);

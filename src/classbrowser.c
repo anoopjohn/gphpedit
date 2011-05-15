@@ -32,7 +32,6 @@
 #include "preferences_manager.h"
 #include "document_manager.h"
 
-
 /* functions */
 static void gphpedit_classbrowser_class_init (gphpeditClassBrowserClass *klass);
 static void gphpedit_classbrowser_init (gphpeditClassBrowser *button);
@@ -511,6 +510,7 @@ static void doc_manager_change_document_cb (DocumentManager *docmg, Documentable
   }
   classbrowser_update(user_data);
 }
+
 /*
 * classbrowser_update
 * start update process

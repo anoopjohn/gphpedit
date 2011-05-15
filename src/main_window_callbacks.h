@@ -78,9 +78,9 @@ gboolean on_notebook_focus_tab(GtkNotebook *notebook, GtkNotebookTab arg1, gpoin
 void on_reload1_activate(GtkWidget *widget);
 void keyboard_macro_startstop(GtkWidget *widget);
 void keyboard_macro_playback(GtkWidget *widget);
-void classbrowser_show(void);
-void classbrowser_hide(void);
-void classbrowser_show_hide(GtkWidget *widget);
+//void classbrowser_show(void);
+//void classbrowser_hide(void);
+//void classbrowser_show_hide(GtkWidget *widget);
 void close_all_tabs(void);
 gboolean main_window_activate_focus (GtkWidget *widget,GdkEventFocus *event, gpointer user_data);
 void document_manager_new_document_cb (DocumentManager *docmg, Documentable *doc, gpointer user_data);
