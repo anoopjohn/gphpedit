@@ -574,9 +574,7 @@ void update_status_combobox(Documentable *document)
 void on_notebook_switch_page (GtkNotebook *notebook, GtkWidget *page,
                 gint page_num, gpointer user_data)
 {
-  GtkWidget *child;
-  child = gtk_notebook_get_nth_page(GTK_NOTEBOOK(main_window.notebook_editor), page_num);
-  if(!document_manager_set_current_document_from_widget (main_window.docmg, child)) {
+  if(!document_manager_set_current_document_from_widget (main_window.docmg, page)) {
     gphpedit_debug_message(DEBUG_MAIN_WINDOW,_("Unable to get data for page %d"), page_num);
   }
 }
@@ -585,7 +583,8 @@ gboolean on_notebook_focus_tab(GtkNotebook *notebook,
                  GtkNotebookTab arg1, gpointer user_data)
 {
   GtkWidget *document_widget;
-  g_object_get(document_manager_get_current_documentable(main_window.docmg), "editor_widget", &document_widget, NULL);
+  Documentable *doc = document_manager_get_current_documentable(main_window.docmg);
+  g_object_get(doc, "editor_widget", &document_widget, NULL);
   gtk_widget_grab_focus(document_widget);
   return TRUE;
 }
