@@ -33,7 +33,7 @@
 #include "main_window_callbacks.h"
 #include "templates.h"
 #include "gvfs_utils.h"
-#include "gphpedit-close-button.h"
+#include "gedit-close-button.h"
 #include "gphpedit-statusbar.h"
 #include "syntax_check_window.h"
 #include "filebrowser_ui.h"
@@ -141,7 +141,7 @@ static void create_side_panel(void){
 
   close_box = gtk_hbox_new(FALSE, 0);
   gtk_container_set_border_width(GTK_CONTAINER(close_box), 0);
-  main_window.pclose_sidebar_button = gphpedit_close_button_new();
+  main_window.pclose_sidebar_button = gedit_close_button_new();
   gtk_widget_set_tooltip_text(main_window.pclose_sidebar_button, _("Close side panel"));
   g_signal_connect(G_OBJECT(main_window.pclose_sidebar_button), "clicked", G_CALLBACK (side_panel_show_hide),NULL);
   gtk_widget_show(main_window.pclose_sidebar_button);

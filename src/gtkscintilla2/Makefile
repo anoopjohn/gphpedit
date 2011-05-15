@@ -10,7 +10,7 @@ SCINTILLA_INCLUDE = $(SCINTILLA_DIR)/include
 SCINTILLA_LIB = $(SCINTILLA_DIR)/bin/scintilla.a
 SCINTILLA_IFACE = $(SCINTILLA_INCLUDE)/Scintilla.iface
 LEXERS = $(wildcard $(SCINTILLA_DIR)/gtk/Lex*.o)
-CFLAGS = $(shell pkg-config --cflags gtk+-3.0) -g -Wall -DGTK3 -DSCI_LEXER -fPIC
+CFLAGS = $(shell pkg-config --cflags gtk+-3.0) -g -Wall -DGTK -DGTK3 -DSCI_LEXER -fPIC
 LDFLAGS_PRE = $(shell pkg-config --libs gtk+-3.0) -DGTK3
 LDFLAGS_POST =  $(LEXERS)  $(SCINTILLA_LIB) -lstdc++
 

@@ -31,7 +31,7 @@
 #include "document_manager.h"
 #include "preferences_manager.h"
 #include "search_infobar.h"
-#include "gphpedit-close-button.h"
+#include "gedit-close-button.h"
 
 #define SEARCHINFOBAR_GET_PRIVATE(object)(G_TYPE_INSTANCE_GET_PRIVATE ((object), \
 						INFOBAR_TYPE_SEARCH,              \
@@ -176,7 +176,7 @@ search_infobar_init (SearchInfobar *search_infobar)
   hbox = gtk_hbox_new (FALSE, 6);
   gtk_box_pack_start (GTK_BOX (content_area), hbox, TRUE, TRUE, 0);
 
-  GtkWidget *close = gphpedit_close_button_new ();
+  GtkWidget *close = gedit_close_button_new ();
   g_signal_connect(G_OBJECT(close), "clicked", G_CALLBACK(on_close_button_activate), search_infobar);
   gtk_box_pack_start (GTK_BOX (hbox), close, FALSE, FALSE, 0);
   

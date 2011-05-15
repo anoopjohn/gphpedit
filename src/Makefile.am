@@ -95,8 +95,8 @@ gphpedit_SOURCES = \
   filebrowser_ui.h \
   find_dialog.c \
   find_dialog.h \
-  gphpedit-close-button.c \
-  gphpedit-close-button.h \
+  gedit-close-button.c \
+  gedit-close-button.h \
   gphpedit-session.c \
   gphpedit-session.h \
   gphpedit-statusbar.c \
