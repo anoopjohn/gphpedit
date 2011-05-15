@@ -144,7 +144,7 @@ MENUBAR_class_init (MenuBarClass *klass)
  * Show/hide side panel
 */
 static void tog_classbrowser(GtkCheckMenuItem *checkmenuitem, gpointer user_data){
-  classbrowser_show_hide(NULL);
+  side_panel_show_hide(NULL);
 }
 /*
  * tog_statusbar
