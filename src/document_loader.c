@@ -312,7 +312,7 @@ static gboolean _document_loader_validate_and_convert_utf8_buffer (gchar **buffe
         return FALSE;
       }
     }
-    gphpedit_debug_message (DEBUG_DOCUMENT,_("Converted to UTF-8 size: %u"), utf8_size);
+    gphpedit_debug_message (DEBUG_DOCUMENT,_("Converted to UTF-8 size: %" G_GSSIZE_FORMAT), utf8_size);
     g_free(*buffer);
     *buffer = converted_text;
     result = TRUE;
@@ -471,7 +471,7 @@ static void _document_loader_load_file_finish (GObject *source_object, GAsyncRes
     emit_signal (doclod, FALSE, NULL);
     return ;
   }
-  gphpedit_debug_message (DEBUG_DOCUMENT,"Loaded %u bytes", size);
+  gphpedit_debug_message (DEBUG_DOCUMENT,"Loaded %" G_GSSIZE_FORMAT "bytes", size);
   gphpedit_debug_message (DEBUG_DOCUMENT,"BUFFER=\n%s\n-------------------------------------------", buffer);
 
   if (size) converted_to_utf8 = _document_loader_validate_and_convert_utf8_buffer(&buffer);
