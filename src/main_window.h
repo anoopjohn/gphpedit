@@ -39,6 +39,7 @@
 
 typedef struct
 {
+  GtkBuilder *builder;
   /* preferences manager */
   PreferencesManager *prefmg;
   TemplatesManager *tempmg;
@@ -48,8 +49,6 @@ typedef struct
   SymbolManager *symbolmg;
 
   GtkWidget *window;
-  GtkWidget *prinbox;
-  GtkWidget *prin_hbox;
   /* menu */
   GtkWidget *menu;
   /* toolbars */
@@ -70,7 +69,6 @@ typedef struct
 
   //widget for close side bar button
   GtkWidget *pclose_sidebar_button;
-  
   GtkWidget *pclassbrowser;
 
   /*filebrowser widget */

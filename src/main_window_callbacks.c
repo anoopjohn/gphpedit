@@ -616,12 +616,15 @@ void zoom_100(GtkWidget *widget)
 
 void syntax_check(GtkWidget *widget)
 {
-   gtk_syntax_check_window_run_check(GTK_SYNTAX_CHECK_WINDOW(main_window.win), document_manager_get_current_documentable(main_window.docmg));
+  gtk_syntax_check_window_run_check(GTK_SYNTAX_CHECK_WINDOW(main_window.win), document_manager_get_current_documentable(main_window.docmg));
+  gtk_paned_set_position(GTK_PANED(main_window.main_vertical_pane), 200);
 }
 
 void syntax_check_clear(GtkWidget *widget)
 {
-  gtk_widget_hide(GTK_WIDGET(main_window.win));
+  gint max;
+  g_object_get(main_window.main_vertical_pane, "max-position", &max, NULL);
+  gtk_paned_set_position(GTK_PANED(main_window.main_vertical_pane), max);
 }
 
 void force_php(GtkWidget *widget)

@@ -85,11 +85,6 @@ struct _MenuBarPrivate
   GtkWidget *zoomout;
   GtkWidget *zoom100;
   GtkWidget *preview;
-  GSList *iconsizegroup;
-  GtkWidget *Ticonsizemenu;
-  GtkWidget *Ticonsize;
-  GtkWidget *sizebig;
-  GtkWidget *sizesmall;
   GtkWidget *preferences;
 
   GtkWidget *code;
@@ -187,19 +182,6 @@ static void tog_fullscreen(GtkWidget *widget, gpointer user_data)
 static void showpreview (GtkWidget *widget, gpointer user_data)
 {
   document_manager_get_document_preview(main_window.docmg);
-}
-/*
- *size_change
- * Changes toolbar icon sizes
-*/
-static void size_change(GtkWidget *widget, gpointer user_data)
-{
-  MenuBarPrivate *priv= (MenuBarPrivate *) user_data;
-  if (gtk_check_menu_item_get_active ((GtkCheckMenuItem *)priv->sizebig)){
-    gtk_toolbar_set_icon_size (GTK_TOOLBAR (main_window.toolbar_main), GTK_ICON_SIZE_LARGE_TOOLBAR);
-  } else {
-    gtk_toolbar_set_icon_size (GTK_TOOLBAR (main_window.toolbar_main), GTK_ICON_SIZE_SMALL_TOOLBAR);
-  }
 }
 
 /*
@@ -485,25 +467,6 @@ static void fill_menu_view(MenuBarPrivate *priv)
   /* separator */
   _create_separator_item(priv->menuview);
 
-  /* toolbar icon size menu*/
-  priv->Ticonsize = gtk_menu_item_new_with_mnemonic(_("_Toolbar Icon Size"));
-  gtk_container_add (GTK_CONTAINER (priv->menuview), priv->Ticonsize);
-  priv->Ticonsizemenu = gtk_menu_new();
-  gtk_menu_item_set_submenu (GTK_MENU_ITEM (priv->Ticonsize), priv->Ticonsizemenu);
-
-  /*set new radio button group*/
-  priv->iconsizegroup=NULL;
-
-  priv->sizebig=gtk_radio_menu_item_new_with_mnemonic (priv->iconsizegroup,_("Big Icons"));
-  priv->iconsizegroup = gtk_radio_menu_item_get_group (GTK_RADIO_MENU_ITEM (priv->sizebig));
-  gtk_menu_shell_append(GTK_MENU_SHELL(priv->Ticonsizemenu), priv->sizebig);
-  g_signal_connect(G_OBJECT(priv->sizebig), "activate", G_CALLBACK(size_change), priv);
-  priv->sizesmall=gtk_radio_menu_item_new_with_mnemonic (priv->iconsizegroup,_("Small Icons"));
-  priv->iconsizegroup = gtk_radio_menu_item_get_group (GTK_RADIO_MENU_ITEM (priv->sizesmall));
-  gtk_menu_shell_append(GTK_MENU_SHELL(priv->Ticonsizemenu), priv->sizesmall);
-  /* separator */
-  _create_separator_item(priv->menuview);
-
   create_mnemonic_menu_item(&priv->preview ,priv->menuview,_("_Show Preview"), _("Preview the Document"),priv->accel_group, 0, 0);
   g_signal_connect(G_OBJECT(priv->preview), "activate", G_CALLBACK(showpreview), NULL);
 }
@@ -600,26 +563,11 @@ menubar_new (void)
 
 }
 
-void menubar_set_toolbar_size(MenuBar *menubar, gboolean value)
-{
-  if (!menubar) return;
-  MenuBarPrivate *priv = MENUBAR_GET_PRIVATE(menubar);
-  gtk_check_menu_item_set_active (GTK_CHECK_MENU_ITEM (priv->sizesmall), value);
-  if (!value) gtk_check_menu_item_set_active (GTK_CHECK_MENU_ITEM (priv->sizebig), TRUE);
-}
-
 GtkWidget *menubar_get_menu_plugin(MenuBar *menubar)
 {
   if (!menubar) return NULL;
   MenuBarPrivate *priv = MENUBAR_GET_PRIVATE(menubar);
   return priv->menuplugin;
-}
-
-GtkAccelGroup *menubar_get_accel_group(MenuBar *menubar)
-{
-  if (!menubar) return NULL;
-  MenuBarPrivate *priv = MENUBAR_GET_PRIVATE(menubar);
-  return priv->accel_group;
 }
 
 void menubar_set_classbrowser_status(MenuBar *menubar, gboolean value)

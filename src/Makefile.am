@@ -1,5 +1,5 @@
 ##
-##  This file is part of gPHPEdit, a GNOME2 PHP Editor.
+##  This file is part of gPHPEdit, a GNOME PHP Editor.
 ##
 ##  Copyright (C) 2003, 2004, 2005 Andy Jeffries <andy at gphpedit.org>
 ##  Copyright (C) 2009 Anoop John <anoop dot john at zyxware.com>
@@ -28,8 +28,10 @@ bin_PROGRAMS = gphpedit
 
 uidir = $(pkgdatadir)/ui
 dist_ui_DATA = preferences_dialog.ui \
+  gphpedit.ui \
   classbrowser.ui \
   filebrowser.ui  \
+  toolbar.ui \
   find_dialog.ui \
   replace_dialog.ui
 
