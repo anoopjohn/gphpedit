@@ -41,13 +41,13 @@
 */
 struct SymbolManagerDetails
 {
-  SymbolBdPHP *sbd_php;
-  SymbolBdCOBOL *sbd_cobol;
-  SymbolBdSQL *sbd_sql;
-  SymbolBdCSS *sbd_css;
-  SymbolBdCXX *sbd_cxx;
-  SymbolBdPYTHON *sbd_python;
-  SymbolBdPERL *sbd_perl;
+  Symbolizable *sbd_php;
+  Symbolizable *sbd_cobol;
+  Symbolizable *sbd_sql;
+  Symbolizable *sbd_css;
+  Symbolizable *sbd_cxx;
+  Symbolizable *sbd_python;
+  Symbolizable *sbd_perl;
 };
 
 /* object signal enumeration */
@@ -150,20 +150,20 @@ symbol_manager_init (SymbolManager *symbolmg)
   symbolmgdet = SYMBOL_MANAGER_GET_PRIVATE(symbolmg);
 
   /* add symbol_bd objects */
-  symbolmgdet->sbd_php = symbol_bd_php_new ();
-  g_signal_connect(SYMBOLIZABLE(symbolmgdet->sbd_php), "update", G_CALLBACK(sdb_symbolizable_update_cb), symbolmg);
-  symbolmgdet->sbd_cobol = symbol_bd_cobol_new ();
-  g_signal_connect(SYMBOLIZABLE(symbolmgdet->sbd_cobol), "update", G_CALLBACK(sdb_symbolizable_update_cb), symbolmg);
-  symbolmgdet->sbd_sql = symbol_bd_sql_new ();
-  g_signal_connect(SYMBOLIZABLE(symbolmgdet->sbd_sql), "update", G_CALLBACK(sdb_symbolizable_update_cb), symbolmg);
-  symbolmgdet->sbd_css = symbol_bd_css_new ();
-  g_signal_connect(SYMBOLIZABLE(symbolmgdet->sbd_css), "update", G_CALLBACK(sdb_symbolizable_update_cb), symbolmg);
-  symbolmgdet->sbd_cxx = symbol_bd_cxx_new ();
-  g_signal_connect(SYMBOLIZABLE(symbolmgdet->sbd_cxx), "update", G_CALLBACK(sdb_symbolizable_update_cb), symbolmg);
-  symbolmgdet->sbd_python = symbol_bd_python_new ();
-  g_signal_connect(SYMBOLIZABLE(symbolmgdet->sbd_python), "update", G_CALLBACK(sdb_symbolizable_update_cb), symbolmg);
-  symbolmgdet->sbd_perl = symbol_bd_perl_new ();
-  g_signal_connect(SYMBOLIZABLE(symbolmgdet->sbd_perl), "update", G_CALLBACK(sdb_symbolizable_update_cb), symbolmg);
+  symbolmgdet->sbd_php = SYMBOLIZABLE(symbol_bd_php_new ());
+  g_signal_connect(symbolmgdet->sbd_php, "update", G_CALLBACK(sdb_symbolizable_update_cb), symbolmg);
+  symbolmgdet->sbd_cobol = SYMBOLIZABLE(symbol_bd_cobol_new ());
+  g_signal_connect(symbolmgdet->sbd_cobol, "update", G_CALLBACK(sdb_symbolizable_update_cb), symbolmg);
+  symbolmgdet->sbd_sql = SYMBOLIZABLE(symbol_bd_sql_new ());
+  g_signal_connect(symbolmgdet->sbd_sql, "update", G_CALLBACK(sdb_symbolizable_update_cb), symbolmg);
+  symbolmgdet->sbd_css = SYMBOLIZABLE(symbol_bd_css_new ());
+  g_signal_connect(symbolmgdet->sbd_css, "update", G_CALLBACK(sdb_symbolizable_update_cb), symbolmg);
+  symbolmgdet->sbd_cxx = SYMBOLIZABLE(symbol_bd_cxx_new ());
+  g_signal_connect(symbolmgdet->sbd_cxx, "update", G_CALLBACK(sdb_symbolizable_update_cb), symbolmg);
+  symbolmgdet->sbd_python = SYMBOLIZABLE(symbol_bd_python_new ());
+  g_signal_connect(symbolmgdet->sbd_python, "update", G_CALLBACK(sdb_symbolizable_update_cb), symbolmg);
+  symbolmgdet->sbd_perl = SYMBOLIZABLE(symbol_bd_perl_new ());
+  g_signal_connect(symbolmgdet->sbd_perl, "update", G_CALLBACK(sdb_symbolizable_update_cb), symbolmg);
 }
 
 SymbolManager *symbol_manager_new (void)
@@ -182,25 +182,25 @@ static Symbolizable *symbol_manager_get_symbolizable_for_type(SymbolManager *sym
   Symbolizable *result;
   switch(ftype) {
     case TAB_PHP:
-      result = SYMBOLIZABLE(symbolmgdet->sbd_php);
+      result = symbolmgdet->sbd_php;
       break;
     case TAB_CSS:
-      result = SYMBOLIZABLE(symbolmgdet->sbd_css);
+      result = symbolmgdet->sbd_css;
       break;
     case TAB_SQL:
-      result = SYMBOLIZABLE(symbolmgdet->sbd_sql);
+      result = symbolmgdet->sbd_sql;
       break;
     case TAB_COBOL:
-      result = SYMBOLIZABLE(symbolmgdet->sbd_cobol);
+      result = symbolmgdet->sbd_cobol;
       break;
     case TAB_CXX:
-      result = SYMBOLIZABLE(symbolmgdet->sbd_cxx);
+      result = symbolmgdet->sbd_cxx;
       break;
     case TAB_PYTHON:
-      result = SYMBOLIZABLE(symbolmgdet->sbd_python);
+      result = symbolmgdet->sbd_python;
       break;
     case TAB_PERL:
-      result = SYMBOLIZABLE(symbolmgdet->sbd_perl);
+      result = symbolmgdet->sbd_perl;
       break;
     default:
       result = NULL;
