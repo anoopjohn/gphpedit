@@ -82,7 +82,7 @@ gint main_window_key_press_event(GtkWidget   *widget, GdkEventKey *event,gpointe
 
   if (main_window.notebook_editor != NULL) {
     documentable_check_externally_modified(document_manager_get_current_documentable(main_window.docmg));
-    if (((event->state & (GDK_CONTROL_MASK | GDK_SHIFT_MASK))==(GDK_CONTROL_MASK | GDK_SHIFT_MASK)) && (event->keyval == GDK_ISO_Left_Tab)) {
+    if (((event->state & (GDK_CONTROL_MASK | GDK_SHIFT_MASK))==(GDK_CONTROL_MASK | GDK_SHIFT_MASK)) && (event->keyval == GDK_KEY_ISO_Left_Tab)) {
       // Hack, for some reason when shift is held down keyval comes through as GDK_ISO_Left_Tab not GDK_Tab
       if (gtk_notebook_get_current_page(GTK_NOTEBOOK(main_window.notebook_editor)) == 0) {
         gtk_notebook_set_current_page(GTK_NOTEBOOK(main_window.notebook_editor), gtk_notebook_get_n_pages(GTK_NOTEBOOK(main_window.notebook_editor))-1);
@@ -92,7 +92,7 @@ gint main_window_key_press_event(GtkWidget   *widget, GdkEventKey *event,gpointe
       }
       return TRUE;
     }
-    else if ((event->state & GDK_CONTROL_MASK)==GDK_CONTROL_MASK && (event->keyval == GDK_Tab)) {
+    else if ((event->state & GDK_CONTROL_MASK)==GDK_CONTROL_MASK && (event->keyval == GDK_KEY_Tab)) {
       if (gtk_notebook_get_current_page(GTK_NOTEBOOK(main_window.notebook_editor)) == gtk_notebook_get_n_pages(GTK_NOTEBOOK(main_window.notebook_editor))-1) {
         gtk_notebook_set_current_page(GTK_NOTEBOOK(main_window.notebook_editor),0);
       }
@@ -101,8 +101,8 @@ gint main_window_key_press_event(GtkWidget   *widget, GdkEventKey *event,gpointe
       }
       return TRUE;
     }
-    else if ((event->state & GDK_MOD1_MASK)==GDK_MOD1_MASK && ((event->keyval >= GDK_0) && (event->keyval <= GDK_9))) {
-      gtk_notebook_set_current_page(GTK_NOTEBOOK(main_window.notebook_editor),event->keyval - ((event->keyval == GDK_0) ? (GDK_0 - 9) : (GDK_0 + 1)));
+    else if ((event->state & GDK_MOD1_MASK)==GDK_MOD1_MASK && ((event->keyval >= GDK_KEY_0) && (event->keyval <= GDK_KEY_9))) {
+      gtk_notebook_set_current_page(GTK_NOTEBOOK(main_window.notebook_editor),event->keyval - ((event->keyval == GDK_KEY_0) ? (GDK_KEY_0 - 9) : (GDK_KEY_0 + 1)));
       return TRUE;
     }
   }
@@ -571,12 +571,10 @@ void update_status_combobox(Documentable *document)
       }
 }
 
-void on_notebook_switch_page (GtkNotebook *notebook, GtkNotebookPage *page,
+void on_notebook_switch_page (GtkNotebook *notebook, GtkWidget *page,
                 gint page_num, gpointer user_data)
 {
-  GtkWidget *child;
-  child = gtk_notebook_get_nth_page(GTK_NOTEBOOK(main_window.notebook_editor), page_num);
-  if(!document_manager_set_current_document_from_widget (main_window.docmg, child)) {
+  if(!document_manager_set_current_document_from_widget (main_window.docmg, page)) {
     gphpedit_debug_message(DEBUG_MAIN_WINDOW,_("Unable to get data for page %d"), page_num);
   }
 }
@@ -585,7 +583,8 @@ gboolean on_notebook_focus_tab(GtkNotebook *notebook,
                  GtkNotebookTab arg1, gpointer user_data)
 {
   GtkWidget *document_widget;
-  g_object_get(document_manager_get_current_documentable(main_window.docmg), "editor_widget", &document_widget, NULL);
+  Documentable *doc = document_manager_get_current_documentable(main_window.docmg);
+  g_object_get(doc, "editor_widget", &document_widget, NULL);
   gtk_widget_grab_focus(document_widget);
   return TRUE;
 }
@@ -617,42 +616,15 @@ void zoom_100(GtkWidget *widget)
 
 void syntax_check(GtkWidget *widget)
 {
-   gtk_syntax_check_window_run_check(GTK_SYNTAX_CHECK_WINDOW(main_window.win), document_manager_get_current_documentable(main_window.docmg));
+  gtk_syntax_check_window_run_check(GTK_SYNTAX_CHECK_WINDOW(main_window.win), document_manager_get_current_documentable(main_window.docmg));
+  gtk_paned_set_position(GTK_PANED(main_window.main_vertical_pane), 200);
 }
 
 void syntax_check_clear(GtkWidget *widget)
 {
-  gtk_widget_hide(GTK_WIDGET(main_window.win));
-}
-
-
-void classbrowser_show(void)
-{
-  gphpedit_debug(DEBUG_MAIN_WINDOW);
-  gint size;
-  g_object_get(main_window.prefmg, "side_panel_size", &size, NULL);
-  gtk_paned_set_position(GTK_PANED(main_window.main_horizontal_pane), size);
-  g_object_set(main_window.prefmg, "side_panel_hidden", FALSE, NULL);
-  classbrowser_update(GPHPEDIT_CLASSBROWSER(main_window.classbrowser));
-}
-
-
-void classbrowser_hide(void)
-{
-  gphpedit_debug(DEBUG_MAIN_WINDOW);
-  gtk_paned_set_position(GTK_PANED(main_window.main_horizontal_pane), 0);
-  g_object_set(main_window.prefmg, "side_panel_hidden", TRUE, NULL);
-}
-
-void classbrowser_show_hide(GtkWidget *widget)
-{
-  gboolean hidden;
-  g_object_get(main_window.prefmg, "side_panel_hidden", &hidden, NULL);
-  menubar_set_classbrowser_status(MENUBAR(main_window.menu), hidden);
-  if (hidden)
-    classbrowser_show();
-  else
-    classbrowser_hide();
+  gint max;
+  g_object_get(main_window.main_vertical_pane, "max-position", &max, NULL);
+  gtk_paned_set_position(GTK_PANED(main_window.main_vertical_pane), max);
 }
 
 void force_php(GtkWidget *widget)

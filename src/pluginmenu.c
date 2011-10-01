@@ -106,28 +106,28 @@ gtk_plugin_manager_menu_finalize (GObject *object)
 */
 static gint parse_shortcut(gint accel_number){ 
   switch (accel_number) {
-   case 0: return GDK_0;
+   case 0: return GDK_KEY_0;
     break;
-    case 1: return GDK_1;
+    case 1: return GDK_KEY_1;
       break;
-    case 2: return GDK_2;
+    case 2: return GDK_KEY_2;
       break;
-    case 3: return GDK_3;
+    case 3: return GDK_KEY_3;
       break;
-    case 4: return GDK_4;
+    case 4: return GDK_KEY_4;
       break;
-    case 5: return GDK_5;
+    case 5: return GDK_KEY_5;
       break;
-    case 6: return GDK_6;
+    case 6: return GDK_KEY_6;
       break;
-    case 7: return GDK_7;
+    case 7: return GDK_KEY_7;
       break;
-    case 8: return GDK_8;
+    case 8: return GDK_KEY_8;
       break;
-    case 9: return GDK_9;
+    case 9: return GDK_KEY_9;
       break;
   }
- return GDK_0;
+ return GDK_KEY_0;
 }
 
 /* removes the items we own from the menu */

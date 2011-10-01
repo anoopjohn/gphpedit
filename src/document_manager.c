@@ -31,7 +31,7 @@
 #include "debug.h"
 #include "main_window_callbacks.h"
 #include "gvfs_utils.h"
-#include "gphpedit-close-button.h"
+#include "gedit-close-button.h"
 #include "gphpedit-statusbar.h"
 #include "document_loader.h"
 #include "tab.h"
@@ -224,7 +224,7 @@ GtkWidget *get_close_tab_widget(Document *document)
   GtkWidget *hbox;
   GtkWidget *close_button;
   hbox = gtk_hbox_new(FALSE, 0);
-  close_button = gphpedit_close_button_new ();
+  close_button = gedit_close_button_new ();
   gtk_widget_set_tooltip_text(close_button, _("Close Tab"));
 
   g_signal_connect(G_OBJECT(close_button), "clicked", G_CALLBACK(on_tab_close_activate), document);

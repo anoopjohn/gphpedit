@@ -74,8 +74,6 @@ GType 		 MENUBAR_get_type 		(void) G_GNUC_CONST;
 
 GtkWidget *menubar_new (void);
 void install_menu_hint(GtkWidget *widget, gchar *message);
-GtkAccelGroup *menubar_get_accel_group(MenuBar *menubar);
-void menubar_set_toolbar_size(MenuBar *menubar, gboolean value);
 GtkWidget *menubar_get_menu_plugin(MenuBar *menubar);
 void menubar_set_classbrowser_status(MenuBar *menubar, gboolean value);
 void menubar_update_controls(MenuBar *menubar, gboolean is_scintilla, gboolean can_preview, gboolean isreadonly);

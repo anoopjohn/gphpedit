@@ -88,6 +88,9 @@ struct _gphpeditFileBrowserPrivate
   GtkWidget *button_refresh;
   GtkWidget *image_refresh;
 
+  GtkWidget *searchbox;
+  GtkWidget *togglesearch;
+
   GtkTreeModel *cache_model;
   gulong  handlerid;
   gulong  handleridchange;
@@ -222,6 +225,11 @@ gphpedit_file_browser_init (gphpeditFileBrowser *button)
   priv->button_refresh= GTK_WIDGET(gtk_builder_get_object (priv->builder, "button_refresh"));
   g_signal_connect(G_OBJECT(priv->button_refresh), "clicked", G_CALLBACK (_button_refresh), priv->fbbackend);
 
+  priv->searchbox = GTK_WIDGET(gtk_builder_get_object (priv->builder, "searchbox"));
+  priv->togglesearch = GTK_WIDGET(gtk_builder_get_object (priv->builder, "togglesearch"));
+  g_object_bind_property (priv->togglesearch, "active", priv->searchbox, "visible", G_BINDING_SYNC_CREATE);
+
+
   priv->searchentry = GTK_WIDGET(gtk_builder_get_object (priv->builder, "searchentry"));
   g_signal_connect (G_OBJECT (priv->searchentry), "icon-press", G_CALLBACK (on_cleanicon_press), priv);
   g_signal_connect_after(G_OBJECT(priv->searchentry), "insert_text", G_CALLBACK(search_typed), priv);
@@ -355,11 +363,11 @@ gboolean key_press (GtkWidget *widget, GdkEventKey *event, gpointer user_data){
   gphpeditFileBrowserPrivate *priv = (gphpeditFileBrowserPrivate *) user_data;
   gphpedit_debug_message(DEBUG_FILEBROWSER, "keyval:%d \n",event->keyval);
 
-  if (event->keyval==GDK_Delete || event->keyval==GDK_Return){
+  if (event->keyval==GDK_KEY_Delete || event->keyval==GDK_KEY_Return){
     gchar *mime=get_mime_from_tree(GTK_TREE_VIEW(widget));
     gchar *path=(gchar*)get_filebrowser_backend_current_folder(priv->fbbackend);
     gchar *file_name=get_path_from_tree(GTK_TREE_VIEW(widget),path);
-    if (event->keyval==GDK_Delete){
+    if (event->keyval==GDK_KEY_Delete){
       //delete file
       pop.fbbackend=priv->fbbackend;
       pop.filename=file_name;

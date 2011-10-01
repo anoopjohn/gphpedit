@@ -612,6 +612,18 @@ void gtk_scintilla_marker_set_back(GtkScintilla *sci, gint marker_number, glong 
         2042, (gulong) marker_number, (gulong) back);
 }
 
+void gtk_scintilla_marker_set_back_selected(GtkScintilla *sci, gint marker_number, glong back)
+{
+    scintilla_send_message(SCINTILLA(sci->scintilla),
+        2292, (gulong) marker_number, (gulong) back);
+}
+
+void gtk_scintilla_marker_enable_highlight(GtkScintilla *sci, gboolean enabled)
+{
+    scintilla_send_message(SCINTILLA(sci->scintilla),
+        2293, (gulong) enabled, 0);
+}
+
 gint gtk_scintilla_marker_add(GtkScintilla *sci, gint line, gint marker_number)
 {
     return scintilla_send_message(SCINTILLA(sci->scintilla),
@@ -2490,10 +2502,22 @@ void gtk_scintilla_brace_highlight(GtkScintilla *sci, glong pos1, glong pos2)
         2351, (gulong) pos1, (gulong) pos2);
 }
 
+void gtk_scintilla_brace_highlight_indicator(GtkScintilla *sci, gboolean use_brace_highlight_indicator, gint indicator)
+{
+    scintilla_send_message(SCINTILLA(sci->scintilla),
+        2498, (gulong) use_brace_highlight_indicator, (gulong) indicator);
+}
+
 void gtk_scintilla_brace_bad_light(GtkScintilla *sci, glong pos)
 {
     scintilla_send_message(SCINTILLA(sci->scintilla),
         2352, (gulong) pos, 0);
+}
+
+void gtk_scintilla_brace_bad_light_indicator(GtkScintilla *sci, gboolean use_brace_bad_light_indicator, gint indicator)
+{
+    scintilla_send_message(SCINTILLA(sci->scintilla),
+        2499, (gulong) use_brace_bad_light_indicator, (gulong) indicator);
 }
 
 glong gtk_scintilla_brace_match(GtkScintilla *sci, glong pos)
@@ -3232,6 +3256,18 @@ gint gtk_scintilla_indic_get_alpha(GtkScintilla *sci, gint indicator)
 {
     return scintilla_send_message(SCINTILLA(sci->scintilla),
         2524, (gulong) indicator, 0);
+}
+
+void gtk_scintilla_indic_set_outline_alpha(GtkScintilla *sci, gint indicator, gint alpha)
+{
+    scintilla_send_message(SCINTILLA(sci->scintilla),
+        2558, (gulong) indicator, (gulong) alpha);
+}
+
+gint gtk_scintilla_indic_get_outline_alpha(GtkScintilla *sci, gint indicator)
+{
+    return scintilla_send_message(SCINTILLA(sci->scintilla),
+        2559, (gulong) indicator, 0);
 }
 
 void gtk_scintilla_set_extra_ascent(GtkScintilla *sci, gint extra_ascent)

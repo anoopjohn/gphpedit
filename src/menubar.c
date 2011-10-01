@@ -85,11 +85,6 @@ struct _MenuBarPrivate
   GtkWidget *zoomout;
   GtkWidget *zoom100;
   GtkWidget *preview;
-  GSList *iconsizegroup;
-  GtkWidget *Ticonsizemenu;
-  GtkWidget *Ticonsize;
-  GtkWidget *sizebig;
-  GtkWidget *sizesmall;
   GtkWidget *preferences;
 
   GtkWidget *code;
@@ -144,7 +139,7 @@ MENUBAR_class_init (MenuBarClass *klass)
  * Show/hide side panel
 */
 static void tog_classbrowser(GtkCheckMenuItem *checkmenuitem, gpointer user_data){
-  classbrowser_show_hide(NULL);
+  side_panel_show_hide(NULL);
 }
 /*
  * tog_statusbar
@@ -187,19 +182,6 @@ static void tog_fullscreen(GtkWidget *widget, gpointer user_data)
 static void showpreview (GtkWidget *widget, gpointer user_data)
 {
   document_manager_get_document_preview(main_window.docmg);
-}
-/*
- *size_change
- * Changes toolbar icon sizes
-*/
-static void size_change(GtkWidget *widget, gpointer user_data)
-{
-  MenuBarPrivate *priv= (MenuBarPrivate *) user_data;
-  if (gtk_check_menu_item_get_active ((GtkCheckMenuItem *)priv->sizebig)){
-    gtk_toolbar_set_icon_size (GTK_TOOLBAR (main_window.toolbar_main), GTK_ICON_SIZE_LARGE_TOOLBAR);
-  } else {
-    gtk_toolbar_set_icon_size (GTK_TOOLBAR (main_window.toolbar_main), GTK_ICON_SIZE_SMALL_TOOLBAR);
-  }
 }
 
 /*
@@ -330,11 +312,11 @@ static inline void create_check_menu_item(GtkWidget **menuitem,GtkWidget *menu,g
 * create file menu widgets and fill file menu
 */
 static void fill_menu_file(MenuBarPrivate *priv){
-  create_stock_menu_item(&priv->newi, priv->menunew,GTK_STOCK_NEW, _("Creates a new file"),priv->accel_group, GDK_n, GDK_CONTROL_MASK);
+  create_stock_menu_item(&priv->newi, priv->menunew,GTK_STOCK_NEW, _("Creates a new file"),priv->accel_group, GDK_KEY_n, GDK_CONTROL_MASK);
   g_signal_connect(G_OBJECT(priv->newi), "activate", G_CALLBACK(on_new1_activate), NULL);
-  create_stock_menu_item(&priv->open,priv->menunew,GTK_STOCK_OPEN, _("Open a file"),priv->accel_group, GDK_o, GDK_CONTROL_MASK);
+  create_stock_menu_item(&priv->open,priv->menunew,GTK_STOCK_OPEN, _("Open a file"),priv->accel_group, GDK_KEY_o, GDK_CONTROL_MASK);
   g_signal_connect(G_OBJECT(priv->open), "activate", G_CALLBACK(on_open1_activate), NULL);
-  create_mnemonic_menu_item(&priv->opensel ,priv->menunew,_("_Open selected file"), _("Open a file with the name currently selected in the editor"), priv->accel_group,GDK_o, GDK_CONTROL_MASK);
+  create_mnemonic_menu_item(&priv->opensel ,priv->menunew,_("_Open selected file"), _("Open a file with the name currently selected in the editor"), priv->accel_group,GDK_KEY_o, GDK_CONTROL_MASK);
   g_signal_connect(G_OBJECT(priv->opensel), "activate", G_CALLBACK(on_openselected1_activate), NULL);
 
   /* recent menu setup */
@@ -350,23 +332,23 @@ static void fill_menu_file(MenuBarPrivate *priv){
   g_signal_connect(G_OBJECT(priv->menureciente), "item-activated", G_CALLBACK(reopen_recent), NULL);
 
 
-  create_stock_menu_item(&priv->reload, priv->menunew, GTK_STOCK_REVERT_TO_SAVED, _("Save the file currently selected in the editor"),priv->accel_group, GDK_r, GDK_SHIFT_MASK | GDK_CONTROL_MASK);
+  create_stock_menu_item(&priv->reload, priv->menunew, GTK_STOCK_REVERT_TO_SAVED, _("Save the file currently selected in the editor"),priv->accel_group, GDK_KEY_r, GDK_SHIFT_MASK | GDK_CONTROL_MASK);
   g_signal_connect(G_OBJECT(priv->reload), "activate", G_CALLBACK(on_reload1_activate), NULL);
   /* separator */
   _create_separator_item(priv->menunew);
 
-  create_stock_menu_item(&priv->save,priv->menunew, GTK_STOCK_SAVE, _("Save the file currently selected in the editor"),priv->accel_group, GDK_s, GDK_CONTROL_MASK);
+  create_stock_menu_item(&priv->save,priv->menunew, GTK_STOCK_SAVE, _("Save the file currently selected in the editor"),priv->accel_group, GDK_KEY_s, GDK_CONTROL_MASK);
   g_signal_connect(G_OBJECT(priv->save), "activate", G_CALLBACK(on_save1_activate), NULL);
-  create_stock_menu_item(&priv->saveas,priv->menunew,GTK_STOCK_SAVE_AS, _("Save the file currently selected in the editor"),priv->accel_group, GDK_s, GDK_SHIFT_MASK | GDK_CONTROL_MASK);
+  create_stock_menu_item(&priv->saveas,priv->menunew,GTK_STOCK_SAVE_AS, _("Save the file currently selected in the editor"),priv->accel_group, GDK_KEY_s, GDK_SHIFT_MASK | GDK_CONTROL_MASK);
   g_signal_connect(G_OBJECT(priv->saveas), "activate", G_CALLBACK(on_save_as1_activate), NULL);
-  create_mnemonic_menu_item(&priv->saveall ,priv->menunew,_("Save A_ll"), _("Save all open unsaved files"),priv->accel_group, GDK_a, GDK_SHIFT_MASK | GDK_MOD1_MASK);
+  create_mnemonic_menu_item(&priv->saveall ,priv->menunew,_("Save A_ll"), _("Save all open unsaved files"),priv->accel_group, GDK_KEY_a, GDK_SHIFT_MASK | GDK_MOD1_MASK);
   g_signal_connect(G_OBJECT(priv->saveall), "activate", G_CALLBACK(on_saveall1_activate), NULL);
-  create_stock_menu_item(&priv->close,priv->menunew,GTK_STOCK_CLOSE, _("Close the current file"),priv->accel_group, GDK_w, GDK_CONTROL_MASK);
+  create_stock_menu_item(&priv->close,priv->menunew,GTK_STOCK_CLOSE, _("Close the current file"),priv->accel_group, GDK_KEY_w, GDK_CONTROL_MASK);
   g_signal_connect(G_OBJECT(priv->close), "activate", G_CALLBACK(on_close1_activate), NULL);
   /* separator */
   _create_separator_item(priv->menunew);
 
-  create_stock_menu_item(&priv->quit,priv->menunew, GTK_STOCK_QUIT, _("Quit the application"),priv->accel_group, GDK_q, GDK_CONTROL_MASK);
+  create_stock_menu_item(&priv->quit,priv->menunew, GTK_STOCK_QUIT, _("Quit the application"),priv->accel_group, GDK_KEY_q, GDK_CONTROL_MASK);
   g_signal_connect(G_OBJECT(priv->quit), "activate", G_CALLBACK(on_quit1_activate), NULL);
 }
 
@@ -376,7 +358,7 @@ static void fill_menu_file(MenuBarPrivate *priv){
 */
 static void fill_help_menu(MenuBarPrivate *priv){
   /* help menu */
-  create_stock_menu_item(&priv->phphelp,priv->menuhelp, GTK_STOCK_HELP, _("Look for help on the currently selected function"),priv->accel_group, GDK_F1, 0);
+  create_stock_menu_item(&priv->phphelp,priv->menuhelp, GTK_STOCK_HELP, _("Look for help on the currently selected function"),priv->accel_group, GDK_KEY_F1, 0);
   /* set custom label */
   gtk_menu_item_set_label (GTK_MENU_ITEM(priv->phphelp), _("_PHP Help"));
   g_signal_connect(G_OBJECT(priv->phphelp), "activate", G_CALLBACK(context_help), NULL);
@@ -398,56 +380,56 @@ static void fill_help_menu(MenuBarPrivate *priv){
 */
 static void fill_menu_edit(MenuBarPrivate *priv){
 
-  create_stock_menu_item(&priv->undo,priv->menuedit,GTK_STOCK_UNDO, _("Undo last action"),priv->accel_group, GDK_z, GDK_CONTROL_MASK);
+  create_stock_menu_item(&priv->undo,priv->menuedit,GTK_STOCK_UNDO, _("Undo last action"),priv->accel_group, GDK_KEY_z, GDK_CONTROL_MASK);
   g_signal_connect(G_OBJECT(priv->undo), "activate", G_CALLBACK(on_undo1_activate), NULL);
-  create_stock_menu_item(&priv->redo,priv->menuedit,GTK_STOCK_REDO, _("Redo last action"),priv->accel_group, GDK_z, GDK_SHIFT_MASK | GDK_CONTROL_MASK);
+  create_stock_menu_item(&priv->redo,priv->menuedit,GTK_STOCK_REDO, _("Redo last action"),priv->accel_group, GDK_KEY_z, GDK_SHIFT_MASK | GDK_CONTROL_MASK);
   g_signal_connect(G_OBJECT(priv->redo), "activate", G_CALLBACK(on_redo1_activate), NULL);
 
   /* separator */
   _create_separator_item(priv->menuedit);
 
-  create_stock_menu_item(&priv->cut,priv->menuedit,GTK_STOCK_CUT, _("Cut Selected Text"),priv->accel_group, GDK_x, GDK_CONTROL_MASK);
+  create_stock_menu_item(&priv->cut,priv->menuedit,GTK_STOCK_CUT, _("Cut Selected Text"),priv->accel_group, GDK_KEY_x, GDK_CONTROL_MASK);
   g_signal_connect(G_OBJECT(priv->cut), "activate", G_CALLBACK(on_cut1_activate), NULL);
-  create_stock_menu_item(&priv->copy,priv->menuedit,GTK_STOCK_COPY, _("Copy Selected Text"),priv->accel_group, GDK_c, GDK_CONTROL_MASK);
+  create_stock_menu_item(&priv->copy,priv->menuedit,GTK_STOCK_COPY, _("Copy Selected Text"),priv->accel_group, GDK_KEY_c, GDK_CONTROL_MASK);
   g_signal_connect(G_OBJECT(priv->copy), "activate", G_CALLBACK(on_copy1_activate), NULL);
-  create_stock_menu_item(&priv->paste,priv->menuedit,GTK_STOCK_PASTE, _("Paste Text from clipboard"),priv->accel_group, GDK_v, GDK_CONTROL_MASK);
+  create_stock_menu_item(&priv->paste,priv->menuedit,GTK_STOCK_PASTE, _("Paste Text from clipboard"),priv->accel_group, GDK_KEY_v, GDK_CONTROL_MASK);
   g_signal_connect(G_OBJECT(priv->paste), "activate", G_CALLBACK(on_paste1_activate), NULL);
-  create_stock_menu_item(&priv->selectall,priv->menuedit,GTK_STOCK_SELECT_ALL, _("Select all Text in current file"), priv->accel_group, GDK_a, GDK_CONTROL_MASK);
+  create_stock_menu_item(&priv->selectall,priv->menuedit,GTK_STOCK_SELECT_ALL, _("Select all Text in current file"), priv->accel_group, GDK_KEY_a, GDK_CONTROL_MASK);
   g_signal_connect(G_OBJECT(priv->selectall), "activate", G_CALLBACK(on_selectall1_activate), NULL);
 
   /* separator */
   _create_separator_item(priv->menuedit);
 
-  create_stock_menu_item(&priv->find,priv->menuedit,GTK_STOCK_FIND, _("Find text in current file"),priv->accel_group, GDK_f, GDK_CONTROL_MASK);
+  create_stock_menu_item(&priv->find,priv->menuedit,GTK_STOCK_FIND, _("Find text in current file"),priv->accel_group, GDK_KEY_f, GDK_CONTROL_MASK);
   g_signal_connect(G_OBJECT(priv->find), "activate", G_CALLBACK(on_find1_activate), NULL);
-  create_stock_menu_item(&priv->replace,priv->menuedit,GTK_STOCK_FIND_AND_REPLACE, _("Find and replace text in current file"),priv->accel_group, GDK_h, GDK_CONTROL_MASK);
+  create_stock_menu_item(&priv->replace,priv->menuedit,GTK_STOCK_FIND_AND_REPLACE, _("Find and replace text in current file"),priv->accel_group, GDK_KEY_h, GDK_CONTROL_MASK);
   g_signal_connect(G_OBJECT(priv->replace), "activate", G_CALLBACK(on_replace1_activate), NULL);
 
-  create_mnemonic_menu_item(&priv->incfind,priv->menuedit,_("Incremental search"), _("Search as you type"), priv->accel_group, GDK_i, GDK_CONTROL_MASK);
+  create_mnemonic_menu_item(&priv->incfind,priv->menuedit,_("Incremental search"), _("Search as you type"), priv->accel_group, GDK_KEY_i, GDK_CONTROL_MASK);
   g_signal_connect(G_OBJECT(priv->incfind), "activate", G_CALLBACK(on_incfind_activate), NULL);
 
-  create_mnemonic_menu_item(&priv->gotoline,priv->menuedit,_("Go to line"), _("Go to line"), priv->accel_group, GDK_g, GDK_CONTROL_MASK);
+  create_mnemonic_menu_item(&priv->gotoline,priv->menuedit,_("Go to line"), _("Go to line"), priv->accel_group, GDK_KEY_g, GDK_CONTROL_MASK);
   g_signal_connect(G_OBJECT(priv->gotoline), "activate", G_CALLBACK(on_gotoline_activate), NULL);
   
   /* separator */
   _create_separator_item(priv->menuedit);
 
-  create_stock_menu_item(&priv->indent,priv->menuedit,GTK_STOCK_INDENT, _("Indent the currently selected block"),priv->accel_group, GDK_i, GDK_SHIFT_MASK | GDK_MOD1_MASK);
+  create_stock_menu_item(&priv->indent,priv->menuedit,GTK_STOCK_INDENT, _("Indent the currently selected block"),priv->accel_group, GDK_KEY_i, GDK_SHIFT_MASK | GDK_MOD1_MASK);
   g_signal_connect(G_OBJECT(priv->indent), "activate", G_CALLBACK(block_indent), NULL);
-  create_stock_menu_item(&priv->unindent,priv->menuedit,GTK_STOCK_UNINDENT, _("Unindent the currently selected block"),priv->accel_group, GDK_i,  GDK_SHIFT_MASK | GDK_CONTROL_MASK |GDK_MOD1_MASK);
+  create_stock_menu_item(&priv->unindent,priv->menuedit,GTK_STOCK_UNINDENT, _("Unindent the currently selected block"),priv->accel_group, GDK_KEY_i,  GDK_SHIFT_MASK | GDK_CONTROL_MASK |GDK_MOD1_MASK);
   g_signal_connect(G_OBJECT(priv->unindent), "activate", G_CALLBACK(block_unindent), NULL);
 
   /* separator */
   _create_separator_item(priv->menuedit);
 
-  create_mnemonic_menu_item(&priv->upper ,priv->menuedit,_("_ToUpper"), _("Convert the current selection text to upper case"),priv->accel_group, GDK_u, GDK_CONTROL_MASK);
+  create_mnemonic_menu_item(&priv->upper ,priv->menuedit,_("_ToUpper"), _("Convert the current selection text to upper case"),priv->accel_group, GDK_KEY_u, GDK_CONTROL_MASK);
   g_signal_connect(G_OBJECT(priv->upper), "activate", G_CALLBACK(selectiontoupper), NULL);
-  create_mnemonic_menu_item(&priv->lower,priv->menuedit,_("_ToLower"), _("Convert the current selection text to lower case"),priv->accel_group, GDK_l, GDK_CONTROL_MASK);
+  create_mnemonic_menu_item(&priv->lower,priv->menuedit,_("_ToLower"), _("Convert the current selection text to lower case"),priv->accel_group, GDK_KEY_l, GDK_CONTROL_MASK);
   g_signal_connect(G_OBJECT(priv->lower), "activate", G_CALLBACK(selectiontolower), NULL);
   /* separator */
   _create_separator_item(priv->menuedit);
 
-  create_stock_menu_item(&priv->preferences, priv->menuedit, GTK_STOCK_PREFERENCES, _("Application Config"), priv->accel_group, GDK_F5, 0);
+  create_stock_menu_item(&priv->preferences, priv->menuedit, GTK_STOCK_PREFERENCES, _("Application Config"), priv->accel_group, GDK_KEY_F5, 0);
   g_signal_connect(G_OBJECT(priv->preferences), "activate", G_CALLBACK(on_preferences1_activate), NULL);
 }
 
@@ -468,39 +450,20 @@ static void fill_menu_view(MenuBarPrivate *priv)
 
   gboolean status;
   g_object_get(main_window.prefmg, "side_panel_hidden", &status, NULL);
-  create_check_menu_item(&priv->tog_class,priv->menuview,_("Show Side Panel"), _("Show/Hide Application Side Panel"),priv->accel_group, GDK_F8, 0,status);
+  create_check_menu_item(&priv->tog_class,priv->menuview,_("Show Side Panel"), _("Show/Hide Application Side Panel"),priv->accel_group, GDK_KEY_F8, 0,status);
   g_signal_connect(G_OBJECT(priv->tog_class), "activate", G_CALLBACK(tog_classbrowser),NULL);
 
-  create_check_menu_item(&priv->viewfullscreen,priv->menuview,_("Fullscreen"), _("Enable/Disable Fullscreen mode"),priv->accel_group, GDK_F11, 0,FALSE);
+  create_check_menu_item(&priv->viewfullscreen,priv->menuview,_("Fullscreen"), _("Enable/Disable Fullscreen mode"),priv->accel_group, GDK_KEY_F11, 0,FALSE);
   g_signal_connect(G_OBJECT(priv->viewfullscreen), "activate", G_CALLBACK(tog_fullscreen),NULL);
   /* separator */
   _create_separator_item(priv->menuview);
 
-  create_stock_menu_item(&priv->zoomin,priv->menuview,GTK_STOCK_ZOOM_IN, _("Increases zoom in 10%"),priv->accel_group, GDK_plus, GDK_CONTROL_MASK);
+  create_stock_menu_item(&priv->zoomin,priv->menuview,GTK_STOCK_ZOOM_IN, _("Increases zoom in 10%"),priv->accel_group, GDK_KEY_plus, GDK_CONTROL_MASK);
   g_signal_connect(G_OBJECT(priv->zoomin), "activate", G_CALLBACK(zoom_in),NULL);
-  create_stock_menu_item(&priv->zoomout,priv->menuview,GTK_STOCK_ZOOM_OUT, _("Decreases zoom in 10%"),priv->accel_group, GDK_minus, GDK_CONTROL_MASK);
+  create_stock_menu_item(&priv->zoomout,priv->menuview,GTK_STOCK_ZOOM_OUT, _("Decreases zoom in 10%"),priv->accel_group, GDK_KEY_minus, GDK_CONTROL_MASK);
   g_signal_connect(G_OBJECT(priv->zoomout), "activate", G_CALLBACK(zoom_out),NULL);
-  create_stock_menu_item(&priv->zoom100,priv->menuview,GTK_STOCK_ZOOM_100, _("Restores normal zoom level"),priv->accel_group, GDK_0, GDK_CONTROL_MASK);
+  create_stock_menu_item(&priv->zoom100,priv->menuview,GTK_STOCK_ZOOM_100, _("Restores normal zoom level"),priv->accel_group, GDK_KEY_0, GDK_CONTROL_MASK);
   g_signal_connect(G_OBJECT(priv->zoom100), "activate", G_CALLBACK(zoom_100),NULL);
-  /* separator */
-  _create_separator_item(priv->menuview);
-
-  /* toolbar icon size menu*/
-  priv->Ticonsize = gtk_menu_item_new_with_mnemonic(_("_Toolbar Icon Size"));
-  gtk_container_add (GTK_CONTAINER (priv->menuview), priv->Ticonsize);
-  priv->Ticonsizemenu = gtk_menu_new();
-  gtk_menu_item_set_submenu (GTK_MENU_ITEM (priv->Ticonsize), priv->Ticonsizemenu);
-
-  /*set new radio button group*/
-  priv->iconsizegroup=NULL;
-
-  priv->sizebig=gtk_radio_menu_item_new_with_mnemonic (priv->iconsizegroup,_("Big Icons"));
-  priv->iconsizegroup = gtk_radio_menu_item_get_group (GTK_RADIO_MENU_ITEM (priv->sizebig));
-  gtk_menu_shell_append(GTK_MENU_SHELL(priv->Ticonsizemenu), priv->sizebig);
-  g_signal_connect(G_OBJECT(priv->sizebig), "activate", G_CALLBACK(size_change), priv);
-  priv->sizesmall=gtk_radio_menu_item_new_with_mnemonic (priv->iconsizegroup,_("Small Icons"));
-  priv->iconsizegroup = gtk_radio_menu_item_get_group (GTK_RADIO_MENU_ITEM (priv->sizesmall));
-  gtk_menu_shell_append(GTK_MENU_SHELL(priv->Ticonsizemenu), priv->sizesmall);
   /* separator */
   _create_separator_item(priv->menuview);
 
@@ -514,23 +477,23 @@ static void fill_menu_view(MenuBarPrivate *priv)
 */
 static void fill_menu_code (MenuBarPrivate *priv)
 {
-  create_stock_menu_item(&priv->syntax,priv->menucode, GTK_STOCK_SPELL_CHECK, _("Check the syntax using the PHP command line binary"),priv->accel_group, GDK_F9, 0);
+  create_stock_menu_item(&priv->syntax,priv->menucode, GTK_STOCK_SPELL_CHECK, _("Check the syntax using the PHP command line binary"),priv->accel_group, GDK_KEY_F9, 0);
   /* set custom label */
   gtk_menu_item_set_label (GTK_MENU_ITEM(priv->syntax), _("_Syntax check"));
   g_signal_connect(G_OBJECT(priv->syntax), "activate", G_CALLBACK(syntax_check), NULL);
-  create_stock_menu_item(&priv->clearsyntax,priv->menucode, GTK_STOCK_CLEAR, _("Remove the syntax check window"),priv->accel_group, GDK_F9, GDK_CONTROL_MASK);
+  create_stock_menu_item(&priv->clearsyntax,priv->menucode, GTK_STOCK_CLEAR, _("Remove the syntax check window"),priv->accel_group, GDK_KEY_F9, GDK_CONTROL_MASK);
   /* set custom label */
   gtk_menu_item_set_label (GTK_MENU_ITEM(priv->clearsyntax), _("_Clear Syntax check"));
   g_signal_connect(G_OBJECT(priv->clearsyntax), "activate", G_CALLBACK(syntax_check_clear), NULL);
   /* separator */
   _create_separator_item(priv->menucode);
 
-  create_stock_menu_item(&priv->record,priv->menucode, GTK_STOCK_MEDIA_RECORD, _("Record keyboard actions"),priv->accel_group, GDK_k, GDK_MOD1_MASK);
+  create_stock_menu_item(&priv->record,priv->menucode, GTK_STOCK_MEDIA_RECORD, _("Record keyboard actions"),priv->accel_group, GDK_KEY_k, GDK_MOD1_MASK);
   /* set custom label */
   gtk_menu_item_set_label (GTK_MENU_ITEM(priv->record), _("_Record keyboard macro start/stop"));
   g_signal_connect(G_OBJECT(priv->record), "activate", G_CALLBACK(keyboard_macro_startstop), NULL);
 
-  create_stock_menu_item(&priv->playback,priv->menucode, GTK_STOCK_MEDIA_PLAY, _("Playback the stored keyboard macro"),priv->accel_group, GDK_k, GDK_CONTROL_MASK);
+  create_stock_menu_item(&priv->playback,priv->menucode, GTK_STOCK_MEDIA_PLAY, _("Playback the stored keyboard macro"),priv->accel_group, GDK_KEY_k, GDK_CONTROL_MASK);
   /* set custom label */
   gtk_menu_item_set_label (GTK_MENU_ITEM(priv->playback), _("_Playback keyboard macro"));
   g_signal_connect(G_OBJECT(priv->playback), "activate", G_CALLBACK(keyboard_macro_playback), NULL);
@@ -561,7 +524,7 @@ MENUBAR_init (MenuBar *menubar)
 {
   MenuBarPrivate *priv = MENUBAR_GET_PRIVATE(menubar);
 
-  /* create menu accel gruop */
+  /* create menu accel group */
   priv->accel_group = gtk_accel_group_new();
   gtk_window_add_accel_group(GTK_WINDOW(main_window.window), priv->accel_group);
   /*create menus*/
@@ -600,26 +563,11 @@ menubar_new (void)
 
 }
 
-void menubar_set_toolbar_size(MenuBar *menubar, gboolean value)
-{
-  if (!menubar) return;
-  MenuBarPrivate *priv = MENUBAR_GET_PRIVATE(menubar);
-  gtk_check_menu_item_set_active (GTK_CHECK_MENU_ITEM (priv->sizesmall), value);
-  if (!value) gtk_check_menu_item_set_active (GTK_CHECK_MENU_ITEM (priv->sizebig), TRUE);
-}
-
 GtkWidget *menubar_get_menu_plugin(MenuBar *menubar)
 {
   if (!menubar) return NULL;
   MenuBarPrivate *priv = MENUBAR_GET_PRIVATE(menubar);
   return priv->menuplugin;
-}
-
-GtkAccelGroup *menubar_get_accel_group(MenuBar *menubar)
-{
-  if (!menubar) return NULL;
-  MenuBarPrivate *priv = MENUBAR_GET_PRIVATE(menubar);
-  return priv->accel_group;
 }
 
 void menubar_set_classbrowser_status(MenuBar *menubar, gboolean value)

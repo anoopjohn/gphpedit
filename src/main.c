@@ -52,17 +52,18 @@ int main (int argc, char **argv)
 
   gphpedit_debug_init ();
         
-  main_window.prefmg = preferences_manager_new();
+  PreferencesManager *pref = preferences_manager_new();
 
   gboolean single_instance;
 
-  g_object_get(main_window.prefmg, "single_instance_only", &single_instance, NULL);
+  g_object_get(pref, "single_instance_only", &single_instance, NULL);
   /* Start of IPC communication */
   if (single_instance && poke_existing_instance (argc - 1, argv + 1)) return 0;
 
   main_window_create(argv, argc);
   gtk_main();
-        
+
+  g_object_unref(pref);
   /* it makes sense to install sigterm handler that would call this too */
   shutdown_ipc ();
 

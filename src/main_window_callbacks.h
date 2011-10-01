@@ -67,7 +67,7 @@ void zoom_out(GtkWidget *widget);
 void zoom_100(GtkWidget *widget);
 void update_zoom_level(Documentable *document);
 void can_undo(GtkWidget *widget);
-void on_notebook_switch_page (GtkNotebook *notebook, GtkNotebookPage *page, gint page_num, gpointer user_data);
+void on_notebook_switch_page (GtkNotebook *notebook, GtkWidget *page, gint page_num, gpointer user_data);
 void block_indent(GtkWidget *widget);
 void block_unindent(GtkWidget *widget);
 void syntax_check(GtkWidget *widget);
@@ -78,9 +78,6 @@ gboolean on_notebook_focus_tab(GtkNotebook *notebook, GtkNotebookTab arg1, gpoin
 void on_reload1_activate(GtkWidget *widget);
 void keyboard_macro_startstop(GtkWidget *widget);
 void keyboard_macro_playback(GtkWidget *widget);
-void classbrowser_show(void);
-void classbrowser_hide(void);
-void classbrowser_show_hide(GtkWidget *widget);
 void close_all_tabs(void);
 gboolean main_window_activate_focus (GtkWidget *widget,GdkEventFocus *event, gpointer user_data);
 void document_manager_new_document_cb (DocumentManager *docmg, Documentable *doc, gpointer user_data);

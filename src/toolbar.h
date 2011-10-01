@@ -1,8 +1,8 @@
-/* This file is part of gPHPEdit, a GNOME2 PHP Editor.
+/* This file is part of gPHPEdit, a GNOME PHP Editor.
 
    Copyright (C) 2003, 2004, 2005 Andy Jeffries <andy at gphpedit.org>
    Copyright (C) 2009 Anoop John <anoop dot john at zyxware.com>
-   Copyright (C) 2009, 2010 José Rostagno (for vijona.com.ar) 
+   Copyright (C) 2009, 2011 José Rostagno (for vijona.com.ar) 
 
    For more information or to find the latest release, visit our 
    website at http://www.gphpedit.org/
@@ -31,9 +31,6 @@
 
 G_BEGIN_DECLS
 
-/*
- * Type checking and casting macros
- */
 #define GOBJECT_TYPE_TOOLBAR              (TOOLBAR_get_type())
 #define TOOLBAR(obj)              (G_TYPE_CHECK_INSTANCE_CAST((obj), GOBJECT_TYPE_TOOLBAR, ToolBar))
 #define TOOLBAR_CLASS(klass)      (G_TYPE_CHECK_CLASS_CAST((klass), GOBJECT_TYPE_TOOLBAR, ToolBarClass))
@@ -43,37 +40,24 @@ G_BEGIN_DECLS
 
 /* Private structure type */
 typedef struct _ToolBarPrivate ToolBarPrivate;
-
-/*
- * Main object structure
- */
 typedef struct _ToolBar ToolBar;
 
 struct _ToolBar 
 {
-	GtkToolbar dialog;
-
-	/*< private > */
+	GtkBox dialog;
 	ToolBarPrivate *priv;
 };
 
-/*
- * Class definition
- */
 typedef struct _ToolBarClass ToolBarClass;
-
-struct _ToolBarClass 
+struct _ToolBarClass
 {
-	GtkToolbarClass parent_class;
+	GtkBoxClass parent_class;
 };
 
-/*
- * Public methods
- */
 GType 		 TOOLBAR_get_type 		(void) G_GNUC_CONST;
-
 GtkWidget *toolbar_new (void);
 void toolbar_update_controls(ToolBar *toolbar, gboolean is_scintilla, gboolean isreadonly);
+
 G_END_DECLS
 
 #endif  /* __TOOLBAR_H__  */

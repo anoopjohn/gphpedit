@@ -1,0 +1,119 @@
+<schemalist>
+  <schema gettext-domain="gphpedit" id="org.gphpedit" path="/apps/gphpedit/">
+    <child name="preferences" schema="org.gphpedit.preferences"/>
+    <child name="history-entry" schema="org.gphpedit.history-entry"/>
+  </schema>
+  <schema gettext-domain="gphpedit" id="org.gphpedit.preferences" path="/apps/gphpedit/preferences/">
+    <child name="editor" schema="org.gphpedit.preferences.editor"/>
+  </schema>
+  <schema gettext-domain="gphpedit" id="org.gphpedit.preferences.editor" path="/apps/gphpedit/preferences/editor/">
+    <key name="show-indentation-guides" type="b">
+      <default>false</default>
+      <_summary>Show indentation guides</_summary>
+      <_description>Indentation guides are dotted vertical lines that appear within indentation white space every indent size columns.</_description>
+    </key>
+    <key name="display-right-margin" type="b">
+      <default>false</default>
+      <_summary>Display Right Margin</_summary>
+      <_description>Whether gphpedit should display the right margin in the editing area.</_description>
+    </key>
+    <key name="right-margin-position" type="u">
+      <default>80</default>
+      <_summary>Right Margin Position</_summary>
+      <_description>Specifies the position of the right margin.</_description>
+    </key>
+    <key name="line-wrapping" type="b">
+      <default>false</default>
+      <_summary>Line Wrapping</_summary>
+      <_description>If you enable line wrapping, lines wider than the window width are continued on the following lines.</_description>
+    </key>
+    <key name="tabs-size" type="u">
+      <default>4</default>
+      <_summary>Tab Size</_summary>
+      <_description>Specifies the number of spaces that should be displayed instead of Tab characters.</_description>
+    </key>
+    <key name="indentation-size" type="u">
+      <default>4</default>
+      <_summary>Tab Size</_summary>
+      <_description>Specifies the indentation size.</_description>
+    </key>
+    <key name="auto-complete-delay" type="u">
+      <default>500</default>
+      <_summary>auto complete delay</_summary>
+      <_description></_description>
+    </key>
+    <key name="calltip-delay" type="u">
+      <default>500</default>
+      <_summary>calltip delay</_summary>
+      <_description></_description>
+    </key>
+    <key name="scheme" type="s">
+      <default>'mixer'</default>
+      <_summary>Style Scheme</_summary>
+      <_description>The ID of a Style Scheme used to color the text.</_description>
+    </key>
+    <key name="editor-font" type="s">
+      <default l10n="messages">''</default>
+      <_summary>Editor Font</_summary>
+      <_description>A custom font that will be used for the editing area.</_description>
+    </key>
+    <key name="highlight-current-line" type="b">
+      <default>false</default>
+      <_summary>Highlight Current Line</_summary>
+      <_description>Whether gphpedit should highlight the current line.</_description>
+    </key>
+    <key name="use-tabs-instead-spaces" type="b">
+      <default>false</default>
+      <_summary>Use tabs instead spaces</_summary>
+      <_description>Whether gphpedit should insert only tabs.</_description>
+    </key>
+    <key name="auto-indent" type="b">
+      <default>false</default>
+      <_summary>Automatic indent</_summary>
+      <_description>Whether gphpedit should enable automatic indentation.</_description>
+    </key>
+    <key name="save-session" type="b">
+      <default>true</default>
+      <_summary>Save Session</_summary>
+      <_description>Whether gphpedit should save current open files.</_description>
+    </key>
+    <key name="auto-complete-braces" type="b">
+      <default>false</default>
+      <_summary>Auto Complete Braces</_summary>
+      <_description>Whether gphpedit should autocomplete braces and quotes.</_description>
+    </key>
+    <key name="single-instance-only" type="b">
+      <default>false</default>
+      <_summary>Single Instance Only</_summary>
+      <_description>Whether gphpedit should work in single instance mode.</_description>
+    </key>
+    <key name="showfilebrowser" type="b">
+      <default>true</default>
+      <_summary>Show Filebrowser</_summary>
+      <_description>Whether gphpedit should show filebrowser in side panel.</_description>
+    </key>
+    <key name="php-binary-location" type="s">
+      <default l10n="messages">'php'</default>
+      <_summary>PHP binary location</_summary>
+      <_description>Location of php binary.</_description>
+    </key>
+    <key name="shared-source-location" type="s">
+      <default l10n="messages">''</default>
+      <_summary>Shared Source Location</_summary>
+      <_description>Shared source php library location.</_description>
+    </key>
+    <key name="php-file-extensions" type="s">
+      <default>'php,inc,phtml,php3,xml,htm,html'</default>
+      <_summary>php file extensions</_summary>
+      <_description>Supported php file extensions.</_description>
+    </key>
+  </schema>
+  <schema id="org.gphpedit.history-entry" path="/apps/gphpedit/history-entry/">
+    <key name="search-for-entry" type="as">
+      <default>['']</default>
+    </key>
+    <key name="replace-with-entry" type="as">
+      <default>['']</default>
+    </key>
+  </schema>
+</schemalist>

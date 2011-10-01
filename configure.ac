@@ -19,7 +19,7 @@ dnl with this program; if not, write to the Free Software Foundation, Inc.,
 dnl 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
 dnl
 AC_PREREQ([2.59])
-AC_INIT([gPHPEdit],[0.9.98],[https://savannah.nongnu.org/support/?group=gphpedit],[gphpedit],[http://www.gphpedit.org])
+AC_INIT([gPHPEdit],[1.00],[https://savannah.nongnu.org/support/?group=gphpedit],[gphpedit],[http://www.gphpedit.org])
 
 dnl autoconf versions before 2.64 don't have AC_PACKAGE_URL
 m4_ifdef([AC_PACKAGE_URL],,
@@ -80,15 +80,25 @@ dnl  --------------
 
 # Checks for libraries.
 dnl Checking for the required libraries.
-GTK_REQUIRED_VERSION=2.20.0
-GLIB_REQUIRED_VERSION=2.26.0
+GTK_REQUIRED_VERSION=3.0.0
+GLIB_REQUIRED_VERSION=2.28.0
+WEBKIT_REQUIRED_VERSION=1.3.0
 LIBXML_REQUIRED_VERSION=2.6.0
 
-PKG_CHECK_MODULES(GTK, gtk+-2.0 >= $GTK_REQUIRED_VERSION)
-PKG_CHECK_MODULES(GLIB, 	glib-2.0 >= $GLIB_REQUIRED_VERSION
-                        	gio-2.0 >= $GLIB_REQUIRED_VERSION)
-PKG_CHECK_MODULES(WEBKIT,[webkit-1.0])
-PKG_CHECK_MODULES(LIBXML, libxml-2.0 >= $LIBXML_REQUIRED_VERSION)
+PKG_CHECK_MODULES(GTK, gtk+-3.0 >= 3.0.0)
+PKG_CHECK_MODULES(GLIB, 	glib-2.0 >= 2.28
+                        	gio-2.0 >= 2.26)
+PKG_CHECK_MODULES(WEBKIT, webkitgtk-3.0 >= 1.3.0)
+PKG_CHECK_MODULES(LIBXML, libxml-2.0 >= 2.6.0)
+
+# Dependencies
+
+#PKG_CHECK_MODULES(GPHPEDIT, [
+#	libxml-2.0 >= 2.6.0
+#	glib-2.0 >= 2.28.0
+#	gio-2.0 >= 2.26.0
+#    webkitgtk-3.0 >= 1.3.0
+#])
 
 AC_PATH_PROG([CTAGS_EXUBERANT], [ctags-exuberant], [/usr/bin/ctags-exuberant],
                    [$PATH$PATH_SEPARATOR/usr/bin$PATH_SEPARATOR]dnl

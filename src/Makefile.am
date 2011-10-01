@@ -1,5 +1,5 @@
 ##
-##  This file is part of gPHPEdit, a GNOME2 PHP Editor.
+##  This file is part of gPHPEdit, a GNOME PHP Editor.
 ##
 ##  Copyright (C) 2003, 2004, 2005 Andy Jeffries <andy at gphpedit.org>
 ##  Copyright (C) 2009 Anoop John <anoop dot john at zyxware.com>
@@ -28,15 +28,17 @@ bin_PROGRAMS = gphpedit
 
 uidir = $(pkgdatadir)/ui
 dist_ui_DATA = preferences_dialog.ui \
+  gphpedit.ui \
   classbrowser.ui \
   filebrowser.ui  \
+  toolbar.ui \
   find_dialog.ui \
   replace_dialog.ui
 
 AM_CFLAGS = \
 	$(WEBKIT_CFLAGS) $(GTK_CFLAGS) $(GLIB_CFLAGS) $(LIBXML_CFLAGS)\
 	-I$(top_srcdir)/src/gtkscintilla2 \
-	-Wall -DGTK -DSCI_LEXER \
+	-Wall -DGTK -DSCI_LEXER\
 	-DPIXMAP_DIR=\""$(datadir)/pixmaps"\" \
   -DGPHPEDIT_UI_DIR=\""$(uidir)"\"
 
@@ -95,8 +97,8 @@ gphpedit_SOURCES = \
   filebrowser_ui.h \
   find_dialog.c \
   find_dialog.h \
-  gphpedit-close-button.c \
-  gphpedit-close-button.h \
+  gedit-close-button.c \
+  gedit-close-button.h \
   gphpedit-session.c \
   gphpedit-session.h \
   gphpedit-statusbar.c \
@@ -107,8 +109,8 @@ gphpedit_SOURCES = \
   gvfs_utils.h \
   goto_infobar.c \
   goto_infobar.h \
-  history-entry.c \
-  history-entry.h \
+  gedit-history-entry.c \
+  gedit-history-entry.h \
   images.h \
   main.c \
   main.h \
@@ -132,8 +134,8 @@ gphpedit_SOURCES = \
   preferences_manager.h \
   replace_dialog.c \
   replace_dialog.h \
-  status-combo-box.c \
-  status-combo-box.h \
+  gedit-status-combo-box.c \
+  gedit-status-combo-box.h \
   search_infobar.c \
   search_infobar.h \
   symbolizable.c \
