@@ -360,9 +360,8 @@ static inline void create_stock_menu_item(GtkWidget **menuitem,GtkWidget *menu,c
  * create_mnemonic_menu_item
  * creates a new mnemonic menu item, append it to menu, add menu hint, optionally add accelerator and return the new menuitem
 */
-static inline void create_mnemonic_menu_item(GtkWidget **menuitem,GtkWidget *menu,gchar *mnemonic, gchar *menu_hint, GtkAccelGroup *accel_group, guint accel_key, GdkModifierType accel_mods){
+static inline void create_mnemonic_menu_item(GtkWidget **menuitem,GtkWidget *menu,gchar *mnemonic, GtkAccelGroup *accel_group, guint accel_key, GdkModifierType accel_mods){
   *menuitem = gtk_menu_item_new_with_mnemonic(mnemonic);
-  install_menu_hint(*menuitem,menu_hint, NULL); //FIXME:
   if (!(accel_key==0 && accel_mods==0))
     gtk_widget_add_accelerator(*menuitem, "activate", accel_group, accel_key, accel_mods, GTK_ACCEL_VISIBLE);
   gtk_menu_shell_append(GTK_MENU_SHELL(menu), *menuitem);
@@ -388,18 +387,18 @@ static void fill_menu_file(MenuBarPrivate *priv){
     install_menu_hint(priv->newi, _("Creates a new file"), priv->main_window);
     create_stock_menu_item(&priv->open,priv->menunew,GTK_STOCK_OPEN, priv->accel_group, GDK_KEY_o, GDK_CONTROL_MASK);
     install_menu_hint(priv->open, _("Open a file"), priv->main_window);
-  create_mnemonic_menu_item(&priv->opensel ,priv->menunew,_("_Open selected file"), _("Open a file with the name currently selected in the editor"), priv->accel_group,GDK_KEY_o, GDK_CONTROL_MASK);
-
-  /* recent menu setup */
-  GtkWidget *reciente = gtk_menu_item_new_with_mnemonic(_("_Recent Files"));
-  gtk_container_add (GTK_CONTAINER (priv->menunew), reciente);
-  priv->menureciente =  gtk_recent_chooser_menu_new (); /* create recent menu for default recent manager*/
-  gtk_menu_item_set_submenu (GTK_MENU_ITEM (reciente), priv->menureciente);
-  gtk_recent_chooser_set_limit (GTK_RECENT_CHOOSER(priv->menureciente), NUM_REOPEN_MAX); /* set max files in menu */
-  gtk_recent_chooser_set_sort_type (GTK_RECENT_CHOOSER(priv->menureciente),GTK_RECENT_SORT_MRU); /* Most recent first*/
-  GtkRecentFilter *filter = gtk_recent_filter_new ();
-  gtk_recent_filter_add_application (filter, "gPHPEdit"); /* only show our files */
-  gtk_recent_chooser_add_filter (GTK_RECENT_CHOOSER(priv->menureciente), filter);
+    create_mnemonic_menu_item(&priv->opensel ,priv->menunew,_("_Open selected file"), priv->accel_group,GDK_KEY_o, GDK_CONTROL_MASK);
+    install_menu_hint(priv->opensel, _("Open a file with the name currently selected in the editor"), priv->main_window);
+    /* recent menu setup */
+    GtkWidget *reciente = gtk_menu_item_new_with_mnemonic(_("_Recent Files"));
+    gtk_container_add (GTK_CONTAINER (priv->menunew), reciente);
+    priv->menureciente =  gtk_recent_chooser_menu_new (); /* create recent menu for default recent manager*/
+    gtk_menu_item_set_submenu (GTK_MENU_ITEM (reciente), priv->menureciente);
+    gtk_recent_chooser_set_limit (GTK_RECENT_CHOOSER(priv->menureciente), NUM_REOPEN_MAX); /* set max files in menu */
+    gtk_recent_chooser_set_sort_type (GTK_RECENT_CHOOSER(priv->menureciente),GTK_RECENT_SORT_MRU); /* Most recent first*/
+    GtkRecentFilter *filter = gtk_recent_filter_new ();
+    gtk_recent_filter_add_application (filter, "gPHPEdit"); /* only show our files */
+    gtk_recent_chooser_add_filter (GTK_RECENT_CHOOSER(priv->menureciente), filter);
 
 
     create_stock_menu_item(&priv->reload, priv->menunew, GTK_STOCK_REVERT_TO_SAVED, priv->accel_group, GDK_KEY_r, GDK_SHIFT_MASK | GDK_CONTROL_MASK);
@@ -411,11 +410,12 @@ static void fill_menu_file(MenuBarPrivate *priv){
     install_menu_hint(priv->save, _("Save the file currently selected in the editor"), priv->main_window);
     create_stock_menu_item(&priv->saveas,priv->menunew,GTK_STOCK_SAVE_AS, priv->accel_group, GDK_KEY_s, GDK_SHIFT_MASK | GDK_CONTROL_MASK);
     install_menu_hint(priv->saveas, _("Save the file currently selected in the editor"), priv->main_window);
-  create_mnemonic_menu_item(&priv->saveall ,priv->menunew,_("Save A_ll"), _("Save all open unsaved files"),priv->accel_group, GDK_KEY_a, GDK_SHIFT_MASK | GDK_MOD1_MASK);
+    create_mnemonic_menu_item(&priv->saveall ,priv->menunew,_("Save A_ll"), priv->accel_group, GDK_KEY_a, GDK_SHIFT_MASK | GDK_MOD1_MASK);
+    install_menu_hint(priv->saveall, _("Save all open unsaved files"), priv->main_window);
     create_stock_menu_item(&priv->close,priv->menunew,GTK_STOCK_CLOSE, priv->accel_group, GDK_KEY_w, GDK_CONTROL_MASK);
     install_menu_hint(priv->close, _("Close the current file"), priv->main_window);
-  /* separator */
-  _create_separator_item(priv->menunew);
+    /* separator */
+    _create_separator_item(priv->menunew);
 
     create_stock_menu_item(&priv->quit,priv->menunew, GTK_STOCK_QUIT, priv->accel_group, GDK_KEY_q, GDK_CONTROL_MASK);
     install_menu_hint(priv->quit, _("Quit the application"), priv->main_window);
@@ -451,16 +451,17 @@ static void fill_help_menu(MenuBarPrivate *priv){
     create_stock_menu_item(&priv->phphelp,priv->menuhelp, GTK_STOCK_HELP,
                         priv->accel_group, GDK_KEY_F1, 0);
     install_menu_hint(priv->phphelp, _("Look for help on the currently selected function"), priv->main_window);
-  /* set custom label */
-  gtk_menu_item_set_label (GTK_MENU_ITEM(priv->phphelp), _("_PHP Help"));
+    /* set custom label */
+    gtk_menu_item_set_label (GTK_MENU_ITEM(priv->phphelp), _("_PHP Help"));
   #ifdef PACKAGE_BUGREPORT
-  create_mnemonic_menu_item(&priv->bugreport,priv->menuhelp,
-                            _("_Report a bug in gPHPEdit"), _("Go to bug report page to report a bug"),
-                            priv->accel_group, 0, 0);
+    create_mnemonic_menu_item(&priv->bugreport,priv->menuhelp,
+                            _("_Report a bug in gPHPEdit"), priv->accel_group, 0, 0);
+    install_menu_hint(priv->bugreport, _("Go to bug report page to report a bug"), priv->main_window);
   #endif
   #ifdef TRANSLATE_URL
   create_mnemonic_menu_item(&priv->translate,priv->menuhelp,_("_Translate this application"),
-                            _("Start translating this application"),priv->accel_group, 0, 0);
+                            priv->accel_group, 0, 0);
+    install_menu_hint(priv->translate, _("Start translating this application"), priv->main_window);
   #endif
     create_stock_menu_item(&priv->abouthelp,priv->menuhelp,GTK_STOCK_ABOUT,
                         priv->accel_group, 0, 0);
@@ -506,9 +507,10 @@ static void fill_menu_edit(MenuBarPrivate *priv){
     install_menu_hint(priv->find, _("Find text in current file"), priv->main_window);
     create_stock_menu_item(&priv->replace,priv->menuedit,GTK_STOCK_FIND_AND_REPLACE, priv->accel_group, GDK_KEY_h, GDK_CONTROL_MASK);
     install_menu_hint(priv->replace, _("Find and replace text in current file"), priv->main_window);
-  create_mnemonic_menu_item(&priv->incfind,priv->menuedit,_("Incremental search"), _("Search as you type"), priv->accel_group, GDK_KEY_i, GDK_CONTROL_MASK);
-  create_mnemonic_menu_item(&priv->gotoline,priv->menuedit,_("Go to line"), _("Go to line"), priv->accel_group, GDK_KEY_g, GDK_CONTROL_MASK);
-  
+    create_mnemonic_menu_item(&priv->incfind,priv->menuedit,_("Incremental search"), priv->accel_group, GDK_KEY_i, GDK_CONTROL_MASK);
+    install_menu_hint(priv->incfind, _("Search as you type"), priv->main_window);
+    create_mnemonic_menu_item(&priv->gotoline,priv->menuedit,_("Go to line"), priv->accel_group, GDK_KEY_g, GDK_CONTROL_MASK);
+    install_menu_hint(priv->gotoline, _("Go to line"), priv->main_window);
     /* separator */
     _create_separator_item(priv->menuedit);
 
@@ -516,13 +518,15 @@ static void fill_menu_edit(MenuBarPrivate *priv){
     install_menu_hint(priv->indent, _("Indent the currently selected block"), priv->main_window);
     create_stock_menu_item(&priv->unindent,priv->menuedit,GTK_STOCK_UNINDENT, priv->accel_group, GDK_KEY_i,  GDK_SHIFT_MASK | GDK_CONTROL_MASK |GDK_MOD1_MASK);
     install_menu_hint(priv->unindent, _("Unindent the currently selected block"), priv->main_window);
-  /* separator */
-  _create_separator_item(priv->menuedit);
+    /* separator */
+    _create_separator_item(priv->menuedit);
 
-  create_mnemonic_menu_item(&priv->upper ,priv->menuedit,_("_ToUpper"), _("Convert the current selection text to upper case"),priv->accel_group, GDK_KEY_u, GDK_CONTROL_MASK);
-  create_mnemonic_menu_item(&priv->lower,priv->menuedit,_("_ToLower"), _("Convert the current selection text to lower case"),priv->accel_group, GDK_KEY_l, GDK_CONTROL_MASK);
-  /* separator */
-  _create_separator_item(priv->menuedit);
+    create_mnemonic_menu_item(&priv->upper ,priv->menuedit,_("_ToUpper"), priv->accel_group, GDK_KEY_u, GDK_CONTROL_MASK);
+    install_menu_hint(priv->upper, _("Convert the current selection text to upper case"), priv->main_window);
+    create_mnemonic_menu_item(&priv->lower,priv->menuedit,_("_ToLower"),priv->accel_group, GDK_KEY_l, GDK_CONTROL_MASK);
+    install_menu_hint(priv->lower, _("Convert the current selection text to lower case"), priv->main_window);
+    /* separator */
+    _create_separator_item(priv->menuedit);
 
     create_stock_menu_item(&priv->preferences, priv->menuedit, GTK_STOCK_PREFERENCES, priv->accel_group, GDK_KEY_F5, 0);
     install_menu_hint(priv->preferences, _("Application Config"), priv->main_window);
@@ -569,19 +573,20 @@ static void fill_menu_view(MenuBarPrivate *priv)
     install_menu_hint(priv->tog_class, _("Show/Hide Application Side Panel"), priv->main_window);
     create_check_menu_item(&priv->viewfullscreen,priv->menuview,_("Fullscreen"), priv->accel_group, GDK_KEY_F11, 0);
     install_menu_hint(priv->viewfullscreen, _("Enable/Disable Fullscreen mode"), priv->main_window);
-  /* separator */
-  _create_separator_item(priv->menuview);
+    /* separator */
+    _create_separator_item(priv->menuview);
 
-  create_stock_menu_item(&priv->zoomin,priv->menuview,GTK_STOCK_ZOOM_IN, priv->accel_group, GDK_KEY_plus, GDK_CONTROL_MASK);
+    create_stock_menu_item(&priv->zoomin,priv->menuview,GTK_STOCK_ZOOM_IN, priv->accel_group, GDK_KEY_plus, GDK_CONTROL_MASK);
     install_menu_hint(priv->zoomin, _("Increases zoom in 10%"), priv->main_window);
-  create_stock_menu_item(&priv->zoomout,priv->menuview,GTK_STOCK_ZOOM_OUT, priv->accel_group, GDK_KEY_minus, GDK_CONTROL_MASK);
+    create_stock_menu_item(&priv->zoomout,priv->menuview,GTK_STOCK_ZOOM_OUT, priv->accel_group, GDK_KEY_minus, GDK_CONTROL_MASK);
     install_menu_hint(priv->zoomout, _("Decreases zoom in 10%"), priv->main_window);
-  create_stock_menu_item(&priv->zoom100,priv->menuview,GTK_STOCK_ZOOM_100, priv->accel_group, GDK_KEY_0, GDK_CONTROL_MASK);
+    create_stock_menu_item(&priv->zoom100,priv->menuview,GTK_STOCK_ZOOM_100, priv->accel_group, GDK_KEY_0, GDK_CONTROL_MASK);
     install_menu_hint(priv->zoom100, _("Restores normal zoom level"), priv->main_window);
-  /* separator */
-  _create_separator_item(priv->menuview);
+    /* separator */
+    _create_separator_item(priv->menuview);
 
-  create_mnemonic_menu_item(&priv->preview ,priv->menuview,_("_Show Preview"), _("Preview the Document"),priv->accel_group, 0, 0);
+    create_mnemonic_menu_item(&priv->preview ,priv->menuview,_("_Show Preview"), priv->accel_group, 0, 0);
+    install_menu_hint(priv->preview, _("Preview the Document"), priv->main_window);
 }
 
 static void prepare_menu_view(MenuBarPrivate *priv)
@@ -638,13 +643,20 @@ static void fill_menu_code (MenuBarPrivate *priv)
   priv->menuforce = gtk_menu_new();
   gtk_menu_item_set_submenu (GTK_MENU_ITEM (priv->force), priv->menuforce);
 
-  create_mnemonic_menu_item(&priv->forcephp,priv->menuforce,_("_PHP/HTML/XML"), _("Force syntax highlighting to PHP/HTML/XML mode"),priv->accel_group, 0, 0);
-  create_mnemonic_menu_item(&priv->forcecss,priv->menuforce,_("_CSS"), _("Force syntax highlighting to CSS mode"),priv->accel_group, 0, 0);
-  create_mnemonic_menu_item(&priv->forcecxx,priv->menuforce,_("C/C_++"), _("Force syntax highlighting to C/C++ mode"),priv->accel_group, 0, 0);
-  create_mnemonic_menu_item(&priv->forcesql,priv->menuforce,_("_SQL"), _("Force syntax highlighting to SQL mode"),priv->accel_group, 0, 0);
-  create_mnemonic_menu_item(&priv->forceperl,priv->menuforce,_("_Perl"), _("Force syntax highlighting to Perl mode"),priv->accel_group, 0, 0);
-  create_mnemonic_menu_item(&priv->forcecobol,priv->menuforce,_("_Cobol"), _("Force syntax highlighting to Cobol mode"),priv->accel_group, 0, 0);
-  create_mnemonic_menu_item(&priv->forcepython,priv->menuforce,_("P_ython"), _("Force syntax highlighting to Python mode"),priv->accel_group, 0, 0);
+  create_mnemonic_menu_item(&priv->forcephp,priv->menuforce,_("_PHP/HTML/XML"), priv->accel_group, 0, 0);
+  install_menu_hint(priv->forcephp, _("Force syntax highlighting to PHP/HTML/XML mode"), priv->main_window);
+  create_mnemonic_menu_item(&priv->forcecss,priv->menuforce,_("_CSS"), priv->accel_group, 0, 0);
+  install_menu_hint(priv->forcecss, _("Force syntax highlighting to CSS mode"), priv->main_window);
+  create_mnemonic_menu_item(&priv->forcecxx,priv->menuforce,_("C/C_++"), priv->accel_group, 0, 0);
+  install_menu_hint(priv->forcecxx, _("Force syntax highlighting to C/C++ mode"), priv->main_window);
+  create_mnemonic_menu_item(&priv->forcesql,priv->menuforce,_("_SQL"), priv->accel_group, 0, 0);
+  install_menu_hint(priv->forcesql, _("Force syntax highlighting to SQL mode"), priv->main_window);
+  create_mnemonic_menu_item(&priv->forceperl,priv->menuforce,_("_Perl"), priv->accel_group, 0, 0);
+  install_menu_hint(priv->forceperl, _("Force syntax highlighting to Perl mode"), priv->main_window);
+  create_mnemonic_menu_item(&priv->forcecobol,priv->menuforce,_("_Cobol"), priv->accel_group, 0, 0);
+  install_menu_hint(priv->forcecobol, _("Force syntax highlighting to Cobol mode"), priv->main_window);
+  create_mnemonic_menu_item(&priv->forcepython,priv->menuforce,_("P_ython"), priv->accel_group, 0, 0);
+  install_menu_hint(priv->forcepython, _("Force syntax highlighting to Python mode"), priv->main_window);
 }
 
 static void prepare_menu_code (MenuBarPrivate *priv)
