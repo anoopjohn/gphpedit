@@ -230,7 +230,7 @@ static void tog_fullscreen(GtkWidget *widget, gpointer user_data)
 {
     MainWindow *main_window = (MainWindow *) user_data;
     gboolean state = gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(widget));
-    fullscreen_show_hide(main_window, gboolean state);
+    fullscreen_show_hide(main_window, state);
 }
 
 /*
@@ -256,8 +256,8 @@ Hint hint;
 gboolean show_hint(GtkWidget *widget, GdkEventCrossing *event, gpointer user_data){
     Hint *hint = (Hint*) user_data;
     gtk_widget_set_state (widget, GTK_STATE_PRELIGHT);
-    context_id = gtk_statusbar_get_context_id (GTK_STATUSBAR(hint->main_window->appbar), (const gchar *) hint->message);//user_data);
-    message_id= gtk_statusbar_push (GTK_STATUSBAR(hint->main_window->appbar), context_id, (const gchar *) hint->message);//user_data);
+    context_id = gtk_statusbar_get_context_id (GTK_STATUSBAR(hint->main_window->appbar), (const gchar *) hint->message);
+    message_id= gtk_statusbar_push (GTK_STATUSBAR(hint->main_window->appbar), context_id, (const gchar *) hint->message);
     return FALSE;
 }
 
@@ -279,7 +279,7 @@ gboolean delete_hint(GtkWidget *widget, GdkEventCrossing *event, gpointer user_d
 void inline install_menu_hint(GtkWidget *widget, gchar *message, gpointer main_window){
     hint.message = message;
     hint.main_window = main_window;
-    g_signal_connect(G_OBJECT(widget), "enter-notify-event", G_CALLBACK(show_hint), &hint);//message);
+    g_signal_connect(G_OBJECT(widget), "enter-notify-event", G_CALLBACK(show_hint), &hint);
     g_signal_connect(G_OBJECT(widget), "leave-notify-event", G_CALLBACK(delete_hint), main_window);
 }
 
@@ -371,9 +371,9 @@ static inline void create_mnemonic_menu_item(GtkWidget **menuitem,GtkWidget *men
  * create_mnemonic_menu_item
  * creates a check menu item, append it to menu, add menu hint, optionally add accelerator, set default state and return the new menuitem
 */
-static inline void create_check_menu_item(GtkWidget **menuitem,GtkWidget *menu,gchar *mnemonic, gchar *menu_hint, GtkAccelGroup *accel_group, guint accel_key, GdkModifierType accel_mods, gboolean active){
+static inline void create_check_menu_item(GtkWidget **menuitem,GtkWidget *menu,gchar *mnemonic, gchar *menu_hint, GtkAccelGroup *accel_group, guint accel_key, GdkModifierType accel_mods){
   *menuitem = gtk_check_menu_item_new_with_label(mnemonic);
-  gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(*menuitem), active);
+  gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(*menuitem), FALSE);
   install_menu_hint(*menuitem, menu_hint, NULL);//FIXME
   if (!(accel_key==0 && accel_mods==0))
     gtk_widget_add_accelerator(*menuitem, "activate", accel_group, accel_key, accel_mods, GTK_ACCEL_VISIBLE);
@@ -560,13 +560,13 @@ static void prepare_menu_edit(MenuBarPrivate *priv){
 static void fill_menu_view(MenuBarPrivate *priv)
 {
 //FIXME: remove last create_check_menu_item is always false
-  create_check_menu_item(&priv->viewstatusbar,priv->menuview,_("Statusbar"), _("Show/Hide Application Statusbar"), priv->accel_group, 0, 0, FALSE);
-  create_check_menu_item(&priv->viewmaintoolbar,priv->menuview,_("Main Toolbar"), _("Show/Hide Application Main Toolbar"),priv->accel_group, 0, 0, FALSE);
+  create_check_menu_item(&priv->viewstatusbar,priv->menuview,_("Statusbar"), _("Show/Hide Application Statusbar"), priv->accel_group, 0, 0);
+  create_check_menu_item(&priv->viewmaintoolbar,priv->menuview,_("Main Toolbar"), _("Show/Hide Application Main Toolbar"),priv->accel_group, 0, 0);
   /* separator */
   _create_separator_item(priv->menuview);
 
-  create_check_menu_item(&priv->tog_class,priv->menuview,_("Show Side Panel"), _("Show/Hide Application Side Panel"),priv->accel_group, GDK_KEY_F8, 0, FALSE);
-  create_check_menu_item(&priv->viewfullscreen,priv->menuview,_("Fullscreen"), _("Enable/Disable Fullscreen mode"),priv->accel_group, GDK_KEY_F11, 0,FALSE);
+  create_check_menu_item(&priv->tog_class,priv->menuview,_("Show Side Panel"), _("Show/Hide Application Side Panel"),priv->accel_group, GDK_KEY_F8, 0);
+  create_check_menu_item(&priv->viewfullscreen,priv->menuview,_("Fullscreen"), _("Enable/Disable Fullscreen mode"),priv->accel_group, GDK_KEY_F11, 0);
   /* separator */
   _create_separator_item(priv->menuview);
 
