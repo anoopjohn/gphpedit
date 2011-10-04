@@ -27,6 +27,7 @@
 #define __MENUBAR_H__
 
 #include <gtk/gtk.h>
+#include "main_window.h"
 
 G_BEGIN_DECLS
 
@@ -72,7 +73,7 @@ struct _MenuBarClass
  */
 GType 		 MENUBAR_get_type 		(void) G_GNUC_CONST;
 
-GtkWidget *menubar_new (void);
+GtkWidget *menubar_new (gpointer main_window);
 void install_menu_hint(GtkWidget *widget, gchar *message);
 GtkWidget *menubar_get_menu_plugin(MenuBar *menubar);
 void menubar_set_classbrowser_status(MenuBar *menubar, gboolean value);

@@ -105,7 +105,7 @@ void side_panel_show_hide(GtkWidget *widget)
 {
   gboolean hidden;
   g_object_get(main_window.prefmg, "side_panel_hidden", &hidden, NULL);
-  menubar_set_classbrowser_status(MENUBAR(main_window.menu), hidden);
+  menubar_set_classbrowser_status(MENUBAR(main_window.pmenu), hidden);
   if (hidden)
     side_panel_show();
   else
@@ -246,9 +246,9 @@ void main_window_create(char **argv, gint argc)
   GtkWidget *menubox = get_widget_from_builder("menubox");
   gtk_widget_show (menubox);
 
-  main_window.menu = menubar_new ();
-  gtk_box_pack_start (GTK_BOX (menubox), main_window.menu, FALSE, FALSE, 0);
-  gtk_widget_show_all (main_window.menu);
+  main_window.pmenu = menubar_new (&main_window);
+  gtk_box_pack_start (GTK_BOX (menubox), main_window.pmenu, FALSE, FALSE, 0);
+  gtk_widget_show_all (main_window.pmenu);
 
   GtkWidget *toolbox = get_widget_from_builder("toolbox");
   gtk_widget_show (toolbox);
@@ -293,6 +293,6 @@ void update_controls(Documentable *document)
   if (!document) return ;
   gboolean read_only, can_modify, preview;
   g_object_get(document, "read_only", &read_only, "can_modify", &can_modify, "can_preview", &preview, NULL);
-  menubar_update_controls(MENUBAR(main_window.menu), can_modify, preview, read_only);
+  menubar_update_controls(MENUBAR(main_window.pmenu), can_modify, preview, read_only);
   toolbar_update_controls(TOOLBAR(main_window.toolbar_main), can_modify, read_only);
 }

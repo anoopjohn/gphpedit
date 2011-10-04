@@ -50,7 +50,7 @@ typedef struct
 
   GtkWidget *window;
   /* menu */
-  GtkWidget *menu;
+  GtkWidget *pmenu;
   /* toolbars */
   GtkWidget *toolbar_main;
 
