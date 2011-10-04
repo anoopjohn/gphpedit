@@ -123,6 +123,12 @@ void statusbar_show_hide(MainWindow *main_window, gboolean state)
     gtk_widget_set_visible(main_window->appbar, state);
 }
 
+void maintoolbar_show_hide(MainWindow *main_window, gboolean state)
+{
+    set_preferences_manager_show_maintoolbar(main_window->prefmg, state);
+    gtk_widget_set_visible(main_window->toolbar_main, state);
+}
+
 static void main_window_create_panes(void)
 {
   gboolean hidden;

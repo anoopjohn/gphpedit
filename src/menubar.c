@@ -208,6 +208,7 @@ static void tog_statusbar(GtkWidget *widget, gpointer user_data)
     gboolean state = gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(widget));
     statusbar_show_hide(main_window, state);
 }
+
 /*
  * tog_maintoolbar
  * Show/hide application maintoolbar
@@ -217,8 +218,7 @@ static void tog_maintoolbar(GtkWidget *widget, gpointer user_data)
 {
     MainWindow *main_window = (MainWindow *) user_data;
     gboolean state = gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(widget));
-    set_preferences_manager_show_maintoolbar( main_window->prefmg, state);
-    gtk_widget_set_visible(main_window->toolbar_main, state);
+    maintoolbar_show_hide(main_window, state);
 }
 
 /*
