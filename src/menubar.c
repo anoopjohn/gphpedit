@@ -371,10 +371,9 @@ static inline void create_mnemonic_menu_item(GtkWidget **menuitem,GtkWidget *men
  * create_mnemonic_menu_item
  * creates a check menu item, append it to menu, add menu hint, optionally add accelerator, set default state and return the new menuitem
 */
-static inline void create_check_menu_item(GtkWidget **menuitem,GtkWidget *menu,gchar *mnemonic, gchar *menu_hint, GtkAccelGroup *accel_group, guint accel_key, GdkModifierType accel_mods){
+static inline void create_check_menu_item(GtkWidget **menuitem,GtkWidget *menu,gchar *mnemonic, GtkAccelGroup *accel_group, guint accel_key, GdkModifierType accel_mods){
   *menuitem = gtk_check_menu_item_new_with_label(mnemonic);
   gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(*menuitem), FALSE);
-  install_menu_hint(*menuitem, menu_hint, NULL);//FIXME
   if (!(accel_key==0 && accel_mods==0))
     gtk_widget_add_accelerator(*menuitem, "activate", accel_group, accel_key, accel_mods, GTK_ACCEL_VISIBLE);
   gtk_menu_shell_append(GTK_MENU_SHELL(menu),*menuitem);
@@ -559,14 +558,17 @@ static void prepare_menu_edit(MenuBarPrivate *priv){
 */
 static void fill_menu_view(MenuBarPrivate *priv)
 {
-//FIXME: remove last create_check_menu_item is always false
-  create_check_menu_item(&priv->viewstatusbar,priv->menuview,_("Statusbar"), _("Show/Hide Application Statusbar"), priv->accel_group, 0, 0);
-  create_check_menu_item(&priv->viewmaintoolbar,priv->menuview,_("Main Toolbar"), _("Show/Hide Application Main Toolbar"),priv->accel_group, 0, 0);
-  /* separator */
-  _create_separator_item(priv->menuview);
+    create_check_menu_item(&priv->viewstatusbar,priv->menuview,_("Statusbar"), priv->accel_group, 0, 0);
+    install_menu_hint(priv->viewstatusbar, _("Show/Hide Application Statusbar"), priv->main_window);
+    create_check_menu_item(&priv->viewmaintoolbar,priv->menuview,_("Main Toolbar"), priv->accel_group, 0, 0);
+    install_menu_hint(priv->viewmaintoolbar, _("Show/Hide Application Main Toolbar"), priv->main_window);
+    /* separator */
+    _create_separator_item(priv->menuview);
 
-  create_check_menu_item(&priv->tog_class,priv->menuview,_("Show Side Panel"), _("Show/Hide Application Side Panel"),priv->accel_group, GDK_KEY_F8, 0);
-  create_check_menu_item(&priv->viewfullscreen,priv->menuview,_("Fullscreen"), _("Enable/Disable Fullscreen mode"),priv->accel_group, GDK_KEY_F11, 0);
+    create_check_menu_item(&priv->tog_class,priv->menuview,_("Show Side Panel"), priv->accel_group, GDK_KEY_F8, 0);
+    install_menu_hint(priv->tog_class, _("Show/Hide Application Side Panel"), priv->main_window);
+    create_check_menu_item(&priv->viewfullscreen,priv->menuview,_("Fullscreen"), priv->accel_group, GDK_KEY_F11, 0);
+    install_menu_hint(priv->viewfullscreen, _("Enable/Disable Fullscreen mode"), priv->main_window);
   /* separator */
   _create_separator_item(priv->menuview);
 
