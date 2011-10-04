@@ -189,7 +189,7 @@ void add_plugin_to_menu (gpointer data, gpointer user_data)
     if (get_plugin_syntax_type(plugin)==-1){ 
     item =  gtk_menu_item_new_image_item(GTK_STOCK_EXECUTE, get_plugin_name(plugin));
     gtk_widget_show(item);
-    install_menu_hint(item, (gchar *)get_plugin_description(plugin));
+    install_menu_hint(item, (gchar *)get_plugin_description(plugin), &main_window);
     g_signal_connect(G_OBJECT(item), "activate", G_CALLBACK(plugin_exec), (gpointer) menu);
     gtk_menu_shell_append(GTK_MENU_SHELL(menu), item);
     if (i<10) gtk_widget_add_accelerator(item, "activate", menu->priv->accel_group, parse_shortcut(i), GDK_CONTROL_MASK, GTK_ACCEL_VISIBLE);
