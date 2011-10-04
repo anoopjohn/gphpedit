@@ -229,12 +229,10 @@ static void tog_maintoolbar(GtkWidget *widget, gpointer user_data)
 static void tog_fullscreen(GtkWidget *widget, gpointer user_data)
 {
     MainWindow *main_window = (MainWindow *) user_data;
-    if (gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(widget))) {
-        gtk_window_fullscreen (GTK_WINDOW(main_window->window));
-    } else {
-        gtk_window_unfullscreen (GTK_WINDOW(main_window->window));
-    }
+    gboolean state = gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(widget));
+    fullscreen_show_hide(main_window, gboolean state);
 }
+
 /*
  * ShowPreview
  * Preview Current Document

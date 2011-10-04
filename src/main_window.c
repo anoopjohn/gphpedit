@@ -134,6 +134,15 @@ void maintoolbar_show_hide(MainWindow *main_window, gboolean state)
     gtk_widget_set_visible(main_window->toolbar_main, state);
 }
 
+void fullscreen_show_hide(MainWindow *main_window, gboolean state)
+{
+    if (state) {
+        gtk_window_fullscreen (GTK_WINDOW(main_window->window));
+    } else {
+        gtk_window_unfullscreen (GTK_WINDOW(main_window->window));
+    }
+}
+
 static void main_window_create_panes(void)
 {
   gboolean hidden;

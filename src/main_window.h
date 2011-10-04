@@ -83,4 +83,5 @@ void update_app_title(Documentable *document);
 void side_panel_show_hide(MainWindow *main_window);
 void statusbar_show_hide(MainWindow *main_window, gboolean state);
 void maintoolbar_show_hide(MainWindow *main_window, gboolean state);
+void fullscreen_show_hide(MainWindow *main_window, gboolean state);
 #endif
