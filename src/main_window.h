@@ -81,4 +81,5 @@ extern MainWindow main_window;
 void main_window_create(char **argv, gint argc);
 void update_app_title(Documentable *document);
 void side_panel_show_hide(GtkWidget *widget, gpointer user_data);
+void statusbar_show_hide(MainWindow *main_window, gboolean state);
 #endif

@@ -113,6 +113,16 @@ void side_panel_show_hide(GtkWidget *widget, gpointer user_data)
         side_panel_hide();
 }
 
+/*
+ * tog_statusbar
+ * Show/hide application statusbar
+*/
+void statusbar_show_hide(MainWindow *main_window, gboolean state)
+{
+    set_preferences_manager_show_statusbar(main_window->prefmg, state);
+    gtk_widget_set_visible(main_window->appbar, state);
+}
+
 static void main_window_create_panes(void)
 {
   gboolean hidden;
