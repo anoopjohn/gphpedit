@@ -39,7 +39,7 @@
 
 typedef struct
 {
-  GtkBuilder *builder;
+  GtkBuilder *pbuilder;
   /* preferences manager */
   PreferencesManager *prefmg;
   TemplatesManager *tempmg;

@@ -68,9 +68,14 @@ gboolean classbrowser_accept_size(GtkPaned *paned, gpointer user_data)
   return TRUE;
 }
 
+static GtkWidget *get_widget_from_builder(const gchar *name){
+    g_return_val_if_fail(name!=NULL, NULL);
+    return GTK_WIDGET(gtk_builder_get_object (main_window.pbuilder, name));
+}
+
 static void main_window_create_appbar(void)
 {
-  GtkWidget *statusbox = GTK_WIDGET(gtk_builder_get_object (main_window.builder, "statusbox"));
+  GtkWidget *statusbox = get_widget_from_builder("statusbox");
   gtk_widget_show (statusbox);
   main_window.appbar = gphpedit_statusbar_new ();
   gtk_box_pack_start(GTK_BOX(statusbox), main_window.appbar, FALSE, TRUE, 1);
@@ -112,8 +117,8 @@ static void main_window_create_panes(void)
   gboolean hidden;
   gint size;
 
-  main_window.main_horizontal_pane = GTK_WIDGET(gtk_builder_get_object (main_window.builder, "main_horizontal_pane"));
-  main_window.main_vertical_pane = GTK_WIDGET(gtk_builder_get_object (main_window.builder, "main_vertical_pane"));
+  main_window.main_horizontal_pane = get_widget_from_builder("main_horizontal_pane");
+  main_window.main_vertical_pane = get_widget_from_builder("main_vertical_pane");
   g_signal_connect (G_OBJECT (main_window.window), "size_allocate", G_CALLBACK (classbrowser_accept_size), NULL);
 
   g_object_get(main_window.prefmg, "side_panel_hidden", &hidden,"side_panel_size", &size, NULL);
@@ -124,17 +129,17 @@ static void main_window_create_panes(void)
 
 static void create_side_panel(void){
   /* Close button for the side bar */
-  GtkWidget *close_box = GTK_WIDGET(gtk_builder_get_object (main_window.builder, "sidepanelheader"));
+  GtkWidget *close_box = get_widget_from_builder("sidepanelheader");
   main_window.pclose_sidebar_button = gedit_close_button_new();
   gtk_widget_set_tooltip_text(main_window.pclose_sidebar_button, _("Close side panel"));
   g_signal_connect(G_OBJECT(main_window.pclose_sidebar_button), "clicked", G_CALLBACK (side_panel_show_hide),NULL);
   gtk_widget_show(main_window.pclose_sidebar_button);
   gtk_box_pack_end(GTK_BOX(close_box), main_window.pclose_sidebar_button, FALSE, FALSE, 0);
 
-  main_window.notebook_manager = GTK_WIDGET(gtk_builder_get_object (main_window.builder, "notebook_manager"));
+  main_window.notebook_manager = get_widget_from_builder("notebook_manager");
   
   /* Classbrowser stuff creation */  
-  GtkWidget *classbox = GTK_WIDGET(gtk_builder_get_object (main_window.builder, "classbox"));
+  GtkWidget *classbox = get_widget_from_builder("classbox");
   main_window.pclassbrowser = gphpedit_classbrowser_new (); 
   gtk_widget_show(main_window.pclassbrowser);
   gtk_box_pack_start(GTK_BOX(classbox), main_window.pclassbrowser, TRUE, TRUE, 0);
@@ -153,7 +158,7 @@ static void main_window_fill_panes(void)
   /* create side panel */
   create_side_panel();
 
-  GtkWidget *pribox = GTK_WIDGET(gtk_builder_get_object (main_window.builder, "pribox"));
+  GtkWidget *pribox = get_widget_from_builder("pribox");
   main_window.notebook_editor = gtk_notebook_new ();
   gtk_notebook_set_scrollable(GTK_NOTEBOOK(main_window.notebook_editor), TRUE);
   gtk_widget_show (main_window.notebook_editor);
@@ -162,7 +167,7 @@ static void main_window_fill_panes(void)
   g_signal_connect (G_OBJECT (main_window.notebook_editor), "focus-tab", G_CALLBACK (on_notebook_focus_tab), NULL);
 
   /* add syntax check window */
-  GtkWidget *prin_hbox = GTK_WIDGET(gtk_builder_get_object (main_window.builder, "prin_hbox"));
+  GtkWidget *prin_hbox = get_widget_from_builder("prin_hbox");
   main_window.win = gtk_syntax_check_window_new ();
   gtk_box_pack_start(GTK_BOX(prin_hbox), GTK_WIDGET(main_window.win), TRUE, TRUE, 2);
   gtk_syntax_check_window_run_check(main_window.win, NULL);
@@ -225,27 +230,27 @@ void main_window_create(char **argv, gint argc)
   main_window.prefmg = preferences_manager_new();
   create_app_main_window(_("gPHPEdit"));
 
-  main_window.builder = gtk_builder_new ();
+  main_window.pbuilder = gtk_builder_new ();
   GError *error = NULL;
-  guint res = gtk_builder_add_from_file (main_window.builder, GPHPEDIT_UI_DIR "/gphpedit.ui", &error);
+  guint res = gtk_builder_add_from_file (main_window.pbuilder, GPHPEDIT_UI_DIR "/gphpedit.ui", &error);
   if (!res) {
     g_critical ("Unable to load the UI file!");
     g_error_free(error);
     return ;
   }
 
-  GtkWidget *prinbox = GTK_WIDGET(gtk_builder_get_object (main_window.builder, "prinbox"));
+  GtkWidget *prinbox = get_widget_from_builder("prinbox");
   gtk_widget_reparent (prinbox, GTK_WIDGET(main_window.window));
 
   /* add menu bar to main window */
-  GtkWidget *menubox = GTK_WIDGET(gtk_builder_get_object (main_window.builder, "menubox"));
+  GtkWidget *menubox = get_widget_from_builder("menubox");
   gtk_widget_show (menubox);
 
   main_window.menu = menubar_new ();
   gtk_box_pack_start (GTK_BOX (menubox), main_window.menu, FALSE, FALSE, 0);
   gtk_widget_show_all (main_window.menu);
 
-  GtkWidget *toolbox = GTK_WIDGET(gtk_builder_get_object (main_window.builder, "toolbox"));
+  GtkWidget *toolbox = get_widget_from_builder("toolbox");
   gtk_widget_show (toolbox);
 
   main_window.toolbar_main = toolbar_new ();
