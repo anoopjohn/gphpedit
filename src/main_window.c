@@ -101,15 +101,16 @@ static void side_panel_hide(void)
   g_object_set(main_window.prefmg, "side_panel_hidden", TRUE, NULL);
 }
 
-void side_panel_show_hide(GtkWidget *widget)
+void side_panel_show_hide(GtkWidget *widget, gpointer user_data)
 {
-  gboolean hidden;
-  g_object_get(main_window.prefmg, "side_panel_hidden", &hidden, NULL);
-  menubar_set_classbrowser_status(MENUBAR(main_window.pmenu), hidden);
-  if (hidden)
-    side_panel_show();
-  else
-    side_panel_hide();
+    MainWindow *main_window = (MainWindow *) user_data;
+    gboolean hidden;
+    g_object_get(main_window->prefmg, "side_panel_hidden", &hidden, NULL);
+    menubar_set_classbrowser_status(MENUBAR(main_window->pmenu), hidden);
+    if (hidden)
+        side_panel_show();
+    else
+        side_panel_hide();
 }
 
 static void main_window_create_panes(void)
@@ -132,7 +133,7 @@ static void create_side_panel(void){
   GtkWidget *close_box = get_widget_from_builder("sidepanelheader");
   main_window.pclose_sidebar_button = gedit_close_button_new();
   gtk_widget_set_tooltip_text(main_window.pclose_sidebar_button, _("Close side panel"));
-  g_signal_connect(G_OBJECT(main_window.pclose_sidebar_button), "clicked", G_CALLBACK (side_panel_show_hide),NULL);
+  g_signal_connect(G_OBJECT(main_window.pclose_sidebar_button), "clicked", G_CALLBACK (side_panel_show_hide), &main_window);
   gtk_widget_show(main_window.pclose_sidebar_button);
   gtk_box_pack_end(GTK_BOX(close_box), main_window.pclose_sidebar_button, FALSE, FALSE, 0);
 

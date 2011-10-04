@@ -74,7 +74,7 @@ struct _MenuBarClass
 GType 		 MENUBAR_get_type 		(void) G_GNUC_CONST;
 
 GtkWidget *menubar_new (gpointer main_window);
-void install_menu_hint(GtkWidget *widget, gchar *message);
+void install_menu_hint(GtkWidget *widget, gchar *message, gpointer main_window);
 GtkWidget *menubar_get_menu_plugin(MenuBar *menubar);
 void menubar_set_classbrowser_status(MenuBar *menubar, gboolean value);
 void menubar_update_controls(MenuBar *menubar, gboolean is_scintilla, gboolean can_preview, gboolean isreadonly);
