@@ -191,6 +191,16 @@ MENUBAR_class_init (MenuBarClass *klass)
 	g_type_class_add_private (klass, sizeof (MenuBarPrivate));
 }
 
+static void syntax_check(GtkWidget *widget, gpointer user_data)
+{
+    syntax_check_show((MainWindow *)user_data);
+}
+
+static void syntax_check_clear(GtkWidget *widget, gpointer user_data)
+{
+    syntax_check_hide((MainWindow *)user_data);
+}
+
 /*
  * tog_classbrowser
  * Show/hide side panel
@@ -661,8 +671,8 @@ static void prepare_menu_code (MenuBarPrivate *priv)
     install_menu_hint(priv->forcecobol, _("Force syntax highlighting to Cobol mode"), priv->main_window);
     install_menu_hint(priv->forcepython, _("Force syntax highlighting to Python mode"), priv->main_window);
 
-    g_signal_connect(G_OBJECT(priv->syntax), "activate", G_CALLBACK(syntax_check), NULL);
-    g_signal_connect(G_OBJECT(priv->clearsyntax), "activate", G_CALLBACK(syntax_check_clear), NULL);
+    g_signal_connect(G_OBJECT(priv->syntax), "activate", G_CALLBACK(syntax_check), priv->main_window);
+    g_signal_connect(G_OBJECT(priv->clearsyntax), "activate", G_CALLBACK(syntax_check_clear), priv->main_window);
     g_signal_connect(G_OBJECT(priv->record), "activate", G_CALLBACK(keyboard_macro_startstop), NULL);
     g_signal_connect(G_OBJECT(priv->playback), "activate", G_CALLBACK(keyboard_macro_playback), NULL);
 

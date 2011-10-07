@@ -54,7 +54,7 @@ typedef struct
   /* toolbars */
   GtkWidget *toolbar_main;
 
-  GtkWidget *main_vertical_pane;
+  GtkWidget *pmain_vertical_pane;
   GtkWidget *main_horizontal_pane;
   /* status bar */
   GtkWidget *appbar;
@@ -84,4 +84,6 @@ void side_panel_show_hide(MainWindow *main_window);
 void statusbar_show_hide(MainWindow *main_window, gboolean state);
 void maintoolbar_show_hide(MainWindow *main_window, gboolean state);
 void fullscreen_show_hide(MainWindow *main_window, gboolean state);
+void syntax_check_show(MainWindow *main_window);
+void syntax_check_hide(MainWindow *main_window);
 #endif

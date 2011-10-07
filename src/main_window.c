@@ -143,13 +143,27 @@ void fullscreen_show_hide(MainWindow *main_window, gboolean state)
     }
 }
 
+void syntax_check_show(MainWindow *main_window)
+{
+  Documentable *doc = document_manager_get_current_documentable(main_window->docmg);
+  gtk_syntax_check_window_run_check(GTK_SYNTAX_CHECK_WINDOW(main_window->win), doc);
+  gtk_paned_set_position(GTK_PANED(main_window->pmain_vertical_pane), 200);
+}
+
+void syntax_check_hide(MainWindow *main_window)
+{
+  gint max;
+  g_object_get(main_window->pmain_vertical_pane, "max-position", &max, NULL);
+  gtk_paned_set_position(GTK_PANED(main_window->pmain_vertical_pane), max);
+}
+
 static void main_window_create_panes(void)
 {
   gboolean hidden;
   gint size;
 
   main_window.main_horizontal_pane = get_widget_from_builder("main_horizontal_pane");
-  main_window.main_vertical_pane = get_widget_from_builder("main_vertical_pane");
+  main_window.pmain_vertical_pane = get_widget_from_builder("main_vertical_pane");
   g_signal_connect (G_OBJECT (main_window.window), "size_allocate", G_CALLBACK (classbrowser_accept_size), NULL);
 
   g_object_get(main_window.prefmg, "side_panel_hidden", &hidden,"side_panel_size", &size, NULL);
@@ -205,7 +219,7 @@ static void main_window_fill_panes(void)
   gtk_widget_show (main_window.win);
 
   //FIXME: hack to hide syntax pane on start-up
-  gtk_paned_set_position(GTK_PANED(main_window.main_vertical_pane), 10000);
+  gtk_paned_set_position(GTK_PANED(main_window.pmain_vertical_pane), 10000);
 }
 
 /**

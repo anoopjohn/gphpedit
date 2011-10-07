@@ -70,8 +70,6 @@ void can_undo(GtkWidget *widget);
 void on_notebook_switch_page (GtkNotebook *notebook, GtkWidget *page, gint page_num, gpointer user_data);
 void block_indent(GtkWidget *widget);
 void block_unindent(GtkWidget *widget);
-void syntax_check(GtkWidget *widget);
-void syntax_check_clear(GtkWidget *widget);
 void selectiontoupper(void);
 void selectiontolower(void);
 gboolean on_notebook_focus_tab(GtkNotebook *notebook, GtkNotebookTab arg1, gpointer user_data);
