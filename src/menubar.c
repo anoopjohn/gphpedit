@@ -248,7 +248,6 @@ typedef struct {
     MainWindow *main_window;
 } Hint;
 
-Hint hint;
 /*
  *show_hint
  * Show a new menu hint in the statusbar, and set widget state to prelight
@@ -276,10 +275,13 @@ gboolean delete_hint(GtkWidget *widget, GdkEventCrossing *event, gpointer user_d
  * install_menu_hint
  * connect menu hint signals
 */
-void inline install_menu_hint(GtkWidget *widget, gchar *message, gpointer main_window){
-    hint.message = message;
-    hint.main_window = main_window;
-    g_signal_connect(G_OBJECT(widget), "enter-notify-event", G_CALLBACK(show_hint), &hint);
+void inline install_menu_hint(GtkWidget *widget, gchar *message, gpointer main_window)
+{
+//FIXME: big memory leak. use a table and free when destroy the widget
+    Hint *hint = g_slice_new(Hint);
+    hint->message = message;
+    hint->main_window = main_window;
+    g_signal_connect(G_OBJECT(widget), "enter-notify-event", G_CALLBACK(show_hint), hint);
     g_signal_connect(G_OBJECT(widget), "leave-notify-event", G_CALLBACK(delete_hint), main_window);
 }
 
@@ -384,11 +386,8 @@ static inline void create_check_menu_item(GtkWidget **menuitem,GtkWidget *menu,g
 */
 static void fill_menu_file(MenuBarPrivate *priv){
     create_stock_menu_item(&priv->newi, priv->menunew, GTK_STOCK_NEW, priv->accel_group, GDK_KEY_n, GDK_CONTROL_MASK);
-    install_menu_hint(priv->newi, _("Creates a new file"), priv->main_window);
     create_stock_menu_item(&priv->open,priv->menunew,GTK_STOCK_OPEN, priv->accel_group, GDK_KEY_o, GDK_CONTROL_MASK);
-    install_menu_hint(priv->open, _("Open a file"), priv->main_window);
     create_mnemonic_menu_item(&priv->opensel ,priv->menunew,_("_Open selected file"), priv->accel_group,GDK_KEY_o, GDK_CONTROL_MASK);
-    install_menu_hint(priv->opensel, _("Open a file with the name currently selected in the editor"), priv->main_window);
     /* recent menu setup */
     GtkWidget *reciente = gtk_menu_item_new_with_mnemonic(_("_Recent Files"));
     gtk_container_add (GTK_CONTAINER (priv->menunew), reciente);
@@ -400,25 +399,17 @@ static void fill_menu_file(MenuBarPrivate *priv){
     gtk_recent_filter_add_application (filter, "gPHPEdit"); /* only show our files */
     gtk_recent_chooser_add_filter (GTK_RECENT_CHOOSER(priv->menureciente), filter);
 
-
     create_stock_menu_item(&priv->reload, priv->menunew, GTK_STOCK_REVERT_TO_SAVED, priv->accel_group, GDK_KEY_r, GDK_SHIFT_MASK | GDK_CONTROL_MASK);
-    install_menu_hint(priv->reload, _("Save the file currently selected in the editor"), priv->main_window);
   /* separator */
   _create_separator_item(priv->menunew);
 
     create_stock_menu_item(&priv->save,priv->menunew, GTK_STOCK_SAVE, priv->accel_group, GDK_KEY_s, GDK_CONTROL_MASK);
-    install_menu_hint(priv->save, _("Save the file currently selected in the editor"), priv->main_window);
     create_stock_menu_item(&priv->saveas,priv->menunew,GTK_STOCK_SAVE_AS, priv->accel_group, GDK_KEY_s, GDK_SHIFT_MASK | GDK_CONTROL_MASK);
-    install_menu_hint(priv->saveas, _("Save the file currently selected in the editor"), priv->main_window);
     create_mnemonic_menu_item(&priv->saveall ,priv->menunew,_("Save A_ll"), priv->accel_group, GDK_KEY_a, GDK_SHIFT_MASK | GDK_MOD1_MASK);
-    install_menu_hint(priv->saveall, _("Save all open unsaved files"), priv->main_window);
     create_stock_menu_item(&priv->close,priv->menunew,GTK_STOCK_CLOSE, priv->accel_group, GDK_KEY_w, GDK_CONTROL_MASK);
-    install_menu_hint(priv->close, _("Close the current file"), priv->main_window);
     /* separator */
     _create_separator_item(priv->menunew);
-
     create_stock_menu_item(&priv->quit,priv->menunew, GTK_STOCK_QUIT, priv->accel_group, GDK_KEY_q, GDK_CONTROL_MASK);
-    install_menu_hint(priv->quit, _("Quit the application"), priv->main_window);
 }
 
 /*
@@ -426,20 +417,28 @@ static void fill_menu_file(MenuBarPrivate *priv){
 * create file menu widgets and fill file menu
 */
 static void prepare_menu_file(MenuBarPrivate *priv){
-  g_signal_connect(G_OBJECT(priv->newi), "activate", G_CALLBACK(on_new1_activate), NULL);
-  g_signal_connect(G_OBJECT(priv->open), "activate", G_CALLBACK(on_open1_activate), NULL);
-  g_signal_connect(G_OBJECT(priv->opensel), "activate", G_CALLBACK(on_openselected1_activate), NULL);
+    install_menu_hint(priv->newi, _("Creates a new file"), priv->main_window);
+    install_menu_hint(priv->open, _("Open a file"), priv->main_window);
+    install_menu_hint(priv->opensel, _("Open a file with the name currently selected in the editor"), priv->main_window);
+    install_menu_hint(priv->reload, _("Save the file currently selected in the editor"), priv->main_window);
 
-  g_signal_connect(G_OBJECT(priv->menureciente), "item-activated", G_CALLBACK(reopen_recent), NULL);
+    install_menu_hint(priv->save, _("Save the file currently selected in the editor"), priv->main_window);
+    install_menu_hint(priv->saveas, _("Save the file currently selected in the editor"), priv->main_window);
+    install_menu_hint(priv->saveall, _("Save all open unsaved files"), priv->main_window);
+    install_menu_hint(priv->close, _("Close the current file"), priv->main_window);
+    install_menu_hint(priv->quit, _("Quit the application"), priv->main_window);
 
+    g_signal_connect(G_OBJECT(priv->newi), "activate", G_CALLBACK(on_new1_activate), NULL);
+    g_signal_connect(G_OBJECT(priv->open), "activate", G_CALLBACK(on_open1_activate), NULL);
+    g_signal_connect(G_OBJECT(priv->opensel), "activate", G_CALLBACK(on_openselected1_activate), NULL);
+    g_signal_connect(G_OBJECT(priv->menureciente), "item-activated", G_CALLBACK(reopen_recent), NULL);
+    g_signal_connect(G_OBJECT(priv->reload), "activate", G_CALLBACK(on_reload1_activate), NULL);
 
-  g_signal_connect(G_OBJECT(priv->reload), "activate", G_CALLBACK(on_reload1_activate), NULL);
-
-  g_signal_connect(G_OBJECT(priv->save), "activate", G_CALLBACK(on_save1_activate), NULL);
-  g_signal_connect(G_OBJECT(priv->saveas), "activate", G_CALLBACK(on_save_as1_activate), NULL);
-  g_signal_connect(G_OBJECT(priv->saveall), "activate", G_CALLBACK(on_saveall1_activate), NULL);
-  g_signal_connect(G_OBJECT(priv->close), "activate", G_CALLBACK(on_close1_activate), NULL);
-  g_signal_connect(G_OBJECT(priv->quit), "activate", G_CALLBACK(on_quit1_activate), NULL);
+    g_signal_connect(G_OBJECT(priv->save), "activate", G_CALLBACK(on_save1_activate), NULL);
+    g_signal_connect(G_OBJECT(priv->saveas), "activate", G_CALLBACK(on_save_as1_activate), NULL);
+    g_signal_connect(G_OBJECT(priv->saveall), "activate", G_CALLBACK(on_saveall1_activate), NULL);
+    g_signal_connect(G_OBJECT(priv->close), "activate", G_CALLBACK(on_close1_activate), NULL);
+    g_signal_connect(G_OBJECT(priv->quit), "activate", G_CALLBACK(on_quit1_activate), NULL);
 }
 
 /*
@@ -450,110 +449,110 @@ static void fill_help_menu(MenuBarPrivate *priv){
   /* help menu */
     create_stock_menu_item(&priv->phphelp,priv->menuhelp, GTK_STOCK_HELP,
                         priv->accel_group, GDK_KEY_F1, 0);
-    install_menu_hint(priv->phphelp, _("Look for help on the currently selected function"), priv->main_window);
     /* set custom label */
     gtk_menu_item_set_label (GTK_MENU_ITEM(priv->phphelp), _("_PHP Help"));
   #ifdef PACKAGE_BUGREPORT
     create_mnemonic_menu_item(&priv->bugreport,priv->menuhelp,
                             _("_Report a bug in gPHPEdit"), priv->accel_group, 0, 0);
-    install_menu_hint(priv->bugreport, _("Go to bug report page to report a bug"), priv->main_window);
   #endif
   #ifdef TRANSLATE_URL
   create_mnemonic_menu_item(&priv->translate,priv->menuhelp,_("_Translate this application"),
                             priv->accel_group, 0, 0);
-    install_menu_hint(priv->translate, _("Start translating this application"), priv->main_window);
   #endif
     create_stock_menu_item(&priv->abouthelp,priv->menuhelp,GTK_STOCK_ABOUT,
                         priv->accel_group, 0, 0);
-    install_menu_hint(priv->abouthelp, _("Shows info about gPHPEdit"), priv->main_window);
 }
 
 static void prepare_help_menu(MenuBarPrivate *priv){
-  g_signal_connect(G_OBJECT(priv->phphelp), "activate", G_CALLBACK(context_help), priv->main_window);
-  #ifdef PACKAGE_BUGREPORT
-  g_signal_connect(G_OBJECT(priv->bugreport), "activate", G_CALLBACK(bugreport), priv->main_window);
-  #endif
-  #ifdef TRANSLATE_URL
-  g_signal_connect(G_OBJECT(priv->translate), "activate", G_CALLBACK(translate), priv->main_window);
-  #endif
-  g_signal_connect(G_OBJECT(priv->abouthelp), "activate", G_CALLBACK(on_about1_activate), priv->main_window);
+    install_menu_hint(priv->phphelp, _("Look for help on the currently selected function"), priv->main_window);
+    g_signal_connect(G_OBJECT(priv->phphelp), "activate", G_CALLBACK(context_help), priv->main_window);
+    #ifdef PACKAGE_BUGREPORT
+    g_signal_connect(G_OBJECT(priv->bugreport), "activate", G_CALLBACK(bugreport), priv->main_window);
+    install_menu_hint(priv->bugreport, _("Go to bug report page to report a bug"), priv->main_window);
+    #endif
+    #ifdef TRANSLATE_URL
+    g_signal_connect(G_OBJECT(priv->translate), "activate", G_CALLBACK(translate), priv->main_window);
+    install_menu_hint(priv->translate, _("Start translating this application"), priv->main_window);
+    #endif
+    g_signal_connect(G_OBJECT(priv->abouthelp), "activate", G_CALLBACK(on_about1_activate), priv->main_window);
+    install_menu_hint(priv->abouthelp, _("Shows info about gPHPEdit"), priv->main_window);
 }
 
 /*
 * create_edit_menu
 * create edit menu widgets and fill edit menu
 */
-static void fill_menu_edit(MenuBarPrivate *priv){
-
+static void fill_menu_edit(MenuBarPrivate *priv)
+{
     create_stock_menu_item(&priv->undo,priv->menuedit,GTK_STOCK_UNDO, priv->accel_group, GDK_KEY_z, GDK_CONTROL_MASK);
-    install_menu_hint(priv->undo, _("Undo last action"), priv->main_window);
     create_stock_menu_item(&priv->redo,priv->menuedit,GTK_STOCK_REDO, priv->accel_group, GDK_KEY_z, GDK_SHIFT_MASK | GDK_CONTROL_MASK);
-    install_menu_hint(priv->redo, _("Redo last action"), priv->main_window);
     /* separator */
     _create_separator_item(priv->menuedit);
 
     create_stock_menu_item(&priv->cut,priv->menuedit,GTK_STOCK_CUT, priv->accel_group, GDK_KEY_x, GDK_CONTROL_MASK);
-    install_menu_hint(priv->cut, _("Cut Selected Text"), priv->main_window);
     create_stock_menu_item(&priv->copy,priv->menuedit,GTK_STOCK_COPY, priv->accel_group, GDK_KEY_c, GDK_CONTROL_MASK);
-    install_menu_hint(priv->copy, _("Copy Selected Text"), priv->main_window);
     create_stock_menu_item(&priv->paste,priv->menuedit,GTK_STOCK_PASTE, priv->accel_group, GDK_KEY_v, GDK_CONTROL_MASK);
-    install_menu_hint(priv->paste, _("Paste Text from clipboard"), priv->main_window);
     create_stock_menu_item(&priv->selectall,priv->menuedit,GTK_STOCK_SELECT_ALL, priv->accel_group, GDK_KEY_a, GDK_CONTROL_MASK);
-    install_menu_hint(priv->selectall, _("Select all Text in current file"), priv->main_window);
     /* separator */
     _create_separator_item(priv->menuedit);
 
     create_stock_menu_item(&priv->find,priv->menuedit,GTK_STOCK_FIND, priv->accel_group, GDK_KEY_f, GDK_CONTROL_MASK);
-    install_menu_hint(priv->find, _("Find text in current file"), priv->main_window);
     create_stock_menu_item(&priv->replace,priv->menuedit,GTK_STOCK_FIND_AND_REPLACE, priv->accel_group, GDK_KEY_h, GDK_CONTROL_MASK);
-    install_menu_hint(priv->replace, _("Find and replace text in current file"), priv->main_window);
     create_mnemonic_menu_item(&priv->incfind,priv->menuedit,_("Incremental search"), priv->accel_group, GDK_KEY_i, GDK_CONTROL_MASK);
-    install_menu_hint(priv->incfind, _("Search as you type"), priv->main_window);
     create_mnemonic_menu_item(&priv->gotoline,priv->menuedit,_("Go to line"), priv->accel_group, GDK_KEY_g, GDK_CONTROL_MASK);
-    install_menu_hint(priv->gotoline, _("Go to line"), priv->main_window);
     /* separator */
     _create_separator_item(priv->menuedit);
 
     create_stock_menu_item(&priv->indent,priv->menuedit,GTK_STOCK_INDENT, priv->accel_group, GDK_KEY_i, GDK_SHIFT_MASK | GDK_MOD1_MASK);
-    install_menu_hint(priv->indent, _("Indent the currently selected block"), priv->main_window);
     create_stock_menu_item(&priv->unindent,priv->menuedit,GTK_STOCK_UNINDENT, priv->accel_group, GDK_KEY_i,  GDK_SHIFT_MASK | GDK_CONTROL_MASK |GDK_MOD1_MASK);
-    install_menu_hint(priv->unindent, _("Unindent the currently selected block"), priv->main_window);
     /* separator */
     _create_separator_item(priv->menuedit);
 
     create_mnemonic_menu_item(&priv->upper ,priv->menuedit,_("_ToUpper"), priv->accel_group, GDK_KEY_u, GDK_CONTROL_MASK);
-    install_menu_hint(priv->upper, _("Convert the current selection text to upper case"), priv->main_window);
     create_mnemonic_menu_item(&priv->lower,priv->menuedit,_("_ToLower"),priv->accel_group, GDK_KEY_l, GDK_CONTROL_MASK);
-    install_menu_hint(priv->lower, _("Convert the current selection text to lower case"), priv->main_window);
     /* separator */
     _create_separator_item(priv->menuedit);
 
     create_stock_menu_item(&priv->preferences, priv->menuedit, GTK_STOCK_PREFERENCES, priv->accel_group, GDK_KEY_F5, 0);
-    install_menu_hint(priv->preferences, _("Application Config"), priv->main_window);
 }
 
-static void prepare_menu_edit(MenuBarPrivate *priv){
+static void prepare_menu_edit(MenuBarPrivate *priv)
+{
+    install_menu_hint(priv->undo, _("Undo last action"), priv->main_window);
+    install_menu_hint(priv->redo, _("Redo last action"), priv->main_window);
+    install_menu_hint(priv->cut, _("Cut Selected Text"), priv->main_window);
+    install_menu_hint(priv->copy, _("Copy Selected Text"), priv->main_window);
+    install_menu_hint(priv->paste, _("Paste Text from clipboard"), priv->main_window);
+    install_menu_hint(priv->selectall, _("Select all Text in current file"), priv->main_window);
+    install_menu_hint(priv->find, _("Find text in current file"), priv->main_window);
+    install_menu_hint(priv->replace, _("Find and replace text in current file"), priv->main_window);
+    install_menu_hint(priv->incfind, _("Search as you type"), priv->main_window);
+    install_menu_hint(priv->gotoline, _("Go to line"), priv->main_window);
+    install_menu_hint(priv->indent, _("Indent the currently selected block"), priv->main_window);
+    install_menu_hint(priv->unindent, _("Unindent the currently selected block"), priv->main_window);
+    install_menu_hint(priv->upper, _("Convert the current selection text to upper case"), priv->main_window);
+    install_menu_hint(priv->lower, _("Convert the current selection text to lower case"), priv->main_window);
+    install_menu_hint(priv->preferences, _("Application Config"), priv->main_window);
+    g_signal_connect(G_OBJECT(priv->undo), "activate", G_CALLBACK(on_undo1_activate), NULL);
+    g_signal_connect(G_OBJECT(priv->redo), "activate", G_CALLBACK(on_redo1_activate), NULL);
 
-  g_signal_connect(G_OBJECT(priv->undo), "activate", G_CALLBACK(on_undo1_activate), NULL);
-  g_signal_connect(G_OBJECT(priv->redo), "activate", G_CALLBACK(on_redo1_activate), NULL);
+    g_signal_connect(G_OBJECT(priv->cut), "activate", G_CALLBACK(on_cut1_activate), NULL);
+    g_signal_connect(G_OBJECT(priv->copy), "activate", G_CALLBACK(on_copy1_activate), NULL);
+    g_signal_connect(G_OBJECT(priv->paste), "activate", G_CALLBACK(on_paste1_activate), NULL);
+    g_signal_connect(G_OBJECT(priv->selectall), "activate", G_CALLBACK(on_selectall1_activate), NULL);
 
-  g_signal_connect(G_OBJECT(priv->cut), "activate", G_CALLBACK(on_cut1_activate), NULL);
-  g_signal_connect(G_OBJECT(priv->copy), "activate", G_CALLBACK(on_copy1_activate), NULL);
-  g_signal_connect(G_OBJECT(priv->paste), "activate", G_CALLBACK(on_paste1_activate), NULL);
-  g_signal_connect(G_OBJECT(priv->selectall), "activate", G_CALLBACK(on_selectall1_activate), NULL);
+    g_signal_connect(G_OBJECT(priv->find), "activate", G_CALLBACK(on_find1_activate), NULL);
+    g_signal_connect(G_OBJECT(priv->replace), "activate", G_CALLBACK(on_replace1_activate), NULL);
 
-  g_signal_connect(G_OBJECT(priv->find), "activate", G_CALLBACK(on_find1_activate), NULL);
-  g_signal_connect(G_OBJECT(priv->replace), "activate", G_CALLBACK(on_replace1_activate), NULL);
-
-  g_signal_connect(G_OBJECT(priv->incfind), "activate", G_CALLBACK(on_incfind_activate), priv->main_window);
-  g_signal_connect(G_OBJECT(priv->gotoline), "activate", G_CALLBACK(on_gotoline_activate), priv->main_window);
+    g_signal_connect(G_OBJECT(priv->incfind), "activate", G_CALLBACK(on_incfind_activate), priv->main_window);
+    g_signal_connect(G_OBJECT(priv->gotoline), "activate", G_CALLBACK(on_gotoline_activate), priv->main_window);
   
-  g_signal_connect(G_OBJECT(priv->indent), "activate", G_CALLBACK(block_indent), NULL);
-  g_signal_connect(G_OBJECT(priv->unindent), "activate", G_CALLBACK(block_unindent), NULL);
+    g_signal_connect(G_OBJECT(priv->indent), "activate", G_CALLBACK(block_indent), NULL);
+    g_signal_connect(G_OBJECT(priv->unindent), "activate", G_CALLBACK(block_unindent), NULL);
 
-  g_signal_connect(G_OBJECT(priv->upper), "activate", G_CALLBACK(selectiontoupper), NULL);
-  g_signal_connect(G_OBJECT(priv->lower), "activate", G_CALLBACK(selectiontolower), NULL);
-  g_signal_connect(G_OBJECT(priv->preferences), "activate", G_CALLBACK(on_preferences1_activate), NULL);
+    g_signal_connect(G_OBJECT(priv->upper), "activate", G_CALLBACK(selectiontoupper), NULL);
+    g_signal_connect(G_OBJECT(priv->lower), "activate", G_CALLBACK(selectiontolower), NULL);
+    g_signal_connect(G_OBJECT(priv->preferences), "activate", G_CALLBACK(on_preferences1_activate), NULL);
 }
 
 /*
@@ -563,51 +562,51 @@ static void prepare_menu_edit(MenuBarPrivate *priv){
 static void fill_menu_view(MenuBarPrivate *priv)
 {
     create_check_menu_item(&priv->viewstatusbar,priv->menuview,_("Statusbar"), priv->accel_group, 0, 0);
-    install_menu_hint(priv->viewstatusbar, _("Show/Hide Application Statusbar"), priv->main_window);
     create_check_menu_item(&priv->viewmaintoolbar,priv->menuview,_("Main Toolbar"), priv->accel_group, 0, 0);
-    install_menu_hint(priv->viewmaintoolbar, _("Show/Hide Application Main Toolbar"), priv->main_window);
     /* separator */
     _create_separator_item(priv->menuview);
 
     create_check_menu_item(&priv->tog_class,priv->menuview,_("Show Side Panel"), priv->accel_group, GDK_KEY_F8, 0);
-    install_menu_hint(priv->tog_class, _("Show/Hide Application Side Panel"), priv->main_window);
     create_check_menu_item(&priv->viewfullscreen,priv->menuview,_("Fullscreen"), priv->accel_group, GDK_KEY_F11, 0);
-    install_menu_hint(priv->viewfullscreen, _("Enable/Disable Fullscreen mode"), priv->main_window);
     /* separator */
     _create_separator_item(priv->menuview);
 
     create_stock_menu_item(&priv->zoomin,priv->menuview,GTK_STOCK_ZOOM_IN, priv->accel_group, GDK_KEY_plus, GDK_CONTROL_MASK);
-    install_menu_hint(priv->zoomin, _("Increases zoom in 10%"), priv->main_window);
     create_stock_menu_item(&priv->zoomout,priv->menuview,GTK_STOCK_ZOOM_OUT, priv->accel_group, GDK_KEY_minus, GDK_CONTROL_MASK);
-    install_menu_hint(priv->zoomout, _("Decreases zoom in 10%"), priv->main_window);
     create_stock_menu_item(&priv->zoom100,priv->menuview,GTK_STOCK_ZOOM_100, priv->accel_group, GDK_KEY_0, GDK_CONTROL_MASK);
-    install_menu_hint(priv->zoom100, _("Restores normal zoom level"), priv->main_window);
     /* separator */
     _create_separator_item(priv->menuview);
-
     create_mnemonic_menu_item(&priv->preview ,priv->menuview,_("_Show Preview"), priv->accel_group, 0, 0);
-    install_menu_hint(priv->preview, _("Preview the Document"), priv->main_window);
 }
 
 static void prepare_menu_view(MenuBarPrivate *priv)
 {
-  gboolean showstatus = get_preferences_manager_show_statusbar(priv->main_window->prefmg);
-  gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(priv->viewstatusbar), showstatus);
-  g_signal_connect(G_OBJECT(priv->viewstatusbar), "activate", G_CALLBACK(tog_statusbar), priv->main_window);
-  gboolean showmainbar = get_preferences_manager_show_maintoolbar(priv->main_window->prefmg);
-  gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(priv->viewmaintoolbar), showmainbar);
-  g_signal_connect(G_OBJECT(priv->viewmaintoolbar), "activate", G_CALLBACK(tog_maintoolbar), priv->main_window);
+    install_menu_hint(priv->viewstatusbar, _("Show/Hide Application Statusbar"), priv->main_window);
+    install_menu_hint(priv->viewmaintoolbar, _("Show/Hide Application Main Toolbar"), priv->main_window);
+    install_menu_hint(priv->tog_class, _("Show/Hide Application Side Panel"), priv->main_window);
+    install_menu_hint(priv->viewfullscreen, _("Enable/Disable Fullscreen mode"), priv->main_window);
+    install_menu_hint(priv->zoomin, _("Increases zoom in 10%"), priv->main_window);
+    install_menu_hint(priv->zoomout, _("Decreases zoom in 10%"), priv->main_window);
+    install_menu_hint(priv->zoom100, _("Restores normal zoom level"), priv->main_window);
+    install_menu_hint(priv->preview, _("Preview the Document"), priv->main_window);
 
-  gboolean status;
-  g_object_get(priv->main_window->prefmg, "side_panel_hidden", &status, NULL);
-  gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(priv->tog_class), status);
-  g_signal_connect(G_OBJECT(priv->tog_class), "activate", G_CALLBACK(tog_classbrowser), priv->main_window);
+    gboolean showstatus = get_preferences_manager_show_statusbar(priv->main_window->prefmg);
+    gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(priv->viewstatusbar), showstatus);
+    g_signal_connect(G_OBJECT(priv->viewstatusbar), "activate", G_CALLBACK(tog_statusbar), priv->main_window);
+    gboolean showmainbar = get_preferences_manager_show_maintoolbar(priv->main_window->prefmg);
+    gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(priv->viewmaintoolbar), showmainbar);
+    g_signal_connect(G_OBJECT(priv->viewmaintoolbar), "activate", G_CALLBACK(tog_maintoolbar), priv->main_window);
 
-  g_signal_connect(G_OBJECT(priv->viewfullscreen), "activate", G_CALLBACK(tog_fullscreen), priv->main_window);
-  g_signal_connect(G_OBJECT(priv->zoomin), "activate", G_CALLBACK(zoom_in),NULL);
-  g_signal_connect(G_OBJECT(priv->zoomout), "activate", G_CALLBACK(zoom_out),NULL);
-  g_signal_connect(G_OBJECT(priv->zoom100), "activate", G_CALLBACK(zoom_100),NULL);
-  g_signal_connect(G_OBJECT(priv->preview), "activate", G_CALLBACK(showpreview), priv->main_window);
+    gboolean status;
+    g_object_get(priv->main_window->prefmg, "side_panel_hidden", &status, NULL);
+    gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(priv->tog_class), status);
+    g_signal_connect(G_OBJECT(priv->tog_class), "activate", G_CALLBACK(tog_classbrowser), priv->main_window);
+
+    g_signal_connect(G_OBJECT(priv->viewfullscreen), "activate", G_CALLBACK(tog_fullscreen), priv->main_window);
+    g_signal_connect(G_OBJECT(priv->zoomin), "activate", G_CALLBACK(zoom_in),NULL);
+    g_signal_connect(G_OBJECT(priv->zoomout), "activate", G_CALLBACK(zoom_out),NULL);
+    g_signal_connect(G_OBJECT(priv->zoom100), "activate", G_CALLBACK(zoom_100),NULL);
+    g_signal_connect(G_OBJECT(priv->preview), "activate", G_CALLBACK(showpreview), priv->main_window);
 }
 
 /*
@@ -617,24 +616,20 @@ static void prepare_menu_view(MenuBarPrivate *priv)
 static void fill_menu_code (MenuBarPrivate *priv)
 {
   create_stock_menu_item(&priv->syntax,priv->menucode, GTK_STOCK_SPELL_CHECK, priv->accel_group, GDK_KEY_F9, 0);
-    install_menu_hint(priv->syntax, _("Check the syntax using the PHP command line binary"), priv->main_window);
   /* set custom label */
   gtk_menu_item_set_label (GTK_MENU_ITEM(priv->syntax), _("_Syntax check"));
 
   create_stock_menu_item(&priv->clearsyntax,priv->menucode, GTK_STOCK_CLEAR, priv->accel_group, GDK_KEY_F9, GDK_CONTROL_MASK);
-    install_menu_hint(priv->clearsyntax, _("Remove the syntax check window"), priv->main_window);
   /* set custom label */
   gtk_menu_item_set_label (GTK_MENU_ITEM(priv->clearsyntax), _("_Clear Syntax check"));
   /* separator */
   _create_separator_item(priv->menucode);
 
   create_stock_menu_item(&priv->record,priv->menucode, GTK_STOCK_MEDIA_RECORD, priv->accel_group, GDK_KEY_k, GDK_MOD1_MASK);
-    install_menu_hint(priv->record, _("Record keyboard actions"), priv->main_window);
   /* set custom label */
   gtk_menu_item_set_label (GTK_MENU_ITEM(priv->record), _("_Record keyboard macro start/stop"));
 
   create_stock_menu_item(&priv->playback,priv->menucode, GTK_STOCK_MEDIA_PLAY, priv->accel_group, GDK_KEY_k, GDK_CONTROL_MASK);
-    install_menu_hint(priv->playback, _("Playback the stored keyboard macro"), priv->main_window);
   /* set custom label */
   gtk_menu_item_set_label (GTK_MENU_ITEM(priv->playback), _("_Playback keyboard macro"));
 
@@ -644,35 +639,40 @@ static void fill_menu_code (MenuBarPrivate *priv)
   gtk_menu_item_set_submenu (GTK_MENU_ITEM (priv->force), priv->menuforce);
 
   create_mnemonic_menu_item(&priv->forcephp,priv->menuforce,_("_PHP/HTML/XML"), priv->accel_group, 0, 0);
-  install_menu_hint(priv->forcephp, _("Force syntax highlighting to PHP/HTML/XML mode"), priv->main_window);
   create_mnemonic_menu_item(&priv->forcecss,priv->menuforce,_("_CSS"), priv->accel_group, 0, 0);
-  install_menu_hint(priv->forcecss, _("Force syntax highlighting to CSS mode"), priv->main_window);
   create_mnemonic_menu_item(&priv->forcecxx,priv->menuforce,_("C/C_++"), priv->accel_group, 0, 0);
-  install_menu_hint(priv->forcecxx, _("Force syntax highlighting to C/C++ mode"), priv->main_window);
   create_mnemonic_menu_item(&priv->forcesql,priv->menuforce,_("_SQL"), priv->accel_group, 0, 0);
-  install_menu_hint(priv->forcesql, _("Force syntax highlighting to SQL mode"), priv->main_window);
   create_mnemonic_menu_item(&priv->forceperl,priv->menuforce,_("_Perl"), priv->accel_group, 0, 0);
-  install_menu_hint(priv->forceperl, _("Force syntax highlighting to Perl mode"), priv->main_window);
   create_mnemonic_menu_item(&priv->forcecobol,priv->menuforce,_("_Cobol"), priv->accel_group, 0, 0);
-  install_menu_hint(priv->forcecobol, _("Force syntax highlighting to Cobol mode"), priv->main_window);
   create_mnemonic_menu_item(&priv->forcepython,priv->menuforce,_("P_ython"), priv->accel_group, 0, 0);
-  install_menu_hint(priv->forcepython, _("Force syntax highlighting to Python mode"), priv->main_window);
 }
 
 static void prepare_menu_code (MenuBarPrivate *priv)
 {
-  g_signal_connect(G_OBJECT(priv->syntax), "activate", G_CALLBACK(syntax_check), NULL);
-  g_signal_connect(G_OBJECT(priv->clearsyntax), "activate", G_CALLBACK(syntax_check_clear), NULL);
-  g_signal_connect(G_OBJECT(priv->record), "activate", G_CALLBACK(keyboard_macro_startstop), NULL);
-  g_signal_connect(G_OBJECT(priv->playback), "activate", G_CALLBACK(keyboard_macro_playback), NULL);
+    install_menu_hint(priv->syntax, _("Check the syntax using the PHP command line binary"), priv->main_window);
+    install_menu_hint(priv->clearsyntax, _("Remove the syntax check window"), priv->main_window);
+    install_menu_hint(priv->record, _("Record keyboard actions"), priv->main_window);
+    install_menu_hint(priv->playback, _("Playback the stored keyboard macro"), priv->main_window);
+    install_menu_hint(priv->forcephp, _("Force syntax highlighting to PHP/HTML/XML mode"), priv->main_window);
+    install_menu_hint(priv->forcecss, _("Force syntax highlighting to CSS mode"), priv->main_window);
+    install_menu_hint(priv->forcecxx, _("Force syntax highlighting to C/C++ mode"), priv->main_window);
+    install_menu_hint(priv->forcesql, _("Force syntax highlighting to SQL mode"), priv->main_window);
+    install_menu_hint(priv->forceperl, _("Force syntax highlighting to Perl mode"), priv->main_window);
+    install_menu_hint(priv->forcecobol, _("Force syntax highlighting to Cobol mode"), priv->main_window);
+    install_menu_hint(priv->forcepython, _("Force syntax highlighting to Python mode"), priv->main_window);
 
-  g_signal_connect(G_OBJECT(priv->forcephp), "activate", G_CALLBACK(force_php), NULL);
-  g_signal_connect(G_OBJECT(priv->forcecss), "activate", G_CALLBACK(force_css), NULL);
-  g_signal_connect(G_OBJECT(priv->forcecxx), "activate", G_CALLBACK(force_cxx), NULL);
-  g_signal_connect(G_OBJECT(priv->forcesql), "activate", G_CALLBACK(force_sql), NULL);
-  g_signal_connect(G_OBJECT(priv->forceperl), "activate", G_CALLBACK(force_perl), NULL);
-  g_signal_connect(G_OBJECT(priv->forcecobol), "activate", G_CALLBACK(force_cobol), NULL);
-  g_signal_connect(G_OBJECT(priv->forcepython), "activate", G_CALLBACK(force_python), NULL);
+    g_signal_connect(G_OBJECT(priv->syntax), "activate", G_CALLBACK(syntax_check), NULL);
+    g_signal_connect(G_OBJECT(priv->clearsyntax), "activate", G_CALLBACK(syntax_check_clear), NULL);
+    g_signal_connect(G_OBJECT(priv->record), "activate", G_CALLBACK(keyboard_macro_startstop), NULL);
+    g_signal_connect(G_OBJECT(priv->playback), "activate", G_CALLBACK(keyboard_macro_playback), NULL);
+
+    g_signal_connect(G_OBJECT(priv->forcephp), "activate", G_CALLBACK(force_php), NULL);
+    g_signal_connect(G_OBJECT(priv->forcecss), "activate", G_CALLBACK(force_css), NULL);
+    g_signal_connect(G_OBJECT(priv->forcecxx), "activate", G_CALLBACK(force_cxx), NULL);
+    g_signal_connect(G_OBJECT(priv->forcesql), "activate", G_CALLBACK(force_sql), NULL);
+    g_signal_connect(G_OBJECT(priv->forceperl), "activate", G_CALLBACK(force_perl), NULL);
+    g_signal_connect(G_OBJECT(priv->forcecobol), "activate", G_CALLBACK(force_cobol), NULL);
+    g_signal_connect(G_OBJECT(priv->forcepython), "activate", G_CALLBACK(force_python), NULL);
 }
 
 static void
