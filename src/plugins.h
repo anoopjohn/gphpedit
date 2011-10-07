@@ -26,6 +26,7 @@
 #define PLUGINS_H
 
 #include <gtk/gtk.h>
+#include "main_window.h"
 #include "tab.h"
 
 #define PLUGIN_TYPE plugin_get_type()
@@ -66,7 +67,7 @@ const gchar **get_plugin_authors (Plugin *plugin);
 const gchar *get_plugin_website (Plugin *plugin);
 const gchar *get_plugin_copyright (Plugin *plugin);
 const gchar *get_plugin_version (Plugin *plugin);
-void plugin_run(Plugin *plugin, Documentable *document);
+void plugin_run(Plugin *plugin, Documentable *document, MainWindow *main_window);
 gint get_plugin_syntax_type(Plugin *plugin);
 #endif /* PLUGINS_H */
 

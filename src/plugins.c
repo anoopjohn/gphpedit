@@ -577,7 +577,7 @@ static GString *save_as_temp_file(Documentable *document)
 }
 
 
-void plugin_run(Plugin *plugin, Documentable *document)
+void plugin_run(Plugin *plugin, Documentable *document, MainWindow *main_window)
 {
   gphpedit_debug(DEBUG_PLUGINS);
   /* initial checks*/
@@ -645,11 +645,11 @@ void plugin_run(Plugin *plugin, Documentable *document)
         }
     }
     else if (g_str_has_prefix(stdout, "SYNTAX")){
-        syntax_window(GTK_SYNTAX_CHECK_WINDOW(main_window.win), document, data);
+        syntax_window(GTK_SYNTAX_CHECK_WINDOW(main_window->pwin), document, data);
     }
     else if (g_str_has_prefix(stdout, "OPEN")){
       gphpedit_debug_message(DEBUG_PLUGINS,"Opening file :date: %s\n", data);
-      document_manager_switch_to_file_or_open(main_window.docmg, data, 0);
+      document_manager_switch_to_file_or_open(main_window->docmg, data, 0);
     } else {
       g_print("Unexpected command\n");
     }

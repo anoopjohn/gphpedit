@@ -235,7 +235,7 @@ gboolean get_syntax_plugin_by_ftype (gpointer key, gpointer value, gpointer user
   return FALSE;
 }
 
-gboolean run_syntax_plugin_by_ftype(PluginManager *plugmg, Documentable *document)
+gboolean run_syntax_plugin_by_ftype(PluginManager *plugmg, Documentable *document, MainWindow *main_window)
 {
   g_return_val_if_fail (OBJECT_IS_PLUGIN_MANAGER(plugmg), FALSE);
   PluginManagerDetails *plugmgdet;
@@ -245,7 +245,7 @@ gboolean run_syntax_plugin_by_ftype(PluginManager *plugmg, Documentable *documen
   Plugin *plug = g_hash_table_find (plugmgdet->plugins_table, get_syntax_plugin_by_ftype, GINT_TO_POINTER(ftype));
   if (plug){
     gphpedit_debug_message(DEBUG_PLUGINS,"%s","Plugin FOUND!!\n");
-    plugin_run(plug, document);
+    plugin_run(plug, document, main_window);
     return TRUE;
   } else {
     gphpedit_debug_message(DEBUG_PLUGINS,"%s","Plugin NOT FOUND!!\n");

@@ -55,7 +55,7 @@ typedef struct
   GtkWidget *toolbar_main;
 
   GtkWidget *pmain_vertical_pane;
-  GtkWidget *main_horizontal_pane;
+  GtkWidget *pmain_horizontal_pane;
   /* status bar */
   GtkWidget *appbar;
 
@@ -63,7 +63,7 @@ typedef struct
   
   GtkWidget *notebook_editor;
   /* syntax check widget */
-  GtkWidget *win;
+  GtkWidget *pwin;
 
   DocumentManager *docmg;
 

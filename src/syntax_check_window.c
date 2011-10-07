@@ -201,7 +201,7 @@ gtk_syntax_check_window_new (void)
   return g_object_new (GTK_TYPE_SYNTAX_CHECK_WINDOW, NULL);
 }
 
-void gtk_syntax_check_window_run_check(GtkSyntaxCheckWindow *win, Documentable *document)
+void gtk_syntax_check_window_run_check(GtkSyntaxCheckWindow *win, Documentable *document, MainWindow *main_window)
 {
   g_return_if_fail(win);
   if (!document){
@@ -215,7 +215,7 @@ void gtk_syntax_check_window_run_check(GtkSyntaxCheckWindow *win, Documentable *
   } else {
       /* try plugins */
       PluginManager *plugmg = plugin_manager_new ();
-      if (!run_syntax_plugin_by_ftype(plugmg, document)){
+      if (!run_syntax_plugin_by_ftype(plugmg, document, main_window)){
       syntax_window(win, document, g_strdup(_("syntax check not implement\n")));
       gphpedit_debug_message(DEBUG_SYNTAX, "syntax check not implement\n");
       }

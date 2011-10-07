@@ -124,7 +124,7 @@ struct _MenuBarPrivate
 guint context_id;
 guint message_id;
 
-static void MENUBAR_constructed (GObject *object);
+static void MENUBAR_constructed (MenuBar *menubar);
 
 G_DEFINE_TYPE(MenuBar, MENUBAR, GTK_TYPE_MENU_BAR)
 
@@ -708,9 +708,17 @@ MENUBAR_init (MenuBar *menubar)
   gtk_menu_shell_append(GTK_MENU_SHELL(menubar), priv->code);
 
   fill_menu_code(priv);
+}
+
+
+static void MENUBAR_constructed (MenuBar *menubar)
+{
+    MenuBarPrivate *priv = MENUBAR_GET_PRIVATE(menubar);
+
+    gtk_window_add_accel_group(GTK_WINDOW(priv->main_window->window), priv->accel_group);
 
   /*plugin menu*/
-  priv->menuplugin= gtk_plugin_manager_menu_new (priv->accel_group);
+  priv->menuplugin= gtk_plugin_manager_menu_new (priv->accel_group, priv->main_window);
   priv->plugin = gtk_menu_item_new_with_mnemonic(_("_Plugin"));
   gtk_menu_item_set_submenu(GTK_MENU_ITEM(priv->plugin), priv->menuplugin);
   gtk_menu_shell_append(GTK_MENU_SHELL(menubar), priv->plugin);
@@ -718,14 +726,7 @@ MENUBAR_init (MenuBar *menubar)
   /* help menu */
   _create_menu(&priv->menuhelp, _("_Help"), GTK_WIDGET(menubar));
   fill_help_menu(priv);
-}
 
-
-static void MENUBAR_constructed (GObject *object)
-{
-    MenuBarPrivate *priv = MENUBAR_GET_PRIVATE(object);
-
-    gtk_window_add_accel_group(GTK_WINDOW(priv->main_window->window), priv->accel_group);
     prepare_menu_file(priv);
     prepare_help_menu(priv);
     prepare_menu_edit(priv);

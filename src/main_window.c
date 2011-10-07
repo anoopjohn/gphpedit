@@ -61,8 +61,8 @@ void main_window_resize(GtkWidget *widget, GtkAllocation *allocation, gpointer u
 
 gboolean classbrowser_accept_size(GtkPaned *paned, gpointer user_data)
 {
-  if (gtk_paned_get_position(GTK_PANED(main_window.main_horizontal_pane)) != 0) {
-    gint size = gtk_paned_get_position(GTK_PANED(main_window.main_horizontal_pane));
+  if (gtk_paned_get_position(GTK_PANED(main_window.pmain_horizontal_pane)) != 0) {
+    gint size = gtk_paned_get_position(GTK_PANED(main_window.pmain_horizontal_pane));
     g_object_set(main_window.prefmg, "side_panel_size", size, NULL);
   }
   return TRUE;
@@ -88,7 +88,7 @@ static void side_panel_show(void)
   gphpedit_debug(DEBUG_MAIN_WINDOW);
   gint size;
   g_object_get(main_window.prefmg, "side_panel_size", &size, NULL);
-  gtk_paned_set_position(GTK_PANED(main_window.main_horizontal_pane), size);
+  gtk_paned_set_position(GTK_PANED(main_window.pmain_horizontal_pane), size);
   g_object_set(main_window.prefmg, "side_panel_hidden", FALSE, NULL);
   classbrowser_update(GPHPEDIT_CLASSBROWSER(main_window.pclassbrowser));
 }
@@ -97,7 +97,7 @@ static void side_panel_show(void)
 static void side_panel_hide(void)
 {
   gphpedit_debug(DEBUG_MAIN_WINDOW);
-  gtk_paned_set_position(GTK_PANED(main_window.main_horizontal_pane), 0);
+  gtk_paned_set_position(GTK_PANED(main_window.pmain_horizontal_pane), 0);
   g_object_set(main_window.prefmg, "side_panel_hidden", TRUE, NULL);
 }
 
@@ -146,7 +146,7 @@ void fullscreen_show_hide(MainWindow *main_window, gboolean state)
 void syntax_check_show(MainWindow *main_window)
 {
   Documentable *doc = document_manager_get_current_documentable(main_window->docmg);
-  gtk_syntax_check_window_run_check(GTK_SYNTAX_CHECK_WINDOW(main_window->win), doc);
+  gtk_syntax_check_window_run_check(GTK_SYNTAX_CHECK_WINDOW(main_window->pwin), doc, main_window);
   gtk_paned_set_position(GTK_PANED(main_window->pmain_vertical_pane), 200);
 }
 
@@ -162,12 +162,12 @@ static void main_window_create_panes(void)
   gboolean hidden;
   gint size;
 
-  main_window.main_horizontal_pane = get_widget_from_builder("main_horizontal_pane");
+  main_window.pmain_horizontal_pane = get_widget_from_builder("main_horizontal_pane");
   main_window.pmain_vertical_pane = get_widget_from_builder("main_vertical_pane");
   g_signal_connect (G_OBJECT (main_window.window), "size_allocate", G_CALLBACK (classbrowser_accept_size), NULL);
 
   g_object_get(main_window.prefmg, "side_panel_hidden", &hidden,"side_panel_size", &size, NULL);
-  gtk_paned_set_position(GTK_PANED(main_window.main_horizontal_pane), size);
+  gtk_paned_set_position(GTK_PANED(main_window.pmain_horizontal_pane), size);
   if (hidden) side_panel_hide();
 }
 
@@ -213,10 +213,10 @@ static void main_window_fill_panes(void)
 
   /* add syntax check window */
   GtkWidget *prin_hbox = get_widget_from_builder("prin_hbox");
-  main_window.win = gtk_syntax_check_window_new ();
-  gtk_box_pack_start(GTK_BOX(prin_hbox), GTK_WIDGET(main_window.win), TRUE, TRUE, 2);
-  gtk_syntax_check_window_run_check(main_window.win, NULL);
-  gtk_widget_show (main_window.win);
+  main_window.pwin = gtk_syntax_check_window_new ();
+  gtk_box_pack_start(GTK_BOX(prin_hbox), GTK_WIDGET(main_window.pwin), TRUE, TRUE, 2);
+  gtk_syntax_check_window_run_check(GTK_SYNTAX_CHECK_WINDOW(main_window.pwin), NULL, &main_window);
+  gtk_widget_show (main_window.pwin);
 
   //FIXME: hack to hide syntax pane on start-up
   gtk_paned_set_position(GTK_PANED(main_window.pmain_vertical_pane), 10000);

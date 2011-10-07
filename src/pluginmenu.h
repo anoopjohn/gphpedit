@@ -56,7 +56,7 @@ struct _GtkPluginManagerMenuClass
 };
 
 GType gtk_plugin_manager_menu_get_type         (void) G_GNUC_CONST;
-GtkWidget *gtk_plugin_manager_menu_new (GtkAccelGroup *accel_grup);
+GtkWidget *gtk_plugin_manager_menu_new (GtkAccelGroup *accel_grup, MainWindow *main_window);
 void plugin_exec_with_num(GtkWidget *widget, gint num);
 G_END_DECLS
 
