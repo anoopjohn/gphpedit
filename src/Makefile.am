@@ -191,6 +191,6 @@ gtkscintilla2/libgtkscintilla2.a:
 	cd gtkscintilla2 && $(MAKE) libgtkscintilla2.a && cd ..
 
 gphpedit_LDADD = \
-	$(WEBKIT_LIBS) $(GTK_LIBS) $(GLIB_LIBS) $(LIBXML_LIBS)\
 	gtkscintilla2/libgtkscintilla2.a\
-	gtkscintilla2/scintilla/bin/scintilla.a
+	gtkscintilla2/scintilla/bin/scintilla.a\
+	$(WEBKIT_LIBS) $(GTK_LIBS) $(GLIB_LIBS) $(LIBXML_LIBS)
