@@ -13,6 +13,7 @@
 
 #include <string>
 #include <vector>
+#include <map>
 
 #include <gtk/gtk.h>
 #include <gdk/gdkkeysyms.h>
@@ -20,7 +21,7 @@
 #include "Platform.h"
 
 #if PLAT_GTK_WIN32
-#include "windows.h"
+#include <windows.h>
 #endif
 
 #include "ILexer.h"
@@ -73,10 +74,6 @@
 #define IS_WIDGET_VISIBLE(w) (GTK_WIDGET_VISIBLE(w))
 #endif
 
-#if GTK_CHECK_VERSION(2,22,0)
-#define USE_CAIRO 1
-#endif
-
 static GdkWindow *WindowFromWidget(GtkWidget *w) {
 #if GTK_CHECK_VERSION(3,0,0)
 	return gtk_widget_get_window(w);
@@ -101,10 +98,6 @@ static GdkWindow *PWindow(const Window &w) {
 #pragma warning(disable: 4505)
 #endif
 
-#if GTK_CHECK_VERSION(2,6,0)
-#define USE_GTK_CLIPBOARD
-#endif
-
 #define OBJECT_CLASS GObjectClass
 
 #ifdef SCI_NAMESPACE
@@ -122,11 +115,6 @@ class ScintillaGTK : public ScintillaBase {
 	GtkAdjustment *adjustmenth;
 	int scrollBarWidth;
 	int scrollBarHeight;
-
-	// Because clipboard access is asynchronous, copyText is created by Copy
-#ifndef USE_GTK_CLIPBOARD
-	SelectionText copyText;
-#endif
 
 	SelectionText primary;
 
@@ -219,11 +207,9 @@ private:
 	void ReceivedSelection(GtkSelectionData *selection_data);
 	void ReceivedDrop(GtkSelectionData *selection_data);
 	static void GetSelection(GtkSelectionData *selection_data, guint info, SelectionText *selected);
-#ifdef USE_GTK_CLIPBOARD
 	void StoreOnClipboard(SelectionText *clipText);
 	static void ClipboardGetSelection(GtkClipboard* clip, GtkSelectionData *selection_data, guint info, void *data);
 	static void ClipboardClearSelection(GtkClipboard* clip, void *data);
-#endif
 
 	void UnclaimSelection(GdkEventSelection *selection_event);
 	void Resize(int width, int height);
@@ -270,8 +256,13 @@ private:
 	gboolean KeyThis(GdkEventKey *event);
 	static gboolean KeyPress(GtkWidget *widget, GdkEventKey *event);
 	static gboolean KeyRelease(GtkWidget *widget, GdkEventKey *event);
+#if GTK_CHECK_VERSION(3,0,0)
+	gboolean DrawPreeditThis(GtkWidget *widget, cairo_t *cr);
+	static gboolean DrawPreedit(GtkWidget *widget, cairo_t *cr, ScintillaGTK *sciThis);
+#else
 	gboolean ExposePreeditThis(GtkWidget *widget, GdkEventExpose *ose);
 	static gboolean ExposePreedit(GtkWidget *widget, GdkEventExpose *ose, ScintillaGTK *sciThis);
+#endif
 	void CommitThis(char *str);
 	static void Commit(GtkIMContext *context, char *str, ScintillaGTK *sciThis);
 	void PreeditChangedThis();
@@ -401,6 +392,14 @@ ScintillaGTK::~ScintillaGTK() {
 	g_idle_remove_by_data(this);
 }
 
+static void UnRefCursor(GdkCursor *cursor) {
+#if GTK_CHECK_VERSION(3,0,0)
+	g_object_unref(cursor);
+#else
+	gdk_cursor_unref(cursor);
+#endif
+}
+
 void ScintillaGTK::RealizeThis(GtkWidget *widget) {
 	//Platform::DebugPrintf("ScintillaGTK::realize this\n");
 #if GTK_CHECK_VERSION(2,20,0)
@@ -432,25 +431,30 @@ void ScintillaGTK::RealizeThis(GtkWidget *widget) {
 	gtk_widget_set_window(widget, gdk_window_new(gtk_widget_get_parent_window(widget), &attrs,
 		GDK_WA_X | GDK_WA_Y | GDK_WA_VISUAL | GDK_WA_CURSOR));
 	gdk_window_set_user_data(gtk_widget_get_window(widget), widget);
-	gdk_window_set_background(gtk_widget_get_window(widget),
-		&(gtk_widget_get_style(widget)->bg[GTK_STATE_NORMAL]));
+	GtkStyleContext *styleContext = gtk_widget_get_style_context(widget);
+	if (styleContext) {
+		GdkRGBA colourBackWidget;
+		gtk_style_context_get_background_color(styleContext, GTK_STATE_FLAG_NORMAL, &colourBackWidget);
+		gdk_window_set_background_rgba(gtk_widget_get_window(widget), &colourBackWidget);
+	}
 	gdk_window_show(gtk_widget_get_window(widget));
-	gdk_cursor_unref(cursor);
-	// Deprecated: should chain up to parent class' "realize" implementation
-	gtk_widget_style_attach(widget);
+	UnRefCursor(cursor);
 #else
 	widget->window = gdk_window_new(gtk_widget_get_parent_window(widget), &attrs,
 		GDK_WA_X | GDK_WA_Y | GDK_WA_VISUAL | GDK_WA_COLORMAP | GDK_WA_CURSOR);
 	gdk_window_set_user_data(widget->window, widget);
+	widget->style = gtk_style_attach(widget->style, widget->window);
 	gdk_window_set_background(widget->window, &widget->style->bg[GTK_STATE_NORMAL]);
 	gdk_window_show(widget->window);
-	gdk_cursor_unref(cursor);
-	widget->style = gtk_style_attach(widget->style, widget->window);
+	UnRefCursor(cursor);
 #endif
 	wPreedit = gtk_window_new(GTK_WINDOW_POPUP);
 	wPreeditDraw = gtk_drawing_area_new();
 	GtkWidget *predrw = PWidget(wPreeditDraw);	// No code inside the G_OBJECT macro
-#if !GTK_CHECK_VERSION(3,0,0)
+#if GTK_CHECK_VERSION(3,0,0)
+	g_signal_connect(G_OBJECT(predrw), "draw",
+		G_CALLBACK(DrawPreedit), this);
+#else
 	g_signal_connect(G_OBJECT(predrw), "expose_event",
 		G_CALLBACK(ExposePreedit), this);
 #endif
@@ -476,22 +480,18 @@ void ScintillaGTK::RealizeThis(GtkWidget *widget) {
 
 	cursor = gdk_cursor_new(GDK_XTERM);
 	gdk_window_set_cursor(PWindow(wText), cursor);
-	gdk_cursor_unref(cursor);
+	UnRefCursor(cursor);
 
 	cursor = gdk_cursor_new(GDK_LEFT_PTR);
 	gdk_window_set_cursor(PWindow(scrollbarv), cursor);
-	gdk_cursor_unref(cursor);
+	UnRefCursor(cursor);
 
 	cursor = gdk_cursor_new(GDK_LEFT_PTR);
 	gdk_window_set_cursor(PWindow(scrollbarh), cursor);
-	gdk_cursor_unref(cursor);
+	UnRefCursor(cursor);
 
 	gtk_selection_add_targets(widget, GDK_SELECTION_PRIMARY,
 	                          clipboardCopyTargets, nClipboardCopyTargets);
-#ifndef USE_GTK_CLIPBOARD
-	gtk_selection_add_targets(widget, atomClipboard,
-	                          clipboardPasteTargets, nClipboardPasteTargets);
-#endif
 }
 
 void ScintillaGTK::Realize(GtkWidget *widget) {
@@ -502,9 +502,6 @@ void ScintillaGTK::Realize(GtkWidget *widget) {
 void ScintillaGTK::UnRealizeThis(GtkWidget *widget) {
 	try {
 		gtk_selection_clear_targets(widget, GDK_SELECTION_PRIMARY);
-#ifndef USE_GTK_CLIPBOARD
-		gtk_selection_clear_targets(widget, atomClipboard);
-#endif
 
 		if (IS_WIDGET_MAPPED(widget)) {
 			gtk_widget_unmap(widget);
@@ -577,7 +574,7 @@ void ScintillaGTK::UnMapThis() {
 #else
 		GTK_WIDGET_UNSET_FLAGS(PWidget(wMain), GTK_MAPPED);
 #endif
-		DropGraphics();
+		DropGraphics(false);
 		gdk_window_hide(PWindow(wMain));
 		gtk_widget_unmap(PWidget(wText));
 		gtk_widget_unmap(PWidget(scrollbarh));
@@ -748,7 +745,11 @@ void ScintillaGTK::Initialise() {
 	gtk_widget_set_double_buffered(widtxt, FALSE);
 	gtk_widget_set_size_request(widtxt, 100, 100);
 	adjustmentv = GTK_ADJUSTMENT(gtk_adjustment_new(0.0, 0.0, 201.0, 1.0, 20.0, 20.0));
+#if GTK_CHECK_VERSION(3,0,0)
+	scrollbarv = gtk_scrollbar_new(GTK_ORIENTATION_VERTICAL, GTK_ADJUSTMENT(adjustmentv));
+#else
 	scrollbarv = gtk_vscrollbar_new(GTK_ADJUSTMENT(adjustmentv));
+#endif
 #if GTK_CHECK_VERSION(2,20,0)
 	gtk_widget_set_can_focus(PWidget(scrollbarv), FALSE);
 #else
@@ -760,7 +761,11 @@ void ScintillaGTK::Initialise() {
 	gtk_widget_show(PWidget(scrollbarv));
 
 	adjustmenth = GTK_ADJUSTMENT(gtk_adjustment_new(0.0, 0.0, 101.0, 1.0, 20.0, 20.0));
+#if GTK_CHECK_VERSION(3,0,0)
+	scrollbarh = gtk_scrollbar_new(GTK_ORIENTATION_HORIZONTAL, GTK_ADJUSTMENT(adjustmenth));
+#else
 	scrollbarh = gtk_hscrollbar_new(GTK_ADJUSTMENT(adjustmenth));
+#endif
 #if GTK_CHECK_VERSION(2,20,0)
 	gtk_widget_set_can_focus(PWidget(scrollbarh), FALSE);
 #else
@@ -1105,7 +1110,7 @@ void ScintillaGTK::SyncPaint(PRectangle rc) {
 	PRectangle rcClient = GetClientRectangle();
 	paintingAllText = rcPaint.Contains(rcClient);
 	if (PWindow(wText)) {
-		Surface *sw = Surface::Allocate();
+		Surface *sw = Surface::Allocate(SC_TECHNOLOGY_DEFAULT);
 		if (sw) {
 #if GTK_CHECK_VERSION(3,0,0)
 			cairo_t *cr = gdk_cairo_create(PWindow(wText));
@@ -1417,30 +1422,16 @@ int ScintillaGTK::KeyDefault(int key, int modifiers) {
 }
 
 void ScintillaGTK::CopyToClipboard(const SelectionText &selectedText) {
-#ifndef USE_GTK_CLIPBOARD
-	copyText.Copy(selectedText);
-	gtk_selection_owner_set(GTK_WIDGET(PWidget(wMain)),
-				atomClipboard,
-				GDK_CURRENT_TIME);
-#else
 	SelectionText *clipText = new SelectionText();
 	clipText->Copy(selectedText);
 	StoreOnClipboard(clipText);
-#endif
 }
 
 void ScintillaGTK::Copy() {
 	if (!sel.Empty()) {
-#ifndef USE_GTK_CLIPBOARD
-		CopySelectionRange(&copyText);
-		gtk_selection_owner_set(GTK_WIDGET(PWidget(wMain)),
-		                        atomClipboard,
-		                        GDK_CURRENT_TIME);
-#else
 		SelectionText *clipText = new SelectionText();
 		CopySelectionRange(clipText);
 		StoreOnClipboard(clipText);
-#endif
 #if PLAT_GTK_WIN32
 		if (sel.IsRectangular()) {
 			::OpenClipboard(NULL);
@@ -1700,7 +1691,6 @@ void ScintillaGTK::GetSelection(GtkSelectionData *selection_data, guint info, Se
 #endif
 }
 
-#ifdef USE_GTK_CLIPBOARD
 void ScintillaGTK::StoreOnClipboard(SelectionText *clipText) {
 	GtkClipboard *clipBoard =
 		gtk_widget_get_clipboard(GTK_WIDGET(PWidget(wMain)), atomClipboard);
@@ -1721,7 +1711,6 @@ void ScintillaGTK::ClipboardClearSelection(GtkClipboard *, void *data) {
 	SelectionText *obj = static_cast<SelectionText*>(data);
 	delete obj;
 }
-#endif
 
 void ScintillaGTK::UnclaimSelection(GdkEventSelection *selection_event) {
 	try {
@@ -2200,7 +2189,7 @@ gboolean ScintillaGTK::KeyThis(GdkEventKey *event) {
 		bool ctrl = (event->state & GDK_CONTROL_MASK) != 0;
 		bool alt = (event->state & GDK_MOD1_MASK) != 0;
 		guint key = event->keyval;
-		if (ctrl && (key < 128))
+		if ((ctrl || alt) && (key < 128))
 			key = toupper(key);
 #if GTK_CHECK_VERSION(3,0,0)
 		else if (!ctrl && (key >= GDK_KEY_KP_Multiply && key <= GDK_KEY_KP_9))
@@ -2214,7 +2203,17 @@ gboolean ScintillaGTK::KeyThis(GdkEventKey *event) {
 			key = KeyTranslate(key);
 
 		bool consumed = false;
+#if !(PLAT_GTK_MACOSX)
 		bool added = KeyDown(key, shift, ctrl, alt, &consumed) != 0;
+#else
+		bool meta = ctrl;
+		ctrl = alt;
+		alt = (event->state & GDK_MOD5_MASK) != 0;
+		bool added = KeyDownWithModifiers(key, (shift ? SCI_SHIFT : 0) |
+		                                       (ctrl ? SCI_CTRL : 0) |
+		                                       (alt ? SCI_ALT : 0) |
+		                                       (meta ? SCI_META : 0), &consumed) != 0;
+#endif
 		if (!consumed)
 			consumed = added;
 		//fprintf(stderr, "SK-key: %d %x %x\n",event->keyval, event->state, consumed);
@@ -2236,10 +2235,44 @@ gboolean ScintillaGTK::KeyPress(GtkWidget *widget, GdkEventKey *event) {
 	return sciThis->KeyThis(event);
 }
 
-gboolean ScintillaGTK::KeyRelease(GtkWidget *, GdkEventKey * /*event*/) {
+gboolean ScintillaGTK::KeyRelease(GtkWidget *widget, GdkEventKey *event) {
 	//Platform::DebugPrintf("SC-keyrel: %d %x %3s\n",event->keyval, event->state, event->string);
+	ScintillaGTK *sciThis = ScintillaFromWidget(widget);
+	if (gtk_im_context_filter_keypress(sciThis->im_context, event)) {
+		return TRUE;
+	}
 	return FALSE;
 }
+
+#if GTK_CHECK_VERSION(3,0,0)
+
+gboolean ScintillaGTK::DrawPreeditThis(GtkWidget *widget, cairo_t *cr) {
+	try {
+		gchar *str;
+		gint cursor_pos;
+		PangoAttrList *attrs;
+
+		gtk_im_context_get_preedit_string(im_context, &str, &attrs, &cursor_pos);
+		PangoLayout *layout = gtk_widget_create_pango_layout(PWidget(wText), str);
+		pango_layout_set_attributes(layout, attrs);
+
+		cairo_move_to(cr, 0, 0);
+		pango_cairo_show_layout(cr, layout);
+
+		g_free(str);
+		pango_attr_list_unref(attrs);
+		g_object_unref(layout);
+	} catch (...) {
+		errorStatus = SC_STATUS_FAILURE;
+	}
+	return TRUE;
+}
+
+gboolean ScintillaGTK::DrawPreedit(GtkWidget *widget, cairo_t *cr, ScintillaGTK *sciThis) {
+	return sciThis->DrawPreeditThis(widget, cr);
+}
+
+#else
 
 gboolean ScintillaGTK::ExposePreeditThis(GtkWidget *widget, GdkEventExpose *ose) {
 	try {
@@ -2251,23 +2284,10 @@ gboolean ScintillaGTK::ExposePreeditThis(GtkWidget *widget, GdkEventExpose *ose)
 		PangoLayout *layout = gtk_widget_create_pango_layout(PWidget(wText), str);
 		pango_layout_set_attributes(layout, attrs);
 
-#ifndef USE_CAIRO
-		GdkGC *gc = gdk_gc_new(widget->window);
-		GdkColor color[2] = {   {0, 0x0000, 0x0000, 0x0000},
-			{0, 0xffff, 0xffff, 0xffff}
-		};
-		gdk_colormap_alloc_color(gdk_colormap_get_system(), color, FALSE, TRUE);
-		gdk_colormap_alloc_color(gdk_colormap_get_system(), color + 1, FALSE, TRUE);
-
-		gdk_gc_set_foreground(gc, color + 1);
-		gdk_draw_rectangle(widget->window, gc, TRUE, ose->area.x, ose->area.y,
-		        ose->area.width, ose->area.height);
-
-		gdk_gc_set_foreground(gc, color);
-		gdk_gc_set_background(gc, color + 1);
-		gdk_draw_layout(widget->window, gc, 0, 0, layout);
-		g_object_unref(gc);
-#endif
+		cairo_t *context = gdk_cairo_create(reinterpret_cast<GdkDrawable *>(WindowFromWidget(widget)));
+		cairo_move_to(context, 0, 0);
+		pango_cairo_show_layout(context, layout);
+		cairo_destroy(context);
 		g_free(str);
 		pango_attr_list_unref(attrs);
 		g_object_unref(layout);
@@ -2280,6 +2300,8 @@ gboolean ScintillaGTK::ExposePreeditThis(GtkWidget *widget, GdkEventExpose *ose)
 gboolean ScintillaGTK::ExposePreedit(GtkWidget *widget, GdkEventExpose *ose, ScintillaGTK *sciThis) {
 	return sciThis->ExposePreeditThis(widget, ose);
 }
+
+#endif
 
 void ScintillaGTK::CommitThis(char *utfVal) {
 	try {
@@ -2415,7 +2437,7 @@ gboolean ScintillaGTK::DrawTextThis(cairo_t *cr) {
 		rcPaint.bottom = y2;
 		PRectangle rcClient = GetClientRectangle();
 		paintingAllText = rcPaint.Contains(rcClient);
-		Surface *surfaceWindow = Surface::Allocate();
+		Surface *surfaceWindow = Surface::Allocate(SC_TECHNOLOGY_DEFAULT);
 		if (surfaceWindow) {
 			surfaceWindow->Init(cr, PWidget(wText));
 			Paint(surfaceWindow, rcPaint);
@@ -2476,7 +2498,7 @@ gboolean ScintillaGTK::ExposeTextThis(GtkWidget * /*widget*/, GdkEventExpose *os
 		rgnUpdate = gdk_region_copy(ose->region);
 		PRectangle rcClient = GetClientRectangle();
 		paintingAllText = rcPaint.Contains(rcClient);
-		Surface *surfaceWindow = Surface::Allocate();
+		Surface *surfaceWindow = Surface::Allocate(SC_TECHNOLOGY_DEFAULT);
 		if (surfaceWindow) {
 			surfaceWindow->Init(PWindow(wText), PWidget(wText));
 			Paint(surfaceWindow, rcPaint);
@@ -2572,11 +2594,6 @@ void ScintillaGTK::SelectionGet(GtkWidget *widget,
 			}
 			sciThis->GetSelection(selection_data, info, &sciThis->primary);
 		}
-#ifndef USE_GTK_CLIPBOARD
-		else {
-			sciThis->GetSelection(selection_data, info, &sciThis->copyText);
-		}
-#endif
 	} catch (...) {
 		sciThis->errorStatus = SC_STATUS_FAILURE;
 	}
@@ -2773,7 +2790,7 @@ gboolean ScintillaGTK::PressCT(GtkWidget *widget, GdkEventButton *event, Scintil
 
 gboolean ScintillaGTK::DrawCT(GtkWidget *widget, cairo_t *cr, CallTip *ctip) {
 	try {
-		Surface *surfaceWindow = Surface::Allocate();
+		Surface *surfaceWindow = Surface::Allocate(SC_TECHNOLOGY_DEFAULT);
 		if (surfaceWindow) {
 			surfaceWindow->Init(cr, widget);
 			surfaceWindow->SetUnicodeMode(SC_CP_UTF8 == ctip->codePage);
@@ -2792,7 +2809,7 @@ gboolean ScintillaGTK::DrawCT(GtkWidget *widget, cairo_t *cr, CallTip *ctip) {
 
 gboolean ScintillaGTK::ExposeCT(GtkWidget *widget, GdkEventExpose * /*ose*/, CallTip *ctip) {
 	try {
-		Surface *surfaceWindow = Surface::Allocate();
+		Surface *surfaceWindow = Surface::Allocate(SC_TECHNOLOGY_DEFAULT);
 		if (surfaceWindow) {
 			surfaceWindow->Init(WindowFromWidget(widget), widget);
 			surfaceWindow->SetUnicodeMode(SC_CP_UTF8 == ctip->codePage);

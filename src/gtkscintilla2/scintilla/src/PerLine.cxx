@@ -182,6 +182,19 @@ int LineMarkers::MarkValue(int line) {
 		return 0;
 }
 
+int LineMarkers::MarkerNext(int lineStart, int mask) const {
+	if (lineStart < 0)
+		lineStart = 0;
+	int length = markers.Length();
+	for (int iLine = lineStart; iLine < length; iLine++) {
+		MarkerHandleSet *onLine = markers[iLine];
+		if (onLine && ((onLine->MarkValue() & mask) != 0))
+		//if ((pdoc->GetMark(iLine) & lParam) != 0)
+			return iLine;
+	}
+	return -1;
+}
+
 int LineMarkers::AddMark(int line, int markerNum, int lines) {
 	handleCurrent++;
 	if (!markers.Length()) {
@@ -425,10 +438,10 @@ void LineAnnotation::SetText(int line, const char *text) {
 		if (annotations[line]) {
 			delete []annotations[line];
 		}
-		annotations[line] = AllocateAnnotation(strlen(text), style);
+		annotations[line] = AllocateAnnotation(static_cast<int>(strlen(text)), style);
 		AnnotationHeader *pah = reinterpret_cast<AnnotationHeader *>(annotations[line]);
 		pah->style = static_cast<short>(style);
-		pah->length = strlen(text);
+		pah->length = static_cast<int>(strlen(text));
 		pah->lines = static_cast<short>(NumberLines(text));
 		memcpy(annotations[line]+sizeof(AnnotationHeader), text, pah->length);
 	} else {

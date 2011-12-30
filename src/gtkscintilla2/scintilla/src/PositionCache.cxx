@@ -12,6 +12,7 @@
 
 #include <string>
 #include <vector>
+#include <map>
 
 #include "Platform.h"
 
@@ -85,7 +86,7 @@ void LineLayout::Resize(int maxLineLength_) {
 		indicators = new char[maxLineLength_ + 1];
 		// Extra position allocated as sometimes the Windows
 		// GetTextExtentExPoint API writes an extra element.
-		positions = new int[maxLineLength_ + 1 + 1];
+		positions = new XYPOSITION[maxLineLength_ + 1 + 1];
 		maxLineLength = maxLineLength_;
 	}
 }
@@ -502,15 +503,15 @@ PositionCacheEntry::PositionCacheEntry() :
 }
 
 void PositionCacheEntry::Set(unsigned int styleNumber_, const char *s_,
-	unsigned int len_, int *positions_, unsigned int clock_) {
+	unsigned int len_, XYPOSITION *positions_, unsigned int clock_) {
 	Clear();
 	styleNumber = styleNumber_;
 	len = len_;
 	clock = clock_;
 	if (s_ && positions_) {
-		positions = new short[len + (len + 1) / 2];
+		positions = new XYPOSITION[len + (len + 1) / 2];
 		for (unsigned int i=0; i<len; i++) {
-			positions[i] = static_cast<short>(positions_[i]);
+			positions[i] = static_cast<XYPOSITION>(positions_[i]);
 		}
 		memcpy(reinterpret_cast<char *>(positions + len), s_, len);
 	}
@@ -529,7 +530,7 @@ void PositionCacheEntry::Clear() {
 }
 
 bool PositionCacheEntry::Retrieve(unsigned int styleNumber_, const char *s_,
-	unsigned int len_, int *positions_) const {
+	unsigned int len_, XYPOSITION *positions_) const {
 	if ((styleNumber == styleNumber_) && (len == len_) &&
 		(memcmp(reinterpret_cast<char *>(positions + len), s_, len)== 0)) {
 		for (unsigned int i=0; i<len; i++) {
@@ -541,16 +542,16 @@ bool PositionCacheEntry::Retrieve(unsigned int styleNumber_, const char *s_,
 	}
 }
 
-int PositionCacheEntry::Hash(unsigned int styleNumber, const char *s, unsigned int len) {
+int PositionCacheEntry::Hash(unsigned int styleNumber_, const char *s, unsigned int len_) {
 	unsigned int ret = s[0] << 7;
-	for (unsigned int i=0; i<len; i++) {
+	for (unsigned int i=0; i<len_; i++) {
 		ret *= 1000003;
 		ret ^= s[i];
 	}
 	ret *= 1000003;
-	ret ^= len;
+	ret ^= len_;
 	ret *= 1000003;
-	ret ^= styleNumber;
+	ret ^= styleNumber_;
 	return ret;
 }
 
@@ -594,7 +595,7 @@ void PositionCache::SetSize(size_t size_) {
 }
 
 void PositionCache::MeasureWidths(Surface *surface, ViewStyle &vstyle, unsigned int styleNumber,
-	const char *s, unsigned int len, int *positions, Document *pdoc) {
+	const char *s, unsigned int len, XYPOSITION *positions, Document *pdoc) {
 
 	allClear = false;
 	int probe = -1;
@@ -604,11 +605,11 @@ void PositionCache::MeasureWidths(Surface *surface, ViewStyle &vstyle, unsigned 
 
 		// Two way associative: try two probe positions.
 		int hashValue = PositionCacheEntry::Hash(styleNumber, s, len);
-		probe = hashValue % size;
+		probe = static_cast<int>(hashValue % size);
 		if (pces[probe].Retrieve(styleNumber, s, len, positions)) {
 			return;
 		}
-		int probe2 = (hashValue * 37) % size;
+		int probe2 = static_cast<int>((hashValue * 37) % size);
 		if (pces[probe2].Retrieve(styleNumber, s, len, positions)) {
 			return;
 		}
@@ -620,7 +621,7 @@ void PositionCache::MeasureWidths(Surface *surface, ViewStyle &vstyle, unsigned 
 	if (len > BreakFinder::lengthStartSubdivision) {
 		// Break up into segments
 		unsigned int startSegment = 0;
-		int xStartSegment = 0;
+		XYPOSITION xStartSegment = 0;
 		while (startSegment < len) {
 			unsigned int lenSegment = pdoc->SafeSegment(s + startSegment, len - startSegment, BreakFinder::lengthEachSubdivision);
 			surface->MeasureWidths(vstyle.styles[styleNumber].font, s + startSegment, lenSegment, positions + startSegment);
