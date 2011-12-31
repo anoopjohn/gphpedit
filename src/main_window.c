@@ -323,7 +323,7 @@ void main_window_create(char **argv, gint argc)
   g_free(theme_dir);
 
   main_window.tempmg = templates_manager_new();
-  main_window.docmg = document_manager_new_full(argv, argc);
+  main_window.docmg = document_manager_new_full(argv, argc, &main_window);
   g_signal_connect (G_OBJECT (main_window.docmg), "new_document", G_CALLBACK(document_manager_new_document_cb), NULL);
   g_signal_connect (G_OBJECT (main_window.docmg), "change_document", G_CALLBACK(document_manager_change_document_cb), NULL);
   g_signal_connect (G_OBJECT (main_window.docmg), "close_document", G_CALLBACK(document_manager_close_document_cb), NULL);

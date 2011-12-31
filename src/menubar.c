@@ -120,10 +120,6 @@ struct _MenuBarPrivate
 
 };
 
-/*needed for menu hints*/
-guint context_id;
-guint message_id;
-
 static void MENUBAR_constructed (MenuBar *menubar);
 
 G_DEFINE_TYPE(MenuBar, MENUBAR, GTK_TYPE_MENU_BAR)

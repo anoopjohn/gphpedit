@@ -41,6 +41,7 @@
 */
 struct DocumentManagerDetails
 {
+  MainWindow *main_window;
   Document *current_document;
   GSList *editors;
 };
@@ -69,6 +70,50 @@ void document_loader_done_refresh_cb (DocumentLoader *doclod, gboolean result, g
  * register DocumentManager type and returns a new GType
 */
 G_DEFINE_TYPE(DocumentManager, document_manager, G_TYPE_OBJECT);  
+
+enum
+{
+  PROP_0,
+  PROP_MAIN_WINDOW
+};
+
+static void
+document_manager_set_property (GObject      *object,
+			      guint         prop_id,
+			      const GValue *value,
+			      GParamSpec   *pspec)
+{
+  DocumentManagerDetails *docdet = DOCUMENT_MANAGER_GET_PRIVATE(object);
+
+  switch (prop_id)
+  {
+    case PROP_MAIN_WINDOW:
+        docdet->main_window = g_value_get_pointer(value);
+      break;
+    default:
+      G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
+      break;
+  }
+}
+
+static void
+document_manager_get_property (GObject    *object,
+			      guint       prop_id,
+			      GValue     *value,
+			      GParamSpec *pspec)
+{
+  DocumentManagerDetails *docdet = DOCUMENT_MANAGER_GET_PRIVATE(object);
+  
+  switch (prop_id)
+  {
+    case PROP_MAIN_WINDOW:
+      g_value_set_pointer (value, docdet->main_window);
+      break;
+    default:
+      G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
+      break;
+    }
+}
 
 /*
 * overide default contructor to make a singleton.
@@ -110,6 +155,8 @@ document_manager_class_init (DocumentManagerClass *klass)
   object_class = G_OBJECT_CLASS (klass);
   object_class->finalize = document_manager_finalize;
   object_class->dispose = document_manager_dispose;
+  object_class->set_property = document_manager_set_property;
+  object_class->get_property = document_manager_get_property;
   object_class->constructor = document_manager_constructor;
 
 	signals[NEW_DOCUMENT] =
@@ -148,6 +195,12 @@ document_manager_class_init (DocumentManagerClass *klass)
 		               g_cclosure_marshal_VOID__OBJECT,
 		               G_TYPE_NONE, 1, G_TYPE_OBJECT, NULL);
 
+    g_object_class_install_property (object_class,
+                              PROP_MAIN_WINDOW,
+                              g_param_spec_pointer ("main_window",
+                              NULL, NULL,
+                              G_PARAM_READWRITE));
+
   g_type_class_add_private (klass, sizeof (DocumentManagerDetails));
 }
 
@@ -175,14 +228,15 @@ document_manager_finalize (GObject *object)
 
 DocumentManager *document_manager_new (void)
 {
-  return g_object_new (DOCUMENT_MANAGER_TYPE, NULL);
+  return g_object_new (DOCUMENT_MANAGER_TYPE, "main_window", NULL, NULL);
 }
 
-DocumentManager *document_manager_new_full (char **argv, gint argc)
+DocumentManager *document_manager_new_full (char **argv, gint argc, gpointer main_window)
 {
   gphpedit_debug(DEBUG_DOC_MANAGER);
+  MainWindow *main_win = (MainWindow *) main_window;
   DocumentManager *docmg;
-  docmg = g_object_new (DOCUMENT_MANAGER_TYPE, NULL);
+  docmg = g_object_new (DOCUMENT_MANAGER_TYPE, "main_window", main_win, NULL);
   
   /* load command line files */
   guint i;
@@ -256,8 +310,7 @@ void document_save_update_cb (Document *doc, gpointer user_data)
 void document_zoom_update_cb (Document *doc, gpointer user_data)
 {
   DocumentManager *docmg = DOCUMENT_MANAGER(user_data);
-  DocumentManagerDetails *docmgdet;
-  docmgdet = DOCUMENT_MANAGER_GET_PRIVATE(docmg);
+  DocumentManagerDetails *docmgdet = DOCUMENT_MANAGER_GET_PRIVATE(docmg);
   if (doc==docmgdet->current_document){
     g_signal_emit (G_OBJECT (docmg), signals[ZOOM_CHANGE], 0, docmgdet->current_document);
   }
@@ -265,10 +318,11 @@ void document_zoom_update_cb (Document *doc, gpointer user_data)
 
 void document_save_start_cb (Document *doc, gpointer user_data)
 {
+  DocumentManagerDetails *docmgdet = DOCUMENT_MANAGER_GET_PRIVATE(user_data);
   /* show status in statusbar */
   const gchar *short_filename;
   g_object_get(doc, "short_filename", &short_filename, NULL);
-  gphpedit_statusbar_flash_message (GPHPEDIT_STATUSBAR(main_window.appbar),0,_("Saving %s"), short_filename);
+  gphpedit_statusbar_flash_message (GPHPEDIT_STATUSBAR(docmgdet->main_window->appbar),0,_("Saving %s"), short_filename);
 }
 
 void document_type_changed_cb (Document *doc, gint type, gpointer user_data)
@@ -281,7 +335,9 @@ void document_type_changed_cb (Document *doc, gint type, gpointer user_data)
 
 void document_pos_changed_cb (Document *doc, gint pos, gint col, gpointer user_data)
 {
-  gphpedit_statusbar_set_cursor_position (GPHPEDIT_STATUSBAR(main_window.appbar), pos, col);
+  DocumentManager *docmg = DOCUMENT_MANAGER(user_data);
+  DocumentManagerDetails *docmgdet = DOCUMENT_MANAGER_GET_PRIVATE(docmg);
+  gphpedit_statusbar_set_cursor_position (GPHPEDIT_STATUSBAR(docmgdet->main_window->appbar), pos, col);
 }
 
 void document_need_reload_cb (Document *doc, gpointer user_data)
@@ -294,12 +350,14 @@ void document_need_reload_cb (Document *doc, gpointer user_data)
 
 static void document_ovr_changed_cb (Document *doc, gboolean status, gpointer user_data)
 {
-  gphpedit_statusbar_set_overwrite (GPHPEDIT_STATUSBAR(main_window.appbar), status);
+  DocumentManagerDetails *docmgdet = DOCUMENT_MANAGER_GET_PRIVATE(user_data);
+  gphpedit_statusbar_set_overwrite (GPHPEDIT_STATUSBAR(docmgdet->main_window->appbar), status);
 }
 
 static void document_marker_not_found_cb (Document *doc, gpointer user_data)
 {
-  gphpedit_statusbar_flash_message (GPHPEDIT_STATUSBAR(main_window.appbar),0 , "%s",_("No marker found"));
+  DocumentManagerDetails *docmgdet = DOCUMENT_MANAGER_GET_PRIVATE(user_data);
+  gphpedit_statusbar_flash_message (GPHPEDIT_STATUSBAR(docmgdet->main_window->appbar),0 , "%s",_("No marker found"));
 }
 
 static void document_open_request_cb (Document *doc, gchar *uri, gpointer user_data)
@@ -326,12 +384,12 @@ void document_loader_done_loading_cb (DocumentLoader *doclod, gboolean result, D
     g_signal_connect(G_OBJECT(doc), "save_update", G_CALLBACK(document_save_update_cb), docmg);
     g_signal_connect(G_OBJECT(doc), "zoom_update", G_CALLBACK(document_zoom_update_cb), docmg);
     if (OBJECT_IS_DOCUMENT_SCINTILLA(doc)) {
-      g_signal_connect(G_OBJECT(doc), "save_start", G_CALLBACK(document_save_start_cb), NULL);
+      g_signal_connect(G_OBJECT(doc), "save_start", G_CALLBACK(document_save_start_cb), docmg);
       g_signal_connect(G_OBJECT(doc), "type_changed", G_CALLBACK(document_type_changed_cb), docmg);
       g_signal_connect(G_OBJECT(doc), "pos_changed", G_CALLBACK(document_pos_changed_cb), docmg);
       g_signal_connect(G_OBJECT(doc), "need_reload", G_CALLBACK(document_need_reload_cb), docmg);
-      g_signal_connect(G_OBJECT(doc), "ovr_changed", G_CALLBACK(document_ovr_changed_cb), NULL);
-      g_signal_connect(G_OBJECT(doc), "marker_not_found", G_CALLBACK(document_marker_not_found_cb), NULL);
+      g_signal_connect(G_OBJECT(doc), "ovr_changed", G_CALLBACK(document_ovr_changed_cb), docmg);
+      g_signal_connect(G_OBJECT(doc), "marker_not_found", G_CALLBACK(document_marker_not_found_cb), docmg);
       g_signal_connect(G_OBJECT(doc), "open_request", G_CALLBACK(document_open_request_cb), docmg);
     }
     g_signal_emit (G_OBJECT (docmg), signals[NEW_DOCUMENT], 0, doc);
@@ -343,13 +401,15 @@ void document_loader_done_loading_cb (DocumentLoader *doclod, gboolean result, D
 
 void document_loader_need_mounting_cb (DocumentLoader *doclod, gpointer user_data)
 {
-  gphpedit_statusbar_flash_message (GPHPEDIT_STATUSBAR(main_window.appbar),0,"%s", 
+  DocumentManagerDetails *docmgdet = DOCUMENT_MANAGER_GET_PRIVATE(user_data);
+  gphpedit_statusbar_flash_message (GPHPEDIT_STATUSBAR(docmgdet->main_window->appbar),0,"%s", 
     _("Error filesystem not mounted. Mounting filesystem, this will take a few seconds..."));
 }
 
 void document_loader_help_file_not_found_cb (DocumentLoader *doclod, gpointer user_data)
 {
-  gphpedit_statusbar_flash_message (GPHPEDIT_STATUSBAR(main_window.appbar),0,"%s",_("Could not find the required command in the online help"));
+  DocumentManagerDetails *docmgdet = DOCUMENT_MANAGER_GET_PRIVATE(user_data);
+  gphpedit_statusbar_flash_message (GPHPEDIT_STATUSBAR(docmgdet->main_window->appbar),0,"%s",_("Could not find the required command in the online help"));
   g_object_unref(doclod);
 }
 
@@ -587,7 +647,7 @@ void document_manager_document_reload(DocumentManager *docmg)
   }
   const gchar *short_filename;
   g_object_get(docmgdet->current_document, "short_filename", &short_filename, NULL);
-  gphpedit_statusbar_flash_message (GPHPEDIT_STATUSBAR(main_window.appbar),0,_("Reloading %s"), short_filename);
+  gphpedit_statusbar_flash_message (GPHPEDIT_STATUSBAR(docmgdet->main_window->appbar),0,_("Reloading %s"), short_filename);
   documentable_reload(DOCUMENTABLE(docmgdet->current_document));
 }
 

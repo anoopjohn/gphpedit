@@ -59,7 +59,7 @@ typedef struct
 /* Basic GObject requirements. */
 GType document_manager_get_type (void);
 DocumentManager *document_manager_new (void);
-DocumentManager *document_manager_new_full (char **argv, gint argc);
+DocumentManager *document_manager_new_full (char **argv, gint argc, gpointer main_window);
 void document_manager_add_new_document(DocumentManager *docmg, gint type, const gchar *filename, gint goto_line);
 void document_manager_document_reload(DocumentManager *docmg);
 Documentable *document_manager_find_documentable_from_filename (DocumentManager *docmg, gchar *filename);
