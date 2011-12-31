@@ -59,6 +59,8 @@ void quit_application()
   g_object_unref(main_window.prefmg);
   g_object_unref(main_window.stylemg);
   g_object_unref(main_window.symbolmg);
+  //free menu hints table
+  if (main_window.pmenu_hints) g_hash_table_destroy (main_window.pmenu_hints);
 }
 
 

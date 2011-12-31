@@ -253,48 +253,6 @@ static void showpreview (GtkWidget *widget, gpointer user_data)
     document_manager_get_document_preview(main_window->docmg);
 }
 
-typedef struct {
-    const gchar *message;
-    MainWindow *main_window;
-} Hint;
-
-/*
- *show_hint
- * Show a new menu hint in the statusbar, and set widget state to prelight
-*/
-gboolean show_hint(GtkWidget *widget, GdkEventCrossing *event, gpointer user_data){
-    Hint *hint = (Hint*) user_data;
-    gtk_widget_set_state (widget, GTK_STATE_PRELIGHT);
-    context_id = gtk_statusbar_get_context_id (GTK_STATUSBAR(hint->main_window->appbar), (const gchar *) hint->message);
-    message_id= gtk_statusbar_push (GTK_STATUSBAR(hint->main_window->appbar), context_id, (const gchar *) hint->message);
-    return FALSE;
-}
-
-/*
- *delete_hint
- * deletes the menu hint from the statusbar, and set widget state to normal
-*/
-gboolean delete_hint(GtkWidget *widget, GdkEventCrossing *event, gpointer user_data){
-    MainWindow *main_window = (MainWindow *) user_data;
-    gtk_widget_set_state (widget, GTK_STATE_NORMAL);
-    gtk_statusbar_remove (GTK_STATUSBAR(main_window->appbar), context_id, message_id);
-    return FALSE;
-}
-
-/*
- * install_menu_hint
- * connect menu hint signals
-*/
-void inline install_menu_hint(GtkWidget *widget, gchar *message, gpointer main_window)
-{
-//FIXME: big memory leak. use a table and free when destroy the widget
-    Hint *hint = g_slice_new(Hint);
-    hint->message = message;
-    hint->main_window = main_window;
-    g_signal_connect(G_OBJECT(widget), "enter-notify-event", G_CALLBACK(show_hint), hint);
-    g_signal_connect(G_OBJECT(widget), "leave-notify-event", G_CALLBACK(delete_hint), main_window);
-}
-
 #ifdef PACKAGE_BUGREPORT
 /*
  * bugreport
@@ -427,16 +385,17 @@ static void fill_menu_file(MenuBarPrivate *priv){
 * create file menu widgets and fill file menu
 */
 static void prepare_menu_file(MenuBarPrivate *priv){
-    install_menu_hint(priv->newi, _("Creates a new file"), priv->main_window);
-    install_menu_hint(priv->open, _("Open a file"), priv->main_window);
-    install_menu_hint(priv->opensel, _("Open a file with the name currently selected in the editor"), priv->main_window);
-    install_menu_hint(priv->reload, _("Save the file currently selected in the editor"), priv->main_window);
 
-    install_menu_hint(priv->save, _("Save the file currently selected in the editor"), priv->main_window);
-    install_menu_hint(priv->saveas, _("Save the file currently selected in the editor"), priv->main_window);
-    install_menu_hint(priv->saveall, _("Save all open unsaved files"), priv->main_window);
-    install_menu_hint(priv->close, _("Close the current file"), priv->main_window);
-    install_menu_hint(priv->quit, _("Quit the application"), priv->main_window);
+    main_window_install_menu_hint(priv->main_window, priv->newi, _("Creates a new file"));
+    main_window_install_menu_hint(priv->main_window, priv->open, _("Open a file"));
+    main_window_install_menu_hint(priv->main_window, priv->opensel, _("Open a file with the name currently selected in the editor"));
+    main_window_install_menu_hint(priv->main_window, priv->reload, _("Save the file currently selected in the editor"));
+
+    main_window_install_menu_hint(priv->main_window, priv->save, _("Save the file currently selected in the editor"));
+    main_window_install_menu_hint(priv->main_window, priv->saveas, _("Save the file currently selected in the editor"));
+    main_window_install_menu_hint(priv->main_window, priv->saveall, _("Save all open unsaved files"));
+    main_window_install_menu_hint(priv->main_window, priv->close, _("Close the current file"));
+    main_window_install_menu_hint(priv->main_window, priv->quit, _("Quit the application"));
 
     g_signal_connect(G_OBJECT(priv->newi), "activate", G_CALLBACK(on_new1_activate), NULL);
     g_signal_connect(G_OBJECT(priv->open), "activate", G_CALLBACK(on_open1_activate), NULL);
@@ -474,18 +433,18 @@ static void fill_help_menu(MenuBarPrivate *priv){
 }
 
 static void prepare_help_menu(MenuBarPrivate *priv){
-    install_menu_hint(priv->phphelp, _("Look for help on the currently selected function"), priv->main_window);
+    main_window_install_menu_hint(priv->main_window, priv->phphelp, _("Look for help on the currently selected function"));
     g_signal_connect(G_OBJECT(priv->phphelp), "activate", G_CALLBACK(context_help), priv->main_window);
     #ifdef PACKAGE_BUGREPORT
     g_signal_connect(G_OBJECT(priv->bugreport), "activate", G_CALLBACK(bugreport), priv->main_window);
-    install_menu_hint(priv->bugreport, _("Go to bug report page to report a bug"), priv->main_window);
+    main_window_install_menu_hint(priv->main_window, priv->bugreport, _("Go to bug report page to report a bug"));
     #endif
     #ifdef TRANSLATE_URL
     g_signal_connect(G_OBJECT(priv->translate), "activate", G_CALLBACK(translate), priv->main_window);
-    install_menu_hint(priv->translate, _("Start translating this application"), priv->main_window);
+    main_window_install_menu_hint(priv->main_window, priv->translate, _("Start translating this application"));
     #endif
     g_signal_connect(G_OBJECT(priv->abouthelp), "activate", G_CALLBACK(on_about1_activate), priv->main_window);
-    install_menu_hint(priv->abouthelp, _("Shows info about gPHPEdit"), priv->main_window);
+    main_window_install_menu_hint(priv->main_window, priv->abouthelp, _("Shows info about gPHPEdit"));
 }
 
 /*
@@ -528,21 +487,21 @@ static void fill_menu_edit(MenuBarPrivate *priv)
 
 static void prepare_menu_edit(MenuBarPrivate *priv)
 {
-    install_menu_hint(priv->undo, _("Undo last action"), priv->main_window);
-    install_menu_hint(priv->redo, _("Redo last action"), priv->main_window);
-    install_menu_hint(priv->cut, _("Cut Selected Text"), priv->main_window);
-    install_menu_hint(priv->copy, _("Copy Selected Text"), priv->main_window);
-    install_menu_hint(priv->paste, _("Paste Text from clipboard"), priv->main_window);
-    install_menu_hint(priv->selectall, _("Select all Text in current file"), priv->main_window);
-    install_menu_hint(priv->find, _("Find text in current file"), priv->main_window);
-    install_menu_hint(priv->replace, _("Find and replace text in current file"), priv->main_window);
-    install_menu_hint(priv->incfind, _("Search as you type"), priv->main_window);
-    install_menu_hint(priv->gotoline, _("Go to line"), priv->main_window);
-    install_menu_hint(priv->indent, _("Indent the currently selected block"), priv->main_window);
-    install_menu_hint(priv->unindent, _("Unindent the currently selected block"), priv->main_window);
-    install_menu_hint(priv->upper, _("Convert the current selection text to upper case"), priv->main_window);
-    install_menu_hint(priv->lower, _("Convert the current selection text to lower case"), priv->main_window);
-    install_menu_hint(priv->preferences, _("Application Config"), priv->main_window);
+    main_window_install_menu_hint(priv->main_window, priv->undo, _("Undo last action"));
+    main_window_install_menu_hint(priv->main_window, priv->redo, _("Redo last action"));
+    main_window_install_menu_hint(priv->main_window, priv->cut, _("Cut Selected Text"));
+    main_window_install_menu_hint(priv->main_window, priv->copy, _("Copy Selected Text"));
+    main_window_install_menu_hint(priv->main_window, priv->paste, _("Paste Text from clipboard"));
+    main_window_install_menu_hint(priv->main_window, priv->selectall, _("Select all Text in current file"));
+    main_window_install_menu_hint(priv->main_window, priv->find, _("Find text in current file"));
+    main_window_install_menu_hint(priv->main_window, priv->replace, _("Find and replace text in current file"));
+    main_window_install_menu_hint(priv->main_window, priv->incfind, _("Search as you type"));
+    main_window_install_menu_hint(priv->main_window, priv->gotoline, _("Go to line"));
+    main_window_install_menu_hint(priv->main_window, priv->indent, _("Indent the currently selected block"));
+    main_window_install_menu_hint(priv->main_window, priv->unindent, _("Unindent the currently selected block"));
+    main_window_install_menu_hint(priv->main_window, priv->upper, _("Convert the current selection text to upper case"));
+    main_window_install_menu_hint(priv->main_window, priv->lower, _("Convert the current selection text to lower case"));
+    main_window_install_menu_hint(priv->main_window, priv->preferences, _("Application Config"));
     g_signal_connect(G_OBJECT(priv->undo), "activate", G_CALLBACK(on_undo1_activate), NULL);
     g_signal_connect(G_OBJECT(priv->redo), "activate", G_CALLBACK(on_redo1_activate), NULL);
 
@@ -591,14 +550,14 @@ static void fill_menu_view(MenuBarPrivate *priv)
 
 static void prepare_menu_view(MenuBarPrivate *priv)
 {
-    install_menu_hint(priv->viewstatusbar, _("Show/Hide Application Statusbar"), priv->main_window);
-    install_menu_hint(priv->viewmaintoolbar, _("Show/Hide Application Main Toolbar"), priv->main_window);
-    install_menu_hint(priv->tog_class, _("Show/Hide Application Side Panel"), priv->main_window);
-    install_menu_hint(priv->viewfullscreen, _("Enable/Disable Fullscreen mode"), priv->main_window);
-    install_menu_hint(priv->zoomin, _("Increases zoom in 10%"), priv->main_window);
-    install_menu_hint(priv->zoomout, _("Decreases zoom in 10%"), priv->main_window);
-    install_menu_hint(priv->zoom100, _("Restores normal zoom level"), priv->main_window);
-    install_menu_hint(priv->preview, _("Preview the Document"), priv->main_window);
+    main_window_install_menu_hint(priv->main_window, priv->viewstatusbar, _("Show/Hide Application Statusbar"));
+    main_window_install_menu_hint(priv->main_window, priv->viewmaintoolbar, _("Show/Hide Application Main Toolbar"));
+    main_window_install_menu_hint(priv->main_window, priv->tog_class, _("Show/Hide Application Side Panel"));
+    main_window_install_menu_hint(priv->main_window, priv->viewfullscreen, _("Enable/Disable Fullscreen mode"));
+    main_window_install_menu_hint(priv->main_window, priv->zoomin, _("Increases zoom in 10%"));
+    main_window_install_menu_hint(priv->main_window, priv->zoomout, _("Decreases zoom in 10%"));
+    main_window_install_menu_hint(priv->main_window, priv->zoom100, _("Restores normal zoom level"));
+    main_window_install_menu_hint(priv->main_window, priv->preview, _("Preview the Document"));
 
     gboolean showstatus = get_preferences_manager_show_statusbar(priv->main_window->prefmg);
     gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(priv->viewstatusbar), showstatus);
@@ -659,17 +618,17 @@ static void fill_menu_code (MenuBarPrivate *priv)
 
 static void prepare_menu_code (MenuBarPrivate *priv)
 {
-    install_menu_hint(priv->syntax, _("Check the syntax using the PHP command line binary"), priv->main_window);
-    install_menu_hint(priv->clearsyntax, _("Remove the syntax check window"), priv->main_window);
-    install_menu_hint(priv->record, _("Record keyboard actions"), priv->main_window);
-    install_menu_hint(priv->playback, _("Playback the stored keyboard macro"), priv->main_window);
-    install_menu_hint(priv->forcephp, _("Force syntax highlighting to PHP/HTML/XML mode"), priv->main_window);
-    install_menu_hint(priv->forcecss, _("Force syntax highlighting to CSS mode"), priv->main_window);
-    install_menu_hint(priv->forcecxx, _("Force syntax highlighting to C/C++ mode"), priv->main_window);
-    install_menu_hint(priv->forcesql, _("Force syntax highlighting to SQL mode"), priv->main_window);
-    install_menu_hint(priv->forceperl, _("Force syntax highlighting to Perl mode"), priv->main_window);
-    install_menu_hint(priv->forcecobol, _("Force syntax highlighting to Cobol mode"), priv->main_window);
-    install_menu_hint(priv->forcepython, _("Force syntax highlighting to Python mode"), priv->main_window);
+    main_window_install_menu_hint(priv->main_window, priv->syntax, _("Check the syntax using the PHP command line binary"));
+    main_window_install_menu_hint(priv->main_window, priv->clearsyntax, _("Remove the syntax check window"));
+    main_window_install_menu_hint(priv->main_window, priv->record, _("Record keyboard actions"));
+    main_window_install_menu_hint(priv->main_window, priv->playback, _("Playback the stored keyboard macro"));
+    main_window_install_menu_hint(priv->main_window, priv->forcephp, _("Force syntax highlighting to PHP/HTML/XML mode"));
+    main_window_install_menu_hint(priv->main_window, priv->forcecss, _("Force syntax highlighting to CSS mode"));
+    main_window_install_menu_hint(priv->main_window, priv->forcecxx, _("Force syntax highlighting to C/C++ mode"));
+    main_window_install_menu_hint(priv->main_window, priv->forcesql, _("Force syntax highlighting to SQL mode"));
+    main_window_install_menu_hint(priv->main_window, priv->forceperl, _("Force syntax highlighting to Perl mode"));
+    main_window_install_menu_hint(priv->main_window, priv->forcecobol, _("Force syntax highlighting to Cobol mode"));
+    main_window_install_menu_hint(priv->main_window, priv->forcepython, _("Force syntax highlighting to Python mode"));
 
     g_signal_connect(G_OBJECT(priv->syntax), "activate", G_CALLBACK(syntax_check), priv->main_window);
     g_signal_connect(G_OBJECT(priv->clearsyntax), "activate", G_CALLBACK(syntax_check_clear), priv->main_window);

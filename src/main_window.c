@@ -291,6 +291,8 @@ void main_window_create(char **argv, gint argc)
   GtkWidget *menubox = get_widget_from_builder("menubox");
   gtk_widget_show (menubox);
 
+  main_window.pmenu_hints = g_hash_table_new_full (g_direct_hash, g_direct_equal, NULL, NULL);
+
   main_window.pmenu = menubar_new (&main_window);
   gtk_box_pack_start (GTK_BOX (menubox), main_window.pmenu, FALSE, FALSE, 0);
   gtk_widget_show_all (main_window.pmenu);
@@ -340,4 +342,48 @@ void update_controls(Documentable *document)
   g_object_get(document, "read_only", &read_only, "can_modify", &can_modify, "can_preview", &preview, NULL);
   menubar_update_controls(MENUBAR(main_window.pmenu), can_modify, preview, read_only);
   toolbar_update_controls(TOOLBAR(main_window.toolbar_main), can_modify, read_only);
+}
+
+/*
+ *show_hint
+ * Show a new menu hint in the statusbar, and set widget state to prelight
+*/
+static gboolean show_hint(GtkWidget *widget, GdkEventCrossing *event, gpointer user_data)
+{
+    MainWindow *main_window = (MainWindow *) user_data;
+    gtk_widget_set_state (widget, GTK_STATE_PRELIGHT);
+    const gchar *message = (const gchar *) g_hash_table_lookup (main_window->pmenu_hints, widget);
+    if (!message)
+    {
+        gphpedit_debug_message (DEBUG_MAIN_WINDOW,"%s", "Error menu hint is Null, skipping");
+        return FALSE;
+    }
+    main_window->context_id = gtk_statusbar_get_context_id (GTK_STATUSBAR(main_window->appbar), message);
+    main_window->message_id= gtk_statusbar_push (GTK_STATUSBAR(main_window->appbar), main_window->context_id, message);
+    return FALSE;
+}
+
+/*
+ *delete_hint
+ * deletes the menu hint from the statusbar, and set widget state to normal
+*/
+static gboolean delete_hint(GtkWidget *widget, GdkEventCrossing *event, gpointer user_data){
+    MainWindow *main_window = (MainWindow *) user_data;
+    gtk_widget_set_state (widget, GTK_STATE_NORMAL);
+    gtk_statusbar_remove (GTK_STATUSBAR(main_window->appbar), main_window->context_id, main_window->message_id);
+    return FALSE;
+}
+
+/*
+ * install_menu_hint
+ * connect menu hint signals
+*/
+void main_window_install_menu_hint(MainWindow *main_window, GtkWidget *widget, gchar *message)
+{
+    g_return_if_fail(widget!=NULL);
+    g_return_if_fail(message!=NULL);
+
+    g_hash_table_insert (main_window->pmenu_hints, widget, message);
+    g_signal_connect(G_OBJECT(widget), "enter-notify-event", G_CALLBACK(show_hint), main_window);
+    g_signal_connect(G_OBJECT(widget), "leave-notify-event", G_CALLBACK(delete_hint), main_window);
 }
