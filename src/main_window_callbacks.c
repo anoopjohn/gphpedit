@@ -446,7 +446,7 @@ void on_find1_activate(GtkWidget *widget)
 void on_replace1_activate(GtkWidget *widget)
 {
   if (document_manager_get_current_documentable(main_window.docmg)) {
-    GtkWidget *replace_dialog = replace_dialog_new (GTK_WINDOW(main_window.window));
+    GtkWidget *replace_dialog = replace_dialog_new (GTK_WINDOW(main_window.window), &main_window);
     gtk_widget_show(replace_dialog);    
   }
 }

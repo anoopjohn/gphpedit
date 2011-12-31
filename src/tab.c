@@ -29,11 +29,10 @@
 void info_dialog (gchar *title, gchar *message)
 {
   GtkWidget *dialog;
-  gint button;
   dialog = gtk_message_dialog_new(GTK_WINDOW(main_window.window),GTK_DIALOG_DESTROY_WITH_PARENT,GTK_MESSAGE_INFO,GTK_BUTTONS_OK,"%s", message);
   gtk_window_set_title(GTK_WINDOW(dialog), title);
   gtk_window_set_transient_for (GTK_WINDOW(dialog),GTK_WINDOW(main_window.window));
-  button = gtk_dialog_run (GTK_DIALOG (dialog));
+  gtk_dialog_run (GTK_DIALOG (dialog));
   gtk_widget_destroy(dialog);
   /*
    * Run the dialog and wait for the user to select yes or no.

@@ -72,7 +72,7 @@ struct _ReplaceDialogClass
  */
 GType 		 REPLACE_DIALOG_get_type 		(void) G_GNUC_CONST;
 
-GtkWidget *replace_dialog_new (GtkWindow *parent);
+GtkWidget *replace_dialog_new (GtkWindow *parent, gpointer main_window);
    
 G_END_DECLS
 
