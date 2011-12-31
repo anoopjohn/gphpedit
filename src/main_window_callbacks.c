@@ -437,7 +437,7 @@ void on_selectall1_activate(GtkWidget *widget)
 void on_find1_activate(GtkWidget *widget)
 {
   if (document_manager_get_current_documentable(main_window.docmg)) {
-    GtkWidget *find_dialog = search_dialog_new (GTK_WINDOW(main_window.window));
+    GtkWidget *find_dialog = search_dialog_new (GTK_WINDOW(main_window.window), &main_window);
     gtk_widget_show(find_dialog);    
   }
 }
