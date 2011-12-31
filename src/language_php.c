@@ -533,13 +533,11 @@ static void language_php_trigger_completion (Language_Provider *lgphp, guint ch)
   gint ac_length;
   gint prev_char;
   gchar *member_function_buffer = NULL;
-  guint style;
   current_pos = gtk_scintilla_get_current_pos(lgphpdet->sci);
   current_line = gtk_scintilla_line_from_position(lgphpdet->sci, current_pos);
   wordStart = gtk_scintilla_word_start_position(lgphpdet->sci, current_pos-1, TRUE);
   wordEnd = gtk_scintilla_word_end_position(lgphpdet->sci, current_pos-1, TRUE);
   current_word_length = wordEnd - wordStart;
-  style = gtk_scintilla_get_style_at(lgphpdet->sci, current_pos);
 
   gboolean auto_brace;
   g_object_get(lgphpdet->prefmg, "auto_complete_braces", &auto_brace, NULL);

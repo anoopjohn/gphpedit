@@ -438,8 +438,7 @@ void pressed_button_file_chooser(GtkButton *widget, gpointer user_data) {
    GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL, GTK_STOCK_OPEN, GTK_RESPONSE_OK, NULL);
   gtk_window_set_modal(GTK_WINDOW(pFileSelection), TRUE);
   gtk_file_chooser_set_local_only (GTK_FILE_CHOOSER(pFileSelection), FALSE);
-  gboolean res;
-  res=gtk_file_chooser_set_current_folder (GTK_FILE_CHOOSER(pFileSelection), get_filebrowser_backend_current_folder(FILEBROWSER_BACKEND(user_data)));
+  gtk_file_chooser_set_current_folder (GTK_FILE_CHOOSER(pFileSelection), get_filebrowser_backend_current_folder(FILEBROWSER_BACKEND(user_data)));
   gchar *sChemin=NULL;
 
   switch(gtk_dialog_run(GTK_DIALOG(pFileSelection))) {

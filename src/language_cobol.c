@@ -287,7 +287,6 @@ static void autoindent_brace_code (GtkScintilla *sci, PreferencesManager *pref)
   gint current_line;
   gint previous_line;
   gint previous_line_indentation;
-  gint previous_line_end;
 
   current_pos = gtk_scintilla_get_current_pos(sci);
   current_line = gtk_scintilla_line_from_position(sci, current_pos);
@@ -299,7 +298,6 @@ static void autoindent_brace_code (GtkScintilla *sci, PreferencesManager *pref)
     previous_line = current_line-1;
     previous_line_indentation = gtk_scintilla_get_line_indentation(sci, previous_line);
 
-    previous_line_end = gtk_scintilla_get_line_end_position(sci, previous_line);
     indent_line(sci, current_line, previous_line_indentation);
     gphpedit_debug_message (DEBUG_DOCUMENT, "previous_line=%d, previous_indent=%d\n", previous_line, previous_line_indentation);
     gint pos;
