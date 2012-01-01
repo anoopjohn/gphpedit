@@ -303,7 +303,7 @@ void document_save_update_cb (Document *doc, gpointer user_data)
   gint ftype;
   g_object_get(doc, "type", &ftype, NULL);
   gchar *filename = documentable_get_filename(DOCUMENTABLE(doc));
-  symbol_manager_rescan_file (main_window.symbolmg, filename, ftype);
+  symbol_manager_rescan_file (docmgdet->main_window->symbolmg, filename, ftype);
   g_free(filename);
 }
 
@@ -343,7 +343,9 @@ void document_pos_changed_cb (Document *doc, gint pos, gint col, gpointer user_d
 void document_need_reload_cb (Document *doc, gpointer user_data)
 {
   gphpedit_debug(DEBUG_DOC_MANAGER);
-  DocumentLoader *loader = document_loader_new (GTK_WINDOW(main_window.window));
+  DocumentManager *docmg = DOCUMENT_MANAGER(user_data);
+  DocumentManagerDetails *docmgdet = DOCUMENT_MANAGER_GET_PRIVATE(docmg);
+  DocumentLoader *loader = document_loader_new (GTK_WINDOW(docmgdet->main_window->window));
   g_signal_connect(G_OBJECT(loader), "done_refresh", G_CALLBACK(document_loader_done_refresh_cb), user_data);
   document_loader_reload_file(loader, doc);
 }
@@ -378,8 +380,8 @@ void document_loader_done_loading_cb (DocumentLoader *doclod, gboolean result, D
     GtkWidget *document_widget;
     g_object_get(doc, "untitled", &untitled, "editor_widget", &document_widget, NULL);
     gtk_widget_show(document_widget);
-    gtk_notebook_append_page (GTK_NOTEBOOK (main_window.notebook_editor), document_widget, document_tab);
-    gtk_notebook_set_current_page (GTK_NOTEBOOK (main_window.notebook_editor), -1);
+    gtk_notebook_append_page (GTK_NOTEBOOK (docmgdet->main_window->notebook_editor), document_widget, document_tab);
+    gtk_notebook_set_current_page (GTK_NOTEBOOK (docmgdet->main_window->notebook_editor), -1);
     _document_manager_set_current_document(docmg, doc);
     g_signal_connect(G_OBJECT(doc), "save_update", G_CALLBACK(document_save_update_cb), docmg);
     g_signal_connect(G_OBJECT(doc), "zoom_update", G_CALLBACK(document_zoom_update_cb), docmg);
@@ -417,8 +419,9 @@ void document_manager_add_new_document(DocumentManager *docmg, gint type, const 
 {
   gphpedit_debug(DEBUG_DOC_MANAGER);
   if (!docmg) return ;
+  DocumentManagerDetails *docmgdet = DOCUMENT_MANAGER_GET_PRIVATE(docmg);
 
-  DocumentLoader *loader = document_loader_new (GTK_WINDOW(main_window.window));
+  DocumentLoader *loader = document_loader_new (GTK_WINDOW(docmgdet->main_window->window));
   g_signal_connect(G_OBJECT(loader), "done_loading", G_CALLBACK(document_loader_done_loading_cb), docmg);
   g_signal_connect(G_OBJECT(loader), "need_mounting", G_CALLBACK(document_loader_need_mounting_cb), docmg);
   g_signal_connect(G_OBJECT(loader), "help_file_not_found", G_CALLBACK(document_loader_help_file_not_found_cb), docmg);
@@ -587,12 +590,12 @@ void document_manager_session_reopen(DocumentManager *docmg)
         if (focus_this_one && (docmgdet->current_document)) {
             GtkWidget *document_widget;
             g_object_get(docmgdet->current_document, "editor_widget", &document_widget, NULL);
-            focus_tab = gtk_notebook_page_num(GTK_NOTEBOOK(main_window.notebook_editor), document_widget);
+            focus_tab = gtk_notebook_page_num(GTK_NOTEBOOK(docmgdet->main_window->notebook_editor), document_widget);
         }
         focus_this_one=FALSE;
     }
   }
-  gtk_notebook_set_current_page(GTK_NOTEBOOK(main_window.notebook_editor), focus_tab);
+  gtk_notebook_set_current_page(GTK_NOTEBOOK(docmgdet->main_window->notebook_editor), focus_tab);
   g_object_unref(prefmg);
 }
 
@@ -615,7 +618,7 @@ void document_manager_switch_to_file_or_open(DocumentManager *docmg, gchar *file
     if (g_strcmp0(docfilename, filename_uri)==0) {
       GtkWidget *document_widget;
       g_object_get(document, "editor_widget", &document_widget, NULL);
-      gtk_notebook_set_current_page( GTK_NOTEBOOK(main_window.notebook_editor), gtk_notebook_page_num(GTK_NOTEBOOK(main_window.notebook_editor), document_widget));
+      gtk_notebook_set_current_page( GTK_NOTEBOOK(docmgdet->main_window->notebook_editor), gtk_notebook_page_num(GTK_NOTEBOOK(docmgdet->main_window->notebook_editor), document_widget));
       documentable_goto_line(DOCUMENTABLE(docmgdet->current_document), line_number);
       g_free(docfilename);
       return ;
@@ -760,7 +763,7 @@ void document_manager_close_page(DocumentManager *docmg, Document *document)
     docmgdet->current_document = NULL;
   }
   document_manager_session_save(docmg);
-  g_signal_emit (G_OBJECT (main_window.docmg), signals[CLOSE_DOCUMENT], 0, document);
+  g_signal_emit (G_OBJECT (docmg), signals[CLOSE_DOCUMENT], 0, document);
   g_object_unref(document);
 }
 
@@ -768,11 +771,12 @@ gboolean document_manager_try_save_page(DocumentManager *docmg, Document *docume
 {
   gphpedit_debug(DEBUG_DOC_MANAGER);
   if (!docmg) return TRUE;
+  DocumentManagerDetails *docmgdet = DOCUMENT_MANAGER_GET_PRIVATE(docmg);
   gint ret;
   const gchar *short_filename;
   g_object_get(document, "short_filename", &short_filename, NULL);
 
-  GtkWidget *confirm_dialog = gtk_message_dialog_new_with_markup (GTK_WINDOW(main_window.window),
+  GtkWidget *confirm_dialog = gtk_message_dialog_new_with_markup (GTK_WINDOW(docmgdet->main_window->window),
     GTK_DIALOG_DESTROY_WITH_PARENT, GTK_MESSAGE_WARNING, GTK_BUTTONS_NONE,
       /*TRANSLATORS: this is a pango markup string you must keep the format tags. */
     _("<b>The file '%s' has not been saved since your last changes.</b>\n<small>Are you sure you want to close it and lose these changes?</small>"),

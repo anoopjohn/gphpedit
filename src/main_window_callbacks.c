@@ -44,17 +44,15 @@
 #include "document_manager.h"
 #include "syntax_check_window.h"
 
-gboolean is_app_closing = FALSE;
-
 /* Actual action functions */
 
 void quit_application()
 {
   gphpedit_debug(DEBUG_MAIN_WINDOW);
   g_object_unref(main_window.tempmg);
-  is_app_closing = TRUE;
+  main_window.is_app_closing = TRUE;
   g_object_unref(main_window.docmg);
-  is_app_closing = FALSE;
+  main_window.is_app_closing = FALSE;
   preferences_manager_save_data(main_window.prefmg);
   g_object_unref(main_window.prefmg);
   g_object_unref(main_window.stylemg);
@@ -73,9 +71,9 @@ void main_window_destroy_event(GtkWidget *widget, gpointer data)
 gboolean main_window_delete_event(GtkWidget *widget, GdkEvent *event, gpointer user_data)
 {
   gboolean cancel_quit = FALSE;
-  is_app_closing = TRUE;
+  main_window.is_app_closing = TRUE;
   cancel_quit = !document_manager_can_all_tabs_be_saved(main_window.docmg);
-  is_app_closing = FALSE;
+  main_window.is_app_closing = FALSE;
   return cancel_quit;
 }
 
@@ -344,52 +342,6 @@ void on_reload1_activate(GtkWidget *widget)
   document_manager_document_reload(main_window.docmg);
 }
 
-void update_zoom_level(Documentable *doc)
-{
-  gphpedit_debug(DEBUG_MAIN_WINDOW);
-  guint zoom_level = 100;
-  if (doc) g_object_get(doc, "zoom_level", &zoom_level, NULL);
-  gphpedit_statusbar_set_zoom_level((GphpeditStatusbar *)main_window.appbar, zoom_level);
-}
-
-/**
- * Close a tab in the Editor. Removes the notebook page,
- * and sets the active tab correcty
- * 
- * @param editor - The editor object corresponding to the tab that is going to be closed.
- * @return void
- */
-
-void close_page(Document *document)
-{
-  gphpedit_debug(DEBUG_MAIN_WINDOW);
-  gint page_num;
-  gint page_num_closing;
-  gint current_active_tab;
-  GtkWidget *document_widget;
-
-  g_object_get(document, "editor_widget", &document_widget, NULL);
-  page_num_closing = gtk_notebook_page_num(GTK_NOTEBOOK(main_window.notebook_editor), document_widget);
-  current_active_tab = gtk_notebook_get_current_page(GTK_NOTEBOOK(main_window.notebook_editor));
-  
-  if (page_num_closing != current_active_tab) {
-    page_num = current_active_tab;
-  } else {
-    // If there is a tab before the current one then set it as the active tab.
-    page_num = page_num_closing - 1;
-    // If the current tab is the 0th tab then set the current tab as 0 itself.
-    // If there are are subsequent tabs, then this will set the next tab as active.
-    if (page_num < 0) {
-      page_num = 0;
-    }  
-  }
-
-  if(document_manager_set_current_document_from_position(main_window.docmg, page_num)) {
-    gtk_notebook_set_current_page(GTK_NOTEBOOK(main_window.notebook_editor), page_num);
-  }
-  gtk_notebook_remove_page(GTK_NOTEBOOK(main_window.notebook_editor), page_num_closing);
-}
-
 void on_close1_activate(GtkWidget *widget)
 {
   document_manager_try_close_current_document(main_window.docmg);
@@ -540,39 +492,6 @@ void on_about1_activate(GtkWidget *widget)
   gtk_widget_destroy(dialog);
 }
 
-void update_status_combobox(Documentable *document)
-{
-      if (is_app_closing) return ;
-      gint type = -1;
-      if (document) g_object_get(document, "type", &type, NULL);
-      /* set statuscombo */
-      switch(type) {
-        case(TAB_PHP):   
-         set_status_combo_item (GPHPEDIT_STATUSBAR(main_window.appbar),_("PHP/HTML/XML"));          
-         break;
-        case (TAB_CSS):
-          set_status_combo_item (GPHPEDIT_STATUSBAR(main_window.appbar),_("CSS"));
-          break;
-        case (TAB_CXX):
-          set_status_combo_item (GPHPEDIT_STATUSBAR(main_window.appbar),_("C/C++"));
-          break;
-        case (TAB_COBOL):
-          set_status_combo_item (GPHPEDIT_STATUSBAR(main_window.appbar),_("Cobol"));
-          break;
-        case (TAB_SQL):
-          set_status_combo_item (GPHPEDIT_STATUSBAR(main_window.appbar),_("SQL"));
-          break;
-        case (TAB_PERL):
-          set_status_combo_item (GPHPEDIT_STATUSBAR(main_window.appbar),_("Perl"));
-          break;
-        case (TAB_PYTHON):
-          set_status_combo_item (GPHPEDIT_STATUSBAR(main_window.appbar),_("Python"));
-          break;
-        default:
-          set_status_combo_item (GPHPEDIT_STATUSBAR(main_window.appbar),_("Text-Plain"));
-      }
-}
-
 void on_notebook_switch_page (GtkNotebook *notebook, GtkWidget *page,
                 gint page_num, gpointer user_data)
 {
@@ -654,37 +573,4 @@ gboolean main_window_activate_focus (GtkWidget *widget,GdkEventFocus *event, gpo
 {
   documentable_check_externally_modified(document_manager_get_current_documentable(main_window.docmg));
   return FALSE;
-}
-
-void document_manager_close_document_cb (DocumentManager *docmg, Documentable *doc, gpointer user_data)
-{
-  close_page(DOCUMENT(doc));
-  update_app_title(document_manager_get_current_documentable(docmg));
-  gchar *filename = documentable_get_filename (doc);
-  gint ftype;
-  g_object_get(doc, "type", &ftype, NULL);
-  symbol_manager_purge_file (main_window.symbolmg, filename, ftype);
-  g_free(filename);
-}
-
-void document_manager_new_document_cb (DocumentManager *docmg, Documentable *doc, gpointer user_data)
-{
-  gint ftype;
-  g_object_get(doc, "type", &ftype, NULL);
-  gchar *filename = documentable_get_filename(doc);
-  symbol_manager_add_file (main_window.symbolmg, filename, ftype);
-  g_free(filename);
-}
-
-void document_manager_change_document_cb (DocumentManager *docmg, Documentable *doc, gpointer user_data)
-{
-  if (!is_app_closing) {
-    update_app_title(doc);
-    documentable_check_externally_modified(doc);
-  }
-}
-
-void document_manager_zoom_change_cb (DocumentManager *docmg, Documentable *doc, gpointer user_data)
-{
-  update_zoom_level(doc);
 }

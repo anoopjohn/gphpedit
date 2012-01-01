@@ -78,13 +78,15 @@ typedef struct
   guint context_id;
   guint message_id;
   GHashTable *pmenu_hints;
+
+  gboolean is_app_closing;
 }
 MainWindow;
 
 extern MainWindow main_window;
 
 void main_window_create(char **argv, gint argc);
-void update_app_title(Documentable *document);
+void update_app_title(MainWindow *main_window, Documentable *document);
 void side_panel_show_hide(MainWindow *main_window);
 void statusbar_show_hide(MainWindow *main_window, gboolean state);
 void maintoolbar_show_hide(MainWindow *main_window, gboolean state);

@@ -29,7 +29,6 @@
 #include "main.h"
 #include "main_window.h"
 
-void update_status_combobox(Documentable *document);
 void main_window_destroy_event(GtkWidget *widget, gpointer data);
 gboolean main_window_delete_event(GtkWidget *widget, GdkEvent *event, gpointer user_data);
 gint main_window_key_press_event(GtkWidget   *widget, GdkEventKey *event,gpointer user_data);
@@ -65,7 +64,7 @@ void force_python(GtkWidget *widget);
 void zoom_in(GtkWidget *widget);
 void zoom_out(GtkWidget *widget);
 void zoom_100(GtkWidget *widget);
-void update_zoom_level(Documentable *document);
+//void update_zoom_level(Documentable *document);
 void can_undo(GtkWidget *widget);
 void on_notebook_switch_page (GtkNotebook *notebook, GtkWidget *page, gint page_num, gpointer user_data);
 void block_indent(GtkWidget *widget);
@@ -78,8 +77,4 @@ void keyboard_macro_startstop(GtkWidget *widget);
 void keyboard_macro_playback(GtkWidget *widget);
 void close_all_tabs(void);
 gboolean main_window_activate_focus (GtkWidget *widget,GdkEventFocus *event, gpointer user_data);
-void document_manager_new_document_cb (DocumentManager *docmg, Documentable *doc, gpointer user_data);
-void document_manager_change_document_cb (DocumentManager *docmg, Documentable *doc, gpointer user_data);
-void document_manager_close_document_cb (DocumentManager *docmg, Documentable *doc, gpointer user_data);
-void document_manager_zoom_change_cb (DocumentManager *docmg, Documentable *doc, gpointer user_data);
 #endif

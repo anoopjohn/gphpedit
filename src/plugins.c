@@ -134,8 +134,6 @@ plugin_class_init (PluginClass *klass)
 static void
 plugin_init (Plugin *object)
 {
-	PluginDetails *plug;
-	plug = PLUGIN_GET_PRIVATE(object);
 }
 
 static void
