@@ -158,7 +158,7 @@ void replace_all_clicked(ReplaceDialogPrivate *priv)
     g_string_printf(message, _("\"%d\" occurences of \"%s\" found, all replaced."), numfound, text);
   }
 
-  gphpedit_statusbar_flash_message (GPHPEDIT_STATUSBAR(main_window.appbar), 0,"%s",message->str);
+  gphpedit_statusbar_flash_message (GPHPEDIT_STATUSBAR(priv->main_window->appbar), 0,"%s",message->str);
   documentable_goto_pos(doc, documentable_get_current_position(doc));
 }
 
@@ -190,7 +190,7 @@ void replace_clicked(GtkDialog *dialog, ReplaceDialogPrivate *priv)
   if (numfound==0) {
     message = g_string_new("");
     g_string_printf(message, _("\"%s\" not found, no replacements made."), text);
-    gphpedit_statusbar_flash_message (GPHPEDIT_STATUSBAR(main_window.appbar), 0, "%s",message->str);
+    gphpedit_statusbar_flash_message (GPHPEDIT_STATUSBAR(priv->main_window->appbar), 0, "%s",message->str);
   }
   documentable_goto_pos(doc, documentable_get_current_position(doc));
 }

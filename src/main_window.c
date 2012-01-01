@@ -73,14 +73,14 @@ static GtkWidget *get_widget_from_builder(const gchar *name){
     return GTK_WIDGET(gtk_builder_get_object (main_window.pbuilder, name));
 }
 
-static void main_window_create_appbar(void)
+static void main_window_create_appbar(MainWindow *main_window)
 {
   GtkWidget *statusbox = get_widget_from_builder("statusbox");
   gtk_widget_show (statusbox);
-  main_window.appbar = gphpedit_statusbar_new ();
-  gtk_box_pack_start(GTK_BOX(statusbox), main_window.appbar, FALSE, TRUE, 1);
-  gphpedit_statusbar_set_zoom_level(GPHPEDIT_STATUSBAR(main_window.appbar), 100);
-  if (get_preferences_manager_show_statusbar(main_window.prefmg)) gtk_widget_show (main_window.appbar);
+  main_window->appbar = gphpedit_statusbar_new ();
+  gtk_box_pack_start(GTK_BOX(statusbox), main_window->appbar, FALSE, TRUE, 1);
+  gphpedit_statusbar_set_zoom_level(GPHPEDIT_STATUSBAR(main_window->appbar), 100);
+  if (get_preferences_manager_show_statusbar(main_window->prefmg)) gtk_widget_show (main_window->appbar);
 }
 
 static void side_panel_show(void)
@@ -425,7 +425,7 @@ void main_window_create(char **argv, gint argc)
 
   main_window_create_panes();
   main_window_fill_panes();
-  main_window_create_appbar();
+  main_window_create_appbar(&main_window);
   
   g_signal_connect (G_OBJECT (main_window.window), "delete_event", G_CALLBACK(main_window_delete_event), NULL);
   g_signal_connect (G_OBJECT (main_window.window), "destroy", G_CALLBACK (main_window_destroy_event), NULL);
