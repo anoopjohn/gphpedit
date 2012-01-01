@@ -185,12 +185,12 @@ static void create_side_panel(void){
   
   /* Classbrowser stuff creation */  
   GtkWidget *classbox = get_widget_from_builder("classbox");
-  main_window.pclassbrowser = gphpedit_classbrowser_new (); 
+  main_window.pclassbrowser = gphpedit_classbrowser_new (&main_window); 
   gtk_widget_show(main_window.pclassbrowser);
   gtk_box_pack_start(GTK_BOX(classbox), main_window.pclassbrowser, TRUE, TRUE, 0);
   /* File browser stuff creation */
   if (get_preferences_manager_show_filebrowser(main_window.prefmg)){
-  main_window.pfolder= gphpedit_filebrowser_new();
+  main_window.pfolder= gphpedit_filebrowser_new(&main_window);
   gtk_widget_show(main_window.pfolder);
   GtkWidget *label= gtk_image_new_from_icon_name ("file-manager", GTK_ICON_SIZE_SMALL_TOOLBAR);
   gtk_widget_show(label);
@@ -198,28 +198,25 @@ static void create_side_panel(void){
   }
 }
 
-static void main_window_fill_panes(void)
+static void main_window_fill_panes(MainWindow *main_window)
 {
-  /* create side panel */
-  create_side_panel();
-
   GtkWidget *pribox = get_widget_from_builder("pribox");
-  main_window.notebook_editor = gtk_notebook_new ();
-  gtk_notebook_set_scrollable(GTK_NOTEBOOK(main_window.notebook_editor), TRUE);
-  gtk_widget_show (main_window.notebook_editor);
-  gtk_box_pack_start(GTK_BOX(pribox), main_window.notebook_editor, TRUE, TRUE, 2);
-  g_signal_connect (G_OBJECT (main_window.notebook_editor), "switch_page", G_CALLBACK (on_notebook_switch_page), NULL);
-  g_signal_connect (G_OBJECT (main_window.notebook_editor), "focus-tab", G_CALLBACK (on_notebook_focus_tab), NULL);
+  main_window->notebook_editor = gtk_notebook_new ();
+  gtk_notebook_set_scrollable(GTK_NOTEBOOK(main_window->notebook_editor), TRUE);
+  gtk_widget_show (main_window->notebook_editor);
+  gtk_box_pack_start(GTK_BOX(pribox), main_window->notebook_editor, TRUE, TRUE, 2);
+  g_signal_connect (G_OBJECT (main_window->notebook_editor), "switch_page", G_CALLBACK (on_notebook_switch_page), NULL);
+  g_signal_connect (G_OBJECT (main_window->notebook_editor), "focus-tab", G_CALLBACK (on_notebook_focus_tab), NULL);
 
   /* add syntax check window */
   GtkWidget *prin_hbox = get_widget_from_builder("prin_hbox");
-  main_window.pwin = gtk_syntax_check_window_new ();
-  gtk_box_pack_start(GTK_BOX(prin_hbox), GTK_WIDGET(main_window.pwin), TRUE, TRUE, 2);
-  gtk_syntax_check_window_run_check(GTK_SYNTAX_CHECK_WINDOW(main_window.pwin), NULL, &main_window);
-  gtk_widget_show (main_window.pwin);
+  main_window->pwin = gtk_syntax_check_window_new ();
+  gtk_box_pack_start(GTK_BOX(prin_hbox), GTK_WIDGET(main_window->pwin), TRUE, TRUE, 2);
+  gtk_syntax_check_window_run_check(GTK_SYNTAX_CHECK_WINDOW(main_window->pwin), NULL, main_window);
+  gtk_widget_show (main_window->pwin);
 
   //FIXME: hack to hide syntax pane on start-up
-  gtk_paned_set_position(GTK_PANED(main_window.pmain_vertical_pane), 10000);
+  gtk_paned_set_position(GTK_PANED(main_window->pmain_vertical_pane), 10000);
 }
 
 void update_zoom_level(MainWindow *main_window, Documentable *doc)
@@ -356,6 +353,38 @@ static void document_manager_change_document_cb (DocumentManager *docmg, Documen
     }
 }
 
+static gint main_window_key_press_event(GtkWidget *widget, GdkEventKey *event,gpointer user_data)
+{
+  MainWindow *main_window = (MainWindow *) user_data;
+  if (main_window->notebook_editor != NULL) {
+    documentable_check_externally_modified(document_manager_get_current_documentable(main_window->docmg));
+    if (((event->state & (GDK_CONTROL_MASK | GDK_SHIFT_MASK))==(GDK_CONTROL_MASK | GDK_SHIFT_MASK)) && (event->keyval == GDK_KEY_ISO_Left_Tab)) {
+      // Hack, for some reason when shift is held down keyval comes through as GDK_ISO_Left_Tab not GDK_Tab
+      if (gtk_notebook_get_current_page(GTK_NOTEBOOK(main_window->notebook_editor)) == 0) {
+        gtk_notebook_set_current_page(GTK_NOTEBOOK(main_window->notebook_editor), gtk_notebook_get_n_pages(GTK_NOTEBOOK(main_window->notebook_editor))-1);
+      }
+      else {
+        gtk_notebook_prev_page(GTK_NOTEBOOK(main_window->notebook_editor));
+      }
+      return TRUE;
+    }
+    else if ((event->state & GDK_CONTROL_MASK)==GDK_CONTROL_MASK && (event->keyval == GDK_KEY_Tab)) {
+      if (gtk_notebook_get_current_page(GTK_NOTEBOOK(main_window->notebook_editor)) == gtk_notebook_get_n_pages(GTK_NOTEBOOK(main_window->notebook_editor))-1) {
+        gtk_notebook_set_current_page(GTK_NOTEBOOK(main_window->notebook_editor),0);
+      }
+      else {
+        gtk_notebook_next_page(GTK_NOTEBOOK(main_window->notebook_editor));
+      }
+      return TRUE;
+    }
+    else if ((event->state & GDK_MOD1_MASK)==GDK_MOD1_MASK && ((event->keyval >= GDK_KEY_0) && (event->keyval <= GDK_KEY_9))) {
+      gtk_notebook_set_current_page(GTK_NOTEBOOK(main_window->notebook_editor),event->keyval - ((event->keyval == GDK_KEY_0) ? (GDK_KEY_0 - 9) : (GDK_KEY_0 + 1)));
+      return TRUE;
+    }
+  }
+  return FALSE;
+}
+
 static void set_colormap(GtkWidget *window)
 {
   /*Set RGBA visual*/
@@ -390,6 +419,8 @@ void main_window_create(char **argv, gint argc)
 {
   main_window.is_app_closing = FALSE;
   main_window.prefmg = preferences_manager_new();
+  main_window.tempmg = templates_manager_new();
+
   create_app_main_window(_("gPHPEdit"));
 
   main_window.pbuilder = gtk_builder_new ();
@@ -424,12 +455,12 @@ void main_window_create(char **argv, gint argc)
   main_window.symbolmg = symbol_manager_new();
 
   main_window_create_panes();
-  main_window_fill_panes();
+  main_window_fill_panes(&main_window);
   main_window_create_appbar(&main_window);
   
   g_signal_connect (G_OBJECT (main_window.window), "delete_event", G_CALLBACK(main_window_delete_event), NULL);
   g_signal_connect (G_OBJECT (main_window.window), "destroy", G_CALLBACK (main_window_destroy_event), NULL);
-  g_signal_connect (G_OBJECT (main_window.window), "key_press_event", G_CALLBACK (main_window_key_press_event), NULL);
+  g_signal_connect (G_OBJECT (main_window.window), "key_press_event", G_CALLBACK (main_window_key_press_event), &main_window);
   g_signal_connect (G_OBJECT (main_window.window), "size_allocate", G_CALLBACK (main_window_resize), NULL);
   g_signal_connect (G_OBJECT (main_window.window), "window-state-event", G_CALLBACK (main_window_state_changed), NULL);
   g_signal_connect (G_OBJECT (main_window.window), "focus-in-event", G_CALLBACK (main_window_activate_focus), NULL);
@@ -439,12 +470,14 @@ void main_window_create(char **argv, gint argc)
   gtk_source_style_scheme_manager_prepend_search_path (main_window.stylemg, theme_dir);
   g_free(theme_dir);
 
-  main_window.tempmg = templates_manager_new();
   main_window.docmg = document_manager_new_full(argv, argc, &main_window);
   g_signal_connect (G_OBJECT (main_window.docmg), "new_document", G_CALLBACK(document_manager_new_document_cb), &main_window);
   g_signal_connect (G_OBJECT (main_window.docmg), "change_document", G_CALLBACK(document_manager_change_document_cb), &main_window);
   g_signal_connect (G_OBJECT (main_window.docmg), "close_document", G_CALLBACK(document_manager_close_document_cb), &main_window);
   g_signal_connect (G_OBJECT (main_window.docmg), "zoom_change", G_CALLBACK(document_manager_zoom_change_cb), &main_window);
+
+  /* create side panel */
+  create_side_panel();
 
   update_app_title(&main_window, document_manager_get_current_documentable(main_window.docmg));
 

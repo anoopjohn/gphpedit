@@ -371,7 +371,9 @@ static void document_open_request_cb (Document *doc, gchar *uri, gpointer user_d
 void document_loader_done_loading_cb (DocumentLoader *doclod, gboolean result, Document *doc, gpointer user_data)
 {
   DocumentManager *docmg = DOCUMENT_MANAGER(user_data);
+  g_return_if_fail(docmg!=NULL);
   DocumentManagerDetails *docmgdet = DOCUMENT_MANAGER_GET_PRIVATE(docmg);
+  g_return_if_fail(docmgdet!=NULL);
   if (result) {
     gboolean untitled;
     docmgdet->editors = g_slist_append(docmgdet->editors, doc);
@@ -469,6 +471,7 @@ Documentable *document_manager_get_current_documentable (DocumentManager *docmg)
   gphpedit_debug(DEBUG_DOC_MANAGER);
   if (!docmg) return NULL;
   DocumentManagerDetails *docmgdet = DOCUMENT_MANAGER_GET_PRIVATE(docmg);
+  if(!docmgdet) return NULL;
   return DOCUMENTABLE(docmgdet->current_document);
 }
 
@@ -613,6 +616,7 @@ void document_manager_switch_to_file_or_open(DocumentManager *docmg, gchar *file
     gchar *docfilename;
     GFile *file;
     g_object_get(document, "GFile", &file, NULL);
+    if(file==NULL) continue;
     docfilename = g_file_get_uri(file);
     gchar *filename_uri = filename_get_uri(filename);
     if (g_strcmp0(docfilename, filename_uri)==0) {

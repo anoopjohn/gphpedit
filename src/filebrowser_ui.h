@@ -53,7 +53,7 @@ struct _gphpeditFileBrowserClass {
 
 GType		  gphpedit_filebrowser_get_type (void) G_GNUC_CONST;
 
-GtkWidget	 *gphpedit_filebrowser_new (void);
+GtkWidget	 *gphpedit_filebrowser_new (gpointer main_window);
 void  cancel_filebrowser_process (GtkWidget	 *widget);
 G_END_DECLS
 

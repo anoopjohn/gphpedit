@@ -59,7 +59,7 @@ static inline void search_control_sensible(gphpeditFileBrowserPrivate *priv, gbo
 void change_folder_cb (gpointer instance, const gchar *current_folder, gpointer user_data);
 gboolean view_onButtonPressed (GtkWidget *treeview, GdkEventButton *event, gpointer userdata) ;
 gboolean view_onPopupMenu (GtkWidget *treeview, gpointer userdata);
-void popup_delete_file(void);
+void popup_delete_file(GtkWidget *wid, gpointer user_data);
 gboolean  cancel_process (GtkWidget *widget, GdkEvent  *event, gpointer   user_data);
 static void on_cleanicon_press (GtkEntry *entry, GtkEntryIconPosition icon_pos, GdkEvent *event, gpointer user_data);
 static void on_search_press (const gchar *filename, gpointer user_data);
@@ -75,6 +75,7 @@ static gchar *get_path_from_tree(GtkTreeView *tree_view, gchar *root_path);
 
 struct _gphpeditFileBrowserPrivate
 {
+  MainWindow *main_window;
   FilebrowserBackend *fbbackend;
 
   GtkBuilder *builder;
@@ -94,6 +95,10 @@ struct _gphpeditFileBrowserPrivate
   GtkTreeModel *cache_model;
   gulong  handlerid;
   gulong  handleridchange;
+
+  /*popup data*/
+  gchar *filename;
+  const gchar *mime;
 };
 
 enum {
@@ -113,24 +118,73 @@ const GtkTargetEntry drag_dest_types[] = {
     {"STRING", 0, TARGET_STRING},
 };
 
-typedef struct {
-  gchar *filename;
-  const gchar *mime;
-  FilebrowserBackend *fbbackend;
-} POPUPDATA;
-POPUPDATA pop;
-
 #define FILEBROWSER_BACKEND_GET_PRIVATE(object)(G_TYPE_INSTANCE_GET_PRIVATE ((object),\
 					    GPHPEDIT_TYPE_FILEBROWSER,\
 					    gphpeditFileBrowserPrivate))
 
+static void gphpedit_file_browser_constructed (GObject *object);
+
 G_DEFINE_TYPE(gphpeditFileBrowser, gphpedit_file_browser, GTK_TYPE_VBOX);
+
+enum
+{
+  PROP_0,
+  PROP_MAIN_WINDOW
+};
+
+static void
+gphpedit_file_browser_set_property (GObject      *object,
+			      guint         prop_id,
+			      const GValue *value,
+			      GParamSpec   *pspec)
+{
+  gphpeditFileBrowserPrivate *priv = FILEBROWSER_BACKEND_GET_PRIVATE(object);
+
+
+  switch (prop_id)
+  {
+    case PROP_MAIN_WINDOW:
+        priv->main_window = g_value_get_pointer(value);
+      break;
+    default:
+      G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
+      break;
+  }
+}
+
+static void
+gphpedit_file_browser_get_property (GObject    *object,
+			      guint       prop_id,
+			      GValue     *value,
+			      GParamSpec *pspec)
+{
+  gphpeditFileBrowserPrivate *priv = FILEBROWSER_BACKEND_GET_PRIVATE(object);
+  
+  switch (prop_id)
+  {
+    case PROP_MAIN_WINDOW:
+      g_value_set_pointer (value, priv->main_window);
+      break;
+    default:
+      G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
+      break;
+    }
+}
 
 static void 
 gphpedit_file_browser_class_init (gphpeditFileBrowserClass *klass)
 {
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
   object_class->dispose = gphpedit_file_browser_dispose;
+  object_class->set_property = gphpedit_file_browser_set_property;
+  object_class->get_property = gphpedit_file_browser_get_property;
+  object_class->constructed = gphpedit_file_browser_constructed;
+
+  g_object_class_install_property (object_class,
+                            PROP_MAIN_WINDOW,
+                            g_param_spec_pointer ("main_window",
+                            NULL, NULL,
+                            G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
 
   g_type_class_add_private (object_class, sizeof(gphpeditFileBrowserPrivate));
 }
@@ -163,13 +217,6 @@ static void
 gphpedit_file_browser_init (gphpeditFileBrowser *button)
 {
   gphpeditFileBrowserPrivate *priv = FILEBROWSER_BACKEND_GET_PRIVATE(button);
-  gchar *current_dir;
-  g_object_get(main_window.prefmg, "filebrowser_last_folder", &current_dir, NULL);
-  priv->fbbackend= filebrowser_backend_new (current_dir);
-  g_free(current_dir);
-  priv->handlerid = g_signal_connect(G_OBJECT(priv->fbbackend), "done_loading", G_CALLBACK(print_files), priv);
-  priv->handleridchange = g_signal_connect(G_OBJECT(priv->fbbackend), "change_folder", G_CALLBACK(change_folder_cb), priv);
-
   priv->builder = gtk_builder_new ();
   GError *error = NULL;
   guint res = gtk_builder_add_from_file (priv->builder, GPHPEDIT_UI_DIR "/filebrowser.ui", &error);
@@ -193,15 +240,6 @@ gphpedit_file_browser_init (gphpeditFileBrowser *button)
   g_object_set (G_OBJECT (pCellRenderer), "stock-size", GTK_ICON_SIZE_SMALL_TOOLBAR, NULL);
   gtk_tree_view_insert_column_with_attributes(GTK_TREE_VIEW(priv->pListView),-1,"", pCellRenderer, "gicon", ICON_COLUMN, NULL);
 
-  //renderer for text
-  g_signal_connect(G_OBJECT(priv->pListView), "row-activated", G_CALLBACK(tree_double_clicked), priv);
-  g_signal_connect(G_OBJECT(priv->pListView), "button-press-event", (GCallback) view_onButtonPressed, priv->fbbackend);
-  g_signal_connect(G_OBJECT(priv->pListView), "popup-menu", (GCallback) view_onPopupMenu, priv->fbbackend);
-  g_signal_connect(G_OBJECT(priv->pListView), "key-press-event", G_CALLBACK(key_press), NULL);
-  gtk_drag_dest_set(priv->pListView, (GTK_DEST_DEFAULT_ALL), drag_dest_types, 2,
-    (GDK_ACTION_DEFAULT | GDK_ACTION_COPY));
-  g_signal_connect(G_OBJECT(priv->pListView), "drag_data_received", G_CALLBACK(fb_file_v_drag_data_received), priv->fbbackend);
-
   pCellRenderer = gtk_cell_renderer_text_new();
   gtk_tree_view_insert_column_with_attributes(GTK_TREE_VIEW(priv->pListView),-1,_("File"),pCellRenderer, "text", FILE_COLUMN, NULL);
   pCellRenderer = gtk_cell_renderer_text_new();
@@ -210,20 +248,15 @@ gphpedit_file_browser_init (gphpeditFileBrowser *button)
   gtk_tree_view_column_set_visible (pColumn,FALSE);
 
   priv->button_dialog = GTK_WIDGET(gtk_builder_get_object (priv->builder, "button_dialog"));
-  gtk_button_set_label (GTK_BUTTON(priv->button_dialog), get_filebrowser_backend_current_folder(priv->fbbackend));
-  g_signal_connect(G_OBJECT(priv->button_dialog), "pressed", G_CALLBACK(pressed_button_file_chooser), priv->fbbackend);
 
   /* home button */
   priv->button_home= GTK_WIDGET(gtk_builder_get_object (priv->builder, "button_home"));
-  g_signal_connect(G_OBJECT(priv->button_home), "clicked", G_CALLBACK (_go_home_cb),priv->fbbackend);
 
   /* up button */
   priv->button_up= GTK_WIDGET(gtk_builder_get_object (priv->builder, "button_up"));
-  g_signal_connect(G_OBJECT(priv->button_up), "clicked", G_CALLBACK (_go_up_cb), priv->fbbackend);
 
   /* refresh button */
   priv->button_refresh= GTK_WIDGET(gtk_builder_get_object (priv->builder, "button_refresh"));
-  g_signal_connect(G_OBJECT(priv->button_refresh), "clicked", G_CALLBACK (_button_refresh), priv->fbbackend);
 
   priv->searchbox = GTK_WIDGET(gtk_builder_get_object (priv->builder, "searchbox"));
   priv->togglesearch = GTK_WIDGET(gtk_builder_get_object (priv->builder, "togglesearch"));
@@ -240,16 +273,43 @@ gphpedit_file_browser_init (gphpeditFileBrowser *button)
   gtk_tree_sortable_set_sort_func(GTK_TREE_SORTABLE(priv->pTree), 1, _filebrowser_sort_func, NULL, NULL);
   gtk_tree_sortable_set_sort_column_id(GTK_TREE_SORTABLE(priv->pTree), 1, GTK_SORT_ASCENDING);
 }
+
+static void gphpedit_file_browser_constructed (GObject *object)
+{
+  gphpeditFileBrowserPrivate *priv = FILEBROWSER_BACKEND_GET_PRIVATE(object);
+  gchar *current_dir;
+  g_object_get(priv->main_window->prefmg, "filebrowser_last_folder", &current_dir, NULL);
+  priv->fbbackend= filebrowser_backend_new (current_dir);
+  g_free(current_dir);
+  priv->handlerid = g_signal_connect(G_OBJECT(priv->fbbackend), "done_loading", G_CALLBACK(print_files), priv);
+  priv->handleridchange = g_signal_connect(G_OBJECT(priv->fbbackend), "change_folder", G_CALLBACK(change_folder_cb), priv);
+
+  //renderer for text
+  g_signal_connect(G_OBJECT(priv->pListView), "row-activated", G_CALLBACK(tree_double_clicked), priv);
+  g_signal_connect(G_OBJECT(priv->pListView), "button-press-event", (GCallback) view_onButtonPressed, priv);
+  g_signal_connect(G_OBJECT(priv->pListView), "popup-menu", (GCallback) view_onPopupMenu, priv);
+  g_signal_connect(G_OBJECT(priv->pListView), "key-press-event", G_CALLBACK(key_press), NULL);
+  gtk_drag_dest_set(priv->pListView, (GTK_DEST_DEFAULT_ALL), drag_dest_types, 2,
+    (GDK_ACTION_DEFAULT | GDK_ACTION_COPY));
+  g_signal_connect(G_OBJECT(priv->pListView), "drag_data_received", G_CALLBACK(fb_file_v_drag_data_received), priv->fbbackend);
+
+  gtk_button_set_label (GTK_BUTTON(priv->button_dialog), get_filebrowser_backend_current_folder(priv->fbbackend));
+  g_signal_connect(G_OBJECT(priv->button_dialog), "pressed", G_CALLBACK(pressed_button_file_chooser), priv);
+  g_signal_connect(G_OBJECT(priv->button_home), "clicked", G_CALLBACK (_go_home_cb),priv);
+  g_signal_connect(G_OBJECT(priv->button_up), "clicked", G_CALLBACK (_go_up_cb), priv->fbbackend);
+  g_signal_connect(G_OBJECT(priv->button_refresh), "clicked", G_CALLBACK (_button_refresh), priv->fbbackend);
+}
+
 /*
 * gphpedit_filebrowser_new
 * return a new filebrowser widget
 */
 GtkWidget *
-gphpedit_filebrowser_new ()
+gphpedit_filebrowser_new (gpointer main_window)
 {
 	gphpeditFileBrowser *button;
 
-	button = g_object_new (GPHPEDIT_TYPE_FILEBROWSER, NULL);
+	button = g_object_new (GPHPEDIT_TYPE_FILEBROWSER, "main_window", main_window, NULL);
 
 	return GTK_WIDGET (button);
 }
@@ -311,9 +371,10 @@ gint _filebrowser_sort_func(GtkTreeModel * model, GtkTreeIter * a, GtkTreeIter *
 */
 void _go_home_cb (GtkButton *button, gpointer   user_data) 
 {
+    gphpeditFileBrowserPrivate *priv = (gphpeditFileBrowserPrivate *) user_data;
     /*if there is a file open set file folder as home dir*/
-    gchar *folderpath = documentable_get_filename(document_manager_get_current_documentable(main_window.docmg));
-    filebrowser_backend_go_folder_home (FILEBROWSER_BACKEND(user_data), folderpath);
+    gchar *folderpath = documentable_get_filename(document_manager_get_current_documentable(priv->main_window->docmg));
+    filebrowser_backend_go_folder_home (FILEBROWSER_BACKEND(priv->fbbackend), folderpath);
     if (folderpath) g_free(folderpath);
 }
 
@@ -348,7 +409,7 @@ void tree_double_clicked(GtkTreeView *tree_view,GtkTreePath *path,GtkTreeViewCol
   gchar *file_name=get_path_from_tree(tree_view,folderpath);
   gphpedit_debug_message(DEBUG_FILEBROWSER,"DOUBLECLICK\t mime:%s\tname:%s\n",mime,file_name);
   if (!MIME_ISDIR(mime)){
-      filebrowser_backend_open_file (priv->fbbackend, file_name);
+      document_manager_switch_to_file_or_open(priv->main_window->docmg, file_name, 0);
   } else {
     filebrowser_backend_update_folder(priv->fbbackend, file_name);
   }
@@ -369,14 +430,13 @@ gboolean key_press (GtkWidget *widget, GdkEventKey *event, gpointer user_data){
     gchar *file_name=get_path_from_tree(GTK_TREE_VIEW(widget),path);
     if (event->keyval==GDK_KEY_Delete){
       //delete file
-      pop.fbbackend=priv->fbbackend;
-      pop.filename=file_name;
-      pop.mime=mime;
-      popup_delete_file();
+      priv->filename=g_strdup(file_name);
+      priv->mime=mime;
+      popup_delete_file(NULL, priv);
     }else {
       //open file
       if (!MIME_ISDIR(mime))
-        filebrowser_backend_open_file (priv->fbbackend, file_name);
+        document_manager_switch_to_file_or_open(priv->main_window->docmg, file_name, 0);
     }
     return TRUE;
   }
@@ -433,12 +493,13 @@ static inline void search_control_sensible(gphpeditFileBrowserPrivate *priv, gbo
 void pressed_button_file_chooser(GtkButton *widget, gpointer user_data) {
 
   GtkWidget *pFileSelection;
+  gphpeditFileBrowserPrivate *priv = (gphpeditFileBrowserPrivate *) user_data;
 
-  pFileSelection = gtk_file_chooser_dialog_new("Open...", GTK_WINDOW(main_window.window), GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER,
+  pFileSelection = gtk_file_chooser_dialog_new("Open...", GTK_WINDOW(priv->main_window->window), GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER,
    GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL, GTK_STOCK_OPEN, GTK_RESPONSE_OK, NULL);
   gtk_window_set_modal(GTK_WINDOW(pFileSelection), TRUE);
   gtk_file_chooser_set_local_only (GTK_FILE_CHOOSER(pFileSelection), FALSE);
-  gtk_file_chooser_set_current_folder (GTK_FILE_CHOOSER(pFileSelection), get_filebrowser_backend_current_folder(FILEBROWSER_BACKEND(user_data)));
+  gtk_file_chooser_set_current_folder (GTK_FILE_CHOOSER(pFileSelection), get_filebrowser_backend_current_folder(FILEBROWSER_BACKEND(priv->fbbackend)));
   gchar *sChemin=NULL;
 
   switch(gtk_dialog_run(GTK_DIALOG(pFileSelection))) {
@@ -451,15 +512,17 @@ void pressed_button_file_chooser(GtkButton *widget, gpointer user_data) {
   gtk_widget_destroy(pFileSelection);
   if(sChemin){
     /*store folder in config*/
-    filebrowser_backend_update_folder (FILEBROWSER_BACKEND(user_data), sChemin);
+    filebrowser_backend_update_folder (FILEBROWSER_BACKEND(priv->fbbackend), sChemin);
     g_free(sChemin);
    }
 }
 
 /* POPUP menu functions */
 
-void popup_open_file(void){
-  filebrowser_backend_open_file (pop.fbbackend, pop.filename);
+void popup_open_file(GtkWidget *wid, gpointer user_data)
+{
+  gphpeditFileBrowserPrivate *priv = (gphpeditFileBrowserPrivate *) user_data;
+  document_manager_switch_to_file_or_open(priv->main_window->docmg, priv->filename, 0);
 }
 
 /*
@@ -472,14 +535,19 @@ void popup_open_file(void){
  *
  */
 
-void popup_delete_file(void){
-  filebrowser_backend_delete_file(pop.fbbackend, (gchar *)pop.filename);
+void popup_delete_file(GtkWidget *wid, gpointer user_data)
+{
+  gphpeditFileBrowserPrivate *priv = (gphpeditFileBrowserPrivate *) user_data;
+  filebrowser_backend_delete_file(priv->fbbackend, (gchar *)priv->filename);
 }
 
-void popup_rename_file(void){
-  gchar *current_name=filebrowser_backend_get_display_name(pop.fbbackend, (gchar *)pop.filename);
+void popup_rename_file(GtkWidget *wid, gpointer user_data)
+{
+  gphpeditFileBrowserPrivate *priv = (gphpeditFileBrowserPrivate *) user_data;
+
+  gchar *current_name = filebrowser_backend_get_display_name(priv->fbbackend, (gchar *)priv->filename);
   GtkWidget *window;
-  window = gtk_dialog_new_with_buttons(_("Rename File"), GTK_WINDOW(main_window.window), GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT, GTK_STOCK_OK, GTK_RESPONSE_ACCEPT, GTK_STOCK_CANCEL, GTK_RESPONSE_REJECT, NULL);
+  window = gtk_dialog_new_with_buttons(_("Rename File"), GTK_WINDOW(priv->main_window->window), GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT, GTK_STOCK_OK, GTK_RESPONSE_ACCEPT, GTK_STOCK_CANCEL, GTK_RESPONSE_REJECT, NULL);
   GtkWidget *vbox1 = gtk_vbox_new (FALSE, 8);
   gtk_widget_show (vbox1);
   gtk_container_add (GTK_CONTAINER (gtk_dialog_get_content_area(GTK_DIALOG(window))),vbox1);
@@ -498,16 +566,19 @@ void popup_rename_file(void){
   gint res=gtk_dialog_run(GTK_DIALOG(window));
   const char *name=gtk_entry_get_text (GTK_ENTRY(text_filename));
   if (res==GTK_RESPONSE_ACCEPT){
-    filebrowser_backend_rename_file(pop.fbbackend, (gchar *) pop.filename,current_name, (gchar *)name);
+    filebrowser_backend_rename_file(priv->fbbackend, (gchar *) priv->filename,current_name, (gchar *)name);
   }
   gtk_widget_destroy(window);
   g_free(current_name);
 }
 
 
-void popup_create_dir(void){
+void popup_create_dir(GtkWidget *wid, gpointer user_data)
+{
+  gphpeditFileBrowserPrivate *priv = (gphpeditFileBrowserPrivate *) user_data;
+
   GtkWidget *window;
-  window = gtk_dialog_new_with_buttons(_("New Dir"), GTK_WINDOW(main_window.window), GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT, GTK_STOCK_OK, GTK_RESPONSE_ACCEPT, GTK_STOCK_CANCEL, GTK_RESPONSE_REJECT, NULL);
+  window = gtk_dialog_new_with_buttons(_("New Dir"), GTK_WINDOW(priv->main_window->window), GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT, GTK_STOCK_OK, GTK_RESPONSE_ACCEPT, GTK_STOCK_CANCEL, GTK_RESPONSE_REJECT, NULL);
   GtkWidget *vbox1 = gtk_vbox_new (FALSE, 8);
   gtk_widget_show (vbox1);
   gtk_container_add (GTK_CONTAINER (gtk_dialog_get_content_area(GTK_DIALOG(window))),vbox1);
@@ -525,7 +596,7 @@ void popup_create_dir(void){
   gint res=gtk_dialog_run(GTK_DIALOG(window));
   const char *name=gtk_entry_get_text (GTK_ENTRY(text_filename));
   if (res==GTK_RESPONSE_ACCEPT && name){
-    filebrowser_backend_create_dir(pop.fbbackend, (gchar *)pop.filename, (gchar *)name, MIME_ISDIR(pop.mime));
+    filebrowser_backend_create_dir(priv->fbbackend, (gchar *)priv->filename, (gchar *)name, MIME_ISDIR(priv->mime));
     }
     gtk_widget_destroy(window);
 }
@@ -542,31 +613,32 @@ void popup_create_dir(void){
  *
  */
 
-void view_popup_menu (GtkWidget *treeview, GdkEventButton *event, gpointer userdata) {
+void view_popup_menu (GtkWidget *treeview, GdkEventButton *event, gpointer user_data) {
+  gphpeditFileBrowserPrivate *priv = (gphpeditFileBrowserPrivate *) user_data;
   GtkWidget *menu, *menuopen,*menurename,*menudelete,*menucreate,*sep;
   menu = gtk_menu_new();
 
   menuopen = gtk_menu_item_new_with_label(_("Open file"));
-  if (MIME_ISDIR(pop.mime)){
+  if (MIME_ISDIR(priv->mime)){
     gtk_widget_set_state (menuopen,GTK_STATE_INSENSITIVE);
   }else {
-    g_signal_connect(menuopen, "activate", (GCallback) popup_open_file, &pop);
+    g_signal_connect(menuopen, "activate", (GCallback) popup_open_file, priv);
   }
   gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuopen);
 
   menurename = gtk_menu_item_new_with_label(_("Rename File"));
-  g_signal_connect(menurename, "activate", (GCallback) popup_rename_file, NULL);
+  g_signal_connect(menurename, "activate", (GCallback) popup_rename_file, priv);
   gtk_menu_shell_append(GTK_MENU_SHELL(menu), menurename);
 
   menudelete = gtk_menu_item_new_with_label(_("Delete file"));
-  g_signal_connect(menudelete, "activate", (GCallback) popup_delete_file, NULL);
+  g_signal_connect(menudelete, "activate", (GCallback) popup_delete_file, priv);
   gtk_menu_shell_append(GTK_MENU_SHELL(menu), menudelete);
 
   sep = gtk_separator_menu_item_new();
   gtk_menu_shell_append(GTK_MENU_SHELL(menu), sep);
   
   menucreate = gtk_menu_item_new_with_label(_("Create New Directory"));
-  g_signal_connect(menucreate, "activate", (GCallback) popup_create_dir, NULL);
+  g_signal_connect(menucreate, "activate", (GCallback) popup_create_dir, priv);
   gtk_menu_shell_append(GTK_MENU_SHELL(menu), menucreate);
 
   gtk_widget_show_all(menu);
@@ -579,7 +651,9 @@ void view_popup_menu (GtkWidget *treeview, GdkEventButton *event, gpointer userd
 }
 
 
-gboolean view_onButtonPressed (GtkWidget *treeview, GdkEventButton *event, gpointer userdata) {
+gboolean view_onButtonPressed (GtkWidget *treeview, GdkEventButton *event, gpointer user_data)
+{
+  gphpeditFileBrowserPrivate *priv = (gphpeditFileBrowserPrivate *) user_data;
   /* single click with the right mouse button? */
   if (event->type == GDK_BUTTON_PRESS  &&  event->button == 3){
     /* select row if no row is selected */
@@ -601,12 +675,11 @@ gboolean view_onButtonPressed (GtkWidget *treeview, GdkEventButton *event, gpoin
       }
     }
     gchar *mime=get_mime_from_tree(GTK_TREE_VIEW(treeview));
-    gchar *path=(gchar*)get_filebrowser_backend_current_folder(userdata);
+    gchar *path=(gchar*)get_filebrowser_backend_current_folder(priv->fbbackend);
     gchar *file_name=get_path_from_tree(GTK_TREE_VIEW(treeview),path);
-    pop.filename=file_name;
-    pop.mime=mime;
-    pop.fbbackend= userdata;
-    view_popup_menu(treeview, event, NULL);
+    priv->filename=g_strdup(file_name);
+    priv->mime=mime;
+    view_popup_menu(treeview, event, priv);
       return TRUE; /* we handled this */
     }
   return FALSE; /* we did not handle this */

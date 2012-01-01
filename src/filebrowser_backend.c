@@ -334,17 +334,11 @@ void filebrowser_backend_go_folder_home (FilebrowserBackend *fbback, gchar *file
   filebrowser_backend_update_folder (fbback,folderpath);
   if (folderpath) g_free(folderpath);
 }
+
 void filebrowser_backend_refresh_folder (FilebrowserBackend *fbback){
   gphpedit_debug(DEBUG_FILEBROWSER);
   FilebrowserBackendDetails *directory = FILEBROWSER_BACKEND_GET_PRIVATE(fbback);
   filebrowser_backend_update_folder (fbback,directory->current_folder); /*update with new uri */
-}
-
-void filebrowser_backend_open_file (FilebrowserBackend *fbback, gchar *filename){
-  gphpedit_debug(DEBUG_FILEBROWSER);
-  DocumentManager *docmg = document_manager_new();
-  document_manager_switch_to_file_or_open(docmg,filename, 0);
-  g_object_unref(docmg);
 }
 
 void filebrowser_backend_delete_file(FilebrowserBackend *filebackend, gchar *filename){
