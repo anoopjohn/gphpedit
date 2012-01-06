@@ -26,7 +26,7 @@
 #ifndef __TEMPLATES_EDITOR_H__
 #define __TEMPLATES_EDITOR_H__
 
-#include "main_window"
+#include "main_window.h"
 
 G_BEGIN_DECLS
 
