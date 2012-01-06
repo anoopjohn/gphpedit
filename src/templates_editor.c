@@ -27,10 +27,6 @@
 #include <config.h>
 #endif
 
-#include <string.h>
-
-#include <glib/gi18n.h>
-
 #include "templates_editor.h"
 #include "templates.h"
 #include "edit_template.h"
@@ -57,9 +53,9 @@ struct _TemplatesEditorPrivate
   GtkWidget *Templates;
 };
 
-G_DEFINE_TYPE(TemplatesEditor, templates_editor, GTK_TYPE_VBOX)
-
 static void templates_editor_finalize (GObject *object);
+
+G_DEFINE_TYPE(TemplatesEditor, templates_editor, GTK_TYPE_VBOX)
 
 static void 
 templates_editor_class_init (TemplatesEditorClass *klass)
@@ -67,7 +63,6 @@ templates_editor_class_init (TemplatesEditorClass *klass)
 	GObjectClass *object_class = G_OBJECT_CLASS (klass);
 
 	object_class->finalize = templates_editor_finalize;
-
 	g_type_class_add_private (object_class, sizeof (TemplatesEditorPrivate));
 }
 
@@ -140,7 +135,8 @@ static void add_template_clicked(GtkButton *button, gpointer data)
   gchar *content;
   TemplatesEditorPrivate *priv = (TemplatesEditorPrivate *) data;
   // create dialog
-  create_edit_template_dialog();
+  GtkWidget *window = gtk_widget_get_toplevel (GTK_WIDGET(button));
+  create_edit_template_dialog(window);
 
   // Run and wait for OK
   if (gtk_dialog_run(GTK_DIALOG(edit_template_dialog.window1)) == GTK_RESPONSE_ACCEPT) {
@@ -178,7 +174,8 @@ static void edit_template_clicked(GtkButton *button, gpointer data)
   TemplatesEditorPrivate *priv = (TemplatesEditorPrivate *) data;
 
   // create dialog
-  create_edit_template_dialog();
+  GtkWidget *window = gtk_widget_get_toplevel (GTK_WIDGET(button));
+  create_edit_template_dialog(window);
 
   // fill in existing content
   gtk_entry_set_text(GTK_ENTRY(edit_template_dialog.entry1), priv->current_key);
@@ -320,14 +317,15 @@ templates_editor_init (TemplatesEditor *te)
 static void
 templates_editor_finalize (GObject *object)
 {
-	TemplatesEditor *te = TEMPLATES_EDITOR (object);
-  TemplatesEditorPrivate *priv = TEMPLATES_EDITOR_GET_PRIVATE(te);
+    TemplatesEditor *te = TEMPLATES_EDITOR (object);
+    TemplatesEditorPrivate *priv = TEMPLATES_EDITOR_GET_PRIVATE(te);
 
-  if(priv->tempmg) g_object_unref(priv->tempmg);
+    if(priv->tempmg) g_object_unref(priv->tempmg);
 
-	G_OBJECT_CLASS (templates_editor_parent_class)->finalize (object);
-
+    G_OBJECT_CLASS (templates_editor_parent_class)->finalize (object);
 }
+
+
 
 GtkWidget *templates_editor_new (void)
 {

@@ -30,10 +30,10 @@
 
 EditTemplateDialog edit_template_dialog;
 
-void create_edit_template_dialog (void)
+void create_edit_template_dialog (GtkWidget *window)
 {
   edit_template_dialog.window1 = gtk_dialog_new_with_buttons(_("Add/Edit Template"),
-    GTK_WINDOW(main_window.window), GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
+    GTK_WINDOW(window), GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
     GTK_STOCK_OK, GTK_RESPONSE_ACCEPT, GTK_STOCK_CANCEL, GTK_RESPONSE_REJECT,NULL);
 
   edit_template_dialog.hbox2 = gtk_hbox_new (FALSE, 0);
