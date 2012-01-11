@@ -639,7 +639,7 @@ void plugin_run(Plugin *plugin, Documentable *document, MainWindow *main_window)
     }
     else if (g_str_has_prefix(stdout, "MESSAGE")){
         if (data){
-        info_dialog(plugdet->name, data);
+            info_dialog(GTK_WINDOW(main_window->window), plugdet->name, data);
         }
     }
     else if (g_str_has_prefix(stdout, "SYNTAX")){

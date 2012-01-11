@@ -44,6 +44,7 @@ File browser has the following features:
 #include "filebrowser_ui.h"
 #include "filebrowser_backend.h"
 #include "main_window.h"
+#include "tab.h"
 #include "debug.h"
 /* functions */
 static void gphpedit_file_browser_dispose (GObject *object);
@@ -537,8 +538,12 @@ void popup_open_file(GtkWidget *wid, gpointer user_data)
 
 void popup_delete_file(GtkWidget *wid, gpointer user_data)
 {
-  gphpeditFileBrowserPrivate *priv = (gphpeditFileBrowserPrivate *) user_data;
-  filebrowser_backend_delete_file(priv->fbbackend, (gchar *)priv->filename);
+    gphpeditFileBrowserPrivate *priv = (gphpeditFileBrowserPrivate *) user_data;
+    gint button = yes_no_dialog (priv->main_window->window, _("Question"), _("Are you sure you wish to delete this file?"));
+    if (button == GTK_RESPONSE_YES)
+    {
+      filebrowser_backend_delete_file(priv->fbbackend, (gchar *)priv->filename);
+    }
 }
 
 void popup_rename_file(GtkWidget *wid, gpointer user_data)

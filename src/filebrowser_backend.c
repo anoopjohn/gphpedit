@@ -341,13 +341,11 @@ void filebrowser_backend_refresh_folder (FilebrowserBackend *fbback){
   filebrowser_backend_update_folder (fbback,directory->current_folder); /*update with new uri */
 }
 
-void filebrowser_backend_delete_file(FilebrowserBackend *filebackend, gchar *filename){
-  if (!filebackend || !filename) return;
- gint button = yes_no_dialog (_("Question"), _("Are you sure you wish to delete this file?"));
-  if (button == GTK_RESPONSE_YES){
-	filename_delete_file(filename);
-	filebrowser_backend_refresh_folder (filebackend);
-  }
+void filebrowser_backend_delete_file(FilebrowserBackend *filebackend, gchar *filename)
+{
+    if (!filebackend || !filename) return;
+    filename_delete_file(filename);
+    filebrowser_backend_refresh_folder (filebackend);
 }
 
 void filebrowser_backend_create_dir(FilebrowserBackend *filebackend, gchar *filename, gchar *name, gboolean isdir){
@@ -435,7 +433,7 @@ void filebrowser_backend_cancel (FilebrowserBackend *fbback){
       GFileInfo *info =g_file_query_info (cf->curfile,"standard::display-name", G_FILE_QUERY_INFO_NOFOLLOW_SYMLINKS,NULL,NULL);
       dispname = (gchar *)g_file_info_get_display_name (info);
       tmpstr = g_strdup_printf(_("%s cannot be copied, it already exists, overwrite?"),dispname);
-      retval = yes_no_dialog (_("Overwrite file?"), tmpstr);
+      retval = yes_no_dialog (NULL, _("Overwrite file?"), tmpstr);
       g_free(tmpstr);
       g_free(dispname);
       if (retval != -8) {

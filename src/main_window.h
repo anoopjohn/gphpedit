@@ -94,4 +94,6 @@ void fullscreen_show_hide(MainWindow *main_window, gboolean state);
 void syntax_check_show(MainWindow *main_window);
 void syntax_check_hide(MainWindow *main_window);
 void main_window_install_menu_hint(MainWindow *main_window, GtkWidget *widget, gchar *message);
+gboolean main_window_delete_event(GtkWidget *widget, GdkEvent *event, gpointer user_data);
+void quit_application(MainWindow *main_window);
 #endif

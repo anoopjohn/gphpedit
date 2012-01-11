@@ -221,7 +221,8 @@ static void delete_template_clicked(GtkButton *button, gpointer data)
 
   gchar *message = g_strdup_printf(_("Are you sure you want to delete template %s?"),priv->current_key);
   // confirm deletion with dialog
-  if (yes_no_dialog (_("gPHPEdit"), message) == GTK_RESPONSE_YES) {
+  GtkWidget *window = gtk_widget_get_toplevel (GTK_WIDGET(button));
+  if (yes_no_dialog (GTK_WINDOW(window), _("gPHPEdit"), message) == GTK_RESPONSE_YES) {
     // delete from templates
     template_delete(priv->tempmg, priv->current_key);
 

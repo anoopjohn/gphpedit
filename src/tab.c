@@ -26,12 +26,15 @@
 #include "main_window.h"
 #include "gvfs_utils.h"
 
-void info_dialog (gchar *title, gchar *message)
+void info_dialog (GtkWindow *window, gchar *title, gchar *message)
 {
   GtkWidget *dialog;
-  dialog = gtk_message_dialog_new(GTK_WINDOW(main_window.window),GTK_DIALOG_DESTROY_WITH_PARENT,GTK_MESSAGE_INFO,GTK_BUTTONS_OK,"%s", message);
+  dialog = gtk_message_dialog_new(window,GTK_DIALOG_DESTROY_WITH_PARENT,GTK_MESSAGE_INFO,GTK_BUTTONS_OK,"%s", message);
   gtk_window_set_title(GTK_WINDOW(dialog), title);
-  gtk_window_set_transient_for (GTK_WINDOW(dialog),GTK_WINDOW(main_window.window));
+  if (window)
+  {
+    gtk_window_set_transient_for (GTK_WINDOW(dialog), window);
+  }
   gtk_dialog_run (GTK_DIALOG (dialog));
   gtk_widget_destroy(dialog);
   /*
@@ -41,13 +44,16 @@ void info_dialog (gchar *title, gchar *message)
    */
 }
 
-gint yes_no_dialog (gchar *title, gchar *message)
+gint yes_no_dialog (GtkWindow *window, gchar *title, gchar *message)
 {
   GtkWidget *dialog;
   gint button;
-  dialog = gtk_message_dialog_new(GTK_WINDOW(main_window.window),GTK_DIALOG_DESTROY_WITH_PARENT,GTK_MESSAGE_INFO,GTK_BUTTONS_YES_NO,"%s", message);
+  dialog = gtk_message_dialog_new(window,GTK_DIALOG_DESTROY_WITH_PARENT,GTK_MESSAGE_INFO,GTK_BUTTONS_YES_NO,"%s", message);
   gtk_window_set_title(GTK_WINDOW(dialog), title);
-  gtk_window_set_transient_for (GTK_WINDOW(dialog),GTK_WINDOW(main_window.window));
+  if (window)
+  {
+    gtk_window_set_transient_for (GTK_WINDOW(dialog), window);
+  }
   button = gtk_dialog_run (GTK_DIALOG (dialog));
   gtk_widget_destroy(dialog);
   /*

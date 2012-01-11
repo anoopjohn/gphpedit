@@ -391,6 +391,40 @@ static gint main_window_key_press_event(GtkWidget *widget, GdkEventKey *event,gp
   return FALSE;
 }
 
+void quit_application(MainWindow *main_window)
+{
+  gphpedit_debug(DEBUG_MAIN_WINDOW);
+  g_object_unref(main_window->tempmg);
+  main_window->is_app_closing = TRUE;
+  g_object_unref(main_window->docmg);
+  main_window->is_app_closing = FALSE;
+  preferences_manager_save_data(main_window->prefmg);
+  g_object_unref(main_window->prefmg);
+  g_object_unref(main_window->stylemg);
+  g_object_unref(main_window->symbolmg);
+  //free menu hints table
+  if (main_window->pmenu_hints) g_hash_table_destroy (main_window->pmenu_hints);
+  main_window->pmenu_hints = NULL;
+}
+
+
+void main_window_destroy_event(GtkWidget *widget, gpointer user_data)
+{
+  MainWindow *main_window = (MainWindow *) user_data;
+  quit_application(main_window);
+  gtk_main_quit();
+}
+
+gboolean main_window_delete_event(GtkWidget *widget, GdkEvent *event, gpointer user_data)
+{
+  MainWindow *main_window = (MainWindow *) user_data;
+  gboolean cancel_quit = FALSE;
+  main_window->is_app_closing = TRUE;
+  cancel_quit = !document_manager_can_all_tabs_be_saved(main_window->docmg);
+  main_window->is_app_closing = FALSE;
+  return cancel_quit;
+}
+
 static void set_colormap(GtkWidget *window)
 {
   /*Set RGBA visual*/
@@ -455,7 +489,7 @@ void main_window_create(char **argv, gint argc)
   GtkWidget *toolbox = get_widget_from_builder(&main_window, "toolbox");
   gtk_widget_show (toolbox);
 
-  main_window.toolbar_main = toolbar_new ();
+  main_window.toolbar_main = toolbar_new (&main_window);
   gtk_box_pack_start (GTK_BOX (toolbox), main_window.toolbar_main, FALSE, FALSE, 0);
   if (get_preferences_manager_show_maintoolbar(main_window.prefmg)) gtk_widget_show (main_window.toolbar_main);
 
@@ -465,8 +499,8 @@ void main_window_create(char **argv, gint argc)
   main_window_fill_panes(&main_window);
   main_window_create_appbar(&main_window);
   
-  g_signal_connect (G_OBJECT (main_window.window), "delete_event", G_CALLBACK(main_window_delete_event), NULL);
-  g_signal_connect (G_OBJECT (main_window.window), "destroy", G_CALLBACK (main_window_destroy_event), NULL);
+  g_signal_connect (G_OBJECT (main_window.window), "delete_event", G_CALLBACK(main_window_delete_event), &main_window);
+  g_signal_connect (G_OBJECT (main_window.window), "destroy", G_CALLBACK (main_window_destroy_event), &main_window);
   g_signal_connect (G_OBJECT (main_window.window), "key_press_event", G_CALLBACK (main_window_key_press_event), &main_window);
   g_signal_connect (G_OBJECT (main_window.window), "size_allocate", G_CALLBACK (main_window_resize), &main_window);
   g_signal_connect (G_OBJECT (main_window.window), "window-state-event", G_CALLBACK (main_window_state_changed), &main_window);

@@ -120,7 +120,7 @@ struct _MenuBarPrivate
 
 };
 
-static void MENUBAR_constructed (MenuBar *menubar);
+static void MENUBAR_constructed (GObject *menubar);
 
 G_DEFINE_TYPE(MenuBar, MENUBAR, GTK_TYPE_MENU_BAR)
 
@@ -393,17 +393,17 @@ static void prepare_menu_file(MenuBarPrivate *priv){
     main_window_install_menu_hint(priv->main_window, priv->close, _("Close the current file"));
     main_window_install_menu_hint(priv->main_window, priv->quit, _("Quit the application"));
 
-    g_signal_connect(G_OBJECT(priv->newi), "activate", G_CALLBACK(on_new1_activate), NULL);
-    g_signal_connect(G_OBJECT(priv->open), "activate", G_CALLBACK(on_open1_activate), NULL);
-    g_signal_connect(G_OBJECT(priv->opensel), "activate", G_CALLBACK(on_openselected1_activate), NULL);
-    g_signal_connect(G_OBJECT(priv->menureciente), "item-activated", G_CALLBACK(reopen_recent), NULL);
-    g_signal_connect(G_OBJECT(priv->reload), "activate", G_CALLBACK(on_reload1_activate), NULL);
+    g_signal_connect(G_OBJECT(priv->newi), "activate", G_CALLBACK(on_new1_activate), priv->main_window);
+    g_signal_connect(G_OBJECT(priv->open), "activate", G_CALLBACK(on_open1_activate), priv->main_window);
+    g_signal_connect(G_OBJECT(priv->opensel), "activate", G_CALLBACK(on_openselected1_activate), priv->main_window);
+    g_signal_connect(G_OBJECT(priv->menureciente), "item-activated", G_CALLBACK(reopen_recent), priv->main_window);
+    g_signal_connect(G_OBJECT(priv->reload), "activate", G_CALLBACK(on_reload1_activate), priv->main_window);
 
-    g_signal_connect(G_OBJECT(priv->save), "activate", G_CALLBACK(on_save1_activate), NULL);
-    g_signal_connect(G_OBJECT(priv->saveas), "activate", G_CALLBACK(on_save_as1_activate), NULL);
-    g_signal_connect(G_OBJECT(priv->saveall), "activate", G_CALLBACK(on_saveall1_activate), NULL);
-    g_signal_connect(G_OBJECT(priv->close), "activate", G_CALLBACK(on_close1_activate), NULL);
-    g_signal_connect(G_OBJECT(priv->quit), "activate", G_CALLBACK(on_quit1_activate), NULL);
+    g_signal_connect(G_OBJECT(priv->save), "activate", G_CALLBACK(on_save1_activate), priv->main_window);
+    g_signal_connect(G_OBJECT(priv->saveas), "activate", G_CALLBACK(on_save_as1_activate), priv->main_window);
+    g_signal_connect(G_OBJECT(priv->saveall), "activate", G_CALLBACK(on_saveall1_activate), priv->main_window);
+    g_signal_connect(G_OBJECT(priv->close), "activate", G_CALLBACK(on_close1_activate), priv->main_window);
+    g_signal_connect(G_OBJECT(priv->quit), "activate", G_CALLBACK(on_quit1_activate), priv->main_window);
 }
 
 /*
@@ -498,26 +498,26 @@ static void prepare_menu_edit(MenuBarPrivate *priv)
     main_window_install_menu_hint(priv->main_window, priv->upper, _("Convert the current selection text to upper case"));
     main_window_install_menu_hint(priv->main_window, priv->lower, _("Convert the current selection text to lower case"));
     main_window_install_menu_hint(priv->main_window, priv->preferences, _("Application Config"));
-    g_signal_connect(G_OBJECT(priv->undo), "activate", G_CALLBACK(on_undo1_activate), NULL);
-    g_signal_connect(G_OBJECT(priv->redo), "activate", G_CALLBACK(on_redo1_activate), NULL);
+    g_signal_connect(G_OBJECT(priv->undo), "activate", G_CALLBACK(on_undo1_activate), priv->main_window);
+    g_signal_connect(G_OBJECT(priv->redo), "activate", G_CALLBACK(on_redo1_activate), priv->main_window);
 
-    g_signal_connect(G_OBJECT(priv->cut), "activate", G_CALLBACK(on_cut1_activate), NULL);
-    g_signal_connect(G_OBJECT(priv->copy), "activate", G_CALLBACK(on_copy1_activate), NULL);
-    g_signal_connect(G_OBJECT(priv->paste), "activate", G_CALLBACK(on_paste1_activate), NULL);
-    g_signal_connect(G_OBJECT(priv->selectall), "activate", G_CALLBACK(on_selectall1_activate), NULL);
+    g_signal_connect(G_OBJECT(priv->cut), "activate", G_CALLBACK(on_cut1_activate), priv->main_window);
+    g_signal_connect(G_OBJECT(priv->copy), "activate", G_CALLBACK(on_copy1_activate), priv->main_window);
+    g_signal_connect(G_OBJECT(priv->paste), "activate", G_CALLBACK(on_paste1_activate), priv->main_window);
+    g_signal_connect(G_OBJECT(priv->selectall), "activate", G_CALLBACK(on_selectall1_activate), priv->main_window);
 
-    g_signal_connect(G_OBJECT(priv->find), "activate", G_CALLBACK(on_find1_activate), NULL);
-    g_signal_connect(G_OBJECT(priv->replace), "activate", G_CALLBACK(on_replace1_activate), NULL);
+    g_signal_connect(G_OBJECT(priv->find), "activate", G_CALLBACK(on_find1_activate), priv->main_window);
+    g_signal_connect(G_OBJECT(priv->replace), "activate", G_CALLBACK(on_replace1_activate), priv->main_window);
 
     g_signal_connect(G_OBJECT(priv->incfind), "activate", G_CALLBACK(on_incfind_activate), priv->main_window);
     g_signal_connect(G_OBJECT(priv->gotoline), "activate", G_CALLBACK(on_gotoline_activate), priv->main_window);
   
-    g_signal_connect(G_OBJECT(priv->indent), "activate", G_CALLBACK(block_indent), NULL);
-    g_signal_connect(G_OBJECT(priv->unindent), "activate", G_CALLBACK(block_unindent), NULL);
+    g_signal_connect(G_OBJECT(priv->indent), "activate", G_CALLBACK(block_indent), priv->main_window);
+    g_signal_connect(G_OBJECT(priv->unindent), "activate", G_CALLBACK(block_unindent), priv->main_window);
 
-    g_signal_connect(G_OBJECT(priv->upper), "activate", G_CALLBACK(selectiontoupper), NULL);
-    g_signal_connect(G_OBJECT(priv->lower), "activate", G_CALLBACK(selectiontolower), NULL);
-    g_signal_connect(G_OBJECT(priv->preferences), "activate", G_CALLBACK(on_preferences1_activate), NULL);
+    g_signal_connect(G_OBJECT(priv->upper), "activate", G_CALLBACK(selectiontoupper), priv->main_window);
+    g_signal_connect(G_OBJECT(priv->lower), "activate", G_CALLBACK(selectiontolower), priv->main_window);
+    g_signal_connect(G_OBJECT(priv->preferences), "activate", G_CALLBACK(on_preferences1_activate), priv->main_window);
 }
 
 /*
@@ -568,9 +568,9 @@ static void prepare_menu_view(MenuBarPrivate *priv)
     g_signal_connect(G_OBJECT(priv->tog_class), "activate", G_CALLBACK(tog_classbrowser), priv->main_window);
 
     g_signal_connect(G_OBJECT(priv->viewfullscreen), "activate", G_CALLBACK(tog_fullscreen), priv->main_window);
-    g_signal_connect(G_OBJECT(priv->zoomin), "activate", G_CALLBACK(zoom_in),NULL);
-    g_signal_connect(G_OBJECT(priv->zoomout), "activate", G_CALLBACK(zoom_out),NULL);
-    g_signal_connect(G_OBJECT(priv->zoom100), "activate", G_CALLBACK(zoom_100),NULL);
+    g_signal_connect(G_OBJECT(priv->zoomin), "activate", G_CALLBACK(zoom_in), priv->main_window);
+    g_signal_connect(G_OBJECT(priv->zoomout), "activate", G_CALLBACK(zoom_out), priv->main_window);
+    g_signal_connect(G_OBJECT(priv->zoom100), "activate", G_CALLBACK(zoom_100), priv->main_window);
     g_signal_connect(G_OBJECT(priv->preview), "activate", G_CALLBACK(showpreview), priv->main_window);
 }
 
@@ -628,16 +628,16 @@ static void prepare_menu_code (MenuBarPrivate *priv)
 
     g_signal_connect(G_OBJECT(priv->syntax), "activate", G_CALLBACK(syntax_check), priv->main_window);
     g_signal_connect(G_OBJECT(priv->clearsyntax), "activate", G_CALLBACK(syntax_check_clear), priv->main_window);
-    g_signal_connect(G_OBJECT(priv->record), "activate", G_CALLBACK(keyboard_macro_startstop), NULL);
-    g_signal_connect(G_OBJECT(priv->playback), "activate", G_CALLBACK(keyboard_macro_playback), NULL);
+    g_signal_connect(G_OBJECT(priv->record), "activate", G_CALLBACK(keyboard_macro_startstop), priv->main_window);
+    g_signal_connect(G_OBJECT(priv->playback), "activate", G_CALLBACK(keyboard_macro_playback), priv->main_window);
 
-    g_signal_connect(G_OBJECT(priv->forcephp), "activate", G_CALLBACK(force_php), NULL);
-    g_signal_connect(G_OBJECT(priv->forcecss), "activate", G_CALLBACK(force_css), NULL);
-    g_signal_connect(G_OBJECT(priv->forcecxx), "activate", G_CALLBACK(force_cxx), NULL);
-    g_signal_connect(G_OBJECT(priv->forcesql), "activate", G_CALLBACK(force_sql), NULL);
-    g_signal_connect(G_OBJECT(priv->forceperl), "activate", G_CALLBACK(force_perl), NULL);
-    g_signal_connect(G_OBJECT(priv->forcecobol), "activate", G_CALLBACK(force_cobol), NULL);
-    g_signal_connect(G_OBJECT(priv->forcepython), "activate", G_CALLBACK(force_python), NULL);
+    g_signal_connect(G_OBJECT(priv->forcephp), "activate", G_CALLBACK(force_php), priv->main_window);
+    g_signal_connect(G_OBJECT(priv->forcecss), "activate", G_CALLBACK(force_css), priv->main_window);
+    g_signal_connect(G_OBJECT(priv->forcecxx), "activate", G_CALLBACK(force_cxx), priv->main_window);
+    g_signal_connect(G_OBJECT(priv->forcesql), "activate", G_CALLBACK(force_sql), priv->main_window);
+    g_signal_connect(G_OBJECT(priv->forceperl), "activate", G_CALLBACK(force_perl), priv->main_window);
+    g_signal_connect(G_OBJECT(priv->forcecobol), "activate", G_CALLBACK(force_cobol), priv->main_window);
+    g_signal_connect(G_OBJECT(priv->forcepython), "activate", G_CALLBACK(force_python), priv->main_window);
 }
 
 static void
@@ -666,7 +666,7 @@ MENUBAR_init (MenuBar *menubar)
 }
 
 
-static void MENUBAR_constructed (MenuBar *menubar)
+static void MENUBAR_constructed (GObject *menubar)
 {
     MenuBarPrivate *priv = MENUBAR_GET_PRIVATE(menubar);
 
