@@ -430,7 +430,7 @@ gchar **plugin_discover_authors(const gchar *filename)
   return authors;
 }
              
-Plugin *plugin_new (gchar *filename)
+Plugin *plugin_new (gchar *filename, MainWindow *main_window)
 {
 	Plugin *plug;
   plug = g_object_new (PLUGIN_TYPE, NULL);
@@ -451,7 +451,7 @@ Plugin *plugin_new (gchar *filename)
   /* get active status, default value TRUE */
   /* Note:: multiple plugins with the same name share the same status */
   if (plugdet->name) {
-    plugdet->active = get_plugin_is_active(main_window.prefmg, plugdet->name);
+    plugdet->active = get_plugin_is_active(main_window->prefmg, plugdet->name);
   } else {
     plugdet->active = FALSE;
   }
@@ -499,8 +499,8 @@ void set_plugin_active (Plugin *plugin, gboolean status)
 	g_return_if_fail (plugin != NULL);
 
   PluginDetails *plugdet = PLUGIN_GET_PRIVATE(plugin);
-
-  set_plugin_is_active(main_window.prefmg, plugdet->name, status);
+//FIXME:
+//  set_plugin_is_active(main_window->prefmg, plugdet->name, status);
 
 	plugdet->active = status;
 }

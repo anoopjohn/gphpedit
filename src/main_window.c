@@ -204,6 +204,26 @@ static void create_side_panel(MainWindow *main_window){
   }
 }
 
+static void on_notebook_switch_page (GtkNotebook *notebook, GtkWidget *page,
+                gint page_num, gpointer user_data)
+{
+  MainWindow *main_window = (MainWindow *) user_data;
+  if(!document_manager_set_current_document_from_widget (main_window->docmg, page)) {
+    gphpedit_debug_message(DEBUG_MAIN_WINDOW,_("Unable to get data for page %d"), page_num);
+  }
+}
+
+static gboolean on_notebook_focus_tab(GtkNotebook *notebook,
+                 GtkNotebookTab arg1, gpointer user_data)
+{
+  MainWindow *main_window = (MainWindow *) user_data;
+  GtkWidget *document_widget;
+  Documentable *doc = document_manager_get_current_documentable(main_window->docmg);
+  g_object_get(doc, "editor_widget", &document_widget, NULL);
+  gtk_widget_grab_focus(document_widget);
+  return TRUE;
+}
+
 static void main_window_fill_panes(MainWindow *main_window)
 {
   GtkWidget *pribox = get_widget_from_builder(main_window, "pribox");
@@ -211,8 +231,8 @@ static void main_window_fill_panes(MainWindow *main_window)
   gtk_notebook_set_scrollable(GTK_NOTEBOOK(main_window->notebook_editor), TRUE);
   gtk_widget_show (main_window->notebook_editor);
   gtk_box_pack_start(GTK_BOX(pribox), main_window->notebook_editor, TRUE, TRUE, 2);
-  g_signal_connect (G_OBJECT (main_window->notebook_editor), "switch_page", G_CALLBACK (on_notebook_switch_page), NULL);
-  g_signal_connect (G_OBJECT (main_window->notebook_editor), "focus-tab", G_CALLBACK (on_notebook_focus_tab), NULL);
+  g_signal_connect (G_OBJECT (main_window->notebook_editor), "switch_page", G_CALLBACK (on_notebook_switch_page), main_window);
+  g_signal_connect (G_OBJECT (main_window->notebook_editor), "focus-tab", G_CALLBACK (on_notebook_focus_tab), main_window);
 
   /* add syntax check window */
   GtkWidget *prin_hbox = get_widget_from_builder(main_window, "prin_hbox");
@@ -425,6 +445,13 @@ gboolean main_window_delete_event(GtkWidget *widget, GdkEvent *event, gpointer u
   return cancel_quit;
 }
 
+static gboolean main_window_activate_focus (GtkWidget *widget,GdkEventFocus *event, gpointer user_data)
+{
+  MainWindow *main_window = (MainWindow *) user_data;
+  documentable_check_externally_modified(document_manager_get_current_documentable(main_window->docmg));
+  return FALSE;
+}
+
 static void set_colormap(GtkWidget *window)
 {
   /*Set RGBA visual*/
@@ -504,7 +531,7 @@ void main_window_create(char **argv, gint argc)
   g_signal_connect (G_OBJECT (main_window.window), "key_press_event", G_CALLBACK (main_window_key_press_event), &main_window);
   g_signal_connect (G_OBJECT (main_window.window), "size_allocate", G_CALLBACK (main_window_resize), &main_window);
   g_signal_connect (G_OBJECT (main_window.window), "window-state-event", G_CALLBACK (main_window_state_changed), &main_window);
-  g_signal_connect (G_OBJECT (main_window.window), "focus-in-event", G_CALLBACK (main_window_activate_focus), NULL);
+  g_signal_connect (G_OBJECT (main_window.window), "focus-in-event", G_CALLBACK (main_window_activate_focus), &main_window);
 
   main_window.stylemg = gtk_source_style_scheme_manager_new ();
   gchar *theme_dir = g_build_path (G_DIR_SEPARATOR_S, API_DIR, "themes", NULL);

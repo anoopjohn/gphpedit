@@ -29,10 +29,7 @@
 #include "main.h"
 #include "main_window.h"
 
-//void main_window_destroy_event(GtkWidget *widget, gpointer data);
-//gboolean main_window_delete_event(GtkWidget *widget, GdkEvent *event, gpointer user_data);
 void on_new1_activate(GtkWidget *widget, gpointer user_data);
-//void open_file_ok(GtkFileChooser *file_selection, MainWindow *main_window);
 void reopen_recent(GtkRecentChooser *chooser, gpointer data);
 void on_open1_activate(GtkWidget *widget, gpointer user_data);
 void on_openselected1_activate(GtkWidget *widget, gpointer user_data);
@@ -63,16 +60,11 @@ void force_python(GtkWidget *widget, gpointer user_data);
 void zoom_in(GtkWidget *widget, gpointer user_data);
 void zoom_out(GtkWidget *widget, gpointer user_data);
 void zoom_100(GtkWidget *widget, gpointer user_data);
-//void can_undo(GtkWidget *widget);
-void on_notebook_switch_page (GtkNotebook *notebook, GtkWidget *page, gint page_num, gpointer user_data);
 void block_indent(GtkWidget *widget, gpointer user_data);
 void block_unindent(GtkWidget *widget, gpointer user_data);
 void selectiontoupper(GtkWidget *widget, gpointer user_data);
 void selectiontolower(GtkWidget *widget, gpointer user_data);
-gboolean on_notebook_focus_tab(GtkNotebook *notebook, GtkNotebookTab arg1, gpointer user_data);
 void on_reload1_activate(GtkWidget *widget, gpointer user_data);
 void keyboard_macro_startstop(GtkWidget *widget, gpointer user_data);
 void keyboard_macro_playback(GtkWidget *widget, gpointer user_data);
-//void close_all_tabs(void);
-gboolean main_window_activate_focus (GtkWidget *widget,GdkEventFocus *event, gpointer user_data);
 #endif

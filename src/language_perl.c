@@ -644,7 +644,9 @@ static void language_perl_setup_lexer(Language_Provider *lgperl)
   gchar *style_name;
   g_object_get(lgperldet->prefmg, "style_name", &style_name, NULL);
 
-  GtkSourceStyleScheme	*scheme = gtk_source_style_scheme_manager_get_scheme (main_window.stylemg, style_name);
+  GtkSourceStyleSchemeManager *stylemg = gtk_source_style_scheme_manager_new();
+  GtkSourceStyleScheme	*scheme = gtk_source_style_scheme_manager_get_scheme (stylemg, style_name);
+
   /* PHP LEXER STYLE */
   set_scintilla_lexer_doc_comment_style(GTK_WIDGET(lgperldet->sci), scheme, SCE_PL_FORMAT_IDENT, font, size);
   set_scintilla_lexer_doc_comment_style(GTK_WIDGET(lgperldet->sci), scheme, SCE_PL_FORMAT, font, size);

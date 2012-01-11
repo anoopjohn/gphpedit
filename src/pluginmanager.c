@@ -131,9 +131,10 @@ PluginManager *plugin_manager_new (void)
   return plugmg; /* return new object */
 }
 
-static void new_plugin(PluginManager *plugmg, gchar *filename){
+static void new_plugin(PluginManager *plugmg, gchar *filename)
+{
     Plugin *plugin;
-    plugin=plugin_new (filename);
+    plugin = plugin_new (filename, NULL); /*FIXME: need to pass proper main_window pointer*/
     PluginManagerDetails *plugmgdet;
     plugmgdet = PLUGIN_MANAGER_GET_PRIVATE(plugmg);
 /* insert new plugin in the plugin table */

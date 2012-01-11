@@ -180,8 +180,8 @@ static void language_untitled_trigger_completion (Language_Provider *lguntitled,
   wordEnd = gtk_scintilla_word_end_position(lguntitleddet->sci, current_pos-1, TRUE);
 
   member_function_buffer = gtk_scintilla_get_text_range (lguntitleddet->sci, wordStart-2, wordEnd, &member_function_length);
-  /* if we type <?untitled then we are in a untitled file so force untitled syntax mode */
-  if (g_strcmp0(member_function_buffer,"<?untitled")==0) {
+  /* if we type <?php then we are in a untitled file so force untitled syntax mode */
+  if (g_strcmp0(member_function_buffer,"<?php")==0) {
     documentable_set_type(DOCUMENTABLE(lguntitleddet->doc), TAB_PHP);
   }
   g_free(member_function_buffer);

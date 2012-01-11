@@ -64,11 +64,3 @@ gint yes_no_dialog (GtkWindow *window, gchar *title, gchar *message)
          
   return button;
 }
-
-void register_file_opened(gchar *filename)
-{
-  gphpedit_debug_message(DEBUG_DOC_MANAGER,"filename: %s\n", filename);
-  gchar *folder = filename_parent_uri(filename);
-  g_object_set (main_window.prefmg, "last_opened_folder", folder, NULL);
-  g_free(folder);
-}

@@ -57,7 +57,7 @@ typedef struct
 
 /* Basic GObject requirements. */
 GType plugin_get_type (void);
-Plugin *plugin_new (gchar *filename);
+Plugin *plugin_new (gchar *filename, MainWindow *main_window);
 const gchar *get_plugin_name(Plugin *plugin);
 const gchar *get_plugin_description(Plugin *plugin);
 gboolean get_plugin_active (Plugin *plugin);

@@ -723,7 +723,9 @@ static void language_php_setup_lexer(Language_Provider *lgphp)
   gchar *style_name;
   g_object_get(lgphpdet->prefmg, "style_name", &style_name, NULL);
 
-  GtkSourceStyleScheme	*scheme = gtk_source_style_scheme_manager_get_scheme (main_window.stylemg, style_name);
+  GtkSourceStyleSchemeManager *stylemg = gtk_source_style_scheme_manager_new();
+  GtkSourceStyleScheme	*scheme = gtk_source_style_scheme_manager_get_scheme (stylemg, style_name);
+
   /* PHP LEXER STYLE */
   set_scintilla_lexer_default_style(GTK_WIDGET(lgphpdet->sci), scheme, SCE_HPHP_DEFAULT, font, size);
   set_scintilla_lexer_keyword_style(GTK_WIDGET(lgphpdet->sci), scheme, SCE_HPHP_WORD, font, size);

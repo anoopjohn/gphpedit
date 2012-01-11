@@ -231,6 +231,14 @@ DocumentManager *document_manager_new (void)
   return g_object_new (DOCUMENT_MANAGER_TYPE, "main_window", NULL, NULL);
 }
 
+static void register_file_opened(MainWindow *main_window, gchar *filename)
+{
+  gphpedit_debug_message(DEBUG_DOC_MANAGER,"filename: %s\n", filename);
+  gchar *folder = filename_parent_uri(filename);
+  g_object_set (main_window->prefmg, "last_opened_folder", folder, NULL);
+  g_free(folder);
+}
+
 DocumentManager *document_manager_new_full (char **argv, gint argc, gpointer main_window)
 {
   gphpedit_debug(DEBUG_DOC_MANAGER);
@@ -261,21 +269,28 @@ void _document_manager_set_current_document(DocumentManager *docmg, Document *do
   g_signal_emit (G_OBJECT (docmg), signals[CHANGE_DOCUMENT], 0, docmgdet->current_document);
 }
 
+struct
+{
+  Document *document;
+  DocumentManager *docmg;
+} data;
+
 static void on_tab_close_activate(GtkWidget *widget, Document *document)
 {
   gphpedit_debug(DEBUG_DOC_MANAGER);
-  document_manager_try_close_document(main_window.docmg, document);
+  document_manager_try_close_document(data.docmg, document);
 }
 
 /* internal */
-GtkWidget *get_close_tab_widget(Document *document)
+GtkWidget *get_close_tab_widget(Document *document, DocumentManager *docmg)
 {
   GtkWidget *hbox;
   GtkWidget *close_button;
   hbox = gtk_hbox_new(FALSE, 0);
   close_button = gedit_close_button_new ();
   gtk_widget_set_tooltip_text(close_button, _("Close Tab"));
-
+  data.document = document;
+  data.docmg = docmg;
   g_signal_connect(G_OBJECT(close_button), "clicked", G_CALLBACK(on_tab_close_activate), document);
   /* load file icon */
   GtkWidget *label;
@@ -304,6 +319,7 @@ void document_save_update_cb (Document *doc, gpointer user_data)
   g_object_get(doc, "type", &ftype, NULL);
   gchar *filename = documentable_get_filename(DOCUMENTABLE(doc));
   symbol_manager_rescan_file (docmgdet->main_window->symbolmg, filename, ftype);
+  register_file_opened(docmgdet->main_window, filename);
   g_free(filename);
 }
 
@@ -378,7 +394,7 @@ void document_loader_done_loading_cb (DocumentLoader *doclod, gboolean result, D
     gboolean untitled;
     docmgdet->editors = g_slist_append(docmgdet->editors, doc);
     GtkWidget *document_tab;
-    document_tab = get_close_tab_widget(doc);
+    document_tab = get_close_tab_widget(doc, docmg);
     GtkWidget *document_widget;
     g_object_get(doc, "untitled", &untitled, "editor_widget", &document_widget, NULL);
     gtk_widget_show(document_widget);
@@ -631,7 +647,7 @@ void document_manager_switch_to_file_or_open(DocumentManager *docmg, gchar *file
     g_free(docfilename);
   }
   document_manager_add_new_document(docmg, TAB_FILE, filename, line_number);
-  register_file_opened(filename);
+  register_file_opened(docmgdet->main_window, filename);
   g_free(filename);
   return ;
 }
@@ -649,7 +665,8 @@ void document_manager_document_reload(DocumentManager *docmg)
   gboolean saved;
   g_object_get(docmgdet->current_document, "saved", &saved, NULL);
   if (!saved) {
-    gint result = yes_no_dialog (_("Question"), _("Are you sure you wish to reload the current file, losing your changes?"));
+    gint result = yes_no_dialog (GTK_WINDOW(docmgdet->main_window->window),
+                    _("Question"), _("Are you sure you wish to reload the current file, losing your changes?"));
     if (result==GTK_RESPONSE_NO) return ;
   }
   const gchar *short_filename;
@@ -806,7 +823,7 @@ gboolean document_manager_try_save_page(DocumentManager *docmg, Document *docume
       }
       return TRUE;
     case 1:
-      on_save1_activate(NULL);
+      on_save1_activate(NULL, docmgdet->main_window);
       // If chose neither of these, dialog either cancelled or closed. Do nothing.
   }
   return FALSE;

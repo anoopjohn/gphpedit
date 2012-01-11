@@ -366,7 +366,9 @@ static void language_cobol_setup_lexer(Language_Provider *lgcobol)
   gchar *style_name;
   g_object_get(lgcoboldet->prefmg, "style_name", &style_name, NULL);
 
-  GtkSourceStyleScheme	*scheme = gtk_source_style_scheme_manager_get_scheme (main_window.stylemg, style_name);
+  GtkSourceStyleSchemeManager *stylemg = gtk_source_style_scheme_manager_new();
+  GtkSourceStyleScheme	*scheme = gtk_source_style_scheme_manager_get_scheme (stylemg, style_name);
+
   /* COBOL LEXER STYLE */
   set_scintilla_lexer_default_style(GTK_WIDGET(lgcoboldet->sci), scheme, SCE_C_DEFAULT, font, size);
   set_scintilla_lexer_variable_style(GTK_WIDGET(lgcoboldet->sci), scheme, SCE_C_WORD, font, size);

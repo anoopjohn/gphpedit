@@ -457,24 +457,6 @@ void on_about1_activate(GtkWidget *widget, gpointer user_data)
   gtk_widget_destroy(dialog);
 }
 
-void on_notebook_switch_page (GtkNotebook *notebook, GtkWidget *page,
-                gint page_num, gpointer user_data)
-{
-  if(!document_manager_set_current_document_from_widget (main_window.docmg, page)) {
-    gphpedit_debug_message(DEBUG_MAIN_WINDOW,_("Unable to get data for page %d"), page_num);
-  }
-}
-
-gboolean on_notebook_focus_tab(GtkNotebook *notebook,
-                 GtkNotebookTab arg1, gpointer user_data)
-{
-  GtkWidget *document_widget;
-  Documentable *doc = document_manager_get_current_documentable(main_window.docmg);
-  g_object_get(doc, "editor_widget", &document_widget, NULL);
-  gtk_widget_grab_focus(document_widget);
-  return TRUE;
-}
-
 void block_indent(GtkWidget *widget, gpointer user_data)
 {
   MainWindow *main_window = (MainWindow *) user_data;
@@ -544,10 +526,4 @@ void force_python(GtkWidget *widget, gpointer user_data)
 {
   MainWindow *main_window = (MainWindow *) user_data;
   documentable_set_type(document_manager_get_current_documentable(main_window->docmg), TAB_PYTHON);
-}
-
-gboolean main_window_activate_focus (GtkWidget *widget,GdkEventFocus *event, gpointer user_data)
-{
-  documentable_check_externally_modified(document_manager_get_current_documentable(main_window.docmg));
-  return FALSE;
 }
