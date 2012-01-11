@@ -128,7 +128,7 @@ void replace_all_clicked(ReplaceDialogPrivate *priv)
   GString *message;
   const gchar *text;
   const gchar *replace;
-  Documentable *doc = document_manager_get_current_documentable(main_window.docmg);
+  Documentable *doc = document_manager_get_current_documentable(priv->main_window->docmg);
 
   text = gtk_combo_box_text_get_active_text (GTK_COMBO_BOX_TEXT(priv->findentry));
   gedit_history_entry_prepend_text	(GEDIT_HISTORY_ENTRY(priv->findentry), text);
@@ -167,7 +167,7 @@ void replace_clicked(GtkDialog *dialog, ReplaceDialogPrivate *priv)
   GString *message;
   const gchar *text;
   const gchar *replace;
-  Documentable *doc = document_manager_get_current_documentable(main_window.docmg);
+  Documentable *doc = document_manager_get_current_documentable(priv->main_window->docmg);
 
   text = gtk_combo_box_text_get_active_text (GTK_COMBO_BOX_TEXT(priv->findentry));
   gedit_history_entry_prepend_text	(GEDIT_HISTORY_ENTRY(priv->findentry), text);

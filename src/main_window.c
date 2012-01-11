@@ -82,7 +82,7 @@ static void main_window_create_appbar(MainWindow *main_window)
 {
   GtkWidget *statusbox = get_widget_from_builder(main_window, "statusbox");
   gtk_widget_show (statusbox);
-  main_window->appbar = gphpedit_statusbar_new ();
+  main_window->appbar = gphpedit_statusbar_new (main_window);
   gtk_box_pack_start(GTK_BOX(statusbox), main_window->appbar, FALSE, TRUE, 1);
   gphpedit_statusbar_set_zoom_level(GPHPEDIT_STATUSBAR(main_window->appbar), 100);
   if (get_preferences_manager_show_statusbar(main_window->prefmg)) gtk_widget_show (main_window->appbar);

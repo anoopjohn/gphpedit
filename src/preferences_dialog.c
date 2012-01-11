@@ -91,18 +91,20 @@ PREFERENCES_DIALOG_class_init (PreferencesDialogClass *klass)
 void preferences_dialog_process_response (GtkDialog *dialog, gint response_id, gpointer   user_data)
 {
   PreferencesDialogPrivate *priv = (PreferencesDialogPrivate *) user_data;
+  DocumentManager *docmg = document_manager_new();
  if (response_id==GTK_RESPONSE_DELETE_EVENT || response_id==GTK_RESPONSE_CANCEL){
   preferences_manager_restore_data(priv->prefmg);
-  document_manager_refresh_properties_all(main_window.docmg);
+  document_manager_refresh_properties_all(docmg);
   gtk_widget_destroy(GTK_WIDGET(dialog));
  } else if (response_id==GTK_RESPONSE_APPLY){
-  document_manager_refresh_properties_all(main_window.docmg);
+  document_manager_refresh_properties_all(docmg);
  } else if (response_id==GTK_RESPONSE_OK){
-  document_manager_refresh_properties_all(main_window.docmg);
+  document_manager_refresh_properties_all(docmg);
   // Save the preferences definitely
   preferences_manager_save_data_full(priv->prefmg);
   gtk_widget_destroy(GTK_WIDGET(dialog));
  }
+ g_object_unref(docmg);
 }
 
 void on_tab_size_changed(GtkSpinButton *spinbutton, gpointer user_data)
@@ -359,8 +361,9 @@ style_scheme_changed (GtkWidget *treeview,
 			    &iter, ID_COLUMN, &id, -1);
 
     g_object_set(priv->prefmg, "style_name", id, NULL);
-    document_manager_refresh_properties_all(main_window.docmg);
-
+    DocumentManager *docmg = document_manager_new();
+    document_manager_refresh_properties_all(docmg);
+    g_object_unref(docmg);
 	g_free (id);
 }
 

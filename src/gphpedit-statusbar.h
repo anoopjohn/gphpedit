@@ -54,7 +54,7 @@ struct _GphpeditStatusbarClass
 
 GType		 gphpedit_statusbar_get_type		(void) G_GNUC_CONST;
 
-GtkWidget	*gphpedit_statusbar_new			(void);
+GtkWidget	*gphpedit_statusbar_new			(gpointer main_window);
 
 void    gphpedit_statusbar_set_zoom_level (GphpeditStatusbar *statusbar,
 				     gint            level);

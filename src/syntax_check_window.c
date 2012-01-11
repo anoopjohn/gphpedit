@@ -94,8 +94,10 @@ gtk_syntax_check_window_dispose (GObject *object)
 
 static void goto_line(gchar *text)
 {
-  Documentable *doc = document_manager_get_current_documentable(main_window.docmg);
+  DocumentManager *docmg = document_manager_new();
+  Documentable *doc = document_manager_get_current_documentable(docmg);
   if (doc) documentable_goto_line(doc, atoi(text));
+  g_object_unref(docmg);
 }
 
 static void lint_row_activated (GtkTreeSelection *selection, gpointer data)

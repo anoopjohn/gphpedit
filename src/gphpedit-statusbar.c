@@ -48,6 +48,7 @@
 
 struct _GphpeditStatusbarPrivate
 {
+	MainWindow     *main_window;
 	GtkWidget     *overwrite_mode_label;
 	GtkWidget     *cursor_position_label;
 
@@ -61,6 +62,52 @@ struct _GphpeditStatusbarPrivate
 };
 
 G_DEFINE_TYPE(GphpeditStatusbar, gphpedit_statusbar, GTK_TYPE_STATUSBAR)
+
+enum
+{
+  PROP_0,
+  PROP_MAIN_WINDOW
+};
+
+static void gphpedit_statusbar_constructed (GObject *object);
+
+static void
+gphpedit_statusbar_set_property (GObject      *object,
+			      guint         prop_id,
+			      const GValue *value,
+			      GParamSpec   *pspec)
+{
+  GphpeditStatusbarPrivate *priv = GPHPEDIT_STATUSBAR_GET_PRIVATE(object);
+
+  switch (prop_id)
+  {
+    case PROP_MAIN_WINDOW:
+        priv->main_window = g_value_get_pointer(value);
+      break;
+    default:
+      G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
+      break;
+  }
+}
+
+static void
+gphpedit_statusbar_get_property (GObject    *object,
+			      guint       prop_id,
+			      GValue     *value,
+			      GParamSpec *pspec)
+{
+  GphpeditStatusbarPrivate *priv = GPHPEDIT_STATUSBAR_GET_PRIVATE(object);
+  
+  switch (prop_id)
+  {
+    case PROP_MAIN_WINDOW:
+      g_value_set_pointer (value, priv->main_window);
+      break;
+    default:
+      G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
+      break;
+    }
+}
 
 static gchar *
 get_overwrite_mode_string (gboolean overwrite)
@@ -95,13 +142,23 @@ gphpedit_statusbar_class_init (GphpeditStatusbarClass *klass)
 	GObjectClass *object_class = G_OBJECT_CLASS (klass);
 
 	object_class->dispose = gphpedit_statusbar_dispose;
+	object_class->set_property = gphpedit_statusbar_set_property;
+	object_class->get_property = gphpedit_statusbar_get_property;
+	object_class->constructed = gphpedit_statusbar_constructed;
+
+	g_object_class_install_property (object_class,
+                              PROP_MAIN_WINDOW,
+                              g_param_spec_pointer ("main_window",
+                              NULL, NULL,
+                              G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
 
 	g_type_class_add_private (object_class, sizeof (GphpeditStatusbarPrivate));
 }
 
 #define CURSOR_POSITION_LABEL_WIDTH_CHARS 18
 
-void set_higthlight (GeditStatusComboBox *combo, GtkMenuItem *item){
+void set_higthlight (GeditStatusComboBox *combo, GtkMenuItem *item, gpointer user_data){
+  GphpeditStatusbar *statusbar = GPHPEDIT_STATUSBAR (user_data);
   const gchar *label = gtk_menu_item_get_label (item);
   gint type;
   if (g_strcmp0(label,_("Cobol"))==0){
@@ -121,7 +178,7 @@ void set_higthlight (GeditStatusComboBox *combo, GtkMenuItem *item){
   } else {
     type = TAB_FILE;
   }
-  Documentable *doc = document_manager_get_current_documentable(main_window.docmg);
+  Documentable *doc = document_manager_get_current_documentable(statusbar->priv->main_window->docmg);
   if (doc) documentable_set_type(doc, type);
 }
 
@@ -138,7 +195,7 @@ void set_status_combo_item (GphpeditStatusbar *statusbar,const gchar *label)
   }
   g_list_free (items);
 }
-static void fill_combo_box(GeditStatusComboBox 	*combo)
+static void fill_combo_box(GeditStatusComboBox 	*combo, gpointer user_data)
 {
   GtkMenuItem *item;
   item = GTK_MENU_ITEM(gtk_menu_item_new_with_mnemonic(_("Cobol")));
@@ -166,7 +223,7 @@ static void fill_combo_box(GeditStatusComboBox 	*combo)
   gtk_widget_show (GTK_WIDGET(item));
   gedit_status_combo_box_add_item (combo, item, _("Text-Plain"));
   
-  g_signal_connect (combo, "changed", G_CALLBACK (set_higthlight), NULL);
+  g_signal_connect (combo, "changed", G_CALLBACK (set_higthlight), user_data);
 }
 
 static void
@@ -201,9 +258,13 @@ gphpedit_statusbar_init (GphpeditStatusbar *statusbar)
 	statusbar->priv->filetype_menu= gedit_status_combo_box_new ("");
 	gtk_widget_show (statusbar->priv->filetype_menu);
 	gtk_box_pack_end (GTK_BOX (statusbar), statusbar->priv->filetype_menu, FALSE, TRUE, 0);
-	fill_combo_box(GEDIT_STATUS_COMBO_BOX(statusbar->priv->filetype_menu));
 }
 
+static void gphpedit_statusbar_constructed (GObject *object)
+{
+	GphpeditStatusbar *statusbar = GPHPEDIT_STATUSBAR (object);
+	fill_combo_box(GEDIT_STATUS_COMBO_BOX(statusbar->priv->filetype_menu), object);
+}
 /**
  * gphpedit_statusbar_new:
  *
@@ -212,9 +273,9 @@ gphpedit_statusbar_init (GphpeditStatusbar *statusbar)
  * Return value: the new #GphpeditStatusbar object
  **/
 GtkWidget *
-gphpedit_statusbar_new (void)
+gphpedit_statusbar_new (gpointer main_window)
 {
-	return GTK_WIDGET (g_object_new (GPHPEDIT_TYPE_STATUSBAR, NULL));
+	return GTK_WIDGET (g_object_new (GPHPEDIT_TYPE_STATUSBAR, "main_window", main_window, NULL));
 }
 
 /**
