@@ -36,6 +36,8 @@
 
 struct _ToolBarPrivate
 {
+  MainWindow *main_window;
+
   GtkWidget *toolbar;
 /* main toolbar widgets */
   GtkWidget *button_new;
@@ -58,9 +60,67 @@ struct _ToolBarPrivate
 
 G_DEFINE_TYPE(ToolBar, TOOLBAR, GTK_TYPE_BOX)
 
+enum
+{
+  PROP_0,
+  PROP_MAIN_WINDOW
+};
+
+static void
+TOOLBAR_set_property (GObject      *object,
+			      guint         prop_id,
+			      const GValue *value,
+			      GParamSpec   *pspec)
+{
+  ToolBarPrivate *priv = TOOLBAR_GET_PRIVATE(object);
+
+  switch (prop_id)
+  {
+    case PROP_MAIN_WINDOW:
+        priv->main_window = g_value_get_pointer(value);
+      break;
+    default:
+      G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
+      break;
+  }
+}
+
+static void
+TOOLBAR_get_property (GObject    *object,
+			      guint       prop_id,
+			      GValue     *value,
+			      GParamSpec *pspec)
+{
+  ToolBarPrivate *priv = TOOLBAR_GET_PRIVATE(object);
+  
+  switch (prop_id)
+  {
+    case PROP_MAIN_WINDOW:
+      g_value_set_pointer (value, priv->main_window);
+      break;
+    default:
+      G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
+      break;
+    }
+}
+
+static void TOOLBAR_constructed (GObject    *object);
+
 static void
 TOOLBAR_class_init (ToolBarClass *klass)
 {
+	GObjectClass *object_class;
+
+	object_class = G_OBJECT_CLASS (klass);
+    object_class->set_property = TOOLBAR_set_property;
+    object_class->get_property = TOOLBAR_get_property;
+    object_class->constructed = TOOLBAR_constructed;
+
+    g_object_class_install_property (object_class,
+                              PROP_MAIN_WINDOW,
+                              g_param_spec_pointer ("main_window",
+                              NULL, NULL,
+                              G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
 	g_type_class_add_private (klass, sizeof (ToolBarPrivate));
 }
 
@@ -87,52 +147,66 @@ TOOLBAR_init (ToolBar *toolbar)
   gtk_style_context_save (context);
 
   priv->button_new = GTK_WIDGET(gtk_builder_get_object (builder, "new"));
-  g_signal_connect (G_OBJECT (priv->button_new), "clicked", G_CALLBACK (on_new1_activate), NULL);
   priv->button_open = GTK_WIDGET(gtk_builder_get_object (builder, "open"));
-  g_signal_connect (G_OBJECT (priv->button_open), "clicked", G_CALLBACK (on_open1_activate), NULL);
   priv->button_save = GTK_WIDGET(gtk_builder_get_object (builder, "save"));
-  g_signal_connect (G_OBJECT (priv->button_save), "clicked", G_CALLBACK (on_save1_activate), NULL);
   priv->button_save_as = GTK_WIDGET(gtk_builder_get_object (builder, "save_as"));
-  g_signal_connect (G_OBJECT (priv->button_save_as), "clicked", G_CALLBACK (on_save_as1_activate), NULL);
 
   priv->button_undo = GTK_WIDGET(gtk_builder_get_object (builder, "undo"));
-  g_signal_connect (G_OBJECT (priv->button_undo), "clicked", G_CALLBACK (on_undo1_activate), NULL);
   priv->button_redo = GTK_WIDGET(gtk_builder_get_object (builder, "redo"));
-  g_signal_connect (G_OBJECT (priv->button_redo), "clicked", G_CALLBACK (on_redo1_activate), NULL);
 
   priv->button_cut = GTK_WIDGET(gtk_builder_get_object (builder, "cut"));
-  g_signal_connect (G_OBJECT (priv->button_cut), "clicked", G_CALLBACK (on_cut1_activate), NULL);
   priv->button_copy = GTK_WIDGET(gtk_builder_get_object (builder, "copy"));
-  g_signal_connect (G_OBJECT (priv->button_copy), "clicked", G_CALLBACK (on_copy1_activate), NULL);
   priv->button_paste = GTK_WIDGET(gtk_builder_get_object (builder, "paste"));
-  g_signal_connect (G_OBJECT (priv->button_paste), "clicked", G_CALLBACK (on_paste1_activate), NULL);
 
   priv->button_find = GTK_WIDGET(gtk_builder_get_object (builder, "find"));
-  g_signal_connect (G_OBJECT (priv->button_find), "clicked", G_CALLBACK (on_find1_activate), NULL);
   priv->button_replace = GTK_WIDGET(gtk_builder_get_object (builder, "replace"));
-  g_signal_connect (G_OBJECT (priv->button_replace), "clicked", G_CALLBACK (on_replace1_activate), NULL);
 
   /* Add the indent/unindent operations to the Main Toolbar */
   /*indent block*/
   priv->button_indent = GTK_WIDGET(gtk_builder_get_object (builder, "indent"));
-  g_signal_connect (G_OBJECT (priv->button_indent), "clicked", G_CALLBACK (block_indent), NULL);
   priv->button_unindent = GTK_WIDGET(gtk_builder_get_object (builder, "unindent"));
-  g_signal_connect (G_OBJECT (priv->button_unindent), "clicked", G_CALLBACK (block_unindent), NULL);
 
   /* Add Zoom operations to the main Toolbar */
   priv->button_zoom_in = GTK_WIDGET(gtk_builder_get_object (builder, "zoomin"));
-  g_signal_connect (G_OBJECT (priv->button_zoom_in), "clicked", G_CALLBACK (zoom_in), NULL);
   priv->button_zoom_out = GTK_WIDGET(gtk_builder_get_object (builder, "zoomout"));
-  g_signal_connect (G_OBJECT (priv->button_zoom_out), "clicked", G_CALLBACK (zoom_out), NULL);
   priv->button_zoom_100 = GTK_WIDGET(gtk_builder_get_object (builder, "zoom100"));
-  g_signal_connect (G_OBJECT (priv->button_zoom_100), "clicked", G_CALLBACK (zoom_100), NULL);
 
 }
 
-GtkWidget *
-toolbar_new (void)
+static void TOOLBAR_constructed (GObject    *object)
 {
-  return GTK_WIDGET(g_object_new (GOBJECT_TYPE_TOOLBAR, NULL));
+  ToolBarPrivate *priv = TOOLBAR_GET_PRIVATE(object);
+
+  g_signal_connect (G_OBJECT (priv->button_new), "clicked", G_CALLBACK (on_new1_activate), priv->main_window);
+  g_signal_connect (G_OBJECT (priv->button_open), "clicked", G_CALLBACK (on_open1_activate), priv->main_window);
+  g_signal_connect (G_OBJECT (priv->button_save), "clicked", G_CALLBACK (on_save1_activate), priv->main_window);
+  g_signal_connect (G_OBJECT (priv->button_save_as), "clicked", G_CALLBACK (on_save_as1_activate), priv->main_window);
+
+  g_signal_connect (G_OBJECT (priv->button_undo), "clicked", G_CALLBACK (on_undo1_activate), priv->main_window);
+  g_signal_connect (G_OBJECT (priv->button_redo), "clicked", G_CALLBACK (on_redo1_activate), priv->main_window);
+
+  g_signal_connect (G_OBJECT (priv->button_cut), "clicked", G_CALLBACK (on_cut1_activate), priv->main_window);
+  g_signal_connect (G_OBJECT (priv->button_copy), "clicked", G_CALLBACK (on_copy1_activate), priv->main_window);
+  g_signal_connect (G_OBJECT (priv->button_paste), "clicked", G_CALLBACK (on_paste1_activate), priv->main_window);
+
+  g_signal_connect (G_OBJECT (priv->button_find), "clicked", G_CALLBACK (on_find1_activate), priv->main_window);
+  g_signal_connect (G_OBJECT (priv->button_replace), "clicked", G_CALLBACK (on_replace1_activate), priv->main_window);
+
+  /* Add the indent/unindent operations to the Main Toolbar */
+  /*indent block*/
+  g_signal_connect (G_OBJECT (priv->button_indent), "clicked", G_CALLBACK (block_indent), priv->main_window);
+  g_signal_connect (G_OBJECT (priv->button_unindent), "clicked", G_CALLBACK (block_unindent), priv->main_window);
+
+  /* Add Zoom operations to the main Toolbar */
+  g_signal_connect (G_OBJECT (priv->button_zoom_in), "clicked", G_CALLBACK (zoom_in), priv->main_window);
+  g_signal_connect (G_OBJECT (priv->button_zoom_out), "clicked", G_CALLBACK (zoom_out), priv->main_window);
+  g_signal_connect (G_OBJECT (priv->button_zoom_100), "clicked", G_CALLBACK (zoom_100), priv->main_window);
+}
+
+GtkWidget *
+toolbar_new (gpointer main_window)
+{
+  return GTK_WIDGET(g_object_new (GOBJECT_TYPE_TOOLBAR, "main_window", main_window, NULL));
 }
 
 void toolbar_update_controls(ToolBar *toolbar, gboolean is_scintilla, gboolean isreadonly)

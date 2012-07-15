@@ -533,13 +533,11 @@ static void language_php_trigger_completion (Language_Provider *lgphp, guint ch)
   gint ac_length;
   gint prev_char;
   gchar *member_function_buffer = NULL;
-  guint style;
   current_pos = gtk_scintilla_get_current_pos(lgphpdet->sci);
   current_line = gtk_scintilla_line_from_position(lgphpdet->sci, current_pos);
   wordStart = gtk_scintilla_word_start_position(lgphpdet->sci, current_pos-1, TRUE);
   wordEnd = gtk_scintilla_word_end_position(lgphpdet->sci, current_pos-1, TRUE);
   current_word_length = wordEnd - wordStart;
-  style = gtk_scintilla_get_style_at(lgphpdet->sci, current_pos);
 
   gboolean auto_brace;
   g_object_get(lgphpdet->prefmg, "auto_complete_braces", &auto_brace, NULL);
@@ -725,7 +723,9 @@ static void language_php_setup_lexer(Language_Provider *lgphp)
   gchar *style_name;
   g_object_get(lgphpdet->prefmg, "style_name", &style_name, NULL);
 
-  GtkSourceStyleScheme	*scheme = gtk_source_style_scheme_manager_get_scheme (main_window.stylemg, style_name);
+  GtkSourceStyleSchemeManager *stylemg = gtk_source_style_scheme_manager_new();
+  GtkSourceStyleScheme	*scheme = gtk_source_style_scheme_manager_get_scheme (stylemg, style_name);
+
   /* PHP LEXER STYLE */
   set_scintilla_lexer_default_style(GTK_WIDGET(lgphpdet->sci), scheme, SCE_HPHP_DEFAULT, font, size);
   set_scintilla_lexer_keyword_style(GTK_WIDGET(lgphpdet->sci), scheme, SCE_HPHP_WORD, font, size);

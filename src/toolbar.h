@@ -55,7 +55,7 @@ struct _ToolBarClass
 };
 
 GType 		 TOOLBAR_get_type 		(void) G_GNUC_CONST;
-GtkWidget *toolbar_new (void);
+GtkWidget *toolbar_new (gpointer main_window);
 void toolbar_update_controls(ToolBar *toolbar, gboolean is_scintilla, gboolean isreadonly);
 
 G_END_DECLS

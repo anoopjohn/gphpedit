@@ -117,42 +117,41 @@ struct StyledText {
 
 class HighlightDelimiter {
 public:
-	HighlightDelimiter() {
+	HighlightDelimiter() : isEnabled(false) {
+		Clear();
+	}
+
+	void Clear() {
 		beginFoldBlock = -1;
 		endFoldBlock = -1;
-		beginMarginCorrectlyDrawnZone = -1;
-		endMarginCorrectlyDrawnZone = -1;
-		isEnabled = false;
+		firstChangeableLineBefore = -1;
+		firstChangeableLineAfter = -1;
 	}
 
 	bool NeedsDrawing(int line) {
-		return isEnabled && (line <= beginMarginCorrectlyDrawnZone || endMarginCorrectlyDrawnZone <= line);
+		return isEnabled && (line <= firstChangeableLineBefore || line >= firstChangeableLineAfter);
 	}
 
-	bool isCurrentBlockHighlight(int line) {
+	bool IsFoldBlockHighlighted(int line) {
 		return isEnabled && beginFoldBlock != -1 && beginFoldBlock <= line && line <= endFoldBlock;
 	}
 
-	bool isHeadBlockFold(int line) {
+	bool IsHeadOfFoldBlock(int line) {
 		return beginFoldBlock == line && line < endFoldBlock;
 	}
 
-	bool isBodyBlockFold(int line) {
+	bool IsBodyOfFoldBlock(int line) {
 		return beginFoldBlock != -1 && beginFoldBlock < line && line < endFoldBlock;
 	}
 
-	bool isTailBlockFold(int line) {
+	bool IsTailOfFoldBlock(int line) {
 		return beginFoldBlock != -1 && beginFoldBlock < line && line == endFoldBlock;
 	}
 
-	// beginFoldBlock : Begin of current fold block.
-	// endStartBlock : End of current fold block.
-	// beginMarginCorrectlyDrawnZone : Begin of zone where margin is correctly drawn.
-	// endMarginCorrectlyDrawnZone : End of zone where margin is correctly drawn.
-	int beginFoldBlock;
-	int endFoldBlock;
-	int beginMarginCorrectlyDrawnZone;
-	int endMarginCorrectlyDrawnZone;
+	int beginFoldBlock;	// Begin of current fold block
+	int endFoldBlock;	// End of current fold block
+	int firstChangeableLineBefore;	// First line that triggers repaint before starting line that determined current fold block
+	int firstChangeableLineAfter;	// First line that triggers repaint after starting line that determined current fold block
 	bool isEnabled;
 };
 
@@ -194,7 +193,7 @@ public:
 
 /**
  */
-class Document : PerLine, public IDocument {
+class Document : PerLine, public IDocument, public ILoader {
 
 public:
 	/** Used to pair watcher pointer with user data. */
@@ -253,7 +252,7 @@ public:
 	virtual ~Document();
 
 	int AddRef();
-	int Release();
+	int SCI_METHOD Release();
 
 	virtual void Init();
 	virtual void InsertLine(int line);
@@ -282,6 +281,8 @@ public:
 	void CheckReadOnly();
 	bool DeleteChars(int pos, int len);
 	bool InsertString(int position, const char *s, int insertLength);
+	int SCI_METHOD AddData(char *data, int length);
+	void * SCI_METHOD ConvertToDocument();
 	int Undo();
 	int Redo();
 	bool CanUndo() { return cb.CanUndo(); }
@@ -302,9 +303,10 @@ public:
 	void SetLineIndentation(int line, int indent);
 	int GetLineIndentPosition(int line) const;
 	int GetColumn(int position);
+	int CountCharacters(int startPos, int endPos);
 	int FindColumn(int line, int column);
 	void Indent(bool forwards, int lineBottom, int lineTop);
-	static char *TransformLineEnds(int *pLenOut, const char *s, size_t len, int eolMode);
+	static char *TransformLineEnds(int *pLenOut, const char *s, size_t len, int eolModeWanted);
 	void ConvertLineEnds(int eolModeSet);
 	void SetReadOnly(bool set) { cb.SetReadOnly(set); }
 	bool IsReadOnly() { return cb.IsReadOnly(); }
@@ -324,6 +326,7 @@ public:
 		cb.GetStyleRange(buffer, position, lengthRetrieve);
 	}
 	int GetMark(int line);
+	int MarkerNext(int lineStart, int mask) const;
 	int AddMark(int line, int markerNum);
 	void AddMarkSet(int line, int valueSet);
 	void DeleteMark(int line, int markerNum);
@@ -339,9 +342,9 @@ public:
 	int SCI_METHOD SetLevel(int line, int level);
 	int SCI_METHOD GetLevel(int line) const;
 	void ClearLevels();
-	int GetLastChild(int lineParent, int level=-1);
+	int GetLastChild(int lineParent, int level=-1, int lastLine=-1);
 	int GetFoldParent(int line);
-	void GetHighlightDelimiters(HighlightDelimiter &hDelimiter, int line, int topLine, int bottomLine);
+	void GetHighlightDelimiters(HighlightDelimiter &hDelimiter, int line, int lastLine);
 
 	void Indent(bool forwards);
 	int ExtendWordSelect(int pos, int delta, bool onlyWordCharacters=false);

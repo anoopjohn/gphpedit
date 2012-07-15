@@ -26,14 +26,16 @@
 #include "main_window.h"
 #include "gvfs_utils.h"
 
-void info_dialog (gchar *title, gchar *message)
+void info_dialog (GtkWindow *window, gchar *title, gchar *message)
 {
   GtkWidget *dialog;
-  gint button;
-  dialog = gtk_message_dialog_new(GTK_WINDOW(main_window.window),GTK_DIALOG_DESTROY_WITH_PARENT,GTK_MESSAGE_INFO,GTK_BUTTONS_OK,"%s", message);
+  dialog = gtk_message_dialog_new(window,GTK_DIALOG_DESTROY_WITH_PARENT,GTK_MESSAGE_INFO,GTK_BUTTONS_OK,"%s", message);
   gtk_window_set_title(GTK_WINDOW(dialog), title);
-  gtk_window_set_transient_for (GTK_WINDOW(dialog),GTK_WINDOW(main_window.window));
-  button = gtk_dialog_run (GTK_DIALOG (dialog));
+  if (window)
+  {
+    gtk_window_set_transient_for (GTK_WINDOW(dialog), window);
+  }
+  gtk_dialog_run (GTK_DIALOG (dialog));
   gtk_widget_destroy(dialog);
   /*
    * Run the dialog and wait for the user to select yes or no.
@@ -42,13 +44,16 @@ void info_dialog (gchar *title, gchar *message)
    */
 }
 
-gint yes_no_dialog (gchar *title, gchar *message)
+gint yes_no_dialog (GtkWindow *window, gchar *title, gchar *message)
 {
   GtkWidget *dialog;
   gint button;
-  dialog = gtk_message_dialog_new(GTK_WINDOW(main_window.window),GTK_DIALOG_DESTROY_WITH_PARENT,GTK_MESSAGE_INFO,GTK_BUTTONS_YES_NO,"%s", message);
+  dialog = gtk_message_dialog_new(window,GTK_DIALOG_DESTROY_WITH_PARENT,GTK_MESSAGE_INFO,GTK_BUTTONS_YES_NO,"%s", message);
   gtk_window_set_title(GTK_WINDOW(dialog), title);
-  gtk_window_set_transient_for (GTK_WINDOW(dialog),GTK_WINDOW(main_window.window));
+  if (window)
+  {
+    gtk_window_set_transient_for (GTK_WINDOW(dialog), window);
+  }
   button = gtk_dialog_run (GTK_DIALOG (dialog));
   gtk_widget_destroy(dialog);
   /*
@@ -58,12 +63,4 @@ gint yes_no_dialog (gchar *title, gchar *message)
    */
          
   return button;
-}
-
-void register_file_opened(gchar *filename)
-{
-  gphpedit_debug_message(DEBUG_DOC_MANAGER,"filename: %s\n", filename);
-  gchar *folder = filename_parent_uri(filename);
-  g_object_set (main_window.prefmg, "last_opened_folder", folder, NULL);
-  g_free(folder);
 }

@@ -1153,7 +1153,6 @@ static void document_scintilla_constructed (GObject *object)
   g_object_set(object, "short_filename", short_filename, NULL);
   gtk_label_set_text(GTK_LABEL(docdet->label), short_filename);
   gtk_widget_show (docdet->label);
-
 }
 
 Document_Scintilla *document_scintilla_new (gint type, GFile *file, gint goto_line, gchar *contents)
@@ -1765,9 +1764,6 @@ static void document_scintilla_saver_done_saving_cb (DocumentSaver *docsav, Docu
   if (type==TAB_FILE) {
     document_scintilla_auto_detect_file_type(DOCUMENTABLE(doc));
   }
-  gchar *filename = documentable_get_filename(DOCUMENTABLE(doc));
-  register_file_opened(filename);
-  g_free(filename);
 }
 
 static char *macro_message_to_string(gint message)

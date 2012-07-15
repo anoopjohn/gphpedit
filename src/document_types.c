@@ -77,7 +77,9 @@ gboolean is_php_file_from_filename(const gchar *filename)
     file_extension++;
     
     const gchar *php_extensions;
-    g_object_get(main_window.prefmg, "php_file_extensions", &php_extensions, NULL);
+    PreferencesManager *prefmg = preferences_manager_new();
+    g_object_get(prefmg, "php_file_extensions", &php_extensions, NULL);
+    g_object_unref(prefmg);
 
     php_file_extensions = g_strsplit(php_extensions, ",", -1);
     

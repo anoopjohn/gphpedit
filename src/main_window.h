@@ -39,7 +39,7 @@
 
 typedef struct
 {
-  GtkBuilder *builder;
+  GtkBuilder *pbuilder;
   /* preferences manager */
   PreferencesManager *prefmg;
   TemplatesManager *tempmg;
@@ -50,12 +50,12 @@ typedef struct
 
   GtkWidget *window;
   /* menu */
-  GtkWidget *menu;
+  GtkWidget *pmenu;
   /* toolbars */
   GtkWidget *toolbar_main;
 
-  GtkWidget *main_vertical_pane;
-  GtkWidget *main_horizontal_pane;
+  GtkWidget *pmain_vertical_pane;
+  GtkWidget *pmain_horizontal_pane;
   /* status bar */
   GtkWidget *appbar;
 
@@ -63,7 +63,7 @@ typedef struct
   
   GtkWidget *notebook_editor;
   /* syntax check widget */
-  GtkWidget *win;
+  GtkWidget *pwin;
 
   DocumentManager *docmg;
 
@@ -73,12 +73,27 @@ typedef struct
 
   /*filebrowser widget */
   GtkWidget *pfolder;
+
+  /*needed for menu hints*/
+  guint context_id;
+  guint message_id;
+  GHashTable *pmenu_hints;
+
+  gboolean is_app_closing;
 }
 MainWindow;
 
 extern MainWindow main_window;
 
 void main_window_create(char **argv, gint argc);
-void update_app_title(Documentable *document);
-void side_panel_show_hide(GtkWidget *widget);
+void update_app_title(MainWindow *main_window, Documentable *document);
+void side_panel_show_hide(MainWindow *main_window);
+void statusbar_show_hide(MainWindow *main_window, gboolean state);
+void maintoolbar_show_hide(MainWindow *main_window, gboolean state);
+void fullscreen_show_hide(MainWindow *main_window, gboolean state);
+void syntax_check_show(MainWindow *main_window);
+void syntax_check_hide(MainWindow *main_window);
+void main_window_install_menu_hint(MainWindow *main_window, GtkWidget *widget, gchar *message);
+gboolean main_window_delete_event(GtkWidget *widget, GdkEvent *event, gpointer user_data);
+void quit_application(MainWindow *main_window);
 #endif

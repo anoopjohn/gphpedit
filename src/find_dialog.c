@@ -41,6 +41,7 @@
 
 struct _SearchDialogPrivate 
 {
+  MainWindow *main_window;
   GtkWidget *diagbox;
   GtkWidget *findentry;
   GtkWidget *checkcase;
@@ -53,7 +54,53 @@ struct _SearchDialogPrivate
   GtkWidget *find_button;
 };
 
+static void search_dialog_constructed (GObject *object);
+
 G_DEFINE_TYPE(SearchDialog, SEARCH_DIALOG, GTK_TYPE_DIALOG)
+
+enum
+{
+  PROP_0,
+  PROP_MAIN_WINDOW
+};
+
+static void
+search_dialog_set_property (GObject      *object,
+			      guint         prop_id,
+			      const GValue *value,
+			      GParamSpec   *pspec)
+{
+  SearchDialogPrivate *priv = SEARCH_DIALOG_GET_PRIVATE(object);
+
+  switch (prop_id)
+  {
+    case PROP_MAIN_WINDOW:
+        priv->main_window = g_value_get_pointer(value);
+      break;
+    default:
+      G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
+      break;
+  }
+}
+
+static void
+search_dialog_get_property (GObject    *object,
+			      guint       prop_id,
+			      GValue     *value,
+			      GParamSpec *pspec)
+{
+  SearchDialogPrivate *priv = SEARCH_DIALOG_GET_PRIVATE(object);
+  
+  switch (prop_id)
+  {
+    case PROP_MAIN_WINDOW:
+      g_value_set_pointer (value, priv->main_window);
+      break;
+    default:
+      G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
+      break;
+    }
+}
 
 static void
 SEARCH_DIALOG_class_init (SearchDialogClass *klass)
@@ -61,6 +108,15 @@ SEARCH_DIALOG_class_init (SearchDialogClass *klass)
 	GObjectClass *object_class;
 
 	object_class = G_OBJECT_CLASS (klass);
+    object_class->set_property = search_dialog_set_property;
+    object_class->get_property = search_dialog_get_property;
+    object_class->constructed = search_dialog_constructed;
+
+    g_object_class_install_property (object_class,
+                              PROP_MAIN_WINDOW,
+                              g_param_spec_pointer ("main_window",
+                              NULL, NULL,
+                              G_PARAM_READWRITE | G_PARAM_CONSTRUCT));
 
 	g_type_class_add_private (klass, sizeof (SearchDialogPrivate));
 }
@@ -69,7 +125,7 @@ SEARCH_DIALOG_class_init (SearchDialogClass *klass)
 void find_action(SearchDialogPrivate *priv)
 {
   const gchar *text;
-  Documentable *doc = document_manager_get_current_documentable(main_window.docmg);
+  Documentable *doc = document_manager_get_current_documentable(priv->main_window->docmg);
   text = gtk_combo_box_text_get_active_text (GTK_COMBO_BOX_TEXT(priv->findentry));
   gedit_history_entry_prepend_text	(GEDIT_HISTORY_ENTRY(priv->findentry), text);
   gboolean checkwholedoc = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON(priv->checkwholedoc));
@@ -82,16 +138,16 @@ void find_action(SearchDialogPrivate *priv)
     if (checkwholedoc) {
       documentable_goto_pos(doc, 0);
       found = documentable_search_text(doc, text, checkwholedoc, checkcase, checkwholeword, checkregex);
-      gphpedit_statusbar_flash_message (GPHPEDIT_STATUSBAR(main_window.appbar),0, "%s", _("Resuming search from top."));
+      gphpedit_statusbar_flash_message (GPHPEDIT_STATUSBAR(priv->main_window->appbar),0, "%s", _("Resuming search from top."));
     }
   }
   if (!found) {
     // Show message saying could not be found.
-    gphpedit_statusbar_flash_message (GPHPEDIT_STATUSBAR(main_window.appbar),0, _("The text \"%s\" was not found."), text);
+    gphpedit_statusbar_flash_message (GPHPEDIT_STATUSBAR(priv->main_window->appbar),0, _("The text \"%s\" was not found."), text);
   }  
 }
 
-void search_dialog_process_response (GtkDialog *dialog, gint response_id, gpointer   user_data)
+void search_dialog_process_response (GtkDialog *dialog, gint response_id, gpointer user_data)
 {
  if (response_id==GTK_RESPONSE_DELETE_EVENT){
     gtk_widget_destroy(GTK_WIDGET(dialog));
@@ -129,15 +185,6 @@ SEARCH_DIALOG_init (SearchDialog *dialog)
 
   gtk_box_pack_start(GTK_BOX(findbox), priv->findentry, FALSE, FALSE, 6);
 
-  /* Get selected text */
-  gchar *buffer;
-  buffer = documentable_get_current_selected_text(document_manager_get_current_documentable(main_window.docmg));
-  if (buffer) {
-      gedit_history_entry_prepend_text	(GEDIT_HISTORY_ENTRY(priv->findentry),buffer);
-      gtk_combo_box_set_active (GTK_COMBO_BOX(priv->findentry), 0);
-  }
-  /* End get selected text */
-
   priv->checkcase = GTK_WIDGET(gtk_builder_get_object (builder, "match_case_checkbutton"));
   priv->checkwholeword = GTK_WIDGET(gtk_builder_get_object (builder, "entire_word_checkbutton"));
   priv->checkwholedoc = GTK_WIDGET(gtk_builder_get_object (builder, "wrapdoc"));
@@ -147,28 +194,42 @@ SEARCH_DIALOG_init (SearchDialog *dialog)
   priv->find_button = gtk_dialog_add_button (GTK_DIALOG(dialog), GTK_STOCK_FIND, GTK_RESPONSE_OK);
   
   gtk_dialog_set_default_response (GTK_DIALOG(dialog), GTK_RESPONSE_OK);
-
-  g_signal_connect(G_OBJECT(dialog), "response", G_CALLBACK(search_dialog_process_response), priv);
 }
 
+static void search_dialog_constructed (GObject *object)
+{
+    SearchDialogPrivate *priv = SEARCH_DIALOG_GET_PRIVATE(object);
+
+    /* Get selected text */
+    gchar *buffer;
+    Documentable *doc = document_manager_get_current_documentable(priv->main_window->docmg);
+    buffer = documentable_get_current_selected_text(doc);
+    if (buffer) {
+        gedit_history_entry_prepend_text (GEDIT_HISTORY_ENTRY(priv->findentry), buffer);
+        gtk_combo_box_set_active (GTK_COMBO_BOX(priv->findentry), 0);
+    }
+    /* End get selected text */
+
+    gtk_window_set_position (GTK_WINDOW(object), GTK_WIN_POS_CENTER);
+    gtk_window_set_title (GTK_WINDOW (object), _("Find"));
+    gtk_window_set_resizable (GTK_WINDOW (object), FALSE);
+    gtk_container_set_border_width (GTK_CONTAINER (object), 10);
+
+    g_signal_connect(object, "response", G_CALLBACK(search_dialog_process_response), priv);
+}
+
+
 GtkWidget *
-search_dialog_new (GtkWindow *parent)
+search_dialog_new (GtkWindow *parent, gpointer main_window)
 {
 	SearchDialog *dialog;
-
-	dialog = g_object_new (GOBJECT_TYPE_SEARCH_DIALOG, "has-separator", FALSE, NULL);
+	dialog = g_object_new (GOBJECT_TYPE_SEARCH_DIALOG, "main_window", main_window, NULL);
 
 	if (parent != NULL)
 	{
 		gtk_window_set_transient_for (GTK_WINDOW (dialog), parent);
-	
 		gtk_window_set_destroy_with_parent (GTK_WINDOW (dialog), TRUE);
 	}
-
-  gtk_window_set_position (GTK_WINDOW(dialog), GTK_WIN_POS_CENTER);
-  gtk_window_set_title (GTK_WINDOW (dialog), _("Find"));
-  gtk_window_set_resizable (GTK_WINDOW (dialog), FALSE);
-  gtk_container_set_border_width (GTK_CONTAINER (dialog), 10);
 
 	return GTK_WIDGET (dialog);
 }

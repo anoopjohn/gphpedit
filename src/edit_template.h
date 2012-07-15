@@ -45,6 +45,6 @@ typedef struct
 } EditTemplateDialog;
 
 extern EditTemplateDialog edit_template_dialog; 
-void create_edit_template_dialog (void);
+void create_edit_template_dialog (GtkWidget *window);
 
 #endif

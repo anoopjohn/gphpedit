@@ -58,7 +58,8 @@ static void start_ipc (void);
 /* this is the function that does stuff when receives data */
 static void commit (Input *self);
 
-gboolean poke_existing_instance (int argc, char **argv){
+gboolean poke_existing_instance (int argc, char **argv)
+{
   GDir *dir;
   const char *entry, *username, *tmp_path;
   char *prefix;
@@ -158,7 +159,8 @@ static void commit (Input *self) {
     gphpedit_debug_message( DEBUG_IPC, "Opening %s\n", (char*) self->buffer->data);
   }
 
-  if (self->buffer->len > MAX_BUFFER_SIZE){
+  if (self->buffer->len > MAX_BUFFER_SIZE)
+  {
     g_byte_array_free (self->buffer, TRUE);
     self->buffer = g_byte_array_new ();
   } else {

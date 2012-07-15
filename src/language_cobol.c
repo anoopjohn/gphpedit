@@ -287,7 +287,6 @@ static void autoindent_brace_code (GtkScintilla *sci, PreferencesManager *pref)
   gint current_line;
   gint previous_line;
   gint previous_line_indentation;
-  gint previous_line_end;
 
   current_pos = gtk_scintilla_get_current_pos(sci);
   current_line = gtk_scintilla_line_from_position(sci, current_pos);
@@ -299,7 +298,6 @@ static void autoindent_brace_code (GtkScintilla *sci, PreferencesManager *pref)
     previous_line = current_line-1;
     previous_line_indentation = gtk_scintilla_get_line_indentation(sci, previous_line);
 
-    previous_line_end = gtk_scintilla_get_line_end_position(sci, previous_line);
     indent_line(sci, current_line, previous_line_indentation);
     gphpedit_debug_message (DEBUG_DOCUMENT, "previous_line=%d, previous_indent=%d\n", previous_line, previous_line_indentation);
     gint pos;
@@ -368,7 +366,9 @@ static void language_cobol_setup_lexer(Language_Provider *lgcobol)
   gchar *style_name;
   g_object_get(lgcoboldet->prefmg, "style_name", &style_name, NULL);
 
-  GtkSourceStyleScheme	*scheme = gtk_source_style_scheme_manager_get_scheme (main_window.stylemg, style_name);
+  GtkSourceStyleSchemeManager *stylemg = gtk_source_style_scheme_manager_new();
+  GtkSourceStyleScheme	*scheme = gtk_source_style_scheme_manager_get_scheme (stylemg, style_name);
+
   /* COBOL LEXER STYLE */
   set_scintilla_lexer_default_style(GTK_WIDGET(lgcoboldet->sci), scheme, SCE_C_DEFAULT, font, size);
   set_scintilla_lexer_variable_style(GTK_WIDGET(lgcoboldet->sci), scheme, SCE_C_WORD, font, size);

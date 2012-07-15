@@ -32,7 +32,6 @@
 #define STYLE_ANNOTATION_ERROR 200
 #define STYLE_ANNOTATION_WARNING 201
 
-void register_file_opened(gchar *filename);
-void info_dialog (gchar *title, gchar *message);
-gint yes_no_dialog (gchar *title, gchar *message);
+void info_dialog (GtkWindow *window, gchar *title, gchar *message);
+gint yes_no_dialog (GtkWindow *window, gchar *title, gchar *message);
 #endif

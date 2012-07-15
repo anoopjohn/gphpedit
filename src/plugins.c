@@ -134,8 +134,6 @@ plugin_class_init (PluginClass *klass)
 static void
 plugin_init (Plugin *object)
 {
-	PluginDetails *plug;
-	plug = PLUGIN_GET_PRIVATE(object);
 }
 
 static void
@@ -432,7 +430,7 @@ gchar **plugin_discover_authors(const gchar *filename)
   return authors;
 }
              
-Plugin *plugin_new (gchar *filename)
+Plugin *plugin_new (gchar *filename, MainWindow *main_window)
 {
 	Plugin *plug;
   plug = g_object_new (PLUGIN_TYPE, NULL);
@@ -453,7 +451,7 @@ Plugin *plugin_new (gchar *filename)
   /* get active status, default value TRUE */
   /* Note:: multiple plugins with the same name share the same status */
   if (plugdet->name) {
-    plugdet->active = get_plugin_is_active(main_window.prefmg, plugdet->name);
+    plugdet->active = get_plugin_is_active(main_window->prefmg, plugdet->name);
   } else {
     plugdet->active = FALSE;
   }
@@ -501,8 +499,8 @@ void set_plugin_active (Plugin *plugin, gboolean status)
 	g_return_if_fail (plugin != NULL);
 
   PluginDetails *plugdet = PLUGIN_GET_PRIVATE(plugin);
-
-  set_plugin_is_active(main_window.prefmg, plugdet->name, status);
+//FIXME:
+//  set_plugin_is_active(main_window->prefmg, plugdet->name, status);
 
 	plugdet->active = status;
 }
@@ -577,7 +575,7 @@ static GString *save_as_temp_file(Documentable *document)
 }
 
 
-void plugin_run(Plugin *plugin, Documentable *document)
+void plugin_run(Plugin *plugin, Documentable *document, MainWindow *main_window)
 {
   gphpedit_debug(DEBUG_PLUGINS);
   /* initial checks*/
@@ -641,15 +639,15 @@ void plugin_run(Plugin *plugin, Documentable *document)
     }
     else if (g_str_has_prefix(stdout, "MESSAGE")){
         if (data){
-        info_dialog(plugdet->name, data);
+            info_dialog(GTK_WINDOW(main_window->window), plugdet->name, data);
         }
     }
     else if (g_str_has_prefix(stdout, "SYNTAX")){
-        syntax_window(GTK_SYNTAX_CHECK_WINDOW(main_window.win), document, data);
+        syntax_window(GTK_SYNTAX_CHECK_WINDOW(main_window->pwin), document, data);
     }
     else if (g_str_has_prefix(stdout, "OPEN")){
       gphpedit_debug_message(DEBUG_PLUGINS,"Opening file :date: %s\n", data);
-      document_manager_switch_to_file_or_open(main_window.docmg, data, 0);
+      document_manager_switch_to_file_or_open(main_window->docmg, data, 0);
     } else {
       g_print("Unexpected command\n");
     }

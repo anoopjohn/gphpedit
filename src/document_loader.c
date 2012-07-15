@@ -374,7 +374,7 @@ static gboolean _document_loader_prompt_create_file(const gchar *filename)
   if (!filename) return TRUE;
   gint result;
   gchar *message = g_strdup_printf(_("The file %s was not found.\n\nWould you like to create it as an empty document?"), filename);
-  result = yes_no_dialog(_("File not found"), message);
+  result = yes_no_dialog(NULL, _("File not found"), message);
   g_free(message);
   if (result != GTK_RESPONSE_YES){
     return FALSE;
@@ -402,7 +402,7 @@ static gboolean _document_loader_check_supported_type(GFile *file)
   const char *contenttype= g_file_info_get_content_type (info); 
   /*we could open text based types so if it not a text based content don't open and displays error*/
   if (!is_mime_allowed(contenttype)){
-    info_dialog (_("gPHPEdit"), _("Sorry, I can open this kind of file.\n"));
+    info_dialog (NULL, _("gPHPEdit"), _("Sorry, I can open this kind of file.\n"));
     result = FALSE;
   }
   g_object_unref(info);

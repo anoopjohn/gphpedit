@@ -32,7 +32,7 @@ struct _GtkPluginManagerMenuPrivate
 {
   /* the recent manager object */
   PluginManager *plugmg;
-  
+  MainWindow *main_window;
   GtkWidget *placeholder;
 
   GtkAccelGroup *accel_group;
@@ -189,7 +189,7 @@ void add_plugin_to_menu (gpointer data, gpointer user_data)
     if (get_plugin_syntax_type(plugin)==-1){ 
     item =  gtk_menu_item_new_image_item(GTK_STOCK_EXECUTE, get_plugin_name(plugin));
     gtk_widget_show(item);
-    install_menu_hint(item, (gchar *)get_plugin_description(plugin));
+    main_window_install_menu_hint(menu->priv->main_window, item, (gchar *)get_plugin_description(plugin));
     g_signal_connect(G_OBJECT(item), "activate", G_CALLBACK(plugin_exec), (gpointer) menu);
     gtk_menu_shell_append(GTK_MENU_SHELL(menu), item);
     if (i<10) gtk_widget_add_accelerator(item, "activate", menu->priv->accel_group, parse_shortcut(i), GDK_CONTROL_MASK, GTK_ACCEL_VISIBLE);
@@ -213,34 +213,37 @@ gtk_plugin_manager_menu_populate (GtkPluginManagerMenu *menu)
 static void plugin_exec (GtkWidget *widget, gpointer user_data)
 {
   Plugin *plugin;
-  Documentable *doc = document_manager_get_current_documentable(main_window.docmg);
-  if (!doc) return;
   GtkPluginManagerMenu *menu= GTK_PLUGIN_MANAGER_MENU (user_data);
+  Documentable *doc = document_manager_get_current_documentable(menu->priv->main_window->docmg);
+  if (!doc) return;
   
   plugin = get_plugin_by_name(menu->priv->plugmg, (gchar *) gtk_menu_item_get_label (GTK_MENU_ITEM(widget)));
-  plugin_run(plugin, doc);
+  plugin_run(plugin, doc, menu->priv->main_window);
 }
 
 void plugin_exec_with_num(GtkWidget *widget, gint num){
   Plugin *plugin;
-  Documentable *doc = document_manager_get_current_documentable(main_window.docmg); 
-  if (!doc) return;
   GtkPluginManagerMenu *menu= GTK_PLUGIN_MANAGER_MENU (widget);
+  Documentable *doc = document_manager_get_current_documentable(menu->priv->main_window->docmg); 
+  if (!doc) return;
   if (get_plugin_manager_items_count(menu->priv->plugmg) < num) return;
   plugin = get_plugin_by_num(menu->priv->plugmg, num);
-  plugin_run(plugin, doc);
+  plugin_run(plugin, doc, menu->priv->main_window);
 }
 /*
  * Public API
  */
 
 GtkWidget *
-gtk_plugin_manager_menu_new (GtkAccelGroup *accel_grup)
+gtk_plugin_manager_menu_new (GtkAccelGroup *accel_grup, MainWindow *main_window)
 {
   GtkPluginManagerMenu *menu = g_object_new (GTK_TYPE_PLUGIN_MANAGER_MENU, NULL);
+//FIXME: use a property like in menubar to store main_window and accel_group
+//and move this into contructed method
   /* (re)populate the menu */
   GtkPluginManagerMenuPrivate *priv = menu->priv;
   priv->accel_group= accel_grup;
+  priv->main_window = main_window;
   gtk_plugin_manager_menu_populate (menu);
   return GTK_WIDGET(menu);
 }

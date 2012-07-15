@@ -27,6 +27,7 @@
 
 #include <gtk/gtk.h>
 #include <gio/gio.h>
+#include "document_manager.h"
 
 #define FILEBROWSER_TYPE_BACKEND filebrowser_backend_get_type()
 #define FILEBROWSER_BACKEND(obj) \
@@ -74,7 +75,6 @@ GSList *get_filebrowser_backend_files(FilebrowserBackend *fbback);
 void filebrowser_backend_update_folder (FilebrowserBackend *fbback, const gchar *newfolder);
 void filebrowser_backend_go_folder_up (FilebrowserBackend *fbback);
 void filebrowser_backend_refresh_folder (FilebrowserBackend *fbback);
-void filebrowser_backend_open_file (FilebrowserBackend *fbback, gchar *filename);
 void filebrowser_backend_go_folder_home (FilebrowserBackend *fbback, gchar *filename);
 void filebrowser_backend_cancel (FilebrowserBackend *fbback);
 void filebrowser_backend_delete_file(FilebrowserBackend *filebackend, gchar *filename);

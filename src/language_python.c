@@ -455,7 +455,8 @@ static void language_python_setup_lexer(Language_Provider *lgpython)
   gchar *style_name;
   g_object_get(lgpythondet->prefmg, "style_name", &style_name, NULL);
 
-  GtkSourceStyleScheme	*scheme = gtk_source_style_scheme_manager_get_scheme (main_window.stylemg, style_name);
+  GtkSourceStyleSchemeManager *stylemg = gtk_source_style_scheme_manager_new();
+  GtkSourceStyleScheme	*scheme = gtk_source_style_scheme_manager_get_scheme (stylemg, style_name);
   /* PYTHON LEXER STYLE */
   gchar *font;
   guint size;

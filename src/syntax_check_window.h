@@ -26,6 +26,7 @@
 #define __GTK_SYNTAX_CHECK_WINDOW_H__
 
 #include <gtk/gtk.h>
+#include "main_window.h"
 #include "tab.h"
 
 G_BEGIN_DECLS
@@ -57,7 +58,7 @@ struct _GtkSyntaxCheckWindowClass
 GType      gtk_syntax_check_window_get_type         (void) G_GNUC_CONST;
 GtkWidget *gtk_syntax_check_window_new              (void);
 void syntax_window(GtkSyntaxCheckWindow *win, Documentable *document, gchar *data);
-void gtk_syntax_check_window_run_check(GtkSyntaxCheckWindow *win, Documentable *document);
+void gtk_syntax_check_window_run_check(GtkSyntaxCheckWindow *win, Documentable *document, MainWindow *main_window);
 G_END_DECLS
 
 #endif /* ! __GTK_SYNTAX_CHECK_WINDOW_H__ */
