@@ -1,0 +1,822 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: gPHPEdit 0.9.98\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2010-12-28 00:56+0530\n"
+"PO-Revision-Date: 2013-05-30 23:21+0100\n"
+"Last-Translator: Domokos Endre János <domokos.endrejanos@gmail.com>\n"
+"Language-Team: Hungarian <hu@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1)\n"
+"X-Poedit-Language: Hungarian\n"
+"X-Poedit-Country: HUNGARY\n"
+"X-Poedit-SourceCharset: utf-8\n"
+
+msgid "Could not open %s file\n"
+msgstr "Nem sikerült megnyitni a %s fájlt\n"
+
+msgid "Name"
+msgstr "Név"
+
+msgid "FILE:"
+msgstr "Fájl:"
+
+msgid "FILE: "
+msgstr "Fájl:"
+
+#: ../src/document_loader.c:294
+msgid "Help for function not found: %s"
+msgstr "%s funkcióhoz nem található súgó"
+
+msgid "gPHPEdit UTF-8 Error: %s"
+msgstr "UTF-8 hiba történt: %s"
+
+msgid "Converted to UTF-8 size: %u"
+msgstr "Méret UTF-8-ra konvertálva: %u "
+
+msgid ""
+"The file %s was not found.\n"
+"\n"
+"Would you like to create it as an empty document?"
+msgstr ""
+"A %s fájl nem található.\n"
+"\n"
+" Létrehozzunk egy üres dokumentumot?"
+
+msgid "File not found"
+msgstr "A fájl nem található"
+
+msgid "Could not get the file info. GIO error: %s \n"
+msgstr "Nem érhető el fájlinformáció. GIO hiba: %s \n"
+
+#. confirm deletion with dialog
+#: ../src/document_loader.c:417
+#: ../src/main_window.c:213
+#: ../src/main_window.c:252
+#: ../gphpedit.desktop.in.h:3
+#: ../src/templates_editor.c:227
+msgid "gPHPEdit"
+msgstr "gPHPEdit"
+
+msgid "Sorry, I cannot open this kind of file.\n"
+msgstr "Az ilyen típusú fájlt nem lehet megnyitni.\n"
+
+msgid "Close Tab"
+msgstr "Lap bezárása"
+
+msgid "Saving %s"
+msgstr "%s mentése"
+
+msgid "Error filesystem not mounted. Mounting filesystem, this will take a few seconds..."
+msgstr "Hiba: a fájlrendszer nincs csatolva. A fájlrendszer csatolása eltarthat néhány pillanatig..."
+
+msgid "Could not find the required command in the online help"
+msgstr "A keresett parancs nem található az online súgóban."
+
+#: ../src/filebrowser_backend.c:354
+msgid "Question"
+msgstr "Kérdés"
+
+msgid "Are you sure you wish to reload the current file, losing your changes?"
+msgstr "Ha újratölti az aktuális fájlt, a módosítások elvesznek. Valóban ezt szeretné?"
+
+msgid "Reloading %s"
+msgstr "%s fájl újratöltése..."
+
+#: ../src/document_manager.c:608
+msgid ""
+"<b>The file '%s' has not been saved since your last changes.</b>\n"
+"<small>Are you sure you want to close it and lose these changes?</small>"
+msgstr ""
+"<b>A '%s' fájl  utolsó változtatásai még nincsenek elmentve.</b>\n"
+"<small>Valóban be szeretné zárni a változások mentése nélkül?</small>"
+
+msgid "Close and _lose changes"
+msgstr "Bezárás és a változtatások elvetése"
+
+msgid "Add/Edit Template"
+msgstr "Add/Edit Template"
+
+msgid "Name/Shortcut:"
+msgstr "Név:"
+
+msgid "Code:"
+msgstr "Kód:"
+
+msgid "Workspace's directory"
+msgstr "Ideiglenes fájlok könyvtára"
+
+msgid "Error getting file browser files. GIO Error:%s\t"
+msgstr "Hiba lépett fel a fájlok böngészése közben. GIO hiba:%s\t"
+
+msgid "Error::%s"
+msgstr "Hiba: %s"
+
+msgid "Are you sure you wish to delete this file?"
+msgstr "Biztos véglegesen törölni akarja a fájlt?"
+
+msgid "Error creating folder. GIO error:%s\n"
+msgstr "Hiba történt a mappa létrehozásakor. GIO hiba: %s\n"
+
+msgid "%s cannot be copied, it already exists, overwrite?"
+msgstr "%s nem másolható, mert már létezik. Felülírja?"
+
+msgid "Overwrite file?"
+msgstr "Felülírja a fájlokat?"
+
+msgid "File"
+msgstr "Fájl"
+
+msgid "Mime"
+msgstr "Mime"
+
+#: ../src/filebrowser_ui.c:545
+msgid "Rename File"
+msgstr "Fájl átnevezése"
+
+msgid "New Filename"
+msgstr "Írja be az új állománynevet"
+
+msgid "New Dir"
+msgstr "új könyvtár (%dir)"
+
+msgid "Directory Name"
+msgstr "Címtár neve"
+
+msgid "Open file"
+msgstr "Fájl megnyitása"
+
+msgid "Delete file"
+msgstr "Fájl törlése"
+
+msgid "Create New Directory"
+msgstr "Könyvtár létrehozása"
+
+msgid "Resuming search from top."
+msgstr "Y eltolás a képernyő tetejétől."
+
+#: ../src/find_dialog.c:88
+msgid "The text \"%s\" was not found."
+msgstr "A \"%s\" szöveg nem található."
+
+msgid "Find"
+msgstr "Keresés"
+
+#: ../src/gphpedit-statusbar.c:172
+#: ../src/gphpedit-statusbar.c:174
+#: ../src/main_window_callbacks.c:579
+msgid "Cobol"
+msgstr "Cobol"
+
+#: ../src/gphpedit-statusbar.c:175
+#: ../src/gphpedit-statusbar.c:177
+#: ../src/main_window_callbacks.c:576
+msgid "C/C++"
+msgstr "C/C++"
+
+#: ../src/gphpedit-statusbar.c:178
+#: ../src/gphpedit-statusbar.c:180
+#: ../src/main_window_callbacks.c:573
+msgid "CSS"
+msgstr "CSS"
+
+#: ../src/gphpedit-statusbar.c:181
+#: ../src/gphpedit-statusbar.c:183
+#: ../src/main_window_callbacks.c:570
+msgid "PHP/HTML/XML"
+msgstr "PHP/HTML/CSS"
+
+#: ../src/gphpedit-statusbar.c:184
+#: ../src/gphpedit-statusbar.c:186
+#: ../src/main_window_callbacks.c:585
+msgid "Perl"
+msgstr "Perl"
+
+#: ../src/gphpedit-statusbar.c:190
+#: ../src/gphpedit-statusbar.c:192
+#: ../src/main_window_callbacks.c:582
+msgid "SQL"
+msgstr "SQL"
+
+#: ../src/gphpedit-statusbar.c:187
+#: ../src/gphpedit-statusbar.c:189
+#: ../src/main_window_callbacks.c:588
+msgid "Python"
+msgstr "Python"
+
+#: ../src/gphpedit-statusbar.c:195
+#: ../src/main_window_callbacks.c:591
+msgid "Text-Plain"
+msgstr "Egyszerű szöveg"
+
+#: ../src/gphpedit-statusbar.c:209
+msgid "OVR"
+msgstr "ÁTÍR"
+
+#: ../src/gphpedit-statusbar.c:209
+msgid "INS"
+msgstr "BESZ"
+
+msgid "Zoom: %d%s"
+msgstr "Nagyítás: %d%s"
+
+#. use abbreviations if possible to avoid space problems.
+#: ../src/gphpedit-statusbar.c:437
+msgid "  Ln %d, Col %d"
+msgstr " %d. sor, %d. oszlop"
+
+msgid "Error reading file sync '%s'. GIO error:%s\n"
+msgstr "Hiba a '%s' fájl olvasásakor: %s\n"
+
+#: ../src/gvfs_utils.c:242
+msgid "Error renaming file. GIO Error:%s\n"
+msgstr "Hiba a fájl átnevezésekor: %s\n"
+
+#: ../src/gvfs_utils.c:263
+msgid "GIO Error deleting file: %s\n"
+msgstr "GIO hiba a fájl törlése közben: %s\n"
+
+msgid "Error saving temp file: '%s'. GIO Error:%s"
+msgstr "Hiba az ideiglenes '%s' fájl mentése közben: %s"
+
+msgid "Close side panel"
+msgstr "Oldalpanel bezárása"
+
+#: ../src/main_window.c:168
+msgid "Class Browser"
+msgstr "Fájlböngésző"
+
+msgid "PHP files ("
+msgstr "PHP fájlok (*.php)"
+
+msgid "HTML files (*.html *.htm *.xhtml *.tpl)"
+msgstr "HTML fájlok (*.html *.htm *.xhtml *.tpl)"
+
+msgid "XML files (*.xml)"
+msgstr "XML fájlok (*.xml)"
+
+msgid "Stylesheet files (*.css)"
+msgstr "CSS fájlok (*.css)"
+
+msgid "SQL files (*.sql)"
+msgstr "SQL fájlok (*.sql)"
+
+msgid "Javascript files (*.js)"
+msgstr "JavaScript fájlok (*.js)"
+
+msgid "C/C++ files (*.c *.h *.cpp *.hh *.cc)"
+msgstr "C/C++ fájlok (*.c *.h *.cpp *.hh *.cc)"
+
+msgid "Perl Files (*.pl *.ph *.pm)"
+msgstr "Perl fájlok (*.pl *.ph *.pm)"
+
+msgid "Cobol Files (*.cbl)"
+msgstr "Cobol fájlok (*.cbl)."
+
+msgid "Python Files (*.py *.pyd *.pyw)"
+msgstr "Python fájlok (*.py *.pyd *.pyw)"
+
+msgid "All files"
+msgstr "Minden fájl"
+
+#: ../src/main_window_callbacks.c:314
+msgid "Please type the filename to save as..."
+msgstr "Milyen néven kívánja menteni ezt a fájlt?"
+
+msgid "Untitled"
+msgstr "Cím nélküli"
+
+msgid "translator_credits"
+msgstr "A magyar fordítást Domokos Endre János (domokos.endrejanos@gmail.com) készítette."
+
+msgid "Copyright © 2003-2006 Andy Jeffries, 2009-2010 Anoop John"
+msgstr "Copyright © 2003-2006 Andy Jeffries, 2009-2010 Anoop John"
+
+msgid "gPHPEdit is a GNOME2 editor specialised for editing PHP scripts and related files (HTML/CSS/JS)."
+msgstr "A gPHPEdit a Gnome2 speciális PHP/HTML/CSS/JS szerkesztő alkalmazása."
+
+msgid "Unable to get data for page %d"
+msgstr "A %d laphoz nem érhetők el adatok"
+
+msgid "Creates a new file"
+msgstr "Új fájl létrehozása"
+
+msgid "Open a file"
+msgstr "Fájl megnyitása"
+
+msgid "_Open selected file"
+msgstr "A kijelölt fájl megnyitása"
+
+msgid "Open a file with the name currently selected in the editor"
+msgstr "Fájl megnyitása a szerkesztőben a kiválasztott néven"
+
+#: ../src/menubar.c:341
+msgid "_Recent Files"
+msgstr "Legutóbbi fájlok"
+
+#: ../src/menubar.c:358
+#: ../src/menubar.c:360
+msgid "Save the file currently selected in the editor"
+msgstr "A jelenleg kiválasztott fájl változtatásainak mentése"
+
+msgid "Save A_ll"
+msgstr "Az összes mentése"
+
+msgid "Save all open unsaved files"
+msgstr "Minden mentetlen megnyitott fájl mentése"
+
+msgid "Close the current file"
+msgstr "A jelenlegi fájl bezárása"
+
+msgid "Quit the application"
+msgstr "Kilépés az alkalmazásból"
+
+#: ../src/menubar.c:379
+msgid "Look for help on the currently selected function"
+msgstr "Tekintse meg a kiválasztott funkcióhoz tartozó súgót"
+
+#: ../src/menubar.c:381
+msgid "_PHP Help"
+msgstr "Súgó szöveg"
+
+msgid "_Report a bug in gPHPEdit"
+msgstr "A gPHPEdit hibájának bejelentése"
+
+msgid "Go to bug report page to report a bug"
+msgstr "Jelentse ezt a hibát (angolul) a fejlesztőknek."
+
+msgid "_Translate this application"
+msgstr "Ezen alkalmazás fordítása..."
+
+msgid "Start translating this application"
+msgstr "Ezen alkalmazás fordításának megkezdése"
+
+msgid "Shows info about gPHPEdit"
+msgstr "Információk a gPHPEdit programról"
+
+msgid "Undo last action"
+msgstr "Utolsó lépés visszavonása"
+
+msgid "Redo last action"
+msgstr "Mégis az utolsó lépést"
+
+msgid "Cut Selected Text"
+msgstr "A kijelölt szöveg áthelyezése a vágólapra"
+
+msgid "Copy Selected Text"
+msgstr "Kijelölt szöveg másolása"
+
+msgid "Paste Text from clipboard"
+msgstr "Szöveg beillesztése a vágólapról"
+
+msgid "Select all Text in current file"
+msgstr "Az összes szöveg kijelölése az aktuális fájlban"
+
+msgid "Find text in current file"
+msgstr "Szöveg keresése a jelenlegi fájlban"
+
+msgid "Find and replace text in current file"
+msgstr "Szöveg keresése és cseréje az aktuális fájlban"
+
+msgid "Incremental search"
+msgstr "Növekményes keresés…"
+
+msgid "Search as you type"
+msgstr "Gépeljen a kereséshez…"
+
+msgid "Go to line"
+msgstr "Ugrás sorra…"
+
+msgid "Indent the currently selected block"
+msgstr "A kiválasztott blokk behúzásának növelése"
+
+msgid "Unindent the currently selected block"
+msgstr "A kiválasztott blokk behúzásának csökkentése"
+
+msgid "_ToUpper"
+msgstr "Nagybetűs"
+
+msgid "Convert the current selection text to upper case"
+msgstr "A kijelölt szöveg átalakítása csupa nagybetűsre"
+
+msgid "_ToLower"
+msgstr "Kisbetűs"
+
+msgid "Convert the current selection text to lower case"
+msgstr "A kijelölt szöveg átalakítása csupa kisbetűsre"
+
+msgid "Application Config"
+msgstr "Beállítás"
+
+msgid "Statusbar"
+msgstr "Állapotsor"
+
+msgid "Show/Hide Application Statusbar"
+msgstr "Állapotsor megjelenítése vagy elrejtése"
+
+msgid "Main Toolbar"
+msgstr "Fő eszköztár"
+
+msgid "Show/Hide Application Main Toolbar"
+msgstr "Fő eszköztár mutatása/rejtése"
+
+msgid "Show Side Panel"
+msgstr "Oldalpanel megjelenítése"
+
+msgid "Show/Hide Application Side Panel"
+msgstr "Az oldalpanel automatikus megjelenítése/elrejtése"
+
+msgid "Fullscreen"
+msgstr "Teljes képernyő"
+
+msgid "Enable/Disable Fullscreen mode"
+msgstr "Teljes képernyős mód ki- vagy bekapcsolása"
+
+msgid "Increases zoom in 10%"
+msgstr "Nagyítás 10%-al"
+
+msgid "Decreases zoom in 10%"
+msgstr "Kicsinyítés 10%-al"
+
+msgid "Restores normal zoom level"
+msgstr "Vissza az eredeti mérethez"
+
+#: ../src/menubar.c:489
+msgid "_Toolbar Icon Size"
+msgstr "Eszköztárikonok mérete"
+
+msgid "Big Icons"
+msgstr "Nagy ikonok"
+
+msgid "Small Icons"
+msgstr "Kis ikonok"
+
+msgid "_Show Preview"
+msgstr "Előnézet megjelenítése"
+
+msgid "Preview the Document"
+msgstr "A dokumentum előnézete"
+
+msgid "Check the syntax using the PHP command line binary"
+msgstr "Nyelvhelyesség ellenőrzése parancssori PHP program segítségével"
+
+#: ../src/menubar.c:519
+msgid "_Syntax check"
+msgstr "Szintaxis-ellenőrzés"
+
+msgid "Remove the syntax check window"
+msgstr "Szintaxis-ellenőrzés ablak eltávolítása legfelülről"
+
+#: ../src/menubar.c:523
+msgid "_Clear Syntax check"
+msgstr "Szintaxis-ellenőrzés törlése"
+
+msgid "Record keyboard actions"
+msgstr "Billentyűzet-akciók rögzítése"
+
+#: ../src/menubar.c:530
+msgid "_Record keyboard macro start/stop"
+msgstr "Billentyűzet makró felvétel indítása/leállítása."
+
+msgid "Playback the stored keyboard macro"
+msgstr "Billentyűzet-makró visszajátszása"
+
+#: ../src/menubar.c:535
+msgid "_Playback keyboard macro"
+msgstr "Billentyűzet makró visszajátszása."
+
+msgid "_Force"
+msgstr "Szintaxiskiemelés"
+
+msgid "_PHP/HTML/XML"
+msgstr "PHP/HTML/CSS"
+
+msgid "Force syntax highlighting to PHP/HTML/XML mode"
+msgstr "PHP/HTML/XML szintaxiskiemelés"
+
+msgid "_CSS"
+msgstr "CSS"
+
+msgid "Force syntax highlighting to CSS mode"
+msgstr "CSS szintaxiskiemelés"
+
+msgid "C/C_++"
+msgstr "C/C_++"
+
+msgid "Force syntax highlighting to C/C++ mode"
+msgstr "C/C++ szintaxiskiemelés"
+
+msgid "_SQL"
+msgstr "SQL"
+
+msgid "Force syntax highlighting to SQL mode"
+msgstr "SQL szintaxiskiemelés"
+
+msgid "_Perl"
+msgstr "PERL"
+
+msgid "Force syntax highlighting to Perl mode"
+msgstr "Perl szintaxiskiemelés"
+
+msgid "_Cobol"
+msgstr "Cobol"
+
+msgid "Force syntax highlighting to Cobol mode"
+msgstr "Cobol szintaxiskiemelés"
+
+msgid "P_ython"
+msgstr "Python"
+
+msgid "Force syntax highlighting to Python mode"
+msgstr "Python szintaxiskiemelés"
+
+#. Menu file
+#: ../src/menubar.c:569
+msgid "_File"
+msgstr "Fájl"
+
+#: ../src/menubar.c:572
+msgid "_Edit"
+msgstr "Szerkesztés"
+
+#: ../src/menubar.c:575
+msgid "_View"
+msgstr "Nézet"
+
+msgid "_Code"
+msgstr "Kód"
+
+msgid "_Plugin"
+msgstr "Bővítmény"
+
+#: ../src/menubar.c:592
+msgid "_Help"
+msgstr "Súgó"
+
+msgid "Unable to create ~/.gphpedit/ (%d) %s"
+msgstr "Nem sikerült létrehozni: ~/gphpedit/ (%d) %s"
+
+#. * the menu is empty. this placeholder will stay around
+#. * for the entire lifetime of the menu, and we just hide it
+#. * when it's not used. we have to do this, and do it here,
+#. * because we need a marker for the beginning of the recent
+#. * items list, so that we can insert the new items at the
+#. * right place when idly populating the menu in case the
+#. * user appended or prepended custom menu items to the
+#. * recent chooser menu widget.
+#.
+#: ../src/pluginmenu.c:82
+msgid "No items found"
+msgstr "Nem találhatók elemek"
+
+msgid "Preferences"
+msgstr "Beállítások"
+
+msgid "Unable to create %s (%d) %s"
+msgstr "Nem sikerült létrehozni: %s (%d) %s"
+
+#: ../src/replace_dialog.c:133
+msgid "\"%s\" not found, no replacements made."
+msgstr "A \"%s\" kifejezés nem található, ezért a csere nem végrehajtható."
+
+msgid "1 occurence of \"%s\" found, replaced."
+msgstr "1 egyezés megtalálva és kicserélve"
+
+msgid "\"%d\" occurences of \"%s\" found, all replaced."
+msgstr "%d egyezés megtalálva és kicserélve"
+
+msgid "Replace _all"
+msgstr "Összes cseréje"
+
+msgid "Replace"
+msgstr "Helyettesít"
+
+msgid "Error calling PHP CLI (is PHP command line binary installed? If so, check if it's in your path or set php_binary in Preferences)\n"
+msgstr "Hibát jelzett a PHP CLI (PHP parancssori alkalmazás telepítve?)\n"
+
+msgid "Syntax Check Output"
+msgstr "Szintaxis-ellenőrzés"
+
+msgid "You don't have any files open to check\n"
+msgstr "Más fájlt nem lehet megnyitni ellenőrzésre\n"
+
+msgid "CANNOT Create templates file:: %s\n"
+msgstr "Nem lehet létrehozni ezt a sablonfájlt: %s\n"
+
+msgid "CANNOT Create templates file: %s\n"
+msgstr "Nem lehet létrehozni ezt a sablonfájlt: %s\n"
+
+#: ../src/toolbar.c:108
+msgid "New File"
+msgstr "Új fájl"
+
+msgid "Open File"
+msgstr "Fájl megnyitása"
+
+msgid "Save current File"
+msgstr "A jelenlegi fájl mentése"
+
+msgid "Save File As..."
+msgstr "Fájl mentése másként"
+
+#: ../src/toolbar.c:125
+msgid "Undo last change"
+msgstr "Utolsó módosítás visszavonása"
+
+msgid "Redo last change"
+msgstr "Utolsó visszavont módosítás ismételt végrehajtása"
+
+#: ../src/toolbar.c:135
+msgid "Cut Current Selection"
+msgstr "A jelenlegi kijelölés cseréje"
+
+msgid "Copy Current Selection"
+msgstr "A jelenlegi kijelölés másolása az asztalra"
+
+msgid "Paste text from clipboard"
+msgstr "Szöveg beillesztése a vágólapról"
+
+#: ../src/toolbar.c:148
+msgid "Find text"
+msgstr "Szöveg keresése és _cseréje..."
+
+msgid "Replace Text"
+msgstr "szöveg cseréje"
+
+#. indent block
+#: ../src/toolbar.c:160
+msgid "Indent Selected Text"
+msgstr "Kiválasztott szöveg behúzása"
+
+#: ../src/toolbar.c:163
+msgid "Unindent Selected Text"
+msgstr "Kiválasztott szöveg behúzásának csökkentése"
+
+#. zoom in
+#: ../src/toolbar.c:171
+msgid "Increases Zoom level"
+msgstr "Nagyítás mértéke"
+
+#: ../src/toolbar.c:174
+msgid "Decreases Zoom level"
+msgstr "Kicsinyítés mértéke"
+
+#: ../src/toolbar.c:177
+msgid "Zoom 100%"
+msgstr "100% nagyítás"
+
+msgid "Edit PHP source files"
+msgstr "A jelenleg kiválasztott PHP forrás szerkesztése"
+
+msgid "PHP/HTML/CSS editor"
+msgstr "PHP/HTML/CSS szerkesztő"
+
+msgid "Line background"
+msgstr "Sorháttér"
+
+msgid "Line background color"
+msgstr "Sorháttér színe"
+
+msgid "Background"
+msgstr "Háttér"
+
+msgid "Background color"
+msgstr "Háttérszín"
+
+msgid "Foreground"
+msgstr "Előtér"
+
+msgid "Foreground color"
+msgstr "Előtérszín"
+
+#: ../src/gtksourcestyle.c:105
+msgid "Bold"
+msgstr "Vastag"
+
+#: ../src/gtksourcestyle.c:113
+msgid "Italic"
+msgstr "Dőlt"
+
+#: ../src/gtksourcestyle.c:121
+msgid "Underline"
+msgstr "Aláhúzott"
+
+#: ../src/gtksourcestyle.c:129
+msgid "Strikethrough"
+msgstr "Áthúzott"
+
+msgid "Line background set"
+msgstr "Sorháttér beállítva"
+
+msgid "Whether line background color is set"
+msgstr "A sorháttérszín be van-e állítva"
+
+msgid "Foreground set"
+msgstr "Előtér beállítása"
+
+msgid "Whether foreground color is set"
+msgstr "Az előtérszín be van-e állítva"
+
+msgid "Background set"
+msgstr "Háttér beállítása"
+
+msgid "Whether background color is set"
+msgstr "A háttérszín be van-e állítva"
+
+msgid "Bold set"
+msgstr "Félkövér beállítva"
+
+msgid "Whether bold attribute is set"
+msgstr "A félkövér attribútum be van-e állítva"
+
+msgid "Italic set"
+msgstr "Dőlt beállítva"
+
+msgid "Whether italic attribute is set"
+msgstr "A dőlt attribútum be van-e állítva"
+
+msgid "Underline set"
+msgstr "Aláhúzás beállítása"
+
+msgid "Whether underline attribute is set"
+msgstr "Az aláhúzott attribútum be van-e állítva"
+
+msgid "Strikethrough set"
+msgstr "Áthúzás beállítása"
+
+msgid "Whether strikethrough attribute is set"
+msgstr "Az áthúzott attribútum be van-e állítva"
+
+#: ../src/gtksourcestylescheme.c:187
+msgid "Style scheme id"
+msgstr "Stílusséma azonosítója"
+
+#: ../src/gtksourcestylescheme.c:200
+msgid "Style scheme name"
+msgstr "Stílusséma neve"
+
+#: ../src/gtksourcestylescheme.c:213
+msgid "Style scheme description"
+msgstr "Stílusséma leírása"
+
+#: ../src/gtksourcestylescheme.c:226
+msgid "Style scheme filename"
+msgstr "Stílusséma fájlneve"
+
+msgid "Style scheme search path"
+msgstr "Stílusséma keresési útvonala"
+
+msgid "List of directories and files where the style schemes are located"
+msgstr "A stílussémákat tartalmazó könyvtárak és fájlok listája"
+
+msgid "Scheme ids"
+msgstr "Sémaazonosítók"
+
+msgid "List of the ids of the available style schemes"
+msgstr "Az elérhető stílussémák azonosítóinak listája"
+
+msgid "Plugin"
+msgstr "Bővítmény"
+
+msgid "Enabled"
+msgstr "Engedélyezett"
+
+msgid "_About"
+msgstr "Névjegy"
+
+msgid "A_ctivate"
+msgstr "Aktiválás"
+
+msgid "Ac_tivate All"
+msgstr "Összes aktiválása"
+
+msgid "_Deactivate All"
+msgstr "Összes letiltása"
+
+msgid "Active _Plugins:"
+msgstr "Aktív bővítmények"
+
+msgid "_About Plugin"
+msgstr "A bővítmény névjegye"
+
+msgid "Templates"
+msgstr "Sablon"
+
+msgid "Name/Shortcut"
+msgstr "Név"
+
+msgid "Are you sure you want to delete template %s?"
+msgstr "%s sablon biztosan törölhető?"
+
+msgid "Active Templates:"
+msgstr "Aktív sablonok"
+
+msgid "Templates:"
+msgstr "Sablonok"
+
+msgid "Mixer"
+msgstr "Keverő"
+
